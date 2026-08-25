@@ -1,0 +1,171 @@
+-arg -w -arg -projection-no-head-constant
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -notation-overridden
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -notation-incompatible-format
+
+-R lib pgg_smc
+-R protocol pgg_smc
+-R groups pgg_smc
+-R security pgg_smc
+-R reconstruct pgg_reconstruct
+-R instances/denboer1989 pgg_smc
+-R instances/kim2025 pgg_smc
+-R instances/s5 pgg_smc
+-R instances/s5x5 pgg_smc
+-R instances/oc pgg_smc
+-R instances/star pgg_smc
+-R instances/abelian pgg_smc
+-R instances/cyclic pgg_smc
+-R instances/monster pgg_smc
+-R instances/pgl27 pgg_smc
+-R manifest pgg_smc
+
+lib/perm_uniform.v
+protocol/pgg_interface.v
+protocol/pgg_session_types.v
+protocol/card_exchange_pismc.v
+protocol/pgg_input_commitment.v
+protocol/pgg_run.v
+protocol/pgg_monodromy_profile.v
+protocol/pgg_execution_plug.v
+protocol/pgg_observed_execution.v
+manifest/pgg_analysis_status.v
+protocol/pgg_correctness.v
+instances/abelian/pgg_abelian.v
+instances/abelian/abelian_word_collapse.v
+instances/star/pgg_raag_star.v
+groups/pgg_raag_path.v
+instances/s5/pgg_raag_s5.v
+instances/s5x5/pgg_s5x5.v
+instances/s5x5/s5x5_pile.v
+instances/oc/pgg_oc_param.v
+groups/pgg_weval_inj.v
+instances/denboer1989/five_card_group.v
+instances/denboer1989/five_card_program.v
+instances/denboer1989/five_card_scheme_I5.v
+instances/denboer1989/den_boer_profile.v
+instances/denboer1989/five_card_leakage.v
+instances/denboer1989/den_boer_encoding.v
+instances/denboer1989/den_boer_run.v
+instances/denboer1989/denboer_secrecy.v
+instances/kim2025/five_card_kim.v
+instances/kim2025/five_card_family.v
+instances/kim2025/kim_run.v
+instances/kim2025/kim_secrecy.v
+instances/kim2025/kim_trace.v
+instances/kim2025/kim_input_privacy.v
+instances/kim2025/five_card_exec.v
+instances/kim2025/five_card_models.v
+instances/kim2025/five_card_analysis.v
+protocol/card_protocol.v
+protocol/card_protocol_posterior.v
+protocol/pgg_uc_security.v
+groups/pgg_raag.v
+groups/free_group_ball.v
+groups/pgg_raag_clique.v
+groups/pgg_raag_cartier_foata.v
+groups/pgg_cycle.v
+security/pgg_collusion_bound.v
+security/pgg_security_solver.v
+security/pgg_schreier.v
+security/pgg_entropy_security.v
+security/pgg_weighted_entropy.v
+security/pgg_entropy_security_demo.v
+security/pgg_security_demo.v
+security/pgg_word_analysis.v
+security/pgg_abelian_collapse.v
+security/pgg_security.v
+security/pgg_uniform_security.v
+security/pgg_weighted_words.v
+security/pgg_schreier_weighted.v
+security/pgg_mixing.v
+security/pgg_leakage_witness.v
+security/pgg_randomized_sharing.v
+security/pgg_cyclic_cut_leakage.v
+security/pgg_sharing_mechanism.v
+security/pgg_fdist_rV_indep.v
+security/pgg_canonical_sharing.v
+security/pgg_leakage_product.v
+security/pgg_trace_secrecy.v
+security/pgg_sample_adapter.v
+reconstruct/pgg_sum_mod.v
+reconstruct/pgg_sharing_framework.v
+reconstruct/massey.v
+reconstruct/lagrange.v
+reconstruct/covering_scheme.v
+reconstruct/input_encoding.v
+reconstruct/curve_realisation.v
+reconstruct/multi_covering.v
+reconstruct/rs_privacy.v
+reconstruct/rs_massey_bridge.v
+reconstruct/ag_code.v
+reconstruct/ag_massey_bridge.v
+reconstruct/gap_dimension.v
+reconstruct/invariant_profiler.v
+reconstruct/s5_nogo.v
+reconstruct/hyperelliptic_code.v
+reconstruct/coord_perm_compatible.v
+reconstruct/ag_multiplicative.v
+reconstruct/cover_genus0.v
+reconstruct/cover_genus1.v
+reconstruct/cover_genus2.v
+reconstruct/cover_tradeoff.v
+reconstruct/algebraic_rigidity.v
+reconstruct/dropout_witness.v
+reconstruct/pgg_dealer_bridge.v
+reconstruct/pgg_protocol_landscape.v
+reconstruct/product_threshold.v
+reconstruct/combinatorial_rigidity.v
+instances/s5/s5_mixing.v
+instances/s5/rigidity_s5_instance.v
+instances/s5/s5_profile.v
+instances/s5/s5_run.v
+instances/s5/s5_secrecy.v
+instances/s5/s5_trace.v
+instances/s5/s5_exec.v
+instances/s5/s5_models.v
+instances/s5/s5_analysis.v
+instances/denboer1989/denboer_trace.v
+instances/s5x5/s5x5_mixing.v
+instances/s5x5/rigidity_s5x5_instance.v
+instances/s5x5/s5x5_profile.v
+instances/s5x5/s5x5_run.v
+instances/s5x5/s5x5_secrecy.v
+instances/s5x5/s5x5_trace.v
+instances/s5x5/s5x5_exec.v
+instances/s5x5/s5x5_models.v
+instances/s5x5/s5x5_analysis.v
+instances/monster/rigidity_monster_instance.v
+instances/oc/rigidity_oc_instance.v
+instances/cyclic/rigidity_cyclic_instance.v
+instances/abelian/rigidity_abelian_instance.v
+instances/abelian/abel_profile.v
+instances/abelian/abelian_exec.v
+instances/abelian/abelian_models.v
+instances/abelian/abelian_analysis.v
+instances/kim2025/rigidity_kim_instance.v
+reconstruct/pgg_landscape_demo.v
+reconstruct/pgl_bound.v
+reconstruct/pgg_covering_correctness.v
+reconstruct/pgg_assignment.v
+reconstruct/pgg_deck_pairing.v
+reconstruct/pgg_threshold.v
+reconstruct/transitivity_privacy.v
+instances/pgl27/pgl27_group.v
+instances/pgl27/pgl27_orbit.v
+instances/pgl27/pgl27_scheme.v
+instances/pgl27/pgl27_profile.v
+instances/pgl27/pgl27_run.v
+instances/pgl27/pgl27_secrecy.v
+instances/pgl27/pgl27_profile_privacy.v
+instances/pgl27/pgl27_trace.v
+instances/pgl27/pgl27_recovery.v
+instances/pgl27/pgl27_leakage_census.v
+instances/pgl27/pgl27_mixing.v
+instances/pgl27/pgl27_word_privacy.v
+instances/pgl27/pgl27_exec.v
+instances/pgl27/pgl27_models.v
+instances/pgl27/pgl27_analysis.v
+manifest/pgg_analysis_manifest.v
+manifest/pgg_analysis_client.v

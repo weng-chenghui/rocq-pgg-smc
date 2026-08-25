@@ -13,3 +13,5 @@ Makefile.rocq
 Makefile.rocq.conf
 .Makefile.rocq.d
 build.log
+*~
+.*.~undo-tree~
