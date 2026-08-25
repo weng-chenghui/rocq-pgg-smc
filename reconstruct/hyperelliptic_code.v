@@ -577,25 +577,10 @@ Hypothesis curve_sep_g2 : separable_poly curve_poly_g2.
 End genus2.
 
 (******************************************************************************)
-(*     Section 6: Summary of Axiom Reduction                                  *)
+(*     Section 6: Dependency Summary                                          *)
 (******************************************************************************)
 
-(* PROVED (algebraically, from polynomial resultant):
-   1. hyp_resultant_neq0 — parity argument on polynomial degrees
-   2. hyp_zero_to_root   — curve zeros map to resultant roots
-   3. hyp_multiplicity   — shared x-coordinates use >= 2 multiplicity
-
-   ADMITTED (routine but technically involved):
-   4. hyp_resultant_deg  — degree arithmetic on polynomial sizes
-   5. hyp_goppa_wt_mdeg  — counting zeros via polynomial root counting
-   6. hyp_priv_surj      — linear algebra (rank vs. dual distance)
-   7. separable_dvd_sqr  — square-free divides square => divides base
-
-   The key mathematical insight is FULLY PROVED: the parity argument
-   (odd vs even polynomial degree) ensures R = A^2 - B^2*f != 0.
-
-   For cover_genus1.v integration:
-   - goppa_wt is hyp_goppa_wt (proved modulo routine lemmas)
-   - ag_priv_surj is hyp_priv_surj (derived from dual_ev_encode)
-   - dual_min_dist is now PROVED from dual_root_poly (proved from dual_ev_encode)
-   - Remaining axioms: dual_ev_encode + share_compatible (2 instead of 4) *)
+(* hyp_resultant_neq0, hyp_zero_to_root, hyp_multiplicity and hyp_resultant_deg
+   hold unconditionally, from the parity of deg(A^2) against deg(B^2*f)
+   forcing R = A^2 - B^2*f nonzero. hyp_goppa_wt_mdeg and hyp_priv_surj hold
+   conditional on the ev_encode and dual_ev_encode section hypotheses. *)

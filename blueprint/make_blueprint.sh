@@ -3,52 +3,55 @@
 # coqdoc API pages the \rocq{...} node links point at (the \dochome target).
 set -euo pipefail
 
-BP="$(cd "$(dirname "$0")" && pwd)"          # .../pgg-smc/blueprint
-REPO="$(cd "$BP/../.." && pwd)"              # repo root (has _CoqProject)
+BP="$(cd "$(dirname "$0")" && pwd)"          # .../rocq-pgg-smc/blueprint
+REPO="$(cd "$BP/.." && pwd)"                 # repo root (has _CoqProject)
 
 # Reuse the rocqblueprint/plasTeX install from the dumas2017dual blueprint venv
 # (document-agnostic). Override with PLASTEX=... if it lives elsewhere.
-PLASTEX="${PLASTEX:-/Users/cheng-huiweng/Projects/coq/infotheo-itp/dumas2017dual/blueprint/.venv/bin/plastex}"
+PLASTEX="${PLASTEX:-$(command -v plastex || true)}"
 
 # -R mappings matching _CoqProject so coqdoc emits pgg_reconstruct.<mod>.html
 # and pgg_smc.<mod>.html, the filenames the \rocq{...} links resolve to.
-RFLAGS=(-R . infotheo
-  -R pgg-smc/lib pgg_smc -R pgg-smc/protocol pgg_smc -R pgg-smc/groups pgg_smc
-  -R pgg-smc/security pgg_smc -R pgg-smc/reconstruct pgg_reconstruct
-  -R pgg-smc/instances/denboer1989 pgg_smc -R pgg-smc/instances/kim2025 pgg_smc
-  -R pgg-smc/instances/s5 pgg_smc -R pgg-smc/instances/s5x5 pgg_smc)
+RFLAGS=(-R lib pgg_smc -R protocol pgg_smc -R groups pgg_smc -R security pgg_smc
+  -R reconstruct pgg_reconstruct
+  -R instances/denboer1989 pgg_smc -R instances/kim2025 pgg_smc
+  -R instances/s5 pgg_smc -R instances/s5x5 pgg_smc
+  -R instances/oc pgg_smc -R instances/star pgg_smc
+  -R instances/abelian pgg_smc -R instances/cyclic pgg_smc
+  -R instances/monster pgg_smc -R instances/pgl27 pgg_smc
+  -R manifest pgg_smc)
 
 # Modules referenced by \rocq{...} in content.tex (their .glob is present after
 # a normal project build).
 MODULES=(
-  pgg-smc/protocol/pgg_interface.v
-  pgg-smc/protocol/pgg_monodromy_profile.v
-  pgg-smc/protocol/card_exchange_pismc.v
-  pgg-smc/protocol/pgg_input_commitment.v
-  pgg-smc/reconstruct/pgg_sharing_framework.v
-  pgg-smc/reconstruct/covering_scheme.v
-  pgg-smc/reconstruct/input_encoding.v
-  pgg-smc/reconstruct/algebraic_rigidity.v
-  pgg-smc/reconstruct/cover_tradeoff.v
-  pgg-smc/reconstruct/s5_nogo.v
-  pgg-smc/reconstruct/invariant_profiler.v
-  pgg-smc/reconstruct/gap_dimension.v
-  pgg-smc/reconstruct/cover_genus0.v
-  pgg-smc/reconstruct/cover_genus1.v
-  pgg-smc/reconstruct/cover_genus2.v
-  pgg-smc/reconstruct/combinatorial_rigidity.v
-  pgg-smc/instances/denboer1989/five_card_scheme_I5.v
-  pgg-smc/instances/denboer1989/den_boer_encoding.v
-  pgg-smc/instances/denboer1989/den_boer_run.v
-  pgg-smc/instances/denboer1989/den_boer_profile.v
-  pgg-smc/instances/denboer1989/five_card_leakage.v
-  pgg-smc/instances/kim2025/five_card_kim.v
-  pgg-smc/instances/kim2025/five_card_family.v
-  pgg-smc/instances/kim2025/rigidity_kim_instance.v
-  pgg-smc/instances/s5/rigidity_s5_instance.v
-  pgg-smc/instances/s5/s5_mixing.v
-  pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
-  pgg-smc/instances/s5x5/s5x5_pile.v
+  protocol/pgg_interface.v
+  protocol/pgg_monodromy_profile.v
+  protocol/card_exchange_pismc.v
+  protocol/pgg_input_commitment.v
+  reconstruct/pgg_sharing_framework.v
+  reconstruct/covering_scheme.v
+  reconstruct/input_encoding.v
+  reconstruct/algebraic_rigidity.v
+  reconstruct/cover_tradeoff.v
+  reconstruct/s5_nogo.v
+  reconstruct/invariant_profiler.v
+  reconstruct/gap_dimension.v
+  reconstruct/cover_genus0.v
+  reconstruct/cover_genus1.v
+  reconstruct/cover_genus2.v
+  reconstruct/combinatorial_rigidity.v
+  instances/denboer1989/five_card_scheme_I5.v
+  instances/denboer1989/den_boer_encoding.v
+  instances/denboer1989/den_boer_run.v
+  instances/denboer1989/den_boer_profile.v
+  instances/denboer1989/five_card_leakage.v
+  instances/kim2025/five_card_kim.v
+  instances/kim2025/five_card_family.v
+  instances/kim2025/rigidity_kim_instance.v
+  instances/s5/rigidity_s5_instance.v
+  instances/s5/s5_mixing.v
+  instances/s5x5/rigidity_s5x5_instance.v
+  instances/s5x5/s5x5_pile.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"
