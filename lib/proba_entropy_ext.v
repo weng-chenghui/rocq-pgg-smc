@@ -67,7 +67,9 @@ Definition inde_RV_ev :=
   forall E F,
     `Pr[ [% X, Y] \in E `* F] = `Pr[ X \in E ] * `Pr[ Y \in F ].
 
-(* Point-value independence and rectangle independence are the same property. *)
+(* Point-value independence and rectangle independence are the same property,
+   which is what lets an independence hypothesis stated on secrets be applied
+   to an adversary's view, an event rather than a value. *)
 Lemma inde_RV_events' : P |= X _|_ Y <-> inde_RV_ev.
 Proof.
 split=> H; last by move=> *; rewrite -!pr_in1 -H setX1.
@@ -98,17 +100,6 @@ Proof. by apply/setP => ?; rewrite !inE. Qed.
 Section more_inde_RV_lemmas.
 Context {R : realType}.
 Variables (A : finType) (P : R.-fdist A).
-
-(* Independence is preserved by applying a deterministic function to each side
-   separately, since a post-processing map cannot create a dependence that the
-   joint law does not already carry. *)
-Lemma inde_RV_comp (TA TB UA UB : finType) (X : {RV P -> TA}) (Y : {RV P -> TB})
-  (f : TA -> UA) (g : TB -> UB) :
-  P |= X _|_ Y -> P|= (f `o X) _|_ (g `o Y).
-Proof.
-move=> /inde_RV_events' inde_XY'; apply/inde_RV_events' => E F.
-by rewrite (pr_in_comp' f) (pr_in_comp' g) -inde_XY' -preimsetX -pr_in_comp'.
-Qed.
 
 (* The constant unit variable is independent of everything: it is the neutral
    element of the conditioning side, used to move between unconditional
@@ -162,7 +153,9 @@ by rewrite [RHS]eq_sym subr_eq eq_sym addrC.
 Qed.
 
 (* A big operator indexed by the duplicate-free image of a function may be read
-   as indexed by the membership predicate of that image. *)
+   as indexed by the membership predicate of that image; this is the step that
+   widens the support-indexed convolution to a sum over the whole group in
+   pr_add_eqE, where the summand can then be compared to a uniform law. *)
 Lemma big_fin_img :
   forall [R : Type] (op : SemiGroup.com_law R) (x : R) [I J : finType]
          (h : J -> I) (F : I -> R),
@@ -202,7 +195,9 @@ Variable XY_indep : P |= X _|_ Y.
    group; the unmasking operation dual to add_RV. *)
 Definition sub_RV : {RV P -> A} := X \- Y.
 
-(* Pointwise additive inverse of a random variable. *)
+(* Pointwise additive inverse of a random variable: the form in which a mask is
+   consumed, by sub_RV when the mask is removed and by neg_RV_inde_eq when a
+   subtractive mask must be shown as fresh as an additive one. *)
 Definition neg_RV : {RV P -> A} := \0 \- X.
 
 (* Adding an independent uniform summand yields a uniform law, irrespective of
@@ -389,9 +384,7 @@ Lemma cond_prob_zero_outside_constraint
   {T TX TY : finType} (P : R.-fdist T)
   (X : {RV P -> TX}) (Y : {RV P -> TY})
   (constraint : TX -> TY -> bool) :
-  (* The constraint must hold almost surely *)
   (forall t, constraint (X t) (Y t)) ->
-  (* Then conditional probability is zero outside the constraint *)
   forall x y,
     `Pr[X = x] != 0 ->
     ~~ constraint x y ->
