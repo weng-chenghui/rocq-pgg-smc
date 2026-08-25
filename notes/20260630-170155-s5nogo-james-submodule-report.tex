@@ -1,0 +1,271 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\GF}[1]{\mathbb{F}_{#1}}
+\newcommand{\Sym}{S}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\Aut}{\operatorname{Aut}}
+\newcommand{\Perm}{\operatorname{Perm}}
+
+\title{The $\Sym_5/\GF{5}$ No-Go as an Instance of James's Submodule Theorem:\\
+A Trichotomy of Obstruction, Possibility, and Existence\\ for Group-Invariant Codes}
+\author{Cheng-Hui Weng\thanks{Literature synthesis assembled from a fan-out, adversarially
+verified deep-research pass over the modular representation theory of symmetric groups and
+the algebraic-geometry-code secret-sharing literature. The classical core is documented
+through graduate lecture notes that quote the named theorems verbatim. Bibliographic
+details should be confirmed against the authoritative published sources before formal
+citation.}}
+\date{30 June 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The Rocq formalization \texttt{reconstruct/s5\_nogo.v} proves, by an elementary
+difference-vector argument, that the natural permutation module $\GF{5}^5$ of the
+symmetric group $\Sym_5$ has invariant submodules of dimension only $0,1,4,5$, so no
+secret-encoding invariant code of the gap-window dimensions $3$ or $4$ exists. This note
+records that the result is not a single witness but the smallest instance of a named
+general rule. The obstruction is governed by James's Submodule Theorem for Young
+permutation modules. For the natural $\Sym_n$ module the realizable submodule dimensions
+are $\{0,1,n-1,n\}$ in every characteristic, since the difference-vector argument is
+characteristic-free and the standard module is the irreducible piece of dimension $n-1$, so
+the $\Sym_5$ gap window $\{3,4\}$ is infeasible over every field. The divisibility condition
+$p \mid n$ controls only whether the structure is uniserial or split, not the available
+dimensions, so the obstruction is characteristic-independent and Maschke does not remove
+it. Algebraic-geometry-code secret sharing with automorphism-transfer supplies a
+constructive existence rule for suitable groups, with the threshold gap governed by the
+genus rather than by a submodule lattice, but for the natural $\Sym_5$ action that route is
+obstructed as well.
+\end{abstract}
+
+\section{The question and the verdict}
+
+A code-based (Massey) secret-sharing scheme that recovers a secret needs a $G$-invariant
+submodule $W$, a linear code, of a representation module over a field $F$, of a dimension
+forced into a threshold gap window. The $\Sym_5/\GF{5}$ instance acts on $\GF{5}^5$ by the
+natural permutation module, with the secret in a fixed coordinate adjoined to the five
+shuffled shares. The formalization establishes that the available invariant submodule
+dimensions are exactly $\{0,1,4,5\}$, so the intermediate dimensions $2$ and $3$ are
+absent and the gap-window code cannot be built.
+
+The verdict of the present survey is that this is a rule, and the rule has a name. The
+hand-proof in \texttt{s5\_nogo.v} re-derives the same $\{0,1,4,5\}$ lattice that James's
+Submodule Theorem forces. Each of the three tiers below, obstruction, possibility, and
+constructive existence, corresponds to a named theorem.
+
+\section{Tier 1: the obstruction rule (which groups cannot)}
+
+The available invariant-code dimensions are precisely the submodule dimensions of the
+permutation module, and those are controlled by a single characteristic-free theorem.
+
+\paragraph{James's Submodule Theorem \cite{wildon-symnotes,tomczak-symnotes}.}
+For any field $F$ and any partition $\lambda$ of $n$, every $F\Sym_n$-submodule $U$ of the
+Young permutation module $M^\lambda$ either contains the Specht module $S^\lambda$ or is
+contained in its orthogonal complement $(S^\lambda)^\perp$ under the tabloid bilinear
+form. No submodule lies strictly between $S^\lambda$ and $(S^\lambda)^\perp$.
+
+For the natural module $M^{(n-1,1)}$, the relevant object for $\Sym_n$ acting on
+$\GF{p}^n$, one has $\dim M = n$, $\dim S^{(n-1,1)} = n-1$ for the sum-zero subspace $P_0$,
+and $\dim (S^{(n-1,1)})^\perp = 1$ for the all-ones line.
+
+\paragraph{What the divisibility condition controls.}
+The Specht module $S^{(n-1,1)}$ is irreducible if and only if $\operatorname{char} F = 0$
+or $\operatorname{char} F \nmid n$ \cite{wildon-symnotes}. This is Peel's theorem on hook
+partitions: $S^{(n-1,1)}$ has exactly two composition factors when $p \mid n$ for odd $p$,
+and is irreducible otherwise. When $p \mid n$, the all-ones vector has coordinate sum
+$n \equiv 0$, hence lies inside the sum-zero space, so
+$(S^{(n-1,1)})^\perp \subset S^{(n-1,1)}$ and the lattice collapses to the uniserial chain
+\[
+  0 \;\subsetneq\; \langle \one \rangle \;\subsetneq\; P_0 = S^{(n-1,1)}
+    \;\subsetneq\; M^{(n-1,1)},
+  \qquad \dim \in \{0,\,1,\,n-1,\,n\}.
+\]
+This is the $\{0,1,4,5\}$ chain at $n=5$, and the rigidity that any nonconstant vector
+forces the dimension from at most $1$ straight to at least $n-1$. This rigidity is
+characteristic-free: the difference-vector argument uses no field hypothesis, so the
+submodule dimensions are $\{0,1,n-1,n\}$ over every field. The divisibility $p \mid n$
+governs only whether $\langle \one\rangle$ lies inside $P_0$, that is uniserial versus
+split, not which dimensions occur. The simple modules are
+fixed as well: in prime characteristic $p$ the simple $F\Sym_n$-modules are
+$D^\lambda = S^\lambda / (S^\lambda \cap (S^\lambda)^\perp)$ for $p$-regular $\lambda$,
+James's 1976 classification recorded in \cite{wildon-symnotes}.
+
+\paragraph{Naming the $\Sym_5/\GF{5}$ module precisely.}
+The module is the natural permutation module $M^{(n-1,1)}$, and the precise modular
+phenomenon is that when $\operatorname{char} F \mid n$ the $(n-1,1)$-Specht module is a
+submodule but not a direct summand of $M^{(n-1,1)}$ \cite{tomczak-symnotes}. Maschke's
+complement fails exactly there, and the intermediate piece does not split off.
+
+\paragraph{Generalization.}
+The no-go holds for $\Sym_n$ on $\GF{p}^n$ exactly when $p \mid n$, and then the entire
+window of intermediate dimensions $2, 3, \dots, n-2$ is forbidden, not merely a single
+gap. The case $n = p = 5$ is the smallest instance. The transposition-difference mechanism
+of \texttt{s5\_nogo.v}, in which $2$-transitivity breeds every difference vector
+$e_i - e_j$ and spans the dimension-$(n-1)$ sum-zero space, is the concrete shadow of this
+theorem.
+
+\section{Tier 2: the possibility rule (which groups can)}
+
+\paragraph{Maschke's theorem \cite{tomczak-symnotes}.}
+If $\operatorname{char} F \nmid |G|$, every submodule has a $G$-invariant complement, the
+module is semisimple, and every partial sum of irreducible-constituent dimensions is
+realized as a submodule. This is the general possibility rule. Whether it returns the
+gap-window dimensions depends on the irreducible-constituent dimensions of the particular
+module.
+
+\paragraph{The possibility rule does not rescue $\Sym_5$ (correction).}
+For the natural module $M^{(n-1,1)}$ the constituents are the trivial module of dimension
+$1$ and the standard module of dimension $n-1$, so the realizable submodule dimensions are
+$\{0,1,n-1,n\}$ in every characteristic. Maschke changes the structure from uniserial to
+split, but it does not change this dimension profile. The symmetric group $\Sym_5$ has no
+$3$-dimensional ordinary irreducible at all, its irreducible dimensions being
+$\{1,1,4,4,5,5,6\}$, and its standard module is the irreducible of dimension $4$. The
+dimension-$3$ object $D^{(4,1)}$, the heart, exists only in characteristic $5$, and even
+there only as the subquotient $P_0/\langle \one\rangle$, never as a submodule. The
+difference-vector argument of \texttt{s5\_nogo.v} is itself characteristic-free, so the
+$\{3,4\}$ gap-window infeasibility for the natural $\Sym_5$ action holds over every field.
+An earlier reading, following a comment in the Rocq source, claimed that coprime
+characteristic restores dimensions $2$ and $3$. That is wrong for $\Sym_5$ and is corrected
+here. The contrast is $\Sym_4$, whose standard module is the irreducible of dimension $3$,
+so a dimension-$3$ invariant code does exist there, which is exactly why the no-go needs
+five shuffled points rather than four.
+
+\paragraph{Refinement away from the corner \cite{wildon2009mfree}.}
+For $n \geq 66$ and $p > 3$, the multiplicity-free permutation characters of $\Sym_n$ are
+completely classified, and each summand of the modular permutation module is self-dual and
+carries a Specht filtration whose factor dimensions are read off the ordinary character.
+The Specht module $S^\lambda$ appears in the filtration if and only if the ordinary
+character $\chi^\lambda$ is a constituent of the permutation character. Outside small or
+defining characteristic, the modular permutation module retains a clean and predictable
+composition series.
+
+\paragraph{Small characteristic genuinely breaks order \cite{wildon2009mfree}.}
+The hypotheses $p > 3$ and large $n$ are necessary, not artifacts. In characteristic $3$
+the module $F[\Sym_9/P\Gamma L(2,8)]$ has no Specht filtration at all, and in
+characteristic $2$ the module $\F_2[\Sym_6/(\Sym_3 \wr \Sym_2)]$ has a Specht filtration
+but not one with the factors predicted by its ordinary character. The $\Sym_5/\GF{5}$
+uniserial collapse is the cleanest member of this small-and-defining-characteristic family.
+
+\paragraph{The semisimple multiplicity data \cite{jamespeel1979,james1978}.}
+The composition-factor multiplicities underlying the realizable submodule dimensions in the
+Maschke regime are Littlewood-Richardson coefficients: over a field where the skew Specht
+module is semisimple, $V^{\lambda/\mu} \cong \bigoplus_\nu (V^\nu)^{c^\lambda_{\mu\nu}}$.
+The James-Peel contribution is the corresponding Specht filtration with the same
+multiplicities valid over an arbitrary field, the direct-sum form holding only in the
+semisimple regime.
+
+\section{Tier 3: the constructive rule (which groups certainly do)}
+
+The constructive engine abandons the permutation-module lattice and switches to
+genus-controlled constructions, in which the threshold gap is a different object.
+
+\paragraph{The AG-LSSS gap is the genus \cite{chen2006aglsss}.}
+From a residue code on a genus-$g$ curve, subsets of size below $n-m$ are unqualified and
+subsets of size at least $n-m+2g$ are qualified, so the privacy and reconstruction
+thresholds are separated by a gap of width exactly $2g$, with $m = \deg G$. The thresholds
+are bracketed by the minimum and dual distances,
+$n-m \leq d_{\min} \leq d_{\mathrm{cheat}} \leq n-m+2g$. Genus $0$ recovers Reed-Solomon and
+hence Shamir, with gap $0$. The gap is driven by the genus, not by a submodule lattice.
+
+\paragraph{Existence over any fixed field \cite{cccx2009}.}
+For every fixed finite field there is an infinite family of ideal linear secret-sharing
+schemes that is asymptotically good with strong multiplication, built on algebraic-geometry
+codes over good towers of function fields. This is an unconditional possibility result, and
+it imposes no group symmetry on its own.
+
+\paragraph{The symmetry-transfer rule that guarantees invariance \cite{joynerksir2008}.}
+If a divisor $D$ is very ample and the evaluation point set $E$ is large enough, namely
+$n > r \cdot \deg D$ for some $r \geq 1$, then the curve-automorphism group fixing $D$ and
+$E$ is realized exactly as the permutation automorphism group of the code, and the two
+groups are isomorphic, $\Aut_{D,E}(X) \cong \Perm(C)$. Concretely, for a smooth projective
+curve of genus $g \geq 2$ with $\deg D \geq 2g+1$ and $|E| \geq (1+g)\deg D$, the code has
+$n = \deg E$, $k = \deg D + 1 - g$, $d \geq \deg E - \deg D$, and its permutation
+automorphism group is the prescribed curve symmetry. Choosing a curve with the desired
+automorphism group, such as the Hermitian, Suzuki, Ree, or modular curves with their large
+automorphism groups, transfers that symmetry to the code.
+
+\paragraph{Group-algebra codes \cite{pandeykrishnan2026,garciaclaro2020}.}
+The Berman codes and their duals, derived from the group algebra $\F_2[\mathbb{Z}_n^m]$,
+have automorphism group the wreath product $\Sym_n \wr \Sym_m$ in product action, with the
+related abelian codes realizing the same group for odd $n \geq 5$. A sharp
+modular-versus-semisimple existence dichotomy parallels the no-go: assuming the MDS
+conjecture, which is a theorem for prime fields, the only nontrivial MDS group codes in a
+non-semisimple group algebra $\F_p G$ occur for $G = C_p$ with $p$ odd, where they coincide
+with extended Reed-Solomon codes, and outside this cyclic corner an MDS group code forces
+$\F_p G$ to be semisimple.
+
+\section{Location of the $\Sym_5/\GF{5}$ case}
+
+The case sits in the multiplicity-free corner of James's Submodule Theorem, with
+$n = p = 5$. For the natural $\Sym_n$ action the realizable submodule dimensions are
+$\{0,1,n-1,n\}$ in every characteristic, because the difference-vector argument is
+characteristic-free and the standard module is the irreducible piece of dimension $n-1$.
+The divisibility condition $p \mid n$ controls only the module structure, uniserial when
+$p \mid n$ and split when $p \nmid n$. It does not change the available dimensions. So the
+$\Sym_5$ gap window $\{3,4\}$ is infeasible over every field, Maschke does not restore it,
+and the no-go is characteristic-independent for the natural action. The same holds for
+$\Sym_n$ on $\GF{p}^n$ for every $n$, the forbidden interior being the dimensions
+$2, \dots, n-2$.
+
+\section{Caveats and refuted framings}
+
+Three points constrain how the result should be stated.
+
+\begin{itemize}[leftmargin=1.4em]
+\item The no-go should not be framed as a distributive-lattice, join-irreducible-poset, or
+  Ext-quiver result. Several such framings were tested and refuted. The supported mechanism
+  is specifically James's Submodule Theorem together with the $(n-1,1)$ irreducibility
+  dichotomy, and nothing more exotic.
+\item The two notions of gap are different objects. The algebraic-geometry threshold gap is
+  the genus window of width $2g$, a curve and code parameter. The representation-theoretic
+  gap is the set of missing submodule dimensions. The constructive results show how to
+  build symmetric codes with controlled parameters. They do not show the submodule
+  obstruction reappearing inside algebraic-geometry codes. The two are independent
+  constraints that a recoverable invariant scheme must both satisfy.
+\item Source quality varies. The James, Maschke, and Peel core is textbook-standard and
+  documented through lecture notes that quote the theorems verbatim, hence high confidence.
+  The Berman automorphism result is a single recent preprint, hence medium confidence. The
+  MDS group-code dichotomy is conditional on the MDS conjecture, discharged for prime
+  fields.
+\item For the specific natural-action $\Sym_5$ protocol of \texttt{pgg-smc}, the Tier-3
+  constructive routes were evaluated and rejected. Genus $0$ is excluded because
+  $|\Sym_5| = 120$ exceeds the Klein finite-subgroup ceiling $60$, Wiman's classification
+  rules out genus $3$, and Bring's curve at genus $4$ is only axiomatized while the
+  algebraic-geometry recovery route is excluded by the no-go itself. Recovery survives only
+  for the small cyclic instances and the intransitive product. A companion note records the
+  rejected Bring-curve and genus-$0$ PGL routes with commit and file pointers.
+\end{itemize}
+
+\section{Open problems}
+
+\begin{enumerate}[leftmargin=1.6em]
+\item A clean criterion for which other $2$-transitive groups, such as projective special
+  linear, affine, or sporadic $2$-transitive groups, carry the defining-characteristic
+  obstruction on their natural modules. The $2$-transitivity is what breeds the difference
+  vectors, but no consulted source pins down the general cross-versus-defining split for an
+  arbitrary $2$-transitive group.
+\item Whether a nontrivial group symmetry can be imposed on the asymptotically good ideal
+  scheme family while preserving asymptotic goodness and strong multiplication. The
+  automorphism-transfer theorem supplies the mechanism and the asymptotically good family
+  exists, but no consulted source combines them into an asymptotically good symmetric
+  algebraic-geometry scheme.
+\item A closed form for the forbidden intermediate dimensions of a general Young
+  permutation module $M^\lambda$, not merely $M^{(n-1,1)}$, in defining characteristic,
+  expressed through the $p$-regular Specht-filtration data.
+\item Whether the genus gap of width $2g$ and the submodule-lattice gap admit a unified
+  representation-theoretic statement, or are genuinely independent constraints that must
+  both be satisfied for a recoverable group-invariant covering scheme.
+\end{enumerate}
+
+\bibliographystyle{plain}
+\bibliography{20260630-170155-s5nogo-james-submodule-report}
+
+\end{document}

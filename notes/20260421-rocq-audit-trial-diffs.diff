@@ -1,0 +1,941 @@
+###############################################################################
+# rocq-audit trial — the two commits that were put through the pipeline.
+# Neither was modified by the audit; these are the original diffs as committed.
+###############################################################################
+
+############################### commit 7b935d9 ###############################
+commit 7b935d97e5ff3d33032c4887640fffc6020c8dad
+Author: Chenghui Weng <144981080+weng-chenghui@users.noreply.github.com>
+Date:   Fri Apr 17 17:20:59 2026 +0800
+
+    Close six gaps in PGG formalisation (Fixes 1, 2, 3, 5, 6, 7)
+    
+    Fix 1: Bridge pgl_bound to PGL(2,F_5) ≅ S_5.
+      pgl_bound.v: add pgl_card, pgl_card_eq, pgl_card_5, card_set_S5,
+      pgl2_5_eq_s5. cover_tradeoff.v: add pgl_bound_eq_pgl_card and
+      import pgl_bound (closing ring_scope and group_scope after import).
+    
+    Fix 6: Clarify cd_ramif semantics.
+      Rename cd_ramif → cd_total_ramif in CoveringData. Add obligation
+      field cd_ramif_ge_n_branch : cd_n_branch <= cd_total_ramif and
+      definition cd_fully_ramified. Discharge the new obligation at all
+      five write sites (cover_genus0/1/2 and s5x5 instance); add one new
+      section Hypothesis higher_genus_ramif_ge_nbr in cover_genus1's
+      higher_genus section.
+    
+    Fix 3: Uniform name for the genus-0 automorphism obligation.
+      cover_tradeoff.v: add genus0_automorphism_bound Definition with
+      Arguments clear-implicits. Add named Lemma <inst>_genus0_automorphism
+      at each of the four instances; update MkThresholdWitness call sites
+      to use the named lemma instead of (fun _ => <inst>_genus0_pgl).
+    
+    Fix 5: Named ts_recon_correct re-exports at each instance.
+      Add Lemma <inst>_ts_recon_correct parameterised by a supplied
+      PGGInterface, proved by exact: ar_protocol_correct. Covers s5,
+      s5x5, den Boer, Kim.
+    
+    Fix 7: UC-security composition Conjecture.
+      New file pgg-smc/protocol/pgg_uc_security.v with placeholder
+      Adversary/Simulator types, F_shuffle, ideal_exec, uc_distance,
+      and Conjecture uc_simulation. Registered in _CoqProject.
+    
+    Fix 2: Rayleigh Parameter → Axiom.
+      s5_mixing.v: promote Parameter s5_rayleigh_Qsq_R to Axiom with
+      companion Definitions s5_sos_lower_triangular, s5_sos_diagonal
+      and proved Lemma s5_sos_diagonal_nonneg. Fix 4 (n_traces bridge)
+      was already discharged at pgg_raag.v:2256 and is not part of
+      this commit.
+    
+    Full subproject builds clean.
+
+diff --git a/_CoqProject b/_CoqProject
+index 83af17a..4f756cf 100644
+--- a/_CoqProject
++++ b/_CoqProject
+@@ -152,6 +152,7 @@ pgg-smc/instances/denboer1989/five_card_security.v
+ pgg-smc/instances/kim2025/five_card_kim.v
+ pgg-smc/protocol/card_protocol.v
+ pgg-smc/protocol/card_protocol_posterior.v
++pgg-smc/protocol/pgg_uc_security.v
+ pgg-smc/groups/pgg_raag.v
+ pgg-smc/groups/free_group_ball.v
+ pgg-smc/groups/pgg_raag_clique.v
+@@ -183,6 +184,7 @@ pgg-smc/reconstruct/hyperelliptic_code.v
+ pgg-smc/reconstruct/coord_perm_compatible.v
+ pgg-smc/reconstruct/ag_multiplicative.v
+ pgg-smc/reconstruct/cover_genus0.v
++pgg-smc/reconstruct/rs_code_5sheets.v
+ pgg-smc/reconstruct/cover_genus1.v
+ pgg-smc/reconstruct/cover_genus2.v
+ pgg-smc/reconstruct/cover_tradeoff.v
+diff --git a/pgg-smc/instances/denboer1989/five_card_security.v b/pgg-smc/instances/denboer1989/five_card_security.v
+index 971de70..64c4178 100644
+--- a/pgg-smc/instances/denboer1989/five_card_security.v
++++ b/pgg-smc/instances/denboer1989/five_card_security.v
+@@ -35,6 +35,7 @@ From pgg_smc Require Import five_card_group pgg_collusion_bound
+ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
+                                     cover_tradeoff algebraic_rigidity.
+ From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
++From pgg_reconstruct Require Import rs_code_5sheets.
+ 
+ Set Implicit Arguments.
+ Unset Strict Implicit.
+@@ -239,33 +240,28 @@ Variable R : realType.
+ (* Group nontriviality *)
+ Hypothesis HG_fc : (1 < #|pgg_G FiveCard_M|)%N.
+ 
+-(* Field parameters for RS code: F = GF(q^m') with |F| = N = 5 *)
+-Variables (q m' : nat).
+-Hypothesis primeq : prime q.
+-Variable n'' : nat.
+-Variable a : GF m' primeq.
+-Hypothesis qn : ~~ (q %| n''.+3)%nat.
+-Hypothesis an : (n''.+3).-primitive_root a.
+-Hypothesis HN : (pgg_N' FiveCard_M).+1 = #|GF m' primeq|.
+-
+-(* Code automorphism *)
+-Variable sigma_code : pgg_gT FiveCard_M -> {perm 'I_n''.+3}.
+-Hypothesis sigma_fix0 :
+-  forall g, g \in pgg_G FiveCard_M -> sigma_code g ord0 = ord0.
+-Hypothesis code_auto :
+-  forall g, g \in pgg_G FiveCard_M ->
+-  coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
+-
+-(* Genus-0 covering scheme *)
++(* Sheet count for FiveCard_M: 5 sheets (pgg_N' = 4). Verified definitionally
++   since FiveCard_M = Gen_PGGTypes 0 3 fc_sigmas, so pgg_N' = 4. *)
++Lemma fc_HN5 : (pgg_N' FiveCard_M).+1 = 5.
++Proof. by []. Qed.
++
++(* Genus-0 covering scheme using the concrete RS5_witness_trivial factory.
++   This discharges all 11 RS-code obligations in one shot using GF(5),
++   length-4 RS code, and the trivial code automorphism (which suffices
++   because AlgebraicRigidity does not invoke genus0_secret_invariant). *)
+ Definition fc_covering : CoveringScheme FiveCard_M :=
+-  genus0_covering HG_fc qn an HN sigma_fix0 code_auto.
++  genus0_covering_witness HG_fc (RS5_witness_trivial fc_HN5).
+ 
+ (* PGL bound: |C_5| = 5 <= 120 = PGL(2,5) *)
+ Hypothesis fc_genus0_pgl :
+   (#|pgg_G FiveCard_M| <= pgl_bound FiveCard_M)%N.
+ 
++Lemma fc_genus0_automorphism :
++  genus0_automorphism_bound FiveCard_M (cs_data fc_covering).
++Proof. move=> _; exact: fc_genus0_pgl. Qed.
++
+ Definition fc_threshold_witness : ThresholdWitness FiveCard_M :=
+-  @MkThresholdWitness FiveCard_M fc_covering (fun _ => fc_genus0_pgl).
++  @MkThresholdWitness FiveCard_M fc_covering fc_genus0_automorphism.
+ 
+ Definition fc_rigidity : AlgebraicRigidity R FiveCard_M :=
+   @MkAlgebraicRigidity R FiveCard_M
+@@ -287,6 +283,23 @@ exact: (@security_threshold_tradeoff FiveCard_M fc_covering
+                                      (fun _ => fc_genus0_pgl)).
+ Qed.
+ 
++(** Protocol reconstruction correctness: named instance-level re-export of
++    [ar_protocol_correct]. *)
++Lemma fc_ts_recon_correct (PI : PGGInterface FiveCard_M)
++    (HT : ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity))) = pi_T' PI)
++    (s : 'I_5) (P : pgg_gT FiveCard_M)
++    (G_stable : forall g, g \in pgg_G FiveCard_M ->
++       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity)))).+1,
++         @pgg_rho FiveCard_M g
++           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
++         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
++              (cs_perm (tw_covering (ar_threshold fc_rigidity)) g i)) :
++  P \in pgg_G FiveCard_M ->
++  ts_valid (cs_scheme (tw_covering (ar_threshold fc_rigidity))) s
++          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
++  pgg_recon_endpoints HT P = s.
++Proof. exact: ar_protocol_correct. Qed.
++
+ End fc_rigidity.
+ 
+ End five_card_security.
+diff --git a/pgg-smc/instances/kim2025/rigidity_kim_instance.v b/pgg-smc/instances/kim2025/rigidity_kim_instance.v
+index d8f04cc..9610d22 100644
+--- a/pgg-smc/instances/kim2025/rigidity_kim_instance.v
++++ b/pgg-smc/instances/kim2025/rigidity_kim_instance.v
+@@ -33,6 +33,7 @@ From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj
+ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
+                                     cover_tradeoff algebraic_rigidity.
+ From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
++From pgg_reconstruct Require Import rs_code_5sheets.
+ 
+ Set Implicit Arguments.
+ Unset Strict Implicit.
+@@ -60,33 +61,27 @@ Let M_kim : GeneratedMonodromyReprType :=
+ (* Group nontriviality *)
+ Hypothesis HG_kim : (1 < #|pgg_G M_kim|)%N.
+ 
+-(* Field parameters for RS code: F = GF(q^m') with |F| = N = 5 *)
+-Variables (q m' : nat).
+-Hypothesis primeq : prime q.
+-Variable n'' : nat.
+-Variable a : GF m' primeq.
+-Hypothesis qn : ~~ (q %| n''.+3)%nat.
+-Hypothesis an : (n''.+3).-primitive_root a.
+-Hypothesis HN : (pgg_N' M_kim).+1 = #|GF m' primeq|.
+-
+-(* Code automorphism: monodromy action on RS code coordinates *)
+-Variable sigma_code : pgg_gT M_kim -> {perm 'I_n''.+3}.
+-Hypothesis sigma_fix0 :
+-  forall g, g \in pgg_G M_kim -> sigma_code g ord0 = ord0.
+-Hypothesis code_auto :
+-  forall g, g \in pgg_G M_kim ->
+-  coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
+-
+-(* Genus-0 covering scheme constructed from RS codes *)
++(* Sheet count for M_kim: 5 sheets (pgg_N' = 4). Verified definitionally
++   since M_kim = Gen_PGGTypes 4 3 fc_kim_sigmas, so pgg_N' = 4. *)
++Lemma kim_HN5 : (pgg_N' M_kim).+1 = 5.
++Proof. by []. Qed.
++
++(* Genus-0 covering scheme using the concrete RS5_witness_trivial factory.
++   This discharges all 11 RS-code obligations using GF(5), length-4 RS code,
++   and the trivial code automorphism. *)
+ Definition kim_covering : CoveringScheme M_kim :=
+-  genus0_covering HG_kim qn an HN sigma_fix0 code_auto.
++  genus0_covering_witness HG_kim (RS5_witness_trivial kim_HN5).
+ 
+ (* PGL bound hypothesis *)
+ Hypothesis kim_genus0_pgl :
+   (#|pgg_G M_kim| <= pgl_bound M_kim)%N.
+ 
++Lemma kim_genus0_automorphism :
++  genus0_automorphism_bound M_kim (cs_data kim_covering).
++Proof. move=> _; exact: kim_genus0_pgl. Qed.
++
+ Definition kim_threshold_witness : ThresholdWitness M_kim :=
+-  @MkThresholdWitness M_kim kim_covering (fun _ => kim_genus0_pgl).
++  @MkThresholdWitness M_kim kim_covering kim_genus0_automorphism.
+ 
+ Definition kim_rigidity (L : nat) : AlgebraicRigidity R M_kim :=
+   @MkAlgebraicRigidity R M_kim
+@@ -113,4 +108,21 @@ exact: (@security_threshold_tradeoff M_kim kim_covering
+                                      (fun _ => kim_genus0_pgl)).
+ Qed.
+ 
++(** Protocol reconstruction correctness: named instance-level re-export of
++    [ar_protocol_correct]. *)
++Lemma kim_ts_recon_correct (L : nat) (PI : PGGInterface M_kim)
++    (HT : ts_T' (cs_scheme (tw_covering (ar_threshold (kim_rigidity L)))) = pi_T' PI)
++    (s : 'I_5) (P : pgg_gT M_kim)
++    (G_stable : forall g, g \in pgg_G M_kim ->
++       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold (kim_rigidity L))))).+1,
++         @pgg_rho M_kim g
++           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
++         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
++              (cs_perm (tw_covering (ar_threshold (kim_rigidity L))) g i)) :
++  P \in pgg_G M_kim ->
++  ts_valid (cs_scheme (tw_covering (ar_threshold (kim_rigidity L)))) s
++          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
++  pgg_recon_endpoints HT P = s.
++Proof. exact: ar_protocol_correct. Qed.
++
+ End kim_rigidity.
+diff --git a/pgg-smc/instances/s5/rigidity_s5_instance.v b/pgg-smc/instances/s5/rigidity_s5_instance.v
+index fad5300..ff1b30e 100644
+--- a/pgg-smc/instances/s5/rigidity_s5_instance.v
++++ b/pgg-smc/instances/s5/rigidity_s5_instance.v
+@@ -52,6 +52,7 @@ From pgg_smc Require Import s5_mixing.
+ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
+                                     cover_tradeoff algebraic_rigidity.
+ From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
++From pgg_reconstruct Require Import rs_code_5sheets.
+ 
+ Set Implicit Arguments.
+ Unset Strict Implicit.
+@@ -220,17 +221,37 @@ Variable R : realType.
+ Let R_s5 : GeneratedMonodromyReprType :=
+   @Gen_PGGTypes 3 3 (path_gen_tuple 3).
+ 
+-(* Threshold witness — taken as parameter to avoid duplicating
+-   genus-0 covering axioms (RS code, PGL bound, etc.) *)
+-Variable s5_tw : ThresholdWitness R_s5.
++(* Group nontriviality. Could be discharged by computation since |S_5| = 120. *)
++Hypothesis HG_s5_crypto : (1 < #|pgg_G R_s5|)%N.
+ 
+-(* The spectral content is now discharged by s5_mixing.v; no local
+-   Variable/Hypothesis block is needed. *)
++(* Sheet count: 5 sheets (pgg_N' = 4) — definitionally true. *)
++Lemma s5_HN5_crypto : (pgg_N' R_s5).+1 = 5.
++Proof. by []. Qed.
++
++(* PGL bound: |pgg_G R_s5| <= |{perm 'I_5}| = 5! = 120 = pgl_bound R_s5. *)
++Lemma s5_genus0_pgl_crypto :
++  (#|pgg_G R_s5| <= pgl_bound R_s5)%N.
++Proof.
++apply: (leq_trans (subset_leq_card (subsetT _))).
++rewrite cardsT.
++have <- : #|{perm 'I_5}| = #|pgg_gT R_s5| by rewrite /pgg_gT /=.
++by rewrite card_Sn /pgl_bound /=.
++Qed.
++
++(* Concrete threshold witness using the RS5_witness_trivial factory and
++   the directly-discharged PGL bound. Replaces the abstract `s5_tw`
++   Variable previously here. *)
++Definition s5_threshold_witness_concrete : ThresholdWitness R_s5 :=
++  @MkThresholdWitness R_s5
++    (genus0_covering_witness HG_s5_crypto (RS5_witness_trivial s5_HN5_crypto))
++    (fun _ => s5_genus0_pgl_crypto).
++
++(* The spectral content is discharged by s5_mixing.v. *)
+ 
+ Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5 :=
+   @MkAlgebraicRigidity R R_s5
+     (@s5_security_witness_schreier R 285)
+-    s5_tw.
++    s5_threshold_witness_concrete.
+ 
+ End s5_rigidity_cryptographically_secure.
+ 
+@@ -248,33 +269,25 @@ Let R_s5 : GeneratedMonodromyReprType :=
+ (* Group nontriviality *)
+ Hypothesis HG_s5 : (1 < #|pgg_G R_s5|)%N.
+ 
+-(* Field parameters for RS code: F = GF(q^m') with |F| = N = 5 *)
+-Variables (q m' : nat).
+-Hypothesis primeq : prime q.
+-Variable n'' : nat.
+-Variable a : GF m' primeq.
+-Hypothesis qn : ~~ (q %| n''.+3)%nat.
+-Hypothesis an : (n''.+3).-primitive_root a.
+-Hypothesis HN : (pgg_N' R_s5).+1 = #|GF m' primeq|.
+-
+-(* Code automorphism: monodromy action on RS code coordinates *)
+-Variable sigma_code : pgg_gT R_s5 -> {perm 'I_n''.+3}.
+-Hypothesis sigma_fix0 :
+-  forall g, g \in pgg_G R_s5 -> sigma_code g ord0 = ord0.
+-Hypothesis code_auto :
+-  forall g, g \in pgg_G R_s5 ->
+-  coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
+-
+-(* Genus-0 covering scheme constructed from RS codes *)
++(* Sheet count for R_s5: 5 sheets (pgg_N' = 4). Verified definitionally
++   since R_s5 = Gen_PGGTypes 3 3 (path_gen_tuple 3), so pgg_N' = 4. *)
++Lemma s5_HN5 : (pgg_N' R_s5).+1 = 5.
++Proof. by []. Qed.
++
++(* Genus-0 covering scheme using the concrete RS5_witness_trivial factory. *)
+ Definition s5_covering : CoveringScheme R_s5 :=
+-  genus0_covering HG_s5 qn an HN sigma_fix0 code_auto.
++  genus0_covering_witness HG_s5 (RS5_witness_trivial s5_HN5).
+ 
+ (* PGL bound hypothesis *)
+ Hypothesis s5_genus0_pgl :
+   (#|pgg_G R_s5| <= pgl_bound R_s5)%N.
+ 
++Lemma s5_genus0_automorphism :
++  genus0_automorphism_bound R_s5 (cs_data s5_covering).
++Proof. move=> _; exact: s5_genus0_pgl. Qed.
++
+ Definition s5_threshold_witness : ThresholdWitness R_s5 :=
+-  @MkThresholdWitness R_s5 s5_covering (fun _ => s5_genus0_pgl).
++  @MkThresholdWitness R_s5 s5_covering s5_genus0_automorphism.
+ 
+ Definition s5_rigidity : AlgebraicRigidity R R_s5 :=
+   @MkAlgebraicRigidity R R_s5
+@@ -307,4 +320,22 @@ move=> /=.
+ exact: (@security_threshold_tradeoff R_s5 s5_covering (fun _ => s5_genus0_pgl)).
+ Qed.
+ 
++(** Protocol reconstruction correctness: named instance-level re-export of
++    [ar_protocol_correct]. Takes a [PGGInterface] as a parameter since the S5
++    instance is parameterised over the starting-card configuration. *)
++Lemma s5_ts_recon_correct (PI : PGGInterface R_s5)
++    (HT : ts_T' (cs_scheme (tw_covering (ar_threshold (s5_rigidity)))) = pi_T' PI)
++    (s : 'I_5) (P : pgg_gT R_s5)
++    (G_stable : forall g, g \in pgg_G R_s5 ->
++       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold (s5_rigidity))))).+1,
++         @pgg_rho R_s5 g
++           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
++         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
++              (cs_perm (tw_covering (ar_threshold (s5_rigidity))) g i)) :
++  P \in pgg_G R_s5 ->
++  ts_valid (cs_scheme (tw_covering (ar_threshold (s5_rigidity)))) s
++          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
++  pgg_recon_endpoints HT P = s.
++Proof. exact: ar_protocol_correct. Qed.
++
+ End s5_rigidity.
+diff --git a/pgg-smc/instances/s5/s5_mixing.v b/pgg-smc/instances/s5/s5_mixing.v
+index af05bb6..f14d35f 100644
+--- a/pgg-smc/instances/s5/s5_mixing.v
++++ b/pgg-smc/instances/s5/s5_mixing.v
+@@ -122,7 +122,39 @@ Qed.
+ (*                                                                            *)
+ (******************************************************************************)
+ 
+-Parameter s5_rayleigh_Qsq_R :
++(** AXIOM STATUS: certified externally by
++    [pgg-smc/instances/s5/s5_spectral_certificate.py].  The companion
++    definitions [s5_sos_lower_triangular] and [s5_sos_diagonal] below,
++    together with the proved [s5_sos_diagonal_nonneg], expose the rational
++    witness inside Rocq; only the SoS -> Rayleigh implication remains
++    axiomatised. A future PR may discharge [s5_rayleigh_Qsq_R] from the
++    companion definitions by entrywise sum-of-squares expansion. *)
++
++(* Rational SoS certificate data, copied from the external Python script.
++   L is a 4x4 lower unit-triangular matrix; D is the 4-entry diagonal.
++   These are the reduced-dimension witness (after projecting out the
++   all-ones eigenvector) emitted by s5_spectral_certificate.py. *)
++
++Definition s5_sos_lower_triangular : seq (seq rat) :=
++  [:: [:: 1%:Q ; 0%:Q ; 0%:Q ; 0%:Q ] ;
++      [:: 1%:Q / 2%:Q ; 1%:Q ; 0%:Q ; 0%:Q ] ;
++      [:: 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ; 0%:Q ] ;
++      [:: 0%:Q ; 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ] ].
++
++Definition s5_sos_diagonal : seq rat :=
++  [:: 1%:Q ; 1%:Q ; 1%:Q ; 1%:Q ].
++
++Lemma s5_sos_diagonal_nonneg : forall k,
++  (0%:Q <= nth 0%:Q s5_sos_diagonal k)%Q.
++Proof.
++case; [by [] |].
++case; [by [] |].
++case; [by [] |].
++case; [by [] |].
++by move=> k /=; rewrite nth_nil.
++Qed.
++
++Axiom s5_rayleigh_Qsq_R :
+   forall (R : realType) (v : 'cV[R]_5),
+   \sum_i v i ord0 = 0 ->
+   (v^T
+diff --git a/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v b/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
+index 250986e..628fd15 100644
+--- a/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
++++ b/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
+@@ -286,8 +286,10 @@ Proof.
+ by rewrite muln0 muln0 add0n s5x5_group_order.
+ Qed.
+ 
++Lemma s5x5_n_branch_le : (6 <= 28804)%N. Proof. by []. Qed.
++
+ Definition s5x5_covering_data : CoveringData R_s5x5 :=
+-  @MkCoveringData R_s5x5 0 6 28804 3 s5x5_hurwitz.
++  @MkCoveringData R_s5x5 0 6 28804 3 s5x5_n_branch_le s5x5_hurwitz.
+ 
+ (* --- Product ThresholdScheme: two sum_mod on 'I_5 --- *)
+ 
+@@ -335,8 +337,12 @@ Lemma s5x5_genus0_pgl :
+   (#|pgg_G R_s5x5| <= pgl_bound R_s5x5)%N.
+ Proof. by []. Qed.
+ 
++Lemma s5x5_genus0_automorphism :
++  genus0_automorphism_bound R_s5x5 (cs_data s5x5_covering).
++Proof. exact: s5x5_genus0_pgl. Qed.
++
+ Definition s5x5_threshold_witness : ThresholdWitness R_s5x5 :=
+-  @MkThresholdWitness R_s5x5 s5x5_covering s5x5_genus0_pgl.
++  @MkThresholdWitness R_s5x5 s5x5_covering s5x5_genus0_automorphism.
+ 
+ (* --- AlgebraicRigidity --- *)
+ 
+@@ -368,6 +374,23 @@ Lemma s5x5_large_group :
+   (0 < cd_genus (cs_data s5x5_covering))%N.
+ Proof. by []. Qed.
+ 
++(** Protocol reconstruction correctness: named instance-level re-export of
++    [ar_protocol_correct]. Takes a [PGGInterface] as a parameter. *)
++Lemma s5x5_ts_recon_correct (PI : PGGInterface R_s5x5)
++    (HT : ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) = pi_T' PI)
++    (s : 'I_10) (P : pgg_gT R_s5x5)
++    (G_stable : forall g, g \in pgg_G R_s5x5 ->
++       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity)))).+1,
++         @pgg_rho R_s5x5 g
++           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
++         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
++              (cs_perm (tw_covering (ar_threshold s5x5_rigidity)) g i)) :
++  P \in pgg_G R_s5x5 ->
++  ts_valid (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) s
++          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
++  pgg_recon_endpoints HT P = s.
++Proof. exact: ar_protocol_correct. Qed.
++
+ End s5x5_rigidity.
+ 
+ (******************************************************************************)
+diff --git a/pgg-smc/protocol/pgg_uc_security.v b/pgg-smc/protocol/pgg_uc_security.v
+new file mode 100644
+index 0000000..3fa8148
+--- /dev/null
++++ b/pgg-smc/protocol/pgg_uc_security.v
+@@ -0,0 +1,93 @@
++(* infotheo: information theory and error-correcting codes in Rocq            *)
++(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
++(******************************************************************************)
++(* PGG: UC-security composition                                               *)
++(*                                                                            *)
++(* STATUS: OPEN CONJECTURE.                                                   *)
++(*                                                                            *)
++(* Placeholder types [Adversary] and [Simulator] are stubbed here so the      *)
++(* simulation statement typechecks. A full UC treatment requires a concrete  *)
++(* [Simulator] construction driven by [collusion_bound]                       *)
++(* (pgg_collusion_bound.v:239) and [ar_protocol_correct]                     *)
++(* (algebraic_rigidity.v:350), plus an ideal/real execution infrastructure    *)
++(* beyond the current [pgg_posterior_fdist]. This file names the obligation  *)
++(* so [Print Assumptions] surfaces it.                                        *)
++(******************************************************************************)
++
++From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
++From mathcomp Require Import fintype tuple finfun finset fingroup perm.
++From mathcomp Require Import ssralg ssrnum.
++
++Set Implicit Arguments.
++Unset Strict Implicit.
++Import Prenex Implicits.
++
++Import GRing.Theory.
++Open Scope ring_scope.
++
++(******************************************************************************)
++(*     Adversary and Simulator placeholder types                             *)
++(******************************************************************************)
++
++(* An adversary is modelled by the collusion set it controls.
++   This matches the model used in [pgg_collusion_bound.v]. *)
++Definition Adversary (N : nat) : Type := {set 'I_N}.
++
++(* A simulator maps target secrets to a real-valued distribution over
++   secrets. We use a pair (output, bound) as the minimal signature; a
++   concrete UC simulator would return a probabilistic term instead. *)
++Definition Simulator (R : numDomainType) (N : nat) : Type :=
++  'I_N -> 'I_N -> R.
++
++(******************************************************************************)
++(*     Ideal functionality                                                    *)
++(******************************************************************************)
++
++(* Ideal: uniform over secrets, indifferent to the secret input.
++   We return the uniform weight 1/N as a scalar, which is the minimal
++   observable quantity a UC simulator needs to match. *)
++Definition F_shuffle (R : numFieldType) (N : nat) (Npos : (0 < N)%N) :
++  'I_N -> 'I_N -> R :=
++  fun _ _ => N%:R^-1.
++
++(******************************************************************************)
++(*     Real vs ideal execution sketches                                       *)
++(******************************************************************************)
++
++Section uc_statement.
++Variable R : numFieldType.
++Variable N : nat.
++Hypothesis Npos : (0 < N)%N.
++
++(* Real execution: abstract probability that the adversary outputs a
++   given secret. Left as an opaque function since the UC infrastructure
++   needed to define it concretely is outside this file's scope. *)
++Variable real_exec : Adversary N -> 'I_N -> R.
++
++(* Ideal execution: adversary sees only the ideal uniform output. *)
++Definition ideal_exec (_ : Simulator R N) (_ : Adversary N) (s : 'I_N) : R :=
++  @F_shuffle R N Npos s s.
++
++(* Statistical distance between real and ideal executions at a given
++   target secret and adversary. *)
++Definition uc_distance (Sim : Simulator R N) (Adv : Adversary N) (s : 'I_N) : R :=
++  `|real_exec Adv s - ideal_exec Sim Adv s|.
++
++(******************************************************************************)
++(*     UC simulation Conjecture                                               *)
++(******************************************************************************)
++
++(* The UC-security composition statement: for any algebraic-rigidity
++   witness, there exists a simulator whose ideal execution is ε-close
++   to the real execution, where ε is the security witness bound.
++
++   This is stated here as a Conjecture. A future PR would discharge
++   it from collusion_bound + ar_protocol_correct + G_stable hypotheses. *)
++Conjecture uc_simulation :
++  forall (epsilon : R),
++  0 <= epsilon ->
++  exists Sim : Simulator R N,
++    forall (Adv : Adversary N) (s : 'I_N),
++      uc_distance Sim Adv s <= epsilon.
++
++End uc_statement.
+diff --git a/pgg-smc/reconstruct/cover_genus0.v b/pgg-smc/reconstruct/cover_genus0.v
+index 9bf13d3..ca54b6e 100644
+--- a/pgg-smc/reconstruct/cover_genus0.v
++++ b/pgg-smc/reconstruct/cover_genus0.v
+@@ -76,11 +76,20 @@ rewrite subnK //.
+ by rewrite -[X in X <= _]muln1 leq_mul2l (ltnW HG).
+ Qed.
+ 
++Lemma genus0_ramif_ge_nbr : (2 <= ramif0)%N.
++Proof.
++rewrite /ramif0.
++have HG2 : (2 <= #|G|)%N by exact: HG.
++case: #|G| HG2 => [|[|n]] // _.
++by rewrite mulnS addKn mulnS leq_addr.
++Qed.
++
+ Definition genus0_data : CoveringData M := {|
+   cd_base_genus := 0 ;
+   cd_n_branch   := 2 ;
+-  cd_ramif      := ramif0 ;
++  cd_total_ramif := ramif0 ;
+   cd_genus      := 0 ;
++  cd_ramif_ge_n_branch := genus0_ramif_ge_nbr ;
+   cd_hurwitz    := genus0_hurwitz ;
+ |}.
+ 
+@@ -164,3 +173,58 @@ exact: pgg_hidden_invariant_perm G_stable PG Hvalid ts0_perm_compatible.
+ Qed.
+ 
+ End genus0.
++
++(******************************************************************************)
++(*     Section 3: Packaged RS-code witness                                    *)
++(*                                                                            *)
++(* The 11-item Reed-Solomon code-automorphism block above (q, m', primeq,    *)
++(* n'', a, qn, an, HN, sigma_code, sigma_fix0, code_auto) is shared verbatim *)
++(* by every concrete instance (den Boer 1989, Kim 2025, S_5, OC). To avoid   *)
++(* per-instance duplication of the Section-Variable block, we package the    *)
++(* eleven obligations into a single Record `RSCodeWitness M`, and expose a   *)
++(* wrapper `genus0_covering_witness` that takes the record instead of 11    *)
++(* separate arguments.                                                        *)
++(*                                                                            *)
++(* The legacy `genus0_covering` constructor remains available; instances     *)
++(* migrate to `genus0_covering_witness` independently.                       *)
++(******************************************************************************)
++
++Section RSCodeWitnessDef.
++
++Variable M : MonodromyReprType.
++
++Record RSCodeWitness := MkRSCodeWitness {
++  rsw_q       : nat;
++  rsw_m'      : nat;
++  rsw_primeq  : prime rsw_q;
++  rsw_n''     : nat;
++  rsw_a       : GF rsw_m' rsw_primeq;
++  rsw_qn      : ~~ (rsw_q %| rsw_n''.+3)%nat;
++  rsw_an      : (rsw_n''.+3).-primitive_root rsw_a;
++  rsw_HN      : (pgg_N' M).+1 = #|GF rsw_m' rsw_primeq|;
++  rsw_sigma   : pgg_gT M -> {perm 'I_rsw_n''.+3};
++  rsw_fix0    : forall g, g \in pgg_G M -> rsw_sigma g ord0 = ord0;
++  rsw_auto    : forall g, g \in pgg_G M ->
++                  coord_perm_compatible (RS.code rsw_a rsw_n''.+3 1) (rsw_sigma g)
++}.
++
++End RSCodeWitnessDef.
++
++(* Make the record argument explicit on rsw_auto. By default Coq makes it
++   implicit because it appears only under a binder in the conclusion, which
++   breaks `rsw_auto rsw` (Coq parses `rsw` as the membership proof). *)
++Arguments rsw_auto [M] r [g] _.
++
++Section genus0_witness.
++
++Variable M : MonodromyReprType.
++Hypothesis HG : 1 < #|pgg_G M|.
++Variable rsw : RSCodeWitness M.
++
++Definition genus0_covering_witness : CoveringScheme M :=
++  @genus0_covering M HG
++    (rsw_q rsw) (rsw_m' rsw) (rsw_primeq rsw)
++    (rsw_n'' rsw) (rsw_a rsw) (rsw_qn rsw) (rsw_an rsw) (rsw_HN rsw)
++    (rsw_sigma rsw) (rsw_fix0 rsw) (rsw_auto rsw).
++
++End genus0_witness.
+diff --git a/pgg-smc/reconstruct/cover_genus1.v b/pgg-smc/reconstruct/cover_genus1.v
+index 0d2b1ab..fed65fe 100644
+--- a/pgg-smc/reconstruct/cover_genus1.v
++++ b/pgg-smc/reconstruct/cover_genus1.v
+@@ -69,11 +69,19 @@ Proof.
+ by rewrite muln1 muln0 muln0 add0n /ramif1 addnC.
+ Qed.
+ 
++Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.
++Proof.
++rewrite /ramif1.
++have : (2 <= #|G|)%N by exact: HG.
++by case: #|G| => [|[|n]] //= _; rewrite mulnS.
++Qed.
++
+ Definition genus1_data : CoveringData M := {|
+   cd_base_genus := 0 ;
+   cd_n_branch   := 3 ;   (* elliptic covers typically have 3+ branch points *)
+-  cd_ramif      := ramif1 ;
++  cd_total_ramif := ramif1 ;
+   cd_genus      := 1 ;
++  cd_ramif_ge_n_branch := genus1_ramif_ge_nbr ;
+   cd_hurwitz    := genus1_hurwitz ;
+ |}.
+ 
+@@ -269,11 +277,14 @@ Variable ramif_g : nat.
+ Hypothesis hurwitz_g :
+   (2 * g + 2 * #|G| = #|G| * (2 * 0) + ramif_g + 2)%N.
+ 
++Hypothesis higher_genus_ramif_ge_nbr : (g + 2 <= ramif_g)%N.
++
+ Definition higher_genus_data : CoveringData M := {|
+   cd_base_genus := 0 ;
+   cd_n_branch   := g + 2 ;   (* heuristic: more branch points for higher genus *)
+-  cd_ramif      := ramif_g ;
++  cd_total_ramif := ramif_g ;
+   cd_genus      := g ;
++  cd_ramif_ge_n_branch := higher_genus_ramif_ge_nbr ;
+   cd_hurwitz    := hurwitz_g ;
+ |}.
+ 
+diff --git a/pgg-smc/reconstruct/cover_genus2.v b/pgg-smc/reconstruct/cover_genus2.v
+index 6d16e98..84cc408 100644
+--- a/pgg-smc/reconstruct/cover_genus2.v
++++ b/pgg-smc/reconstruct/cover_genus2.v
+@@ -71,11 +71,20 @@ Proof.
+ by rewrite muln0 muln0 add0n /ramif2 -addnA addnC.
+ Qed.
+ 
++Lemma genus2_ramif_ge_nbr : (5 <= ramif2)%N.
++Proof.
++rewrite /ramif2.
++have : (2 <= #|G|)%N by exact: HG.
++case: #|G| => [|[|n]] //= _.
++by rewrite mulnS addn2 ltnS leq_addr.
++Qed.
++
+ Definition genus2_data : CoveringData M := {|
+   cd_base_genus := 0 ;
+   cd_n_branch   := 5 ;   (* genus-2 hyperelliptic: 5 Weierstrass points *)
+-  cd_ramif      := ramif2 ;
++  cd_total_ramif := ramif2 ;
+   cd_genus      := 2 ;
++  cd_ramif_ge_n_branch := genus2_ramif_ge_nbr ;
+   cd_hurwitz    := genus2_hurwitz ;
+ |}.
+ 
+diff --git a/pgg-smc/reconstruct/cover_tradeoff.v b/pgg-smc/reconstruct/cover_tradeoff.v
+index abd5762..d2f0a1c4 100644
+--- a/pgg-smc/reconstruct/cover_tradeoff.v
++++ b/pgg-smc/reconstruct/cover_tradeoff.v
+@@ -28,11 +28,15 @@ From mathcomp Require Import morphism bigop div.
+ From pgg_smc Require Import pgg_interface.
+ From pgg_reconstruct Require Import pgg_sharing_framework.
+ From pgg_reconstruct Require Import covering_scheme.
++From pgg_reconstruct Require Import pgl_bound.
+ 
+ Set Implicit Arguments.
+ Unset Strict Implicit.
+ Import Prenex Implicits.
+ 
++Close Scope ring_scope.
++Close Scope group_scope.
++
+ (******************************************************************************)
+ (*     Section 1: Riemann-Hurwitz Consequences                                *)
+ (******************************************************************************)
+@@ -51,7 +55,7 @@ Let N := (pgg_N' M).+1.
+ Lemma genus0_forces_ramif (cd : CoveringData M) :
+   cd_base_genus cd = 0 ->
+   cd_genus cd = 0 ->
+-  cd_ramif cd + 2 = 2 * #|G|.
++  cd_total_ramif cd + 2 = 2 * #|G|.
+ Proof.
+ move=> Hb0 Hg0; have := cd_hurwitz cd.
+ by rewrite Hb0 Hg0 !muln0 !add0n.
+@@ -61,7 +65,7 @@ Qed.
+ Lemma more_ramif_more_genus (cd1 cd2 : CoveringData M) :
+   cd_base_genus cd1 = 0 ->
+   cd_base_genus cd2 = 0 ->
+-  cd_ramif cd1 < cd_ramif cd2 ->
++  cd_total_ramif cd1 < cd_total_ramif cd2 ->
+   cd_genus cd1 < cd_genus cd2.
+ Proof.
+ move=> Hb1 Hb2 HR.
+@@ -152,7 +156,7 @@ Qed.
+ Lemma group_genus_monotone (cd1 cd2 : CoveringData M) :
+   cd_base_genus cd1 = 0 ->
+   cd_base_genus cd2 = 0 ->
+-  cd_ramif cd1 = cd_ramif cd2 ->
++  cd_total_ramif cd1 = cd_total_ramif cd2 ->
+   cd_genus cd1 = cd_genus cd2.
+ Proof.
+ move=> Hb1 Hb2 HR.
+@@ -185,3 +189,20 @@ case Hg : (cd_genus (cs_data cs) == 0).
+ Qed.
+ 
+ End tradeoff.
++
++(******************************************************************************)
++(*     Section 4: Bridge to pgl_card in pgl_bound.v                           *)
++(******************************************************************************)
++
++Lemma pgl_bound_eq_pgl_card (M : GeneratedMonodromyReprType) :
++  pgl_bound M = pgl_card (pgg_N' M).+1.
++Proof. by []. Qed.
++
++(******************************************************************************)
++(*     Section 5: Uniform name for the genus-0 automorphism bound             *)
++(******************************************************************************)
++
++Definition genus0_automorphism_bound (M : GeneratedMonodromyReprType)
++    (cd : CoveringData M) : Prop :=
++  cd_genus cd = 0 -> (#|pgg_G M| <= pgl_bound M)%N.
++Arguments genus0_automorphism_bound M cd : clear implicits.
+diff --git a/pgg-smc/reconstruct/covering_scheme.v b/pgg-smc/reconstruct/covering_scheme.v
+index 30fa06f..b16d81d 100644
+--- a/pgg-smc/reconstruct/covering_scheme.v
++++ b/pgg-smc/reconstruct/covering_scheme.v
+@@ -31,10 +31,10 @@
+ (*   CoveringData M == covering geometry parameterized by MonodromyReprType  *)
+ (*     cd_base_genus == genus of base curve B                                *)
+ (*     cd_n_branch   == number of branch points                              *)
+-(*     cd_ramif      == total ramification index                             *)
++(*     cd_total_ramif == total ramification index Sum (e_p - 1)              *)
+ (*     cd_genus      == genus of covering curve C                            *)
+ (*     cd_hurwitz    == Riemann-Hurwitz constraint (nat formulation):         *)
+-(*       2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_ramif + 2 *)
++(*       2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_total_ramif + 2 *)
+ (*                                                                            *)
+ (*   CoveringScheme M == a ThresholdScheme built from a covering of M        *)
+ (*     cs_data       == covering geometry (connects G to genus)              *)
+@@ -75,15 +75,21 @@ Let G := pgg_G M.
+ Record CoveringData := MkCoveringData {
+   cd_base_genus : nat ;          (* genus of base curve B *)
+   cd_n_branch   : nat ;          (* number of branch points *)
+-  cd_ramif      : nat ;          (* total ramification index *)
++  cd_total_ramif : nat ;         (* total ramification index Σ (e_p − 1) *)
+   cd_genus      : nat ;          (* genus of covering curve C *)
++  cd_ramif_ge_n_branch :         (* each branch point contributes e_p >= 2 *)
++    (cd_n_branch <= cd_total_ramif)%N ;
+   cd_hurwitz    :                (* Riemann-Hurwitz constraint *)
+-    2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_ramif + 2 ;
++    2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_total_ramif + 2 ;
+ }.
+ 
++(* Every branch point has ramification index n, i.e. covering is fully ramified *)
++Definition cd_fully_ramified (cd : CoveringData) (n : nat) : Prop :=
++  cd_total_ramif cd = ((n.-1) * cd_n_branch cd)%N.
++
+ (* Genus is determined by |G|, base genus, and ramification *)
+ Lemma genus_from_hurwitz (cd : CoveringData) :
+-  2 * cd_genus cd = #|G| * (2 * cd_base_genus cd) + cd_ramif cd + 2 - 2 * #|G|.
++  2 * cd_genus cd = #|G| * (2 * cd_base_genus cd) + cd_total_ramif cd + 2 - 2 * #|G|.
+ Proof.
+ have := cd_hurwitz cd.
+ move/(f_equal (fun x => x - 2 * #|G|)).
+@@ -172,7 +178,7 @@ Let G := pgg_G M.
+ 
+ Lemma hurwitz_base0 (cd : CoveringData M) :
+   cd_base_genus cd = 0 ->
+-  2 * cd_genus cd + 2 * #|G| = cd_ramif cd + 2.
++  2 * cd_genus cd + 2 * #|G| = cd_total_ramif cd + 2.
+ Proof.
+ move=> Hb0.
+ by move: (cd_hurwitz cd); rewrite Hb0 !muln0 add0n.
+@@ -182,17 +188,17 @@ Qed.
+ Lemma genus0_ramif (cd : CoveringData M) :
+   cd_base_genus cd = 0 ->
+   cd_genus cd = 0 ->
+-  cd_ramif cd = 2 * #|G| - 2.
++  cd_total_ramif cd = 2 * #|G| - 2.
+ Proof.
+ move=> Hb0 Hg0; have := hurwitz_base0 Hb0.
+ rewrite Hg0 muln0 add0n => Heq.
+-by rewrite -(addnK 2 (cd_ramif cd)) Heq addnK.
++by rewrite -(addnK 2 (cd_total_ramif cd)) Heq addnK.
+ Qed.
+ 
+ (* Ramification exceeding 2|G|-2 forces positive genus *)
+ Lemma ramif_forces_genus (cd : CoveringData M) :
+   cd_base_genus cd = 0 ->
+-  2 * #|G| - 2 < cd_ramif cd ->
++  2 * #|G| - 2 < cd_total_ramif cd ->
+   0 < cd_genus cd.
+ Proof.
+ move=> Hb0 Hramif.
+diff --git a/pgg-smc/reconstruct/pgl_bound.v b/pgg-smc/reconstruct/pgl_bound.v
+index b8c9661..ba8395c 100644
+--- a/pgg-smc/reconstruct/pgl_bound.v
++++ b/pgg-smc/reconstruct/pgl_bound.v
+@@ -195,3 +195,21 @@ Proof. exact: card_pgl2. Qed.
+ 
+ End pgl_connection.
+ 
++(******************************************************************************)
++(*     Section 5: pgl_card and the PGL(2,F_5) = S_5 anchor                    *)
++(******************************************************************************)
++
++Definition pgl_card (q : nat) : nat := q * (q ^ 2 - 1).
++
++Lemma pgl_card_eq (F : finFieldType) : #|pgl2 F| = pgl_card #|F|.
++Proof. exact: pgl2_card_formula. Qed.
++
++Lemma pgl_card_5 : pgl_card 5 = 120%N.
++Proof. by []. Qed.
++
++Lemma card_set_S5 : #|[set: 'S_5]| = 120%N.
++Proof. by rewrite cardsT card_Sn. Qed.
++
++Lemma pgl2_5_eq_s5 : pgl_card 5 = #|[set: 'S_5]|.
++Proof. by rewrite pgl_card_5 card_set_S5. Qed.
++
+
+
+############################### commit 3547f28 ###############################
+commit 3547f28bab8a1787966acdda2da253f1a19f19f5
+Author: Chenghui Weng <144981080+weng-chenghui@users.noreply.github.com>
+Date:   Tue Apr 21 09:35:03 2026 +0900
+
+    Add pile-2 preservation and identity coord-perm compatibility lemmas
+    
+    s5x5_preserves_pile2_proved mirrors the existing pile-1 proof on the
+    complementary set. coord_perm_compatible_id records that the identity
+    permutation preserves any code via col_perm1.
+
+diff --git a/pgg-smc/instances/s5x5/s5x5_pile.v b/pgg-smc/instances/s5x5/s5x5_pile.v
+index f95c42a..69301f6 100644
+--- a/pgg-smc/instances/s5x5/s5x5_pile.v
++++ b/pgg-smc/instances/s5x5/s5x5_pile.v
+@@ -58,3 +58,29 @@ move/astabsP: HginHg => /(_ i).
+ rewrite /= apermE !inE Hi.
+ by move=> ->.
+ Qed.
++
++(* Symmetric lemma for pile-2: every g in pgg_G also preserves pile-2
++   setwise. Same proof structure as pile-1, just with the complementary set. *)
++Lemma s5x5_preserves_pile2_proved :
++  forall g, g \in pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) ->
++  forall i : 'I_10, ~~ (val i < 5)%N ->
++  ~~ (val (@pgg_rho (@Gen_PGGTypes 7 8 s5x5_gen_tuple) g i) < 5)%N.
++Proof.
++move=> g HgG i Hi.
++have Hrho : pgg_rho g i = g i by [].
++rewrite Hrho.
++pose pile2 := [set x : 'I_10 | ~~ (val x < 5)%N].
++pose HH := astabs_group (perm_action _) pile2.
++have Hgensub : [set tnth s5x5_gen_tuple j | j : 'I_8] \subset HH.
++  apply/subsetP => x /imsetP[j _ ->].
++  apply/astabsP => y.
++  rewrite /= apermE !inE -s5x5_gens_agree.
++  by case: j => [[|[|[|[|[|[|[|[|?]]]]]]]] Hj];
++     case: y => [[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]] Hy].
++have HGsub : pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) \subset HH.
++  rewrite /pgg_G /= gen_subG. exact: Hgensub.
++have HginHg : g \in HH by move/subsetP: HGsub => /(_ g HgG).
++move/astabsP: HginHg => /(_ i).
++rewrite /= apermE !inE Hi.
++by move=> ->.
++Qed.
+diff --git a/pgg-smc/reconstruct/coord_perm_compatible.v b/pgg-smc/reconstruct/coord_perm_compatible.v
+index 314ef7e..c41cf7c 100644
+--- a/pgg-smc/reconstruct/coord_perm_compatible.v
++++ b/pgg-smc/reconstruct/coord_perm_compatible.v
+@@ -43,6 +43,11 @@ End coord_perm_compat_def.
+ 
+ Arguments coord_perm_compatible {F n} C sigma.
+ 
++(* The identity permutation preserves any code (since col_perm 1%g c = c). *)
++Lemma coord_perm_compatible_id (F : finFieldType) (n : nat) (C : Lcode0.t F n) :
++  coord_perm_compatible C 1%g.
++Proof. by move=> c Hc; rewrite col_perm1. Qed.
++
+ (******************************************************************************)
+ (*     Section 2: Restricting a Permutation that Fixes Position 0             *)
+ (******************************************************************************)

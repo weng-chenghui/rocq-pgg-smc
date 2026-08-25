@@ -1,0 +1,114 @@
+\PassOptionsToPackage{fleqn}{amsmath}
+\documentclass[final,t]{beamer}
+\usepackage[orientation=portrait,size=a1,scale=1.12]{beamerposter}
+
+\usetheme{default}
+\usecolortheme{seagull}
+\usefonttheme{professionalfonts}
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{newtxtext,newtxmath}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+\urlstyle{rm}
+
+\title{\parbox{0.93\linewidth}{\centering
+Inverting the Formalization Workflow:\\[0.2em]
+\Large Prototyping an MPC Protocol in Rocq with an LLM Agent}}
+\author{Cheng-Hui Weng \quad Nagoya University}
+\date{}
+
+\newcommand{\kw}[1]{\textbf{#1}}
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+
+\begin{document}
+\begin{frame}[t]
+\vspace{-0.5em}
+\begin{columns}[t,totalwidth=\linewidth]
+  \begin{column}{0.49\linewidth}
+    \begin{block}{Motivation}
+      Formalization usually comes last:
+      \[
+      \text{learn} \to \text{design} \to \text{formalize}.
+      \]
+      This is costly when a protocol depends on several unfamiliar domains.
+
+      \vspace{0.4em}
+      We reverse the order and treat formalization as a prototyping medium:
+      \[
+      \text{idea} \to \text{formalize} \to \text{learn}.
+      \]
+    \end{block}
+
+    \begin{block}{Inverted Workflow}
+      \begin{itemize}
+        \item Human proposes hypotheses, steers abstractions, and sets axiomatization boundaries.
+        \item LLM drafts definitions, lemma statements, and candidate proof structure.
+        \item Rocq/MathComp checks logical soundness at each step.
+        \item Failed obligations reveal missing assumptions early.
+      \end{itemize}
+      \vspace{0.3em}
+      \kw{Key loop:} draft $\to$ check $\to$ diagnose $\to$ refine.
+    \end{block}
+
+    \begin{block}{Case Study: SMC-PGG}
+      Secure multi-party computation via covering-space structure:
+      \begin{itemize}
+        \item Monodromy representation \(\rho : G \to S_N\) acts on \(N\) sheets.
+        \item Secret is encoded in fiber structure over a basepoint.
+        \item Session-typed protocol layer implemented in Rocq.
+      \end{itemize}
+      The development is organized as protocol, search-space, reconstruction, and security layers.
+    \end{block}
+  \end{column}
+
+  \begin{column}{0.49\linewidth}
+    \begin{block}{Technical Highlights}
+      \begin{itemize}
+        \item \kw{Search-space analysis:} RAAG trace equivalence for commuting-action reordering.
+        \item \kw{Combinatorics:} Cartier-Foata theorem used for exact trace counting via clique-polynomial recurrence.
+        \item \kw{Reconstruction:} threshold interface instantiated through linear-code secret sharing.
+        \item \kw{Security bound:}
+          \[
+          \mathrm{TV} \le \varepsilon + \frac{2(T-1)}{N}.
+          \]
+        \item \kw{Structure result:} abelian collapse in regular abelian settings; non-abelian structure is required for non-trivial security.
+      \end{itemize}
+    \end{block}
+
+    \begin{block}{Current Scope and Status}
+      \begin{itemize}
+        \item Ongoing formalization: \kw{42 Rocq files}.
+        \item Domains touched: group theory, combinatorics, algebraic geometry, coding theory, information theory.
+        \item Remaining axioms are concentrated at the algebraic-geometry interface.
+      \end{itemize}
+    \end{block}
+
+    \begin{block}{Methodological Takeaways}
+      \begin{itemize}
+        \item LLMs are useful not only for proof search, but also for cross-domain exploration.
+        \item The prover supplies certainty; the human supplies judgment.
+        \item Formalization can be an engine for learning, not only final verification.
+      \end{itemize}
+    \end{block}
+
+    \begin{block}{QR / Links / Contact}
+      \small
+      Paper draft and artifacts:\quad \url{https://github.com/<org>/<repo>}
+
+      \vspace{0.25em}
+      Contact:\quad \href{mailto:cheng-hui.weng@example.com}{cheng-hui.weng@example.com}
+
+      \vspace{0.4em}
+      \todo{Replace URL, email, and add QR image if needed.}
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+\end{document}

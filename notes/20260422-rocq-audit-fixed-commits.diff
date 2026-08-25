@@ -1,0 +1,671 @@
+###############################################################################
+# rocq-audit pipeline — originals vs fixed commits.
+#
+# Safety branch 'pgg-smc-before-checking-pipeline' keeps the originals.
+#   7b935d9  Close six gaps in PGG formalisation (Fixes 1, 2, 3, 5, 6, 7)
+#   3547f28  Add pile-2 preservation and identity coord-perm compatibility lemmas
+#
+# Current pgg-smc branch holds the pipeline-processed versions.
+#   2216e83  Close six gaps in PGG formalisation (Fixes 1, 2, 3, 5, 6, 7)
+#   d5d0641  Add pile-2 preservation and identity coord-perm compatibility lemmas
+#
+# The two new commits share the original author and date; only tree content
+# differs by the comment blocks, Naming: tags, and the one H001 patch that
+# the fix agent missed but the audit caught on its final pass.
+###############################################################################
+
+############################### commit B: 7b935d9  ->  2216e83 ###############
+ pgg-smc/instances/denboer1989/five_card_security.v |  6 +++++
+ pgg-smc/instances/kim2025/rigidity_kim_instance.v  |  6 +++++
+ pgg-smc/instances/s5/rigidity_s5_instance.v        |  6 +++++
+ pgg-smc/instances/s5/s5_mixing.v                   | 13 +++++++++++
+ pgg-smc/instances/s5x5/rigidity_s5x5_instance.v    | 17 ++++++++++++++
+ pgg-smc/reconstruct/cover_genus0.v                 | 15 ++++++++++++
+ pgg-smc/reconstruct/cover_genus1.v                 | 10 ++++++++
+ pgg-smc/reconstruct/cover_genus2.v                 |  7 ++++++
+ pgg-smc/reconstruct/cover_tradeoff.v               | 14 +++++++++++
+ pgg-smc/reconstruct/covering_scheme.v              |  2 +-
+ pgg-smc/reconstruct/pgl_bound.v                    | 27 ++++++++++++++++++++++
+ 11 files changed, 122 insertions(+), 1 deletion(-)
+
+diff --git a/pgg-smc/instances/denboer1989/five_card_security.v b/pgg-smc/instances/denboer1989/five_card_security.v
+index 64c4178..d8c18a9 100644
+--- a/pgg-smc/instances/denboer1989/five_card_security.v
++++ b/pgg-smc/instances/denboer1989/five_card_security.v
+@@ -256,6 +256,12 @@ Definition fc_covering : CoveringScheme FiveCard_M :=
+ Hypothesis fc_genus0_pgl :
+   (#|pgg_G FiveCard_M| <= pgl_bound FiveCard_M)%N.
+ 
++(** fc_genus0_automorphism — discharges [genus0_automorphism_bound] for the
++    FiveCard instance by reducing to the concrete PGL bound [fc_genus0_pgl].
++    Kind: helper.
++    Why: required to instantiate [fc_threshold_witness], which packages the
++    covering scheme with its automorphism-bound obligation.
++    Used by: fc_threshold_witness. *)
+ Lemma fc_genus0_automorphism :
+   genus0_automorphism_bound FiveCard_M (cs_data fc_covering).
+ Proof. move=> _; exact: fc_genus0_pgl. Qed.
+diff --git a/pgg-smc/instances/kim2025/rigidity_kim_instance.v b/pgg-smc/instances/kim2025/rigidity_kim_instance.v
+index 9610d22..69f37af 100644
+--- a/pgg-smc/instances/kim2025/rigidity_kim_instance.v
++++ b/pgg-smc/instances/kim2025/rigidity_kim_instance.v
+@@ -76,6 +76,12 @@ Definition kim_covering : CoveringScheme M_kim :=
+ Hypothesis kim_genus0_pgl :
+   (#|pgg_G M_kim| <= pgl_bound M_kim)%N.
+ 
++(** kim_genus0_automorphism — discharges [genus0_automorphism_bound] for the
++    Kim 2025 instance by reducing to the concrete PGL bound [kim_genus0_pgl].
++    Kind: helper.
++    Why: required to instantiate [kim_threshold_witness], which packages the
++    covering scheme with its automorphism-bound obligation.
++    Used by: kim_threshold_witness. *)
+ Lemma kim_genus0_automorphism :
+   genus0_automorphism_bound M_kim (cs_data kim_covering).
+ Proof. move=> _; exact: kim_genus0_pgl. Qed.
+diff --git a/pgg-smc/instances/s5/rigidity_s5_instance.v b/pgg-smc/instances/s5/rigidity_s5_instance.v
+index ff1b30e..c0e9770 100644
+--- a/pgg-smc/instances/s5/rigidity_s5_instance.v
++++ b/pgg-smc/instances/s5/rigidity_s5_instance.v
+@@ -282,6 +282,12 @@ Definition s5_covering : CoveringScheme R_s5 :=
+ Hypothesis s5_genus0_pgl :
+   (#|pgg_G R_s5| <= pgl_bound R_s5)%N.
+ 
++(** s5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
++    S_5 instance by reducing to the concrete PGL bound [s5_genus0_pgl].
++    Kind: helper.
++    Why: required to instantiate [s5_threshold_witness], which packages the
++    covering scheme with its automorphism-bound obligation.
++    Used by: s5_threshold_witness. *)
+ Lemma s5_genus0_automorphism :
+   genus0_automorphism_bound R_s5 (cs_data s5_covering).
+ Proof. move=> _; exact: s5_genus0_pgl. Qed.
+diff --git a/pgg-smc/instances/s5/s5_mixing.v b/pgg-smc/instances/s5/s5_mixing.v
+index f14d35f..1ad5a76 100644
+--- a/pgg-smc/instances/s5/s5_mixing.v
++++ b/pgg-smc/instances/s5/s5_mixing.v
+@@ -141,9 +141,22 @@ Definition s5_sos_lower_triangular : seq (seq rat) :=
+       [:: 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ; 0%:Q ] ;
+       [:: 0%:Q ; 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ] ].
+ 
++(** s5_sos_diagonal — the 4-entry diagonal [D] of the rational SoS certificate,
++    namely the list [1; 1; 1; 1] in [rat]. Companion to [s5_sos_lower_triangular].
++    Kind: instance.
++    Why: rational witness data consumed by the spectral-certificate machinery
++    that discharges the Rayleigh-bound hypothesis for the S_5 lazy walk.
++    Used by: s5_rayleigh_Qsq_R (axiom statement relies on this diagonal data). *)
+ Definition s5_sos_diagonal : seq rat :=
+   [:: 1%:Q ; 1%:Q ; 1%:Q ; 1%:Q ].
+ 
++(** s5_sos_diagonal_nonneg — every entry of [s5_sos_diagonal] is nonneg in [rat].
++    Kind: helper.
++    Why: discharges the D-nonnegativity premise needed when the SoS
++    certificate is consumed to prove a Rayleigh-bound inequality; entrywise
++    nonnegativity is a prerequisite for reading the diagonal as an SoS form.
++    Used by: downstream SoS-expansion lemmas that will eventually replace the
++    [s5_rayleigh_Qsq_R] axiom. *)
+ Lemma s5_sos_diagonal_nonneg : forall k,
+   (0%:Q <= nth 0%:Q s5_sos_diagonal k)%Q.
+ Proof.
+diff --git a/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v b/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
+index 628fd15..eb374d3 100644
+--- a/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
++++ b/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
+@@ -286,6 +286,12 @@ Proof.
+ by rewrite muln0 muln0 add0n s5x5_group_order.
+ Qed.
+ 
++(** s5x5_n_branch_le — 6 <= 28804, the concrete branch-count-vs-total-ramif
++    inequality for the S_5 x S_5 instance.
++    Kind: helper.
++    Why: discharges the [cd_ramif_ge_n_branch] field required when building
++    the [CoveringData] record for R_s5x5.
++    Used by: s5x5_covering_data. *)
+ Lemma s5x5_n_branch_le : (6 <= 28804)%N. Proof. by []. Qed.
+ 
+ Definition s5x5_covering_data : CoveringData R_s5x5 :=
+@@ -337,10 +343,21 @@ Lemma s5x5_genus0_pgl :
+   (#|pgg_G R_s5x5| <= pgl_bound R_s5x5)%N.
+ Proof. by []. Qed.
+ 
++(** s5x5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
++    S_5 x S_5 instance. Because the genus is 3, the genus-0 branch is
++    vacuous and the obligation is discharged by [s5x5_genus0_pgl] directly.
++    Kind: helper.
++    Why: required to instantiate [s5x5_threshold_witness].
++    Used by: s5x5_threshold_witness. *)
+ Lemma s5x5_genus0_automorphism :
+   genus0_automorphism_bound R_s5x5 (cs_data s5x5_covering).
+ Proof. exact: s5x5_genus0_pgl. Qed.
+ 
++(** s5x5_threshold_witness — threshold witness for the S_5 x S_5 instance,
++    packaging [s5x5_covering] with its genus-0 automorphism discharge.
++    Kind: instance.
++    Why: bundles [s5x5_covering] and [s5x5_genus0_automorphism] into a
++    single [ThresholdWitness] consumed by [s5x5_rigidity] below. *)
+ Definition s5x5_threshold_witness : ThresholdWitness R_s5x5 :=
+   @MkThresholdWitness R_s5x5 s5x5_covering s5x5_genus0_automorphism.
+ 
+diff --git a/pgg-smc/reconstruct/cover_genus0.v b/pgg-smc/reconstruct/cover_genus0.v
+index ca54b6e..794dba5 100644
+--- a/pgg-smc/reconstruct/cover_genus0.v
++++ b/pgg-smc/reconstruct/cover_genus0.v
+@@ -76,6 +76,13 @@ rewrite subnK //.
+ by rewrite -[X in X <= _]muln1 leq_mul2l (ltnW HG).
+ Qed.
+ 
++(** genus0_ramif_ge_nbr — lower bound [2 <= ramif0], where [ramif0] is the
++    total ramification in the genus-0 case.
++    Kind: helper.
++    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-0
++    [CoveringData] record; the inequality is the branch-count-vs-ramification
++    constraint required by the Riemann-Hurwitz witness.
++    Used by: genus0_data. *)
+ Lemma genus0_ramif_ge_nbr : (2 <= ramif0)%N.
+ Proof.
+ rewrite /ramif0.
+@@ -221,6 +228,14 @@ Variable M : MonodromyReprType.
+ Hypothesis HG : 1 < #|pgg_G M|.
+ Variable rsw : RSCodeWitness M.
+ 
++(** genus0_covering_witness — assembles a concrete [CoveringScheme M] from a
++    packaged [RSCodeWitness] by unfolding each witness field and feeding it
++    into [genus0_covering].
++    Kind: instance.
++    Why: provides a one-line constructor usable by concrete instance files
++    (five_card_security, rigidity_kim_instance, rigidity_s5_instance) so each
++    of them can instantiate a covering scheme by supplying a bare RS witness
++    rather than repeating the 11-field argument list. *)
+ Definition genus0_covering_witness : CoveringScheme M :=
+   @genus0_covering M HG
+     (rsw_q rsw) (rsw_m' rsw) (rsw_primeq rsw)
+diff --git a/pgg-smc/reconstruct/cover_genus1.v b/pgg-smc/reconstruct/cover_genus1.v
+index fed65fe..01aac77 100644
+--- a/pgg-smc/reconstruct/cover_genus1.v
++++ b/pgg-smc/reconstruct/cover_genus1.v
+@@ -69,6 +69,13 @@ Proof.
+ by rewrite muln1 muln0 muln0 add0n /ramif1 addnC.
+ Qed.
+ 
++(** genus1_ramif_ge_nbr — lower bound [3 <= ramif1] for the total ramification
++    [ramif1] of the genus-1 cover.
++    Kind: helper.
++    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-1
++    [CoveringData] record, which asserts that the number of branch points is
++    bounded by the total ramification.
++    Used by: genus1_data. *)
+ Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.
+ Proof.
+ rewrite /ramif1.
+@@ -277,6 +284,9 @@ Variable ramif_g : nat.
+ Hypothesis hurwitz_g :
+   (2 * g + 2 * #|G| = #|G| * (2 * 0) + ramif_g + 2)%N.
+ 
++(* Naming: intentional; parallels genus1_ramif_ge_nbr / genus2_ramif_ge_nbr so
++   the higher-genus scaffolding exposes the same [_ramif_ge_nbr] field name in
++   its [CoveringData] record as the concrete genus-1 and genus-2 siblings. *)
+ Hypothesis higher_genus_ramif_ge_nbr : (g + 2 <= ramif_g)%N.
+ 
+ Definition higher_genus_data : CoveringData M := {|
+diff --git a/pgg-smc/reconstruct/cover_genus2.v b/pgg-smc/reconstruct/cover_genus2.v
+index 84cc408..2f8cb7d 100644
+--- a/pgg-smc/reconstruct/cover_genus2.v
++++ b/pgg-smc/reconstruct/cover_genus2.v
+@@ -71,6 +71,13 @@ Proof.
+ by rewrite muln0 muln0 add0n /ramif2 -addnA addnC.
+ Qed.
+ 
++(** genus2_ramif_ge_nbr — lower bound [5 <= ramif2] for the total ramification
++    [ramif2] of the genus-2 hyperelliptic cover.
++    Kind: helper.
++    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-2
++    [CoveringData] record; encodes the branch-count-vs-ramification bound for
++    the five-Weierstrass-point hyperelliptic model.
++    Used by: genus2_data. *)
+ Lemma genus2_ramif_ge_nbr : (5 <= ramif2)%N.
+ Proof.
+ rewrite /ramif2.
+diff --git a/pgg-smc/reconstruct/cover_tradeoff.v b/pgg-smc/reconstruct/cover_tradeoff.v
+index d2f0a1c4..9317543 100644
+--- a/pgg-smc/reconstruct/cover_tradeoff.v
++++ b/pgg-smc/reconstruct/cover_tradeoff.v
+@@ -194,6 +194,13 @@ End tradeoff.
+ (*     Section 4: Bridge to pgl_card in pgl_bound.v                           *)
+ (******************************************************************************)
+ 
++(** pgl_bound_eq_pgl_card — equational bridge [pgl_bound M = pgl_card (pgg_N' M).+1]
++    for any [GeneratedMonodromyReprType] [M].
++    Kind: helper.
++    Why: rewrites the abstract [pgl_bound] accessor into the closed-form
++    [pgl_card] expression so instance files can discharge the PGL bound by
++    direct numerical computation on [pgg_N'].
++    Used by: downstream instance PGL-bound discharges (rigidity_s5_instance). *)
+ Lemma pgl_bound_eq_pgl_card (M : GeneratedMonodromyReprType) :
+   pgl_bound M = pgl_card (pgg_N' M).+1.
+ Proof. by []. Qed.
+@@ -202,6 +209,13 @@ Proof. by []. Qed.
+ (*     Section 5: Uniform name for the genus-0 automorphism bound             *)
+ (******************************************************************************)
+ 
++(** genus0_automorphism_bound — predicate asserting that, when the covering
++    genus is 0, the automorphism group cardinality [#|pgg_G M|] is bounded by
++    [pgl_bound M].
++    Kind: interface.
++    Why: packages the genus-0 automorphism constraint as a named [Prop] so that
++    each concrete instance (five_card, kim, s5, s5x5) can discharge it by
++    direct proof or by unfolding [pgl_bound_eq_pgl_card]. *)
+ Definition genus0_automorphism_bound (M : GeneratedMonodromyReprType)
+     (cd : CoveringData M) : Prop :=
+   cd_genus cd = 0 -> (#|pgg_G M| <= pgl_bound M)%N.
+diff --git a/pgg-smc/reconstruct/covering_scheme.v b/pgg-smc/reconstruct/covering_scheme.v
+index b16d81d..db67c61 100644
+--- a/pgg-smc/reconstruct/covering_scheme.v
++++ b/pgg-smc/reconstruct/covering_scheme.v
+@@ -92,7 +92,7 @@ Lemma genus_from_hurwitz (cd : CoveringData) :
+   2 * cd_genus cd = #|G| * (2 * cd_base_genus cd) + cd_total_ramif cd + 2 - 2 * #|G|.
+ Proof.
+ have := cd_hurwitz cd.
+-move/(f_equal (fun x => x - 2 * #|G|)).
++move/(congr1 (fun x => x - 2 * #|G|)).
+ by rewrite addnK.
+ Qed.
+ 
+diff --git a/pgg-smc/reconstruct/pgl_bound.v b/pgg-smc/reconstruct/pgl_bound.v
+index ba8395c..c5a4831 100644
+--- a/pgg-smc/reconstruct/pgl_bound.v
++++ b/pgg-smc/reconstruct/pgl_bound.v
+@@ -201,15 +201,42 @@ End pgl_connection.
+ 
+ Definition pgl_card (q : nat) : nat := q * (q ^ 2 - 1).
+ 
++(** pgl_card_eq — equational identity [#|pgl2 F| = pgl_card #|F|] for any
++    [finFieldType] [F].
++    Kind: helper.
++    Why: repackages [pgl2_card_formula] as a definitional rewrite lemma so
++    later instance proofs (e.g. [pgl_card_5]) can fold the cardinality of
++    [pgl2 F] into the closed-form polynomial in [#|F|].
++    Used by: pgl_card_5 (and downstream S5 anchor lemmas). *)
+ Lemma pgl_card_eq (F : finFieldType) : #|pgl2 F| = pgl_card #|F|.
+ Proof. exact: pgl2_card_formula. Qed.
+ 
++(** pgl_card_5 — numerical instance [pgl_card 5 = 120]. Definitionally true.
++    Kind: helper.
++    Why: used in combination with [card_set_S5] to identify the PGL(2,F_5)
++    order with the order of [S_5], which anchors the S_5 instance's PGL bound.
++    Used by: pgl2_5_eq_s5. *)
+ Lemma pgl_card_5 : pgl_card 5 = 120%N.
+ Proof. by []. Qed.
+ 
++(** card_set_S5 — [#|[set: 'S_5]| = 120], i.e. the order of the symmetric
++    group on five letters.
++    Kind: helper.
++    Why: standard cardinality fact expressed in the [{set: _}] form so it can
++    be chained with [pgl_card_5] to bridge the PGL(2,F_5) cardinality to the
++    S_5 order without rewriting [card_Sn] in each caller.
++    Used by: pgl2_5_eq_s5. *)
+ Lemma card_set_S5 : #|[set: 'S_5]| = 120%N.
+ Proof. by rewrite cardsT card_Sn. Qed.
+ 
++(** pgl2_5_eq_s5 — bridge equation [pgl_card 5 = #|[set: 'S_5]|]; identifies
++    the PGL(2,F_5) cardinality with the order of S_5.
++    Kind: helper.
++    Why: exposes the PGL(2,F_5)-vs-S_5 isomorphism at the cardinality level,
++    which is the form downstream instance files (rigidity_s5_instance) need
++    to satisfy the genus-0 PGL bound by a simple rewrite rather than invoking
++    the full permutation isomorphism.
++    Used by: rigidity_s5_instance.v (PGL-bound discharge for the S_5 instance). *)
+ Lemma pgl2_5_eq_s5 : pgl_card 5 = #|[set: 'S_5]|.
+ Proof. by rewrite pgl_card_5 card_set_S5. Qed.
+ 
+
+
+############################### commit A: 3547f28  ->  d5d0641 ###############
+ pgg-smc/instances/denboer1989/five_card_security.v |  6 +++++
+ pgg-smc/instances/kim2025/rigidity_kim_instance.v  |  6 +++++
+ pgg-smc/instances/s5/rigidity_s5_instance.v        |  6 +++++
+ pgg-smc/instances/s5/s5_mixing.v                   | 13 +++++++++++
+ pgg-smc/instances/s5x5/rigidity_s5x5_instance.v    | 17 ++++++++++++++
+ pgg-smc/instances/s5x5/s5x5_pile.v                 | 12 ++++++++--
+ pgg-smc/reconstruct/coord_perm_compatible.v        | 13 ++++++++++-
+ pgg-smc/reconstruct/cover_genus0.v                 | 15 ++++++++++++
+ pgg-smc/reconstruct/cover_genus1.v                 | 10 ++++++++
+ pgg-smc/reconstruct/cover_genus2.v                 |  7 ++++++
+ pgg-smc/reconstruct/cover_tradeoff.v               | 14 +++++++++++
+ pgg-smc/reconstruct/covering_scheme.v              |  2 +-
+ pgg-smc/reconstruct/pgl_bound.v                    | 27 ++++++++++++++++++++++
+ 13 files changed, 144 insertions(+), 4 deletions(-)
+
+diff --git a/pgg-smc/instances/denboer1989/five_card_security.v b/pgg-smc/instances/denboer1989/five_card_security.v
+index 64c4178..d8c18a9 100644
+--- a/pgg-smc/instances/denboer1989/five_card_security.v
++++ b/pgg-smc/instances/denboer1989/five_card_security.v
+@@ -256,6 +256,12 @@ Definition fc_covering : CoveringScheme FiveCard_M :=
+ Hypothesis fc_genus0_pgl :
+   (#|pgg_G FiveCard_M| <= pgl_bound FiveCard_M)%N.
+ 
++(** fc_genus0_automorphism — discharges [genus0_automorphism_bound] for the
++    FiveCard instance by reducing to the concrete PGL bound [fc_genus0_pgl].
++    Kind: helper.
++    Why: required to instantiate [fc_threshold_witness], which packages the
++    covering scheme with its automorphism-bound obligation.
++    Used by: fc_threshold_witness. *)
+ Lemma fc_genus0_automorphism :
+   genus0_automorphism_bound FiveCard_M (cs_data fc_covering).
+ Proof. move=> _; exact: fc_genus0_pgl. Qed.
+diff --git a/pgg-smc/instances/kim2025/rigidity_kim_instance.v b/pgg-smc/instances/kim2025/rigidity_kim_instance.v
+index 9610d22..69f37af 100644
+--- a/pgg-smc/instances/kim2025/rigidity_kim_instance.v
++++ b/pgg-smc/instances/kim2025/rigidity_kim_instance.v
+@@ -76,6 +76,12 @@ Definition kim_covering : CoveringScheme M_kim :=
+ Hypothesis kim_genus0_pgl :
+   (#|pgg_G M_kim| <= pgl_bound M_kim)%N.
+ 
++(** kim_genus0_automorphism — discharges [genus0_automorphism_bound] for the
++    Kim 2025 instance by reducing to the concrete PGL bound [kim_genus0_pgl].
++    Kind: helper.
++    Why: required to instantiate [kim_threshold_witness], which packages the
++    covering scheme with its automorphism-bound obligation.
++    Used by: kim_threshold_witness. *)
+ Lemma kim_genus0_automorphism :
+   genus0_automorphism_bound M_kim (cs_data kim_covering).
+ Proof. move=> _; exact: kim_genus0_pgl. Qed.
+diff --git a/pgg-smc/instances/s5/rigidity_s5_instance.v b/pgg-smc/instances/s5/rigidity_s5_instance.v
+index ff1b30e..c0e9770 100644
+--- a/pgg-smc/instances/s5/rigidity_s5_instance.v
++++ b/pgg-smc/instances/s5/rigidity_s5_instance.v
+@@ -282,6 +282,12 @@ Definition s5_covering : CoveringScheme R_s5 :=
+ Hypothesis s5_genus0_pgl :
+   (#|pgg_G R_s5| <= pgl_bound R_s5)%N.
+ 
++(** s5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
++    S_5 instance by reducing to the concrete PGL bound [s5_genus0_pgl].
++    Kind: helper.
++    Why: required to instantiate [s5_threshold_witness], which packages the
++    covering scheme with its automorphism-bound obligation.
++    Used by: s5_threshold_witness. *)
+ Lemma s5_genus0_automorphism :
+   genus0_automorphism_bound R_s5 (cs_data s5_covering).
+ Proof. move=> _; exact: s5_genus0_pgl. Qed.
+diff --git a/pgg-smc/instances/s5/s5_mixing.v b/pgg-smc/instances/s5/s5_mixing.v
+index f14d35f..1ad5a76 100644
+--- a/pgg-smc/instances/s5/s5_mixing.v
++++ b/pgg-smc/instances/s5/s5_mixing.v
+@@ -141,9 +141,22 @@ Definition s5_sos_lower_triangular : seq (seq rat) :=
+       [:: 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ; 0%:Q ] ;
+       [:: 0%:Q ; 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ] ].
+ 
++(** s5_sos_diagonal — the 4-entry diagonal [D] of the rational SoS certificate,
++    namely the list [1; 1; 1; 1] in [rat]. Companion to [s5_sos_lower_triangular].
++    Kind: instance.
++    Why: rational witness data consumed by the spectral-certificate machinery
++    that discharges the Rayleigh-bound hypothesis for the S_5 lazy walk.
++    Used by: s5_rayleigh_Qsq_R (axiom statement relies on this diagonal data). *)
+ Definition s5_sos_diagonal : seq rat :=
+   [:: 1%:Q ; 1%:Q ; 1%:Q ; 1%:Q ].
+ 
++(** s5_sos_diagonal_nonneg — every entry of [s5_sos_diagonal] is nonneg in [rat].
++    Kind: helper.
++    Why: discharges the D-nonnegativity premise needed when the SoS
++    certificate is consumed to prove a Rayleigh-bound inequality; entrywise
++    nonnegativity is a prerequisite for reading the diagonal as an SoS form.
++    Used by: downstream SoS-expansion lemmas that will eventually replace the
++    [s5_rayleigh_Qsq_R] axiom. *)
+ Lemma s5_sos_diagonal_nonneg : forall k,
+   (0%:Q <= nth 0%:Q s5_sos_diagonal k)%Q.
+ Proof.
+diff --git a/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v b/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
+index 628fd15..eb374d3 100644
+--- a/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
++++ b/pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
+@@ -286,6 +286,12 @@ Proof.
+ by rewrite muln0 muln0 add0n s5x5_group_order.
+ Qed.
+ 
++(** s5x5_n_branch_le — 6 <= 28804, the concrete branch-count-vs-total-ramif
++    inequality for the S_5 x S_5 instance.
++    Kind: helper.
++    Why: discharges the [cd_ramif_ge_n_branch] field required when building
++    the [CoveringData] record for R_s5x5.
++    Used by: s5x5_covering_data. *)
+ Lemma s5x5_n_branch_le : (6 <= 28804)%N. Proof. by []. Qed.
+ 
+ Definition s5x5_covering_data : CoveringData R_s5x5 :=
+@@ -337,10 +343,21 @@ Lemma s5x5_genus0_pgl :
+   (#|pgg_G R_s5x5| <= pgl_bound R_s5x5)%N.
+ Proof. by []. Qed.
+ 
++(** s5x5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
++    S_5 x S_5 instance. Because the genus is 3, the genus-0 branch is
++    vacuous and the obligation is discharged by [s5x5_genus0_pgl] directly.
++    Kind: helper.
++    Why: required to instantiate [s5x5_threshold_witness].
++    Used by: s5x5_threshold_witness. *)
+ Lemma s5x5_genus0_automorphism :
+   genus0_automorphism_bound R_s5x5 (cs_data s5x5_covering).
+ Proof. exact: s5x5_genus0_pgl. Qed.
+ 
++(** s5x5_threshold_witness — threshold witness for the S_5 x S_5 instance,
++    packaging [s5x5_covering] with its genus-0 automorphism discharge.
++    Kind: instance.
++    Why: bundles [s5x5_covering] and [s5x5_genus0_automorphism] into a
++    single [ThresholdWitness] consumed by [s5x5_rigidity] below. *)
+ Definition s5x5_threshold_witness : ThresholdWitness R_s5x5 :=
+   @MkThresholdWitness R_s5x5 s5x5_covering s5x5_genus0_automorphism.
+ 
+diff --git a/pgg-smc/instances/s5x5/s5x5_pile.v b/pgg-smc/instances/s5x5/s5x5_pile.v
+index 69301f6..c35a27a 100644
+--- a/pgg-smc/instances/s5x5/s5x5_pile.v
++++ b/pgg-smc/instances/s5x5/s5x5_pile.v
+@@ -59,8 +59,16 @@ rewrite /= apermE !inE Hi.
+ by move=> ->.
+ Qed.
+ 
+-(* Symmetric lemma for pile-2: every g in pgg_G also preserves pile-2
+-   setwise. Same proof structure as pile-1, just with the complementary set. *)
++(** s5x5_preserves_pile2_proved — every [g \in pgg_G] preserves the upper
++    half of [`I_10] (indices >= 5) setwise under the [pgg_rho] action.
++    Kind: helper.
++    Why: companion to [s5x5_preserves_pile1]; together they discharge the
++    pile-decomposition invariance required by downstream S_5 x S_5 rigidity
++    witnesses.
++    Used by: (no caller committed yet; parallel to [s5x5_preserves_pile1]).
++    Naming: intentional; the `_proved` suffix keeps parity with the
++    pile-1 naming in the adjacent file, even though [_stab] would be the
++    canonical MathComp suffix for a set-stabiliser. *)
+ Lemma s5x5_preserves_pile2_proved :
+   forall g, g \in pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) ->
+   forall i : 'I_10, ~~ (val i < 5)%N ->
+diff --git a/pgg-smc/reconstruct/coord_perm_compatible.v b/pgg-smc/reconstruct/coord_perm_compatible.v
+index c41cf7c..90b8c26 100644
+--- a/pgg-smc/reconstruct/coord_perm_compatible.v
++++ b/pgg-smc/reconstruct/coord_perm_compatible.v
+@@ -43,7 +43,18 @@ End coord_perm_compat_def.
+ 
+ Arguments coord_perm_compatible {F n} C sigma.
+ 
+-(* The identity permutation preserves any code (since col_perm 1%g c = c). *)
++(** coord_perm_compatible_id — the identity permutation is coord-perm
++    compatible with every linear code [C : Lcode0.t F n], because
++    [col_perm 1%g c = c].
++    Kind: helper.
++    Why: trivial-sigma base case for building coord-perm-compatibility
++    witnesses on concrete instances; avoids inlining [col_perm1] at call
++    sites.
++    Used by: rs_code_5sheets (instance uses it via [apply: coord_perm_compatible_id]).
++    Naming: intentional; the suffix `_id` names the identity-element
++    instance. MathComp convention would prefer `_1` (cf. [perm1], [mul1g]);
++    keep `_id` here because the existing call site in rs_code_5sheets
++    pins the name and a repo-wide rename is out of scope for this commit. *)
+ Lemma coord_perm_compatible_id (F : finFieldType) (n : nat) (C : Lcode0.t F n) :
+   coord_perm_compatible C 1%g.
+ Proof. by move=> c Hc; rewrite col_perm1. Qed.
+diff --git a/pgg-smc/reconstruct/cover_genus0.v b/pgg-smc/reconstruct/cover_genus0.v
+index ca54b6e..794dba5 100644
+--- a/pgg-smc/reconstruct/cover_genus0.v
++++ b/pgg-smc/reconstruct/cover_genus0.v
+@@ -76,6 +76,13 @@ rewrite subnK //.
+ by rewrite -[X in X <= _]muln1 leq_mul2l (ltnW HG).
+ Qed.
+ 
++(** genus0_ramif_ge_nbr — lower bound [2 <= ramif0], where [ramif0] is the
++    total ramification in the genus-0 case.
++    Kind: helper.
++    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-0
++    [CoveringData] record; the inequality is the branch-count-vs-ramification
++    constraint required by the Riemann-Hurwitz witness.
++    Used by: genus0_data. *)
+ Lemma genus0_ramif_ge_nbr : (2 <= ramif0)%N.
+ Proof.
+ rewrite /ramif0.
+@@ -221,6 +228,14 @@ Variable M : MonodromyReprType.
+ Hypothesis HG : 1 < #|pgg_G M|.
+ Variable rsw : RSCodeWitness M.
+ 
++(** genus0_covering_witness — assembles a concrete [CoveringScheme M] from a
++    packaged [RSCodeWitness] by unfolding each witness field and feeding it
++    into [genus0_covering].
++    Kind: instance.
++    Why: provides a one-line constructor usable by concrete instance files
++    (five_card_security, rigidity_kim_instance, rigidity_s5_instance) so each
++    of them can instantiate a covering scheme by supplying a bare RS witness
++    rather than repeating the 11-field argument list. *)
+ Definition genus0_covering_witness : CoveringScheme M :=
+   @genus0_covering M HG
+     (rsw_q rsw) (rsw_m' rsw) (rsw_primeq rsw)
+diff --git a/pgg-smc/reconstruct/cover_genus1.v b/pgg-smc/reconstruct/cover_genus1.v
+index fed65fe..01aac77 100644
+--- a/pgg-smc/reconstruct/cover_genus1.v
++++ b/pgg-smc/reconstruct/cover_genus1.v
+@@ -69,6 +69,13 @@ Proof.
+ by rewrite muln1 muln0 muln0 add0n /ramif1 addnC.
+ Qed.
+ 
++(** genus1_ramif_ge_nbr — lower bound [3 <= ramif1] for the total ramification
++    [ramif1] of the genus-1 cover.
++    Kind: helper.
++    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-1
++    [CoveringData] record, which asserts that the number of branch points is
++    bounded by the total ramification.
++    Used by: genus1_data. *)
+ Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.
+ Proof.
+ rewrite /ramif1.
+@@ -277,6 +284,9 @@ Variable ramif_g : nat.
+ Hypothesis hurwitz_g :
+   (2 * g + 2 * #|G| = #|G| * (2 * 0) + ramif_g + 2)%N.
+ 
++(* Naming: intentional; parallels genus1_ramif_ge_nbr / genus2_ramif_ge_nbr so
++   the higher-genus scaffolding exposes the same [_ramif_ge_nbr] field name in
++   its [CoveringData] record as the concrete genus-1 and genus-2 siblings. *)
+ Hypothesis higher_genus_ramif_ge_nbr : (g + 2 <= ramif_g)%N.
+ 
+ Definition higher_genus_data : CoveringData M := {|
+diff --git a/pgg-smc/reconstruct/cover_genus2.v b/pgg-smc/reconstruct/cover_genus2.v
+index 84cc408..2f8cb7d 100644
+--- a/pgg-smc/reconstruct/cover_genus2.v
++++ b/pgg-smc/reconstruct/cover_genus2.v
+@@ -71,6 +71,13 @@ Proof.
+ by rewrite muln0 muln0 add0n /ramif2 -addnA addnC.
+ Qed.
+ 
++(** genus2_ramif_ge_nbr — lower bound [5 <= ramif2] for the total ramification
++    [ramif2] of the genus-2 hyperelliptic cover.
++    Kind: helper.
++    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-2
++    [CoveringData] record; encodes the branch-count-vs-ramification bound for
++    the five-Weierstrass-point hyperelliptic model.
++    Used by: genus2_data. *)
+ Lemma genus2_ramif_ge_nbr : (5 <= ramif2)%N.
+ Proof.
+ rewrite /ramif2.
+diff --git a/pgg-smc/reconstruct/cover_tradeoff.v b/pgg-smc/reconstruct/cover_tradeoff.v
+index d2f0a1c4..9317543 100644
+--- a/pgg-smc/reconstruct/cover_tradeoff.v
++++ b/pgg-smc/reconstruct/cover_tradeoff.v
+@@ -194,6 +194,13 @@ End tradeoff.
+ (*     Section 4: Bridge to pgl_card in pgl_bound.v                           *)
+ (******************************************************************************)
+ 
++(** pgl_bound_eq_pgl_card — equational bridge [pgl_bound M = pgl_card (pgg_N' M).+1]
++    for any [GeneratedMonodromyReprType] [M].
++    Kind: helper.
++    Why: rewrites the abstract [pgl_bound] accessor into the closed-form
++    [pgl_card] expression so instance files can discharge the PGL bound by
++    direct numerical computation on [pgg_N'].
++    Used by: downstream instance PGL-bound discharges (rigidity_s5_instance). *)
+ Lemma pgl_bound_eq_pgl_card (M : GeneratedMonodromyReprType) :
+   pgl_bound M = pgl_card (pgg_N' M).+1.
+ Proof. by []. Qed.
+@@ -202,6 +209,13 @@ Proof. by []. Qed.
+ (*     Section 5: Uniform name for the genus-0 automorphism bound             *)
+ (******************************************************************************)
+ 
++(** genus0_automorphism_bound — predicate asserting that, when the covering
++    genus is 0, the automorphism group cardinality [#|pgg_G M|] is bounded by
++    [pgl_bound M].
++    Kind: interface.
++    Why: packages the genus-0 automorphism constraint as a named [Prop] so that
++    each concrete instance (five_card, kim, s5, s5x5) can discharge it by
++    direct proof or by unfolding [pgl_bound_eq_pgl_card]. *)
+ Definition genus0_automorphism_bound (M : GeneratedMonodromyReprType)
+     (cd : CoveringData M) : Prop :=
+   cd_genus cd = 0 -> (#|pgg_G M| <= pgl_bound M)%N.
+diff --git a/pgg-smc/reconstruct/covering_scheme.v b/pgg-smc/reconstruct/covering_scheme.v
+index b16d81d..db67c61 100644
+--- a/pgg-smc/reconstruct/covering_scheme.v
++++ b/pgg-smc/reconstruct/covering_scheme.v
+@@ -92,7 +92,7 @@ Lemma genus_from_hurwitz (cd : CoveringData) :
+   2 * cd_genus cd = #|G| * (2 * cd_base_genus cd) + cd_total_ramif cd + 2 - 2 * #|G|.
+ Proof.
+ have := cd_hurwitz cd.
+-move/(f_equal (fun x => x - 2 * #|G|)).
++move/(congr1 (fun x => x - 2 * #|G|)).
+ by rewrite addnK.
+ Qed.
+ 
+diff --git a/pgg-smc/reconstruct/pgl_bound.v b/pgg-smc/reconstruct/pgl_bound.v
+index ba8395c..c5a4831 100644
+--- a/pgg-smc/reconstruct/pgl_bound.v
++++ b/pgg-smc/reconstruct/pgl_bound.v
+@@ -201,15 +201,42 @@ End pgl_connection.
+ 
+ Definition pgl_card (q : nat) : nat := q * (q ^ 2 - 1).
+ 
++(** pgl_card_eq — equational identity [#|pgl2 F| = pgl_card #|F|] for any
++    [finFieldType] [F].
++    Kind: helper.
++    Why: repackages [pgl2_card_formula] as a definitional rewrite lemma so
++    later instance proofs (e.g. [pgl_card_5]) can fold the cardinality of
++    [pgl2 F] into the closed-form polynomial in [#|F|].
++    Used by: pgl_card_5 (and downstream S5 anchor lemmas). *)
+ Lemma pgl_card_eq (F : finFieldType) : #|pgl2 F| = pgl_card #|F|.
+ Proof. exact: pgl2_card_formula. Qed.
+ 
++(** pgl_card_5 — numerical instance [pgl_card 5 = 120]. Definitionally true.
++    Kind: helper.
++    Why: used in combination with [card_set_S5] to identify the PGL(2,F_5)
++    order with the order of [S_5], which anchors the S_5 instance's PGL bound.
++    Used by: pgl2_5_eq_s5. *)
+ Lemma pgl_card_5 : pgl_card 5 = 120%N.
+ Proof. by []. Qed.
+ 
++(** card_set_S5 — [#|[set: 'S_5]| = 120], i.e. the order of the symmetric
++    group on five letters.
++    Kind: helper.
++    Why: standard cardinality fact expressed in the [{set: _}] form so it can
++    be chained with [pgl_card_5] to bridge the PGL(2,F_5) cardinality to the
++    S_5 order without rewriting [card_Sn] in each caller.
++    Used by: pgl2_5_eq_s5. *)
+ Lemma card_set_S5 : #|[set: 'S_5]| = 120%N.
+ Proof. by rewrite cardsT card_Sn. Qed.
+ 
++(** pgl2_5_eq_s5 — bridge equation [pgl_card 5 = #|[set: 'S_5]|]; identifies
++    the PGL(2,F_5) cardinality with the order of S_5.
++    Kind: helper.
++    Why: exposes the PGL(2,F_5)-vs-S_5 isomorphism at the cardinality level,
++    which is the form downstream instance files (rigidity_s5_instance) need
++    to satisfy the genus-0 PGL bound by a simple rewrite rather than invoking
++    the full permutation isomorphism.
++    Used by: rigidity_s5_instance.v (PGL-bound discharge for the S_5 instance). *)
+ Lemma pgl2_5_eq_s5 : pgl_card 5 = #|[set: 'S_5]|.
+ Proof. by rewrite pgl_card_5 card_set_S5. Qed.
+ 

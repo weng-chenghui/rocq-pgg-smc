@@ -1,0 +1,565 @@
+{
+  "automatically_applied_ids": [
+    "W-ABS-P001",
+    "W-01-P001",
+    "W-01-P003",
+    "W-01-P004",
+    "W-01-P005",
+    "W-01-LI001",
+    "W-01-LI002",
+    "W-01-LI003",
+    "W-01-LI004",
+    "W-01-P006",
+    "W-03-P001",
+    "W-03-P002",
+    "W-03-TC004",
+    "W-03-TC005",
+    "W-03-TC006",
+    "W-03-TC007",
+    "W-03-TC008",
+    "W-03-TC009",
+    "W-03-TC011",
+    "W-03-TC013",
+    "W-03-TC014",
+    "W-03-CAP001",
+    "W-03-P003",
+    "W-03-DIA002",
+    "W-03-DIA004",
+    "W-03-DIA005",
+    "W-03-DIA006",
+    "W-03-DIA008",
+    "W-03-CAP002",
+    "W-03-P004",
+    "W-03-LI001",
+    "W-03-LI002",
+    "W-03-LI003",
+    "W-03-P005",
+    "W-03-P006",
+    "W-03-TC022",
+    "W-03-TC026",
+    "W-03-TC030",
+    "W-03-TC031",
+    "W-03-CAP003",
+    "W-03-P007",
+    "W-03-P008",
+    "W-03-P009",
+    "W-03-P011",
+    "W-03-P012",
+    "W-06-P001",
+    "W-06-P004",
+    "W-06-P005",
+    "W-06-P006",
+    "W-06-CAP001",
+    "W-06-STM004",
+    "W-06-P010",
+    "W-06-P011",
+    "W-06-P012",
+    "W-06-P013",
+    "W-02-P001",
+    "W-02-P002",
+    "W-02-P003",
+    "W-02-P004",
+    "W-02-P005",
+    "W-02-P006",
+    "W-02-P008",
+    "W-02-P009",
+    "W-02-P010",
+    "W-02-P011",
+    "W-02-P012",
+    "W-02-P013",
+    "W-02-P014",
+    "W-02-DIA001",
+    "W-02-DIA002",
+    "W-02-DIA005",
+    "W-02-DIA006",
+    "W-02-CAP001",
+    "W-05-P001",
+    "W-05-P002",
+    "W-05-P004",
+    "W-05-P005",
+    "W-05-P006",
+    "W-05-STM001",
+    "W-05-P007",
+    "W-05-P008",
+    "W-05-P009",
+    "W-05-P010",
+    "W-05-P011",
+    "W-05-CAP001",
+    "W-05-P012",
+    "W-05-P013",
+    "W-05-P014",
+    "W-05-P015",
+    "W-05-P016",
+    "W-05-P017",
+    "W-05-P018",
+    "W-05-DIA007",
+    "W-05-DIA009",
+    "W-05-DIA010",
+    "W-05-DIA012",
+    "W-05-CAP002",
+    "W-05-P019",
+    "W-05-CAP003",
+    "W-05-P021",
+    "W-05-STM008",
+    "W-05-P022",
+    "W-05-P023",
+    "W-05-P024",
+    "W-05-P025",
+    "W-08-P001",
+    "W-08-P002",
+    "W-08-TC015",
+    "W-08-TC018",
+    "W-08-TC019",
+    "W-08-TC022",
+    "W-08-TC023",
+    "W-08-TC024",
+    "W-08-TC029",
+    "W-08-TC035",
+    "W-08-TC036",
+    "W-08-TC038",
+    "W-08-TC039",
+    "W-08-CAP001",
+    "W-08-P003",
+    "W-08-P004",
+    "W-04-P001",
+    "W-04-DIA003",
+    "W-04-DIA006",
+    "W-04-DIA008",
+    "W-04-CAP001",
+    "W-04-P003",
+    "W-04-P007",
+    "W-04-DIA025",
+    "W-04-DIA031",
+    "W-04-CAP002",
+    "W-04-P008",
+    "W-04-STM001",
+    "W-04-P009",
+    "W-04-P011",
+    "W-07-P001",
+    "W-07-P002",
+    "W-07-P003",
+    "W-07-P004",
+    "W-07-P005",
+    "W-07-P006",
+    "W-07-P007",
+    "W-07-P008",
+    "W-07-P010",
+    "W-07-P011",
+    "W-07-TC006",
+    "W-07-TC007",
+    "W-07-TC008",
+    "W-07-TC013",
+    "W-07-TC014",
+    "W-07-TC015",
+    "W-07-TC016",
+    "W-07-TC017",
+    "W-07-TC018",
+    "W-07-TC019",
+    "W-07-TC020",
+    "W-07-TC022",
+    "W-07-TC023",
+    "W-07-TC024",
+    "W-07-TC025",
+    "W-07-TC026",
+    "W-07-TC027",
+    "W-07-TC028",
+    "W-07-TC029",
+    "W-07-TC031",
+    "W-07-TC032",
+    "W-07-TC033",
+    "W-07-TC034",
+    "W-07-TC035",
+    "W-07-TC036",
+    "W-07-TC038",
+    "W-07-TC040",
+    "W-07-CAP001",
+    "W-09-P001",
+    "W-09-P002",
+    "W-09-P003",
+    "W-09-P004",
+    "W-09-P005",
+    "W-09-P006",
+    "W-09-P007",
+    "W-10-P001",
+    "W-10-P002",
+    "W-10-P003",
+    "W-10-P004",
+    "W-10-P005"
+  ],
+  "candidate_path": "/Users/cheng-huiweng/Projects/coq/infotheo-pgg/pgg-smc/paper-wadt2026-baseline-application/candidate-main.tex",
+  "candidate_sha256": "16633360736c8fd22faebb6664201f03a7c8f726a0e3a12cb04fa7aa5a68b954",
+  "input_kind": "legacy_rewrite_shards",
+  "manual_review": [
+    {
+      "id": "W-01-P002",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-01-STM001",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-01-STM002",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-01-LI005",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-03-STM001",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-03-P010",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-03-STM002",
+      "reasons": [
+        "footnote_command",
+        "structural_commands:begin,end,label"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-03-STM003",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-P002",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-STM001",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-P003",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-STM002",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-P007",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-P008",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-STM003",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-P009",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-STM005",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-STM006",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-06-STM007",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-02-P007",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-P003",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-STM002",
+      "reasons": [
+        "footnote_command",
+        "structural_commands:begin,end"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-STM003",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-STM004",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-STM005",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-STM006",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-STM007",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-P020",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-05-STM009",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-04-P002",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-04-P004",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-04-P005",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-04-P006",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-04-STM002",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-04-P010",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-07-STM001",
+      "reasons": [
+        "footnote_command",
+        "structural_commands:begin,end,label"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-07-STM002",
+      "reasons": [
+        "footnote_command",
+        "structural_commands:begin,end,label"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-07-STM003",
+      "reasons": [
+        "footnote_command",
+        "structural_commands:begin,end,label"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-07-STM004",
+      "reasons": [
+        "footnote_command",
+        "structural_commands:begin,end,label"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    },
+    {
+      "id": "W-07-P009",
+      "reasons": [
+        "footnote_command"
+      ],
+      "review_method": "Compared the exact source span, accepted suggestion, and adjacent section context. Merged the suggestion only into the candidate. Preserved the original footnote command and body at its claim attachment. Checked formulas, citations, references, labels, meaning, simple active prose, and authorial I.",
+      "reviewer": "single WADT candidate application writer",
+      "status": "COMPLETE"
+    }
+  ],
+  "rewrites_sha256": "172ac014c3b3654b869abf804a4a30851d2dea10d6c67d64ba907febf2a32fce",
+  "schema_version": "1.0",
+  "source_draft": "/Users/cheng-huiweng/Projects/coq/infotheo-pgg/pgg-smc/paper-wadt2026/main.tex",
+  "source_sha256": "94dbd90b462f9804d2e2cd0eabbb4842ddd7aacb9846e2f4613f6db6ba7824fa",
+  "status": "CHECKED"
+}

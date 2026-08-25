@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{MPC at a glance}{3}{0}{1}
+\beamer@sectionintoc {2}{How this project started}{6}{0}{2}
+\beamer@sectionintoc {3}{Method}{9}{0}{3}
+\beamer@sectionintoc {4}{Glossary (non-Rocq audience)}{11}{0}{4}

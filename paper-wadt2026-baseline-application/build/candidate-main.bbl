@@ -1,0 +1,164 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{SSProve}
+Abate, C., Haselwarter, P.G., Rivas, E., {Van Muylder}, A., Winterhalter, T.,
+  Hritcu, C., Maillard, K., Spitters, B.: {SSProve}: A foundational framework
+  for modular cryptographic proofs in {C}oq. In: 34th IEEE Computer Security
+  Foundations Symposium. pp. 1--15. IEEE (2021)
+
+\bibitem{InfoTheo}
+Affeldt, R., et~al.: A {C}oq formalization of information theory and linear
+  error-correcting codes (2024), \url{https://github.com/affeldt-aist/infotheo}
+
+\bibitem{Barrington1989}
+Barrington, D.A.M.: Bounded-width polynomial-size branching programs recognize
+  exactly those languages in {NC}$^1$. Journal of Computer and System Sciences
+  \textbf{38}(1),  150--164 (1989)
+
+\bibitem{BartheEtAl2017}
+Barthe, G., Gr{\'e}goire, B., Hsu, J., Strub, P.Y.: Coupling proofs are
+  probabilistic product programs. In: 44th ACM SIGPLAN Symposium on Principles
+  of Programming Languages. pp. 161--174. ACM (2017).
+  \doi{10.1145/3009837.3009896}
+
+\bibitem{CertiCrypt}
+Barthe, G., Gr{\'e}goire, B., {Zanella B{\'e}guelin}, S.: Formal certification
+  of code-based cryptographic proofs. In: 36th ACM SIGPLAN-SIGACT Symposium on
+  Principles of Programming Languages. pp. 90--101. ACM (2009)
+
+\bibitem{CryptHOL}
+Basin, D., Lochbihler, A., Sefidgar, S.R.: {CryptHOL}: Game-based proofs in
+  higher-order logic. Journal of Cryptology  \textbf{33},  494--566 (2020)
+
+\bibitem{BlakleyMeadows1984}
+Blakley, G.R., Meadows, C.: Security of ramp schemes. In: Advances in
+  Cryptology, Proceedings of {CRYPTO} 84. Lecture Notes in Computer Science,
+  vol.~196, pp. 242--268. Springer (1985). \doi{10.1007/3-540-39568-7_20}
+
+\bibitem{denBoer1989}
+den Boer, B.: More efficient match-making and satisfiability: The five card
+  trick. In: Advances in Cryptology --- {EUROCRYPT} '89. LNCS, vol.~434, pp.
+  208--217. Springer (1990)
+
+\bibitem{CsiszarKorner2011}
+Csisz{\'a}r, I., K{\"o}rner, J.: Information Theory: Coding Theorems for
+  Discrete Memoryless Systems. Cambridge University Press, 2nd edn. (2011).
+  \doi{10.1017/CBO9780511921889}
+
+\bibitem{DvorakKoucky2021}
+Dvo{\v{r}}{\'a}k, V., Kouck{\'y}, M.: Barrington plays cards: The complexity of
+  card-based protocols. In: 38th International Symposium on Theoretical Aspects
+  of Computer Science. LIPIcs, vol.~187, pp. 26:1--26:17. Schloss Dagstuhl
+  (2021)
+
+\bibitem{Fannes1973}
+Fannes, M.: A continuity property of the entropy density for spin lattice
+  systems. Communications in Mathematical Physics  \textbf{31},  291--294
+  (1973). \doi{10.1007/BF01646490}
+
+\bibitem{GoguenBurstall1992}
+Goguen, J.A., Burstall, R.M.: Institutions: Abstract model theory for
+  specification and programming. Journal of the ACM  \textbf{39}(1),  95--146
+  (1992). \doi{10.1145/147508.147524}
+
+\bibitem{Karayel2023}
+Karayel, E.: Expander graphs. Archive of Formal Proofs  (Mar 2023),
+  \url{https://isa-afp.org/entries/Expander_Graphs.html}, formal proof
+  development
+
+\bibitem{KimCetinkaya2025}
+Kim, D.H., Cetinkaya, A.: Confidentiality in a card-based protocol under
+  repeated biased shuffles (2025)
+
+\bibitem{Koch2019}
+Koch, A., Schrempp, S., Kirsten, M.: Card-based cryptography meets formal
+  verification. In: Advances in Cryptology --- {ASIACRYPT} 2019. LNCS, vol.
+  11921, pp. 488--517. Springer (2019). \doi{10.1007/978-3-030-34578-5_18}
+
+\bibitem{KochFUN2021}
+Koch, A., Walzer, S.: Foundations for actively secure card-based cryptography.
+  In: 10th International Conference on Fun with Algorithms. LIPIcs, vol.~157,
+  pp. 17:1--17:23. Schloss Dagstuhl (2020). \doi{10.4230/LIPIcs.FUN.2021.17}
+
+\bibitem{KochWalzerHartel2015}
+Koch, A., Walzer, S., H{\"a}rtel, K.: Card-based cryptographic protocols using
+  a minimal number of cards. In: Advances in Cryptology --- {ASIACRYPT} 2015.
+  LNCS, vol.~9452, pp. 783--807. Springer (2015)
+
+\bibitem{LevinPeresWilmer2009}
+Levin, D.A., Peres, Y., Wilmer, E.L.: Markov Chains and Mixing Times. American
+  Mathematical Society (2009)
+
+\bibitem{MiyamotoShinagawa2022}
+Miyamoto, K., Shinagawa, K.: Graph automorphism shuffles from pile-scramble
+  shuffles. New Generation Computing  \textbf{40},  199--223 (2022).
+  \doi{10.1007/s00354-022-00164-4}
+
+\bibitem{MizukiSone2012}
+Mizuki, T., Kumamoto, M., Sone, H.: The five-card trick can be done with four
+  cards. In: Advances in Cryptology --- {ASIACRYPT} 2012. LNCS, vol.~7658, pp.
+  598--606. Springer (2012). \doi{10.1007/978-3-642-34961-4_36}
+
+\bibitem{MizukiShizuya2014}
+Mizuki, T., Shizuya, H.: A formalization of card-based cryptographic protocols
+  via abstract machine. International Journal of Information Security
+  \textbf{13}(1),  15--23 (2014). \doi{10.1007/s10207-013-0219-4}
+
+\bibitem{MizukiSone2009}
+Mizuki, T., Sone, H.: Six-card secure {AND} and four-card secure {XOR}. In:
+  Frontiers in Algorithmics. LNCS, vol.~5598, pp. 358--369. Springer (2009).
+  \doi{10.1007/978-3-642-02270-8_36}
+
+\bibitem{NiemiRenvall1999}
+Niemi, V., Renvall, A.: Solitaire zero-knowledge. Fundamenta Informaticae
+  \textbf{38}(1--2),  181--188 (1999). \doi{10.3233/FI-1999-381214}
+
+\bibitem{SannellaTarlecki2012}
+Sannella, D., Tarlecki, A.: Foundations of Algebraic Specification and Formal
+  Software Development. Monographs in Theoretical Computer Science. An {EATCS}
+  Series, Springer (2012). \doi{10.1007/978-3-642-17336-3}
+
+\bibitem{Shamir1979}
+Shamir, A.: How to share a secret. Communications of the ACM  \textbf{22}(11),
+  612--613 (1979). \doi{10.1145/359168.359176}
+
+\bibitem{Shinagawa2021}
+Shinagawa, K.: Card-based cryptography with dihedral symmetry. New Generation
+  Computing  \textbf{39},  41--71 (2021). \doi{10.1007/s00354-020-00117-9}
+
+\bibitem{ShinagawaMiyamoto2023}
+Shinagawa, K., Miyamoto, K.: Automorphism shuffles for graphs and hypergraphs
+  and its applications. IEICE Transactions on Fundamentals of Electronics,
+  Communications and Computer Sciences  \textbf{E106.A}(3),  306--314 (2023).
+  \doi{10.1587/transfun.2022CIP0020}
+
+\bibitem{ShinagawaNuida2021}
+Shinagawa, K., Nuida, K.: A single shuffle is enough for secure card-based
+  computation of any {B}oolean circuit. Discrete Applied Mathematics
+  \textbf{289},  248--261 (2021). \doi{10.1016/j.dam.2020.10.013}
+
+\bibitem{ShinagawaNuida2025}
+Shinagawa, K., Nuida, K.: Card-based protocols imply {PSM} protocols. In: 42nd
+  International Symposium on Theoretical Aspects of Computer Science. LIPIcs,
+  vol.~327, pp. 72:1--72:18. Schloss Dagstuhl (2025).
+  \doi{10.4230/LIPIcs.STACS.2025.72}
+
+\bibitem{MathComp}
+{The Mathematical Components Team}: Mathematical components (2024),
+  \url{https://math-comp.github.io}
+
+\bibitem{WengEtAl2025}
+Weng, C.H., Affeldt, R., Garrigue, J., Saikawa, T.: An approach to formalize
+  information-theoretic security of multiparty computation protocols. In:
+  Formal Techniques for Distributed Objects, Components, and Systems. LNCS,
+  vol. 15732. Springer (2025)
+
+\bibitem{Yamamoto1986}
+Yamamoto, H.: Secret sharing system using {$(k, L, n)$} threshold scheme.
+  Electronics and Communications in Japan (Part I: Communications)
+  \textbf{69}(9),  46--54 (1986). \doi{10.1002/ecja.4410690906}
+
+\end{thebibliography}

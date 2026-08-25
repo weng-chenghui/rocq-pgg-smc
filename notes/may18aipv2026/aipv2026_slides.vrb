@@ -1,0 +1,23 @@
+\frametitle{MPC ambient diagram (adversarial views)}
+\centering
+  \begin{tikzcd}[row sep={2.8em,between origins}, column sep=large]
+  & E
+    \arrow[r, "\pi_S"]
+    \arrow[d, "\pi_X"']
+    \arrow[dl, "\pi_{X_H}"'{pos=0.45}]
+    \arrow[rr, bend left=18, "\pi_{\mathrm{full}}"{pos=0.55}]
+    \arrow[rrr, bend left=22, "\pi_A"{pos=0.55}]
+    \arrow[dr, "\pi_{\mathrm{out}}"{pos=0.35, bend right=20}]
+  & \prod_{i=1}^n S_i \arrow[d, "\rho"]
+  & B_{\mathrm{full}}
+    \arrow[l, "\mathrm{proj}_S"']
+    \arrow[r, "\mathrm{proj}_A"]
+    \arrow[dl, "\rho \circ \mathrm{proj}_S"{pos=0.6}]
+  & B_A \arrow[l, "\iota_A"', hook, bend left=35]
+  \\
+  X_H
+  & \prod_{i=1}^n X_i \arrow[l, "\mathrm{proj}_{X_H}"] \arrow[r, "f"']
+  & Y
+  &
+  &
+  \end{tikzcd}

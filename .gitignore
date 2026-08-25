@@ -1,0 +1,15 @@
+*.vo
+*.vos
+*.vok
+*.glob
+*.aux
+.*.aux
+*.d
+.DS_Store
+__pycache__/
+*.pyc
+.lia.cache
+Makefile.rocq
+Makefile.rocq.conf
+.Makefile.rocq.d
+build.log

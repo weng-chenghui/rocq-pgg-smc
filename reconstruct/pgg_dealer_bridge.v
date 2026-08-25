@@ -1,0 +1,114 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
+(******************************************************************************)
+(* Dealer Bridge: Solver Output to Protocol Correctness                       *)
+(*                                                                            *)
+(* Connects the solver-determined word length (from the marginal bound) to    *)
+(* the session-typed protocol (exchange_dealer_from_words) via                *)
+(* AlgebraicRigidity.                                                         *)
+(*                                                                            *)
+(*   dealer_words_correct == end-to-end: word of solver-determined length L   *)
+(*     produces a correct protocol execution                                  *)
+(*   dealer_words_epsilon_bound == endpoint security bound from the           *)
+(*     AlgebraicRigidity witness                                              *)
+(******************************************************************************)
+
+From HB Require Import structures.
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import morphism bigop order ssrnum ssralg.
+From mathcomp Require Import boolp reals.
+From infotheo Require Import realType_ext fdist proba variation_dist.
+From pgg_smc Require Import pgg_interface card_exchange_pismc.
+From pgg_reconstruct Require Import algebraic_rigidity pgg_sharing_framework
+                                    covering_scheme.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+
+Local Open Scope fdist_scope.
+
+Section dealer_bridge.
+
+Variable R : realType.
+Variable M : MonodromyReprWithGeneratorType.
+Variable PI : PGGInterface M.
+Variable ar : AlgebraicRigidity R M.
+
+Let L := sw_L (scb_bound (ar_security ar)).
+Let Tg := (@pgg_ngens' M).+1.
+Let N := (pgg_N' M).+1.
+Let T := (pi_T' PI).+1.
+Let G := pgg_G M.
+Let cont := rp_content (cs_plug (tw_covering (ar_threshold ar))).
+Let mono := rp_monodromy (cs_plug (tw_covering (ar_threshold ar))).
+
+Variable HT : ts_T' (cs_scheme (tw_covering (ar_threshold ar))) = pi_T' PI.
+Hypothesis G_stable : forall g, g \in G ->
+  forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1,
+    cont (@pgg_rho M g
+      (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+    tnth [tuple cont
+            (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+         | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1]
+      (mono g i).
+
+(** dealer_words_correct — word-based dealer correctness: reconstruction at endpoints.
+    Kind: main.
+    Why: instantiates ar_protocol_correct with an L-word defining the protocol
+         composition, showing endpoint reconstruction yields the original secret.
+*)
+Theorem dealer_words_correct
+    (w : L.-tuple 'I_Tg) (s : 'I_N) :
+  let P := @word_eval M L w in
+  P \in G ->
+  ts_valid (cs_scheme (tw_covering (ar_threshold ar))) s
+    [tuple cont (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+    | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1] ->
+  pgg_recon_endpoints HT cont P = s.
+Proof.
+move=> /= PG Hvalid.
+exact: (@ar_protocol_correct R M ar PI HT s (word_eval w) G_stable PG Hvalid).
+Qed.
+
+(** dealer_words_epsilon_bound — var_dist epsilon bound for the word-based dealer.
+    Kind: main.
+    Why: re-exports the marginal-bound var_dist bound at each secret position,
+         so dealer consumers do not need to unfold the AlgebraicRigidity record.
+*)
+Lemma dealer_words_epsilon_bound (s : 'I_N) :
+  (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
+                      (sw_rho_dist (scb_bound (ar_security ar))))
+            (fdist_uniform (card_ord N))
+   <= sw_bound_eps (scb_bound (ar_security ar)))%O.
+Proof. exact: sw_bound. Qed.
+
+(* When the dealer uses ts_encode to produce the starting shares,
+   the ts_valid hypothesis is automatically satisfied. In the position model
+   the content readout is the identity, so the content-mapped starts coincide
+   with the encoded shares. *)
+Theorem dealer_encode_correct
+    (w : L.-tuple 'I_Tg) (s : 'I_N) :
+  let P := @word_eval M L w in
+  cont = id ->
+  P \in G ->
+  pi_starts PI = cast_tuple (congr1 S HT)
+    (ts_encode (cs_scheme (tw_covering (ar_threshold ar))) s) ->
+  pgg_recon_endpoints HT cont P = s.
+Proof.
+move=> /= Hcont PG Hstarts.
+apply: dealer_words_correct => //.
+rewrite Hstarts Hcont.
+have cast_tupleK : forall (A : Type) (n m : nat) (H : n = m)
+    (t : n.-tuple A), cast_tuple (esym H) (cast_tuple H t) = t.
+  by move=> A' n' m' H'; subst m'.
+rewrite cast_tupleK.
+have -> : [tuple id (tnth (ts_encode (cs_scheme (tw_covering (ar_threshold ar))) s) j)
+          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1]
+        = ts_encode (cs_scheme (tw_covering (ar_threshold ar))) s.
+  by apply: eq_from_tnth => j; rewrite tnth_mktuple.
+exact: ts_encode_valid.
+Qed.
+
+End dealer_bridge.

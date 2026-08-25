@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "status": "PASS",
+  "completed_at": "2026-08-24T15:06:12Z",
+  "reviewer_identity": "/root/wadt_candidate_audit and /root/orbit_definition_audit",
+  "reviewer_role": "independent read-only academic-writing auditor",
+  "review_method": "Compared every source unit with its accepted suggestion, baseline match and narration, adjacent context, and final candidate text. Inspected every rendered PDF page. Re-audited the corrected Orbit encoder definition against its formal authority and re-inspected pages 16 and 17.",
+  "source_sha256": "94dbd90b462f9804d2e2cd0eabbb4842ddd7aacb9846e2f4613f6db6ba7824fa",
+  "candidate_sha256": "de029600e4d38455fa0df57310e3ba09baaf7aaac1e4949bdd759981ccb01405",
+  "pdf_sha256": "dc9110095e930158586164d8c3274aedcd508dbef4241627117cda78ad801ad3",
+  "apply_review_sha256": "c64e720a2fcdac18733bf5e72ee9d3036d52bbe8defcf1379d6be3fc558d08bf",
+  "coverage": {
+    "units_reviewed": 225,
+    "automatic_applications": 185,
+    "manual_applications": 40,
+    "footnotes_verified_unchanged": 65,
+    "formulas_preserved": true,
+    "citations_preserved": 32,
+    "references_preserved": 76,
+    "labels_preserved": 46,
+    "pages_visually_reviewed": 33
+  },
+  "verdicts": {
+    "spec": "PASS",
+    "quality": "PASS",
+    "visual": "PASS",
+    "functional_completeness": "PASS"
+  },
+  "remaining_findings": {
+    "critical": [],
+    "important": [],
+    "minor": [
+      "Two overfull-box diagnostics remain. Both affected figures are visible, legible, and unclipped."
+    ]
+  },
+  "confirmed_properties": [
+    "The original main.tex is unchanged.",
+    "No authorial we or our remains.",
+    "No exact eight-word phrase overlap with Shinagawa21 remains.",
+    "No material claim, hedge, quantifier, theorem-boundary, terminology, transition, or motivation defect remains.",
+    "All 65 footnote signatures and bodies remain unchanged.",
+    "Definition 3 states that the heart-position orbit label of D_s is s, while Example 2 retains the round-trip verification."
+  ]
+}

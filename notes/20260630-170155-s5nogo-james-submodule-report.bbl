@@ -1,0 +1,62 @@
+\begin{thebibliography}{10}
+
+\bibitem{cccx2009}
+Ignacio Cascudo, Hao Chen, Ronald Cramer, and Chaoping Xing.
+\newblock Asymptotically good ideal linear secret sharing with strong
+  multiplication over any fixed finite field.
+\newblock In {\em Advances in Cryptology -- CRYPTO 2009}, volume 5677 of {\em
+  Lecture Notes in Computer Science}, pages 466--486. Springer, 2009.
+
+\bibitem{chen2006aglsss}
+Hao Chen.
+\newblock Linear secret sharing from algebraic-geometric codes, 2006.
+\newblock arXiv:cs/0603008. \url{https://arxiv.org/abs/cs/0603008}.
+
+\bibitem{garciaclaro2020}
+Jes{\'u}s E.~Garc{\'i}a Claro and Horacio~Tapia Recillas.
+\newblock On the dimension of ideals in group algebras, and group codes, 2020.
+\newblock arXiv:2002.06407. \url{https://arxiv.org/abs/2002.06407}.
+
+\bibitem{james1978}
+G.~D. James.
+\newblock {\em The Representation Theory of the Symmetric Groups}, volume 682
+  of {\em Lecture Notes in Mathematics}.
+\newblock Springer-Verlag, 1978.
+
+\bibitem{jamespeel1979}
+G.~D. James and M.~H. Peel.
+\newblock Specht series for skew representations of symmetric groups.
+\newblock {\em Journal of Algebra}, 56(2):343--364, 1979.
+\newblock DOI 10.1016/0021-8693(79)90342-9.
+
+\bibitem{joynerksir2008}
+David Joyner and Amy Ksir.
+\newblock On automorphism groups of certain {G}oppa codes.
+\newblock {\em Designs, Codes and Cryptography}, 49:65--79, 2008.
+\newblock arXiv:math/0412459.
+
+\bibitem{pandeykrishnan2026}
+Nikhil Pandey and Prasad Krishnan.
+\newblock On the automorphism groups of {B}erman codes and associated abelian
+  codes, 2026.
+\newblock arXiv:2605.27312. \url{https://arxiv.org/abs/2605.27312}.
+
+\bibitem{tomczak-symnotes}
+{\L}ukasz Tomczak.
+\newblock Representation theory of the symmetric group, 2022.
+\newblock Lecture notes, University of Cambridge, Part III, Michaelmas 2022.
+  \url{https://math.berkeley.edu/~ltomczak/notes/Mich2022/RepSn_Notes.pdf}.
+
+\bibitem{wildon2009mfree}
+Mark Wildon.
+\newblock Multiplicity-free representations of symmetric groups.
+\newblock {\em Journal of Algebra}, 322, 2009.
+\newblock arXiv:0903.2864. \url{https://arxiv.org/abs/0903.2864}.
+
+\bibitem{wildon-symnotes}
+Mark Wildon.
+\newblock The representation theory of the symmetric group, 2014.
+\newblock Lecture notes, Royal Holloway, University of London.
+  \url{https://www.ma.rhul.ac.uk/~uvah099/Maths/Sym/SymGroup2014.pdf}.
+
+\end{thebibliography}

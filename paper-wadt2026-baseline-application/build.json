@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "status": "PASS",
+  "completed_at": "2026-08-24T15:06:12Z",
+  "source_path": "/Users/cheng-huiweng/Projects/coq/infotheo-pgg/pgg-smc/paper-wadt2026/main.tex",
+  "source_sha256": "94dbd90b462f9804d2e2cd0eabbb4842ddd7aacb9846e2f4613f6db6ba7824fa",
+  "candidate_path": "/Users/cheng-huiweng/Projects/coq/infotheo-pgg/pgg-smc/paper-wadt2026-baseline-application/candidate-main.tex",
+  "candidate_sha256": "de029600e4d38455fa0df57310e3ba09baaf7aaac1e4949bdd759981ccb01405",
+  "pdf_path": "/Users/cheng-huiweng/Projects/coq/infotheo-pgg/pgg-smc/paper-wadt2026-baseline-application/build/candidate-main.pdf",
+  "pdf_sha256": "dc9110095e930158586164d8c3274aedcd508dbef4241627117cda78ad801ad3",
+  "page_count": 33,
+  "shell_escape": false,
+  "build_command": "latexmk -pdf -interaction=nonstopmode -halt-on-error -file-line-error -no-shell-escape -output-directory=build candidate-main.tex",
+  "citations_and_references_resolved": true,
+  "rendered_page_directory": "/Users/cheng-huiweng/Projects/coq/infotheo-pgg/pgg-smc/paper-wadt2026-baseline-application/pdf-review-final",
+  "rendered_page_count": 33,
+  "visual_review_status": "PASS",
+  "warnings": [
+    {
+      "kind": "overfull_hbox",
+      "width_pt": 2.39865,
+      "candidate_lines": "684-687",
+      "page": 11,
+      "disposition": "Minor. The figure and caption are visible, legible, and unclipped."
+    },
+    {
+      "kind": "overfull_hbox",
+      "width_pt": 37.19664,
+      "candidate_lines": "1406-1410",
+      "page": 22,
+      "disposition": "Minor. The diagram extends beyond the nominal text width but remains inside the physical page and is unclipped."
+    }
+  ]
+}

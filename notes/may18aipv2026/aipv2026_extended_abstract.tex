@@ -1,0 +1,317 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2cm,top=1.8cm,bottom=1.8cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{amssymb}
+
+\title{Inverting the Formalization Workflow:\\
+Prototyping an MPC Protocol in Rocq with an LLM Agent}
+\author{Cheng-Hui Weng\\
+Nagoya University}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-1em}
+\thispagestyle{empty}
+
+\begin{abstract}
+% OLD (trimmed for 2-page body)
+% Formalization traditionally comes last, and this creates a high barrier when a
+% construction depends on unfamiliar mathematics. I instead use formalization as
+% the first step and treat it as a prototyping medium. In this workflow, an LLM
+% agent drafts formal models, a theorem prover checks whether they stand on solid
+% logical ground, and the human steers the process while learning from the output.
+% I report on an ongoing Rocq formalization of SMC-PGG, a covering-space-based SMC
+% protocol that spans five mathematical domains learned through formalization
+% itself; the development currently includes 42 Theorem declarations. The paper
+% closes with observations about human judgment, multi-domain lemma drafting by
+% the LLM, and prover-backed certainty.
+Formalization is usually the last step, but that ordering is costly when a
+construction spans unfamiliar mathematics. I invert the order and use
+formalization as a prototyping medium: an LLM drafts candidate models, Rocq
+checks them, and the human steers revisions. The case study is an ongoing
+formalization of SMC-PGG, a covering-space-based secure multi-party computation
+framework with 42 Theorem declarations.
+The main takeaway is methodological: prover feedback can guide
+cross-domain learning and design decisions early, before full pen-and-paper
+domain mastery.
+\end{abstract}
+
+\noindent\textbf{Keywords.} LLM-assisted formalization, Rocq, interactive theorem proving, secure multi-party computation, covering spaces.
+
+\noindent\textbf{Introduction.}
+% OLD (trimmed for 2-page body)
+Formalization traditionally comes last. A researcher studies the relevant
+mathematics, designs a construction informally, and only then translates the
+result into a proof assistant as a final verification step. This ordering works
+well when the mathematical landscape is already familiar, but it becomes a
+serious obstacle when the construction draws on several domains that the
+researcher has not yet studied. In this work, I reverse the order and use
+formalization as a prototyping medium. An LLM agent\footnote{All LLM-assisted
+work reported here used Claude (Anthropic), specifically Claude Opus 4.6.}
+drafts formal models from natural-language direction, and a theorem prover
+checks whether each draft stands on solid logical ground. In this setting, the
+human learns from the structured output of each iteration. Definitions accepted
+by the theorem prover reveal useful abstractions, and failed proof obligations can
+signal missing assumptions, side conditions, or lemmas.
+
+%%Formalization is often treated as end-stage verification. I use it earlier as a
+%%design filter for ideas that span unfamiliar domains. An LLM
+%%agent\footnote{All LLM-assisted work reported here used Claude (Anthropic),
+%%specifically Claude Opus 4.6.} proposes formal candidates, Rocq validates or
+%%rejects them, and each failure pinpoints missing assumptions or lemmas.
+%
+% This extended abstract makes three case-study contributions. First, it presents
+% an inverted workflow in which formalization precedes domain mastery, following
+% the pattern idea $\to$ formalize $\to$ learn, so that unfamiliar
+% mathematical ideas can be tested early on solid logical ground. Second, it
+% reports on an ongoing Rocq formalization of SMC-PGG, a secure multi-party computation
+% protocol inspired by the covering space from topology;
+% the development currently includes 42 Theorem declarations. Third, it
+% draws methodological observations about the distinct roles of human judgment,
+% multi-domain lemma drafting by the LLM, and prover-backed certainty.
+
+
+This case study contributes an inverted workflow (``idea $\to$ formalize $\to$
+learn``) and an ongoing Rocq formalization of SMC-PGG with 42 Theorem
+declarations, highlighting how human judgment, LLM drafting, and prover checks
+play distinct roles.
+
+\noindent\textbf{Inverted Workflow.}
+
+The starting point was a hypothesis from separate ongoing work on generalizing
+secure multi-party computation (SMC). The hypothesis was that any surjective
+relation can serve as a secret-sharing mechanism if legitimate parties possess a
+trapdoor for reconstruction. Covering spaces in algebraic topology fit this
+pattern. An index in the fiber over a basepoint can represent the secret, the
+monodromy action can represent the computation, and a trapdoor inverting the
+covering map can represent reconstruction. However, even formulating such
+connections informally already requires time to understand each contributing
+domain, and developing them to the level of a publishable pen-and-paper
+argument takes much longer. Rather than waiting to master group theory,
+algebraic geometry, and coding theory in advance, I used formalization in
+Rocq/MathComp to test whether this connection makes sense on solid logical
+ground.
+
+From that point onward, formalization served not as a final verification step
+but as an exploratory instrument. Rather than waiting for complete prior
+mastery of every contributing domain, I used proof development to test whether
+the core hypothesis could be realized as a concrete protocol with checkable
+correctness and security guarantees.
+% %
+With this framing, I first asked the agent to assess the mathematical
+plausibility of the secret-hiding assumption and to compile working notes on
+implementations for sharing, computation, and reconstruction. Using those
+notes, I then asked the agent to draft formalization plans and evaluate their
+feasibility against available Rocq infrastructure, especially
+MathComp~\cite{MathComp} and Infotheo~\cite{InfoTheo}. In parallel, the search
+expanded into spectral graph theory, algebraic geometry, and coding theory
+while I learned unfamiliar material.
+% %
+This process also exposed infrastructure boundaries that required explicit
+axiomatization. For instance, the Riemann--Hurwitz formula is central to
+linking group size with reconstruction constraints, yet a full mechanization
+would itself be comparable to a separate research project. When a direction
+appeared unlikely to meet the target guarantees, I required the agent to
+produce structured tabular retrospectives that explicitly listed obstacles and
+alternatives, preventing vague narrative evasion and forcing detailed
+justification of the underlying reasoning.
+% %
+Formalization thus functioned as a methodological filter, separating components
+ready for mechanization from those that should remain explicit assumptions at
+this stage. The next section shows how this filter shaped the concrete SMC-PGG
+case-study formalization.
+
+%%The starting hypothesis was that surjective relations with a reconstruction
+%%trapdoor can instantiate secret sharing. Covering spaces provide one candidate:
+%%fiber indices encode secrets, monodromy models computation, and inversion of the
+%%covering map models reconstruction. Instead of waiting for full prior mastery of
+%%all background domains, I used Rocq/MathComp to test this structure directly.
+
+%%The loop was simple: ask the agent for formal candidates, validate feasibility
+%%against MathComp~\cite{MathComp} and Infotheo~\cite{InfoTheo}, and keep only
+%%components that survived proof obligations. The process also exposed boundaries
+%%that remain explicit assumptions (for example, results whose full mechanization
+%%would be a separate project). In this sense, formalization acted as a
+%%methodological filter before committing to a full protocol architecture.
+%
+
+\noindent\textbf{Case Study.}
+To test the inverted workflow, I used it to build SMC-PGG (Secure Multi-party
+Computation via Parametric Geometry Group), starting from the core idea that a
+covering-space model can hide a secret as an index in the fiber over a base
+point and evolve it through monodromy, formalized as a representation \(\rho : G \to S_N\).
+Through a human--AI hybrid formalization loop, this idea grew into a parametric
+mathematical framework before any venue- or domain-specific targeting;
+AI-assisted literature search then revealed that the framework aligns naturally
+with card-based SMC protocol research.
+%
+% OLD (trimmed for 2-page body)
+% Concretely, the dealer distributes the secret as \(T\) shares placed at
+% positions drawn from the sheet set \(\mathbb{I}_N\); each protocol step applies a
+% permutation \(\rho(g)\) of \(\mathbb{I}_N\) that reshuffles these share positions while
+% the reconstructed secret value stays invariant. This gives one parametric
+% semantics for both single-round and repeated shuffles.
+%
+% The formalization organizes guarantees in three layers. The security layer
+% tracks how far the induced shuffle distribution is from uniform and provides
+% bounds on adversary advantage. The reconstruction layer captures classical
+% \((k,T)\)-threshold behavior: any \(T\) shares reconstruct, while fewer than
+% \(T\) reveal only bounded information. The combined layer connects security
+% and threshold constraints through group-size and geometric conditions. Within
+% this framework, I prove bounds on adversary search space, indistinguishable
+% computation histories, privacy loss, and threshold margin, including the
+% collusion bound
+Concretely, the dealer places \(T\) shares (total share count) on sheet
+positions \(\mathbb{I}_N\), and each protocol step applies \(\rho(g)\in S_N\),
+reshuffling positions while preserving reconstruction semantics. The
+formalization combines security and \((K,T)\)-threshold constraints (\(K\):
+number of shares needed to reconstruct the secret) in one parametric model and
+proves privacy/search-space bounds.
+
+%, including
+%
+%\[
+%\mathrm{TV} \le \varepsilon + \frac{2(T-1)}{N}.
+%\]
+
+%
+The framework is validated on four instances: uniform shuffling
+\cite{denBoer1989}, biased shuffling \cite{KimCetinkaya2025}, a classical
+\(S_5\) construction, and an \(S_5 \times S_5\) construction. The first three fit the
+simpler five-sheet setting; the \(S_5 \times S_5\) case crosses the group size/geometry
+boundary and forces positive dropout tolerance \(T-K>0\). This provides evidence
+that the central trade-off is realized on both sides of the boundary.
+Except those four instances, I also show an impossibility
+result: in the regular abelian setting, symmetry alone cannot deliver
+non-trivial privacy/security gain.
+%
+Methodologically, the section also illustrates learning through formalization:
+stronger arguments were introduced when simpler proof paths failed. The current
+development contains 42 Theorem declarations across group theory, combinatorics,
+algebraic geometry, coding theory, and information theory.
+
+%%I also obtain a quantum-search scaling interpretation and an impossibility
+%%result: in regular abelian settings, symmetry alone does not yield non-trivial
+%%privacy gain. The framework is validated on four instances (including biased
+%%shuffling and a product-group case that forces \(T-K>0\)), and the current
+%%development contains 42 Theorem declarations.
+
+\noindent\textbf{Observations.}
+This case study suggests a methodological distinction from current lines of
+automated-reasoning work that prioritize theorem-level automation, such as
+whole-proof generation, informal-to-formal translation, or benchmark solving
+\cite{first2023baldur,jiang2023dsp,alphaproof2024}. The workflow reported here
+instead semi-automates framework construction: it supports exploration across
+domains, iterative lemma drafting, and composition of many proved components
+into one coherent protocol architecture. In this setting, the main challenge is
+not only closing isolated goals, but also deciding which abstractions should
+exist and how security, reconstruction, and algebraic constraints should fit
+together.
+
+The project also surfaced a practical architecture lesson. During repeated
+pivots, some formally verified components became obsolete, over-general, or
+temporarily disconnected from the main proof path. Examples include a
+Cartier-Foata trace-counting theorem, a right-angled Artin group word-reordering
+module, Massey's secret sharing from linear codes, and a weight bound for codes
+on hyperelliptic curves. These compile and are available for future instances,
+but do not load-bear in the current security or reconstruction proofs. This is
+less a failure of proving than a normal software-architecture effect under
+discovery-driven research: the framework requires continuous housekeeping to
+deprecate stale artifacts, refactor interfaces, and keep dependencies and
+theorem roles explicit, so the final development remains clear, auditable, and
+internally consistent. 
+
+%%Relative to theorem-level automation, this workflow targets framework
+%%construction: selecting abstractions, drafting cross-domain lemmas, and
+%%assembling a coherent security/reconstruction architecture. A practical lesson
+%%is that discovery-driven formalization accumulates stale but compilable artifacts,
+%%so continuous curation (deprecation, refactoring, explicit theorem roles) is
+%%part of the method, not an afterthought.
+
+\noindent\textbf{Related Work.}
+% OLD (trimmed for 2-page body)
+% Related work on LLM-assisted proving includes whole-proof generation
+% \cite{first2023baldur}, informal-to-formal translation \cite{jiang2023dsp}, and
+% retrieval-augmented search \cite{yang2023leandojo}. It also includes IDE
+% integration \cite{song2024leancopilot} and reinforcement-learning-based training
+% \cite{alphaproof2024}. Here, by contrast, the LLM primarily serves as a
+% mechanism for domain-knowledge transfer in a human-directed exploratory
+% workflow.
+LLM-assisted proving work emphasizes proof generation, translation, retrieval,
+and training \cite{first2023baldur,jiang2023dsp,yang2023leandojo,song2024leancopilot,alphaproof2024}.
+In contrast, this project uses the LLM mainly for domain-knowledge transfer and
+design-space exploration inside a prover-checked loop.
+
+\noindent\textbf{Conclusion.}
+% OLD (trimmed for 2-page body)
+% This case study suggests a methodological claim about AI-assisted formalization.
+% An LLM agent can be useful not only for proof search, but also for cross-domain
+% exploration in an ongoing research project. In that setting, formalization need
+% not be the final verification step. It can instead serve as a prototyping medium
+% that tests whether a mathematical idea survives contact with a theorem prover
+% while simultaneously teaching the surrounding domain. The traditional order of
+% learn $\to$ design $\to$ formalize can therefore be inverted into idea
+% $\to$ formalize $\to$ learn.
+The case study supports a simple claim: AI-assisted formalization can guide
+early-stage protocol design, not only late-stage proof search. In this mode,
+formalization functions as a prototyping filter that both validates and teaches,
+making ``idea $\to$ formalize $\to$ learn'' a practical research workflow.
+From this perspective, the next step is twofold: to mature the current prototype
+into a publication-ready development, and to test the same workflow on new ideas
+in other domains.
+
+\begingroup\footnotesize
+\begin{thebibliography}{9}
+\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}\setlength{\parskip}{0pt}
+
+\bibitem{first2023baldur}
+E.~First, M.~N.~Rabe, T.~Ringer, and Y.~Brun. Baldur: Whole-proof generation and
+repair with large language models. In \textit{ESEC/FSE 2023}, 2023.
+
+\bibitem{jiang2023dsp}
+A.~Jiang et al. Draft, sketch, and prove: Guiding formal theorem provers with
+informal proofs. In \textit{ICLR 2023}, 2023.
+
+\bibitem{yang2023leandojo}
+K.~Yang et al. LeanDojo: Theorem proving with retrieval-augmented language
+models. In \textit{NeurIPS 2023 (Datasets and Benchmarks)}, 2023.
+
+\bibitem{song2024leancopilot}
+P.~Song, K.~Yang, and A.~Anandkumar. Lean Copilot: LLMs as copilots for theorem
+proving in Lean.
+\textit{arXiv:2404.12534}, 2024.
+
+\bibitem{alphaproof2024}
+Google DeepMind. AlphaProof and AlphaGeometry~2. Technical report, 2024.
+
+\bibitem{MathComp}
+The Mathematical Components Team. Mathematical Components, 2024.
+\url{https://math-comp.github.io}
+
+\bibitem{InfoTheo}
+R.~Affeldt et al. A Coq Formalization of Information Theory and Linear
+Error-Correcting Codes, 2024.
+\url{https://github.com/affeldt-aist/infotheo}
+
+\bibitem{barthe2011easycrypt}
+G.~Barthe et al. Computer-aided security proofs for the working cryptographer.
+In \textit{CRYPTO 2011}, LNCS 6841, Springer, 2011.
+
+\bibitem{KimCetinkaya2025}
+D.~H.~Kim and A.~Cetinkaya. Confidentiality in a Card-Based Protocol Under
+Repeated Biased Shuffles.
+\textit{arXiv:2511.05111 [cs.CR]}, 2025.
+
+\bibitem{denBoer1989}
+B.~den Boer. More Efficient Match-Making and Satisfiability: The Five Card
+Trick. In \textit{Advances in Cryptology --- EUROCRYPT '89}, LNCS 434, pages
+208--217, Springer, 1990.
+
+\end{thebibliography}
+\endgroup
+
+\end{document}
