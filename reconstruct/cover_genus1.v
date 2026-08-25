@@ -28,7 +28,7 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop div.
 From mathcomp Require Import ssralg finalg matrix mxalgebra vector.
 From mathcomp Require Import poly separable.
-Require Import ssr_ext ssralg_ext hamming linearcode.
+From infotheo Require Import ssr_ext ssralg_ext hamming linearcode.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.

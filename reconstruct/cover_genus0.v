@@ -31,7 +31,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop prime div ssralg finalg.
 From mathcomp Require Import matrix mxalgebra vector zmodp poly cyclic.
-Require Import ssralg_ext hamming linearcode reed_solomon.
+From infotheo Require Import ssralg_ext hamming linearcode reed_solomon.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.

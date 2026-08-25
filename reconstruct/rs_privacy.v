@@ -17,8 +17,8 @@
 
 From mathcomp Require Import all_ssreflect ssralg finalg poly polydiv cyclic.
 From mathcomp Require Import perm matrix mxpoly vector mxalgebra zmodp.
-Require Import ssr_ext ssralg_ext hamming linearcode dft.
-Require Import reed_solomon.
+From infotheo Require Import ssr_ext ssralg_ext hamming linearcode dft.
+From infotheo Require Import reed_solomon.
 From pgg_reconstruct Require Import lagrange.
 
 Set Implicit Arguments.

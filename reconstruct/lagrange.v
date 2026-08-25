@@ -19,7 +19,7 @@
 
 From mathcomp Require Import all_ssreflect ssralg finalg.
 From mathcomp Require Import poly polydiv.
-Require Import ssr_ext ssralg_ext.
+From infotheo Require Import ssr_ext ssralg_ext.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

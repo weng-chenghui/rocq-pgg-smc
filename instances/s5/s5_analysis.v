@@ -52,7 +52,7 @@ From pgg_smc Require Export pgg_canonical_sharing.
 From pgg_smc Require Export pgg_analysis_status.
 
 (* Imported instance cone: loaded, never re-exported. *)
-Require Import smc_interpreter pismc smc_session_types.
+From infotheo Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run.
 From pgg_smc Require Import pgg_leakage_witness pgg_sharing_mechanism.

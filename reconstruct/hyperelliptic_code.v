@@ -26,7 +26,8 @@ From mathcomp Require Import all_ssreflect ssralg finalg zmodp.
 From mathcomp Require Import fingroup matrix mxalgebra vector.
 From mathcomp Require Import poly polydiv.
 From mathcomp Require Import separable.
-Require Import ssr_ext ssralg_ext hamming linearcode rouche_capelli.
+From infotheo Require Import ssr_ext ssralg_ext hamming linearcode.
+Require Import rouche_capelli.
 From pgg_reconstruct Require Import ag_code.
 
 Set Implicit Arguments.

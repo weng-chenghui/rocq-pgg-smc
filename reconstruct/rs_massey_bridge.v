@@ -18,7 +18,7 @@ From HB Require Import structures.
 From mathcomp Require Import all_ssreflect ssralg finalg zmodp.
 From mathcomp Require Import matrix mxalgebra vector poly polydiv cyclic.
 From mathcomp Require Import perm.
-Require Import ssr_ext ssralg_ext hamming linearcode dft reed_solomon.
+From infotheo Require Import ssr_ext ssralg_ext hamming linearcode dft reed_solomon.
 From pgg_reconstruct Require Import pgg_sharing_framework massey lagrange
   rs_privacy.
 

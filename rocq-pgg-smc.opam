@@ -18,6 +18,7 @@ depends: [
   "rocq-mathcomp-fingroup"
   "rocq-mathcomp-algebra"
   "rocq-mathcomp-solvable"
+  "rocq-mathcomp-character"
   "coq-mathcomp-classical"
   "coq-mathcomp-reals"
   "rocq-hierarchy-builder"

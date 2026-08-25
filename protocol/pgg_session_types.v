@@ -3,7 +3,8 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
-Require Import smc_session_types pgg_interface.
+From infotheo Require Import smc_session_types.
+Require Import pgg_interface.
 
 (******************************************************************************)
 (* PGG: Session-Typed Wrappers                                                *)

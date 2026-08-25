@@ -19,7 +19,7 @@
 From HB Require Import structures.
 From mathcomp Require Import all_ssreflect ssralg finalg zmodp.
 From mathcomp Require Import matrix mxalgebra vector.
-Require Import ssr_ext ssralg_ext hamming linearcode.
+From infotheo Require Import ssr_ext ssralg_ext hamming linearcode.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

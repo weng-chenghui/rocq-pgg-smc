@@ -35,7 +35,7 @@ From mathcomp Require Import morphism action bigop order ssrnum ssralg boolp rea
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 Require Import pgg_interface.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
-Require Import smc_interpreter pismc smc_session_types.
+From infotheo Require Import smc_interpreter pismc smc_session_types.
 From pgg_reconstruct Require Import covering_scheme pgg_sharing_framework.
 From pgg_reconstruct Require Import transitivity_privacy.
 From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_scheme pgl27_profile.

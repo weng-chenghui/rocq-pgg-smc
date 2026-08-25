@@ -16,7 +16,7 @@ From mathcomp Require Import morphism action bigop order ssrnum ssralg boolp rea
 Require Import pgg_interface.
 From pgg_smc Require Import pgg_s5x5 s5x5_profile rigidity_s5x5_instance.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
-Require Import smc_interpreter pismc smc_session_types.
+From infotheo Require Import smc_interpreter pismc smc_session_types.
 From pgg_reconstruct Require Import covering_scheme pgg_sharing_framework.
 From pgg_reconstruct Require Import product_threshold.
 

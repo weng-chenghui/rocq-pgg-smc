@@ -45,7 +45,7 @@ From mathcomp Require Import morphism action bigop order ssrnum.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
-Require Import ssralg_ext.
+From infotheo Require Import ssralg_ext.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_raag_path pgg_raag_s5 pgg_collusion_bound.
 From pgg_smc Require Import s5_mixing.
