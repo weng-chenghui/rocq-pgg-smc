@@ -22,6 +22,7 @@
 -R manifest pgg_smc
 
 lib/perm_uniform.v
+lib/proba_entropy_ext.v
 protocol/pgg_interface.v
 protocol/pgg_session_types.v
 protocol/card_exchange_pismc.v
