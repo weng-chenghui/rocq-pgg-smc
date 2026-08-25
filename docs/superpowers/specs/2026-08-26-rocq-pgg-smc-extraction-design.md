@@ -200,10 +200,10 @@ the deviation in `DEVIATIONS.md`. Importing `dumas2017dual`/`du2002`/
 
 rsync from `infotheo-pgg/pgg-smc/` excluding: `*.vo`, `*.vos`, `*.vok`,
 `*.glob`, `*.aux`, `.*.aux`, `*.d`, `.DS_Store`, `__pycache__/`, `*.pyc`,
-`.lia.cache`, `paper-wadt2026/tmp/`, LaTeX build residue (`*.log`, `*.out`,
-`*.fls`, `*.fdb_latexmk`, `*.synctex*`) outside `notes/` (notes keeps
-whatever it has). `.claude/` and `.cursor/` inside pgg-smc are carried.
-The same patterns go into `.gitignore`.
+`.lia.cache`, `paper-wadt2026/tmp/`. LaTeX build residue is carried as-is
+(harmless, and per-directory filtering is not worth the complexity).
+`.claude/` and `.cursor/` inside pgg-smc are carried. The same patterns
+go into `.gitignore`.
 
 ## Verification (definition of done)
 
