@@ -9,7 +9,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset bigop.
 From mathcomp Require Import ssralg ssrnum reals zmodp.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy graphoid.
-Require Import spp_proba spp_entropy.
+From pgg_smc Require Import proba_entropy_ext.
 From pgg_smc Require Import pgg_leakage_witness.
 
 Import GRing.Theory Num.Theory.

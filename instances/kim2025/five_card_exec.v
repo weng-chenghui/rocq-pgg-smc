@@ -95,6 +95,7 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import ssralg_ext realType_ext realType_ln fdist proba.
 From infotheo Require Import variation_dist entropy.
 From infotheo Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import proba_entropy_ext.
 From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
 From pgg_smc Require Import pgg_execution_plug pgg_observed_execution.
@@ -749,8 +750,8 @@ have Hc : five_card_exec_input_trace j
   apply: funext => w.
   rewrite /five_card_exec_input_trace /comp_RV.
   by rewrite five_card_exec_input_raw_traceE.
-rewrite Hc; apply: extra_entropy.inde_cond_entropy.
-apply: pgg_trace_secrecy.inde_RV_comp; exact: spp_proba.inde_unit_RV.
+rewrite Hc; apply: inde_cond_entropy.
+apply: pgg_trace_secrecy.inde_RV_comp; exact: inde_unit_RV.
 Qed.
 
 (******************************************************************************)

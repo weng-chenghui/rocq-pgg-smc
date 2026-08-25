@@ -8,7 +8,6 @@
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype finfun finset bigop ssralg ssrnum reals.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy graphoid.
-Require Import spp_proba.
 From pgg_smc Require Import pgg_leakage_witness.
 
 Import GRing.Theory Num.Theory. Set Implicit Arguments. Unset Strict Implicit. Import Prenex Implicits.

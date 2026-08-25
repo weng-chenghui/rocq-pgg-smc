@@ -7,7 +7,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism cyclic bigop ssralg ssrnum reals.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
-From infotheo.dumas2017dual.lib Require Import extra_entropy.
+From pgg_smc Require Import proba_entropy_ext.
 Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 From pgg_smc Require Import five_card_program five_card_scheme_I5.

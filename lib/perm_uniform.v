@@ -11,7 +11,6 @@ From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup perm.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext ssr_ext fdist proba jfdist_cond entropy.
-Require Import entropy_fiber extra_proba.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

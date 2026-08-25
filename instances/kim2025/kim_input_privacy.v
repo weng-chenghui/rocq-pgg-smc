@@ -28,6 +28,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset bigop ssralg ssrnum reals.
 From mathcomp Require Import lra.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
+From pgg_smc Require Import proba_entropy_ext.
 From pgg_smc Require Import five_card_leakage den_boer_encoding five_card_kim.
 
 Import GRing.Theory Num.Theory.
@@ -90,7 +91,7 @@ have [px0|pxN0] := eqVneq
   (jfdist_cond.jcPr `p_ [% kim_inputs, kim_view A, kim_secret] [set x] [set true])
   0.
   by rewrite px0 mul0r.
-rewrite fdist_proj13_RV3 extra_proba.fdist_proj23_RV3.
+rewrite fdist_proj13_RV3 fdist_proj23_RV3.
 rewrite !jfdist_cond.jPr_Pr !cpr_in1 (surjective_pairing x) /=.
 have HSI : kim_secret = (fun ab : bool * bool => ab.1 && ab.2) `o kim_inputs
   by apply: boolp.funext => -[[a b] i].
@@ -102,7 +103,7 @@ have Hcoll : forall (W : finType) (Wrv : {RV kim_input_dist -> W}) (w : W),
       cPr_eq kim_inputs a Wrv w = 0) ->
     cPr_eq kim_inputs (true, true) Wrv w = 1.
   move=> W Wrv w Hw Hoff.
-  have Hsum := extra_proba.sum_cPr_eq kim_inputs Hw.
+  have Hsum := sum_cPr_eq kim_inputs Hw.
   rewrite (bigD1 (true, true)) //= in Hsum.
   by rewrite big1 ?addr0 // in Hsum => a aN; exact: Hoff.
 have HsecN0 : `Pr[ kim_secret = true ] != 0
@@ -117,7 +118,7 @@ have Hcimp : forall t, kim_secret t ==> (kim_inputs t == (true, true))
 have HoffVS : forall a : bool * bool, a != (true, true) ->
     cPr_eq kim_inputs a [% kim_view A, kim_secret] (x.2, true) = 0.
   move=> a aN.
-  apply: (extra_proba.cond_prob_zero_outside_constraint
+  apply: (cond_prob_zero_outside_constraint
     (constraint := fun (vs : _ * bool) i => vs.2 ==> (i == (true, true)))).
   - by move=> t; exact: Hcimp.
   - exact: HVS.
@@ -125,7 +126,7 @@ have HoffVS : forall a : bool * bool, a != (true, true) ->
 have HoffS : forall a : bool * bool, a != (true, true) ->
     cPr_eq kim_inputs a kim_secret true = 0.
   move=> a aN.
-  apply: (extra_proba.cond_prob_zero_outside_constraint
+  apply: (cond_prob_zero_outside_constraint
     (constraint := fun (s : bool) i => s ==> (i == (true, true)))).
   - by move=> t; exact: Hcimp.
   - exact: HsecN0.

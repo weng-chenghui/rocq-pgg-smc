@@ -27,7 +27,6 @@ From mathcomp Require Import fingroup matrix mxalgebra vector.
 From mathcomp Require Import poly polydiv.
 From mathcomp Require Import separable.
 From infotheo Require Import ssr_ext ssralg_ext hamming linearcode.
-Require Import rouche_capelli.
 From pgg_reconstruct Require Import ag_code.
 
 Set Implicit Arguments.
@@ -36,6 +35,53 @@ Import Prenex Implicits.
 
 Import GRing.Theory.
 Open Scope ring_scope.
+
+(******************************************************************************)
+(*     Section 0: Rank Conditions for Linear Solvability                      *)
+(******************************************************************************)
+
+Section rank_solvability.
+
+Variable R : fieldType.
+
+(** mxrank_sub_eqmx — a submatrix whose rank equals that of its supermatrix
+    spans the same row space.
+    @composes: rouche1 *)
+Local Lemma mxrank_sub_eqmx m n p (A : 'M[R]_(m,n)) (B : 'M[R]_(p,n)) :
+  \rank A = \rank B -> (A <= B)%MS -> (A == B)%MS.
+Proof.
+by move/eqP => Hr /mxrank_leqif_eq/leqifP; rewrite ltn_neqAle Hr; case: ifPn.
+Qed.
+
+(** rouche1 — the system x *m A = B is solvable exactly when adjoining the row
+    B to A leaves the rank unchanged; it turns the full-rank evaluation matrix
+    on a coordinate set into a codeword matching a prescribed target there.
+    @composes: hyp_priv_surj *)
+Local Lemma rouche1 m n (A : 'M[R]_(m,n)) (B : 'rV_n) :
+  (exists x, x *m A = B) <-> (\rank A = \rank (col_mx A B)).
+Proof.
+rewrite -addsmxE; split.
+  case=> x AB; apply/eqmx_rank.
+  by rewrite -AB addsmx_sub submx_refl addsmxSl submxMl.
+move/mxrank_sub_eqmx/(_ (addsmxSl A B)).
+case/eqmxP/eqmx_sym/addsmx_idPl/submxP => x ->.
+by exists x.
+Qed.
+
+(** exists_nonzero_kernel — a matrix of rank below its row count annihilates
+    some nonzero row vector; it supplies the dual word whose support lies in
+    the coordinate set, contradicting the dual minimum distance.
+    @composes: hyp_priv_surj *)
+Local Lemma exists_nonzero_kernel m n (A : 'M[R]_(m, n)) :
+  (\rank A < m)%N -> exists y : 'rV_m, y *m A = 0 /\ y != 0.
+Proof.
+rewrite -subn_gt0 -mxrank_ker lt0n mxrank_eq0 => /matrix0Pn [i] [j] Hij.
+exists (row i (kermx A)); split.
+  exact/sub_kermxP/row_sub.
+by apply/rV0Pn; exists j; rewrite mxE.
+Qed.
+
+End rank_solvability.
 
 (******************************************************************************)
 (*     Section 1: Polynomial Size Lemmas                                      *)
