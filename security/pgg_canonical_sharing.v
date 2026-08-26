@@ -29,14 +29,12 @@ Definition unif_secret : {RV P -> 'Z_N} := fun v => v ord0 ord0.
 
 Definition unif_mask (k : 'I_T') : {RV P -> 'Z_N} := fun v => v ord0 (lift ord0 k).
 
-(** @composes: unif_randomized_sharing *)
 Lemma unif_mask_unif (k : 'I_T') : `p_ (unif_mask k) = fdist_uniform card_ZN.
 Proof.
 have -> : `p_ (unif_mask k) = fdist_nth P (lift ord0 k) by [].
 exact: fdist_nth_unif.
 Qed.
 
-(** @composes: unif_randomized_sharing *)
 Lemma unif_masks_indep :
   P |= ((fun u => [ffun i : 'I_T' => unif_mask i u]) : {RV P -> {ffun 'I_T' -> 'Z_N}})
      _|_ unif_secret.
@@ -55,7 +53,6 @@ exact: (@inde_RV_head_rV R 'Z_N P0 T' 'Z_N _ idfun
           (fun t : 'rV['Z_N]_T' => [ffun i : 'I_T' => t``_i])).
 Qed.
 
-(** @composes: unif_randomized_sharing *)
 Lemma unif_mask_indep (k : 'I_T') :
   P |= unif_mask k
      _|_ [% unif_secret,
@@ -96,7 +93,6 @@ Qed.
    where card_ZN_subproof N' is the cardinality proof generated inside
    pgg_randomized_sharing. It is a distinct proof term from this section's
    card_ZN Let, so we transport across it by proof irrelevance. *)
-(** @composes: unif_randomized_sharing *)
 Lemma unif_mask_unif_subproof (k : 'I_T') :
   `p_ (unif_mask k) = fdist_uniform (pgg_randomized_sharing.card_ZN_subproof N').
 Proof.
@@ -105,9 +101,8 @@ by rewrite (eq_irrelevance (pgg_randomized_sharing.card_ZN_subproof N') card_ZN)
 Qed.
 
 (** unif_randomized_sharing — the uniform iid tape as a RandomizedSharing,
-    witnessing the record is inhabited.
-    @intent: a concrete T-of-T additive sharing whose masks are iid uniform and
-    independent of the secret. *)
+    witnessing the record is inhabited: a concrete T-of-T additive sharing
+    whose masks are iid uniform and independent of the secret. *)
 Definition unif_randomized_sharing : RandomizedSharing P N' T' :=
   @MkRandomizedSharing _ _ P N' T' unif_secret unif_mask
     unif_mask_unif_subproof unif_masks_indep unif_mask_indep.

@@ -25,19 +25,24 @@ Variable U : finType.
 Variable P : R.-fdist U.
 Variable N' T' : nat.
 
-(** SharingMechanism — the randomization mechanism of a PGG instance: an
-    additive T-of-T one-time-pad sharing, or a cyclic-cut card scheme.
-    @intent: the family marker over the two randomization mechanisms; the
-    Additive branch fixes the additive dimensions, the CyclicCut branch ignores
-    them. *)
+(* The randomization mechanism of a PGG instance: either an additive
+   T-of-T one-time-pad sharing (Additive, carrying the coalition-excluded
+   set C with |C| < T'+1) or a cyclic-cut card scheme (CyclicCut).  The
+   family marker mechanism_leakage dispatches on, letting the generic
+   secrecy tail consume either mechanism uniformly through the shared
+   LeakageWitness interface. *)
 Variant SharingMechanism :=
   | Additive  (rs : RandomizedSharing P N' T')
               (C : {set 'I_T'.+1}) (HC : (#|C| < T'.+1)%N)
   | CyclicCut (cc : CyclicCutData P).
 
-(** mechanism_leakage — the leakage witness a mechanism dispatches to.
-    @intent: maps each family to the one LeakageWitness type, which is possible
-    because LeakageWitness packs the secret and view finTypes as fields. *)
+(* Maps each SharingMechanism to its LeakageWitness: additive_leakage rs HC
+   for Additive, cyclic_cut_leakage cc for CyclicCut.  The mapping lands
+   in one type because LeakageWitness packs the secret and view finTypes
+   as fields, so both mechanisms share a witness type despite arising
+   from unrelated randomization constructions; downstream secrecy
+   machinery stops caring which mechanism produced its witness past this
+   point. *)
 Definition mechanism_leakage (m : SharingMechanism) : LeakageWitness P :=
   match m with
   | Additive rs C HC => additive_leakage rs HC

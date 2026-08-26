@@ -34,8 +34,8 @@ Notation othermasks rsh_mask k :=
 
 (** RandomizedSharing — a T-of-T additive sharing of a secret over Z/N: T-1
     independent uniform masks and one dependent share carrying the residue.
-    @intent: the masks are jointly uniform and independent of the secret, and
-    each mask is independent of the secret bundled with the other masks. *)
+    The masks are jointly uniform and independent of the secret, and each
+    mask is independent of the secret bundled with the other masks. *)
 Record RandomizedSharing := MkRandomizedSharing {
   rsh_secret      : {RV P -> 'Z_N} ;
   rsh_mask        : 'I_T' -> {RV P -> 'Z_N} ;
@@ -44,23 +44,22 @@ Record RandomizedSharing := MkRandomizedSharing {
   rsh_mask_indep  : forall k : 'I_T',
       P |= rsh_mask k _|_ [% rsh_secret, (othermasks rsh_mask k)] }.
 
-(** rsh_share — the j-th additive share: a mask coordinate for j < T-1, and the
-    residual share s - sum of masks for the last index.
-    @intent: the T shares of the secret in the T-of-T additive scheme. *)
+(** rsh_share — the j-th additive share: a mask coordinate for j < T-1, and
+    the residual share s - sum of masks for the last index. Together the T
+    shares reconstruct the secret in the T-of-T additive scheme. *)
 Definition rsh_share (rs : RandomizedSharing) (j : 'I_T) : {RV P -> 'Z_N} :=
   if @unlift _ ord_max j is Some j' then rsh_mask rs j'
   else (rsh_secret rs \- (\sum_(i < T') rsh_mask rs i)).
 
-(** rsh_view — the joint view of a coalition C, exposing only the shares whose
-    index lies in C.
-    @intent: what an index set C of corrupted parties observes. *)
+(** rsh_view — the joint view of a coalition C: the shares whose index lies
+    in C, what an index set C of corrupted parties observes. *)
 Definition rsh_view (rs : RandomizedSharing) (C : {set 'I_T}) :
     {RV P -> {ffun 'I_T -> 'Z_N}} :=
   fun u => [ffun j => if j \in C then rsh_share rs j u else 0].
 
-(** additive_allbut_indep — dropping one share leaves a view independent of the
-    secret.
-    @composes: additive_view_indep *)
+(** additive_allbut_indep — the view that exposes every share except one is
+    independent of the secret: the maximal (T-1)-out-of-T coalition already
+    learns nothing, the base case additive_view_indep restricts down from. *)
 Lemma additive_allbut_indep (rs : RandomizedSharing) (k : 'I_T) :
   P |= rsh_view rs (~: [set k]) _|_ rsh_secret rs.
 Proof.
@@ -141,9 +140,12 @@ case: (eqVneq k ord_max) => [Hk|Hk].
   rewrite Hview; exact: (inde_RV_comp g idfun Hpair).
 Qed.
 
-(** additive_view_indep — any coalition of fewer than T shares learns nothing
-    about the secret.
-    @main security: a sub-threshold coalition view is independent of the secret. *)
+(** additive_view_indep — any coalition of fewer than T shares learns
+    nothing about the secret: a sub-threshold coalition's view is exactly
+    independent of the secret, not merely close to independent. The file's
+    secrecy guarantee for the T-of-T additive scheme, obtained by
+    restricting additive_allbut_indep's maximal-coalition case down to an
+    arbitrary sub-threshold C. *)
 Lemma additive_view_indep (rs : RandomizedSharing) (C : {set 'I_T}) :
   (#|C| < T)%N -> P |= rsh_view rs C _|_ rsh_secret rs.
 Proof.
@@ -165,8 +167,11 @@ have Hview : rsh_view rs C = restrict `o rsh_view rs [set~ k].
 rewrite Hview; exact: (inde_RV_comp restrict idfun (additive_allbut_indep rs k)).
 Qed.
 
-(** additive_leakage — the leakage witness packaging a sub-threshold view.
-    @composes: mechanism_leakage *)
+(** additive_leakage — the LeakageWitness packaging a sub-threshold
+    coalition's view for the T-of-T additive scheme, independence
+    witnessed by additive_view_indep. The instance the generic
+    mechanism_leakage dispatch (pgg_sharing_mechanism.v) selects when the
+    concrete mechanism is additive sharing. *)
 Definition additive_leakage (rs : RandomizedSharing) (C : {set 'I_T})
     (HC : (#|C| < T)%N) : LeakageWitness P :=
   @MkLeakageWitness _ _ P _ _ (rsh_secret rs) (rsh_view rs C)

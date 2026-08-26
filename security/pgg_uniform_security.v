@@ -55,10 +55,12 @@ Hypothesis Hn : #|A| = n.+1.
 Let HsetT : (0 < #|[set: A]|)%N.
 Proof. by rewrite cardsT Hn. Qed.
 
-(** fdist_uniform_supp_setT — fdist_uniform_supp over the universal set collapses to fdist_uniform.
-    Kind: helper.
-    Why: bridges the support-based uniform construction and the cardinal-based one, so downstream lemmas can move freely between the two representations.
-    Used by: eval_pushforward_uniform. *)
+(* fdist_uniform_supp over the universal set [set: A] equals the
+   cardinal-indexed fdist_uniform Hn.  Bridges the support-restricted
+   uniform construction, needed while rhoG's support is a proper subset,
+   and the plain cardinal-indexed uniform that is the endpoint bound's
+   target, once transitivity (img_setT) shows the support has become
+   everything. *)
 Lemma fdist_uniform_supp_setT :
   @fdist_uniform_supp R A [set: A] HsetT = fdist_uniform Hn.
 Proof.
@@ -78,10 +80,9 @@ Section var_dist_self.
 Context {R : realType}.
 Variable A : finType.
 
-(** var_dist_self — variation distance of any distribution to itself is zero.
-    Kind: helper.
-    Why: base identity that lets the uniform-security witness discharge its endpoint bound with the trivial epsilon = 0.
-    Used by: endpoint_bound, endpoint_exact. *)
+(* var_dist P P = 0 for any distribution P.  The trivial identity that
+   turns eval_pushforward_uniform's exact equality of the pushforward and
+   fdist_uniform into the file's epsilon = 0 security bound. *)
 Lemma var_dist_self (P : R.-fdist A) : var_dist P P = 0.
 Proof.
 rewrite /var_dist (eq_bigr (fun _ => 0)); last by move=> a _; rewrite subrr normr0.
@@ -129,10 +130,10 @@ Let eval_at (s : 'I_N) : {perm 'I_N} -> 'I_N :=
 (* The image of rhoG under eval_at s *)
 Let img (s : 'I_N) := (eval_at s) @: rhoG.
 
-(** img_pos — the endpoint image of rhoG at any sheet s is non-empty.
-    Kind: helper.
-    Why: positivity of the image cardinality is required to build the support-indexed uniform distribution used as the pushforward target.
-    Used by: eval_pushforward, eval_pushforward_uniform. *)
+(* img s, the endpoint image of rhoG at sheet s, is non-empty, since
+   rhoG itself is non-empty (HrhoG_pos).  Housekeeping needed only to
+   construct fdist_uniform_supp on img s in eval_pushforward; img_setT
+   below is the fact that actually pins down img s. *)
 Lemma img_pos (s : 'I_N) : (0 < #|img s|)%N.
 Proof.
 rewrite card_gt0; apply/set0Pn.
@@ -178,12 +179,14 @@ Lemma endpoint_exact (s : 'I_N) :
            (fdist_uniform (card_ord N)) = 0.
 Proof. by rewrite eval_pushforward_uniform var_dist_self. Qed.
 
-(** uniform_security_witness — the certificate bundle of exact uniform
-    dealing.
-    @intent: the bundle with epsilon = 0 and the exact equality attached;
-    L is recorded so callers can label the round count, while the bound and
-    exact-equality proofs are independent of L because uniform dealing
-    produces the same distribution at every length. *)
+(* The certificate bundle for uniform dealing over a regular group
+   action: marginal bound at epsilon = 0 (endpoint_bound) with the exact
+   equality var_dist = 0 attached (endpoint_exact via MkSecurityExact),
+   no asymptotic slot.  L is carried only as the caller's round-count
+   label; the bound and exact-equality proofs never use it, because a
+   regular action's uniform dealing produces the exact uniform endpoint
+   distribution at every word length.  The file's single result: an
+   exact, not merely asymptotic, security witness. *)
 Definition uniform_security_witness (L : nat) : ShuffleCertificateBundle R M :=
   @MkShuffleCertificateBundle R M
     (@MkShuffleMarginalBound R M L (0 : R) rho_uniform endpoint_bound)

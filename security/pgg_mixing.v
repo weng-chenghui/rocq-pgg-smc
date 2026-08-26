@@ -150,37 +150,29 @@ Variable N : nat.
 (* <v, w> = v^T * w, read off as a scalar *)
 Definition cV_inner (v w : 'cV[R]_N) : R := (v^T *m w) ord0 ord0.
 
-(** cV_innerE — column-vector inner product expressed as a sum over coordinates.
-    Kind: helper.
-    Why: turns the matrix-product definition of cV_inner into a sum, enabling pointwise reasoning.
-    Used by: cV_inner_sym, cV_inner_ge0, cV_inner_self_sum.
-*)
+(** cV_innerE — the column-vector inner product cV_inner v w, defined as
+    the matrix product v^T w, equals the coordinatewise sum
+    sum_i v_i w_i. *)
 Lemma cV_innerE (v w : 'cV[R]_N) :
   cV_inner v w = \sum_i v i ord0 * w i ord0.
 Proof. by rewrite /cV_inner mxE; apply: eq_bigr => i _; rewrite mxE. Qed.
 
-(** cV_inner_sym — column-vector inner product is symmetric.
-    Kind: helper.
-    Used by: downstream norm manipulations where commutativity is invoked.
-*)
+(** cV_inner_sym — the column-vector inner product is symmetric:
+    cV_inner v w = cV_inner w v. *)
 Lemma cV_inner_sym (v w : 'cV[R]_N) : cV_inner v w = cV_inner w v.
 Proof.
 rewrite !cV_innerE.
 by apply: eq_bigr => i _; rewrite mulrC.
 Qed.
 
-(** cV_inner_ge0 — self inner product is non-negative.
-    Kind: helper.
-    Used by: Cauchy--Schwarz and spectral bounds in this file.
-*)
+(** cV_inner_ge0 — a vector's inner product with itself is non-negative:
+    cV_inner v v is a squared-norm quantity. *)
 Lemma cV_inner_ge0 (v : 'cV[R]_N) : 0 <= cV_inner v v.
 Proof. rewrite cV_innerE; apply: sumr_ge0 => i _; rewrite -expr2; exact: sqr_ge0. Qed.
 
-(** cV_inner_self_sum — self inner product equals the sum of squared coordinates.
-    Kind: helper.
-    Why: expresses ||v||^2 as a plain coordinate sum, needed to compare against vec_norm2.
-    Used by: vec_norm2 identities and norm-squared bound derivations.
-*)
+(** cV_inner_self_sum — cV_inner v v equals the sum of squared coordinates
+    sum_i v_i^2, the coordinate-sum form of ||v||^2 that vec_norm2 and its
+    bound derivations compare against. *)
 Lemma cV_inner_self_sum (v : 'cV[R]_N) :
   cV_inner v v = \sum_i (v i ord0) ^+ 2.
 Proof. by rewrite cV_innerE; apply: eq_bigr => i _; rewrite expr2. Qed.
@@ -193,11 +185,10 @@ rewrite /cV_inner trmx_mul.
 by rewrite !mulmxA.
 Qed.
 
-(** cV_inner_Qv_Qv_symm — for symmetric Q, ||Qv||^2 equals v^T Q^2 v.
-    Kind: helper.
-    Why: exploits Q^T = Q to collapse Q^T Q to Q^2 in the quadratic form, used in spectral bound derivations.
-    Used by: symm_ds_step_norm_sq_bound and other symmetric-Q bounds.
-*)
+(** cV_inner_Qv_Qv_symm — for symmetric Q (Q^T = Q), ||Qv||^2 = v^T Q^2 v:
+    this is the correct quadratic form because ||Qv||^2 = v^T Q^T Q v
+    collapses to v^T Q^2 v only under symmetry, not from a bound on
+    <v, Qv> alone. *)
 Lemma cV_inner_Qv_Qv_symm (Q : 'M[R]_N) (v : 'cV[R]_N) :
   Q^T = Q ->
   cV_inner (Q *m v) (Q *m v) = (v^T *m (Q *m Q) *m v) ord0 ord0.
@@ -247,13 +238,11 @@ Hypothesis rayleigh_Qsq :
 
 Hypothesis Q_symm : Q^T = Q.
 
-(** symm_ds_step_norm_sq_bound — one-step Rayleigh bound: <Qv,Qv> <= alpha^2 <v,v> on the 1-perp subspace.
-    Kind: helper.
-    Why: single-step spectral contraction on the mean-zero subspace used to seed the iterated bound.
-    Used by: symm_ds_power_norm_sq_bound.
-    Naming: five components capture subject (symm_ds) / granularity (step) / quantity (norm_sq) / direction (bound); shorter names conflict with the iterated variant below.
-    Step 1: <Q v, Q v> <= alpha^2 * <v, v> for v in 1-perp.
-*)
+(** symm_ds_step_norm_sq_bound — one application of Q contracts the squared
+    norm on the mean-zero subspace by at most alpha^2:
+    <Qv, Qv> <= alpha^2 <v, v> whenever sum_i v_i = 0, the Rayleigh
+    hypothesis restated via cV_inner_Qv_Qv_symm. The base case the L-step
+    iterated bound below builds on. *)
 Lemma symm_ds_step_norm_sq_bound (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
   cV_inner (Q *m v) (Q *m v) <= alpha ^+ 2 * cV_inner v v.
@@ -263,13 +252,11 @@ rewrite cV_inner_Qv_Qv_symm //.
 exact: rayleigh_Qsq.
 Qed.
 
-(** symm_ds_power_norm_sq_bound — iterated Rayleigh bound: <Q^L v, Q^L v> <= alpha^{2L} <v,v> on 1-perp.
-    Kind: helper.
-    Why: the L-iterated spectral contraction; follows symm_ds_step_norm_sq_bound by induction on L.
-    Used by: symm_ds_power_norm2_bound and symm_ds_TV_bound_cV.
-    Naming: parallels symm_ds_step_norm_sq_bound; the power variant is explicitly tagged.
-    Iterated power: <Q^L v, Q^L v> <= alpha^{2L} * <v, v> for v in 1-perp.
-*)
+(** symm_ds_power_norm_sq_bound — L applications of Q contract the squared
+    norm on the mean-zero subspace by at most alpha^{2L}:
+    <Q^L v, Q^L v> <= alpha^{2L} <v, v> whenever sum_i v_i = 0. Each of the
+    L walk steps costs one factor of alpha^2, unconditional on any
+    assumption beyond the Rayleigh hypothesis on Q^2. *)
 Lemma symm_ds_power_norm_sq_bound (L : nat) (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
   cV_inner (Q ^+ L *m v) (Q ^+ L *m v) <= alpha ^+ (2 * L) * cV_inner v v.
@@ -359,11 +346,9 @@ Qed.
 (* The point mass e_s. *)
 Definition e_cV (s : 'I_N) : 'cV[R]_N := \col_i (i == s)%:R.
 
-(** e_cV_sum — coordinates of a point-mass column vector sum to 1.
-    Kind: helper.
-    Why: records that the indicator column e_s is a probability vector.
-    Used by: symm_ds_TV_bound_cV, where the mean-zero witness is e_s - U.
-*)
+(** e_cV_sum — the coordinates of the point-mass column e_s sum to 1: e_s
+    is a probability vector, the coalition's starting-sheet distribution
+    before any mixing step. *)
 Lemma e_cV_sum (s : 'I_N) : \sum_i (e_cV s) i ord0 = 1.
 Proof.
 rewrite /e_cV.
@@ -371,11 +356,9 @@ under eq_bigr do rewrite mxE.
 by rewrite (bigD1 s)//= eqxx big1 ?addr0// => j /negPf->.
 Qed.
 
-(** uniform_cV_sum — coordinates of the uniform column vector sum to 1.
-    Kind: helper.
-    Why: records that the uniform column is itself a probability vector.
-    Used by: mean-zero witnessing for e_s - U in the Rayleigh bound pipeline.
-*)
+(** uniform_cV_sum — the coordinates of the uniform column vector sum to 1:
+    uniform_cV is itself a probability vector, the target this file
+    measures mixing distance against. *)
 Lemma uniform_cV_sum : \sum_i uniform_cV i ord0 = 1.
 Proof.
 rewrite /uniform_cV.
@@ -421,11 +404,9 @@ rewrite addr0 /= mul1r mulr2n.
 by rewrite -addrA -[_ - _ + _]addrA addNr addr0.
 Qed.
 
-(** es_minus_U_norm_sq_le1 — ||e_s - U||^2 is at most 1.
-    Kind: helper.
-    Why: bounds the norm of the point-mass mean-zero witness used in the spectral-to-TV conversion.
-    Used by: symm_ds_TV_bound_cV.
-*)
+(** es_minus_U_norm_sq_le1 — the mean-zero witness e_s - U has squared norm
+    1 - 1/N, so in particular at most 1: the starting slack the spectral
+    contraction alpha^L multiplies down in the final TV bound. *)
 Lemma es_minus_U_norm_sq_le1 (s : 'I_N) :
   cV_inner (e_cV s - uniform_cV) (e_cV s - uniform_cV) <= 1.
 Proof.
@@ -436,21 +417,15 @@ Qed.
 (* The L^2 norm of a column vector. *)
 Definition vec_norm2 (v : 'cV[R]_N) : R := Num.sqrt (cV_inner v v).
 
-(** vec_norm2_ge0 — the L^2 norm is non-negative.
-    Kind: helper.
-    Why: sanitises sqrt-based norms for downstream algebraic manipulations.
-    Used by: symm_ds_power_norm2_bound and sqrt-based spectral derivations.
-*)
+(** vec_norm2_ge0 — the L^2 norm vec_norm2 v is non-negative, as any
+    Euclidean norm must be. *)
 Lemma vec_norm2_ge0 (v : 'cV[R]_N) : 0 <= vec_norm2 v.
 Proof. exact: sqrtr_ge0. Qed.
 
-(** symm_ds_power_norm2_bound — ||Q^L v|| <= alpha^L ||v|| on the 1-perp subspace.
-    Kind: helper.
-    Why: the sqrt form of symm_ds_power_norm_sq_bound, directly usable in Cauchy--Schwarz arguments.
-    Used by: symm_ds_TV_bound_cV.
-    Naming: five components match the sibling symm_ds_power_norm_sq_bound; "norm2" disambiguates from "norm_sq".
-    Task 1: sqrt of the power norm bound.
-*)
+(** symm_ds_power_norm2_bound — the square root of
+    symm_ds_power_norm_sq_bound: ||Q^L v|| <= alpha^L ||v|| whenever
+    sum_i v_i = 0, the L2-norm form the L1-to-L2 bridge composes with to
+    reach the total-variation bound. *)
 Lemma symm_ds_power_norm2_bound (L : nat) (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
   vec_norm2 (Q ^+ L *m v) <= alpha ^+ L * vec_norm2 v.
@@ -518,12 +493,17 @@ apply: ler_wsqrtr.
 exact: es_minus_U_norm_sq_le1.
 Qed.
 
-(* Task 2 (column-vector form): the main TV bound, in vector form.
-   Combines L1-to-L2 bridge, the sqrt'd power bound, and ||e_s - U||_2 <= 1. *)
+(* The mixing bound in raw column-vector form: the L1 distance between the
+   Q^L-iterated point mass at s and the uniform column is at most
+   sqrt(N) * alpha^L. The fdist-level statement (symm_ds_TV_bound, Section
+   7) is this same bound read through fdistmap and var_dist. *)
 Lemma symm_ds_TV_bound_cV (L : nat) (s : 'I_N) :
   \sum_a `|(Q ^+ L *m e_cV s) a ord0 - uniform_cV a ord0|
   <= Num.sqrt (#|'I_N|%:R) * alpha ^+ L.
 Proof.
+(* Chains the L1-to-L2 bridge (cV_l1_le_sqrtN_norm2), the sqrt'd spectral
+   power bound (symm_ds_power_norm2_bound), and ||e_s - U||_2 <= 1
+   (es_minus_U_norm2_le1). *)
 have HQU : Q ^+ L *m uniform_cV = uniform_cV by exact: Q_power_fixes_uniform.
 set w := Q ^+ L *m (e_cV s - uniform_cV).
 have Hw_eq : w = Q ^+ L *m e_cV s - uniform_cV.
@@ -569,7 +549,10 @@ Variable sigmas : Tg.-tuple {perm 'I_N}.
 Hypothesis sigmas_invol :
   forall k : 'I_Tg, (tnth sigmas k * tnth sigmas k)%g = 1%g.
 
-(* Task 3: under self-inverse generators, the Schreier transition is symmetric. *)
+(* Under self-inverse generators, the Schreier transition matrix is
+   symmetric: the random walk it drives treats forward and backward steps
+   alike, one of the structural hypotheses the doubly-stochastic mixing
+   bound needs. *)
 Lemma schreier_transition_symm :
   (schreier_transition R sigmas)^T = schreier_transition R sigmas.
 Proof.
@@ -592,13 +575,11 @@ apply: eq_card => k; rewrite !inE.
 exact: Heq.
 Qed.
 
-(** schreier_transition_doubly_stochastic_col — column sums of the Schreier transition matrix equal 1.
-    Kind: helper.
-    Why: combined with the row-sum version this yields double stochasticity, required for the symmetric spectral argument.
-    Used by: symm_ds_TV_bound.
-    Naming: five components capture subject (schreier_transition) / property (doubly_stochastic) / axis (col); renaming would lose parallel structure with the row variant.
-    Task 4: column sum equals 1, completing doubly stochastic.
-*)
+(** schreier_transition_doubly_stochastic_col — every column of the
+    Schreier transition matrix sums to 1: with the row-sum version
+    (schreier_transition_stochastic) this makes the matrix doubly
+    stochastic, the structural hypothesis the symmetric spectral mixing
+    bound requires. *)
 Lemma schreier_transition_doubly_stochastic_col (j : 'I_N) :
   \sum_i schreier_transition R sigmas i j = 1.
 Proof.
@@ -615,7 +596,11 @@ transitivity (\sum_i schreier_transition R sigmas j i).
 exact: schreier_transition_stochastic.
 Qed.
 
-(* Task 5: bridge from fdistmap-of-rho to the (Q^L *m e_s) column entry. *)
+(* The coalition's endpoint marginal probability at sheet s (from
+   fdistmap ... rho_from_words, the probabilistic picture) equals the
+   (a, ord0) entry of the L-step Schreier transition matrix applied to the
+   point mass at s (Q^L *m e_s, the linear-algebra picture this file's
+   spectral TV bound operates in): the bridge between the two. *)
 Lemma schreier_endpoint_eq_Q_power (L : nat) (s a : 'I_N) :
   fdistmap (fun sigma : {perm 'I_N} => sigma s) (rho_from_words L sigmas) a
   = ((schreier_transition R sigmas) ^+ L *m \col_i (i == s)%:R) a ord0.
@@ -646,9 +631,9 @@ End schreier_bridges.
 (******************************************************************************)
 (*     Section 7: Schreier-form total-variation bound                         *)
 (*                                                                            *)
-(* Task 2 (final form): combines the column-vector TV bound, the bridge       *)
-(* lemmas of Section 6, and the Rayleigh hypothesis on Q^2 to deliver the     *)
-(* exact shape of `SchreierCertificate.sc_convergence`.                       *)
+(* Combines the column-vector TV bound, the bridge lemmas of Section 6, and  *)
+(* the Rayleigh hypothesis on Q^2 to deliver the exact shape of              *)
+(* `SchreierCertificate.sc_convergence`.                                     *)
 (******************************************************************************)
 
 Section schreier_TV_bound.
@@ -661,10 +646,14 @@ Variable sigmas : Tg.-tuple {perm 'I_N}.
 Hypothesis sigmas_invol :
   forall k : 'I_Tg, (tnth sigmas k * tnth sigmas k)%g = 1%g.
 
-(** symm_ds_TV_bound — TV bound between iterated Schreier transition from e_s and uniform, in terms of the spectral constant alpha.
-    Kind: main.
-    Why: headline spectral-mixing result for the symmetric doubly-stochastic transition kernel.
-*)
+(** symm_ds_TV_bound — conditional on the Rayleigh hypothesis on Q^2
+    holding with spectral bound alpha, the coalition's endpoint marginal
+    after L Schreier-walk steps from starting sheet s is within
+    sqrt(N) * alpha^L of the fully uniform distribution. The spectral gap
+    alpha drives the endpoint toward uniform exponentially in L, with the
+    sqrt(N) prefactor coming from the L1-to-L2 bridge rather than the
+    sqrt(|G|) blowup a group-level DPI bound would incur
+    (pgg_collusion_bound.v Section 2). *)
 Lemma symm_ds_TV_bound (alpha : R) (L : nat) (s : 'I_N) :
   0 <= alpha ->
   alpha <= 1 ->

@@ -18,9 +18,13 @@ Variables (R : realType) (U : finType) (P : R.-fdist U).
 Variables (sT1 vT1 sT2 vT2 : finType).
 Variables (S1 : {RV P -> sT1}) (V1 : {RV P -> vT1}) (S2 : {RV P -> sT2}) (V2 : {RV P -> vT2}).
 
-(** joint_view_indep — combined view independent of combined secret, from per-component
-    independence and cross-component independence.
-    @composes: leakage_product *)
+(** joint_view_indep — if each component's view is independent of its own
+    secret, and the two (view, secret) pairs are independent of each other
+    across components, then the paired view [% V1, V2] is independent of
+    the paired secret [% S1, S2]. The AND-composition rule for coalition
+    secrecy: a coalition seeing both components' views learns nothing about
+    the joint secret beyond what it already fails to learn from each
+    component separately. *)
 Lemma joint_view_indep :
   P |= V1 _|_ S1 -> P |= V2 _|_ S2 -> P |= [% V1, S1] _|_ [% V2, S2] ->
   P |= [% V1, V2] _|_ [% S1, S2].
@@ -43,8 +47,12 @@ End joint.
 Section product.
 Variables (R : realType) (A B : finType) (P1 : R.-fdist A) (P2 : R.-fdist B).
 
-(** inde_RV_fst_snd — over a product distribution a function of the first coordinate is
-    independent of a function of the second.  @composes: leakage_product *)
+(** inde_RV_fst_snd — reading a product distribution through any function of
+    the first coordinate is independent of reading it through any function
+    of the second: independence of the product's two factors survives
+    arbitrary post-processing on each side. The unconditional cross-component
+    term joint_view_indep needs when composing two coalition-secrecy
+    witnesses over a product distribution. *)
 Lemma inde_RV_fst_snd (TB1 TB2 : finType) (f : A -> TB1) (g : B -> TB2) :
   (P1 `x P2) |= ((fun ab => f ab.1) : {RV (P1 `x P2) -> TB1})
             _|_ ((fun ab => g ab.2) : {RV (P1 `x P2) -> TB2}).
@@ -62,7 +70,10 @@ apply/setP => -[a b]; rewrite !inE /= xpair_eqE /=.
 by [].
 Qed.
 
-(** inde_RV_fst — independence transports along the first projection.  @composes: leakage_product *)
+(** inde_RV_fst — two P1-independent random variables stay independent when
+    read through the first projection of a product distribution: the
+    second factor contributes no correlation. Transports the first
+    component's own coalition-secrecy witness up to the product. *)
 Lemma inde_RV_fst (TB1 TB2 : finType) (X : {RV P1 -> TB1}) (Y : {RV P1 -> TB2}) :
   P1 |= X _|_ Y ->
   (P1 `x P2) |= ((fun ab => X ab.1) : {RV (P1 `x P2) -> TB1})
@@ -81,7 +92,10 @@ rewrite (Pr_fst _ X x) (Pr_fst _ Y y) (Pr_fst _ [% X, Y] (x, y)).
 by move: (H x y); rewrite /inde_RV !pfwd1E.
 Qed.
 
-(** inde_RV_snd — independence transports along the second projection.  @composes: leakage_product *)
+(** inde_RV_snd — two P2-independent random variables stay independent when
+    read through the second projection of a product distribution: the
+    first factor contributes no correlation. Transports the second
+    component's own coalition-secrecy witness up to the product. *)
 Lemma inde_RV_snd (TB1 TB2 : finType) (X : {RV P2 -> TB1}) (Y : {RV P2 -> TB2}) :
   P2 |= X _|_ Y ->
   (P1 `x P2) |= ((fun ab => X ab.2) : {RV (P1 `x P2) -> TB1})
@@ -100,10 +114,12 @@ rewrite (Pr_snd _ X x) (Pr_snd _ Y y) (Pr_snd _ [% X, Y] (x, y)).
 by move: (H x y); rewrite /inde_RV !pfwd1E.
 Qed.
 
-(** leakage_product — the joint LeakageWitness of two independent components on the two
-    factors of a product distribution.
-    @intent: combined secret [%s1,s2] and combined view [%v1,v2] over P1 `x P2, independent
-    by joint_view_indep. *)
+(** leakage_product — the joint LeakageWitness of two independent
+    components: the combined secret [% s1, s2] paired with the combined
+    view [% v1, v2] over P1 `x P2, independent by joint_view_indep. The
+    composition rule that assembles a coalition-secrecy witness for a
+    system built from two independent sub-protocols out of witnesses for
+    the two parts separately, with no extra correlation term. *)
 Definition leakage_product (lw1 : LeakageWitness P1) (lw2 : LeakageWitness P2)
     : LeakageWitness (P1 `x P2) :=
   let: MkLeakageWitness sT1 vT1 s1 v1 i1 := lw1 in

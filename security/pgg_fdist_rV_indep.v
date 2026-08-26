@@ -15,17 +15,16 @@ Variable R : realType.
 Variable A : finType.
 Variable P0 : R.-fdist A.
 
-(** fdist_perm_rV — @composes: inde_RV_nth_rV:
-    the iid product distribution is invariant under any coordinate permutation. *)
+(** fdist_perm_rV — the iid product distribution is invariant under any
+    coordinate permutation. *)
 Lemma fdist_perm_rV n (s : {perm 'I_n}) : fdist_perm (P0 `^ n) s = P0 `^ n.
 Proof.
 apply/fdist_ext => v. rewrite fdist_permE !fdist_rVE.
 under eq_bigr do rewrite mxE. by rewrite [RHS](reindex_perm s).
 Qed.
 
-(** inde_RV_head_rV — @composes: inde_RV_nth_rV:
-    the head coordinate is independent of the tail vector under any
-    post-processing of either side. *)
+(** inde_RV_head_rV — the head coordinate is independent of the tail vector
+    under any post-processing of either side. *)
 Lemma inde_RV_head_rV n (TB1 TB2 : finType) (g1 : A -> TB1) (g2 : 'rV[A]_n -> TB2) :
   (P0 `^ n.+1) |= ((fun v : 'rV_n.+1 => g1 (v ord0 ord0)) : {RV (P0 `^ n.+1) -> TB1})
               _|_ ((fun v : 'rV_n.+1 => g2 (rbehead v)) : {RV (P0 `^ n.+1) -> TB2}).
@@ -50,9 +49,8 @@ rewrite (_ : setX (finset (preim g1 (pred1 x))) (finset (preim g2 (pred1 y)))
 by rewrite Pr_fdist_prod.
 Qed.
 
-(** inde_RV_col_perm — @composes: inde_RV_nth_rV:
-    independence of two coordinate functionals is preserved by precomposing
-    both with the same coordinate permutation. *)
+(** inde_RV_col_perm — independence of two coordinate functionals is
+    preserved by precomposing both with the same coordinate permutation. *)
 Lemma inde_RV_col_perm n (TB1 TB2 : finType)
     (B1 : {RV (P0 `^ n) -> TB1}) (B2 : {RV (P0 `^ n) -> TB2}) (s : {perm 'I_n}) :
   (P0 `^ n) |= B1 _|_ B2 ->
@@ -82,8 +80,8 @@ Variable R : realType.
 Variable A : finType.
 Variable P0 : R.-fdist A.
 
-(** inde_RV_nth_rV — @main architecture: coordinate independence of the iid product:
-    any single coordinate of the iid product distribution is independent of any
+(** inde_RV_nth_rV — coordinate independence of the iid product: any single
+    coordinate of the iid product distribution is independent of any
     post-processing of the remaining coordinates. *)
 Lemma inde_RV_nth_rV n (TB : finType) (i : 'I_n.+1) (g : 'rV[A]_n -> TB) :
   (P0 `^ n.+1) |= ((fun v : 'rV_n.+1 => v ord0 i) : {RV (P0 `^ n.+1) -> A})
@@ -102,9 +100,8 @@ Qed.
 
 End iid_nth_independence.
 
-(** fdist_nth_unif — @composes: inde_RV_nth_rV:
-    every coordinate marginal of an iid product of a uniform distribution
-    is itself that uniform distribution. *)
+(** fdist_nth_unif — every coordinate marginal of an iid product of a
+    uniform distribution is itself that uniform distribution. *)
 Lemma fdist_nth_unif (R : realType) (A0 : finType) n m (cardA : #|A0| = m.+1) (i : 'I_n) :
   fdist_nth ((@fdist_uniform R _ _ cardA) `^ n) i = fdist_uniform cardA.
 Proof.

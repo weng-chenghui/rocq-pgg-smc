@@ -302,11 +302,9 @@ Record SchreierCertificate := MkSchreierCertificate {
 Definition convergence_rate (sc : SchreierCertificate) : R :=
   1 - sc_lambda_gap sc.
 
-(** convergence_rate_ge0 — the Schreier convergence rate is non-negative.
-    Kind: helper.
-    Why: needed to use convergence_rate as a well-typed probability-like quantity.
-    Used by: security_witness_schreier and asymptotic bound clients.
-*)
+(* The convergence rate 1 - sc_lambda_gap is non-negative, since the
+   spectral gap is at most 1.  This makes it a legitimate decay factor in
+   the geometric bound schreier_epsilon = sqrt(N) * rate^L. *)
 Lemma convergence_rate_ge0 (sc : SchreierCertificate) :
   0 <= convergence_rate sc.
 Proof.
@@ -314,11 +312,9 @@ rewrite /convergence_rate subr_ge0.
 exact: (sc_lambda_le1 sc).
 Qed.
 
-(** convergence_rate_lt1 — the Schreier convergence rate is strictly less than 1.
-    Kind: helper.
-    Why: strict bound required to conclude that repeated application contracts strictly.
-    Used by: security_witness_schreier asymptotic exponential-decay arguments.
-*)
+(* The convergence rate is strictly below 1, since the spectral gap is
+   strictly positive.  Strictness is what makes schreier_epsilon decay
+   geometrically to 0 as L grows, rather than merely stay bounded. *)
 Lemma convergence_rate_lt1 (sc : SchreierCertificate) :
   convergence_rate sc < 1.
 Proof.
@@ -326,11 +322,10 @@ rewrite /convergence_rate ltrBlDr addrC -ltrBlDr subrr.
 exact: (sc_lambda_pos sc).
 Qed.
 
-(* ShuffleCertificateBundle from a Schreier certificate at any L.
-   NOTE: weval_inj IS needed here -- it is required by the marginal bound
-   (to ensure rho_from_words is a valid distribution over achievable
-   permutations). The Schreier spectral bound itself doesn't need it,
-   but the downstream bundle construction does. *)
+(* The certificate's L-free bound repackaged as a SecurityAsymptotic with
+   eps_inf = 0: sa_convergence is exactly sc_convergence sc, since the
+   Schreier walk's spectral bound already holds unconditionally for every L
+   and needs no weval_inj hypothesis. *)
 Definition security_witness_schreier_asymptotic (sc : SchreierCertificate)
   : @SecurityAsymptotic R M.
 Proof.
@@ -344,12 +339,14 @@ rewrite add0r.
 exact: sc_convergence.
 Defined.
 
-(** security_witness_schreier — the certificate bundle at word length L of a
-    Schreier spectral certificate.
-    Kind: main.
-    Why: packages the spectral convergence bound together with the word
-    distribution, attaching the asymptotic certificate to the bundle.
-*)
+(* The PGG certificate bundle at word length L: the marginal bound
+   sw_bound_eps = sqrt(N) * (1 - sc_lambda_gap sc)^L against
+   rho_from_words L sigmas, with the certificate's L-free asymptotic bound
+   attached as the optional convergence witness.  Hlfree, weval_inj at L,
+   is required of the caller: the spectral bound sc_convergence itself does
+   not need it, but the bundle is valid PGG security evidence only once
+   rho_from_words L sigmas is known to range over achievable permutations
+   without collision. *)
 Definition security_witness_schreier (sc : SchreierCertificate)
     (L : nat) (Hlfree : @weval_inj M L) : ShuffleCertificateBundle R M :=
   @MkShuffleCertificateBundle R M
@@ -446,11 +443,10 @@ Variable sigmas : Tg.-tuple {perm 'I_N}.
 
 Local Notation M := (Gen_PGGTypes sigmas).
 
-(** word_eval_cons — evaluating a word with a prepended generator unfolds to the generator times the tail's word_eval.
-    Kind: helper.
-    Why: reduces cons-structured words to their recursive group-product form.
-    Used by: word_eval_cons_endpoint and schreier_walk_eq_endpoint.
-*)
+(* Evaluating a word with a prepended generator i is the group product of
+   that generator with the tail's word_eval: word_eval (i :: w) = sigma_i *
+   word_eval w.  Both word_eval_cons_endpoint and the inductive step of
+   schreier_walk_eq_endpoint peel words on this unfolding. *)
 Lemma word_eval_cons (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg) :
   @word_eval M L.+1 [tuple of i :: w] =
   (tnth sigmas i * @word_eval M L w)%g.
@@ -461,21 +457,24 @@ apply: eq_bigr => j _.
 by rewrite tnthS.
 Qed.
 
-(** word_eval_cons_endpoint — pointwise version of word_eval_cons at a fixed sheet s.
-    Kind: helper.
-    Why: expresses the cons-endpoint identity as a pointwise equation, directly usable in Schreier walks.
-    Used by: schreier_walk_eq_endpoint.
-*)
+(* At a fixed sheet s, word_eval_cons becomes a walk step: applying the
+   (L+1)-word i :: w to s equals applying the length-L tail w to
+   sigma_i(s).  This is the one-generator-per-step form
+   schreier_walk_eq_endpoint inducts on to match the matrix power against
+   the word distribution. *)
 Lemma word_eval_cons_endpoint (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg)
     (s : 'I_N) :
   @word_eval M L.+1 [tuple of i :: w] s =
   @word_eval M L w (tnth sigmas i s).
 Proof. by rewrite word_eval_cons permM. Qed.
 
-(** schreier_walk_eq_endpoint — L-step Schreier random walk distribution equals the endpoint pushforward of rho_from_words.
-    Kind: main.
-    Why: bridges the matrix-power view of the Schreier walk to the probabilistic endpoint distribution over words.
-*)
+(* The L-th power of the Schreier transition matrix at (s, x) equals the
+   probability, over a uniformly random length-L word w, that the endpoint
+   sigma_w(s) is x: (Q^L)(s, x) = fdistmap (sigma => sigma s)
+   (rho_from_words L sigmas) x.  The equality needs no weval_inj and holds
+   for every word length and choice of generators; it is what lets the
+   matrix-power spectral bound be restated as sc_convergence, the field of
+   SchreierCertificate stated in terms of rho_from_words. *)
 Lemma schreier_walk_eq_endpoint : forall (L : nat)
     (s x : 'I_N),
   (schreier_transition R sigmas ^+ L) s x =

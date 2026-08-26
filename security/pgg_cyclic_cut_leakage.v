@@ -24,9 +24,9 @@ Variable U : finType.
 Variable P : R.-fdist U.
 
 (** CyclicCutData — a card-family secret with a sub-threshold view that a
-    uniform cyclic cut renders independent of it.
-    @intent: the cyclic-cut analogue of RandomizedSharing; the secret and view
-    finTypes are fields so card instances (bool secret) inhabit it. *)
+    uniform cyclic cut renders independent of it: the cyclic-cut analogue
+    of RandomizedSharing, with the secret and view finTypes as fields so
+    card instances (bool secret) inhabit it. *)
 Record CyclicCutData := MkCyclicCutData {
   ccd_secretT : finType ;
   ccd_viewT   : finType ;
@@ -34,8 +34,7 @@ Record CyclicCutData := MkCyclicCutData {
   ccd_view    : {RV P -> ccd_viewT} ;
   ccd_indep   : P |= ccd_view _|_ ccd_secret }.
 
-(** cyclic_cut_leakage — the leakage witness carried by cyclic-cut data.
-    @composes: mechanism_leakage *)
+(** cyclic_cut_leakage — the leakage witness carried by cyclic-cut data. *)
 Definition cyclic_cut_leakage (cc : CyclicCutData) : LeakageWitness P :=
   let: MkCyclicCutData sT vT sec view ind := cc in
   @MkLeakageWitness _ _ P sT vT sec view ind.

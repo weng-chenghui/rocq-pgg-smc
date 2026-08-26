@@ -22,19 +22,22 @@ Local Open Scope entropy_scope.
 Section TraceTransport.
 Context {R : realType} {U : finType} {P : R.-fdist U}.
 
-(** inde_RV_comp — independence of a view from the secret is preserved by
-    deterministic post-processing of the view, reducing a coalition's structured
-    view to one player's single share.
-    @composes: trace_secrecy_of_view *)
+(* Deterministic post-processing preserves independence from the secret:
+   if view is independent of secret, so is f `o view for any f.  This is
+   what lets trace_secrecy_of_view reduce a coalition's structured view
+   to one player's recorded trace without breaking independence. *)
 Lemma inde_RV_comp (secretT viewT viewT' : finType)
     (secret : {RV P -> secretT}) (view : {RV P -> viewT}) (f : viewT -> viewT') :
   P |= view _|_ secret -> P |= (f `o view) _|_ secret.
 Proof. by move=> Hindep; exact: (proba.inde_RV_comp f idfun Hindep). Qed.
 
-(** trace_secrecy_of_view — a single player's executed trace, recorded in a
-    content finType determined by the player's view through a global cancel,
-    leaves the secret's conditional entropy equal to its plain entropy.
-    @main security: trace secrecy follows from view secrecy. *)
+(* If player_trace = trace_of `o view for a cancel-paired (trace_of,
+   view_of) and view is independent of secret, then the secret's entropy
+   conditioned on player_trace equals its unconditional entropy:
+   H(secret | player_trace) = H(secret).  Transports view secrecy, the
+   independence of the full coalition view from the secret, down to the
+   coarser single-player trace an actual protocol execution log
+   exposes. *)
 Lemma trace_secrecy_of_view (secretT viewT traceT : finType)
     (secret : {RV P -> secretT}) (view : {RV P -> viewT})
     (player_trace : {RV P -> traceT})
@@ -54,10 +57,13 @@ rewrite Htrace centropy_RV_contraction.
 exact: (proj2 (leakage_of_view_indep secret view Hindep)).
 Qed.
 
-(** trace_secrecy_of_witness — the per-instance entry point packaging the trace
-    transport for a LeakageWitness whose view has already been reduced to the
-    trace-content finType.
-    @composes: trace_secrecy_of_view *)
+(* Specializes trace_secrecy_of_view to a LeakageWitness lw: whenever
+   player_trace is a cancel-paired reduction of lw's own view, the
+   entropy of lw's secret conditioned on player_trace equals its
+   unconditional entropy.  The entry point per-instance files call,
+   since the independence hypothesis and the view and secret come
+   straight from lw via lw_indep; only the trace_of/view_of pair and its
+   cancel proof are supplied. *)
 Lemma trace_secrecy_of_witness (lw : LeakageWitness P) (traceT : finType)
     (player_trace : {RV P -> traceT})
     (trace_of : lw_viewT lw -> traceT) (view_of : traceT -> lw_viewT lw) :

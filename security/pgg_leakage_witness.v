@@ -24,10 +24,10 @@ Variable U : finType.
 Variable P : R.-fdist U.
 
 (** LeakageWitness — a secret random variable together with a view random
-    variable that is statistically independent of it.
-    @intent: the interface a sub-threshold coalition view satisfies; the secret
-    and view finTypes are packed as fields so additive ('Z_N secret) and card
-    (bool secret) instances inhabit the one type. *)
+    variable that is statistically independent of it: the interface a
+    sub-threshold coalition view satisfies, with the secret and view
+    finTypes packed as fields so additive ('Z_N secret) and card (bool
+    secret) instances inhabit the one type. *)
 Record LeakageWitness := MkLeakageWitness {
   lw_secretT : finType ;
   lw_viewT   : finType ;
@@ -35,9 +35,10 @@ Record LeakageWitness := MkLeakageWitness {
   lw_view    : {RV P -> lw_viewT} ;
   lw_indep   : P |= lw_view _|_ lw_secret }.
 
-(** leakage_of_view_indep — a view independent of the secret carries zero mutual
-    information with it and leaves the secret's entropy unchanged.
-    @main security: distributional secrecy of a sub-threshold view. *)
+(** leakage_of_view_indep — a view independent of the secret carries zero
+    mutual information with it and leaves the secret's entropy unchanged:
+    the distributional-secrecy guarantee a sub-threshold coalition view
+    must satisfy. *)
 Lemma leakage_of_view_indep (secretT viewT : finType)
     (Secret : {RV P -> secretT}) (view : {RV P -> viewT}) :
   P |= view _|_ Secret ->

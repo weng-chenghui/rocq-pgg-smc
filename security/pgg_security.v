@@ -22,9 +22,10 @@ Fixpoint isqrt_aux (fuel k n : nat) : nat :=
   | fuel'.+1 => if k.+1 ^ 2 <= n then isqrt_aux fuel' k.+1 n else k
   end.
 
-(** isqrt — integer square root: largest k with k^2 <= n.
-    Kind: canonical.
-*)
+(* The integer square root: the largest k with k^2 <= n, computed by a
+   linear scan.  Grover's algorithm over an M-element space costs
+   Theta(sqrt(M)) queries, so isqrt is the search-cost primitive
+   grover_search_cost and the mitigation theorem below are built on. *)
 Definition isqrt (n : nat) : nat := isqrt_aux n 0 n.
 
 (* --- auxiliary lemmas on isqrt_aux --- *)
@@ -36,11 +37,9 @@ elim: fuel k => [|fuel IH] k Hk //=.
 case: ifP => H; [exact: IH | exact: Hk].
 Qed.
 
-(** isqrt_aux_ge — the isqrt accumulator is monotone: the running k is always <= the returned value.
-    Kind: helper.
-    Why: invariant of the isqrt fuel-loop, used by isqrt_aux_largest and monotonicity proofs.
-    Used by: isqrt_aux_largest, isqrt_monotone.
-*)
+(* The isqrt fuel-loop only increases its running estimate: k <= isqrt_aux
+   fuel k n.  The base invariant isqrt_aux_largest and isqrt_monotone
+   build on. *)
 Lemma isqrt_aux_ge fuel k n : k <= isqrt_aux fuel k n.
 Proof.
 elim: fuel k => [|fuel IH] k //=.
@@ -48,11 +47,10 @@ case: ifP => _ //.
 apply: (leq_trans _ (IH k.+1)). exact: leqnSn.
 Qed.
 
-(** isqrt_aux_upper — under enough fuel, the isqrt accumulator is strictly above sqrt(n): n < (isqrt_aux ...).+1 ^ 2.
-    Kind: helper.
-    Why: packages the upper-bound invariant of the isqrt loop.
-    Used by: isqrt_upper.
-*)
+(* With enough fuel, k + fuel >= n, the isqrt loop overshoots by exactly
+   one step: n < (isqrt_aux fuel k n).+1 ^ 2.  Supplies the upper half of
+   isqrt's specification, isqrt_upper, pinning isqrt n between two
+   consecutive squares. *)
 Lemma isqrt_aux_upper fuel k n :
   k ^ 2 <= n -> k + fuel >= n ->
   n < (isqrt_aux fuel k n).+1 ^ 2.
@@ -65,11 +63,10 @@ elim: fuel k => [|fuel IH] k Hk Hfuel /=.
   + move/negbT: Hif. by rewrite -leqNgt.
 Qed.
 
-(** isqrt_aux_largest — isqrt_aux returns the largest m with m^2 <= n among eligible candidates.
-    Kind: helper.
-    Why: maximality invariant of the isqrt loop; used to prove isqrt_monotone and isqrt_expn.
-    Used by: isqrt_monotone, isqrt_expn.
-*)
+(* Among candidates m in [k, k + fuel] with m^2 <= n, isqrt_aux returns a
+   value at least m: it is the largest square root not exceeding n found
+   in that range.  This maximality is what turns isqrt into a genuine
+   largest-root function, used to prove isqrt_monotone and isqrt_expn. *)
 Lemma isqrt_aux_largest fuel k n m :
   k ^ 2 <= n -> m <= k + fuel -> k <= m -> m ^ 2 <= n ->
   m <= isqrt_aux fuel k n.
@@ -97,19 +94,15 @@ Qed.
 Lemma isqrt_lower n : isqrt n ^ 2 <= n.
 Proof. exact: isqrt_aux_lower. Qed.
 
-(** isqrt_upper — n < (isqrt n + 1)^2: isqrt never undershoots beyond the natural gap.
-    Kind: helper.
-    Why: the upper-bound specification of isqrt.
-    Used by: tight bounds on grover_search_cost.
-*)
+(* n < (isqrt n + 1)^2.  Paired with isqrt_lower (isqrt n ^ 2 <= n), this
+   pins isqrt n as the unique k with k^2 <= n < (k+1)^2, the exact
+   search-cost figure grover_mitigation composes. *)
 Lemma isqrt_upper n : n < (isqrt n).+1 ^ 2.
 Proof. apply: isqrt_aux_upper => //. Qed.
 
-(** isqrt_monotone — isqrt is monotone in its argument.
-    Kind: helper.
-    Why: standard monotonicity used in bounds composition.
-    Used by: grover_mitigation.
-*)
+(* isqrt is monotone: m <= n implies isqrt m <= isqrt n.  Used to transfer
+   the ball_size lower bound at word length 2L into a lower bound on the
+   Grover search cost isqrt (ball_size r (2 * L)) in grover_mitigation. *)
 Lemma isqrt_monotone m n : m <= n -> isqrt m <= isqrt n.
 Proof.
 move=> Hmn.
@@ -123,11 +116,10 @@ have Hle: isqrt m <= n.
 apply: (@isqrt_aux_largest n 0 n (isqrt m)) => //.
 Qed.
 
-(** isqrt_expn — k <= isqrt(k^2): isqrt recovers the exact root when applied to a perfect square.
-    Kind: helper.
-    Why: corrects for rounding on perfect squares; gives the tight inequality for Grover arguments.
-    Used by: grover_mitigation.
-*)
+(* k <= isqrt (k ^ 2): isqrt does not undershoot on perfect squares.
+   Applied at k = kappa^L, this turns the doubled-length identity
+   kappa^(2L) = (kappa^L)^2 into the Grover-security guarantee kappa^L <=
+   sqrt(ball_size r (2L)) proved by grover_mitigation. *)
 Lemma isqrt_expn k : k <= isqrt (k ^ 2).
 Proof.
 have Hk2: k <= k ^ 2.
@@ -146,11 +138,10 @@ Hypothesis Hr : 1 < r.
 
 Let kappa := r.*2 - 1.
 
-(** kappa_gt0 — the security base kappa = 2r - 1 is strictly positive for r > 1.
-    Kind: helper.
-    Why: standard positivity required for exponent manipulations in the Grover tradeoff.
-    Used by: grover_mitigation and security_exponential.
-*)
+(* kappa = 2r - 1 is strictly positive for r > 1.  kappa is the branching
+   factor of the free-group ball (free_group_ball.v) whose size
+   lower-bounds an adversary's exhaustive-search cost; positivity keeps
+   kappa^L, and so the security bound below, from degenerating. *)
 Lemma kappa_gt0 : 0 < kappa.
 Proof. rewrite /kappa; lia. Qed.
 
@@ -163,10 +154,12 @@ Proof. rewrite /kappa; lia. Qed.
 Lemma kappa_sq_L (L : nat) : kappa ^ (2 * L) = (kappa ^ L) ^ 2.
 Proof. by rewrite mulnC expnM. Qed.
 
-(** grover_mitigation — doubling word length L restores quadratic Grover security: kappa^L <= sqrt(ball_size(2L)).
-    Kind: main.
-    Why: headline quantum-mitigation theorem of this file; composes isqrt_monotone and ball_size_lower.
-*)
+(* Theorem 11 (Grover mitigation): kappa^L <= grover_search_cost
+   (ball_size r (2 * L)), i.e. the Grover-adversary query cost against a
+   word length doubled to 2L is at least kappa^L.  Grover's quadratic
+   speedup halves an exponent, so doubling the word length exactly
+   restores the kappa^L classical exhaustive-search cost that word length
+   L alone would give against a classical adversary. *)
 Theorem grover_mitigation (L : nat) :
   kappa ^ L <= grover_search_cost (ball_size r (2 * L)).
 Proof.

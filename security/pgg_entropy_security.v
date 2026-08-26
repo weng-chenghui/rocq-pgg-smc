@@ -158,11 +158,11 @@ Variable A : finType.
 Variable C : {set A}.
 Hypothesis HC : (0 < #|C|)%N.
 
-(** entropy_uniform_supp — Shannon entropy of a uniform-on-support distribution equals log |C|.
-    Kind: helper.
-    Why: provides the closed-form entropy value used by the entropy-gap security arguments.
-    Used by: entropy_fdistmap_uniform_supp and security_witness_from_entropy.
-*)
+(** entropy_uniform_supp — the Shannon entropy of the law uniform on a
+    support C of size |C| is exactly log |C|, the maximum entropy
+    achievable on a set of that size: the base case Section 2's
+    fiber-decomposition formula specializes to when every fiber has size
+    one. *)
 Lemma entropy_uniform_supp :
   `H (@fdist_uniform_supp R A C HC) = log #|C|%:R :> R.
 Proof.
@@ -196,11 +196,13 @@ Variable f : A -> B.
 Let img := f @: C.
 Let fiber_at (b : B) := [set a in C | f a == b].
 
-(** entropy_fdistmap_uniform_supp — entropy of pushforward-of-uniform-on-support expressed as log |C| minus a fiber-weighted correction.
-    Kind: helper.
-    Why: exposes the fiber-decomposition form of post-pushforward entropy needed for entropy-gap arguments.
-    Used by: var_dist_from_fiber_entropy and security_witness_from_entropy.
-*)
+(** entropy_fdistmap_uniform_supp — pushing the law uniform on a support C
+    forward through an arbitrary map f, the resulting entropy is log |C|
+    minus a fiber-weighted correction (1/|C|) sum_{y in img} c_y log c_y,
+    where c_y is the fiber size of y under f restricted to C. Unconditional
+    on f: it reduces to entropy_uniform_supp when f is injective (all
+    c_y = 1) and specializes, in Section 3, to the endpoint map to give
+    fiber_entropy_general's word-fiber entropy formula. *)
 Lemma entropy_fdistmap_uniform_supp :
   `H (fdistmap f (@fdist_uniform_supp R A C HC)) =
   log #|C|%:R -
@@ -320,16 +322,19 @@ by rewrite /img_s /fiber_s.
 Qed.
 
 (* When weval_inj AND perm_endpoint is injective on achievable(L):
-   H(P_s) = log(Tg^L).
-   Proof sketch: weval_inj -> rho_from_words = uniform_supp(achievable),
-   pe_inj -> pushforward is uniform_supp(image), H = log|image| = log(Tg^L).
-   Applies to: Cyclic (trivially), Abelian/Disjoint, Monster (axiom). *)
+   H(P_s) = log(Tg^L), the maximum entropy consistent with a search space
+   of that size. Applies to: Cyclic (trivially), Abelian/Disjoint, Monster
+   (axiom). *)
 Lemma fiber_entropy_injective (s : 'I_N)
     (Hlfree : @weval_inj M L)
     (Hinj_s : {in @achievable M L &,
                injective (fun sigma : {perm 'I_N} => sigma s)}) :
   fiber_entropy s = log (Tg ^ L)%:R.
 Proof.
+(* weval_inj gives rho_from_words = uniform_supp(achievable); pe_inj turns
+   the pushforward into uniform_supp(image); the entropy of a
+   uniform-on-image law is log of the image size, which
+   weval_inj_search_space computes as Tg^L. *)
 rewrite /fiber_entropy (rho_from_words_uniform_supp Hlfree).
 rewrite (fdistmap_uniform_supp_inj _ Hinj_s) entropy_uniform_supp.
 congr (log _%:R).
@@ -445,15 +450,12 @@ Let P_s (s : 'I_N) : R.-fdist 'I_N :=
   fdistmap (fun sigma : {perm 'I_N} => sigma s)
            (rho_from_words (R:=R) L sigmas).
 
-(* Pinsker bridge: entropy bound -> var_dist bound.
-   Combines fiber_entropy_gap (D = log N - H) with Pinsker's inequality
-   (var_dist <= sqrt(2*D)) to get var_dist <= sqrt(2*(log N - H)). *)
-(** var_dist_from_fiber_entropy — Pinsker-style TV bound derived from the fiber entropy gap.
-    Kind: helper.
-    Why: the entropy-to-TV bridge that Pinsker's inequality provides in the fiber-decomposition form.
-    Used by: security_witness_from_entropy and downstream security-from-entropy consumers.
-    Naming: five components record the direction of the conversion (var_dist FROM fiber_entropy); shortening loses the source/target distinction.
-*)
+(** var_dist_from_fiber_entropy — the coalition's endpoint law at sheet s
+    is within sqrt(2*(log N - H(P_s))) of uniform in TV distance, an
+    unconditional consequence of Pinsker's inequality applied to the
+    entropy gap fiber_entropy_gap identifies as D(P_s || uniform). This is
+    the bridge from this file's entropy analysis to the var_dist-based
+    ShuffleMarginalBound / collusion_bound pipeline. *)
 Lemma var_dist_from_fiber_entropy (s : 'I_N) :
   var_dist (P_s s) (fdist_uniform (card_ord N)) <=
   Num.sqrt (2%:R * (log N%:R - fiber_entropy (R:=R) L sigmas s)).
@@ -573,12 +575,11 @@ Variable R : realType.
 Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
-(** security_witness_from_entropy — the marginal bound of an EntropyWitness
-    via Pinsker.
-    Kind: main.
-    Why: materialises the entropy-to-TV conversion path (EntropyWitness ->
-    Pinsker -> ShuffleMarginalBound) as a named construction.
-*)
+(** security_witness_from_entropy — converts an EntropyWitness's per-sheet
+    lower bound on Shannon entropy, ew_min_entropy, into a ShuffleMarginalBound
+    with epsilon = sqrt(2*(log N - ew_min_entropy)): conditional on
+    ew_entropy_bound holding at every sheet, Pinsker's inequality turns
+    that entropy floor into the TV bound collusion_bound consumes. *)
 Definition security_witness_from_entropy
     (ew : EntropyWitness R M) : ShuffleMarginalBound R M.
 Proof.
@@ -701,15 +702,12 @@ Definition joint_endpoint_dist : R.-fdist (T.-tuple 'I_N) :=
 (* Joint fiber entropy: Shannon entropy of the joint distribution. *)
 Definition joint_fiber_entropy : R := `H joint_endpoint_dist.
 
-(* Upper bound: H(joint) <= log(Tg^L).
-   The joint distribution is a pushforward of a distribution on Tg^L words,
-   so its support has at most Tg^L elements. *)
-(** joint_entropy_le_log_words — joint fiber entropy is bounded by log of the total word count.
-    Kind: helper.
-    Why: the joint distribution is a pushforward of a uniform on L-tuples, bounding its Shannon entropy.
-    Used by: joint entropy bounds for multi-sheet adversaries.
-    Naming: five components record "H(joint) <= log(words)" as a compound phrase; shortening collides with joint_entropy_le without the word-count qualifier.
-*)
+(** joint_entropy_le_log_words — the T-party joint fiber entropy never
+    exceeds log(Tg^L), unconditionally: the joint distribution is a
+    pushforward of the uniform law on Tg^L words, so its entropy cannot
+    exceed the entropy of its source. This is the "no more than the word
+    itself carries" bound, complementing joint_entropy_le_T_logN's
+    per-party independence bound below. *)
 Lemma joint_entropy_le_log_words :
   joint_fiber_entropy <= log (Tg ^ L)%:R.
 Proof.
