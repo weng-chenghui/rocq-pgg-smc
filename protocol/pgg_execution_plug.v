@@ -47,12 +47,14 @@ Local Open Scope proba_scope.
 (*     The execution plug                                                     *)
 (******************************************************************************)
 
-(** ExecutionPlug — the execution layer over a MonodromyProfile.
-    Kind: interface.
-    A constructor supplies the run argument type ep_inputT, the seat/share
-    bridge ep_players_bridge, the participant list ep_players with its
-    enumeration equation ep_playersE, the content readout ep_content, the input
-    processes ep_input_procs and the interpreter fuel ep_fuel. *)
+(* The execution layer over a MonodromyProfile: the seven data that turn an
+   algebraic profile into an executable piSMC run. A constructor supplies
+   the run argument type ep_inputT, the seat/share bridge ep_players_bridge,
+   the participant list ep_players with its enumeration equation
+   ep_playersE, the content readout ep_content, the input processes
+   ep_input_procs and the interpreter fuel ep_fuel. The profile itself is
+   unchanged by this record: an execution plug is a second value layered
+   over an existing profile, not a replacement for it. *)
 Record ExecutionPlug (mp : MonodromyProfile) :=
   MkExecutionPlug {
     (* ep_inputT is the carrier of one run argument. It may differ from the
@@ -86,10 +88,9 @@ Record ExecutionPlug (mp : MonodromyProfile) :=
     ep_fuel           : nat ;
   }.
 
-(** dealer_secret_plug — the execution plug of a dealer-dealt secret.
-    @intent: the plug whose runs have no committing party, its input process
-    list being empty at every run argument, so that the dealt secret is the
-    only input of the run. *)
+(* The execution plug of a dealer-dealt secret: the plug whose runs have no
+   committing party, with an empty input-process list at every run
+   argument, so the dealt secret is the only input the run receives. *)
 Definition dealer_secret_plug (mp : MonodromyProfile)
     (inputT : Type)
     (players_bridge : pi_T' (mp_PI mp) = ts_T' (rp_scheme (mp_plug mp)))
@@ -101,10 +102,10 @@ Definition dealer_secret_plug (mp : MonodromyProfile)
   @MkExecutionPlug mp inputT players_bridge players playersE
     content (fun _ => [::]) fuel.
 
-(** committed_input_plug — the execution plug of a committed input.
-    @intent: the plug whose runs carry the committing parties as an argument,
-    one commit process per party, so that the run argument is the committed
-    value rather than a dealt secret. *)
+(* The execution plug of a committed input: the plug whose runs carry the
+   committing parties as an argument, one commit process per party, so the
+   run argument is the value the parties committed rather than a secret the
+   dealer already held. *)
 Definition committed_input_plug (mp : MonodromyProfile)
     (inputT : Type)
     (players_bridge : pi_T' (mp_PI mp) = ts_T' (rp_scheme (mp_plug mp)))
@@ -127,44 +128,39 @@ Section execution_of_profile.
 Variable mp : MonodromyProfile.
 Variable e : ExecutionPlug mp.
 
-(** exec_dealer_id — the dealer's process identifier.
-    @intent: the dealer occupies process identifier 0, the first entry of the
-    process list. *)
+(* The dealer occupies process identifier 0, the first entry of the run's
+   process list. *)
 Definition exec_dealer_id : nat := 0.
 
-(** exec_verifier_id — the verifier's process identifier.
-    @intent: the verifier occupies process identifier 1, the entry following
-    the dealer. *)
+(* The verifier occupies process identifier 1, the entry following the
+   dealer. *)
 Definition exec_verifier_id : nat := 1.
 
-(** exec_seat_id — seat i's process identifier.
-    @intent: seat i occupies process identifier 2 + i, the seats filling the
-    identifiers 2 .. (pi_T' (mp_PI mp)).+2. *)
+(* Seat i occupies process identifier 2 + i: the seats fill the identifiers
+   2 .. (pi_T' (mp_PI mp)).+2, immediately after the dealer and verifier. *)
 Definition exec_seat_id (i : 'I_(pi_T' (mp_PI mp)).+1) : nat := 2 + i.
 
-(** exec_input_id — committing party j's process identifier.
-    @intent: committing party j occupies process identifier
-    (pi_T' (mp_PI mp)).+3 + j, the identifiers following the dealer, the
-    verifier and the seats. *)
+(* Committing party j occupies process identifier (pi_T' (mp_PI mp)).+3 + j,
+   the identifiers following the dealer, the verifier and every seat. *)
 Definition exec_input_id (j : nat) : nat := (pi_T' (mp_PI mp)).+3 + j.
 
-(** exec_input_ids — the party identifiers of the input processes.
-    @intent: exec_input_id read at each position of ep_input_procs e x. *)
+(* The process identifiers of the run's input processes: exec_input_id read
+   at each position of ep_input_procs e x, one identifier per committing
+   party the plug's argument x actually supplies. *)
 Definition exec_input_ids (x : ep_inputT e) : seq nat :=
   [seq exec_input_id j | j <- iota 0 (size (e.(ep_input_procs) x))].
 
-(** exec_dealer — the dealer of the run.
-    @intent: dealer_with_input_encoding at mp_PI mp with the plug's content
-    readout, the singleton deck [:: w0], the input identifiers and the
-    participant list. *)
+(* The dealer of the run: dealer_with_input_encoding instantiated at mp_PI
+   mp with the plug's content readout, the singleton deck [:: w0], the input
+   identifiers exec_input_ids and the plug's participant list. *)
 Definition exec_dealer (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) :=
   dealer_with_input_encoding (mp_PI mp) (e.(ep_content) x) [:: w0]
     (exec_input_ids x) e.(ep_players) P_idx.
 
-(** exec_saprocs — the session-typed process list of the run.
-    @intent: dealer, verifier, one player per participant, then the input
-    processes, in process-identifier order. *)
+(* The session-typed process list of the run, in process-identifier order:
+   the dealer, the verifier, one player per participant seat, then the
+   input processes. *)
 Definition exec_saprocs (x : ep_inputT e) (w0 : pgg_gT (mp_M mp)) (P_idx : nat)
     : seq (aproc pgg_dtype (pgg_data (pgg_N' (mp_M mp)).+1)) :=
   mk_aproc (exec_dealer x w0 P_idx)
@@ -172,119 +168,121 @@ Definition exec_saprocs (x : ep_inputT e) (w0 : pgg_gT (mp_M mp)) (P_idx : nat)
     :: [seq mk_aproc (exchange_player (mp_PI mp) i) | i <- e.(ep_players)]
        ++ e.(ep_input_procs) x.
 
-(** exec_procs — the erased process list.
-    @intent: the plain-proc image of exec_saprocs, the argument of the
-    interpreter. *)
+(* The erased process list exec_saprocs is built as: the plain-proc image
+   the interpreter run_interp actually consumes. *)
 Definition exec_procs (x : ep_inputT e) (w0 : pgg_gT (mp_M mp)) (P_idx : nat) :=
   erase_aprocs (exec_saprocs x w0 P_idx).
 
-(** exec_run — the interpreter result.
-    @intent: run_interp at ep_fuel e on exec_procs, a pair of the final process
-    states and the per-process traces. *)
+(* The interpreter's result on the run: run_interp at fuel ep_fuel e on
+   exec_procs, a pair of the final process states and the per-process
+   traces every downstream extractor reads from. *)
 Definition exec_run (x : ep_inputT e) (w0 : pgg_gT (mp_M mp)) (P_idx : nat) :=
   run_interp e.(ep_fuel) (exec_procs x w0 P_idx).
 
-(** exec_endpoints — the verifier's collected endpoints.
-    @intent: endpoints_of_trace of entry exec_verifier_id of exec_run.2. *)
+(* The verifier's collected endpoints: the endpoint reading of the
+   verifier's row (process id exec_verifier_id) of exec_run's traces. *)
 Definition exec_endpoints (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) :=
   endpoints_of_trace (nth [::] (exec_run x w0 P_idx).2 exec_verifier_id).
 
-(** exec_verifier_trace — the executed trace of the verifier.
-    @intent: entry exec_verifier_id of exec_run.2. The verifier row is a raw
-    message log, distinct from the endpoint list exec_endpoints decoded from
-    it. *)
+(* The executed trace of the verifier: the run's raw process-id
+   exec_verifier_id row. This is a raw message log, distinct from the
+   endpoint list exec_endpoints decodes from it below. *)
 Definition exec_verifier_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) :=
   nth [::] (exec_run x w0 P_idx).2 exec_verifier_id.
 
-(** exec_endpoints_verifier_traceE — the endpoints are the endpoint reading of
-    the verifier's executed trace.
-    @main architecture: exec_endpoints x w0 P_idx = endpoints_of_trace
-    (exec_verifier_trace x w0 P_idx). *)
+(* exec_endpoints is the endpoint reading of exec_verifier_trace: the
+   verifier's collected endpoints and the verifier's raw executed row are
+   the same data viewed two ways, one decoded and one not. *)
 Lemma exec_endpoints_verifier_traceE (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) :
   exec_endpoints x w0 P_idx
   = endpoints_of_trace (exec_verifier_trace x w0 P_idx).
 Proof. by []. Qed.
 
-(** exec_participant_trace — the executed trace of the seat-i player.
-    @intent: entry exec_seat_id i of exec_run.2. The row is one participant
-    seat's own log; a seq of messages is not itself a finite-distribution
-    observable. *)
+(* The executed trace of the seat-i player: the run's process-id
+   exec_seat_id i row. This is one participant seat's own message log, not
+   yet a finite-distribution observable, since a raw sequence of session
+   messages carries no probability structure by itself. *)
 Definition exec_participant_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (i : 'I_(pi_T' (mp_PI mp)).+1) :=
   nth [::] (exec_run x w0 P_idx).2 (exec_seat_id i).
 
-(** exec_input_trace — the executed trace of committing party j.
-    @intent: entry exec_input_id j of exec_run.2. An input row is not a dealer
-    row. Only the indices j below the length of ep_input_procs e x denote
-    committing parties; a larger j is outside the run and returns the default
-    empty row. *)
+(* The executed trace of committing party j: the run's process-id
+   exec_input_id j row, distinct from any dealer row. Only indices j below
+   the length of ep_input_procs e x denote an actual committing party; a
+   larger j falls outside the run and the default empty trace is returned. *)
 Definition exec_input_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (j : nat) :=
   nth [::] (exec_run x w0 P_idx).2 (exec_input_id j).
 
-(** exec_dealer_trace — the executed trace of the dealer.
-    @intent: entry exec_dealer_id of exec_run.2. The dealer row belongs to no
-    participant coalition unless a theorem adds it explicitly. *)
+(* The executed trace of the dealer: the run's process-id exec_dealer_id
+   row. The dealer row belongs to no participant coalition unless a theorem
+   adds it explicitly, since coalitions in this development range over
+   participant seats, not over the dealer or verifier. *)
 Definition exec_dealer_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) :=
   nth [::] (exec_run x w0 P_idx).2 exec_dealer_id.
 
-(** exec_coalition_trace — the coalition's executed raw traces.
-    @intent: the finfun sending a seat in C to its executed trace and a seat
-    outside C to the empty trace. The observation covers the selected
-    participant seats only, and no dealer, verifier or input row. *)
+(* The coalition's executed raw traces: the finfun sending a seat in C to
+   its executed trace and a seat outside C to the empty trace. The
+   observation is restricted to the selected participant seats, with no
+   dealer, verifier or input row included, matching the coalition model of
+   this development where only seats can be corrupted. *)
 Definition exec_coalition_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (C : {set 'I_(pi_T' (mp_PI mp)).+1})
     : {ffun 'I_(pi_T' (mp_PI mp)).+1 -> seq (pgg_data (pgg_N' (mp_M mp)).+1)} :=
   [ffun i => if i \in C then exec_participant_trace x w0 P_idx i else [::]].
 
-(** exec_seat_endpoint — the endpoint recorded for seat i.
-    @intent: entry i of exec_endpoints. *)
+(* The endpoint recorded for seat i: entry i of exec_endpoints, the single
+   card position the verifier collected from that seat. *)
 Definition exec_seat_endpoint (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (i : 'I_(pi_T' (mp_PI mp)).+1) : 'I_(pgg_N' (mp_M mp)).+1 :=
   nth ord0 (exec_endpoints x w0 P_idx) i.
 
-(** exec_coalition_endpoints — the coalition's endpoint readings.
-    @intent: the finfun sending a seat in C to its endpoint and a seat outside
-    C to ord0. *)
+(* The coalition's endpoint readings: the finfun sending a seat in C to its
+   recorded endpoint and a seat outside C to ord0, the endpoint-level
+   counterpart of exec_coalition_trace. *)
 Definition exec_coalition_endpoints (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (C : {set 'I_(pi_T' (mp_PI mp)).+1})
     : {ffun 'I_(pi_T' (mp_PI mp)).+1 -> 'I_(pgg_N' (mp_M mp)).+1} :=
   [ffun i => if i \in C then exec_seat_endpoint x w0 P_idx i else ord0].
 
-(** exec_players_size — the participant list has one entry per seat.
-    @composes: exec_static_endpoints_size *)
+(* The plug's stored participant list has exactly one entry per seat, the
+   fact exec_static_endpoints_size below needs to match the static
+   observation's length against the seat count. *)
 Lemma exec_players_size : size e.(ep_players) = (pi_T' (mp_PI mp)).+1.
 Proof. by rewrite e.(ep_playersE) size_enum_ord. Qed.
 
-(** exec_seat_share_count — the seat/share bridge in successor form.
-    @composes: exec_run_recovers *)
+(* The seat/share bridge ep_players_bridge restated in successor form: the
+   fact exec_run_recovers uses to cast an endpoint list of length seat-count
+   into the tuple type run_recover expects, of length share-count. *)
 Lemma exec_seat_share_count :
   (pi_T' (mp_PI mp)).+1 = (ts_T' (rp_scheme (mp_plug mp))).+1.
 Proof. by rewrite e.(ep_players_bridge). Qed.
 
-(** exec_decode — the endpoint decoder of the plug.
-    @intent: an endpoint list of one card per seat, transported along the
-    seat/share bridge into the argument type of run_recover and reconstructed
-    there. *)
+(* The plug's endpoint decoder: an endpoint list of one card per seat,
+   transported along the seat/share bridge into the argument type of
+   run_recover and reconstructed there. This is the single point where a
+   raw endpoint list is turned back into the profile's secret carrier. *)
 Definition exec_decode (ep : seq 'I_(pgg_N' (mp_M mp)).+1)
     (Hsz : size ep = (pi_T' (mp_PI mp)).+1) : mp_secretT mp :=
   run_recover (tcast (etrans Hsz exec_seat_share_count) (in_tuple ep)).
 
-(** exec_static_endpoints — the static group-action observation over the seats.
-    @intent: content_obs x read at the cut w0 and each participant's starting
-    position. *)
+(* The static group-action observation over the seats: content_obs x read at
+   the cut w0 and each participant's starting position, computed with no
+   reference to the interpreter. This is the value run_of_static_observation
+   below equates the actual executed endpoints against. *)
 Definition exec_static_endpoints
     (content_obs : ep_inputT e -> pgg_gT (mp_M mp) * 'I_(pgg_N' (mp_M mp)).+1
                      -> 'I_(pgg_N' (mp_M mp)).+1)
     (x : ep_inputT e) (w0 : pgg_gT (mp_M mp)) :=
   [seq content_obs x (w0, tnth (pi_starts (mp_PI mp)) i) | i <- e.(ep_players)].
 
-(** exec_static_endpoints_size — the static observation has one entry per seat.
-    @composes: exec_endpoints_size *)
+(* The static observation has exactly one entry per seat, following directly
+   from exec_players_size, the fact exec_endpoints_size below needs once the
+   executed endpoints are identified with the static observation. *)
 Lemma exec_static_endpoints_size content_obs x w0 :
   size (exec_static_endpoints content_obs x w0) = (pi_T' (mp_PI mp)).+1.
 Proof. by rewrite size_map exec_players_size. Qed.
@@ -315,24 +313,27 @@ Hypothesis Hrecon : forall Hsz : size (exec_static_endpoints content_obs x w0)
     = (pi_T' (mp_PI mp)).+1,
   @exec_decode (exec_static_endpoints content_obs x w0) Hsz = expected x.
 
-(** exec_endpoints_size — the run collects one endpoint per seat.
-    @composes: exec_run_recovers *)
+(* Under the endpoint equation Hep, the run collects exactly one endpoint
+   per seat: the count fact exec_run_recovers below needs to type-check its
+   decode call against run_recover's expected tuple length. *)
 Lemma exec_endpoints_size : size (exec_endpoints x w0 P_idx)
   = (pi_T' (mp_PI mp)).+1.
 Proof. by rewrite Hep exec_static_endpoints_size. Qed.
 
-(** exec_run_recovers — decoding the executed endpoints returns the expected
-    value.
-    @main correctness: exec_decode (exec_endpoints x w0 P_idx) = expected x, for
-    a plug whose endpoints are the static observation and whose static
-    observation decodes to expected x. *)
+(* Decoding the run's actually-executed endpoints returns the expected value
+   expected x: the termination equation Hterm gets the run to a state where
+   endpoints exist to decode, the endpoint equation Hep identifies them with
+   the static observation, and the static-recovery hypothesis Hrecon decodes
+   that observation to expected x, so the composite decode of the real run
+   trace matches. *)
 Theorem exec_run_recovers :
   @exec_decode (exec_endpoints x w0 P_idx) exec_endpoints_size = expected x.
 Proof. by move: exec_endpoints_size; rewrite Hep; exact: Hrecon. Qed.
 
-(** exec_seat_endpointE — seat i's endpoint is the static observation at seat i.
-    @main correctness: exec_seat_endpoint x w0 P_idx i = content_obs x (w0, tnth
-    (pi_starts (mp_PI mp)) i). *)
+(* Seat i's actually-executed endpoint is the static observation
+   content_obs x (w0, tnth (pi_starts (mp_PI mp)) i): the pointwise form of
+   the endpoint equation Hep, giving one seat's value without needing the
+   whole endpoint list. *)
 Lemma exec_seat_endpointE (i : 'I_(pi_T' (mp_PI mp)).+1) :
   exec_seat_endpoint x w0 P_idx i
   = content_obs x (w0, tnth (pi_starts (mp_PI mp)) i).
@@ -341,10 +342,12 @@ rewrite /exec_seat_endpoint Hep /exec_static_endpoints e.(ep_playersE).
 by rewrite (nth_map i) ?size_enum_ord // nth_ord_enum.
 Qed.
 
-(** exec_coalition_endpointsE — a coalition's endpoint readings are the static
-    observation restricted to its seats.
-    @main correctness: exec_coalition_endpoints x w0 P_idx C = [ffun i => if i
-    \in C then content_obs x (w0, tnth (pi_starts (mp_PI mp)) i) else ord0]. *)
+(* A coalition C's endpoint readings are the static observation restricted
+   to its seats: exec_coalition_endpoints x w0 P_idx C equals the finfun
+   giving content_obs x (w0, tnth (pi_starts (mp_PI mp)) i) on i \in C and
+   ord0 elsewhere. This is what lets a security argument reason about what a
+   coalition sees purely in terms of the group action, without touching
+   interpreter state. *)
 Lemma exec_coalition_endpointsE (C : {set 'I_(pi_T' (mp_PI mp)).+1}) :
   exec_coalition_endpoints x w0 P_idx C
   = [ffun i => if i \in C
@@ -355,18 +358,22 @@ apply/ffunP => i; rewrite /exec_coalition_endpoints !ffunE.
 by case: ifP => // _; exact: exec_seat_endpointE.
 Qed.
 
-(** exec_coalition_endpoints_seqE — the coalition's endpoints in seat order are
-    the static observation over its seats.
-    @main correctness: [seq exec_seat_endpoint x w0 P_idx i | i <- enum C] =
-    [seq content_obs x (w0, tnth (pi_starts (mp_PI mp)) i) | i <- enum C]. *)
+(* The coalition's endpoints listed in seat order are the static observation
+   over the same seats: the sequence form of exec_coalition_endpointsE, used
+   where a coalition's readings are consumed as an ordered list (for
+   instance, fed to a finite-distribution construction) rather than as a
+   finfun. *)
 Lemma exec_coalition_endpoints_seqE (C : {set 'I_(pi_T' (mp_PI mp)).+1}) :
   [seq exec_seat_endpoint x w0 P_idx i | i <- enum C]
   = [seq content_obs x (w0, tnth (pi_starts (mp_PI mp)) i) | i <- enum C].
 Proof. by apply: eq_map => i; exact: exec_seat_endpointE. Qed.
 
-(** exec_run_correct — termination, endpoint count and recovery of one run.
-    @main correctness: the run reaches Finish at every process, collects one
-    endpoint per seat, and decodes to expected x. *)
+(* One run satisfies all three correctness facts at once: it reaches Finish
+   at every process (Hterm), it collects exactly one endpoint per seat
+   (exec_endpoints_size), and decoding those endpoints returns expected x
+   (exec_run_recovers). This packages the three separately-provable
+   hypotheses of the section into the single conjunction downstream
+   consumers of a plugged profile actually need. *)
 Theorem exec_run_correct :
   [/\ (exec_run x w0 P_idx).1 = nseq (size (exec_procs x w0 P_idx)) Finish,
       size (exec_endpoints x w0 P_idx) = (pi_T' (mp_PI mp)).+1 &

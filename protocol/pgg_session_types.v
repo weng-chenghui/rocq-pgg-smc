@@ -34,25 +34,37 @@ Variable M : MonodromyReprType.
 Let N := (pgg_N' M).+1.
 Let data := pgg_data N.
 
-(* Reveal a card position *)
+(* Types the dealer's reveal move: sending a card position as a DT_Sheet
+   payload. The session environment records the send, so the party at the
+   other end of dst is statically committed to a matching receive of the
+   same shape before either process can close. *)
 Definition PGGReveal_pos {party n env} (dst : nat) (i : 'I_N)
     (p : @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_send env dst DT_Sheet) :=
   SSend dst DT_Sheet (PGG_sheet i) p.
 
-(* Deal a hand to a player *)
+(* Types the dealer's deal move: sending a whole hand of card positions as a
+   DT_Hand payload, distinct in the session environment from a single-sheet
+   send, so a hand can never be mistaken for a lone revealed card at
+   type-checking time. *)
 Definition PGGDeal_hand {party n env} (dst : nat) (s : seq ('I_N))
     (p : @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_send env dst DT_Hand) :=
   SSend dst DT_Hand (PGG_hand s) p.
 
-(* Announce shuffle selection *)
+(* Types the dealer's shuffle-selection move: sending the chosen word index
+   as a DT_Idx payload, the third and last session-typed alphabet letter, so
+   the three protocol moves (sheet, hand, index) stay mutually
+   distinguishable in every session environment they appear in. *)
 Definition PGGAnnounce_idx {party n env} (dst : nat) (k : nat)
     (p : @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_send env dst DT_Idx) :=
   SSend dst DT_Idx (@PGG_idx N k) p.
 
-(* Observe a card position *)
+(* Types the verifier's observe move: receiving a DT_Sheet payload and
+   continuing with the extracted card position, failing closed on a
+   malformed payload. The session discipline guarantees this receive is
+   matched by exactly one PGGReveal_pos on the sender's side. *)
 Definition PGGObserve_pos {party n env} (src : nat)
     (f : 'I_N -> @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_recv env src DT_Sheet) :=
@@ -62,7 +74,10 @@ Definition PGGObserve_pos {party n env} (src : nat)
     | None => SFail
     end).
 
-(* Receive a dealt hand *)
+(* Types a player's receive-hand move: receiving a DT_Hand payload and
+   continuing with the extracted card sequence, failing closed on a
+   malformed payload. The session discipline guarantees this is matched by
+   the dealer's PGGDeal_hand and no other send. *)
 Definition PGGReceive_hand {party n env} (src : nat)
     (f : seq ('I_N) -> @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_recv env src DT_Hand) :=
@@ -72,7 +87,10 @@ Definition PGGReceive_hand {party n env} (src : nat)
     | None => SFail
     end).
 
-(* Receive shuffle announcement *)
+(* Types a player's receive-announcement move: receiving a DT_Idx payload
+   and continuing with the extracted index, failing closed on a malformed
+   payload. The session discipline guarantees this is matched by the
+   dealer's PGGAnnounce_idx and no other send. *)
 Definition PGGReceive_idx {party n env} (src : nat)
     (f : nat -> @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_recv env src DT_Idx) :=
@@ -82,23 +100,23 @@ Definition PGGReceive_idx {party n env} (src : nat)
     | None => SFail
     end).
 
-(* Init/Ret/Finish wrappers *)
+(* Types a purely local step: storing data x for a process's own later use
+   without touching the session environment, since no message crosses a
+   process boundary. *)
 Definition PGGInit {party n env} (x : data) (p : @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 env :=
   SInit x p.
 
-(** PGGRet — session-typed return: deliver final data [x] then end.
-    Kind: interface.
-    Why: wraps [SRet] so callers need not instantiate [sproc] arguments manually.
-*)
+(* Types a process's final return of data x under the empty session
+   environment: every send this process owed has already been matched, so
+   nothing remains to type-check downstream of it. *)
 Definition PGGRet {party : nat} (x : data)
     : @sproc pgg_dtype data party 2 senv_end :=
   SRet x.
 
-(** PGGFinish — session-typed terminal state with an empty environment.
-    Kind: interface.
-    Why: wraps [SFinish] so PGG protocol programs can close uniformly.
-*)
+(* Types the terminal state under the empty session environment with no
+   returned data, the shape every PGG protocol program closes with once its
+   session obligations are discharged. *)
 Definition PGGFinish {party : nat}
     : @sproc pgg_dtype data party 1 senv_end :=
   SFinish.

@@ -34,7 +34,9 @@ Let N := (pgg_N' M).+1.
 Let T := (pi_T' PI).+1.
 Let data := pgg_data N.
 
-(** identity_deck — the singleton deck carrying the identity cut. *)
+(* The singleton deck [1] carrying the identity cut: the dealer's word table
+   when no shuffle is applied, so every player's revealed card position is
+   its own starting sheet. *)
 Definition identity_deck : seq (pgg_gT M) := [:: 1%g].
 
 (** dealer_with_input_encoding — generic input-derived-content dealer: a commit
@@ -50,7 +52,9 @@ Definition dealer_with_input_encoding
        exchange_dealer PI (content_of committed) players W P_idx)
     [::] inputs.
 
-(** sheets_of — the PGG_sheet payloads of a trace, in trace order. *)
+(* Filters a trace down to its PGG_sheet payloads, in trace order, dropping
+   every PGG_hand and PGG_idx message: the raw material endpoints_of_trace
+   below reorders into one endpoint per player. *)
 Definition sheets_of (tr : seq data) : seq 'I_N :=
   pmap (fun d => if d is PGG_sheet x then Some x else None) tr.
 

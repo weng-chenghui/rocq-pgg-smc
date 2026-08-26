@@ -15,12 +15,12 @@ Require Import pgg_interface pgg_session_types card_exchange_pismc.
 (* unchanged exchange_dealer body runs as before; players and the verifier    *)
 (* see exactly the same wire as without the prologue.                         *)
 (*                                                                            *)
-(* GATE 2 (see the protocol-merge plan): the den Boer commit primitives       *)
-(* FCCommit/FCRecvCommit are typed over fc_dtype/fc_data and CANNOT be        *)
-(* spliced into pgg_dtype/pgg_data. These wrappers are NEW, built over the    *)
-(* existing pgg_dtype/pgg_data; the committed payload reuses PGG_sheet, so     *)
-(* the dealer/player/verifier wire of the dealing phase is unchanged and      *)
-(* only the dealer gains a prologue.                                          *)
+(* The den Boer commit primitives FCCommit/FCRecvCommit are typed over       *)
+(* fc_dtype/fc_data, a different session alphabet from pgg_dtype/pgg_data,    *)
+(* so they cannot be reused here. The wrappers below are built directly       *)
+(* over pgg_dtype/pgg_data instead, with the committed payload reusing        *)
+(* PGG_sheet, so the dealer/player/verifier wire of the dealing phase is      *)
+(* unchanged and only the dealer gains a prologue.                            *)
 (*                                                                            *)
 (*   pgg_commit i v               == input party i sends PGG_sheet v to       *)
 (*                                   the dealer, then finishes                 *)
@@ -56,26 +56,19 @@ Variable M : MonodromyReprType.
 Let N := (pgg_N' M).+1.
 Let data := pgg_data N.
 
-(** pgg_commit — an input party's commit send: deliver one card value as a
-    PGG_sheet to the dealer, then finish.
-    Kind: interface.
-    What: SSend dealer_idx DT_Sheet (PGG_sheet v) SFinish, as the input party
-    [i]. Why: GATE 2 forbids reusing the fc_dtype FCCommit; the committed
-    payload is a PGG_sheet so the wire reuses the existing dealing alphabet.
-    Used-by: the idealized duality demo; an input party of the committed
-    protocol. *)
+(* Types an input party's commit send: deliver one card value as a PGG_sheet
+   to the dealer, then finish. The payload reuses PGG_sheet rather than a
+   dedicated commit tag, so the committed value enters the protocol through
+   the same session alphabet the dealing phase already uses. *)
 Definition pgg_commit (i : nat) (v : 'I_N)
     : @sproc pgg_dtype data i 2 (senv_send senv_end dealer_idx DT_Sheet) :=
   SSend dealer_idx DT_Sheet (PGG_sheet v) SFinish.
 
-(** pgg_recv_commit — the dealer's standalone commit receive: receive one
-    PGG_sheet from party [from], then finish.
-    Kind: interface.
-    What: SRecv from DT_Sheet matched through from_sheet, finishing on a valid
-    sheet and failing on a malformed payload. Why: the session dual of
-    pgg_commit, used to certify the commit/recv pair is well typed before it is
-    threaded into the dealer prologue. Used-by: the idealized duality demo
-    (commit/recv pair). *)
+(* Types the dealer's standalone single-party commit receive: receive one
+   PGG_sheet from party [from], failing closed on a malformed payload, then
+   finish. This is the session dual of pgg_commit, checked independently of
+   the prologue so the commit/recv pair is certified well typed before being
+   threaded into the multi-party prologue below. *)
 Definition pgg_recv_commit (from : nat)
     : @sproc pgg_dtype data dealer_idx 2 (senv_recv senv_end from DT_Sheet) :=
   SRecv from DT_Sheet (fun d =>
@@ -84,16 +77,13 @@ Definition pgg_recv_commit (from : nat)
     | None => SFail
     end).
 
-(** pgg_commit_prologue — the dealer's commit-collection prologue: receive one
-    PGG_sheet from each party in [inputs], accumulate the committed values, and
-    hand the collected list to the continuation.
-    Kind: interface.
-    What: a value-capturing fold of SRecv over [inputs]; the fuel and session
-    environment of the result are the continuation's, prepended with one
-    senv_recv layer per input party. Why: the dealing-phase body (exchange_dealer)
-    has a fixed session type; the prologue prepends the committed receives while
-    threading the dependent session environment by computation. Used-by:
-    exchange_dealer_with_commit. *)
+(* Types the dealer's commit-collection prologue: receive one PGG_sheet from
+   each party in [inputs] in order, accumulate the committed values, then
+   hand the collected list to the continuation. The dealing-phase body
+   exchange_dealer has a fixed session type of its own, so this prologue
+   prepends one senv_recv layer per input party ahead of it, threading the
+   dependent session environment by computation on the length of [inputs]
+   rather than by a separate proof obligation. *)
 Fixpoint pgg_commit_prologue {dn : nat} {denv : senv pgg_dtype}
     (cont : seq 'I_N -> @sproc pgg_dtype data dealer_idx dn denv)
     (acc : seq 'I_N) (inputs : seq nat) {struct inputs}
@@ -114,15 +104,13 @@ Fixpoint pgg_commit_prologue {dn : nat} {denv : senv pgg_dtype}
         end)
   end.
 
-(** exchange_dealer_with_commit — the dealer program with an input-commitment
-    prologue: collect one committed card value from each party in [inputs],
-    assemble them into the word table, then run the existing dealing body.
-    Kind: interface.
-    What: pgg_commit_prologue feeding [fun committed => exchange_dealer PI
-    content players (assemble committed) P_idx]. Why: routes committed inputs
-    into the dealing phase without changing the dealer/player/verifier wire of
-    that phase; the prologue is the only addition. Used-by: the den Boer M=2
-    input-commitment instance; the idealized two-input duality demo. *)
+(* Types the dealer program with an input-commitment prologue: collect one
+   committed card value from each party in [inputs] via pgg_commit_prologue,
+   assemble them into the word table via [assemble], then run the existing
+   dealing body exchange_dealer unchanged. Routing committed inputs through
+   the prologue rather than through the dealing body itself is what keeps
+   the dealer/player/verifier wire of the dealing phase identical to the
+   uncommitted protocol; the prologue is the only addition. *)
 Definition exchange_dealer_with_commit
     (PI : PGGInterface M) (inputs : seq nat)
     (assemble : seq 'I_N -> seq (pgg_gT M))
@@ -133,15 +121,11 @@ Definition exchange_dealer_with_commit
     (fun committed => exchange_dealer PI content players (assemble committed) P_idx)
     [::] inputs.
 
-(** exchange_dealer_with_commit_nil — the empty prologue degenerates to the
-    plain dealer.
-    Kind: main.
-    What: with no input parties the committed dealer is the plain
-    exchange_dealer on the assembled-from-nothing word table, holding by
-    computation (pgg_commit_prologue matches on [::]). Why: the position-model
-    instances commit no inputs, so they keep the unchanged dealing program and
-    every existing duality proof. Used-by: the M = 0 degeneration check of the
-    protocol-merge plan. *)
+(* With no input parties, the committed dealer degenerates by computation
+   (pgg_commit_prologue matching on [::]) to the plain exchange_dealer on
+   the word table assembled from the empty list. Position-model instances
+   commit no inputs, so this equation is what lets them keep the unchanged
+   dealing program and every duality proof already established for it. *)
 Lemma exchange_dealer_with_commit_nil
     (PI : PGGInterface M)
     (assemble : seq 'I_N -> seq (pgg_gT M))
@@ -187,70 +171,66 @@ Variables (W : seq {perm 'I_N}) (P_idx : nat).
 
 Local Open Scope sproc_scope.
 
-(** ap_dealer_commit_2 — the two-input committed dealer as an aproc.
-    Kind: example.
-    Why: the dealer side of the two-input duality check. The assemble map is
-    constant (the committed values do not change the dealing-phase session type,
-    only the word payloads), so the duality is exercised on the prologue
-    structure. Used-by: the dwc_* duality lemmas. *)
+(* The two-input committed dealer, wrapped as an aproc for the duality check
+   below. The assemble map is held constant, since committed values change
+   only the word payloads the dealer sends and never the dealing-phase
+   session type, so this instance exercises the prologue's session
+   structure without needing a nonconstant word assembly. *)
 Definition ap_dealer_commit_2 :=
   mk_aproc (exchange_dealer_with_commit PI input_ids
     (fun _ => W) id players_2 P_idx).
 
-(** ap_input0_commit — input party 0 (process id 4) commit as an aproc.
-    Kind: example. *)
+(* Input party 0, at process id 4, wrapped as an aproc for the duality
+   checks below. *)
 Definition ap_input0_commit :=
   mk_aproc (pgg_commit 4 (@Ordinal (pgg_N' M).+1 0 isT)).
 
-(** ap_input1_commit — input party 1 (process id 5) commit as an aproc.
-    Kind: example. *)
+(* Input party 1, at process id 5, wrapped as an aproc for the duality
+   checks below. *)
 Definition ap_input1_commit :=
   mk_aproc (pgg_commit 5 (@Ordinal (pgg_N' M).+1 0 isT)).
 
-(** ap_recv_commit_2 — the dealer's standalone single-commit receive (from
-    party 4) as an aproc.
-    Kind: example. *)
+(* The dealer's standalone single-commit receive from party 4, wrapped as an
+   aproc for the duality check below. *)
 Definition ap_recv_commit_2 := mk_aproc (@pgg_recv_commit M 4).
 
-(** commit_recv_dual_2 — the standalone commit/recv-commit pair is dual.
-    Kind: main.
-    Why: certifies pgg_commit and pgg_recv_commit are session duals
-    independently of the prologue. *)
+(* pgg_commit and pgg_recv_commit are session duals independently of the
+   prologue: this certifies the commit/recv pair is well typed on its own
+   before the prologue's use of pgg_commit_prologue is trusted to compose
+   several such pairs correctly. *)
 Lemma commit_recv_dual_2 : channels_dual ap_recv_commit_2 ap_input0_commit.
 Proof. by native_compute. Qed.
 
-(** dealer_commit_input0_dual_2 — the committed dealer is dual to input party 0.
-    Kind: main.
-    Why: the prologue's first receive is dual to the first input party's commit
-    send; this is the HIGH-risk dependent-senv threading discharged for a
-    concrete two-input instance. *)
+(* The committed dealer's first prologue receive is dual to input party 0's
+   commit send: the dependent session-environment threading through
+   pgg_commit_prologue, discharged by native computation on a concrete
+   two-input instance. *)
 Lemma dealer_commit_input0_dual_2 :
   channels_dual ap_dealer_commit_2 ap_input0_commit.
 Proof. by native_compute. Qed.
 
-(** dealer_commit_input1_dual_2 — the committed dealer is dual to input party 1.
-    Kind: main. *)
+(* The committed dealer's second prologue receive is dual to input party 1's
+   commit send, the second link in the same dependent-senv chain. *)
 Lemma dealer_commit_input1_dual_2 :
   channels_dual ap_dealer_commit_2 ap_input1_commit.
 Proof. by native_compute. Qed.
 
-(** dealer_commit_player0_dual_2 — the committed dealer stays dual to player 0.
-    Kind: main.
-    Why: the prologue does not disturb the dealing-phase sends, so the dealer's
-    session with each player is unchanged. *)
+(* The committed dealer stays dual to player 0 after the prologue is
+   prepended: the prologue only adds receives ahead of the dealing-phase
+   sends, so the dealer's session with each player is unaffected. *)
 Lemma dealer_commit_player0_dual_2 :
   channels_dual ap_dealer_commit_2 (ap_player0_2 n).
 Proof. by native_compute. Qed.
 
-(** dealer_commit_player1_dual_2 — the committed dealer stays dual to player 1.
-    Kind: main. *)
+(* The committed dealer stays dual to player 1, the second player-side
+   instance of the same unaffected-dealing-phase fact. *)
 Lemma dealer_commit_player1_dual_2 :
   channels_dual ap_dealer_commit_2 (ap_player1_2 n).
 Proof. by native_compute. Qed.
 
-(** dealer_commit_verifier_dual_2 — the committed dealer stays dual to the
-    verifier.
-    Kind: main. *)
+(* The committed dealer stays dual to the verifier, completing the check
+   that the commit prologue leaves every non-input counterpart's session
+   unaffected. *)
 Lemma dealer_commit_verifier_dual_2 :
   channels_dual ap_dealer_commit_2 (ap_verifier_2 n).
 Proof. by native_compute. Qed.

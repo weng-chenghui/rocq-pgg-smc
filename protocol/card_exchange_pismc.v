@@ -132,10 +132,9 @@ Let data := pgg_data N.
    player i = i+2: compute players (one per starting sheet) *)
 Definition dealer_idx : nat := 0.
 Definition verifier_idx : nat := 1.
-(** player_idx — maps logical player ordinal [i : 'I_T] to its process index [i+2].
-    Kind: interface.
-    Why: players occupy process ids [2, 3, ...] after dealer (0) and verifier (1).
-*)
+(* Maps player ordinal i to process id i+2: players occupy the process ids
+   following the dealer (0) and the verifier (1), so every player's session
+   position is fixed once T is fixed. *)
 Definition player_idx (i : 'I_T) : nat := i.+2.
 
 (* Make sproc type annotations concise *)
@@ -193,18 +192,20 @@ Let dealer_idx_env (j : 'I_T) (env : senv pgg_dtype) :=
 Let verifier_env_step (j : 'I_T) (env : senv pgg_dtype) :=
   senv_recv env (player_idx j) DT_Sheet.
 
-(** dealt_hand_content — the dealer's column after the fixed content readout:
-    [seq content (rho w (start i)) | w <- W]. Kind: helper. What: bakes the plug's
-    face/id readout into the wire so the revealed values are faces, not identities,
-    while the wire stays 'I_N. Used-by: exchange_dealer. *)
+(* Player i's dealt hand after passing every card position through a
+   content readout: [seq content (rho w (start i)) | w <- W]. The readout
+   lets the dealer send a reconstruction-scheme face (a threshold-share
+   symbol, say) instead of the raw card identity, while the wire type stays
+   'I_N throughout, so the session type of exchange_dealer is unaffected by
+   which readout is plugged in. *)
 Definition dealt_hand_content (content : 'I_N -> 'I_N) (W : seq gT) (i : 'I_T)
     : seq 'I_N :=
   [seq content (rho w (tnth starts i)) | w <- W].
 
-(** dealt_hand_content_id — with the identity readout the content dealing is the
-    plain [dealt_hand]. Kind: helper. What: dealt_hand_content id = dealt_hand.
-    Why: position-model instances (content=id) reuse every existing dealt_hand
-    fact and duality proof. Used-by: exchange_dealer id re-exports. *)
+(* With the identity readout, dealt_hand_content collapses to the plain
+   dealt_hand: this is what lets position-model instances, which pass
+   content = id, reuse every dealt_hand fact and duality proof already
+   established without re-proving them for the content-readout form. *)
 Lemma dealt_hand_content_id (W : seq gT) (i : 'I_T) :
   dealt_hand_content id W i = dealt_hand PI W i.
 Proof. by rewrite /dealt_hand_content /dealt_hand. Qed.
@@ -277,11 +278,12 @@ Variable PI : PGGInterface M.
 Let T := (pi_T' PI).+1.
 Let Tg := (@pgg_ngens' M).+1.
 
-(** exchange_dealer_from_words — dealer program taking a word-tuple and evaluating it.
-    Kind: interface.
-    Why: bridges the word-sampling layer (used in security analysis) to the
-    permutation-level [exchange_dealer] program.
-*)
+(* The dealer program taking a length-L word tuple, evaluating it via
+   word_eval to a single group element, and dealing from the resulting
+   singleton permutation table. This is the bridge from the word-sampling
+   layer, where security analyses quantify the dealer's random choice as a
+   word in the generators, to the permutation-level exchange_dealer program
+   that actually deals cards. *)
 Definition exchange_dealer_from_words (L : nat)
     (players : seq 'I_T) (w : L.-tuple 'I_Tg) (P_idx : nat) :=
   exchange_dealer PI id players [:: @word_eval M L w] P_idx.
@@ -309,22 +311,21 @@ Lemma id_perm_morphM :
   {in G &, {morph (@id gT) : x y / (x * y)%g}}.
 Proof. by []. Qed.
 
-(** id_perm_morph — identity morphism on the full permutation group [G = [set: {perm 'I_N}]].
-    Kind: instance.
-    Why: provides [pgg_rho] for the idealized, fully symmetric instance used in
-    [native_compute]-based duality verification.
-*)
+(* The identity map on the full permutation group G = [set: {perm 'I_N}],
+   packaged as a group morphism into {perm 'I_N} itself: the idealized
+   instance supplies pgg_rho by letting every permutation act as itself,
+   with no shuffle restricted to a proper subgroup. This is what makes the
+   instance fully symmetric and small enough for native_compute to verify
+   session duality on directly. *)
 Definition id_perm_morph : {morphism G >-> {perm 'I_N}} :=
   Morphism id_perm_morphM.
 
-(** Idealized_PGGTypes — PGG types record for the fully symmetric group [S_N].
-    Kind: instance.
-*)
+(* The PGGTypes record for the fully symmetric group S_N: every permutation
+   of the N card positions is an available shuffle. *)
 Definition Idealized_PGGTypes := @MkPGG gT N.-1 G.
 
-(** Idealized_isMonodromyRepr — monodromy mixin for [Idealized_PGGTypes] via identity.
-    Kind: instance.
-*)
+(* The monodromy mixin witnessing that id_perm_morph supplies pgg_rho for
+   Idealized_PGGTypes. *)
 Definition Idealized_isMonodromyRepr : isMonodromyRepr Idealized_PGGTypes.
 Proof.
 constructor.
@@ -332,9 +333,8 @@ rewrite /Idealized_PGGTypes /=.
 exact: id_perm_morph.
 Defined.
 
-(** Idealized_MonodromyRepr — packaged [MonodromyReprType] for the idealized instance.
-    Kind: instance.
-*)
+(* The packaged MonodromyReprType for the idealized fully symmetric
+   instance, the concrete group this section's duality checks run against. *)
 Definition Idealized_MonodromyRepr : MonodromyReprType :=
   @MonodromyRepr.Pack Idealized_PGGTypes
     (@MonodromyRepr.Class Idealized_PGGTypes Idealized_isMonodromyRepr).
@@ -342,23 +342,19 @@ Definition Idealized_MonodromyRepr : MonodromyReprType :=
 (* 2-player interface: starts = [0, 1] *)
 Let M := Idealized_MonodromyRepr.
 
-(** test_starts_2 — two-player starting tuple [[0; 1]] for the idealized test instance.
-    Kind: example.
-*)
+(* The starting tuple [0; 1] for the idealized instance's two-player test
+   interface. *)
 Definition test_starts_2 : 2.-tuple 'I_N :=
   [tuple @Ordinal N 0 isT; @Ordinal N 1 isT].
 
-(** test_starts_2_uniq — the two test starts are distinct.
-    Kind: helper.
-    Why: discharges [pi_starts_uniq] for [Test_PGG_2].
-    Used by: Test_PGG_2.
-*)
+(* The two entries of test_starts_2 are distinct, the pi_starts_uniq
+   obligation Test_PGG_2 needs. *)
 Lemma test_starts_2_uniq : uniq test_starts_2.
 Proof. by native_compute. Qed.
 
-(** Test_PGG_2 — two-player idealized PGG interface for native-compute duality.
-    Kind: example.
-*)
+(* The two-player PGGInterface over the idealized fully symmetric group,
+   small and concrete enough for every session duality check below to run
+   by native_compute. *)
 Definition Test_PGG_2 : PGGInterface M :=
   @MkPGGI M 1 test_starts_2 test_starts_2_uniq.
 
@@ -377,59 +373,53 @@ Local Open Scope sproc_scope.
 (* Wrap as aprocs for duality checking *)
 Definition ap_dealer_2 :=
   mk_aproc (exchange_dealer PI id players_2 W P_idx).
-(** ap_player0_2 — player-0 program as an [aproc] for duality checking.
-    Kind: example.
-*)
+(* Player 0's program as an aproc, for the duality checks below. *)
 Definition ap_player0_2 :=
   mk_aproc (exchange_player PI (@Ordinal 2 0 isT)).
 
-(** ap_player1_2 — player-1 program as an [aproc] for duality checking.
-    Kind: example.
-*)
+(* Player 1's program as an aproc, for the duality checks below. *)
 Definition ap_player1_2 :=
   mk_aproc (exchange_player PI (@Ordinal 2 1 isT)).
 
-(** ap_verifier_2 — verifier program as an [aproc] for duality checking.
-    Kind: example.
-*)
+(* The verifier's program as an aproc, for the duality checks below. *)
 Definition ap_verifier_2 :=
   mk_aproc (exchange_verifier PI players_2).
 
 (* 4-process duality: all 6 pairs *)
 
-(** dealer_player0_dual_2 — session duality between dealer and player 0 (idealized, T=2).
-    Kind: main.
-*)
+(* The dealer's session type is dual to player 0's: every send the dealer
+   directs at player 0 is matched by a receive of the same shape on player
+   0's side, and conversely, verified by native computation on the
+   idealized two-player instance. *)
 Lemma dealer_player0_dual_2 : channels_dual ap_dealer_2 ap_player0_2.
 Proof. by native_compute. Qed.
 
-(** dealer_player1_dual_2 — session duality between dealer and player 1 (idealized, T=2).
-    Kind: main.
-*)
+(* The dealer's session type is dual to player 1's, the second player-side
+   instance of the same channel check. *)
 Lemma dealer_player1_dual_2 : channels_dual ap_dealer_2 ap_player1_2.
 Proof. by native_compute. Qed.
 
-(** dealer_verifier_dual_2 — session duality between dealer and verifier (idealized, T=2).
-    Kind: main.
-*)
+(* The dealer's session type is dual to the verifier's, even though the
+   dealer never sends the verifier a message directly: duality here
+   witnesses that no orphaned send or receive is left unmatched between
+   them under the shared session environment. *)
 Lemma dealer_verifier_dual_2 : channels_dual ap_dealer_2 ap_verifier_2.
 Proof. by native_compute. Qed.
 
-(** player0_player1_dual_2 — session duality between the two players (idealized, T=2).
-    Kind: main.
-*)
+(* The two players' session types are dual to each other, confirming
+   neither player program leaves a send or receive addressed to the other
+   unmatched, even though the card-exchange protocol routes no direct
+   player-to-player message. *)
 Lemma player0_player1_dual_2 : channels_dual ap_player0_2 ap_player1_2.
 Proof. by native_compute. Qed.
 
-(** player0_verifier_dual_2 — session duality between player 0 and verifier (idealized, T=2).
-    Kind: main.
-*)
+(* Player 0's session type is dual to the verifier's: player 0's Reveal send
+   is matched by the verifier's Observe receive at the same process id. *)
 Lemma player0_verifier_dual_2 : channels_dual ap_player0_2 ap_verifier_2.
 Proof. by native_compute. Qed.
 
-(** player1_verifier_dual_2 — session duality between player 1 and verifier (idealized, T=2).
-    Kind: main.
-*)
+(* Player 1's session type is dual to the verifier's, the second
+   player-to-verifier instance of the same reveal/observe match. *)
 Lemma player1_verifier_dual_2 : channels_dual ap_player1_2 ap_verifier_2.
 Proof. by native_compute. Qed.
 
@@ -461,56 +451,45 @@ Let players_2 : seq 'I_2 := [:: @Ordinal 2 0 isT; @Ordinal 2 1 isT].
 
 Local Open Scope sproc_scope.
 
-(** ap_dealer_gen — generic dealer program as an [aproc] for duality checking.
-    Kind: instance.
-*)
+(* The generic dealer program, parametric in the generator count m and card
+   count n, wrapped as an aproc for the duality checks below. *)
 Definition ap_dealer_gen := mk_aproc (exchange_dealer PI_gen id players_2 W P_idx).
-(** ap_player0_gen — generic player-0 program as an [aproc] for duality checking.
-    Kind: instance.
-*)
+(* The generic player-0 program, wrapped as an aproc for the duality checks
+   below. *)
 Definition ap_player0_gen := mk_aproc (exchange_player PI_gen (@Ordinal 2 0 isT)).
-(** ap_player1_gen — generic player-1 program as an [aproc] for duality checking.
-    Kind: instance.
-*)
+(* The generic player-1 program, wrapped as an aproc for the duality checks
+   below. *)
 Definition ap_player1_gen := mk_aproc (exchange_player PI_gen (@Ordinal 2 1 isT)).
-(** ap_verifier_gen — generic verifier program as an [aproc] for duality checking.
-    Kind: instance.
-*)
+(* The generic verifier program, wrapped as an aproc for the duality checks
+   below. *)
 Definition ap_verifier_gen := mk_aproc (exchange_verifier PI_gen players_2).
 
-(** dealer_player0_dual_gen — generic duality (parametric [m], [n]): dealer vs player 0.
-    Kind: main.
-*)
+(* Session duality holds between the dealer and player 0 at every generator
+   count m and card count n, not only for the idealized fully symmetric
+   instance above: this is the same channel check, run once here as a
+   quantified statement over the free parameters instead of once per
+   concrete group family. *)
 Lemma dealer_player0_dual_gen : channels_dual ap_dealer_gen ap_player0_gen.
 Proof. by native_compute. Qed.
 
-(** dealer_player1_dual_gen — generic duality: dealer vs player 1.
-    Kind: main.
-*)
+(* Session duality holds between the dealer and player 1, for every m, n. *)
 Lemma dealer_player1_dual_gen : channels_dual ap_dealer_gen ap_player1_gen.
 Proof. by native_compute. Qed.
 
-(** dealer_verifier_dual_gen — generic duality: dealer vs verifier.
-    Kind: main.
-*)
+(* Session duality holds between the dealer and the verifier, for every m, n. *)
 Lemma dealer_verifier_dual_gen : channels_dual ap_dealer_gen ap_verifier_gen.
 Proof. by native_compute. Qed.
 
-(** player0_player1_dual_gen — generic duality: player 0 vs player 1.
-    Kind: main.
-*)
+(* Session duality holds between the two players, for every m, n. *)
 Lemma player0_player1_dual_gen : channels_dual ap_player0_gen ap_player1_gen.
 Proof. by native_compute. Qed.
 
-(** player0_verifier_dual_gen — generic duality: player 0 vs verifier.
-    Kind: main.
-*)
+(* Session duality holds between player 0 and the verifier, for every m, n. *)
 Lemma player0_verifier_dual_gen : channels_dual ap_player0_gen ap_verifier_gen.
 Proof. by native_compute. Qed.
 
-(** player1_verifier_dual_gen — generic duality: player 1 vs verifier.
-    Kind: main.
-*)
+(* Session duality holds between player 1 and the verifier, for every m, n,
+   completing the six-pair check for the generic parametric instance. *)
 Lemma player1_verifier_dual_gen : channels_dual ap_player1_gen ap_verifier_gen.
 Proof. by native_compute. Qed.
 

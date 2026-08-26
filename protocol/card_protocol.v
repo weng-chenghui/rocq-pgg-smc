@@ -69,23 +69,31 @@ Variable g : {perm 'I_N}.
 Hypothesis g_inv : is_involution g.
 Hypothesis g_fpf : is_fpf g.
 
-(** Encode a bit using the involution. *)
+(* Encodes bit b at card position s as the pair (s, g s) or its swap,
+   through the involution g: this is the card-based commitment to b that
+   the deck-pairing scheme deals, one card position for each of g's two
+   values on s. *)
 Definition cs_encode (b : bool) (s : 'I_N) : 'I_N * 'I_N :=
   encode_bit g b s.
 
-(** Decode a bit from two observed card positions. *)
+(* Recovers a bit from two observed card positions by checking which one is
+   the g-image of the other: the verifier-side inverse of cs_encode, reading
+   off the committed bit once both card positions of a pair are revealed. *)
 Definition cs_decode (eA eB : 'I_N) : bool :=
   decode_bit g eA eB.
 
-(** Reconstruction correctness: after applying any commuting permutation
-    sigma, the decoded bit matches the original.
-    Direct corollary of decode_encode_correct from pgg_deck_pairing.v. *)
+(* Decoding survives any shuffle sigma that commutes with the pairing
+   involution g: applying sigma to both halves of an encoded pair and then
+   decoding recovers the original bit. This is what lets a card protocol
+   shuffle the whole deck for security while the committed bit stays
+   readable at the end, provided the shuffle respects the pairing. *)
 Theorem cs_decode_encode_correct
     (sigma : {perm 'I_N}) (b : bool) (s : 'I_N) :
   commute g sigma ->
   let p := cs_encode b s in
   cs_decode (sigma p.1) (sigma p.2) = b.
 Proof.
+(* Direct corollary of decode_encode_correct from pgg_deck_pairing.v. *)
 move=> Hcomm /=.
 exact: decode_encode_correct.
 Qed.

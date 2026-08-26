@@ -78,14 +78,15 @@ Module OE.
    not. One module-level flag replaces fourteen Arguments lines. *)
 Unset Implicit Arguments.
 
-(** ObservedExecution — one executed run of a plugged monodromy profile at a
-    fixed process offset, together with the static observation it realises and
-    the value it recovers.
-    Kind: interface.
-    A constructor supplies the profile oe_profile, the execution plug
-    oe_execution over that profile, the process offset oe_P_idx, the static
-    observation oe_content_obs, the expected value oe_expected and the three
-    run facts oe_terminates, oe_endpoints and oe_static_recon. *)
+(* One executed run of a plugged monodromy profile at a fixed process
+   offset, together with the static observation it realises and the value it
+   recovers. A constructor supplies the profile oe_profile, the execution
+   plug oe_execution over that same profile, the process offset oe_P_idx,
+   the static observation oe_content_obs, the expected value oe_expected and
+   the three run facts oe_terminates, oe_endpoints and oe_static_recon.
+   Its plug field depends on its own profile field, its three proof fields
+   quantify over every run argument and every cut, and the group-membership
+   hypothesis on the cut appears on the recovery field alone. *)
 Record ObservedExecution := MkObservedExecution {
   (* oe_profile is the program data of the run: the group action, the secret
      carrier, the starting layout and the reconstruction plug. *)
@@ -138,9 +139,10 @@ Record ObservedExecution := MkObservedExecution {
 (*     The derivations, each one application of a pgg_execution_plug theorem  *)
 (******************************************************************************)
 
-(** oe_endpoints_size — the observed run collects one endpoint per seat.
-    @intent: exec_endpoints_size at the record's endpoint equation, kept
-    transparent so oe_run_recovers can name it and stay convertible. *)
+(* The observed run collects exactly one endpoint per seat: exec_endpoints_size
+   applied to the record's own endpoint equation, kept as a transparent
+   Definition rather than a Lemma so oe_run_recovers can name this term and
+   stay convertible with it. *)
 Definition oe_endpoints_size (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe))) :
@@ -148,10 +150,11 @@ Definition oe_endpoints_size (oe : ObservedExecution)
   = (pi_T' (mp_PI (oe_profile oe))).+1
   := exec_endpoints_size (oe_endpoints oe x w0).
 
-(** oe_run_recovers — decoding the observed run's endpoints returns the
-    expected value.
-    @main correctness: exec_decode (exec_endpoints x w0 (oe_P_idx oe)) =
-    oe_expected oe x, for any cut w0 in the group. *)
+(* Decoding the observed run's actually-executed endpoints returns the
+   expected value oe_expected oe x, for any cut w0 in the group: this is
+   exec_run_recovers specialised to the record's own three run facts,
+   packaging the profile-level correctness theorem as a fact about the
+   ObservedExecution value itself. *)
 Theorem oe_run_recovers (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe))) :
@@ -167,11 +170,11 @@ exact: (@exec_run_recovers (oe_profile oe) (oe_execution oe)
           (oe_endpoints oe x w0) (oe_static_recon oe x w0 Hw0)).
 Qed.
 
-(** oe_run_correct — termination, endpoint count and recovery of the observed
-    run.
-    @main correctness: the run reaches Finish at every process, collects one
-    endpoint per seat, and decodes to oe_expected oe x, for any cut w0 in the
-    group. *)
+(* The observed run reaches Finish at every process, collects exactly one
+   endpoint per seat, and decodes those endpoints to oe_expected oe x, for
+   any cut w0 in the group: exec_run_correct specialised to the record's own
+   three run facts, the single conjunction downstream users of an
+   ObservedExecution actually need. *)
 Theorem oe_run_correct (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe))) :
@@ -195,9 +198,8 @@ exact: (@exec_run_correct (oe_profile oe) (oe_execution oe)
           (oe_static_recon oe x w0 Hw0)).
 Qed.
 
-(** oe_seat_endpointE — seat i's endpoint is the static observation at seat i.
-    @main correctness: exec_seat_endpoint x w0 (oe_P_idx oe) i = oe_content_obs
-    oe x (w0, tnth (pi_starts (mp_PI (oe_profile oe))) i). *)
+(* Seat i's actually-executed endpoint is the static observation at seat i:
+   exec_seat_endpointE specialised to the record's own endpoint equation. *)
 Lemma oe_seat_endpointE (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe)))
@@ -209,11 +211,10 @@ exact: (@exec_seat_endpointE (oe_profile oe) (oe_execution oe)
           (oe_content_obs oe) x w0 (oe_P_idx oe) (oe_endpoints oe x w0) i).
 Qed.
 
-(** oe_coalition_endpointsE — a coalition's endpoint readings are the static
-    observation restricted to its seats.
-    @main correctness: exec_coalition_endpoints x w0 (oe_P_idx oe) C = [ffun i
-    => if i \in C then oe_content_obs oe x (w0, tnth (pi_starts (mp_PI
-    (oe_profile oe))) i) else ord0]. *)
+(* A coalition C's endpoint readings on the observed run are the static
+   observation restricted to its seats: exec_coalition_endpointsE
+   specialised to the record's own endpoint equation, letting a security
+   argument reason purely about oe_content_obs on C's seats. *)
 Lemma oe_coalition_endpointsE (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe)))
@@ -237,10 +238,9 @@ Qed.
    trace row to a card content, so no semantic raw-row equation is stated at
    this generality; the instances state their own. *)
 
-(** oe_participant_trace — the executed trace of the observed run's seat-i
-    player.
-    @intent: exec_participant_trace at the package's plug and process offset.
-    The row is one participant seat's own log, and is not an endpoint list. *)
+(* The executed trace of the observed run's seat-i player:
+   exec_participant_trace at the record's own plug and process offset. This
+   is one participant seat's own message log, not yet an endpoint list. *)
 Definition oe_participant_trace (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe)))
@@ -248,38 +248,35 @@ Definition oe_participant_trace (oe : ObservedExecution)
   @exec_participant_trace (oe_profile oe) (oe_execution oe)
     x w0 (oe_P_idx oe) i.
 
-(** oe_input_trace — the executed trace of the observed run's committing party
-    j.
-    @intent: exec_input_trace at the package's plug and process offset. Only
-    the indices j below the length of the plug's input-process list denote
-    committing parties. *)
+(* The executed trace of the observed run's committing party j:
+   exec_input_trace at the record's own plug and process offset. Only
+   indices j below the length of the plug's input-process list denote an
+   actual committing party. *)
 Definition oe_input_trace (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe))) (j : nat) :=
   @exec_input_trace (oe_profile oe) (oe_execution oe)
     x w0 (oe_P_idx oe) j.
 
-(** oe_dealer_trace — the executed trace of the observed run's dealer.
-    @intent: exec_dealer_trace at the package's plug and process offset. The
-    dealer row belongs to no participant coalition. *)
+(* The executed trace of the observed run's dealer: exec_dealer_trace at the
+   record's own plug and process offset. The dealer row belongs to no
+   participant coalition unless a theorem adds it explicitly. *)
 Definition oe_dealer_trace (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe))) :=
   @exec_dealer_trace (oe_profile oe) (oe_execution oe) x w0 (oe_P_idx oe).
 
-(** oe_verifier_trace — the executed trace of the observed run's verifier.
-    @intent: exec_verifier_trace at the package's plug and process offset. The
-    verifier row is a raw message log, distinct from the endpoint list read
-    from it. *)
+(* The executed trace of the observed run's verifier: exec_verifier_trace at
+   the record's own plug and process offset. This is a raw message log,
+   distinct from the endpoint list oe_run_recovers decodes from it. *)
 Definition oe_verifier_trace (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe))) :=
   @exec_verifier_trace (oe_profile oe) (oe_execution oe) x w0 (oe_P_idx oe).
 
-(** oe_coalition_trace — the observed run's coalition raw traces.
-    @intent: exec_coalition_trace at the package's plug and process offset. The
-    observation covers the selected participant seats only, and no dealer,
-    verifier or input row. *)
+(* The observed run's coalition raw traces: exec_coalition_trace at the
+   record's own plug and process offset. The observation covers only the
+   selected participant seats, with no dealer, verifier or input row. *)
 Definition oe_coalition_trace (oe : ObservedExecution)
     (x : ep_inputT (oe_execution oe))
     (w0 : pgg_gT (mp_M (oe_profile oe)))
