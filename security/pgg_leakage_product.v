@@ -51,7 +51,7 @@ Lemma inde_RV_fst_snd (TB1 TB2 : finType) (f : A -> TB1) (g : B -> TB2) :
 Proof.
 move=> x y; rewrite /inde_RV !pfwd1E.
 have Hf : finset (preim (fun ab : (A * B)%type => f ab.1) (pred1 x)) =
-          (finset (preim f (pred1 x)) `*T).
+          ((finset (preim f (pred1 x))) `*T).
   by apply/setP => -[a b]; rewrite !inE.
 have Hg : finset (preim (fun ab : (A * B)%type => g ab.2) (pred1 y)) =
           (T`* finset (preim g (pred1 y))).
@@ -74,7 +74,7 @@ have Pr_fst : forall (T0 : eqType) (Z : A -> T0) (q : T0),
     Pr P1 (finset (preim Z (pred1 q))).
   move=> T0 Z q.
   have HE : finset (preim (fun ab : (A * B)%type => Z ab.1) (pred1 q)) =
-            (finset (preim Z (pred1 q)) `*T).
+            ((finset (preim Z (pred1 q))) `*T).
     by apply/setP => -[a b]; rewrite !inE.
   by rewrite HE -Pr_fdist_fst fdist_prod1.
 rewrite (Pr_fst _ X x) (Pr_fst _ Y y) (Pr_fst _ [% X, Y] (x, y)).

@@ -97,7 +97,7 @@ have HfstA : forall a0,
     `Pr[ ((fun ab => ab.1) : {RV (P1 `x P2) -> A}) = a0 ] = P1 a0.
   move=> a0; rewrite pfwd1E.
   have -> : finset (preim ((fun ab : A * B => ab.1)) (pred1 a0))
-      = (finset (preim (@id A) (pred1 a0)) `*T).
+      = ((finset (preim (@id A) (pred1 a0))) `*T).
     by apply/setP => -[a' b]; rewrite !inE.
   rewrite -Pr_fdist_fst fdist_prod1.
   have -> : finset (preim (@id A) (pred1 a0)) = [set a0].
@@ -174,7 +174,7 @@ have HfstA : forall a0,
     `Pr[ ((fun ab => ab.1) : {RV (P `X W) -> A}) = a0 ] = P a0.
   move=> a0; rewrite pfwd1E.
   have -> : finset (preim ((fun ab : A * B => ab.1)) (pred1 a0))
-      = (finset (preim (@id A) (pred1 a0)) `*T).
+      = ((finset (preim (@id A) (pred1 a0))) `*T).
     by apply/setP => -[a' b]; rewrite !inE.
   rewrite -Pr_fdist_fst fdist_prod1.
   have -> : finset (preim (@id A) (pred1 a0)) = [set a0].

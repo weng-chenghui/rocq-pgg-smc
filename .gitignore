@@ -16,3 +16,4 @@ build.log
 *~
 .*.~undo-tree~
 verify-build.log
+build-*.log
