@@ -140,14 +140,6 @@ Qed.
 (*                                                                            *)
 (******************************************************************************)
 
-(** AXIOM STATUS: certified externally by
-    [pgg-smc/instances/s5/s5_spectral_certificate.py].  The companion
-    definitions [s5_sos_lower_triangular] and [s5_sos_diagonal] below,
-    together with the proved [s5_sos_diagonal_nonneg], expose the rational
-    witness inside Rocq; only the SoS -> Rayleigh implication remains
-    axiomatised. A future PR may discharge [s5_rayleigh_Q2_R] from the
-    companion definitions by entrywise sum-of-squares expansion. *)
-
 (* Rational SoS certificate data, copied from the external Python script.
    L is a 4x4 lower unit-triangular matrix; D is the 4-entry diagonal.
    These are the reduced-dimension witness (after projecting out the
@@ -185,6 +177,22 @@ case; [by [] |].
 by move=> k /=; rewrite nth_nil.
 Qed.
 
+(* Certificate: instances/s5/s5_spectral_certificate.py, rational LDL^T. *)
+
+(** On the mean-zero hyperplane of R^5, the square of the Schreier
+    transition matrix of the four adjacent transpositions contracts by
+    alpha^2 = (181/200)^2: v^T Q^2 v <= alpha^2 <v,v> whenever the
+    coordinates of v sum to zero.  Equivalently, alpha^2 I - Q^2 is
+    positive semidefinite there.
+
+    Restricting to mean-zero vectors is the content, not a technicality:
+    Q fixes the all-ones vector, so no contraction holds on it, and the
+    rate at which the walk forgets its starting deck is decided by what Q
+    does to the complement.  This is the one spectral input of the S_5 row.
+    symm_ds_TV_bound turns it into the variation-distance bound between the
+    walk's endpoint law and uniform, which is how a dealer's word length
+    becomes a security parameter for the five-card deck, and which
+    rigidity_s5_instance.v previously had to assume as a Hypothesis. *)
 Axiom s5_rayleigh_Q2_R :
   forall (R : realType) (v : 'cV[R]_5),
   \sum_i v i ord0 = 0 ->
