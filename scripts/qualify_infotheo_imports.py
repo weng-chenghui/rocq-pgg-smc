@@ -3,9 +3,9 @@
 import re, sys, pathlib
 
 INFOTHEO = {  # modules resolving into installed infotheo (allowed surface)
-    "realType_ext", "ssr_ext", "ssralg_ext", "fdist", "proba",
-    "jfdist_cond", "entropy", "dft", "hamming", "linearcode",
-    "pismc", "reed_solomon", "smc_interpreter", "smc_session_types",
+    "realType_ext", "realType_ln", "ssr_ext", "ssralg_ext", "bigop_ext",
+    "fdist", "proba", "jfdist_cond", "entropy", "graphoid",
+    "dft", "hamming", "linearcode", "reed_solomon",
 }
 BANNED = {  # handled by Tasks 4-5, never qualified here
     "entropy_fiber", "extra_proba", "extra_entropy", "rouche_capelli",

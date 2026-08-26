@@ -4,10 +4,8 @@
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg ring.
 From mathcomp Require Import reals finmap.
-From infotheo Require Import realType_ext ssr_ext ssralg_ext fdist.
-Require Import realType_ln bigop_ext.
-From infotheo Require Import proba jfdist_cond entropy.
-Require Import graphoid.
+From infotheo Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
+From infotheo Require Import proba jfdist_cond entropy graphoid.
 
 (**md**************************************************************************)
 (* # Interpreter for Secure Multiparty Protocols                              *)
