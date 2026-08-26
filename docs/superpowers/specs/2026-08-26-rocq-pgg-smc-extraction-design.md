@@ -255,3 +255,17 @@ the local pin. Findings and changes:
   0.9.7 bound via `-Q ... infotheo` (shadow effectiveness proven by a
   negative probe on the dev-only `centropy_RV_dpi`), and a full clean
   153/153 build against the pinned dev switch. Both green.
+
+## Addendum (2026-08-26): PGG re-expansion
+
+The acronym PGG formerly expanded to "Parametric Geometry Group"; the
+project is not about geometry, so the expansion is retired. PGG now
+stands for "Parametric Group Game": a protocol game parametric over an
+instance (G, N, rho) of a finite group acting on N card positions via a
+permutation representation. The letters, all pgg_* identifiers, the
+pgg_smc namespace, and the repo/opam names are unchanged (zero code
+churn); only prose defining the acronym changed (paper/main.tex, README).
+Dated submission records under notes/ keep the old expansion as
+historical record. The monodromy/sheet vocabulary in the sources is
+retained; de-geometrizing it is a possible separate future pass (~830
+sites).

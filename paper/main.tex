@@ -56,7 +56,7 @@
 Card-based cryptographic protocols use physical card shuffles to compute functions with information-theoretic security.
 Diaconis's spectral analysis bounds how many shuffles suffice for a single observer's fairness, but does not address coalitions of colluding players.
 
-We introduce \pgg (\textit{Parametric Geometry Group}), a framework extending Diaconis's shuffle fairness to $k$-coalition resistance.
+We introduce \pgg (\textit{Parametric Group Game}), a framework extending Diaconis's shuffle fairness to $k$-coalition resistance.
 Our main theorem bounds the adversary's total variation distance: $\dTV(\text{adversary}, \text{uniform}) \leq \eps + 2(T-1)/N$, where $\eps$ converges to zero via the Schreier spectral gap: $\eps(L) \leq \sqrt{N} \cdot (1 - \gapS)^L$.
 The Schreier graph operates on $N$ card positions rather than $|G|$ group elements, improving the convergence prefactor from $\sqrt{|G|}$ to $\sqrt{N}$.
 
@@ -102,7 +102,7 @@ Diaconis's classical spectral gap on the Cayley graph of the permutation group d
 
 \subsection*{PGG: Extending Diaconis to Collusion}
 
-Our contribution, formalized in \Rocq, is the \pgg framework — \textit{Parametric Geometry Group} — which extends Diaconis's spectral fairness analysis to $k$-coalition resistance.
+Our contribution, formalized in \Rocq, is the \pgg framework — \textit{Parametric Group Game} — which extends Diaconis's spectral fairness analysis to $k$-coalition resistance.
 The key innovation is a change of perspective: instead of analyzing the random walk on the group $G$ itself (Cayley graph with $|G|$ vertices), we analyze the random walk on card \emph{positions} (Schreier graph with $N$ vertices, where $N$ is the deck size).
 
 The Schreier graph has a crucial structural property: it naturally separates the group's size from the geometric impact of shuffles.
