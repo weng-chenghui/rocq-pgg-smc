@@ -3,7 +3,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
-From infotheo Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 Require Import pgg_interface pgg_session_types card_exchange_pismc.
 
 (******************************************************************************)

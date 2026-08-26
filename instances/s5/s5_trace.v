@@ -15,7 +15,7 @@ From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 Require Import pgg_interface.
 From pgg_smc Require Import pgg_raag_s5 s5_profile pgg_raag_path.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
-From infotheo Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 From pgg_reconstruct Require Import covering_scheme pgg_sharing_framework.
 From pgg_smc Require Import pgg_leakage_witness pgg_randomized_sharing.
 From pgg_smc Require Import pgg_canonical_sharing pgg_sharing_mechanism.

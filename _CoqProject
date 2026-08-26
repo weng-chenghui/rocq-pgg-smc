@@ -8,6 +8,7 @@
 -R protocol pgg_smc
 -R groups pgg_smc
 -R security pgg_smc
+-R smc pgg_smc
 -R reconstruct pgg_reconstruct
 -R instances/denboer1989 pgg_smc
 -R instances/kim2025 pgg_smc
@@ -23,6 +24,10 @@
 
 lib/perm_uniform.v
 lib/proba_entropy_ext.v
+smc/graded_resource.v
+smc/smc_interpreter.v
+smc/smc_session_types.v
+smc/pismc.v
 protocol/pgg_interface.v
 protocol/pgg_session_types.v
 protocol/card_exchange_pismc.v

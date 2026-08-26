@@ -14,7 +14,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
-From infotheo Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 Require Import pgg_interface.
 From pgg_smc Require Import card_exchange_pismc pgg_run five_card_program.
 From pgg_smc Require Import five_card_kim five_card_family den_boer_run.

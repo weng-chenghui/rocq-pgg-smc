@@ -31,7 +31,7 @@ From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
 From pgg_reconstruct Require Import covering_scheme pgg_sharing_framework.
 From pgg_reconstruct Require Import transitivity_privacy.
 From pgg_smc Require Import pgl27_run pgl27_secrecy pgl27_trace pgl27_mixing.
-From infotheo Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

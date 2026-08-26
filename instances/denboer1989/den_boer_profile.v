@@ -29,7 +29,7 @@ From pgg_smc Require Import five_card_group five_card_program
 From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment.
 From pgg_smc Require Import pgg_monodromy_profile.
-From infotheo Require Import smc_session_types.
+From pgg_smc Require Import smc_session_types.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     algebraic_rigidity.
 

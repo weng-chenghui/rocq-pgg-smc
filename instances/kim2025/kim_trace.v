@@ -17,7 +17,7 @@ Require Import pgg_interface.
 From pgg_smc Require Import five_card_group five_card_program five_card_scheme_I5.
 From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
-From infotheo Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme input_encoding.
 From pgg_smc Require Import five_card_leakage kim_secrecy denboer_trace.
 From pgg_smc Require Import pgg_leakage_witness pgg_trace_secrecy.

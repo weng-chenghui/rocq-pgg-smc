@@ -63,7 +63,7 @@ From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals zmodp matrix.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 From infotheo Require Import variation_dist.
-From infotheo Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
 From pgg_smc Require Import pgg_execution_plug pgg_observed_execution.

@@ -65,7 +65,7 @@ From pgg_smc Require Export pgg_analysis_status.
 From pgg_reconstruct Require Export algebraic_rigidity.
 
 (* Imported instance cone: loaded, never re-exported. *)
-From infotheo Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
