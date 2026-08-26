@@ -25,8 +25,10 @@ Variable R : realType.
 
 Let dbP := P R.
 
-(** denboer_indep — the one-card view is independent of the secret a && b.
-    @composes: denboer_view_secrecy *)
+(** The revealed card at position 0 is stochastically independent of the
+    secret a && b. This independence witness is what lets the one-card view
+    be packaged as a CyclicCutData mechanism, whose zero-leakage property
+    denboer_view_secrecy then follows generically. *)
 Lemma denboer_indep : dbP |= ViewA R [:: 0%N] _|_ Secret R.
 Proof. by apply/inde_RV_sym; apply: mutual_info_RV0_indep; exact: leak_k1. Qed.
 
@@ -36,10 +38,13 @@ Definition denboer_ccd : CyclicCutData dbP :=
 Definition denboer_mechanism : SharingMechanism dbP 0 0 :=
   @CyclicCut _ _ dbP 0 0 denboer_ccd.
 
-(** denboer_view_secrecy — one revealed card of the five-card trick carries zero
-    information about the secret a && b.
-    @main security: zero mutual information and unchanged conditional entropy for
-    the single-card view. *)
+(** One revealed card of the five-card trick is stochastically independent of
+    the secret a && b: their mutual information vanishes exactly, and the
+    secret's entropy conditioned on that view equals its unconditional
+    entropy, so the view narrows the coalition's uncertainty about a && b by
+    nothing. This instantiates the CyclicCut mechanism's generic zero-leakage
+    guarantee for den Boer's protocol, the perfect one-card secrecy claim the
+    file exists to establish. *)
 Lemma denboer_view_secrecy :
   `I( lw_secret (mechanism_leakage denboer_mechanism) ;
       lw_view  (mechanism_leakage denboer_mechanism) ) = 0%R /\

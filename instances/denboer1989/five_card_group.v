@@ -43,10 +43,11 @@ Import Prenex Implicits.
 
 Section five_card_generators.
 
-(** fc_sigma_fun — the shuffle generator as a plain function on 'I_5.
-    @intent: cyclic shift of all 5 positions, sigma = (0 1 2 3 4), i.e.
-    sigma(i) = (i + 1) mod 5; the underlying map packaged into the {perm 'I_5}
-    generator fc_sigma. Used-by: fc_sigmaK, fc_sigma. *)
+(** fc_sigma_fun — the shuffle generator sigma = (0 1 2 3 4) as a plain
+    function on 'I_5: sigma(i) = (i + 1) mod 5, the cyclic shift of all five
+    card positions. This function form carries no proof obligations of its
+    own; fc_sigmaK exhibits its inverse so it can be packaged as the
+    {perm 'I_5} generator fc_sigma below. *)
 Definition fc_sigma_fun (x : 'I_5) : 'I_5 :=
   match val x with
   | 0 => @Ordinal 5 1 isT
@@ -56,9 +57,9 @@ Definition fc_sigma_fun (x : 'I_5) : 'I_5 :=
   | _ => @Ordinal 5 0 isT
   end.
 
-(** fc_sigma_inv — the inverse shuffle map on 'I_5.
-    @intent: sigma^{-1} = (0 4 3 2 1); the cancel partner that witnesses
-    fc_sigma_fun is a permutation. Used-by: fc_sigmaK. *)
+(** fc_sigma_inv — the inverse shuffle map on 'I_5, sigma^{-1} = (0 4 3 2 1).
+    It is the cancel partner fc_sigmaK uses to witness that fc_sigma_fun is a
+    bijection, hence packageable as a permutation. *)
 Definition fc_sigma_inv (x : 'I_5) : 'I_5 :=
   match val x with
   | 0 => @Ordinal 5 4 isT
@@ -68,15 +69,17 @@ Definition fc_sigma_inv (x : 'I_5) : 'I_5 :=
   | _ => @Ordinal 5 3 isT
   end.
 
-(** fc_sigmaK — fc_sigma_inv cancels fc_sigma_fun on every sheet.
-    @main architecture: the injectivity witness that lets fc_sigma_fun be
+(** fc_sigmaK — fc_sigma_inv cancels fc_sigma_fun on every position of 'I_5.
+    This cancellation is the injectivity witness that lets fc_sigma_fun be
     packaged as the {perm 'I_5} generator fc_sigma. *)
 Lemma fc_sigmaK : cancel fc_sigma_fun fc_sigma_inv.
 Proof. by move=> x; apply/val_inj; case: x => [[|[|[|[|[|]]]]]]. Qed.
 
-(** fc_sigma — the five-cycle shuffle generator (0 1 2 3 4).
-    @intent: the sole generator of the cyclic PGG underlying the five-card
-    trick; its order-5 action determines the search space and security. *)
+(** fc_sigma — the five-cycle shuffle generator (0 1 2 3 4), packaged as a
+    permutation of 'I_5 via fc_sigmaK. It is the sole generator of the cyclic
+    PGG underlying the five-card trick; its order-5 action fixes both the
+    dealer's search space and the security margin against a coalition
+    guessing the shuffle. *)
 Definition fc_sigma : {perm 'I_5} := perm (can_inj fc_sigmaK).
 
 End five_card_generators.

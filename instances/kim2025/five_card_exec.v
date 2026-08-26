@@ -129,18 +129,17 @@ Variable R : realType.
 Let mpF : MonodromyProfile := five_card_profile.
 
 (** five_card_players_enumE — the five-element participant list is the seat
-    enumeration.
-    @composes: five_card_exec_endpoints *)
+    enumeration. *)
 Lemma five_card_players_enumE :
   den_boer_players = enum 'I_(pi_T' (mp_PI mpF)).+1.
 Proof. by apply: (inj_map val_inj); rewrite val_enum_ord. Qed.
 
-(** five_card_exec_plug — the five-card execution plug.
-    @intent: the execution layer over five_card_profile with run argument the
-    committed pair (a, b) of bits, the seat/share bridge erefl at 5 seats and 5
-    shares, participant list den_boer_players, content the den Boer layout of
-    the decoded committed cards and fuel 100; the committed-input constructor
-    takes the two commit processes of the committing parties 7 and 8 as its
+(** five_card_exec_plug — the five-card execution plug: the execution layer
+    over five_card_profile with run argument the committed pair (a, b) of
+    bits, the seat/share bridge erefl at 5 seats and 5 shares, participant
+    list den_boer_players, content the den Boer layout of the decoded
+    committed cards and fuel 100. The committed-input constructor takes the
+    two commit processes of the committing parties 7 and 8 as its
     input-process list. *)
 Definition five_card_exec_plug : ExecutionPlug mpF :=
   @committed_input_plug mpF (bool * bool)%type erefl den_boer_players
@@ -150,60 +149,49 @@ Definition five_card_exec_plug : ExecutionPlug mpF :=
                  ; mk_aproc (@pgg_commit FiveCardKim_M 8 (encode_bool ab.2))])
     100.
 
-(** five_card_content_obs — the five-card static observation.
-    @intent: the den Boer layout of the committed pair ab at the cut image of a
-    starting position, namely tnth (den_boer_layout ab) (pgg_rho w0 p) at a cut
-    w0 and a position p. *)
+(** five_card_content_obs — the five-card static observation: the den Boer
+    layout of the committed pair ab at the cut image of a starting position,
+    namely tnth (den_boer_layout ab) (pgg_rho w0 p) at a cut w0 and a
+    position p. *)
 Definition five_card_content_obs (ab : bool * bool)
     (p : pgg_gT FiveCardKim_M * 'I_(pgg_N' FiveCardKim_M).+1)
     : 'I_(pgg_N' FiveCardKim_M).+1 :=
   tnth (den_boer_layout ab) (@pgg_rho FiveCardKim_M p.1 p.2).
 
 (** five_card_exec_playersE — the plug's participant list is the instance's
-    list.
-    @composes: five_card_exec_endpoints *)
+    list. *)
 Lemma five_card_exec_playersE :
   ep_players five_card_exec_plug = den_boer_players.
 Proof. by []. Qed.
 
-(** five_card_exec_fuelE — the plug's fuel is the instance's fuel.
-    @composes: five_card_exec_terminates, five_card_exec_endpoints,
-    five_card_exec_recon *)
+(** five_card_exec_fuelE — the plug's fuel is the instance's fuel. *)
 Lemma five_card_exec_fuelE : ep_fuel five_card_exec_plug = 100.
 Proof. by []. Qed.
 
 (** five_card_exec_input_idsE — the derived input identifiers are those of the
-    two committing parties.
-    @composes: five_card_exec_procsE
-    The derived identifiers exec_input_id j = (pi_T' (mp_PI mpF)).+3 + j are the
-    identifiers 7 and 8 of the instance's own commit processes, which is the
+    two committing parties: exec_input_id j = (pi_T' (mp_PI mpF)).+3 + j is
+    the identifier 7 or 8 of the instance's own commit process, the
     definitional agreement five_card_exec_procsE rests on. *)
 Lemma five_card_exec_input_idsE (ab : bool * bool) :
   @exec_input_ids mpF five_card_exec_plug ab = [:: 7; 8].
 Proof. by []. Qed.
 
 (** five_card_exec_procsE — the derived process list is the instance's process
-    list.
-    @composes: five_card_exec_terminates, five_card_exec_endpoints,
-    five_card_exec_recon *)
+    list. *)
 Lemma five_card_exec_procsE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (P_idx : nat) :
   @exec_procs mpF five_card_exec_plug (a, b) w0 P_idx
   = den_boer_procs a b w0 P_idx.
 Proof. by []. Qed.
 
-(** five_card_exec_procs_size — the derived run has nine processes.
-    @composes: five_card_exec_terminates
-    Naming: intentional; _size is the repo's suffix for a size _ = _ statement,
-    as in exec_endpoints_size and pgl27_exec_procs_size. *)
+(** five_card_exec_procs_size — the derived run has nine processes. *)
 Lemma five_card_exec_procs_size (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (P_idx : nat) :
   size (@exec_procs mpF five_card_exec_plug (a, b) w0 P_idx) = 9.
 Proof. by []. Qed.
 
 (** five_card_exec_terminates — every process of the derived run reaches
-    Finish.
-    @composes: five_card_exec_correct *)
+    Finish. *)
 Lemma five_card_exec_terminates (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (P_idx : nat) :
   (@exec_run mpF five_card_exec_plug (a, b) w0 P_idx).1
@@ -215,9 +203,7 @@ exact: den_boer_run_terminates.
 Qed.
 
 (** five_card_exec_endpoints — the derived verifier endpoints are the static
-    observation over the seats.
-    @composes: five_card_exec_recon, five_card_exec_recovers,
-    five_card_exec_correct *)
+    observation over the seats. *)
 Lemma five_card_exec_endpoints (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
   @exec_endpoints mpF five_card_exec_plug (a, b) w0 0
   = @exec_static_endpoints mpF five_card_exec_plug five_card_content_obs
@@ -230,8 +216,7 @@ exact: den_boer_endpoints.
 Qed.
 
 (** five_card_exec_decodeE — the plug's decoder is the instance's
-    reconstruction.
-    @composes: five_card_exec_decode_seqE *)
+    reconstruction. *)
 Lemma five_card_exec_decodeE (ep : seq 'I_(pgg_N' (mp_M mpF)).+1)
     (Hsz : size ep = (pi_T' (mp_PI mpF)).+1)
     (Hsz' : size ep = (ts_T' fcI_scheme).+1) :
@@ -242,8 +227,7 @@ by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
 Qed.
 
 (** five_card_exec_decode_seqE — the plug's decoder reads the endpoint list as
-    the three-consecutive-cards predicate of the decoded endpoints.
-    @composes: five_card_exec_recon *)
+    the three-consecutive-cards predicate of the decoded endpoints. *)
 Lemma five_card_exec_decode_seqE (ep : seq 'I_(pgg_N' (mp_M mpF)).+1)
     (Hsz : size ep = (pi_T' (mp_PI mpF)).+1) :
   @exec_decode mpF five_card_exec_plug ep Hsz
@@ -255,8 +239,7 @@ Qed.
 
 (** five_card_exec_recon — decoding the static observation returns the
     conjunction of the two committed bits, for any cut in the group and any
-    proof of the endpoint count.
-    @composes: five_card_exec_recovers, five_card_exec_correct *)
+    proof of the endpoint count. *)
 Lemma five_card_exec_recon (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
   w0 \in pgg_G FiveCardKim_M ->
   forall Hsz : size (@exec_static_endpoints mpF five_card_exec_plug
@@ -273,10 +256,7 @@ exact: (den_boer_run_recovers a b w0 Hw0).
 Qed.
 
 (** five_card_exec_recovers — the derived five-card run decodes to the
-    conjunction of the two committed bits.
-    @main correctness: exec_decode of the executed endpoints of the run of
-    five_card_exec_plug at the committed pair (a, b) and cut w0 is a && b, for
-    any cut w0 in the group. *)
+    conjunction of the two committed bits. *)
 Theorem five_card_exec_recovers (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (Hw0 : w0 \in pgg_G FiveCardKim_M) :
   @exec_decode mpF five_card_exec_plug
@@ -289,11 +269,7 @@ exact: (@exec_run_recovers mpF five_card_exec_plug five_card_content_obs
 Qed.
 
 (** five_card_exec_correct — termination, endpoint count and recovery of the
-    derived five-card run.
-    @main correctness: the run of five_card_exec_plug reaches Finish at each of
-    its nine processes, collects one endpoint per seat, and decodes to the
-    conjunction a && b of the two committed bits, for any cut w0 in the
-    group. *)
+    derived five-card run. *)
 Theorem five_card_exec_correct (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (Hw0 : w0 \in pgg_G FiveCardKim_M) :
   [/\ (@exec_run mpF five_card_exec_plug (a, b) w0 0).1
@@ -316,9 +292,7 @@ Qed.
 (******************************************************************************)
 
 (** five_card_exec_seat_endpointE — seat i's endpoint is the layout entry at
-    the cut image of seat i's start.
-    @main correctness: exec_seat_endpoint five_card_exec_plug (a, b) w0 0 i =
-    five_card_content_obs (a, b) (w0, tnth (pi_starts (mp_PI mpF)) i). *)
+    the cut image of seat i's start. *)
 Lemma five_card_exec_seat_endpointE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (i : 'I_(pi_T' (mp_PI mpF)).+1) :
   @exec_seat_endpoint mpF five_card_exec_plug (a, b) w0 0 i
@@ -326,10 +300,8 @@ Lemma five_card_exec_seat_endpointE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
 Proof. exact: (exec_seat_endpointE (five_card_exec_endpoints a b w0) i). Qed.
 
 (** five_card_exec_coalition_endpointsE — a coalition's endpoint readings are
-    the layout entries at the cut images of its seats.
-    @main correctness: the finfun sends a seat in C to the layout entry of the
-    committed pair at the cut image of that seat's start, and every seat
-    outside C to ord0. *)
+    the layout entries at the cut images of its seats, reading ord0 for every
+    seat outside the coalition. *)
 Lemma five_card_exec_coalition_endpointsE (a b : bool)
     (w0 : pgg_gT FiveCardKim_M) (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :
   @exec_coalition_endpoints mpF five_card_exec_plug (a, b) w0 0 C
@@ -342,10 +314,7 @@ exact: (exec_coalition_endpointsE (five_card_exec_endpoints a b w0) C).
 Qed.
 
 (** five_card_exec_coalition_endpoints_seqE — the coalition's endpoints in
-    seat order are the layout entries at the cut images of its seats.
-    @main correctness: mapping the endpoint reading over enum C gives the same
-    list as mapping the layout entry at the cut image of the start over
-    enum C. *)
+    seat order are the layout entries at the cut images of its seats. *)
 Lemma five_card_exec_coalition_endpoints_seqE (a b : bool)
     (w0 : pgg_gT FiveCardKim_M) (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :
   [seq @exec_seat_endpoint mpF five_card_exec_plug (a, b) w0 0 i
@@ -356,55 +325,45 @@ Proof.
 exact: (exec_coalition_endpoints_seqE (five_card_exec_endpoints a b w0) C).
 Qed.
 
-(** five_card_exec_player_raw_trace — seat i's raw executed trace.
-    @intent: the generic participant extractor exec_participant_trace at
-    five_card_exec_plug, committed pair ab, cut w0 and process offset 0.
-    Naming: intentional; _player_raw_trace names the seat-indexed executed
-    trace, matching denboer_player_trace, with which it agrees. *)
+(** five_card_exec_player_raw_trace — seat i's raw executed trace: the generic
+    participant extractor exec_participant_trace at five_card_exec_plug,
+    committed pair ab, cut w0 and process offset 0. It agrees with
+    denboer_player_trace. *)
 Definition five_card_exec_player_raw_trace (ab : bool * bool)
     (w0 : pgg_gT FiveCardKim_M) (i : 'I_(pi_T' (mp_PI mpF)).+1) :=
   @exec_participant_trace mpF five_card_exec_plug ab w0 0 i.
 
-(** five_card_exec_coalition_raw_trace — a coalition's raw executed traces.
-    @intent: the generic coalition assembly exec_coalition_trace at
-    five_card_exec_plug, committed pair ab, cut w0 and process offset 0.
-    Naming: intentional; _coalition_raw_trace names the set-indexed executed
-    trace family, the coalition twin of five_card_exec_player_raw_trace. *)
+(** five_card_exec_coalition_raw_trace — a coalition's raw executed traces:
+    the generic coalition assembly exec_coalition_trace at
+    five_card_exec_plug, committed pair ab, cut w0 and process offset 0, the
+    coalition twin of five_card_exec_player_raw_trace. *)
 Definition five_card_exec_coalition_raw_trace (ab : bool * bool)
     (w0 : pgg_gT FiveCardKim_M) (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :=
   @exec_coalition_trace mpF five_card_exec_plug ab w0 0 C.
 
-(** five_card_exec_input_raw_trace — committing party j's raw executed trace.
-    @intent: the generic input extractor exec_input_trace at
-    five_card_exec_plug, reading process identifier (pi_T' (mp_PI mpF)).+3 + j
-    of the run.
-    Naming: intentional; _input_raw_trace names the party-indexed executed
-    trace, the committing-party twin of five_card_exec_player_raw_trace. *)
+(** five_card_exec_input_raw_trace — committing party j's raw executed trace:
+    the generic input extractor exec_input_trace at five_card_exec_plug,
+    reading process identifier (pi_T' (mp_PI mpF)).+3 + j of the run, the
+    committing-party twin of five_card_exec_player_raw_trace. *)
 Definition five_card_exec_input_raw_trace (ab : bool * bool)
     (w0 : pgg_gT FiveCardKim_M) (j : nat) :=
   @exec_input_trace mpF five_card_exec_plug ab w0 0 j.
 
-(** five_card_exec_seat_countE — the profile's seat index type is 'I_5.
-    @main architecture: (pi_T' (mp_PI mpF)).+1 = 5, the seat index type shared
-    by the execution layer and the five-card coalition view. *)
+(** five_card_exec_seat_countE — the profile's seat index type is 'I_5, the
+    seat index type shared by the execution layer and the five-card coalition
+    view. *)
 Lemma five_card_exec_seat_countE : (pi_T' (mp_PI mpF)).+1 = 5.
 Proof. by []. Qed.
 
 (** five_card_exec_input_positions — the two committing parties are read at
-    process identifiers 7 and 8.
-    @main architecture: [seq (pi_T' (mp_PI mpF)).+3 + j | j <- iota 0 2] =
-    [:: 7; 8], the identifiers of five_card_exec_input_idsE.
-    Naming: intentional; _positions distinguishes the unfolded identifier
-    arithmetic from the packaged exec_input_ids form of
-    five_card_exec_input_idsE. *)
+    process identifiers 7 and 8: the unfolded identifier arithmetic behind
+    the packaged exec_input_ids identifiers of five_card_exec_input_idsE. *)
 Lemma five_card_exec_input_positions :
   [seq ((pi_T' (mp_PI mpF)).+3 + j)%N | j <- iota 0 2] = [:: 7; 8].
 Proof. by []. Qed.
 
 (** five_card_exec_raw_traceE — the derived raw trace is the trace of
-    den_boer_procs at the seat's process identifier.
-    @main architecture: five_card_exec_player_raw_trace (a, b) w0 i = nth [::]
-    (run_interp 100 (den_boer_procs a b w0 0)).2 (2 + i). *)
+    den_boer_procs at the seat's process identifier. *)
 Lemma five_card_exec_raw_traceE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (i : 'I_(pi_T' (mp_PI mpF)).+1) :
   five_card_exec_player_raw_trace (a, b) w0 i
@@ -423,26 +382,21 @@ Qed.
    on the pair and nothing else. *)
 
 (** five_card_oe_terminates — every process of the five-card run reaches
-    Finish at every committed pair and cut.
-    @composes: five_card_observed *)
+    Finish at every committed pair and cut. *)
 Lemma five_card_oe_terminates (x : bool * bool) (w0 : pgg_gT FiveCardKim_M) :
   (@exec_run mpF five_card_exec_plug x w0 0).1
   = nseq (size (@exec_procs mpF five_card_exec_plug x w0 0)) Finish.
 Proof. by case: x => a b; exact: five_card_exec_terminates. Qed.
 
 (** five_card_oe_endpoints — the five-card verifier endpoints are the static
-    observation at every committed pair and cut.
-    @composes: five_card_observed *)
+    observation at every committed pair and cut. *)
 Lemma five_card_oe_endpoints (x : bool * bool) (w0 : pgg_gT FiveCardKim_M) :
   @exec_endpoints mpF five_card_exec_plug x w0 0
   = @exec_static_endpoints mpF five_card_exec_plug five_card_content_obs x w0.
 Proof. by case: x => a b; exact: five_card_exec_endpoints. Qed.
 
 (** five_card_oe_static_recon — decoding the five-card static observation
-    returns the conjunction of the committed pair.
-    @composes: five_card_observed
-    Naming: intentional; the _oe_ infix marks the three fields of the
-    ObservedExecution record, and _static_recon is the field's own name. *)
+    returns the conjunction of the committed pair. *)
 Lemma five_card_oe_static_recon (x : bool * bool)
     (w0 : pgg_gT FiveCardKim_M) :
   w0 \in pgg_G FiveCardKim_M ->
@@ -461,34 +415,27 @@ Proof. by case: x => a b; exact: five_card_exec_recon. Qed.
    no realType, no bias, no hypothesis pack and no word length, and the three
    proof fields quantify over the cut, not over a distribution on cuts. *)
 
-(** five_card_observed — the five-card observed execution.
-    @intent: five_card_profile with plug five_card_exec_plug at process offset
-    0, static observation five_card_content_obs and expected value the
-    conjunction of the committed pair. *)
+(** five_card_observed — the five-card observed execution: five_card_profile
+    with plug five_card_exec_plug at process offset 0, static observation
+    five_card_content_obs and expected value the conjunction of the committed
+    pair. *)
 Definition five_card_observed : OE.ObservedExecution :=
   OE.MkObservedExecution mpF five_card_exec_plug 0
     five_card_content_obs (fun ab : bool * bool => ab.1 && ab.2)
     five_card_oe_terminates five_card_oe_endpoints five_card_oe_static_recon.
 
-(** den_boer_observed — the den Boer observed execution.
-    @intent: the five-card observed execution; the den Boer member adds no
-    execution data to the five-card family.
-    Naming: intentional; the den Boer prefix names the protocol member, matching
-    den_boer_profile, and the body records that the member adds no execution
-    data. *)
+(** den_boer_observed — the den Boer observed execution: the five-card
+    observed execution, since the den Boer member adds no execution data of
+    its own to the five-card family. *)
 Definition den_boer_observed : OE.ObservedExecution := five_card_observed.
 
 (** den_boer_observed_core — the den Boer wrapper is the five-card observed
-    execution.
-    @main architecture: den_boer_observed = five_card_observed. *)
+    execution. *)
 Lemma den_boer_observed_core : den_boer_observed = five_card_observed.
 Proof. by []. Qed.
 
 (** five_card_observed_recovers — the packaged five-card run decodes to the
-    conjunction of the committed pair.
-    @main correctness: exec_decode of the executed endpoints of
-    five_card_observed at the committed pair x and cut w0 is x.1 && x.2, for any
-    cut w0 in the group. *)
+    conjunction of the committed pair. *)
 Theorem five_card_observed_recovers (x : bool * bool)
     (w0 : pgg_gT FiveCardKim_M) (Hw0 : w0 \in pgg_G FiveCardKim_M) :
   @exec_decode mpF five_card_exec_plug
@@ -500,81 +447,64 @@ Proof. exact: (OE.oe_run_recovers five_card_observed x w0 Hw0). Qed.
 (*     The den Boer sample space of the five-card instance                    *)
 (******************************************************************************)
 
-(** five_card_sample_arg — the committed pair of a den Boer sample point.
-    @intent: the first component of a point of bool * bool * 'I_5. *)
+(** five_card_sample_arg — the committed pair of a den Boer sample point: the
+    first component of a point of bool * bool * 'I_5. *)
 Definition five_card_sample_arg (u : five_card_leakage.Omega)
     : (bool * bool)%type := u.1.
 
-(** five_card_sample_cut — the cut of a den Boer sample point.
-    @intent: the rotation fc_sigma ^+ k realizing the sampled rotation k, the
-    second component of a point of bool * bool * 'I_5. *)
+(** five_card_sample_cut — the cut of a den Boer sample point: the rotation
+    fc_sigma ^+ k realizing the sampled rotation k, the second component of a
+    point of bool * bool * 'I_5. *)
 Definition five_card_sample_cut (u : five_card_leakage.Omega)
     : pgg_gT (mp_M mpF) := (five_card_group.fc_sigma ^+ u.2)%g.
 
-(** five_card_sample — the five-card sample adapter.
-    @intent: the sample layer over five_card_exec_plug whose sample space is
-    the den Boer leakage space Omega under its uniform distribution P, the run
-    argument being the committed pair and the cut the realized rotation. *)
+(** five_card_sample — the five-card sample adapter: the sample layer over
+    five_card_exec_plug whose sample space is the den Boer leakage space
+    Omega under its uniform distribution P, with the run argument the
+    committed pair and the cut the realized rotation. *)
 Definition five_card_sample : SampleAdapter R five_card_exec_plug :=
   @MkSampleAdapter R mpF five_card_exec_plug five_card_leakage.Omega (P R)
     five_card_sample_arg five_card_sample_cut.
 
 (** five_card_sample_run — layer 1 at the den Boer space: the run at a sample
-    point.
-    @intent: sa_run at five_card_sample and process offset 0, the run at the
+    point, sa_run at five_card_sample and process offset 0, the run at the
     sampled committed pair and the sampled rotation. *)
 Definition five_card_sample_run (u : five_card_leakage.Omega) :=
   @sa_run R mpF five_card_exec_plug five_card_sample 0 u.
 
 (** five_card_sample_seat_view — layer 2 at the den Boer space: seat i's
-    endpoint.
-    @intent: sa_seat_view at five_card_sample, seat i's endpoint reader as a
-    random variable on P.
-    Naming: intentional; five_card is the two-word instance prefix shared by
-    five_card_exec_plug and five_card_content_obs. *)
+    endpoint, sa_seat_view at five_card_sample, seat i's endpoint reader as a
+    random variable on P. *)
 Definition five_card_sample_seat_view (i : 'I_(pi_T' (mp_PI mpF)).+1) :=
   @sa_seat_view R mpF five_card_exec_plug five_card_sample 0 i.
 
 (** five_card_sample_coalition_view — layer 2 at the den Boer space: a
-    coalition's readings.
-    @intent: sa_coalition_view at five_card_sample, the coalition endpoint
-    reader as a random variable on P.
-    Naming: intentional; five_card is the two-word instance prefix shared by
-    five_card_exec_plug and five_card_content_obs. *)
+    coalition's readings, sa_coalition_view at five_card_sample, the
+    coalition endpoint reader as a random variable on P. *)
 Definition five_card_sample_coalition_view
     (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :=
   @sa_coalition_view R mpF five_card_exec_plug five_card_sample 0 C.
 
 (** five_card_sample_seat_dist — layer 3 at the den Boer space: the
-    distribution of seat i's endpoint.
-    @intent: the pushforward of P along five_card_sample_seat_view i.
-    Naming: intentional; five_card is the two-word instance prefix shared by
-    five_card_exec_plug and five_card_content_obs. *)
+    distribution of seat i's endpoint, the pushforward of P along
+    five_card_sample_seat_view i. *)
 Definition five_card_sample_seat_dist (i : 'I_(pi_T' (mp_PI mpF)).+1) :=
   @sa_seat_dist R mpF five_card_exec_plug five_card_sample 0 i.
 
 (** five_card_sample_coalition_dist — layer 3 at the den Boer space, coalition
-    form.
-    @intent: the pushforward of P along five_card_sample_coalition_view C.
-    Naming: intentional; five_card is the two-word instance prefix shared by
-    five_card_exec_plug and five_card_content_obs. *)
+    form: the pushforward of P along five_card_sample_coalition_view C. *)
 Definition five_card_sample_coalition_dist
     (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :=
   @sa_coalition_dist R mpF five_card_exec_plug five_card_sample 0 C.
 
-(** five_card_sample_cut_dist — the den Boer sample space's cut
-    distribution.
-    @intent: the pushforward of P along the rotation map five_card_sample_cut.
-    Naming: intentional; five_card is the two-word instance prefix shared by
-    five_card_exec_plug and five_card_content_obs. *)
+(** five_card_sample_cut_dist — the den Boer sample space's cut distribution:
+    the pushforward of P along the rotation map five_card_sample_cut. *)
 Definition five_card_sample_cut_dist :=
   @sa_cut_dist R mpF five_card_exec_plug five_card_sample.
 
 (** five_card_sample_seat_distE — the executed seat distribution at the den
     Boer space is the distribution of the layout entry at the rotation image
-    of the seat's start.
-    @main architecture: five_card_sample_seat_dist i = fdistmap
-    (sa_static_seat_view five_card_sample five_card_content_obs i) (P R). *)
+    of the seat's start. *)
 Lemma five_card_sample_seat_distE (i : 'I_(pi_T' (mp_PI mpF)).+1) :
   five_card_sample_seat_dist i
   = fdistmap (@sa_static_seat_view R mpF five_card_exec_plug five_card_sample
@@ -585,10 +515,7 @@ Qed.
 
 (** five_card_sample_coalition_distE — the executed coalition distribution at
     the den Boer space is the distribution of the layout entries at the
-    rotation images of the coalition's starts.
-    @main architecture: five_card_sample_coalition_dist C = fdistmap
-    (sa_static_coalition_view five_card_sample five_card_content_obs C)
-    (P R). *)
+    rotation images of the coalition's starts. *)
 Lemma five_card_sample_coalition_distE (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :
   five_card_sample_coalition_dist C
   = fdistmap (@sa_static_coalition_view R mpF five_card_exec_plug
@@ -604,19 +531,16 @@ Qed.
 Let dbP := P R.
 
 (** five_card_exec_trace — seat i's executed trace as a random variable on the
-    leakage space.
-    @intent: content_of of five_card_exec_player_raw_trace at the committed
-    pair (w.1.1, w.1.2) and the cut fc_sigma ^+ w.2 realizing rotation w.2.
-    Naming: intentional; _exec_trace names the executed-trace random variable
-    of the execution layer, the plug-side twin of denboer_player_trace. *)
+    leakage space: content_of of five_card_exec_player_raw_trace at the
+    committed pair (w.1.1, w.1.2) and the cut fc_sigma ^+ w.2 realizing
+    rotation w.2, the plug-side twin of denboer_player_trace. *)
 Definition five_card_exec_trace (i : 'I_(pi_T' (mp_PI mpF)).+1)
     : {RV dbP -> 'I_5} :=
   fun w => content_of (five_card_exec_player_raw_trace (w.1.1, w.1.2)
                          (five_card_group.fc_sigma ^+ w.2)%g i).
 
 (** five_card_exec_traceE — the execution layer's trace variable is the den
-    Boer trace variable of denboer_trace.v.
-    @composes: five_card_exec_trace_secrecy *)
+    Boer trace variable of denboer_trace.v. *)
 Lemma five_card_exec_traceE (i : 'I_(pi_T' (mp_PI mpF)).+1) :
   five_card_exec_trace i = denboer_player_trace R i.
 Proof.
@@ -627,12 +551,8 @@ Qed.
 
 (** five_card_exec_trace_secrecy — one seat's executed trace, read through the
     generic extractor, leaves the secret's conditional entropy equal to its
-    plain entropy.
-    @main security: conditioning the secret on seat 0's executed trace does not
-    lower its entropy.
-    Naming: intentional; _trace_secrecy names the conditional-entropy statement
-    about the executed trace, matching denboer_trace_secrecy, which it
-    transports. *)
+    plain entropy: this transports denboer_trace_secrecy to the execution
+    layer. *)
 Corollary five_card_exec_trace_secrecy :
   `H( Secret R | five_card_exec_trace ord0 ) = `H `p_ (Secret R).
 Proof. by rewrite five_card_exec_traceE; exact: denboer_trace_secrecy. Qed.
@@ -641,18 +561,16 @@ Proof. by rewrite five_card_exec_traceE; exact: denboer_trace_secrecy. Qed.
 (*     The cut distribution of the den Boer sample space                      *)
 (******************************************************************************)
 
-(** five_card_card_bool2 — the pair of committed bits has four values.
-    @composes: five_card_sample_uniform_prodE
-    Naming: intentional; the identical certificate card_bool2 is declared at
-    kim_input_privacy.v:51, and the five_card prefix keeps this local copy from
-    colliding with it without adding an import edge to that file. *)
+(** five_card_card_bool2 — the pair of committed bits has four values. The
+    identical certificate card_bool2 is declared at kim_input_privacy.v:51;
+    this file keeps its own local copy under the five_card prefix rather than
+    add an import edge to that file. *)
 Lemma five_card_card_bool2 : #|{: bool * bool}| = 3.+1.
 Proof. by rewrite card_prod card_bool. Qed.
 
 (** five_card_sample_uniform_prodE — the den Boer leakage distribution is the
     product of the uniform distribution on the committed pair with the uniform
-    distribution on the rotation.
-    @composes: five_card_sample_snd_uniformE *)
+    distribution on the rotation. *)
 Lemma five_card_sample_uniform_prodE :
   P R = ((fdist_uniform five_card_card_bool2)
          `x (fdist_uniform (card_ord 5)))%fdist.
@@ -664,8 +582,7 @@ by rewrite -invfM -natrM.
 Qed.
 
 (** five_card_sample_snd_uniformE — the rotation marginal of the den Boer
-    leakage distribution is uniform on 'I_5.
-    @composes: five_card_sample_cut_distE *)
+    leakage distribution is uniform on 'I_5. *)
 Lemma five_card_sample_snd_uniformE :
   fdistmap (fun u : five_card_leakage.Omega => u.2) (P R)
   = fdist_uniform (card_ord 5).
@@ -676,9 +593,7 @@ Qed.
 
 (** five_card_sample_cut_distE — the den Boer sample space's cut distribution
     is the image of the uniform rotation distribution under the rotation
-    realization k |-> fc_sigma ^+ k.
-    @main architecture: five_card_sample_cut_dist = fdistmap
-    (fun k : 'I_5 => (fc_sigma ^+ k)%g) (fdist_uniform (card_ord 5)). *)
+    realization k |-> fc_sigma ^+ k. *)
 Lemma five_card_sample_cut_distE :
   five_card_sample_cut_dist
   = fdistmap (fun k : 'I_5 => (five_card_group.fc_sigma ^+ k)%g)
@@ -693,21 +608,16 @@ Qed.
 (*     The committing parties' executed rows                                  *)
 (******************************************************************************)
 
-(** five_card_exec_traces_size — the den Boer run has nine trace rows.
-    @composes: five_card_exec_input_raw_traceE
-    Naming: intentional; _size is the repo's suffix for a size _ = _ statement,
-    as in five_card_exec_procs_size and exec_endpoints_size. *)
+(** five_card_exec_traces_size — the den Boer run has nine trace rows. *)
 Lemma five_card_exec_traces_size (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
   size (run_interp 100 (den_boer_procs a b w0 0)).2 = 9.
 Proof. rewrite /den_boer_procs; vm_compute; reflexivity. Qed.
 
 (** five_card_exec_input_raw_traceE — committing party j's executed row is
-    empty, at every j.
-    @composes: five_card_exec_input_trace_secrecy
-    Rows 0 and 1, the rows of the two committing parties, are empty because a
-    Send logs nothing to the sender's own row in this interpreter and the
-    committing parties are pure senders. Rows j >= 2 are empty by the nth
-    default past the nine-process run. *)
+    empty, at every j. Rows 0 and 1, the rows of the two committing parties,
+    are empty because a Send logs nothing to the sender's own row in this
+    interpreter and the committing parties are pure senders. Rows j >= 2 are
+    empty by the nth default past the nine-process run. *)
 Lemma five_card_exec_input_raw_traceE (a b : bool)
     (w0 : pgg_gT FiveCardKim_M) (j : nat) :
   five_card_exec_input_raw_trace (a, b) w0 j = [::].
@@ -719,29 +629,24 @@ case: j => [|[|j]];
 all: by rewrite /den_boer_procs; vm_compute.
 Qed.
 
-(** five_card_exec_input_trace — committing party j's executed-row content
-    as a random variable on the leakage space.
-    @intent: content_of of five_card_exec_input_raw_trace at the committed pair
-    (w.1.1, w.1.2) and the cut fc_sigma ^+ w.2 realizing rotation w.2.
-    Naming: intentional; _input_trace names the party-indexed executed-trace
-    random variable, the committing-party twin of five_card_exec_trace. *)
+(** five_card_exec_input_trace — committing party j's executed-row content as
+    a random variable on the leakage space: content_of of
+    five_card_exec_input_raw_trace at the committed pair (w.1.1, w.1.2) and
+    the cut fc_sigma ^+ w.2 realizing rotation w.2, the committing-party twin
+    of five_card_exec_trace. *)
 Definition five_card_exec_input_trace (j : nat) : {RV dbP -> 'I_5} :=
   fun w => content_of (five_card_exec_input_raw_trace (w.1.1, w.1.2)
                          (five_card_group.fc_sigma ^+ w.2)%g j).
 
 (** five_card_exec_input_trace_secrecy — conditioning the secret on committing
-    party j's executed-row observable leaves its entropy unchanged, at every j.
-    @main architecture: `H( Secret | five_card_exec_input_trace j ) =
-    `H `p_ Secret.
-    The rows are empty because in this interpreter model a Send logs nothing to
-    the sender's own trace, so the identity is a constant-conditioning
-    statement, not a commitment-privacy result. A committing party knows its
+    party j's executed-row observable leaves its entropy unchanged, at every
+    j. The rows are empty because in this interpreter model a Send logs
+    nothing to the sender's own trace, so this is a constant-conditioning
+    statement, not a commitment-privacy result: a committing party knows its
     own bit, so even a non-empty row would not make this a privacy statement
-    about that party. The committed payloads travel to the dealer's row, which
-    five_card_exec_dealer_pair_centropy0 and
-    five_card_exec_dealer_trace_centropy0 show determines both bits.
-    Naming: intentional; _trace_secrecy names the conditional-entropy statement
-    about an executed trace, matching five_card_exec_trace_secrecy. *)
+    about that party. The committed payloads travel to the dealer's row
+    instead, which five_card_exec_dealer_pair_centropy0 and
+    five_card_exec_dealer_trace_centropy0 show determines both bits. *)
 Lemma five_card_exec_input_trace_secrecy (j : nat) :
   `H( Secret R | five_card_exec_input_trace j ) = `H `p_ (Secret R).
 Proof.
@@ -758,21 +663,19 @@ Qed.
 (*     The dealer's executed row                                              *)
 (******************************************************************************)
 
-(** five_card_exec_dealer_raw_trace — the dealer's raw executed trace.
-    @intent: the generic dealer extractor exec_dealer_trace at
-    five_card_exec_plug, committed pair ab, cut w0 and process offset 0.
-    Naming: intentional; _dealer_raw_trace names the dealer's executed trace,
-    the dealer twin of five_card_exec_input_raw_trace. *)
+(** five_card_exec_dealer_raw_trace — the dealer's raw executed trace: the
+    generic dealer extractor exec_dealer_trace at five_card_exec_plug,
+    committed pair ab, cut w0 and process offset 0, the dealer twin of
+    five_card_exec_input_raw_trace. *)
 Definition five_card_exec_dealer_raw_trace (ab : bool * bool)
     (w0 : pgg_gT FiveCardKim_M) :=
   @exec_dealer_trace mpF five_card_exec_plug ab w0 0.
 
 (** five_card_exec_dealer_raw_traceE — the dealer's executed row is the deck
-    index followed by the two committed sheets.
-    @composes: five_card_exec_dealer_traceE
-    The row is anti-chronological: the head PGG_idx 0 is the dealer's own Init
-    of the deck index, which happens last, then party 8's sheet
-    PGG_sheet (encode_bool b), then party 7's PGG_sheet (encode_bool a). *)
+    index followed by the two committed sheets. The row is anti-chronological:
+    the head PGG_idx 0 is the dealer's own Init of the deck index, which
+    happens last, then party 8's sheet PGG_sheet (encode_bool b), then party
+    7's PGG_sheet (encode_bool a). *)
 Lemma five_card_exec_dealer_raw_traceE (a b : bool)
     (w0 : pgg_gT FiveCardKim_M) :
   five_card_exec_dealer_raw_trace (a, b) w0
@@ -784,34 +687,28 @@ rewrite /den_boer_procs; vm_compute; reflexivity.
 Qed.
 
 (** five_card_exec_dealer_readout — the committed pair decoded from a dealer
-    row.
-    @intent: decode_bool of the two sheets of a three-entry row, the second bit
-    at the head, and (false, false) elsewhere.
-    The (false, false) value returned on a malformed row coincides with a
-    legitimate committed pair, so the readout is meaningful only through
-    five_card_exec_dealer_raw_traceE.
-    Naming: intentional; _dealer_readout names the decoding function of the
-    dealer row, the row-level companion of five_card_exec_dealer_trace. *)
+    row: decode_bool of the two sheets of a three-entry row, the second bit
+    at the head, and (false, false) elsewhere, the row-level companion of
+    five_card_exec_dealer_trace. The (false, false) value returned on a
+    malformed row coincides with a legitimate committed pair, so the readout
+    is meaningful only through five_card_exec_dealer_raw_traceE. *)
 Definition five_card_exec_dealer_readout
     (tr : seq (pgg_data (pgg_N' FiveCardKim_M).+1)) : (bool * bool)%type :=
   if tr is [:: _ ; PGG_sheet y ; PGG_sheet x]
   then (decode_bool x, decode_bool y) else (false, false).
 
 (** five_card_exec_dealer_trace — the dealer's executed row decoded as a
-    random variable on the leakage space.
-    @intent: five_card_exec_dealer_readout of five_card_exec_dealer_raw_trace
-    at the committed pair (w.1.1, w.1.2) and the cut fc_sigma ^+ w.2 realizing
-    rotation w.2.
-    Naming: intentional; _dealer_trace names the dealer's executed-trace random
-    variable, the dealer twin of five_card_exec_trace. *)
+    random variable on the leakage space: five_card_exec_dealer_readout of
+    five_card_exec_dealer_raw_trace at the committed pair (w.1.1, w.1.2) and
+    the cut fc_sigma ^+ w.2 realizing rotation w.2, the dealer twin of
+    five_card_exec_trace. *)
 Definition five_card_exec_dealer_trace : {RV dbP -> (bool * bool)%type} :=
   fun w => five_card_exec_dealer_readout
              (five_card_exec_dealer_raw_trace (w.1.1, w.1.2)
                 (five_card_group.fc_sigma ^+ w.2)%g).
 
 (** five_card_exec_dealer_traceE — the dealer's decoded row is the sampled
-    committed pair.
-    @composes: five_card_exec_dealer_pair_centropy0 *)
+    committed pair. *)
 Lemma five_card_exec_dealer_traceE :
   five_card_exec_dealer_trace = fun w => (w.1.1, w.1.2).
 Proof.
@@ -821,11 +718,7 @@ by rewrite /five_card_exec_dealer_readout /= !decode_encode_bool.
 Qed.
 
 (** five_card_exec_dealer_pair_centropy0 — the dealer's decoded row determines
-    the committed pair.
-    @main security: `H( (fun w => w.1) | five_card_exec_dealer_trace ) = 0,
-    where fun w => w.1 reads the committed pair off a sample point.
-    Naming: intentional; _centropy0 names a conditional-entropy-zero
-    determination statement, _pair_ marking the committed-pair reader. *)
+    the committed pair. *)
 Lemma five_card_exec_dealer_pair_centropy0 :
   `H( (fun w : five_card_leakage.Omega => w.1)
       | five_card_exec_dealer_trace ) = 0.
@@ -837,10 +730,7 @@ exact: centropy_RV_comp0.
 Qed.
 
 (** five_card_exec_dealer_trace_centropy0 — the dealer's decoded row
-    determines the secret.
-    @main security: `H( Secret | five_card_exec_dealer_trace ) = 0.
-    Naming: intentional; _trace_centropy0 names the conditional-entropy-zero
-    determination statement carried by an executed trace. *)
+    determines the secret. *)
 Lemma five_card_exec_dealer_trace_centropy0 :
   `H( Secret R | five_card_exec_dealer_trace ) = 0.
 Proof.
@@ -857,9 +747,7 @@ End five_card_execution.
    a word length, so there is one process list, compared here with itself. *)
 
 (** five_card_exec_procs_biasE — the executed program does not depend on the
-    bias.
-    @main architecture: the process list of the single five-card plug at a
-    committed pair, a cut and a process offset equals itself. *)
+    bias. *)
 Lemma five_card_exec_procs_biasE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (P_idx : nat) :
   @exec_procs five_card_profile five_card_exec_plug (a, b) w0 P_idx
@@ -879,8 +767,7 @@ Variable sigmas : m.+1.-tuple {perm 'I_N''.+2}.
 Variable W : R.-fdist 'I_m.+1.
 
 (** fdistmap_head1 — the head letter of a one-letter word is distributed as
-    the letter itself.
-    @composes: rho_from_words_weighted1 *)
+    the letter itself. *)
 Lemma fdistmap_head1 :
   fdistmap (fun v : 'rV['I_m.+1]_1 => v ``_ ord0) (W `^ 1) = W.
 Proof.
@@ -891,8 +778,7 @@ by rewrite -big_mkcond big_pred1_eq.
 Qed.
 
 (** rho_from_words_weighted1 — the word shuffle at word length 1 is the image
-    of the letter distribution under the alphabet lookup.
-    @composes: den_boer_witness_rotationE *)
+    of the letter distribution under the alphabet lookup. *)
 Lemma rho_from_words_weighted1 :
   @rho_from_words_weighted R N'' m 1 sigmas W = fdistmap (tnth sigmas) W.
 Proof.
@@ -911,8 +797,7 @@ Section den_boer_witness_distribution.
 Variable R : realType.
 
 (** kim_weight_uniform_at0 — the Kim weight distribution at bias 0 is uniform
-    on 'I_5.
-    @composes: den_boer_witness_rotationE *)
+    on 'I_5. *)
 Lemma kim_weight_uniform_at0 :
   kim_weight_dist (den_boer_eps0_lt R) (den_boer_eps0_gt R)
   = fdist_uniform (card_ord 5).
@@ -923,8 +808,7 @@ Qed.
 
 (** den_boer_witness_rotationE — the den Boer marginal bound's distribution is
     the image of the uniform rotation distribution under the rotation
-    realization k |-> fc_sigma ^+ k.
-    @composes: den_boer_sample_cut_witnessE *)
+    realization k |-> fc_sigma ^+ k. *)
 Lemma den_boer_witness_rotationE :
   sw_rho_dist (den_boer_marginal_bound R)
   = fdistmap (fun k : 'I_5 => (five_card_group.fc_sigma ^+ k)%g)
@@ -938,9 +822,7 @@ Qed.
 End den_boer_witness_distribution.
 
 (** den_boer_sample_cut_witnessE — the five-card sample's cut distribution is
-    the den Boer marginal bound's own shuffle distribution.
-    @main architecture: five_card_sample_cut_dist R = sw_rho_dist
-    (den_boer_marginal_bound R). *)
+    the den Boer marginal bound's own shuffle distribution. *)
 Lemma den_boer_sample_cut_witnessE (R : realType) :
   five_card_sample_cut_dist R = sw_rho_dist (den_boer_marginal_bound R).
 Proof. by rewrite five_card_sample_cut_distE den_boer_witness_rotationE. Qed.

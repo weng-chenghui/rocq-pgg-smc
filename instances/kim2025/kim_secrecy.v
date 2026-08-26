@@ -29,9 +29,9 @@ Variable R : realType.
 
 Let kimP := P R.
 
-(** kim_indep — the one-card view is independent of the secret a && b under
-    Kim's uniform C_5 cut, the same fact as den Boer.
-    @composes: kim_view_secrecy *)
+(** kim_indep — the one-card view is independent of the secret a && b, the
+    same C_5-uniformity fact den Boer's view secrecy proves, now instantiated
+    at Kim's five-generator presentation of the cut. *)
 Lemma kim_indep : kimP |= ViewA R [:: 0%N] _|_ Secret R.
 Proof. by apply/inde_RV_sym; apply: mutual_info_RV0_indep; exact: leak_k1. Qed.
 
@@ -41,10 +41,12 @@ Definition kim_ccd : CyclicCutData kimP :=
 Definition kim_mechanism : SharingMechanism kimP 0 0 :=
   @CyclicCut _ _ kimP 0 0 kim_ccd.
 
-(** kim_view_secrecy — one revealed card of Kim's five-card family carries zero
-    information about the secret a && b.
-    @main security: zero mutual information and unchanged conditional entropy for
-    the single-card view. *)
+(** kim_view_secrecy — one revealed card of Kim's five-card family carries
+    zero information about the secret a && b: mutual information between
+    secret and single-card view is 0, and the secret's entropy conditioned on
+    the view equals its unconditional entropy. This is the dealing-phase
+    secrecy guarantee for Kim's mechanism, and it coincides with den Boer's
+    because both cut through the same uniform C_5 orbit. *)
 Lemma kim_view_secrecy :
   `I( lw_secret (mechanism_leakage kim_mechanism) ;
       lw_view  (mechanism_leakage kim_mechanism) ) = 0%R /\

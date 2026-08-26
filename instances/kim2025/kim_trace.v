@@ -33,16 +33,18 @@ Local Open Scope entropy_scope.
 Section kim_trace_sec.
 Variable R : realType.
 
-(* kim's player trace coincides with den Boer's: kim_procs = den_boer_procs.
-   @intent: alias the den Boer executed-trace random variable for the kim
-   instance. *)
+(* kim_player_trace is denboer_player_trace R: Kim's family shares
+   FiveCardKim_M and the five-card layout with den Boer, so the two
+   instances trace the same executed random variable and every den Boer
+   trace fact transfers to Kim without a new proof. *)
 Definition kim_player_trace := denboer_player_trace R.
 
-(* a single corrupted player's executed kim trace leaves the secret's
-   conditional entropy equal to its plain entropy.
-   @main security: single-player executed-trace secrecy for the kim five-card
-   instance, reusing the den Boer monodromy-cut bridge with kim's
-   independence. *)
+(* A single corrupted player's executed Kim trace leaves the secret's
+   conditional entropy equal to its unconditional entropy: trace-level
+   secrecy, strictly stronger than the single-card view secrecy of
+   kim_secrecy.v. The proof reuses den Boer's trace_secrecy_of_view bridge,
+   instantiated with Kim's independence fact kim_indep in place of
+   den Boer's. *)
 Lemma kim_trace_secrecy :
   `H( Secret R | kim_player_trace ord0 ) = `H `p_ (Secret R).
 Proof.

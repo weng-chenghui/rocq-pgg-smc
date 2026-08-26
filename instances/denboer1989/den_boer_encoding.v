@@ -20,14 +20,13 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 (** den_boer_layout — the den Boer starting layout: the two committed bits
-    encoded into the five-card arrangement as 'I_5 shares.
-    @intent: map_tuple encode_bool over fc_arrange_tup of the input bits. *)
+    encoded into the five-card arrangement as 'I_5 shares. *)
 Definition den_boer_layout (ab : bool * bool) : 5.-tuple 'I_5 :=
   map_tuple encode_bool (fc_arrange_tup ab.1 ab.2).
 
 (** den_boer_assemble_valid — the encoded den Boer arrangement is a valid
-    sharing of a && b.
-    @composes: den_boer_encoding. *)
+    sharing of a && b. This is the assemble-valid component of
+    den_boer_encoding. *)
 Lemma den_boer_assemble_valid (ab : bool * bool) :
   fcI_valid (ab.1 && ab.2) (den_boer_layout ab).
 Proof.
@@ -39,8 +38,7 @@ by have := fc_correct ab.1 ab.2 (k:=0) isT; rewrite /fc_shuffle rot0.
 Qed.
 
 (** den_boer_orbit — inputs with equal AND give layouts that differ by a cyclic
-    rotation: the three a&&b=false inputs lie in one rotation orbit.
-    @composes: den_boer_encoding. *)
+    rotation: the three a&&b=false inputs lie in one rotation orbit. *)
 Lemma den_boer_orbit (ab ab' : bool * bool) :
   ab.1 && ab.2 = ab'.1 && ab'.2 ->
   exists k : 'I_5, val (den_boer_layout ab') = rot k (val (den_boer_layout ab)).
@@ -55,8 +53,7 @@ case: a; case: b; case: a'; case: b' => //=; move=> _;
 Qed.
 
 (** den_boer_orbit_perm — den_boer_orbit in the rp_monodromy reindex form the
-    InputEncoding.ie_orbit field expects.
-    @composes: den_boer_encoding. *)
+    InputEncoding.ie_orbit field expects. *)
 Lemma den_boer_orbit_perm (ab ab' : bool * bool) :
   ab.1 && ab.2 = ab'.1 && ab'.2 ->
   exists g : pgg_gT FiveCardKim_M, g \in pgg_G FiveCardKim_M /\
@@ -98,9 +95,9 @@ rewrite nth_rot_mod //.
 by rewrite -/s fc_sigma_pow_val.
 Qed.
 
-(** den_boer_encoding — the AND-function input encoding through five_card_plug.
-    @main correctness: assembles input bits into a valid five-card layout whose
-    equal-output orbit is the cyclic cut group. *)
+(** den_boer_encoding — the AND-function input encoding through
+    five_card_plug: it assembles input bits into a valid five-card layout
+    whose equal-output orbit is the cyclic cut group. *)
 Definition den_boer_encoding : InputEncoding five_card_plug (bool * bool) :=
   @MkInputEncoding FiveCardKim_M bool five_card_plug (bool * bool)
     den_boer_layout
@@ -129,17 +126,16 @@ Import GRing.Theory Num.Theory.
 
 Variable R : realType.
 
-(** Inputs — the two committed input bits of an outcome.
-    @intent: the pair (a, b) of input bits, the random variable whose
-    conditional independence from the partial view given the secret a && b is
-    the perfect-input-privacy statement. *)
+(** Inputs — the two committed input bits of an outcome: the pair (a, b).
+    This is the random variable whose conditional independence from the
+    partial view, given the secret a && b, is the perfect-input-privacy
+    statement. *)
 Definition Inputs : {RV (P R) -> bool * bool} :=
   fun w => let: (a, b, _) := w in (a, b).
 
 (** den_boer_view_count_eq — inputs with equal output deal a partial view with
     the same fibre count: for any position list and view value, the number of
-    cuts realising it is the same across the orbit.
-    @composes: den_boer_input_private. *)
+    cuts realising it is the same across the orbit. *)
 Lemma den_boer_view_count_eq (A : seq nat) (b : (size A).-tuple bool)
     (x x' : bool * bool) :
   x.1 && x.2 = x'.1 && x'.2 ->
@@ -222,8 +218,7 @@ by rewrite phiK.
 Qed.
 
 (** den_boer_cinde — conditioned on the secret, the inputs are independent of
-    any partial view of the dealt row.
-    @composes: den_boer_input_private. *)
+    any partial view of the dealt row. *)
 Lemma den_boer_cinde (A : seq nat) :
   cinde_RV Inputs (ViewA R A) (Secret R).
 Proof.
@@ -338,8 +333,7 @@ Qed.
 
 (** den_boer_input_private — perfect input privacy: conditioned on the secret,
     the inputs are independent of any partial view, so the conditional mutual
-    information of the inputs and the view given the secret is zero.
-    @main security: cond_mutual_info (`p_ [% Inputs, ViewA A, Secret]) = 0. *)
+    information of the inputs and the view given the secret is zero. *)
 Lemma den_boer_input_private (A : seq nat) :
   cond_mutual_info (`p_ [% Inputs, ViewA R A, Secret R]) = 0 :> R.
 Proof.
@@ -348,8 +342,7 @@ Qed.
 
 (** cinde_ViewT_of_A — transport of the conditional independence from a
     position list to a position tuple carrying the same positions: the size
-    index of the tuple is eliminated along the equation size A = k.
-    @composes: cinde_ViewS. *)
+    index of the tuple is eliminated along the equation size A = k. *)
 Lemma cinde_ViewT_of_A (A : seq nat) k (t : k.-tuple 'I_5) (e : size A = k) :
   [seq val i | i <- val t] = A -> cinde_RV Inputs (ViewT R t) (Secret R).
 Proof.
@@ -359,8 +352,7 @@ Qed.
 
 (** cinde_ViewS — conditioned on the announced output a && b, the input pair
     is independent of the view at any subset of the five row positions, hence
-    at each of the thirty-two reveal patterns indexing leak_view_set.
-    @main security: cinde_RV Inputs (ViewS S) Secret, for every reveal set S. *)
+    at each of the thirty-two reveal patterns indexing leak_view_set. *)
 Lemma cinde_ViewS (S : {set 'I_5}) : cinde_RV Inputs (ViewS R S) (Secret R).
 Proof.
 apply: (@cinde_ViewT_of_A [seq val i | i <- val (enum_tuple S)] #|S|
@@ -371,8 +363,7 @@ Qed.
 
 (** input_private_ViewS — the set-indexed form of perfect input privacy: the
     view at a reveal pattern carries no information about the input pair once
-    the announced output is known.
-    @main security: cond_mutual_info (`p_ [% Inputs, ViewS S, Secret]) = 0. *)
+    the announced output is known. *)
 Lemma input_private_ViewS (S : {set 'I_5}) :
   cond_mutual_info (`p_ [% Inputs, ViewS R S, Secret R]) = 0 :> R.
 Proof. by apply: cinde_cond_mutual_info0; exact: cinde_ViewS. Qed.

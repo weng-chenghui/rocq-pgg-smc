@@ -105,12 +105,12 @@ Module FiveCardAnalysis.
 (* one program and the equality holds by erefl.                               *)
 (******************************************************************************)
 
-(** profile — the probability-independent five-card program profile.
-    @intent: alias of five_card_profile. *)
+(** profile — the probability-independent five-card program profile. *)
 Definition profile := five_card_profile.
 
-(** den_boer_profile — the same program under the den Boer name.
-    @intent: alias of den_boer_profile.den_boer_profile. *)
+(** den_boer_profile — the den Boer instance's name for the same program
+    value as profile: the two aliases are erefl-equal, so naming the program
+    twice costs nothing at the value level, per the retention check below. *)
 Definition den_boer_profile := den_boer_profile.den_boer_profile.
 
 (******************************************************************************)
@@ -118,13 +118,11 @@ Definition den_boer_profile := den_boer_profile.den_boer_profile.
 (******************************************************************************)
 
 (** exec_plug — the execution plug over that profile, carrying the shared
-    piSMC run.
-    @intent: alias of five_card_exec_plug. *)
+    piSMC run. *)
 Definition exec_plug := five_card_exec_plug.
 
 (** verifier_trace — the verifier's raw executed trace, a message list read
-    at the verifier process of the run.
-    @intent: exec_verifier_trace specialized at five_card_exec_plug. *)
+    at the verifier process of the run. *)
 Definition verifier_trace :=
   @exec_verifier_trace five_card_profile five_card_exec_plug.
 
@@ -138,67 +136,56 @@ Definition verifier_trace :=
 (* sequence, and bool for the evaluated secret.                               *)
 (******************************************************************************)
 
-(** player_raw_trace — one seat's raw executed trace, a message list.
-    @intent: alias of five_card_exec_player_raw_trace. *)
+(** player_raw_trace — one seat's raw executed trace, a message list. *)
 Definition player_raw_trace := @five_card_exec_player_raw_trace.
 
 (** coalition_raw_trace — a coalition's raw executed traces, a finfun of
-    message lists indexed by seats.
-    @intent: alias of five_card_exec_coalition_raw_trace. *)
+    message lists indexed by seats. *)
 Definition coalition_raw_trace := @five_card_exec_coalition_raw_trace.
 
 (** input_raw_trace — an input party's raw executed trace, a message list
-    indexed by the party index.
-    @intent: alias of five_card_exec_input_raw_trace. *)
+    indexed by the party index. *)
 Definition input_raw_trace := @five_card_exec_input_raw_trace.
 
 (** input_trace — an input party's finite content reader, a random variable
-    with carrier 'I_5.
-    @intent: alias of five_card_exec_input_trace. *)
+    with carrier 'I_5. *)
 Definition input_trace := @five_card_exec_input_trace.
 
-(** dealer_raw_trace — the dealer's raw executed trace, a message list.
-    @intent: alias of five_card_exec_dealer_raw_trace. *)
+(** dealer_raw_trace — the dealer's raw executed trace, a message list. *)
 Definition dealer_raw_trace := @five_card_exec_dealer_raw_trace.
 
 (** dealer_trace — the dealer's finite content reader, a random variable with
-    carrier bool * bool.
-    @intent: alias of five_card_exec_dealer_trace. *)
+    carrier bool * bool. *)
 Definition dealer_trace := @five_card_exec_dealer_trace.
 
 (** verifier_endpoints — the executed endpoint list of the run, the dealt
-    card positions the verifier reads.
-    @intent: exec_endpoints specialized at five_card_exec_plug. *)
+    card positions the verifier reads. *)
 Definition verifier_endpoints :=
   @exec_endpoints five_card_profile five_card_exec_plug.
 
 (** content_trace — one seat's finite content reader, a random variable with
-    carrier 'I_5.
-    @intent: alias of five_card_exec_trace. *)
+    carrier 'I_5. *)
 Definition content_trace := @five_card_exec_trace.
 
 (** colour_view — the decoded colour sequence at a list of seat indices into
-    the endpoint list, carrier (size A).-tuple bool.
-    @intent: alias of five_card_exec_colour_view, the observer of the Kim
+    the endpoint list, carrier (size A).-tuple bool: the observer of the Kim
     input-privacy bridge. *)
 Definition colour_view := @five_card_exec_colour_view.
 
-(** secret — the evaluated secret a AND b read as a random variable.
-    @intent: alias of five_card_leakage.Secret. *)
+(** secret — the evaluated secret a AND b read as a random variable. *)
 Definition secret := @five_card_leakage.Secret.
 
 (** prior — the uniform distribution on the den Boer sample space the finite
-    content readers are random variables on.
-    @intent: alias of five_card_leakage.P. *)
+    content readers are random variables on. *)
 Definition prior := @five_card_leakage.P.
 
 (** observed — the observed execution of the profile and plug: the run, its
-    static observation and the value it recovers.
-    @intent: alias of five_card_observed. *)
+    static observation and the value it recovers. *)
 Definition observed := five_card_observed.
 
-(** den_boer_observed — the same observed execution under the den Boer name.
-    @intent: alias of five_card_exec.den_boer_observed. *)
+(** den_boer_observed — the facade's bare name for five_card_exec's own
+    den_boer_observed value: re-exposing it under the module drops the
+    five_card_exec prefix without touching the landed observed execution. *)
 Definition den_boer_observed := five_card_exec.den_boer_observed.
 
 (******************************************************************************)
@@ -209,104 +196,84 @@ Definition den_boer_observed := five_card_exec.den_boer_observed.
 (* can be attached to a named executed observer.                              *)
 (******************************************************************************)
 
-(** uniform_sample — the uniform one-cut model.
-    @intent: alias of five_card_sample. *)
+(** uniform_sample — the uniform one-cut model. *)
 Definition uniform_sample := @five_card_sample.
 
 (** single_biased_sample — the single-biased one-cut model at Kim's input
-    distribution.
-    @intent: alias of kim_single_sample. *)
+    distribution. *)
 Definition single_biased_sample := @kim_single_sample.
 
-(** repeated_sample — the repeated-biased model at word length L.
-    @intent: alias of kim_repeated_sample. *)
+(** repeated_sample — the repeated-biased model at word length L. *)
 Definition repeated_sample := @kim_repeated_sample.
 
-(** centi_sample — the seven-cut model at bias one hundredth.
-    @intent: alias of kim_centi_repeated_sample. *)
+(** centi_sample — the seven-cut model at bias one hundredth. *)
 Definition centi_sample := @kim_centi_repeated_sample.
 
 (** uniform_family — the uniform rotation model as a unit-indexed typed
-    family.
-    @intent: alias of five_card_uniform_family. *)
+    family. *)
 Definition uniform_family := five_card_uniform_family.
 
 (** biased_family — the single biased cut at bias one hundredth as a
-    unit-indexed typed family.
-    @intent: alias of kim_biased_family. *)
+    unit-indexed typed family. *)
 Definition biased_family := kim_biased_family.
 
 (** centi_family — the seven-cut repeated model at bias one hundredth as a
-    unit-indexed typed family.
-    @intent: alias of kim_centi_family. *)
+    unit-indexed typed family. *)
 Definition centi_family := kim_centi_family.
 
 (** sample_cut_distE — the uniform model's cut distribution is the uniform
-    rotation.
-    @intent: alias of five_card_sample_cut_distE. *)
+    rotation. *)
 Definition sample_cut_distE := @five_card_sample_cut_distE.
 
 (** sample_cut_witnessE — the uniform model's cut distribution is the shuffle
-    of the den Boer marginal bound.
-    @intent: alias of den_boer_sample_cut_witnessE. *)
+    of the den Boer marginal bound. *)
 Definition sample_cut_witnessE := @den_boer_sample_cut_witnessE.
 
 (** witness_rotationE — the den Boer marginal bound's shuffle is the uniform
-    rotation.
-    @intent: alias of den_boer_witness_rotationE. *)
+    rotation. *)
 Definition witness_rotationE := @den_boer_witness_rotationE.
 
 (** single_cut_distE — the single-biased model's cut distribution is the
-    biased rotation.
-    @intent: alias of kim_single_cut_distE. *)
+    biased rotation. *)
 Definition single_cut_distE := @kim_single_cut_distE.
 
 (** repeated_cut_distE — the repeated model's cut distribution is the
-    weighted word shuffle at word length L.
-    @intent: alias of kim_repeated_cut_distE. *)
+    weighted word shuffle at word length L. *)
 Definition repeated_cut_distE := @kim_repeated_cut_distE.
 
 (** repeated_seat_distE — the repeated model's executed seat distribution is
-    the pushforward of the static observation.
-    @intent: alias of kim_repeated_seat_distE. *)
+    the pushforward of the static observation. *)
 Definition repeated_seat_distE := @kim_repeated_seat_distE.
 
 (** centi_cut_distE — the seven-cut model's cut distribution is the marginal
-    bound of the seven-cut certificate bundle.
-    @intent: alias of kim_centi_cut_distE. *)
+    bound of the seven-cut certificate bundle. *)
 Definition centi_cut_distE := @kim_centi_cut_distE.
 
 (** centi_witness_rhoE — the seven-cut certificate bundle's marginal bound
-    carries the weighted word shuffle at word length seven.
-    @intent: alias of kim_centi_witness_rhoE. *)
+    carries the weighted word shuffle at word length seven. *)
 Definition centi_witness_rhoE := @kim_centi_witness_rhoE.
 
 (** centi_repeated_seat_distE — the seven-cut model's executed seat
-    distribution is the pushforward of the static observation.
-    @intent: alias of kim_centi_repeated_seat_distE. *)
+    distribution is the pushforward of the static observation. *)
 Definition centi_repeated_seat_distE := @kim_centi_repeated_seat_distE.
 
 (******************************************************************************)
 (* ===== 5. Correctness ===== *)
 (******************************************************************************)
 
-(** exec_correct — termination, endpoint count and recovery together.
-    @intent: alias of five_card_exec_correct. *)
+(** exec_correct — termination, endpoint count and recovery together. *)
 Definition exec_correct := @five_card_exec_correct.
 
-(** exec_recovers — the executed run decodes to a AND b.
-    @intent: alias of five_card_exec_recovers. *)
+(** exec_recovers — the executed run decodes to a AND b. *)
 Definition exec_recovers := @five_card_exec_recovers.
 
-(** observed_recovers — the observed run decodes to a AND b.
-    @intent: alias of five_card_observed_recovers. *)
+(** observed_recovers — the observed run decodes to a AND b. *)
 Definition observed_recovers := @five_card_observed_recovers.
 
 (** procs_biasE — the process list of the run is one list, so the equation it
     once carried between two biases is the self-equality of that list; the
     bias-independence content now lives in the type of the profile, which
-    mentions no bias.
-    @intent: alias of five_card_exec_procs_biasE. *)
+    mentions no bias. *)
 Definition procs_biasE := @five_card_exec_procs_biasE.
 
 (******************************************************************************)
@@ -314,8 +281,7 @@ Definition procs_biasE := @five_card_exec_procs_biasE.
 (******************************************************************************)
 
 (** exec_trace_secrecy — the conditional entropy of the secret given seat
-    zero's executed content trace equals its entropy.
-    @intent: alias of five_card_exec_trace_secrecy. *)
+    zero's executed content trace equals its entropy. *)
 Definition exec_trace_secrecy := @five_card_exec_trace_secrecy.
 
 (** input_trace_secrecy — the same equality for an input party's content
@@ -323,41 +289,33 @@ Definition exec_trace_secrecy := @five_card_exec_trace_secrecy.
     empty, so the conditioning variable is constant and the equality holds at
     every index including out-of-range ones. It is an architecture statement
     about where the input parties appear in the run, not a privacy bound
-    against an adversary who reads their trace.
-    @intent: alias of five_card_exec_input_trace_secrecy. *)
+    against an adversary who reads their trace. *)
 Definition input_trace_secrecy := @five_card_exec_input_trace_secrecy.
 
 (** dealer_pair_centropy0 — the committed pair is determined by the dealer's
-    executed content trace.
-    @intent: alias of five_card_exec_dealer_pair_centropy0. *)
+    executed content trace. *)
 Definition dealer_pair_centropy0 := @five_card_exec_dealer_pair_centropy0.
 
 (** dealer_trace_centropy0 — the secret is determined by the dealer's
-    executed content trace.
-    @intent: alias of five_card_exec_dealer_trace_centropy0. *)
+    executed content trace. *)
 Definition dealer_trace_centropy0 := @five_card_exec_dealer_trace_centropy0.
 
 (** colour_viewE — the executed colour view at a rotation cut is the Kim
-    static view, pointwise on the den Boer sample space.
-    @intent: alias of five_card_colour_viewE. *)
+    static view, pointwise on the den Boer sample space. *)
 Definition colour_viewE := @five_card_colour_viewE.
 
-(** colour_view_RV_E — the same equality as an equality of random variables.
-    @intent: alias of five_card_colour_view_RV_E. *)
+(** colour_view_RV_E — the same equality as an equality of random variables. *)
 Definition colour_view_RV_E := @five_card_colour_view_RV_E.
 
 (** colour_view_leak_bound — the conditional mutual information the decoded
     colour sequence carries about the inputs given the output is at most
-    kim_leak_bound eps, under Kim's biased input distribution.
-    @intent: alias of five_card_colour_view_leak_bound. *)
+    kim_leak_bound eps, under Kim's biased input distribution. *)
 Definition colour_view_leak_bound := @five_card_colour_view_leak_bound.
 
-(** marginal_bound — the shuffle marginal bound of the uniform model.
-    @intent: alias of den_boer_marginal_bound. *)
+(** marginal_bound — the shuffle marginal bound of the uniform model. *)
 Definition marginal_bound := @den_boer_marginal_bound.
 
-(** perfect — the epsilon of that marginal bound is zero.
-    @intent: alias of den_boer_perfect. *)
+(** perfect — the epsilon of that marginal bound is zero. *)
 Definition perfect := @den_boer_perfect.
 
 (******************************************************************************)
@@ -371,24 +329,20 @@ Definition perfect := @den_boer_perfect.
 (******************************************************************************)
 
 (** kim_bundle — the certificate bundle of the repeated model at word length
-    L, carrying its endpoint marginal bound.
-    @intent: alias of fc_kim_security_bundle. *)
+    L, carrying its endpoint marginal bound. *)
 Definition kim_bundle := @fc_kim_security_bundle.
 
 (** centi_bundle — the certificate bundle of the seven-cut model at bias one
-    hundredth.
-    @intent: alias of kim_security_bundle_centi. *)
+    hundredth. *)
 Definition centi_bundle := @kim_security_bundle_centi.
 
 (** endpoint_bound — the spectral endpoint marginal bound at word length L:
     one seat's endpoint distribution is within sqrt 5 times the L-th power of
-    the second eigenvalue of the uniform distribution.
-    @intent: alias of fc_kim_security_bound. *)
+    the second eigenvalue of the uniform distribution. *)
 Definition endpoint_bound := @fc_kim_security_bound.
 
 (** deal_centi_lt — the seven-cut endpoint marginal bound at bias one
-    hundredth is strictly below 2^-40.
-    @intent: alias of kim_deal_centi_lt. *)
+    hundredth is strictly below 2^-40. *)
 Definition deal_centi_lt := @kim_deal_centi_lt.
 
 (******************************************************************************)
@@ -405,14 +359,12 @@ Definition deal_centi_lt := @kim_deal_centi_lt.
 (******************************************************************************)
 
 (** exec_transfer_status — the transfer status of the two exact-cut paths, the
-    uniform one and the single-biased one.
-    @intent: StaticExecutedOnly, the paths carrying their landed static
-    results to their executed observers and no ideal-to-finite theorem. *)
+    uniform one and the single-biased one: they carry their landed static
+    results to their executed observers, with no ideal-to-finite theorem. *)
 Definition exec_transfer_status : TransferStatus := StaticExecutedOnly.
 
-(** repeated_transfer_status — the transfer status of the repeated-cut path.
-    @intent: NoModelComparison, the path carrying endpoint marginal bounds
-    only. *)
+(** repeated_transfer_status — the transfer status of the repeated-cut path:
+    it carries endpoint marginal bounds only. *)
 Definition repeated_transfer_status : TransferStatus := NoModelComparison.
 
 End FiveCardAnalysis.

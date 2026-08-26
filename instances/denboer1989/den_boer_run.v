@@ -19,18 +19,20 @@ From pgg_smc Require Import den_boer_profile den_boer_encoding.
 (* ab.1 && ab.2 rather than a constant.                                       *)
 (******************************************************************************)
 
-(** den_boer_run_output — recovering the dealt endpoints of the input-derived
-    layout returns the AND of the committed bits.
-    @main correctness: the running den Boer protocol computes ab.1 && ab.2, not
-    a constant. The committed layout den_boer_layout ab is injected through the
-    dealer content readout tnth (den_boer_layout ab); with starts = ord_tuple the
-    endpoint recovery is the reindex form, discharged by pgg_recon_monodromy_correct
-    fed the layout-content G-stability and den_boer_assemble_valid. *)
+(** den_boer_run_output — recovering the dealt endpoints of the
+    input-derived layout den_boer_layout ab returns ab.1 && ab.2, not a
+    constant. This is the running protocol's correctness result: once the
+    dealer's content readout carries the committed layout instead of the
+    fixed identity content, the interpreter-level endpoint recovery computes
+    the same AND that fc_correct computes on pure sequences. *)
 Lemma den_boer_run_output (ab : bool * bool) (P : pgg_gT FiveCardKim_M) :
   P \in pgg_G FiveCardKim_M ->
   @pgg_recon_endpoints FiveCardKim_M FiveCardKim_PI bool fcI_scheme FiveCardKim_Teq
     (tnth (den_boer_layout ab)) P = ab.1 && ab.2.
 Proof.
+(* Endpoint recovery is the reindex form at starts = ord_tuple, discharged by
+   pgg_recon_monodromy_correct fed the layout-content G-stability and
+   den_boer_assemble_valid. *)
 move=> PG.
 apply: (@pgg_recon_monodromy_correct FiveCardKim_M FiveCardKim_PI bool fcI_scheme
           FiveCardKim_Teq (tnth (den_boer_layout ab)) (pgg_G FiveCardKim_M)
@@ -51,26 +53,27 @@ apply: (@pgg_recon_monodromy_correct FiveCardKim_M FiveCardKim_PI bool fcI_schem
 - exact: fcI_perm_compatible_kim.
 Qed.
 
-(** den_boer_decode — recover the two committed input bits from their card
-    encodings.
-    @intent: reads the bits committed by the two input parties back out of their
+(** den_boer_decode — the two committed input bits, read back out of their
     encode_bool card positions via decode_bool. *)
 Definition den_boer_decode (committed : seq 'I_(pgg_N' FiveCardKim_M).+1)
     : bool * bool :=
   (decode_bool (nth ord0 committed 0), decode_bool (nth ord0 committed 1)).
 
-(** den_boer_decodeK — decoding the honestly committed bits returns them.
-    @composes: den_boer_run_output. *)
+(** den_boer_decodeK — decode_bool undoes encode_bool on both committed
+    positions: den_boer_decode recovers exactly the pair (a, b) that was
+    encoded. This is the bridge fact that lets the dealer's content readout,
+    which decodes committed positions back to a layout, be read as carrying
+    the same pair ab that den_boer_run_output's endpoint recovery is stated
+    over. *)
 Lemma den_boer_decodeK (a b : bool) :
   den_boer_decode [:: encode_bool a; encode_bool b] = (a, b).
 Proof. by rewrite /den_boer_decode /= !decode_encode_bool. Qed.
 
-(** den_boer_dealer_layout — the den Boer committed dealer injecting the
-    input-derived layout through the content readout.
-    @intent: like den_boer_dealer_committed, but the dealt content readout is
-    tnth (den_boer_layout (den_boer_decode committed)) instead of fc_content, so
-    the dealing phase carries the input-derived layout; the bits committed at
-    parties 7 and 8 then determine the recovered secret (den_boer_run_output). *)
+(** den_boer_dealer_layout — the den Boer dealer whose content readout is
+    tnth (den_boer_layout (den_boer_decode committed)) rather than the fixed
+    fc_content, so the dealing phase carries the layout determined by the
+    bits committed at parties 7 and 8, the layout den_boer_run_output's
+    endpoint recovery is stated over. *)
 Definition den_boer_dealer_layout (P_idx : nat) :=
   pgg_commit_prologue
     (fun committed => exchange_dealer FiveCardKim_PI
@@ -78,43 +81,37 @@ Definition den_boer_dealer_layout (P_idx : nat) :=
        den_boer_players [:: 1%g] P_idx)
     [::] [:: 7; 8].
 
-(** den_boer_dealer_layout_ap — the input-derived-content den Boer dealer as an
-    aproc.
-    @intent: den_boer_dealer_layout packaged for the session-type duality
-    checks. *)
+(** den_boer_dealer_layout_ap — den_boer_dealer_layout packaged as an aproc,
+    the form the session-type duality checks below operate on. *)
 Definition den_boer_dealer_layout_ap (P_idx : nat) :=
   mk_aproc (den_boer_dealer_layout P_idx).
 
-(** den_boer_layout_player0_dual — the input-derived-content dealer stays dual to
-    player 0.
-    @main architecture: injecting the layout through the content readout leaves
-    the dealing-phase session structure unchanged, so the dealer's session with
-    each player is the same as for den_boer_dealer_committed. *)
+(** den_boer_layout_player0_dual — the input-derived-content dealer stays
+    dual to player 0: injecting the layout through the content readout
+    leaves the dealing-phase session structure unchanged, the same duality
+    den_boer_dealer_committed has with each player. *)
 Lemma den_boer_layout_player0_dual (P_idx : nat) :
   channels_dual (den_boer_dealer_layout_ap P_idx) den_boer_player0_ap.
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 
-(** den_boer_layout_input0_dual — the input-derived-content dealer is dual to
-    input party 0.
-    @main architecture: the prologue's first receive is the session dual of the
-    first input party's bit commit, unchanged by the content readout. *)
+(** den_boer_layout_input0_dual — the input-derived-content dealer is dual
+    to input party 0: the prologue's first receive is the session dual of
+    the first input party's bit commit, unchanged by the content readout. *)
 Lemma den_boer_layout_input0_dual (a : bool) (P_idx : nat) :
   channels_dual (den_boer_dealer_layout_ap P_idx) (den_boer_input0_ap a).
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 
-(** den_boer_layout_input1_dual — the input-derived-content dealer is dual to
-    input party 1.
-    @main architecture: the prologue's second receive is the session dual of the
-    second input party's bit commit, unchanged by the content readout. *)
+(** den_boer_layout_input1_dual — the input-derived-content dealer is dual
+    to input party 1: the prologue's second receive is the session dual of
+    the second input party's bit commit, unchanged by the content readout. *)
 Lemma den_boer_layout_input1_dual (b : bool) (P_idx : nat) :
   channels_dual (den_boer_dealer_layout_ap P_idx) (den_boer_input1_ap b).
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 
-(** den_boer_layout_verifier_dual — the input-derived-content dealer stays dual
-    to the verifier.
-    @main architecture: the content readout leaves the dealing-phase verifier
-    wire unchanged, so the dealer's session with the verifier is the same as for
-    den_boer_dealer_committed. *)
+(** den_boer_layout_verifier_dual — the input-derived-content dealer stays
+    dual to the verifier: the content readout leaves the dealing-phase
+    verifier wire unchanged, the same duality den_boer_dealer_committed has
+    with the verifier. *)
 Lemma den_boer_layout_verifier_dual (P_idx : nat) :
   channels_dual (den_boer_dealer_layout_ap P_idx) den_boer_verifier_ap.
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
@@ -156,8 +153,9 @@ Lemma den_boer_run_terminates (a b : bool) (w0 : pgg_gT FiveCardKim_M) (P_idx : 
 Proof. by vm_compute. Qed.
 
 (** den_boer_verifier_endpoints — the verifier's executed endpoints are the
-    dealt content readout at the deck cut and starts, one per player.
-    @composes: den_boer_endpoints. *)
+    dealt content readout at the deck cut and starts, one per player. This is
+    the raw interpreter-trace form; den_boer_endpoints specializes it to the
+    den Boer dealer and layout content. *)
 Lemma den_boer_verifier_endpoints
     (g : seq 'I_(pgg_N' FiveCardKim_M).+1 -> ('I_5 -> 'I_5))
     (va vb : 'I_5) (w0 : pgg_gT FiveCardKim_M)
@@ -197,16 +195,17 @@ by rewrite Hde.
 Qed.
 
 (** den_boer_run_recovers — reconstructing the verifier's executed endpoints
-    returns the committed AND, for ANY cut w0 in the group (the random cut buys
-    privacy, not correctness). The DSDP dsdp_is_correct analog; fcI_recon read at
-    the seq level (= fc_three_consec of the decoded endpoints), discharged by the
-    monodromy-invariant den_boer_run_output at P = w0. *)
+    from the executed trace returns the committed AND a && b, for ANY cut w0
+    in the group: the random cut buys privacy, not correctness. This is the
+    file's DSDP dsdp_is_correct analog, read at the seq level via fcI_recon
+    (= fc_three_consec of the decoded endpoints). *)
 Lemma den_boer_run_recovers (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
   w0 \in pgg_G FiveCardKim_M ->
   fc_three_consec [seq decode_bool x | x <-
     endpoints_of_trace (nth [::] (run_interp 100 (den_boer_procs a b w0 0)).2 1)]
   = a && b.
 Proof.
+(* Discharged by the monodromy-invariant den_boer_run_output at P = w0. *)
 move=> Hw0; rewrite den_boer_endpoints.
 have HX := den_boer_run_output (a, b) w0 Hw0.
 rewrite /pgg_recon_endpoints /pgg_recon /ts_recon /fcI_scheme /fcI_recon in HX.

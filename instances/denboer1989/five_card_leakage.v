@@ -44,45 +44,48 @@ Variable R : realType.
 
 Local Open Scope ring_scope.
 
-(** Omega — the sample space of the den Boer trick.
-    @intent: the product finite type of the two input bits and the cyclic cut,
-    bool * bool * 'I_5, with 20 equally likely outcomes. *)
+(** Omega is the sample space of the den Boer trick: the product finite type
+    of the two input bits and the cyclic cut, bool * bool * 'I_5, giving 20
+    equally likely outcomes. Every probability and leakage figure in this
+    file is computed relative to the uniform distribution built on Omega. *)
 Definition Omega : finType := [the finType of (bool * bool * 'I_5)%type].
 
-(** card_Omega20 — the sample space has 20 outcomes.
-    Casts #|Omega| into n.+1 form so the uniform distribution fdist_uniform
-    can be built on Omega.
-    @composes: P. *)
+(** card_Omega20 — the sample space has 20 outcomes, cast into n.+1 form
+    (19.+1) so the uniform distribution fdist_uniform can be built on
+    Omega. *)
 Lemma card_Omega20 : #|Omega| = 19.+1.
 Proof. by rewrite !card_prod card_bool card_ord. Qed.
 
-(** P — the uniform distribution on the sample space.
-    @intent: fdist_uniform over Omega; each of the 20 outcomes (a, b, k) has
-    probability 1/20, so a && b is true with the realistic prior 1/4. *)
+(** P is fdist_uniform over Omega, the uniform distribution on the sample
+    space: each of the 20 outcomes (a, b, k) has probability 1/20, so a && b
+    is true with the realistic prior 1/4 that the file's leakage figures are
+    computed against. *)
 Definition P : R.-fdist Omega := fdist_uniform card_Omega20.
 
-(** arr — the dealt, cut five-card row of an outcome.
-    @intent: applies the cyclic cut sigma^k to the den Boer arrangement of the
-    two input bits, fc_shuffle k (fc_arrange a b); hearts = true, size 5. *)
+(** arr w is the dealt, cut five-card row of outcome w: the cyclic cut
+    sigma^k applied to the den Boer arrangement of the two input bits,
+    fc_shuffle k (fc_arrange a b), with hearts = true and size 5. Every view
+    in this file reads its colours from arr. *)
 Definition arr (w : Omega) : seq bool :=
   let: (a, b, k) := w in fc_shuffle k (fc_arrange a b).
 
-(** Secret — the den Boer secret of an outcome.
-    @intent: the conjunction a && b of the two input bits, equal to
-    fc_three_consec (arr w) by fc_correct. *)
+(** Secret w is the den Boer secret of outcome w: the conjunction a && b of
+    the two input bits, equal to fc_three_consec (arr w) by fc_correct. It is
+    the quantity whose leakage under partial views the rest of the file
+    measures. *)
 Definition Secret : {RV P -> bool} := fun w => let: (a, b, _) := w in a && b.
 
-(** ViewA — the partial view at a fixed list of card positions.
-    @intent: reads the card colours of arr w at the positions in A as a
+(** ViewA A is the partial view at the fixed list of card positions A: it
+    reads the card colours of arr w at the positions in A as a
     (size A)-tuple of bits, the finite-type-valued random variable whose
-    leakage about Secret is measured. *)
+    leakage about Secret this file measures for every choice of A. *)
 Definition ViewA (A : seq nat) : {RV P -> (size A).-tuple bool} :=
   fun w => map_tuple (fun i => nth false (arr w) i) (in_tuple A).
 
-(** H_secret — the entropy of the den Boer secret is H(1/4) = 2 - (3/4) log 3.
-    The Shannon entropy of a && b under the uniform prior, the leakage that
-    leak_k4 and leak_k5 attain at full reveal.
-    @composes: leak_k4. *)
+(** H_secret — the entropy of the den Boer secret is H(1/4) = 2 - (3/4) log 3,
+    the Shannon entropy of a && b under the uniform prior. It is the ceiling
+    every partial-view leakage figure in the file approaches, and the value
+    that four or five revealed cards attain exactly. *)
 Lemma H_secret : `H `p_Secret = 2%:R - (3%:R / 4%:R) * log 3%:R.
 Proof.
 have val : forall c : bool,
@@ -125,10 +128,11 @@ have -> : (4%:R^-1 + 3%:R / 4%:R : R) = 1.
 by rewrite mul1r.
 Qed.
 
-(** count_pr — the law of any random variable under the uniform prior is its
-    fibre cardinality divided by 20. The pushforward probability pfwd1 X x
-    equals #|preim X (pred1 x)| / 20, since P is uniform on the 20 outcomes.
-    @composes: condent_ratio. *)
+(** count_pr — under the uniform prior, the law of any random variable is its
+    fibre cardinality divided by 20: pfwd1 X x equals
+    #|preim X (pred1 x)| / 20, since P is uniform on the 20 outcomes. This
+    turns every probability computation below into a card-counting exercise
+    on Omega. *)
 Lemma count_pr (A : finType) (X : {RV P -> A}) (x : A) :
   pfwd1 X x = #|preim X (pred1 x)|%:R / 20%:R :> R.
 Proof.
@@ -138,35 +142,37 @@ rewrite big_const GRing.iter_addr_0 card_Omega20.
 by rewrite -[20^-1 *+ _]mulr_natl mulrC.
 Qed.
 
-(** stepBB — a sum over bool * bool expands into the four constituent cells.
-    Reindexes \sum_(ab : bool * bool) into the nested \sum_a \sum_b form for
-    explicit cell enumeration.
-    @composes: condent_ratio. *)
+(** stepBB — a sum over bool * bool expands into the four constituent cells:
+    it reindexes \sum_(ab : bool * bool) into the nested \sum_a \sum_b form
+    the card-count computations below enumerate explicitly. *)
 Lemma stepBB (G : bool * bool -> nat) :
   (\sum_(ab : bool * bool) G ab)%N
     = (\sum_(a : bool) \sum_(b : bool) G (a, b))%N.
 Proof. by rewrite pair_bigA /=; apply: eq_big => // i _; case: i. Qed.
 
-(** stepO — a sum over Omega expands into a sum over (bool * bool) then 'I_5.
-    Reindexes \sum_(i : Omega) into \sum_ab \sum_k, the shape on which the
-    card enumerations operate.
-    @composes: condent_ratio. *)
+(** stepO — a sum over Omega expands into a sum over (bool * bool) then 'I_5:
+    it reindexes \sum_(i : Omega) into \sum_ab \sum_k, the shape the card
+    enumerations below operate on. *)
 Lemma stepO (G : Omega -> nat) :
   (\sum_(i : Omega) G i)%N
     = (\sum_(ab : bool * bool) \sum_(k : 'I_5) G (ab, k))%N.
 Proof. by rewrite pair_bigA /=; apply: eq_big => // i _; case: i. Qed.
 
-(** binent_1_4 — the binary entropy at 1/4 in closed form.
-    -1/4 log(1/4) - 3/4 log(3/4) = 2 - 3/4 log 3.
-    @composes: leak_k3. *)
+(** binent_1_4 — the binary entropy at 1/4 in closed form:
+    -1/4 log(1/4) - 3/4 log(3/4) = 2 - 3/4 log 3. This is the per-branch
+    entropy contributed by a view value whose secret-conditional counts
+    split 1:3, the ratio recurring across the three-card leakage
+    computations. *)
 Lemma binent_1_4 :
   - (1%:R / 4%:R) * log (1%:R / 4%:R) - (3%:R / 4%:R) * log (3%:R / 4%:R)
   = 2%:R - 3%:R / 4%:R * log 3%:R :> R.
 Proof. rewrite logDiv ?ltr0n// logDiv ?ltr0n// log1 log4. lra. Qed.
 
-(** binent_1_7 — the binary entropy at 1/7 in closed form.
-    -1/7 log(1/7) - 6/7 log(6/7) = log 7 - 6/7 - 6/7 log 3.
-    @composes: leak_k2_adj. *)
+(** binent_1_7 — the binary entropy at 1/7 in closed form:
+    -1/7 log(1/7) - 6/7 log(6/7) = log 7 - 6/7 - 6/7 log 3. This is the
+    per-branch entropy contributed by a view value whose secret-conditional
+    counts split 1:6, the ratio recurring across the two-card leakage
+    computations. *)
 Lemma binent_1_7 :
   - (1%:R / 7%:R) * log (1%:R / 7%:R) - (6%:R / 7%:R) * log (6%:R / 7%:R)
   = log 7%:R - 6%:R / 7%:R - 6%:R / 7%:R * log 3%:R :> R.
@@ -176,17 +182,20 @@ have l6 : log (6%:R : R) = 1 + log 3%:R.
 rewrite logDiv ?ltr0n// log1 logDiv ?ltr0n// l6. lra.
 Qed.
 
-(** binent_2_5 — the binary entropy at 2/5 in closed form.
-    -2/5 log(2/5) - 3/5 log(3/5) = log 5 - 2/5 - 3/5 log 3.
-    @composes: leak_k2_dist2. *)
+(** binent_2_5 — the binary entropy at 2/5 in closed form:
+    -2/5 log(2/5) - 3/5 log(3/5) = log 5 - 2/5 - 3/5 log 3. This is the
+    per-branch entropy contributed by a view value whose secret-conditional
+    counts split 2:3, the ratio recurring across the two-card leakage
+    computations. *)
 Lemma binent_2_5 :
   - (2%:R / 5%:R) * log (2%:R / 5%:R) - (3%:R / 5%:R) * log (3%:R / 5%:R)
   = log 5%:R - 2%:R / 5%:R - 3%:R / 5%:R * log 3%:R :> R.
 Proof. rewrite logDiv ?ltr0n// log2 logDiv ?ltr0n//. lra. Qed.
 
-(** binent_det0 — a view whose secret is determined false carries no entropy.
-    The binary entropy of the ratios (0/nv, nv/nv) is 0.
-    @composes: leak_k3. *)
+(** binent_det0 — a view value that determines the secret false carries no
+    entropy: the binary entropy of the ratio pair (0/nv, nv/nv) is 0. This
+    zeroes out the deterministic branches that appear alongside the
+    genuinely mixed ones in the two- and three-card leakage sums. *)
 Lemma binent_det0 (nv : nat) : (0 < nv)%N ->
   - (0%:R / nv%:R) * log (0%:R / nv%:R)
   - (nv%:R / nv%:R) * log (nv%:R / nv%:R) = 0 :> R.
@@ -196,9 +205,10 @@ have nvn0 : nv%:R != 0 :> R by rewrite pnatr_eq0 -lt0n.
 rewrite mul0r !divff // log1. lra.
 Qed.
 
-(** binent_det1 — a view whose secret is determined true carries no entropy.
-    The binary entropy of the ratios (nv/nv, 0/nv) is 0.
-    @composes: leak_k3. *)
+(** binent_det1 — a view value that determines the secret true carries no
+    entropy: the binary entropy of the ratio pair (nv/nv, 0/nv) is 0. This
+    zeroes out the deterministic branches that appear alongside the
+    genuinely mixed ones in the two- and three-card leakage sums. *)
 Lemma binent_det1 (nv : nat) : (0 < nv)%N ->
   - (nv%:R / nv%:R) * log (nv%:R / nv%:R)
   - (0%:R / nv%:R) * log (0%:R / nv%:R) = 0 :> R.
@@ -209,11 +219,12 @@ rewrite mul0r !divff // log1. lra.
 Qed.
 
 (** condent_ratio — the conditional entropy of the secret given a fixed view
-    value is the binary entropy of its true/false fibre ratios. For a view
-    value a with view count nv > 0 and joint counts nt (secret true) and nf
-    (secret false), H[Secret | View = a] equals -(nt/nv) log(nt/nv) -
-    (nf/nv) log(nf/nv).
-    @composes: leak_k3. *)
+    value a is the binary entropy of its true/false fibre ratios: for view
+    count nv > 0 and joint counts nt (secret true) and nf (secret false),
+    H[Secret | View = a] equals -(nt/nv) log(nt/nv) - (nf/nv) log(nf/nv).
+    This is the parametric core every k >= 2 leakage computation below
+    instantiates once per observed view value, with card-counted fibre
+    sizes fed in as literal naturals. *)
 Lemma condent_ratio (A : seq nat) (a : (size A).-tuple bool) (nv nt nf : nat) :
   #|preim (ViewA A) (pred1 a)| = nv ->
   #|preim [% Secret, ViewA A] (pred1 (true, a))| = nt ->
@@ -239,9 +250,9 @@ rewrite /entropy big_bool /= !Hd Hnt Hnf.
 by rewrite opprD mulNr.
 Qed.
 
-(** leak_k1 — revealing one card leaks nothing about a && b.
-    @main security: the mutual information between the secret and a single
-    revealed card position is 0. *)
+(** leak_k1 — revealing one card leaks nothing about a && b: the mutual
+    information between the secret and a single revealed card position is
+    0, the k = 1 point of the file's card-count-to-leakage classification. *)
 Lemma leak_k1 : `I( Secret ; ViewA [:: 0%N] ) = 0.
 Proof.
 have Hinde : P |= Secret _|_ (ViewA [:: 0%N]).
@@ -311,9 +322,9 @@ by rewrite HcondE subrr.
 Qed.
 
 (** leak_k2_adj — two adjacent cards leak 27/10 - (1/4) log 5 - (7/10) log 7
-    bits about a && b.
-    @main security: the mutual information between the secret and the colours
-    at the adjacent positions {0, 1}. *)
+    bits about a && b: the mutual information between the secret and the
+    colours at the adjacent positions {0, 1}, the k = 2 adjacent branch of
+    the classification. *)
 Lemma leak_k2_adj :
   `I( Secret ; ViewA [:: 0; 1]%N ) =
     27%:R / 10%:R - (4%:R^-1) * log 5%:R - (7%:R / 10%:R) * log 7%:R.
@@ -377,9 +388,9 @@ lra.
 Qed.
 
 (** leak_k2_dist2 — two distance-2 cards leak
-    5/2 - (3/20) log 3 - (1/2) log 5 - (7/20) log 7 bits about a && b.
-    @main security: the mutual information between the secret and the colours
-    at the distance-2 positions {0, 2}. *)
+    5/2 - (3/20) log 3 - (1/2) log 5 - (7/20) log 7 bits about a && b: the
+    mutual information between the secret and the colours at the distance-2
+    positions {0, 2}, the k = 2 non-adjacent branch of the classification. *)
 Lemma leak_k2_dist2 :
   `I( Secret ; ViewA [:: 0; 2]%N ) =
     5%:R / 2%:R - (3%:R / 20%:R) * log 3%:R - (2%:R^-1) * log 5%:R
@@ -442,9 +453,9 @@ rewrite !binent_2_5 binent_1_7 addr0.
 lra.
 Qed.
 
-(** leak_k3 — three cards leak 6/5 - (9/20) log 3 bits about a && b.
-    @main security: the mutual information between the secret and the colours
-    at positions {0, 1, 2}. *)
+(** leak_k3 — three cards leak 6/5 - (9/20) log 3 bits about a && b: the
+    mutual information between the secret and the colours at positions
+    {0, 1, 2}, the k = 3 point of the classification. *)
 Lemma leak_k3 :
   `I( Secret ; ViewA [:: 0; 1; 2]%N ) = 6%:R / 5%:R - (9%:R / 20%:R) * log 3%:R.
 Proof.
@@ -522,9 +533,10 @@ lra.
 Qed.
 
 (** leak_k3_gap — the gapped three cards {0, 1, 3} leak 6/5 - (9/20) log 3
-    bits about a && b, the same value as the consecutive triple {0, 1, 2}.
-    @main security: the mutual information between the secret and the colours
-    at positions {0, 1, 3}. *)
+    bits about a && b: the mutual information between the secret and the
+    colours at positions {0, 1, 3} equals the value at the consecutive
+    triple {0, 1, 2}, confirming the k = 3 branch of the classification
+    needs no adjacency split, unlike k = 2. *)
 Lemma leak_k3_gap :
   `I( Secret ; ViewA [:: 0; 1; 3]%N ) = 6%:R / 5%:R - (9%:R / 20%:R) * log 3%:R.
 Proof.
@@ -604,9 +616,10 @@ rewrite !binent_1_4 addr0.
 lra.
 Qed.
 
-(** leak_k4 — four cards leak the full secret entropy 2 - (3/4) log 3 bits.
-    @main security: the mutual information between the secret and the colours
-    at positions {0, 1, 2, 3} equals H(Secret), so the secret is determined. *)
+(** leak_k4 — four cards leak the full secret entropy 2 - (3/4) log 3 bits:
+    the mutual information between the secret and the colours at positions
+    {0, 1, 2, 3} equals H(Secret), so four revealed cards determine the
+    secret outright. This is the k = 4 point of the classification. *)
 Lemma leak_k4 :
   `I( Secret ; ViewA [:: 0; 1; 2; 3]%N ) = 2%:R - (3%:R / 4%:R) * log 3%:R.
 Proof.
@@ -623,9 +636,10 @@ have HSec : Secret = g4 `o (ViewA [:: 0%N; 1; 2; 3]).
 by rewrite mutual_info_RVE {2}HSec centropy_RV_comp0 subr0 H_secret.
 Qed.
 
-(** leak_k5 — all five cards leak the full secret entropy 2 - (3/4) log 3 bits.
-    @main security: the mutual information between the secret and the colours
-    at all positions {0, 1, 2, 3, 4} equals H(Secret). *)
+(** leak_k5 — all five cards leak the full secret entropy 2 - (3/4) log 3
+    bits: the mutual information between the secret and the colours at all
+    positions {0, 1, 2, 3, 4} equals H(Secret), the k = 5 point of the
+    classification. *)
 Lemma leak_k5 :
   `I( Secret ; ViewA [:: 0; 1; 2; 3; 4]%N ) = 2%:R - (3%:R / 4%:R) * log 3%:R.
 Proof.
@@ -648,28 +662,32 @@ Local Notation p2 := (Ordinal (isT : (2 < 5)%N)).
 Local Notation p3 := (Ordinal (isT : (3 < 5)%N)).
 Local Notation p4 := (Ordinal (isT : (4 < 5)%N)).
 
-(** ViewT — the view at a tuple of card positions.
-    @intent: the partial view at a tuple of positions; component i reads the
-    colour of arr w at position tnth t i. *)
+(** ViewT t is the view at a tuple of card positions t: its i-th component
+    reads the colour of arr w at position tnth t i. It is the tuple-indexed
+    twin of ViewA, needed below because rotation acts naturally on
+    'I_5-tuples, not on seq nat position lists. *)
 Definition ViewT k (t : k.-tuple 'I_5) : {RV P -> k.-tuple bool} :=
   fun w => [tuple nth false (arr w) (val (tnth t i)) | i < k].
 
-(** ViewS — the view at a set of card positions.
-    @intent: the partial view at a set of positions, read in ascending
-    enumeration order via enum_tuple. *)
+(** ViewS S is the view at a set of card positions S: ViewT applied to its
+    ascending enumeration enum_tuple S. It is the object leak_view_set's
+    statement is phrased over, since reveal patterns are naturally sets, not
+    ordered lists. *)
 Definition ViewS (S : {set 'I_5}) : {RV P -> #|S|.-tuple bool} :=
   ViewT (enum_tuple S).
 
-(** adjacent — cyclic adjacency of a two-element set of positions.
-    @intent: the two elements of a 2-set lie at cyclic distance 1, i.e.
-    S = {i, sigma i} for some i. *)
+(** adjacent S holds when the two elements of the 2-set S lie at cyclic
+    distance 1, i.e. S = {i, fc_sigma_fun i} for some i. It is the split
+    point of the k = 2 case of leak, since two cyclically adjacent revealed
+    cards leak a different amount than two cards two apart. *)
 Definition adjacent (S : {set 'I_5}) : bool :=
   [exists i : 'I_5, S == [set i; fc_sigma_fun i]].
 
-(** leak — the exact mutual information, in bits, between the den Boer secret
-    and the view at S.
-    @intent: the closed-form leakage of a reveal pattern, classified by
-    cardinality with the adjacency split at two cards. *)
+(** leak S is the closed-form leakage figure for reveal pattern S: it looks
+    up the value assigned above by cardinality, with an adjacency split at
+    |S| = 2. leak_view_set below proves this closed form equals the actual
+    mutual information `I( Secret ; ViewS S ) for every one of the
+    thirty-two subsets of 'I_5. *)
 Definition leak (S : {set 'I_5}) : R :=
   match #|S| with
   | 0 => 0
@@ -682,21 +700,21 @@ Definition leak (S : {set 'I_5}) : R :=
   | _ => 2%:R - (3%:R / 4%:R) * log 3%:R  (* #|S| >= 4 determines the secret *)
   end.
 
-(** setb5 — a subset of 'I_5 presented by five membership bits.
-    @intent: the subset of 'I_5 whose membership vector is the five given
-    bits. *)
+(** setb5 b0 b1 b2 b3 b4 is the subset of 'I_5 whose membership vector is the
+    five given bits. Presenting every subset this way lets leak_view_set's
+    proof split on the five booleans directly, turning its 32-way case
+    analysis over {set 'I_5} into five nested case splits. *)
 Definition setb5 (b0 b1 b2 b3 b4 : bool) : {set 'I_5} :=
   [set i : 'I_5 | nth false [:: b0; b1; b2; b3; b4] (val i)].
 
-(** mem_setb5 — membership in setb5 is the bit at the position's index.
-    @composes: card_setb5 *)
+(** mem_setb5 — membership in setb5 b0 b1 b2 b3 b4 is the bit at the
+    position's index. *)
 Lemma mem_setb5 (b0 b1 b2 b3 b4 : bool) (x : 'I_5) :
   (x \in setb5 b0 b1 b2 b3 b4) = nth false [:: b0; b1; b2; b3; b4] (val x).
 Proof. by rewrite inE. Qed.
 
-(** exists_ord5 — an existential quantifier over 'I_5 is the disjunction of its
-    five instances.
-    @composes: adjacentE *)
+(** exists_ord5 — an existential quantifier over 'I_5 is the disjunction of
+    its five instances. *)
 Lemma exists_ord5 (q : pred 'I_5) :
   [exists i : 'I_5, q i] = [|| q p0, q p1, q p2, q p3 | q p4].
 Proof.
@@ -714,8 +732,7 @@ by case/orP => [H|/orP[H|/orP[H|/orP[H|H]]]];
 Qed.
 
 (** setb5_eq — two bit-presented subsets are equal exactly when their bit
-    vectors are.
-    @composes: adjacentE *)
+    vectors are. *)
 Lemma setb5_eq (b0 b1 b2 b3 b4 c0 c1 c2 c3 c4 : bool) :
   (setb5 b0 b1 b2 b3 b4 == setb5 c0 c1 c2 c3 c4)
   = [&& b0 == c0, b1 == c1, b2 == c2, b3 == c3 & b4 == c4].
@@ -728,8 +745,8 @@ by case/and5P => /eqP-> /eqP-> /eqP-> /eqP-> /eqP->.
 Qed.
 
 (** adjacentE — adjacency of a bit-presented subset is the boolean condition
-    that exactly two bits are set at cyclically consecutive positions.
-    @composes: leak_view_set *)
+    that exactly two of its five bits are set, at cyclically consecutive
+    positions. *)
 Lemma adjacentE (b0 b1 b2 b3 b4 : bool) :
   adjacent (setb5 b0 b1 b2 b3 b4)
   = [|| [&& b0, b1, ~~ b2, ~~ b3 & ~~ b4],
@@ -758,8 +775,9 @@ rewrite e0 e1 e2 e3 e4 !setb5_eq.
 by case: b0; case: b1; case: b2; case: b3; case: b4.
 Qed.
 
-(** setb5_onto — every subset of 'I_5 is bit-presented.
-    @composes: leak_view_set *)
+(** setb5_onto — every subset of 'I_5 is bit-presented: it equals
+    setb5 b0 b1 b2 b3 b4 for the membership bits of its own five
+    positions. *)
 Lemma setb5_onto (S : {set 'I_5}) :
   exists b0 b1 b2 b3 b4 : bool, S = setb5 b0 b1 b2 b3 b4.
 Proof.
@@ -769,8 +787,8 @@ by case: x => [[|[|[|[|[|m]]]]] Hm] //=; congr (_ \in S); apply: val_inj.
 Qed.
 
 (** enum_val5 — the indices enumerating a subset of 'I_5 described by a
-    predicate on nat are that predicate's filter of the first five naturals.
-    @composes: enum_setb5 *)
+    predicate on nat are that predicate's filter of the first five
+    naturals. *)
 Lemma enum_val5 (S : {set 'I_5}) (q : pred nat) :
   (forall x : 'I_5, (x \in S) = q (val x)) ->
   map val (enum S) = filter q (iota 0 5).
@@ -779,77 +797,70 @@ move=> hq; rewrite -val_enum_ord filter_map; congr (map _ _).
 by rewrite {1}/enum_mem -enumT; apply: eq_filter => x /=; exact: hq.
 Qed.
 
-(** card_val5 — the cardinality of a subset of 'I_5 described by a predicate on
-    nat is the length of that predicate's filter of the first five naturals.
-    @composes: card_setb5 *)
+(** card_val5 — the cardinality of a subset of 'I_5 described by a predicate
+    on nat is the length of that predicate's filter of the first five
+    naturals. *)
 Lemma card_val5 (S : {set 'I_5}) (q : pred nat) :
   (forall x : 'I_5, (x \in S) = q (val x)) -> #|S| = size (filter q (iota 0 5)).
 Proof. by move=> hq; rewrite cardE -(size_map val) (enum_val5 hq). Qed.
 
 (** card_setb5 — the cardinality of a bit-presented subset counts its set
-    bits.
-    @composes: leak_view_set *)
+    bits. *)
 Lemma card_setb5 (b0 b1 b2 b3 b4 : bool) :
   #|setb5 b0 b1 b2 b3 b4|
   = size (filter (fun n => nth false [:: b0; b1; b2; b3; b4] n) (iota 0 5)).
 Proof. by apply: card_val5 => x; exact: mem_setb5. Qed.
 
 (** enum_setb5 — the enumeration indices of a bit-presented subset are the
-    indices of its set bits, in increasing order.
-    @composes: leak_view_set *)
+    indices of its set bits, in increasing order. *)
 Lemma enum_setb5 (b0 b1 b2 b3 b4 : bool) :
   map val (enum (setb5 b0 b1 b2 b3 b4))
   = filter (fun n => nth false [:: b0; b1; b2; b3; b4] n) (iota 0 5).
 Proof. by apply: enum_val5 => x; exact: mem_setb5. Qed.
 
-(** leakE0 — a reveal pattern of no card has leak zero.
-    @composes: leak_view_set *)
+(** leakE0 — a reveal pattern of no card has leak zero. *)
 Lemma leakE0 (S : {set 'I_5}) : #|S| = 0%N -> leak S = 0.
 Proof. by rewrite /leak => ->. Qed.
 
-(** leakE1 — a reveal pattern of one card has leak zero.
-    @composes: leak_view_set *)
+(** leakE1 — a reveal pattern of one card has leak zero. *)
 Lemma leakE1 (S : {set 'I_5}) : #|S| = 1%N -> leak S = 0.
 Proof. by rewrite /leak => ->. Qed.
 
 (** leakE2adj — a reveal pattern of two adjacent cards has leak
-    27/10 - (1/4) log 5 - (7/10) log 7.
-    @composes: leak_view_set *)
+    27/10 - (1/4) log 5 - (7/10) log 7. *)
 Lemma leakE2adj (S : {set 'I_5}) : #|S| = 2%N -> adjacent S ->
   leak S = 27%:R / 10%:R - 4%:R^-1 * log 5%:R - (7%:R / 10%:R) * log 7%:R.
 Proof. by rewrite /leak => -> ->. Qed.
 
 (** leakE2dist2 — a reveal pattern of two non-adjacent cards has leak
-    5/2 - (3/20) log 3 - (1/2) log 5 - (7/20) log 7.
-    @composes: leak_view_set *)
+    5/2 - (3/20) log 3 - (1/2) log 5 - (7/20) log 7. *)
 Lemma leakE2dist2 (S : {set 'I_5}) : #|S| = 2%N -> ~~ adjacent S ->
   leak S = 5%:R / 2%:R - (3%:R / 20%:R) * log 3%:R - 2%:R^-1 * log 5%:R
            - (7%:R / 20%:R) * log 7%:R.
 Proof. by rewrite /leak => -> /negbTE ->. Qed.
 
-(** leakE3 — a reveal pattern of three cards has leak 6/5 - (9/20) log 3.
-    @composes: leak_view_set *)
+(** leakE3 — a reveal pattern of three cards has leak 6/5 - (9/20) log 3. *)
 Lemma leakE3 (S : {set 'I_5}) : #|S| = 3%N ->
   leak S = 6%:R / 5%:R - (9%:R / 20%:R) * log 3%:R.
 Proof. by rewrite /leak => ->. Qed.
 
-(** leakE4 — a reveal pattern of four cards has leak 2 - (3/4) log 3.
-    @composes: leak_view_set *)
+(** leakE4 — a reveal pattern of four cards has leak 2 - (3/4) log 3. *)
 Lemma leakE4 (S : {set 'I_5}) : #|S| = 4%N ->
   leak S = 2%:R - (3%:R / 4%:R) * log 3%:R.
 Proof. by rewrite /leak => ->. Qed.
 
-(** leakE5 — a reveal pattern of five cards has leak 2 - (3/4) log 3.
-    @composes: leak_view_set *)
+(** leakE5 — a reveal pattern of five cards has leak 2 - (3/4) log 3. *)
 Lemma leakE5 (S : {set 'I_5}) : #|S| = 5%N ->
   leak S = 2%:R - (3%:R / 4%:R) * log 3%:R.
 Proof. by rewrite /leak => ->. Qed.
 
-(** injective_mutual_info_RV — relabeling the alphabet of a random variable by
-    an injection leaves its mutual information with any other random variable
-    unchanged, an upstream candidate next to infotheo's
-    injective_joint_entropy.
-    @composes: mutual_info_ViewT_rot *)
+(** injective_mutual_info_RV — relabeling the alphabet of a random variable
+    by an injection leaves its mutual information with any other random
+    variable unchanged. This is the general principle behind the rotation-
+    invariance argument below: since fc_sigma_fun and rot_tuple act as
+    injections on view alphabets, rotating or cyclically shifting the
+    revealed positions cannot change the leakage, letting leak_view_set
+    reduce its 32 cases to the handful computed directly above. *)
 Lemma injective_mutual_info_RV (T' T U : finType) (X : {RV P -> T'})
     (Y : {RV P -> T}) (g : T -> U) :
   injective g -> `I( X ; g `o Y ) = `I( X ; Y ).
@@ -863,21 +874,19 @@ have hinj : injective (fun p : T' * T => (p.1, g p.2)).
 by rewrite -(pfwd1_comp [% X, Y] (x, y) hinj).
 Qed.
 
-(** rot_tuple_inj — cyclic rotation of a tuple is injective.
-    @composes: mutual_info_ViewT_rot *)
+(** rot_tuple_inj — cyclic rotation of a tuple is injective. *)
 Lemma rot_tuple_inj (T : Type) k n :
   injective (fun t : k.-tuple T => rot_tuple n t).
 Proof. by move=> x y /(congr1 val) /= /rot_inj /val_inj. Qed.
 
-(** ViewTE — the view at a position tuple is the row read pointwise along that
-    tuple.
-    @composes: ViewT_rot *)
+(** ViewTE — the view at a position tuple is the row read pointwise along
+    that tuple. *)
 Lemma ViewTE k (t : k.-tuple 'I_5) (w : Omega) :
   ViewT t w = map_tuple (fun j : 'I_5 => nth false (arr w) (val j)) t.
 Proof. by apply: eq_from_tnth => i; rewrite /ViewT tnth_mktuple tnth_map. Qed.
 
-(** ViewT_rot — rotating the position tuple rotates the view tuple.
-    @composes: mutual_info_ViewT_rot *)
+(** ViewT_rot — rotating the position tuple by n rotates the view tuple by
+    n. *)
 Lemma ViewT_rot k n (t : k.-tuple 'I_5) :
   ViewT (rot_tuple n t) = (fun x : k.-tuple bool => rot_tuple n x) `o ViewT t.
 Proof.
@@ -886,18 +895,16 @@ exact: map_rot.
 Qed.
 
 (** mutual_info_ViewT_rot — rotating the position tuple leaves the leakage
-    unchanged.
-    @composes: leak_view_set *)
+    `I( Secret ; ViewT t ) unchanged, for any rotation amount n. *)
 Lemma mutual_info_ViewT_rot k n (t : k.-tuple 'I_5) :
   `I( Secret ; ViewT (rot_tuple n t) ) = `I( Secret ; ViewT t ).
 Proof.
 by rewrite ViewT_rot; apply: injective_mutual_info_RV; exact: rot_tuple_inj.
 Qed.
 
-(** mutual_info_ViewS_ViewT — the set-indexed view has the leakage of the
-    tuple-indexed view at any position tuple of the same length and the same
-    ascending values.
-    @composes: leak_view_set *)
+(** mutual_info_ViewS_ViewT — for k = #|S|, the set-indexed view ViewS S has
+    the same leakage as the tuple-indexed view ViewT t at any position
+    tuple t enumerating the same values as S in ascending order. *)
 Lemma mutual_info_ViewS_ViewT (S : {set 'I_5}) k (t : k.-tuple 'I_5)
     (e : #|S| = k) :
   map val (val (enum_tuple S)) = map val (val t) ->
@@ -906,41 +913,37 @@ Proof.
 by move: t; case: k / e => t hv; rewrite /ViewS (val_inj (inj_map val_inj hv)).
 Qed.
 
-(** val_fc_sigma_fun — the five-cycle shift sends a position to its successor
-    modulo five.
-    @composes: ViewT_sigma *)
+(** val_fc_sigma_fun — the five-cycle shift sends a position to its
+    successor modulo five. *)
 Lemma val_fc_sigma_fun (i : 'I_5) : val (fc_sigma_fun i) = (i.+1 %% 5)%N.
 Proof. by case: i => [[|[|[|[|[|m]]]]] Hm]. Qed.
 
-(** fc_sigmaKV — fc_sigma_fun cancels fc_sigma_inv.
-    @composes: cut_sigmaKV *)
+(** fc_sigmaKV — fc_sigma_fun cancels fc_sigma_inv. *)
 Lemma fc_sigmaKV : cancel fc_sigma_inv fc_sigma_fun.
 Proof. by move=> x; apply: val_inj; case: x => [[|[|[|[|[|m]]]]] Hm]. Qed.
 
-(** cut_sigma — the cut advance on the sample space.
-    @intent: the sample-space map advancing the cut by one cyclic shift,
-    identity on the two input bits. *)
+(** cut_sigma is the sample-space map that advances the cut by one cyclic
+    shift, leaving the two input bits fixed. *)
 Definition cut_sigma (w : Omega) : Omega :=
   let: (a, b, k) := w in (a, b, fc_sigma_fun k).
 
-(** cut_sigma_inv — the cut retraction on the sample space.
-    @intent: the sample-space map retracting the cut by one cyclic shift. *)
+(** cut_sigma_inv is the sample-space map that retracts the cut by one
+    cyclic shift, leaving the two input bits fixed. *)
 Definition cut_sigma_inv (w : Omega) : Omega :=
   let: (a, b, k) := w in (a, b, fc_sigma_inv k).
 
-(** cut_sigmaK — cut_sigma_inv cancels cut_sigma.
-    @composes: fdistmap_cut_sigma *)
+(** cut_sigmaK — cut_sigma_inv cancels cut_sigma. *)
 Lemma cut_sigmaK : cancel cut_sigma cut_sigma_inv.
 Proof. by move=> [[a b] k]; rewrite /= fc_sigmaK. Qed.
 
-(** cut_sigmaKV — cut_sigma cancels cut_sigma_inv.
-    @composes: fdistmap_cut_sigma *)
+(** cut_sigmaKV — cut_sigma cancels cut_sigma_inv. *)
 Lemma cut_sigmaKV : cancel cut_sigma_inv cut_sigma.
 Proof. by move=> [[a b] k]; rewrite /= fc_sigmaKV. Qed.
 
-(** fdistmap_cut_sigma — the uniform distribution on the sample space is
-    invariant under the cut shift.
-    @composes: mutual_info_ViewT_sigma *)
+(** fdistmap_cut_sigma — the uniform distribution P is invariant under
+    pushforward along cut_sigma: shifting the cut leaves the sample space's
+    law unchanged, which is what lets mutual information be computed after
+    a cut shift without reweighting. *)
 Lemma fdistmap_cut_sigma : fdistmap cut_sigma P = P.
 Proof.
 apply/fdist_ext => w; rewrite fdistmapE.
@@ -950,9 +953,9 @@ rewrite (big_pred1 (cut_sigma_inv w)); last first.
 by rewrite /P !fdist_uniformE.
 Qed.
 
-(** ViewT_sigma — reading the shifted positions of an outcome is reading the
-    original positions of the shifted outcome.
-    @composes: mutual_info_ViewT_sigma *)
+(** ViewT_sigma — reading the row of outcome w at the sigma-shifted
+    positions is the same as reading the row of the sigma-shifted outcome
+    cut_sigma w at the original positions. *)
 Lemma ViewT_sigma k (t : k.-tuple 'I_5) (w : Omega) :
   ViewT (map_tuple fc_sigma_fun t) w = ViewT t (cut_sigma w).
 Proof.
@@ -973,8 +976,7 @@ by rewrite addSnnS.
 Qed.
 
 (** mutual_info_ViewT_sigma — shifting every position of the tuple by the
-    five-cycle leaves the leakage unchanged.
-    @composes: leak_view_set *)
+    five-cycle leaves the leakage unchanged. *)
 Lemma mutual_info_ViewT_sigma k (t : k.-tuple 'I_5) :
   `I( Secret ; ViewT (map_tuple fc_sigma_fun t) ) = `I( Secret ; ViewT t ).
 Proof.
@@ -986,9 +988,8 @@ have -> : [% Secret, ViewT (map_tuple fc_sigma_fun t)]
 by rewrite /dist_of_RV -fdistmap_comp fdistmap_cut_sigma.
 Qed.
 
-(** map_tnth — mapping a function along the components of a tuple is mapping it
-    along the tuple's underlying sequence.
-    @composes: ViewT_ViewA *)
+(** map_tnth — mapping a function along the components of a tuple is mapping
+    it along the tuple's underlying sequence. *)
 Lemma map_tnth (T1 T2 : Type) n (t : n.-tuple T1) (f : T1 -> T2) :
   [seq f (tnth t i) | i <- enum 'I_n] = [seq f j | j <- val t].
 Proof.
@@ -997,9 +998,11 @@ have e : [seq f (tnth t i) | i <- enum 'I_n] = [seq f j | j <- tval t].
 exact: e.
 Qed.
 
-(** ViewT_ViewA — the tuple-indexed view at t is the position-list view at the
-    list of values of t.
-    @composes: leak_view_set *)
+(** ViewT_ViewA — when a position tuple t's underlying values equal the list
+    A, the tuple-indexed view ViewT t coincides with the list-indexed view
+    ViewA A. This is the bridge that lets leak_view_set's rotation-reduced
+    tuple views be identified with the concrete ViewA instances the leak_k*
+    lemmas were computed for. *)
 Lemma ViewT_ViewA (A : seq nat) (t : (size A).-tuple 'I_5) :
   map val (val t) = A -> ViewT t = ViewA A.
 Proof.
@@ -1012,9 +1015,9 @@ have -> : [seq nth false (arr w) (val j) | j <- val t]
 by rewrite hA.
 Qed.
 
-(** leak_k0 — revealing no card leaks nothing about a && b.
-    @main security: the empty reveal carries no information about the
-    secret. *)
+(** leak_k0 — revealing no card leaks nothing about a && b: the empty reveal
+    carries no information about the secret, the k = 0 boundary of the
+    file's card-count-to-leakage classification. *)
 Lemma leak_k0 : `I( Secret ; ViewT ([tuple] : 0.-tuple 'I_5) ) = 0.
 Proof.
 have hind : P |= Secret _|_ (ViewT ([tuple] : 0.-tuple 'I_5)).
@@ -1041,11 +1044,11 @@ have hcond : `H( Secret | ViewT ([tuple] : 0.-tuple 'I_5)) = `H `p_Secret.
 by rewrite hcond subrr.
 Qed.
 
-(** leak_view_set — the mutual information between the den Boer secret and the
-    view at any subset of the five row positions is the closed form leak S.
-    @main security: for every subset of the five positions, the mutual
-    information between the secret and the revealed colours equals the closed
-    form leak; all thirty-two reveal patterns in one statement. *)
+(** leak_view_set — the mutual information between the den Boer secret and
+    the view at any subset of the five row positions equals the closed form
+    leak S: for every one of the thirty-two possible reveal patterns, the
+    exact leakage is given by one formula, closing the case-by-case
+    computations above into a single theorem. *)
 Theorem leak_view_set (S : {set 'I_5}) : `I( Secret ; ViewS S ) = leak S.
 Proof.
 case: (setb5_onto S) => b0 [b1 [b2 [b3 [b4 ->]]]].

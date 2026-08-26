@@ -49,11 +49,13 @@ Hypothesis eps_gt : - (4%:R * 5%:R^-1) < eps.
 Hypothesis eps_spectral : (`|eps| < 4%:R / 5%:R)%R.
 Let M_kim : MonodromyReprWithGeneratorType := FiveCardKim_M.
 
-(** kim_complexity — search-space complexity bound for the Kim instance.
-    Kind: main.
-    @main bound: the brute-force search space over length-L words is bounded
-    by the monodromy group order, specialising [search_space_leG] to the Kim
-    five-card monodromy. *)
+(** kim_complexity — the brute-force search space over length-L words for
+    Kim's five-card monodromy M_kim is bounded by the monodromy group order
+    #|pgg_G M_kim|, the generic bound search_space_leG specialised to this
+    instance. It is the one fact this file still proves after the retired
+    Reed-Solomon rigidity block: the five-card trick's secret recovery goes
+    through the boolean three-consecutive-hearts read, not an algebraic
+    code, so no rigidity argument is needed here. *)
 Lemma kim_complexity (L : nat) :
   (@search_space M_kim L <= #|pgg_G M_kim|)%N.
 Proof. exact: search_space_leG. Qed.

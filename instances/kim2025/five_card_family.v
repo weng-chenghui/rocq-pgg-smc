@@ -49,26 +49,24 @@ Import Prenex Implicits.
 
 Open Scope group_scope.
 
-(** fcI_perm_compatible_kim — reconstruction is invariant under the monodromy
-    share permutation over the FULL group pgg_G FiveCardKim_M.
-    Kind: helper.
-    @composes: fcI_scheme fc_three_consec_rot fc_sigma_pow_val.
-    What: the ts_recon_perm_invariant obligation of five_card_plug, stated for
-    Kim's five-generator instance FiveCardKim_M.
-    Why: Kim's instance uses all five rotations sigma^0..sigma^4 as generators,
-    but they still generate the same cyclic group <[fc_sigma]> = C_5 as the
-    single-generator presentation. The ONLY change from the single-generator
-    proof is the cyclicity fact Gcyc: the generating set [set sigma^i | i] generates
-    <[fc_sigma]> because every sigma^i lies in <[fc_sigma]> and sigma = sigma^1
-    is in the generating set. After Gcyc, every group element is a power
-    fc_sigma^k, so reindexing the shares by g is a cyclic rotation by k mod 5
-    of the decoded row (fc_sigma_pow_val), and fc_three_consec is invariant
-    under that rotation (fc_three_consec_rot).
-    Used by: five_card_plug (rp_recon_invariant). *)
+(** fcI_perm_compatible_kim — reconstruction under fcI_scheme is invariant
+    under the monodromy share permutation, over the FULL group pgg_G
+    FiveCardKim_M rather than just the cyclic subgroup <[fc_sigma]> generated
+    by a single rotation. It supplies the ts_recon_perm_invariant obligation
+    of five_card_plug for Kim's five-generator instance: Kim's monodromy adds
+    sigma^2..sigma^4 as extra generators, but they generate the same C_5 as
+    den Boer's single sigma, so the reconstruction argument goes through with
+    that one extra generation fact. *)
 Lemma fcI_perm_compatible_kim :
   @ts_recon_perm_invariant _ (pgg_G FiveCardKim_M) _ _ fcI_scheme
     (morphism.mfun (@pgg_rho FiveCardKim_M)).
 Proof.
+(* Gcyc identifies pgg_G FiveCardKim_M with <[fc_sigma]>: the five-generator
+   set generates <[fc_sigma]> since every sigma^i lies in it and sigma =
+   sigma^1 is itself a generator. After Gcyc, every group element is some
+   fc_sigma^k, so reindexing shares by g is a cyclic rotation by k mod 5 of
+   the decoded row (fc_sigma_pow_val), and fc_three_consec is invariant under
+   that rotation (fc_three_consec_rot). *)
 rewrite /ts_recon_perm_invariant.
 move=> g s shares Hg Hvalid.
 rewrite /ts_recon /ts_valid /= in Hvalid *.
@@ -124,27 +122,26 @@ rewrite Hrot fc_three_consec_rot.
 - exact: HLsize.
 Qed.
 
-(** ord_tuple5_uniq — the five starting card positions are distinct.
-    @composes: FiveCardKim_PI
-    What: uniq (ord_tuple 5), the uniqueness witness FiveCardKim_PI consumes. *)
+(** ord_tuple5_uniq — the five starting card positions (ord_tuple 5) are
+    pairwise distinct, the uniqueness witness FiveCardKim_PI's starting
+    interface requires. *)
 Lemma ord_tuple5_uniq : uniq (ord_tuple 5).
 Proof. by rewrite val_ord_tuple enum_uniq. Qed.
 
-(** FiveCardKim_PI — the concrete five-sheet starting interface for Kim's
-    instance.
-    @intent: the identity start tuple (ord_tuple 5) over the five card
-    positions of FiveCardKim_M. The identity starts make the G_stable
-    condition reduce to reflexivity of pgg_rho (content = fc_content = id),
-    exactly as for the s5x5 starting interface. Used-by: five_card_profile. *)
+(** FiveCardKim_PI — the five-sheet starting interface for FiveCardKim_M,
+    with the identity start tuple ord_tuple 5 over the five card positions.
+    The identity starts reduce the G_stable condition to reflexivity of
+    pgg_rho (content = fc_content = id), exactly as for the s5x5 starting
+    interface. *)
 Definition FiveCardKim_PI : PGGInterface FiveCardKim_M :=
   @MkPGGI FiveCardKim_M 4 (ord_tuple 5) ord_tuple5_uniq.
 
-(** five_card_plug — the heterogeneous-secret ReconPlug for FiveCardKim_M.
-    @intent: the bool/'I_5 scheme fcI_scheme, the identity content readout
-    fc_content, the C_5 monodromy pgg_rho, and the proven full-group
-    reconstruction invariance fcI_perm_compatible_kim. Routes Kim's
-    five-generator five-card trick through the shared MonodromyProfile program.
-    Used-by: five_card_profile. *)
+(** five_card_plug — the heterogeneous-secret ReconPlug for FiveCardKim_M,
+    bundling the bool/'I_5 scheme fcI_scheme, the identity content readout
+    fc_content, the C_5 monodromy pgg_rho, and the full-group reconstruction
+    invariance fcI_perm_compatible_kim. This is what routes Kim's
+    five-generator five-card trick through the shared MonodromyProfile
+    program that also drives den Boer's instance. *)
 Definition five_card_plug : ReconPlug FiveCardKim_M bool :=
   @MkReconPlug FiveCardKim_M bool fcI_scheme five_card_program.fc_content
     (morphism.mfun (@pgg_rho FiveCardKim_M)) fcI_perm_compatible_kim.
@@ -152,26 +149,24 @@ Definition five_card_plug : ReconPlug FiveCardKim_M bool :=
 Import GRing.Theory Num.Theory.
 Local Open Scope ring_scope.
 
-(** five_card_profile — the five-card MonodromyProfile.
-    @intent: bundles FiveCardKim_M, the secret type bool, FiveCardKim_PI and
-    five_card_plug. This is the single profile that unifies den Boer and Kim:
-    the group, the plug and the starting layout are shared, and the dealing
-    distribution's bias eps is data of the separate marginal bound rather than
-    of the program layer.
-    Used-by: the unified five-card landscape entry. *)
+(** five_card_profile — the five-card MonodromyProfile bundling FiveCardKim_M,
+    the secret type bool, FiveCardKim_PI and five_card_plug. It is the single
+    profile that unifies den Boer and Kim: the group, the plug and the
+    starting layout are shared between the two protocols, and the dealing
+    distribution's bias eps stays data of the separate marginal-security
+    bound rather than of this program layer. *)
 Definition five_card_profile : MonodromyProfile :=
   @MkMonodromyProfile FiveCardKim_M bool FiveCardKim_PI five_card_plug.
 
-(** five_card_eps0_eq0 — at eps = 0 the dealing-phase security bound is 0.
-    @main bound: for any positive word length L.+1 the Kim security epsilon
-    sw_bound_eps at bias 0 equals 0, the precise sense in which the unbiased
-    family member recovers den Boer's perfect dealing-phase anonymity (a
-    uniform cyclic cut leaks nothing). At eps = 0 the second-largest eigenvalue
-    modulus kim_lambda2 is 0, so any positive power vanishes and the bound
-    sqrt 5 * kim_lambda2 ^+ L.+1 collapses to 0 (kim_security_at_zero). Restricted
-    to L.+1 because at L = 0 the bound is sqrt 5, not 0 (no shuffle applied).
-    Naming: _eq0 marks the lhs = 0 shape (the auditor's own G001 sketch); the
-    eps0 component keeps the bias condition explicit. *)
+(** five_card_eps0_eq0 — at bias eps = 0, for any positive word length L.+1,
+    Kim's dealing-phase security epsilon sw_bound_eps is 0: the sense in
+    which the unbiased family member recovers den Boer's perfect
+    dealing-phase anonymity, where a uniform cyclic cut leaks nothing. At
+    eps = 0 the second-largest eigenvalue modulus kim_lambda2 vanishes, so
+    every positive power of it does too and the bound sqrt 5 *
+    kim_lambda2 ^+ L.+1 collapses to 0. The word length is restricted to
+    L.+1 because at L = 0 no shuffle is applied and the bound stays sqrt 5,
+    not 0. *)
 Lemma five_card_eps0_eq0 (R : realType) (L : nat)
     (Hlt : (0:R) < 5%:R^-1) (Hgt : - (4%:R * 5%:R^-1) < (0:R))
     (Hspec : `|(0:R)| < 4%:R / 5%:R) :

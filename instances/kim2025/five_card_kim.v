@@ -162,10 +162,8 @@ Definition kim_weight_fun : {ffun 'I_5 -> R} :=
     if val k == 0%N then 5%:R^-1 - eps
     else 5%:R^-1 + eps / 4%:R].
 
-(** kim_weight_gt0 — the Kim weight function is strictly positive.
-    Kind: helper.
-    Why: strict positivity discharges the support hypothesis in the fdist lift.
-    Used by: [kim_weight_ge0] and the downstream fdist construction. *)
+(** kim_weight_gt0 — the Kim weight function is strictly positive: this
+    discharges the support hypothesis needed to lift it into an fdist. *)
 Lemma kim_weight_gt0 (k : 'I_5) : 0 < kim_weight_fun k.
 Proof.
 rewrite ffunE.
@@ -180,17 +178,13 @@ case: ifP => Hk.
   by rewrite -(subrr (5%:R^-1)) ltrD2l.
 Qed.
 
-(** kim_weight_ge0 — the Kim weight function is non-negative.
-    Kind: helper.
-    Why: non-negativity is required for the fdist construction.
-    Used by: the fdist construction for the Kim five-card instance. *)
+(** kim_weight_ge0 — the Kim weight function is non-negative, the weakening
+    of kim_weight_gt0 the fdist construction's non-negativity field needs. *)
 Lemma kim_weight_ge0 : forall k : 'I_5, 0 <= kim_weight_fun k.
 Proof. by move=> k; exact: Order.POrderTheory.ltW (kim_weight_gt0 k). Qed.
 
-(** kim_weight_sum1 — the perturbed Kim weight vector sums to one.
-    Kind: helper.
-    Why: required to build a Kim-weighted fdist from [kim_weight_fun].
-    Used by: the fdist construction for the Kim five-card instance. *)
+(** kim_weight_sum1 — the perturbed Kim weight vector sums to one, the mass
+    constraint kim_weight_dist's fdist construction needs. *)
 Lemma kim_weight_sum1 : \sum_(k in 'I_5) kim_weight_fun k = 1.
 Proof.
 rewrite big_ord_recr /= big_ord_recr /= big_ord_recr /=
@@ -225,18 +219,16 @@ have -> : 5%:R^-1 + (5%:R^-1 + (5%:R^-1 + (5%:R^-1 + 5%:R^-1))) =
 by rewrite -[5%:R^-1 *+ 5]mulr_natl divff // pnatr_eq0.
 Qed.
 
-(** kim_weight_dist — fdist on 'I_5 packaging the weight function kim_weight_fun.
-    Kind: instance.
-    Why: Builds the probability distribution W used in the weighted Schreier analysis of Kim's trick.
-*)
+(** kim_weight_dist — the fdist on 'I_5 packaging kim_weight_fun: the
+    distribution W the weighted Schreier analysis of Kim's biased trick
+    runs on. *)
 Definition kim_weight_dist : R.-fdist 'I_5 :=
   FDist.make kim_weight_ge0 kim_weight_sum1.
 
-(** kim_weight_distE — evaluation of kim_weight_dist on k gives the branch 5^-1 +/- (eps, eps/4).
-    Kind: helper.
-    Why: Rewrite lemma that replaces the FDist.make wrapper with the explicit case-analysis form.
-    Used by: fc_kim_schreier_diag, fc_kim_schreier_offdiag.
-*)
+(** kim_weight_distE — evaluating kim_weight_dist at k unfolds the
+    FDist.make wrapper to the explicit case-analysis branch, 5^-1 -/+
+    (eps, eps/4), the form the Schreier diagonal and off-diagonal entries
+    below are computed in. *)
 Lemma kim_weight_distE (k : 'I_5) :
   kim_weight_dist k =
   if val k == 0%N then 5%:R^-1 - eps else 5%:R^-1 + eps / 4%:R.
@@ -371,19 +363,15 @@ Let W := kim_weight_dist eps_lt eps_gt.
 (** Second-largest eigenvalue modulus *)
 Definition kim_lambda2 : R := 5%:R / 4%:R * `|eps|.
 
-(** kim_lambda2_ge0 — the second-largest eigenvalue modulus is non-negative.
-    Kind: helper.
-    Why: Non-negativity feeding kim_spectral_gap_le1.
-    Used by: kim_spectral_gap_le1.
-*)
+(** kim_lambda2_ge0 — the second-largest eigenvalue modulus is non-negative,
+    the fact kim_spectral_gap_le1 needs to keep the spectral gap at most
+    one. *)
 Lemma kim_lambda2_ge0 : 0 <= kim_lambda2.
 Proof. by rewrite /kim_lambda2 mulr_ge0 // ?divr_ge0 // normr_ge0. Qed.
 
-(** kim_lambda2_lt1 — the second-largest eigenvalue modulus is strictly below 1.
-    Kind: helper.
-    Why: Ensures a strictly positive spectral gap; uses eps_spectral hypothesis.
-    Used by: kim_spectral_gap_pos.
-*)
+(** kim_lambda2_lt1 — under the eps_spectral hypothesis, the second-largest
+    eigenvalue modulus is strictly below 1: this is what keeps the spectral
+    gap 1 - kim_lambda2 strictly positive. *)
 Lemma kim_lambda2_lt1 : kim_lambda2 < 1.
 Proof.
 rewrite /kim_lambda2.
@@ -397,33 +385,30 @@ Qed.
 (** Spectral gap *)
 Definition kim_spectral_gap : R := 1 - kim_lambda2.
 
-(** kim_spectral_gap_pos — the spectral gap is strictly positive.
-    Kind: helper.
-    Why: Gap positivity input to the WeightedSchreierCertificate constructor; follows from kim_lambda2 < 1.
-    Used by: fc_kim_schreier_cert, fc_kim_asymptotic.
-*)
+(** kim_spectral_gap_pos — the spectral gap is strictly positive, following
+    from kim_lambda2 < 1: the positivity input the WeightedSchreierCertificate
+    constructor requires. *)
 Lemma kim_spectral_gap_pos : 0 < kim_spectral_gap.
 Proof. by rewrite /kim_spectral_gap subr_gt0; exact: kim_lambda2_lt1. Qed.
 
-(** kim_spectral_gap_le1 — the spectral gap is at most 1.
-    Kind: helper.
-    Why: Gap upper-bound input to the WeightedSchreierCertificate constructor.
-    Used by: fc_kim_schreier_cert, fc_kim_asymptotic.
-*)
+(** kim_spectral_gap_le1 — the spectral gap is at most 1, the upper-bound
+    input the WeightedSchreierCertificate constructor requires. *)
 Lemma kim_spectral_gap_le1 : kim_spectral_gap <= 1.
 Proof. by rewrite /kim_spectral_gap lerBlDr lerDl; exact: kim_lambda2_ge0. Qed.
 
-(** Spectral convergence bound.
-    Proved via the uniform-off-diagonal convergence theorem
-    (unif_offdiag_convergence from pgg_schreier_weighted.v):
-    Kim's circulant Schreier matrix has constant diagonal a = 1/5 - eps
-    and constant off-diagonal b = 1/5 + eps/4, so the general theorem
-    gives var_dist = 8/5 * |a-b|^L <= sqrt(5) * |a-b|^L. *)
+(** kim_spectral_convergence — the spectral bound: after L shuffles, the
+    variation distance of the weighted rotation image from uniform is at
+    most sqrt 5 * kim_lambda2 ^ L, the geometric rate at which Kim's biased
+    shuffle mixes to uniform. *)
 Lemma kim_spectral_convergence : forall (L : nat) (s : 'I_5),
   var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas W s)
            (fdist_uniform (card_ord 5))
   <= Num.sqrt 5%:R * kim_lambda2 ^+ L.
 Proof.
+(* Via the uniform-off-diagonal convergence theorem (unif_offdiag_convergence,
+   pgg_schreier_weighted.v): Kim's circulant Schreier matrix has constant
+   diagonal a = 1/5 - eps and constant off-diagonal b = 1/5 + eps/4, so the
+   general theorem gives var_dist = 8/5 * |a-b|^L <= sqrt(5) * |a-b|^L. *)
 move=> L s.
 (* Rewrite var_dist using bridge: endpoint_dist = matrix power entry *)
 rewrite /var_dist.
@@ -461,15 +446,18 @@ apply: (@MkWeightedSchreierCertificate R 4 3 fc_kim_sigmas W).
   exact: kim_spectral_convergence.
 Defined.
 
-(** Exact variation distance via the uniform-off-diagonal identity.
-    The proof mirrors kim_spectral_convergence but calls
-    unif_offdiag_var_dist (equality) instead of
-    unif_offdiag_convergence (inequality). *)
+(** kim_var_dist_exact — the exact variation distance: after L shuffles, the
+    variation distance of the weighted rotation image from uniform equals
+    (8/5) * kim_lambda2 ^ L exactly, sharpening kim_spectral_convergence's
+    inequality to an equality. *)
 Lemma kim_var_dist_exact (L : nat) (s : 'I_5) :
   var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas W s)
            (fdist_uniform (card_ord 5))
   = 2%:R * 4%:R / 5%:R * kim_lambda2 ^+ L.
 Proof.
+(* Mirrors kim_spectral_convergence's proof, calling the equality
+   unif_offdiag_var_dist instead of the inequality
+   unif_offdiag_convergence. *)
 rewrite /var_dist.
 under eq_bigr => x _ do
   rewrite (@schreier_weighted_bridge R 4 3) fdist_uniformE card_ord.
@@ -505,10 +493,7 @@ Defined.
 
 (** fc_kim_security_bundle — the certificate bundle at word length L, carrying
     the spectral marginal bound, the exact variational distance and the
-    asymptotic convergence certificate.
-    @intent: MkShuffleCertificateBundle at the spectral bound of the weighted
-    word distribution, with scb_exact the closed-form equality and
-    scb_asymptotic the geometric-convergence certificate. *)
+    asymptotic convergence certificate. *)
 Definition fc_kim_security_bundle (L : nat) :
   ShuffleCertificateBundle R FiveCardKim_M :=
   @MkShuffleCertificateBundle R FiveCardKim_M
@@ -526,22 +511,21 @@ Definition fc_kim_security_bundle (L : nat) :
 Lemma kim_lambda2_at_zero : eps = 0 -> kim_lambda2 = 0.
 Proof. by move=> H0; rewrite /kim_lambda2 H0 normr0 mulr0. Qed.
 
-(** kim_bound_at_zero — at eps = 0 any positive power of kim_lambda2 is zero.
-    Kind: helper.
-    Why: Intermediate step feeding kim_security_at_zero.
-    Used by: kim_security_at_zero.
-*)
+(** kim_bound_at_zero — at eps = 0, any positive power kim_lambda2 ^+ L.+1
+    is zero, since kim_lambda2 itself vanishes there. This is the
+    intermediate step kim_security_at_zero multiplies by sqrt 5 to collapse
+    the whole spectral bound. *)
 Lemma kim_bound_at_zero (L : nat) :
   eps = 0 -> kim_lambda2 ^+ L.+1 = 0.
 Proof.
 by move=> H0; rewrite kim_lambda2_at_zero // expr0n.
 Qed.
 
-(** kim_security_at_zero — at eps = 0 the security bound collapses to zero for any positive word length.
-    Kind: helper.
-    Why: Degenerate limit check: unbiased weights recover the uniform-dealing regime.
-    Used by: downstream sanity checks of Kim's instance.
-*)
+(** kim_security_at_zero — at eps = 0 the spectral security bound
+    sqrt 5 * kim_lambda2 ^+ L.+1 collapses to zero, for any positive word
+    length. This is the degenerate-limit check confirming the unbiased
+    weights recover the uniform-dealing regime, matching den Boer's perfect
+    anonymity at zero bias. *)
 Lemma kim_security_at_zero (L : nat) :
   eps = 0 -> Num.sqrt 5%:R * kim_lambda2 ^+ L.+1 = 0.
 Proof. by move=> H0; rewrite kim_bound_at_zero // mulr0. Qed.
@@ -569,8 +553,10 @@ Variable R : realType.
     5. Exact variation distance (kim_var_dist_exact)
     6. certificate bundle with scb_exact (fc_kim_security_bundle) *)
 
-(** The security bound for L shuffles:
-    var_dist <= sqrt(5) * ((5/4)*|eps|)^L *)
+(** The security bound for L shuffles, at an explicit bias eps rather than
+    the section's hoisted one: var_dist <= sqrt(5) * ((5/4)*|eps|)^L, the
+    same inequality kim_spectral_convergence already proves for the
+    section's own eps. *)
 Lemma fc_kim_security_bound (eps : R)
     (Hlt : eps < 5%:R^-1)
     (Hgt : - (4%:R * 5%:R^-1) < eps)
@@ -582,8 +568,9 @@ Lemma fc_kim_security_bound (eps : R)
   <= Num.sqrt 5%:R * (kim_lambda2 eps) ^+ L.
 Proof. exact: kim_spectral_convergence. Qed.
 
-(** At bias eps = 1/100 the second eigenvalue modulus equals 1/80.
-    @composes: kim_bound_centi *)
+(** At bias eps = 1/100 the second eigenvalue modulus kim_lambda2 equals
+    1/80 exactly. This is the concrete value kim_bound_centi raises to the
+    seventh power to certify the 2^-40 numeric bound. *)
 Lemma kim_lambda2_at_centi : kim_lambda2 (1 / 100 : R) = 1 / 80.
 Proof.
 rewrite /kim_lambda2 ger0_norm; last by rewrite divr_ge0.
@@ -592,13 +579,15 @@ rewrite mulf_div mulr1; apply/eqP; rewrite eqr_div ?pnatr_eq0 //;
 by rewrite mul1r -!natrM.
 Qed.
 
-(** The bias 1/100 lies below the no-cut threshold 1/5.
-    @composes: kim_deal_centi_lt *)
+(** The bias 1/100 lies below the no-cut threshold 1/5, discharging
+    kim_weight_dist's eps_lt_inv5 hypothesis for the concrete seven-cut
+    instance kim_deal_centi_lt assembles. *)
 Lemma kim_centi_lt : (1 / 100 : R) < 5%:R^-1.
 Proof. by rewrite div1r ltf_pV2 ?posrE ?ltr0n // ltr_nat. Qed.
 
-(** The bias 1/100 lies above the lower positivity bound -(4/5).
-    @composes: kim_deal_centi_lt *)
+(** The bias 1/100 lies above the lower positivity bound -(4/5), discharging
+    kim_weight_dist's eps_gt_neg4inv5 hypothesis for the concrete seven-cut
+    instance kim_deal_centi_lt assembles. *)
 Lemma kim_centi_gt : - (4%:R * 5%:R^-1) < (1 / 100 : R).
 Proof.
 apply: (Order.POrderTheory.lt_le_trans (y := 0)).
@@ -606,16 +595,20 @@ apply: (Order.POrderTheory.lt_le_trans (y := 0)).
 - by rewrite divr_ge0.
 Qed.
 
-(** The bias 1/100 has magnitude below the spectral-gap bound 4/5.
-    @composes: kim_deal_centi_lt *)
+(** The bias 1/100 has magnitude below the spectral-gap bound 4/5,
+    discharging the eps_spectral hypothesis that gives kim_spectral_gap_pos
+    and, through it, the concrete seven-cut instance kim_deal_centi_lt
+    assembles. *)
 Lemma kim_centi_spec : `|1 / 100 : R| < 4%:R / 5%:R.
 Proof.
 rewrite ger0_norm; last by rewrite divr_ge0.
 by rewrite ltr_pdivrMr ?ltr0n // mulrAC ltr_pdivlMr ?ltr0n // mul1r -natrM ltr_nat.
 Qed.
 
-(** At bias 1/100 and word length 7 the spectral bound is below 2^-40.
-    @composes: kim_deal_centi_lt *)
+(** At bias 1/100 and word length 7 the spectral bound
+    sqrt 5 * kim_lambda2 ^+ 7 is below 2^-40. This is the numeric closure
+    kim_deal_centi_lt cites to certify the concrete seven-cut deal's
+    proximity to uniform. *)
 Lemma kim_bound_centi :
   Num.sqrt 5%:R * (kim_lambda2 (1 / 100 : R)) ^+ 7 < 2%:R ^- 40.
 Proof.
@@ -632,14 +625,14 @@ by lia.
 Qed.
 
 (** kim_security_bundle_centi — the certificate bundle for Kim at bias 1/100
-    and word length 7.
-    @intent: fc_kim_security_bundle at bias 1/100 and L = 7, whose marginal
-    bound is sqrt 5 * (1/80)^7. *)
+    and word length 7: fc_kim_security_bundle instantiated at that bias and
+    L = 7, whose marginal bound is sqrt 5 * (1/80)^7. *)
 Definition kim_security_bundle_centi : ShuffleCertificateBundle R FiveCardKim_M :=
   @fc_kim_security_bundle R (1 / 100) kim_centi_lt kim_centi_gt kim_centi_spec 7.
 
-(** Variation distance of the 7-cut biased deal from uniform is below 2^-40.
-    @main security: closes the numeric mixing-length step in-kernel for Kim. *)
+(** Variation distance of the 7-cut biased deal from uniform is below
+    2^-40: the numeric mixing-length step that closes Kim's concrete
+    security instance in-kernel. *)
 Lemma kim_deal_centi_lt (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
               (sw_rho_dist (scb_bound kim_security_bundle_centi)))
@@ -652,8 +645,9 @@ rewrite /kim_security_bundle_centi /fc_kim_security_bundle /sw_bound_eps.
 exact: kim_bound_centi.
 Qed.
 
-(** Variation distance of a single biased cut from uniform equals 1/50.
-    @main security: the paper-faithful single-shuffle leak at bias 1/100. *)
+(** Variation distance of a single biased cut from uniform equals 1/50 at
+    bias 1/100: the paper-faithful single-shuffle leak Kim & Cetinkaya
+    report. *)
 Lemma kim_one_cut_centiE (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
               (@rho_from_words_weighted R 3 4 1 fc_kim_sigmas

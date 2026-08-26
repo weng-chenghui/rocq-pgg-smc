@@ -47,43 +47,43 @@ Variable eps : R.
 Hypothesis eps_lt_inv5 : eps < 5%:R^-1.
 Hypothesis eps_gt_neg4inv5 : - (4%:R * 5%:R^-1) < eps.
 
-(** card_bool2 — the input alphabet [bool * bool] has four elements.
-    @composes: kim_input_private *)
+(** card_bool2 — the input alphabet [bool * bool] has four elements. This is
+    the finiteness certificate kim_input_dist's uniform input factor
+    needs. *)
 Lemma card_bool2 : #|{: bool * bool}| = 3.+1.
 Proof. by rewrite card_prod !card_bool. Qed.
 
 (** kim_input_dist — the biased joint law on [Omega = bool * bool * 'I_5]: fair
-    inputs [(a, b)] times Kim's weighted cyclic cut [W_eps].
-    @intent: the probability space for Kim's input-privacy analysis. *)
+    inputs [(a, b)] times Kim's weighted cyclic cut [W_eps]. *)
 Definition kim_input_dist : R.-fdist Omega :=
   (fdist_uniform card_bool2 : R.-fdist (bool * bool))
     `x (kim_weight_dist eps_lt_inv5 eps_gt_neg4inv5).
 
 (** kim_inputs — the input pair [(a, b)] over [kim_input_dist], reusing the den
-    Boer function so [den_boer_view_count_eq] applies.
-    @intent: the secret-determining inputs of Kim's trick. *)
+    Boer function so [den_boer_view_count_eq] applies. *)
 Definition kim_inputs : {RV kim_input_dist -> bool * bool} := Inputs R.
 
-(** kim_secret — the output [a && b] over [kim_input_dist].
-    @intent: the den Boer / Kim computed value. *)
+(** kim_secret — the output [a && b] over [kim_input_dist], the den Boer / Kim
+    computed value. *)
 Definition kim_secret : {RV kim_input_dist -> bool} := Secret R.
 
-(** kim_view — the partial card view at positions [A] over [kim_input_dist].
-    @intent: the adversary's revealed colours. *)
+(** kim_view — the partial card view at positions [A] over [kim_input_dist]:
+    the adversary's revealed colours. *)
 Definition kim_view (A : seq nat) : {RV kim_input_dist -> (size A).-tuple bool} :=
   ViewA R A.
 
-(** kim_leak_bound — the [O(eps^2)] leakage ceiling.
-    @intent: Kim's input-privacy bound as a function of the bias. *)
+(** kim_leak_bound — the [O(eps^2)] leakage ceiling: Kim's input-privacy bound
+    as a function of the bias eps, vanishing at eps = 0 to recover den Boer's
+    exact zero. *)
 Definition kim_leak_bound (e : R) : R :=
   12%:R * log (sequences.expR 1) * e ^+ 2 / (5%:R^-1 - `|e|).
 
 Let PQR (A : seq nat) := `p_ [% kim_inputs, kim_view A, kim_secret].
 
-(** cdiv1_secret_true0 — conditioned on the output a && b being true, the inputs
-    are the point mass (1, 1), so the secret-true fibre's conditional KL term is
-    zero.
-    @composes: kim_input_private *)
+(** cdiv1_secret_true0 — conditioned on the output a && b being true, the
+    inputs are the point mass (1, 1), so the secret-true fibre's conditional
+    KL term is zero. This is the vacuous half of kim_cond_mutual_infoE's
+    fibre split: the leakage lives entirely in the secret-false fibre. *)
 Fact cdiv1_secret_true0 (A : seq nat) : cdiv1 (PQR A) true = 0.
 Proof.
 rewrite /PQR /cdiv1; apply: big1 => x _.
@@ -148,9 +148,10 @@ have [->|q2N] := eqVneq (cPr_eq (kim_view A) x.2 kim_secret true) 0;
 by rewrite divff // log1 mulr0.
 Qed.
 
-(** kim_cond_mutual_infoE — the conditional mutual information is carried entirely
-    by the output-false fibre, which has probability 3 / 4.
-    @composes: kim_input_private *)
+(** kim_cond_mutual_infoE — the conditional mutual information
+    cond_mutual_info (PQR A) is carried entirely by the output-false fibre,
+    which has probability 3 / 4. This isolates the one fibre
+    kim_cdiv1_false and the chi-square chain below must bound. *)
 Fact kim_cond_mutual_infoE (A : seq nat) :
   cond_mutual_info (PQR A) = 3%:R / 4%:R * cdiv1 (PQR A) false.
 Proof.
@@ -175,15 +176,17 @@ have -> : #|(fun i : bool * bool => ~~ (i.1 && i.2) (+) false)| = 3.
 by rewrite mulrnAl mul1r.
 Qed.
 
-(** chi2_div — the Pearson chi-square divergence sum_a (P a - Q a)^2 / Q a.
-    @intent: the second-order surrogate that upper-bounds the KL divergence. *)
+(** chi2_div — the Pearson chi-square divergence sum_a (P a - Q a)^2 / Q a:
+    the second-order surrogate le_div_chi2 uses to upper-bound the KL
+    divergence. *)
 Definition chi2_div (T : finType) (P Q : R.-fdist T) : R :=
   \sum_(a in T) (P a - Q a) ^+ 2 / Q a.
 
 (** le_div_chi2 — KL is bounded by chi-square times log e (a one-step
     consequence of log x <= (x - 1) log e), under absolute continuity so the
-    bound also covers product references with zeros off the support.
-    @composes: kim_input_private *)
+    bound also covers product references with zeros off the support. This is
+    the general information-theoretic step kim_div_bound instantiates to
+    turn the chi-square bound kim_chi2_bound into a KL bound. *)
 Fact le_div_chi2 (T : finType) (P Q : R.-fdist T) :
   P `<< Q ->
   divergence.div P Q <= chi2_div P Q * log (sequences.expR 1).
@@ -222,13 +225,15 @@ Qed.
 
 Local Notation W := (kim_weight_dist eps_lt_inv5 eps_gt_neg4inv5).
 
-(** kim_mass — the Kim joint law factors as a uniform input times the biased cut.
-    @composes: kim_input_private *)
+(** kim_mass — the Kim joint law kim_input_dist factors as a uniform input
+    times the biased cut: kim_input_dist w = 1/4 * W w.2. This factorization
+    is the algebraic fact every mass computation below unfolds through. *)
 Fact kim_mass (w : Omega) : kim_input_dist w = 4%:R^-1 * W w.2.
 Proof. by case: w => [ab k]; rewrite /kim_input_dist fdist_prodE /= fdist_uniformE card_bool2. Qed.
 
-(** kim_w_dev — each Kim weight deviates from uniform by at most the bias.
-    @composes: kim_input_private *)
+(** kim_w_dev — each Kim weight [W k] deviates from the uniform value 1/5 by
+    at most the bias: `|W k - 1/5| <= |eps|. This is the per-letter
+    deviation kim_w_tv sums into a total-variation bound. *)
 Fact kim_w_dev (k : 'I_5) : `|W k - 5%:R^-1| <= `|eps|.
 Proof.
 rewrite /W kim_weight_distE; case: ifP => _.
@@ -238,16 +243,18 @@ rewrite normrM (@ger0_norm _ (4%:R^-1)) ?invr_ge0 //.
 by rewrite ler_pdivrMr ?ltr0n // ler_peMr ?normr_ge0 // ler1n.
 Qed.
 
-(** kim_w_ge — each Kim weight is at least the uniform value minus the bias.
-    @composes: kim_input_private *)
+(** kim_w_ge — each Kim weight [W k] is at least the uniform value minus the
+    bias: 1/5 - |eps| <= W k. This is the lower bound kim_q_ge_pos sums to
+    floor a realised view's cut mass. *)
 Fact kim_w_ge (k : 'I_5) : 5%:R^-1 - `|eps| <= W k.
 Proof.
 have := kim_w_dev k; rewrite ler_norml => /andP[H1 _]; lra.
 Qed.
 
-(** kim_w_tv — the Kim weight vector deviates from uniform by total variation
-    at most twice the bias.
-    @composes: kim_input_private *)
+(** kim_w_tv — the Kim weight vector deviates from the uniform distribution
+    on 'I_5, in total variation, by at most twice the bias:
+    sum_k `|W k - 1/5| <= 2 |eps|. This is the total-variation ceiling
+    kim_q_dev transports to the per-input view law. *)
 Fact kim_w_tv : \sum_(k in 'I_5) `|W k - 5%:R^-1| <= 2%:R * `|eps|.
 Proof.
 rewrite /W /kim_weight_dist /=.
@@ -263,44 +270,47 @@ rewrite normrN normrM (@ger0_norm _ (4%:R^-1)) ?invr_ge0 //.
 by rewrite -mulr_natr; lra.
 Qed.
 
-(** kim_q — the weight a given input deals to a given view: the cut mass that
-    realises that partial reveal.
-    @intent: per-input view law, summed weight of cuts matching the view. *)
+(** kim_q — the weight a given input deals to a given view: the cut mass,
+    summed over the cuts realising that partial reveal, i.e. the per-input
+    view law. *)
 Definition kim_q (A : seq nat) (x : bool * bool) (v : (size A).-tuple bool) : R :=
   \sum_(k in 'I_5 | ViewA R A (x, k) == v) W k.
 Arguments kim_q A x v : clear implicits.
 
-(** kim_qctr — the uniform-cut reference value for kim_q: the same sum with each
-    weight replaced by 1 / 5.
-    @intent: the den Boer (unbiased) view law against which kim_q is compared. *)
+(** kim_qctr — the uniform-cut reference value for kim_q: the same sum with
+    each weight replaced by 1 / 5, i.e. the den Boer (unbiased) view law
+    against which kim_q is compared. *)
 Definition kim_qctr (A : seq nat) (x : bool * bool)
     (v : (size A).-tuple bool) : R :=
   \sum_(k in 'I_5 | ViewA R A (x, k) == v) 5%:R^-1.
 Arguments kim_qctr A x v : clear implicits.
 
-(** kim_qbar — the view law conditioned on the output being false: the average
-    of kim_q over the three false-fibre inputs.
-    @intent: the product-reference view marginal in the chi-square comparison. *)
+(** kim_qbar — the view law conditioned on the output being false: the
+    average of kim_q over the three false-fibre inputs, the
+    product-reference view marginal the chi-square comparison
+    kim_chi2_bound measures each input against. *)
 Definition kim_qbar (A : seq nat) (v : (size A).-tuple bool) : R :=
   3%:R^-1 * \sum_(x in {: bool * bool} | ~~ (x.1 && x.2)) kim_q A x v.
 Arguments kim_qbar A v : clear implicits.
 
-(** kim_q_ge0 — kim_q is non-negative.
-    @composes: kim_input_private *)
+(** kim_q_ge0 — kim_q is non-negative. This is what the chi-square and KL
+    steps below need whenever they compare, bound, or sum kim_q values. *)
 Fact kim_q_ge0 (A : seq nat) (x : bool * bool) (v : (size A).-tuple bool) :
   0 <= kim_q A x v.
 Proof. by apply: sumr_ge0 => k _; exact: FDist.ge0. Qed.
 
-(** kim_qbar_ge0 — kim_qbar is non-negative.
-    @composes: kim_input_private *)
+(** kim_qbar_ge0 — kim_qbar is non-negative. This is the sign fact
+    kim_chi2_bound needs before it can divide by kim_qbar A v. *)
 Fact kim_qbar_ge0 (A : seq nat) (v : (size A).-tuple bool) : 0 <= kim_qbar A v.
 Proof.
 rewrite /kim_qbar mulr_ge0 ?invr_ge0 ?ler0n //.
 by apply: sumr_ge0 => x _; exact: kim_q_ge0.
 Qed.
 
-(** kim_qsum1 — kim_q is a probability law over views.
-    @composes: kim_input_private *)
+(** kim_qsum1 — kim_q A x sums to 1 over all views v, so it is a genuine
+    probability law on views, for each input x. This is what lets
+    kim_qbar_sum1 average kim_q over the false fibre and still land on a
+    probability law. *)
 Fact kim_qsum1 (A : seq nat) (x : bool * bool) : \sum_v kim_q A x v = 1.
 Proof.
 rewrite /kim_q (exchange_big_dep predT) //=.
@@ -308,9 +318,12 @@ under eq_bigr => k _ do rewrite (big_pred1 (ViewA R A (x, k))) //=.
 exact: (FDist.f1 W).
 Qed.
 
-(** kim_qctr_card — the uniform reference value counts the cuts matching the
-    view, as a preimage cardinality of the joint input-view map.
-    @composes: kim_input_private *)
+(** kim_qctr_card — the uniform reference value kim_qctr A x v counts the
+    cuts matching the view, read as a preimage cardinality of the joint
+    input-view map [% Inputs, ViewA]:
+    #|preim [% Inputs, ViewA A] (pred1 (x, v))| times 1/5. This combinatorial
+    reading is what kim_qctr_eq transports den_boer_view_count_eq's
+    fibre-count equality across. *)
 Fact kim_qctr_card (A : seq nat) (x : bool * bool) (v : (size A).-tuple bool) :
   kim_qctr A x v =
   #|preim [% Inputs R, ViewA R A] (pred1 (x, v))|%:R * 5%:R^-1.
@@ -325,9 +338,11 @@ have -> : [% Inputs R, ViewA R A] (x, k) = (x, ViewA R A (x, k)) by case: x.
 by rewrite xpair_eqE eqxx.
 Qed.
 
-(** kim_qctr_eq — equal-output inputs share the uniform reference view value:
-    the cut count realising a view is the same across the false fibre.
-    @composes: kim_input_private *)
+(** kim_qctr_eq — equal-output inputs share the uniform reference view value
+    kim_qctr: the cut count realising a view is the same across the false
+    fibre, by den Boer's own fibre-count equality den_boer_view_count_eq.
+    This is what lets kim_qbar_ge and kim_qbar_diff compare every
+    false-fibre input against one common reference. *)
 Fact kim_qctr_eq (A : seq nat) (x x' : bool * bool) (v : (size A).-tuple bool) :
   x.1 && x.2 = x'.1 && x'.2 -> kim_qctr A x v = kim_qctr A x' v.
 Proof.
@@ -335,9 +350,11 @@ move=> Hxx; rewrite !kim_qctr_card.
 by rewrite (den_boer_view_count_eq R v Hxx).
 Qed.
 
-(** kim_q_dev — the per-input view law deviates from the uniform reference in
-    total variation by at most twice the bias.
-    @composes: kim_input_private *)
+(** kim_q_dev — the per-input view law kim_q A x deviates from the uniform
+    reference kim_qctr A x, in total variation, by at most twice the bias:
+    sum_v `|kim_q A x v - kim_qctr A x v| <= 2 |eps|. This transports
+    kim_w_tv's per-letter bound to the level of a single input's view
+    law. *)
 Fact kim_q_dev (A : seq nat) (x : bool * bool) :
   \sum_v `|kim_q A x v - kim_qctr A x v| <= 2%:R * `|eps|.
 Proof.
@@ -356,9 +373,10 @@ apply: (order.Order.POrderTheory.le_trans (ler_norm_sum _ _ _)).
 by apply: ler_sum => k _.
 Qed.
 
-(** kim_qbar_diff — a false-fibre input's view law differs from the mixed
-    reference in total variation by at most four times the bias.
-    @composes: kim_input_private *)
+(** kim_qbar_diff — a false-fibre input's view law kim_q A x differs from the
+    mixed reference kim_qbar A, in total variation, by at most four times
+    the bias. This is the total-variation bound kim_chi2_bound squares and
+    rescales into a chi-square bound. *)
 Fact kim_qbar_diff (A : seq nat) (x : bool * bool) :
   ~~ (x.1 && x.2) ->
   \sum_v `|kim_q A x v - kim_qbar A v| <= 4%:R * `|eps|.
@@ -420,9 +438,10 @@ Qed.
     All concrete Kim instances (den Boer eps = 0, Kim bias 1/100) satisfy it. *)
 Hypothesis eps_small : 0 < 5%:R^-1 - `|eps|.
 
-(** kim_q_ge_pos — when a view is realised by some uniform cut, its biased weight
-    is at least the minimum cut weight 1/5 - |eps|.
-    @composes: kim_input_private *)
+(** kim_q_ge_pos — when a view is realised by some uniform cut, its biased
+    weight kim_q A x' v is at least the minimum cut weight 1/5 - |eps|. This
+    floors an individual input's realised view mass, the fact kim_qbar_ge
+    averages across the false fibre. *)
 Fact kim_q_ge_pos (A : seq nat) (x' : bool * bool) (v : (size A).-tuple bool) :
   0 < kim_qctr A x' v -> 5%:R^-1 - `|eps| <= kim_q A x' v.
 Proof.
@@ -442,9 +461,10 @@ apply: (order.Order.POrderTheory.le_trans
 by apply: ler_sum => k _; exact: kim_w_ge.
 Qed.
 
-(** kim_qbar_ge — when the false-fibre average view law is nonzero, it is at
-    least the minimum cut weight 1/5 - |eps|.
-    @composes: kim_input_private *)
+(** kim_qbar_ge — when the false-fibre average view law kim_qbar A v is
+    nonzero, it is at least the minimum cut weight 1/5 - |eps|. This is the
+    lower bound kim_chi2_bound needs to divide by kim_qbar A v without the
+    ratio blowing up. *)
 Fact kim_qbar_ge (A : seq nat) (v : (size A).-tuple bool) :
   kim_qbar A v != 0 -> 5%:R^-1 - `|eps| <= kim_qbar A v.
 Proof.
@@ -485,8 +505,10 @@ apply: ler_sum => x' Hx'.
 by apply: Hall; apply/negbTE.
 Qed.
 
-(** kim_qbar_sum1 — the false-fibre average view law is a probability law.
-    @composes: kim_input_private *)
+(** kim_qbar_sum1 — kim_qbar A sums to 1 over all views, so the false-fibre
+    average view law is itself a genuine probability law. This is what
+    makes kim_div_bound's divergence.div P Q, with Q built from kim_qbar, a
+    well-formed KL divergence. *)
 Fact kim_qbar_sum1 (A : seq nat) : \sum_v kim_qbar A v = 1.
 Proof.
 rewrite /kim_qbar -mulr_sumr exchange_big /=.
@@ -501,8 +523,10 @@ by rewrite Hc3 mulVf // pnatr_eq0.
 Qed.
 
 (** kim_chi2_bound — a false-fibre input's view law deviates from the mixed
-    reference by chi-square at most 16 eps^2 / (1/5 - |eps|).
-    @composes: kim_input_private *)
+    reference kim_qbar, in Pearson chi-square, by at most
+    16 eps^2 / (1/5 - |eps|). This squares kim_qbar_diff's total-variation
+    bound and floors the denominator with kim_qbar_ge, the two facts the
+    chi-square-to-KL step kim_div_bound needs. *)
 Fact kim_chi2_bound (A : seq nat) (x : bool * bool) :
   ~~ (x.1 && x.2) ->
   \sum_v (kim_q A x v - kim_qbar A v) ^+ 2 / kim_qbar A v
@@ -545,9 +569,11 @@ apply: (order.Order.POrderTheory.le_trans (y := (4%:R * `|eps|) ^+ 2)).
 by rewrite exprMn -natrX /= real_normK ?num_real //.
 Qed.
 
-(** kim_div_bound — a false-fibre input's view law has KL against the mixed
-    reference at most 16 eps^2 log e / (1/5 - |eps|).
-    @composes: kim_input_private *)
+(** kim_div_bound — a false-fibre input's view law has KL divergence against
+    the mixed reference kim_qbar at most 16 eps^2 log e / (1/5 - |eps|).
+    This upgrades kim_chi2_bound's chi-square bound to the KL bound
+    kim_cdiv1_false averages over the false fibre to reach the
+    conditional-mutual-information ceiling. *)
 Fact kim_div_bound (A : seq nat) (x : bool * bool) :
   ~~ (x.1 && x.2) ->
   \sum_v kim_q A x v * log (kim_q A x v / kim_qbar A v)
@@ -590,9 +616,12 @@ apply: ler_wpM2r; first exact: log_exp1_Rle_0.
 exact: chi2le.
 Qed.
 
-(** kim_cdiv1_false — the output-false conditional KL term is the false-fibre
-    average of the per-input view-law KL terms.
-    @composes: kim_input_private *)
+(** kim_cdiv1_false — the output-false conditional KL term
+    cdiv1 (PQR A) false is exactly the false-fibre average of the per-input
+    view-law KL terms kim_q A x v * log (kim_q A x v / kim_qbar A v). This
+    is the reduction from the KL-divergence quantity
+    kim_cond_mutual_infoE isolates down to the per-input bound
+    kim_div_bound proves. *)
 Fact kim_cdiv1_false (A : seq nat) :
   cdiv1 (PQR A) false =
   3%:R^-1 * \sum_(x in {: bool * bool} | ~~ (x.1 && x.2))
@@ -679,10 +708,11 @@ rewrite -(pair_big (fun a : bool * bool => a.1 && a.2 == false) xpredT
 apply: eq_bigl => i; by case: (i.1 && i.2).
 Qed.
 
-(** kim_input_private — under Kim's biased cut, a partial view carries at most
-    kim_leak_bound eps conditional mutual information about the inputs given the
-    output a && b.
-    @main security: cond_mutual_info bound on inputs vs view given the secret. *)
+(** kim_input_private — under Kim's biased cut, a partial view of the dealt
+    row carries at most kim_leak_bound eps conditional mutual information
+    about the inputs given the output a && b. This is the file's
+    O(eps^2) leakage ceiling, closing the chain of chi-square and KL bounds
+    above into the one number the den Boer / Kim comparison cares about. *)
 Lemma kim_input_private (A : seq nat) :
   cond_mutual_info (`p_ [% kim_inputs, kim_view A, kim_secret]) <= kim_leak_bound eps.
 Proof.
@@ -712,9 +742,10 @@ Qed.
 
 End kim_input_privacy.
 
-(** kim_input_private0 — at zero bias the conditional mutual information meets
-    kim_leak_bound 0, the unbiased (den Boer) endpoint of the O(eps^2) ceiling.
-    @composes: kim_input_private *)
+(** kim_input_private0 — at zero bias the conditional mutual information
+    meets kim_leak_bound 0, the unbiased (den Boer) endpoint of the O(eps^2)
+    ceiling, confirming kim_input_private recovers den Boer's exact
+    zero-leakage result as the bias-0 special case. *)
 Corollary kim_input_private0 (R : realType)
     (H1 : (0 : R) < 5%:R^-1) (H2 : - (4%:R * 5%:R^-1) < (0 : R))
     (H3 : 0 < 5%:R^-1 - `|0 : R|) (A : seq nat) :
