@@ -232,3 +232,26 @@ go into `.gitignore`.
 - Controller audits proving agents ~every 5 minutes; wrong-track agents
   are stopped and relaunched with tighter constraints rather than waited
   out.
+
+## Addendum (2026-08-26): published-infotheo dependency
+
+User follow-up: depend on the PUBLISHED coq-infotheo opam package, not
+the local pin. Findings and changes:
+
+- Published coq-infotheo 0.9.7 (latest release) ships no `smc/`
+  directory; `pismc`, `smc_interpreter`, `smc_session_types` and their
+  dependency `graded_resource` are fork-only (authored on the
+  weng-chenghui fork, absent from upstream affeldt-aist entirely).
+  They are now VENDORED verbatim into `smc/` (namespace `pgg_smc`), and
+  the 36 consumer import lines say `From pgg_smc Require Import ...`.
+- All other imported modules and every core lemma the project (and
+  `lib/proba_entropy_ext.v`) uses exist unrenamed in 0.9.7.
+- One real 0.9.7 incompatibility: the `` `*T `` notation level moved
+  from 40 to 1, requiring explicit parentheses at four sites
+  (`security/pgg_leakage_product.v`, `reconstruct/transitivity_privacy.v`);
+  the parenthesized form parses identically at both levels.
+- opam depends now reads `"coq-infotheo" {>= "0.9.7"}`.
+- Verification: full clean 153/153 build against a scratch-compiled
+  0.9.7 bound via `-Q ... infotheo` (shadow effectiveness proven by a
+  negative probe on the dev-only `centropy_RV_dpi`), and a full clean
+  153/153 build against the pinned dev switch. Both green.
