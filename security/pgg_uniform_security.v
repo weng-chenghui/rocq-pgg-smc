@@ -4,7 +4,7 @@
 (* Certificate bundle for uniform dealing (epsilon = 0)                       *)
 (*                                                                            *)
 (* When the dealing phase samples a permutation uniformly from a group G      *)
-(* that acts regularly (= free + transitive) on sheets, the endpoint          *)
+(* that acts regularly (= free + transitive) on card positions, the endpoint *)
 (* distribution is exactly uniform, giving epsilon = 0.                       *)
 (*                                                                            *)
 (* Main result:                                                               *)
@@ -114,7 +114,8 @@ Hypothesis Hregular :
   forall s : 'I_N,
   {in rhoG &, injective (fun sigma : {perm 'I_N} => sigma s)}.
 
-(* Transitivity: the orbit of every sheet s under rhoG is all of 'I_N *)
+(* Transitivity: the orbit of every card position s under rhoG is all of
+   'I_N *)
 Hypothesis Htrans :
   forall s : 'I_N,
   [set (sigma : {perm 'I_N}) s | sigma in rhoG] = [set: 'I_N].
@@ -130,7 +131,7 @@ Let eval_at (s : 'I_N) : {perm 'I_N} -> 'I_N :=
 (* The image of rhoG under eval_at s *)
 Let img (s : 'I_N) := (eval_at s) @: rhoG.
 
-(* img s, the endpoint image of rhoG at sheet s, is non-empty, since
+(* img s, the endpoint image of rhoG at card position s, is non-empty, since
    rhoG itself is non-empty (HrhoG_pos).  Housekeeping needed only to
    construct fdist_uniform_supp on img s in eval_pushforward; img_setT
    below is the fact that actually pins down img s. *)

@@ -313,7 +313,7 @@ Variable T' : nat.
 Let T := T'.+1.
 Hypothesis TN : (T <= N)%N.
 
-(* Distinct starting sheets *)
+(* Distinct starting card positions *)
 Variable starts : T.-tuple 'I_N.
 Hypothesis starts_uniq : uniq starts.
 
@@ -385,8 +385,9 @@ Qed.
 
 (* The unconditional bound: pushing Assumption 1's group-level gap epsilon
    through the endpoint-evaluation map (the data processing inequality
-   above) gives the same epsilon for the coalition's single-sheet marginal,
-   with no overhead from the coalition's other observations. *)
+   above) gives the same epsilon for the coalition's marginal at a single
+   card position, with no overhead from the coalition's other
+   observations. *)
 Theorem collusion_bound_unconditional :
   var_dist adversary_marginal target_uniform <= epsilon.
 Proof.
@@ -397,7 +398,7 @@ Qed.
 (* The T-1-slack bound: collusion_bound_unconditional's epsilon, loosened by
    the unconditional additive term 2(T-1)/N so the bound has the same shape
    as collusion_bound_conditional's (Section 5), which does derive that
-   term from the coalition's T-1 observed sheets via the triangle
+   term from the coalition's T-1 observed card positions via the triangle
    inequality through the restricted-uniform ideal posterior. *)
 Theorem collusion_bound :
   var_dist adversary_marginal target_uniform <= epsilon + 2%:R * T'%:R / N%:R.
@@ -453,18 +454,18 @@ Hypothesis epsilon_ge0 : 0 <= epsilon.
 Hypothesis dpi_bound :
   var_dist adversary_posterior ideal_posterior <= epsilon.
 
-(** Hcard_remaining — the set of sheets the coalition has not observed has
-    exactly N - T' elements. *)
+(** Hcard_remaining — the set of card positions the coalition has not
+    observed has exactly N - T' elements. *)
 Lemma Hcard_remaining : #|remaining| = (N - T')%N.
 Proof. exact: card_remaining. Qed.
 
 (** collusion_bound_conditional — the coalition's conditional posterior over
-    the unobserved sheet's value is within epsilon + 2T'/N of fully
-    uniform, where epsilon is the DPI-derived distance to the ideal
+    the unobserved card position's value is within epsilon + 2T'/N of
+    fully uniform, where epsilon is the DPI-derived distance to the ideal
     posterior conditional on dpi_bound, and
     2T'/N is the unconditional TV price of that ideal posterior itself
-    being uniform only over the N - T' sheets the coalition has not
-    observed. *)
+    being uniform only over the N - T' card positions the coalition has
+    not observed. *)
 Theorem collusion_bound_conditional :
   var_dist adversary_posterior full_uniform <= epsilon + 2%:R * T'%:R / N%:R.
 Proof.
@@ -495,7 +496,8 @@ Let N := N'.+1.
 Let card_perm_N : #|{perm 'I_N}| = (N`!.-1).+1 := card_permT_N N'.
 
 (** fdistmap_eval_uniform — evaluating a uniformly random permutation of
-    'I_N at one fixed sheet yields the uniform law on 'I_N: the idealized
+    'I_N at one fixed card position yields the uniform law on 'I_N: the
+    idealized
     endpoint marginal a coalition would see if the protocol realized the
     truly uniform permutation, standalone from the collusion bound's
     Assumption 1 hypothesis. *)
@@ -608,7 +610,7 @@ Variable T' : nat.
 Let T := T'.+1.
 Hypothesis TN : (T <= N)%N.
 
-(* Distinct starting sheets *)
+(* Distinct starting card positions *)
 Variable starts : T.-tuple 'I_N.
 Hypothesis starts_uniq : uniq starts.
 
@@ -773,7 +775,7 @@ Variable k : nat.
 Hypothesis k_pos : (0 < k)%N.
 Hypothesis kN : (k <= N)%N.
 
-(* k distinct starting sheets observed by the coalition *)
+(* k distinct starting card positions observed by the coalition *)
 Variable obs_starts : k.-tuple 'I_N.
 Hypothesis obs_starts_uniq : uniq obs_starts.
 
@@ -891,7 +893,7 @@ Hypothesis Hlfree : @weval_inj M L.
 Let eval_at (s : 'I_N) : {perm 'I_N} -> 'I_N :=
   fun sigma => sigma s.
 
-(* eval_at s is injective on achievable(L) for each starting sheet s *)
+(* eval_at s is injective on achievable(L) for each starting card position s *)
 Hypothesis Hinj_s :
   forall s : 'I_N,
   {in @achievable M L &, injective (eval_at s)}.
@@ -935,8 +937,8 @@ exact: achievable_card_TgL.
 Qed.
 
 (** perm_endpoint_image_pos — the endpoint image of achievable permutations
-    at sheet s is non-empty, the positivity witness needed to put a
-    uniform-on-image law on it. *)
+    at card position s is non-empty, the positivity witness needed to put
+    a uniform-on-image law on it. *)
 Lemma perm_endpoint_image_pos (s : 'I_N) :
   (0 < #|(eval_at s) @: @achievable M L|)%N.
 Proof. by rewrite perm_endpoint_image_card expn_gt0. Qed.
@@ -951,7 +953,7 @@ apply: (leq_trans (max_card _)).
 by rewrite card_ord.
 Qed.
 
-(* Direct endpoint bound: for each sheet s, the marginal endpoint
+(* Direct endpoint bound: for each card position s, the marginal endpoint
    distribution is at distance 2*(N-Tg^L)/N from uniform.
    This is TIGHTER than the DPI bound 2*(N!-Tg^L)/N!. *)
 Theorem var_dist_endpoint_direct (s : 'I_N) :
@@ -1195,7 +1197,8 @@ Let M := Gen_PGGTypes sigmas.
 Hypothesis Hlfree : @weval_inj M L.
 
 (** var_dist_endpoint_unbalanced — in the unbalanced regime Tg^L <= N, the
-    coalition's endpoint marginal at sheet s is at TV distance exactly
+    coalition's endpoint marginal at card position s is at TV distance
+    exactly
     2(N - |image_s|)/N from uniform, where image_s is the endpoint's image
     of the achievable-permutation set. *)
 Lemma var_dist_endpoint_unbalanced

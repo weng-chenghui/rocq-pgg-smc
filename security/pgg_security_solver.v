@@ -243,12 +243,13 @@ Eval vm_compute in star_solve (Star_FixML 10 1).
 
 (* For groups where perm_endpoint is NOT injective on achievable(L), the formula
    2*(N-Tg^L)/N is WRONG (underestimates). The true epsilon comes from
-   the worst-case fiber distribution over all starting sheets. *)
+   the worst-case fiber distribution over all starting card positions. *)
 
 (* Star(m) at L=1: true epsilon = 2(m+1)/(m+3) *)
 Definition star_fiber_eps (m : nat) : nat * nat := (2 * (m + 1), m + 3).
 
-(* OC at L=2: true epsilon = 1 (worst-case s=1; other sheets have 1/2) *)
+(* OC at L=2: true epsilon = 1 (worst-case s=1; other card positions have
+   1/2) *)
 Definition oc_fiber_eps : nat * nat := (1, 1).
 
 (* S5 at L=1: true epsilon = 6/5 *)
@@ -324,8 +325,9 @@ Fixpoint enum_words (Tg L : nat) : seq (seq nat) :=
     flatten [seq map (cons i) (enum_words Tg L') | i <- iota 0 Tg]
   end.
 
-(* Left-folds the generators of word w over starting sheet x: the sheet
-   reached by applying w's generators in order.  The numeric word
+(* Left-folds the generators of word w over starting card position x: the
+   card position reached by applying w's generators in order.  The numeric
+   word
    evaluator every solver check in this file, fingerprinting,
    injectivity, fiber epsilon, is built from; kept purely on nat so
    vm_compute stays fast. *)
@@ -333,9 +335,10 @@ Definition eval_word (gens : nat -> nat -> nat) (w : seq nat) (x : nat)
     : nat :=
   foldl (fun acc i => gens i acc) x w.
 
-(* The full action of word w on every sheet, reified as a seq: mapping
-   eval_word gens w over 0, ..., N-1.  Two words act identically on every
-   sheet iff their fingerprints are equal, so comparing fingerprints is
+(* The full action of word w on every card position, reified as a seq:
+   mapping eval_word gens w over 0, ..., N-1.  Two words act identically
+   on every card position iff their fingerprints are equal, so comparing
+   fingerprints is
    how check_weval_inj decides word-evaluation injectivity at the nat
    level. *)
 Definition word_fingerprint (N : nat) (gens : nat -> nat -> nat)
@@ -343,7 +346,8 @@ Definition word_fingerprint (N : nat) (gens : nat -> nat -> nat)
   map (eval_word gens w) (iota 0 N).
 
 (* Decides whether the length-L word fingerprints over Tg generators on N
-   sheets are pairwise distinct: whether word evaluation is injective at
+   card positions are pairwise distinct: whether word evaluation is
+   injective at
    length L.  group_template checks this before trusting the generic
    endpoint formula 2*(N-Tg^L)/N, which assumes distinct words reach
    distinct achievable permutations and underestimates epsilon when that
@@ -366,7 +370,7 @@ Definition check_weval_inj (N Tg L : nat) (gens : nat -> nat -> nat)
 
 Record GroupDesc := MkGroupDesc {
   gd_Tg   : nat ;                        (* number of generators *)
-  gd_N    : nat ;                        (* number of sheets *)
+  gd_N    : nat ;                        (* number of card positions *)
   gd_comm : nat -> nat -> bool ;         (* commutativity relation *)
   gd_gens : nat -> nat -> nat ;          (* generator action: gens(i, x) *)
 }.
@@ -399,7 +403,8 @@ Definition star_comm' (m i j : nat) : bool :=
   ((i == 0) || (j == 0)) && (i != j).
 
 (* GroupDesc for Star(m): Tg = m+1 generators, gen 0 the central
-   swap(0, 1) and gen i > 0 the leaf swap(2, i+2), on N = m+3 sheets,
+   swap(0, 1) and gen i > 0 the leaf swap(2, i+2), on N = m+3 card
+   positions,
    with commutation star_comm'.  A worked instance where word evaluation
    is not injective, so the naive endpoint formula 2*(N-Tg^L)/N
    underestimates epsilon and the fiber-counted computation further down
@@ -420,7 +425,8 @@ Definition path_comm' (i j : nat) : bool :=
   (2 <= (maxn i j - minn i j)) && (i != j).
 
 (* GroupDesc for Path(n): Tg = n+1 adjacent transpositions gen i =
-   swap(i, i+1) on N = n+2 sheets, with commutation path_comm'.  The
+   swap(i, i+1) on N = n+2 card positions, with commutation path_comm'.
+   The
    adjacent transpositions generate the full symmetric group S_{n+2}, so
    this is the file's transitive test case, whose achievable set can
    reach every permutation as L grows (contrasted with Star's stuck
@@ -435,7 +441,7 @@ Definition disjoint_gens (i x : nat) : nat :=
   if x == a then a.+1 else if x == a.+1 then a else x.
 
 (* GroupDesc for Disjoint(k): Tg = k pairwise-disjoint transpositions
-   gen i = swap(2i, 2i+1) on N = 2k sheets; every pair of distinct
+   gen i = swap(2i, 2i+1) on N = 2k card positions; every pair of distinct
    generators commutes, since their supports never overlap.  The
    fully-commuting extreme, a stress test for the solver's
    commutation-relation handling and a sanity ceiling for the
@@ -457,9 +463,10 @@ Definition oc_comm' (p i j : nat) : bool :=
   (p <= maxn i j - minn i j) && (i != j).
 
 (* GroupDesc for OC(k, p): Tg = k overlapping p-cycles gen i, a p-cycle
-   on {i, ..., i+p-1}, on N = k+p-1 sheets, with commutation oc_comm'.
-   Overlapping cycles mix more sheets per generator than Path's adjacent
-   transpositions, so OC converges to eps -> 0 faster; the eps-progression
+   on {i, ..., i+p-1}, on N = k+p-1 card positions, with commutation
+   oc_comm'. Each generator moves more card positions than one of Path's
+   adjacent transpositions does, so OC converges to eps -> 0 faster; the
+   eps-progression
    demos in pgg_security_demo.v compare the two families on this basis. *)
 Definition oc_desc (k p : nat) : GroupDesc :=
   MkGroupDesc k (k + p - 1) (oc_comm' p) (oc_gens p).
@@ -472,7 +479,8 @@ Definition cyclic_gens (n i x : nat) : nat :=
   else x.
 
 (* GroupDesc for Cyclic(n): a single generator (Tg = 1) rotating
-   x -> x+1 mod n on N = n sheets; the commutation relation is vacuously
+   x -> x+1 mod n on N = n card positions; the commutation relation is
+   vacuously
    false, since there is no pair of distinct generators to commute.  The
    degenerate one-generator case, checking that the generic solver
    pipeline degrades correctly when Tg = 1. *)
@@ -496,11 +504,11 @@ Definition achievable_fps (desc : GroupDesc) (L : nat) : seq (seq nat) :=
   undup (map (word_fingerprint (rd_N desc) (rd_gens desc))
              (enum_words (rd_Tg desc) L)).
 
-(* Count how many achievable elements map sheet s to endpoint x *)
+(* Count how many achievable elements map card position s to endpoint x *)
 Definition endpoint_count (fps : seq (seq nat)) (s x : nat) : nat :=
   count (fun fp => nth 0 fp s == x) fps.
 
-(* Var_dist numerator for sheet s:
+(* Var_dist numerator for card position s:
    sum_{x=0}^{N-1} |N * count(x) - total|
    where |a - b| = (a - b) + (b - a) in nat arithmetic *)
 Definition vardist_num (fps : seq (seq nat)) (N s : nat) : nat :=
@@ -509,7 +517,7 @@ Definition vardist_num (fps : seq (seq nat)) (N s : nat) : nat :=
             (N * c - total) + (total - N * c)
        | x <- iota 0 N].
 
-(* Worst-case vardist numerator over all sheets *)
+(* Worst-case vardist numerator over all card positions *)
 Definition worst_vardist (fps : seq (seq nat)) (N : nat) : nat :=
   foldr maxn 0 [seq vardist_num fps N s | s <- iota 0 N].
 
@@ -676,14 +684,14 @@ Eval vm_compute in fiber_eps_nat (star_desc 10) 1.  (* m=10: Tg=11, N=13 *)
 (*     pgg_entropy_security.v with real-valued log.                           *)
 (******************************************************************************)
 
-(* Fiber unevenness indicator for sheet s:
+(* Fiber unevenness indicator for card position s:
    Σ_{x} c_x * (c_x - 1) where c_x = endpoint_count fps s x.
    This is 0 iff all fibers are singletons (perm_endpoint injective). *)
 Definition fiber_unevenness (fps : seq (seq nat)) (N s : nat) : nat :=
   sumn [seq let c := endpoint_count fps s x in c * (c - 1)
        | x <- iota 0 N].
 
-(* Worst-case fiber unevenness over all sheets *)
+(* Worst-case fiber unevenness over all card positions *)
 Definition worst_unevenness (fps : seq (seq nat)) (N : nat) : nat :=
   foldr maxn 0 [seq fiber_unevenness fps N s | s <- iota 0 N].
 

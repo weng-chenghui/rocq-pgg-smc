@@ -12,7 +12,7 @@ From pgg_smc Require Import pgg_raag_path pgg_raag_clique.
 (*                                                                            *)
 (* Specialization of the path-graph RAAG at m=3, giving:                      *)
 (*   T = 4 generators: s0=(01), s1=(12), s2=(23), s3=(34)                    *)
-(*   N = 5 sheets                                                             *)
+(*   N = 5 card positions                                                     *)
 (*   Commutation: s_i s_j = s_j s_i iff |i-j| >= 2                          *)
 (*   Independence graph: {(0,2), (0,3), (1,3)}                               *)
 (*                                                                            *)

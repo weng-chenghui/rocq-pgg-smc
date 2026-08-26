@@ -131,7 +131,7 @@ End kim_generators.
 
 Section kim_pgg_instance.
 
-(** m = 4 (5 generators), n' = 3 (N = 5 sheets) *)
+(** m = 4 (5 generators), n' = 3 (N = 5 card positions) *)
 Definition FiveCardKim_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 4 3 fc_kim_sigmas.
 

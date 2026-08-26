@@ -34,14 +34,16 @@ Hypothesis starts_uniq : uniq starts.
 
 (* A dealt hand for player i is a function from shuffles to card positions.
    Given a set of shuffles W (represented as a sequence), the hand maps
-   each shuffle index to the endpoint evaluation at player i's starting sheet. *)
+   each shuffle index to the endpoint evaluation at player i's starting
+   card position. *)
 
 (* The permutation table: for a sequence of group elements (words),
    compute the full N x |W| table of permutation evaluations *)
 Definition perm_table (W : seq gT) : seq {perm 'I_N} :=
   [seq rho w | w <- W].
 
-(* Player i's dealt hand: column of the permutation table at starting sheet s_i *)
+(* Player i's dealt hand: column of the permutation table at starting card
+   position s_i *)
 Definition dealt_hand (W : seq gT) (i : 'I_T) : seq ('I_N) :=
   [seq rho w (tnth starts i) | w <- W].
 
@@ -62,7 +64,8 @@ move=> PW; rewrite /dealt_hand /compute.
 by apply/mapP; exists P.
 Qed.
 
-(* The card positions are just rho(P) applied to each starting sheet *)
+(* The card positions are just rho(P) applied to each starting card
+   position *)
 Lemma endpointsE (P : gT) (i : 'I_T) :
   tnth (endpoints P) i = rho P (tnth starts i).
 Proof. by rewrite tnth_mktuple. Qed.

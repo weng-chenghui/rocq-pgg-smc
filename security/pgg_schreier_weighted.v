@@ -83,7 +83,7 @@ exact: FDist.ge0.
 Qed.
 
 (* Each row sums to 1 (row-stochastic).
-   Proof: partition generators by target sheet, then use FDist.f1.
+   Proof: partition generators by target card position, then use FDist.f1.
    For each generator i, there is exactly one y = sigma_i(x),
    so sum_y sum_{i:sigma_i(x)=y} W(i) = sum_i W(i) = 1. *)
 Lemma schreier_weighted_stochastic (x : 'I_N) :
@@ -147,7 +147,7 @@ Record WeightedSchreierCertificate := MkWeightedSchreierCertificate {
   wsc_lambda_pos : 0 < wsc_lambda_gap ;
   wsc_lambda_le1 : wsc_lambda_gap <= 1 ;
 
-  (* The convergence bound: var_dist at each sheet bounded by
+  (* The convergence bound: var_dist at each card position bounded by
      sqrt(N) * (1 - lambda_gap)^L.
      Uses endpoint_dist_weighted from pgg_weighted_words.v. *)
   wsc_convergence : forall (L : nat) (s : 'I_N),

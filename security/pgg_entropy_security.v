@@ -70,12 +70,13 @@
 (*   larger L needed.                                                        *)
 (*                                                                            *)
 (* Example C -- OC(2,3) at L=2 (uneven fibers):                              *)
-(*   Tg=2, N=4, Tg^L=4. Sheet s=1 has uneven word fibers (2,0,0,2).        *)
+(*   Tg=2, N=4, Tg^L=4. Card position s=1 has uneven word fibers            *)
+(*   (2,0,0,2).                                                              *)
 (*   P_s concentrates on 2 of 4 endpoints. H = log 2. D = log 2.           *)
 (*   eps <= sqrt(2 log 2) ~ 1.18. Combinatorial eps = 1 is tighter.         *)
 (*                                                                            *)
 (* Example D -- OC(2,N-1) at large L (asymptotic security):                  *)
-(*   OC is transitive: the group acts on all N sheets.                       *)
+(*   OC is transitive: the group acts on all N card positions.              *)
 (*   As L grows, the achievable permutations cover 'I_N more evenly,        *)
 (*   so P_s converges to uniform. H -> log N, D -> 0, eps -> 0.             *)
 (*   e.g., OC(2,2^64+1) at L=128: 2^128 >> 2^64. Secure.                   *)
@@ -257,7 +258,8 @@ End entropy_fdistmap_uniform_supp.
 (*  Section 3: Fiber Entropy                                                  *)
 (*                                                                            *)
 (*  fiber_entropy s = H(fdistmap (sigma |-> sigma(s)) rho_from_words)         *)
-(*  The Shannon entropy of the endpoint distribution at sheet s when the      *)
+(*  The Shannon entropy of the endpoint distribution at card position s when *)
+(*  the                                                                      *)
 (*  protocol word is sampled uniformly. Works for ANY group described by       *)
 (*  generators, not RAAG-specific.                                            *)
 (*                                                                            *)
@@ -289,7 +291,7 @@ Variable L : nat.
 Variable sigmas : Tg.-tuple {perm 'I_N}.
 Let M := Gen_PGGTypes sigmas.
 
-(* Fiber entropy at sheet s: H of the endpoint distribution.
+(* Fiber entropy at card position s: H of the endpoint distribution.
    P_s(x) = Pr[sigma(s) = x] where sigma ~ rho_from_words (uniform over
    achievable permutations when weval_inj holds, uniform over all words
    otherwise). *)
@@ -345,7 +347,7 @@ Qed.
 
 (* Perfect security: H(P_s) = log N (maximum entropy, zero leakage).
    Requires weval_inj + pe_inj + the saturation condition Tg^L = N.
-   When Tg^L = N, the achievable permutations cover all N sheets
+   When Tg^L = N, the achievable permutations cover all N card positions
    injectively, so the endpoint distribution is uniform on 'I_N. *)
 Lemma fiber_entropy_perfect (s : 'I_N)
     (Hlfree : @weval_inj M L)
@@ -450,7 +452,8 @@ Let P_s (s : 'I_N) : R.-fdist 'I_N :=
   fdistmap (fun sigma : {perm 'I_N} => sigma s)
            (rho_from_words (R:=R) L sigmas).
 
-(** var_dist_from_fiber_entropy — the coalition's endpoint law at sheet s
+(** var_dist_from_fiber_entropy — the coalition's endpoint law at card
+    position s
     is within sqrt(2*(log N - H(P_s))) of uniform in TV distance, an
     unconditional consequence of Pinsker's inequality applied to the
     entropy gap fiber_entropy_gap identifies as D(P_s || uniform). This is
@@ -470,7 +473,7 @@ End entropy_var_dist_bridge.
 (*  Section 5: Protocol Random Variables                                      *)
 (*                                                                            *)
 (*  Endpoint_RV s : the random variable mapping a word w to the endpoint      *)
-(*  that party at sheet s observes, i.e., endpoint(word_eval(w), s).          *)
+(*  that party at card position s observes, i.e., endpoint(word_eval(w), s). *)
 (*  This bridges protocol-level word sampling with information-theoretic      *)
 (*  entropy: H(Endpoint_RV s) = fiber_entropy s.                              *)
 (******************************************************************************)
@@ -498,7 +501,8 @@ Let w_uniform : R.-fdist (L.-tuple 'I_Tg) :=
 
 (* Endpoint_RV: the random variable "word w |-> endpoint(word_eval(w), s)".
    Defined over the word space L.-tuple 'I_Tg, with the uniform distribution
-   w_uniform. Its entropy measures how much information a party at sheet s
+   w_uniform. Its entropy measures how much information a party at card
+   position s
    learns about the word from observing its endpoint. *)
 Definition Endpoint_RV (s : 'I_N) : L.-tuple 'I_Tg -> 'I_N :=
   fun w => @endpoint M (@word_eval M L w) s.
@@ -522,12 +526,13 @@ End protocol_rvs.
 (******************************************************************************)
 (*  Section 6: EntropyWitness Record                                          *)
 (*                                                                            *)
-(*  Packages a min-entropy lower bound for ALL sheets into a single record.   *)
+(*  Packages a min-entropy lower bound for ALL card positions into a single  *)
+(*  record.                                                                  *)
 (*  Generic over M : MonodromyReprWithGeneratorType (not RAAG-specific).          *)
 (*                                                                            *)
 (*  Fields:                                                                    *)
 (*    ew_L             : word length                                           *)
-(*    ew_min_entropy   : lower bound H_min on entropy at every sheet           *)
+(*    ew_min_entropy   : lower bound H_min on entropy at every card position  *)
 (*    ew_rho_dist      : the permutation distribution used                     *)
 (*    ew_entropy_bound : forall s, H_min <= H(fdistmap (sigma |-> sigma(s))    *)
 (*                                           ew_rho_dist)                      *)
@@ -575,11 +580,12 @@ Variable R : realType.
 Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
-(** security_witness_from_entropy — converts an EntropyWitness's per-sheet
-    lower bound on Shannon entropy, ew_min_entropy, into a ShuffleMarginalBound
-    with epsilon = sqrt(2*(log N - ew_min_entropy)): conditional on
-    ew_entropy_bound holding at every sheet, Pinsker's inequality turns
-    that entropy floor into the TV bound collusion_bound consumes. *)
+(** security_witness_from_entropy — converts an EntropyWitness's lower
+    bound on Shannon entropy at each card position, ew_min_entropy, into a
+    ShuffleMarginalBound with epsilon = sqrt(2*(log N - ew_min_entropy)):
+    conditional on ew_entropy_bound holding at every card position,
+    Pinsker's inequality turns that entropy floor into the TV bound
+    collusion_bound consumes. *)
 Definition security_witness_from_entropy
     (ew : EntropyWitness R M) : ShuffleMarginalBound R M.
 Proof.
@@ -690,7 +696,7 @@ Let T := T'.+1.
 Variable parties : T.-tuple 'I_N.
 
 (* Joint endpoint extraction: given a permutation sigma, extract the
-   T-tuple of endpoints at the party sheets. *)
+   T-tuple of endpoints at the party card positions. *)
 Definition joint_endpoint (sigma : {perm 'I_N}) : T.-tuple 'I_N :=
   [tuple sigma (tnth parties i) | i < T].
 
@@ -748,7 +754,7 @@ by rewrite card_tuple card_ord -log_pow_natmul.
 Qed.
 
 (* Single-party consistency: when T = 1, joint_fiber_entropy reduces to
-   fiber_entropy at the single party's sheet. *)
+   fiber_entropy at the single party's card position. *)
 Lemma joint_entropy_single (HT1 : T' = 0) :
   joint_fiber_entropy =
   fiber_entropy (R:=R) L sigmas (tnth parties (Ordinal (ltn0Sn T'))).

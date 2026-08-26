@@ -65,8 +65,8 @@ Let N := N'.+1.
 
 (** The "channel": for each input bit b, the distribution over observed
     card positions is obtained by pushing rho_dist through sigma |-> sigma(s_b).
-    - s0 = starting sheet when bit = false
-    - s1 = starting sheet when bit = true *)
+    - s0 = starting card position when bit = false
+    - s1 = starting card position when bit = true *)
 Variable rho_dist : R.-fdist {perm 'I_N}.
 Variables (s0 s1 : 'I_N).
 
@@ -273,7 +273,8 @@ Context {R : realType}.
 Variable N' : nat.
 Let N := N'.+1.
 
-(** For PGG's weighted word distribution, the channel at sheet s is exactly
+(** For PGG's weighted word distribution, the channel at card position s is
+    exactly
     endpoint_dist_weighted. This connects the abstract posterior to PGG's
     concrete security measure. *)
 

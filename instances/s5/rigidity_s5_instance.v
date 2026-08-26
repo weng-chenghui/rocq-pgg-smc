@@ -75,10 +75,10 @@ Let s5_M : MonodromyReprWithGeneratorType := M_s5.
 
 Local Open Scope ring_scope.
 
-(* Fiber-counted endpoint bound: for each sheet s in 'I_5,
+(* Fiber-counted endpoint bound: for each card position s in 'I_5,
    var_dist(fdistmap perm_endpoint (rho_from_words 1 path_gen_tuple_3), uniform) <= 6/5.
    Achievable(1) = {(01),(12),(23),(34)} (4 adjacent transpositions).
-   Worst-case sheets s=0,4: P=(3/4,1/4,0,0,0), var_dist=6/5. *)
+   Worst-case card positions s=0,4: P=(3/4,1/4,0,0,0), var_dist=6/5. *)
 Lemma s5_endpoint_bound_fiber :
   forall s : 'I_5,
   (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
@@ -374,7 +374,8 @@ Let s5_M : MonodromyReprWithGeneratorType :=
 (* Group nontriviality. Could be discharged by computation since |S_5| = 120. *)
 Hypothesis HG_s5_crypto : (1 < #|pgg_G s5_M|)%N.
 
-(* Sheet count: 5 sheets (pgg_N' = 4) — definitionally true. *)
+(* Card-position count: 5 card positions (pgg_N' = 4) —
+   definitionally true. *)
 Lemma s5_HN5_crypto : (pgg_N' s5_M).+1 = 5.
 Proof. by []. Qed.
 
@@ -425,7 +426,8 @@ Let s5_M : MonodromyReprWithGeneratorType :=
 (* Group nontriviality *)
 Hypothesis HG_s5 : (1 < #|pgg_G s5_M|)%N.
 
-(* Sheet count for s5_M: 5 sheets (pgg_N' = 4). Verified definitionally
+(* Card-position count for s5_M: 5 card positions (pgg_N' = 4). Verified
+   definitionally
    since s5_M = Gen_PGGTypes 3 3 (path_gen_tuple 3), so pgg_N' = 4. *)
 Lemma s5_HN5 : (pgg_N' s5_M).+1 = 5.
 Proof. by []. Qed.

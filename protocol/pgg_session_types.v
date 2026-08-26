@@ -44,9 +44,9 @@ Definition PGGReveal_pos {party n env} (dst : nat) (i : 'I_N)
   SSend dst DT_Sheet (PGG_sheet i) p.
 
 (* Types the dealer's deal move: sending a whole hand of card positions as a
-   DT_Hand payload, distinct in the session environment from a single-sheet
-   send, so a hand can never be mistaken for a lone revealed card at
-   type-checking time. *)
+   DT_Hand payload, distinct in the session environment from a send of a
+   single card position, so a hand can never be mistaken for a lone
+   revealed card at type-checking time. *)
 Definition PGGDeal_hand {party n env} (dst : nat) (s : seq ('I_N))
     (p : @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_send env dst DT_Hand) :=
@@ -54,7 +54,7 @@ Definition PGGDeal_hand {party n env} (dst : nat) (s : seq ('I_N))
 
 (* Types the dealer's shuffle-selection move: sending the chosen word index
    as a DT_Idx payload, the third and last session-typed alphabet letter, so
-   the three protocol moves (sheet, hand, index) stay mutually
+   the three protocol moves (card position, hand, index) stay mutually
    distinguishable in every session environment they appear in. *)
 Definition PGGAnnounce_idx {party n env} (dst : nat) (k : nat)
     (p : @sproc pgg_dtype data party n env)

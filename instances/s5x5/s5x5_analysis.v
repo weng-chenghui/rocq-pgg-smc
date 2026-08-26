@@ -478,13 +478,13 @@ Definition pile2_limitation_transfer_status : TransferStatus :=
 
 (** word_pile1_floor — cut-level negative mixing result for the first pile:
     the reverse triangle lower bound to global uniform on ten seats at the
-    sheet-endpoint reader of the word-cut distribution, conditional on
+    card position's endpoint reader of the word-cut distribution, conditional on
     s5_rayleigh_Q2_R. *)
 Definition word_pile1_floor := @s5x5_word_pile1_floor.
 
 (** word_pile2_floor — cut-level negative mixing result for the second pile:
     the reverse triangle lower bound to global uniform on ten seats at the
-    sheet-endpoint reader of the word-cut distribution, conditional on
+    card position's endpoint reader of the word-cut distribution, conditional on
     s5_rayleigh_Q2_R. *)
 Definition word_pile2_floor := @s5x5_word_pile2_floor.
 
@@ -496,13 +496,15 @@ Definition word_positive_regime := @s5x5_lazy_bound_lt1.
 
 (** word_pile1_floor_gt0 — cut-level negative mixing result for the first
     pile in its positive regime: at word length at least seventeen the
-    first pile's sheet-endpoint reading of the word-cut distribution is at
+    first pile's card position's endpoint reading of the word-cut
+    distribution is at
     positive distance from global uniform, conditional on s5_rayleigh_Q2_R. *)
 Definition word_pile1_floor_gt0 := @s5x5_word_pile1_floor_gt0.
 
 (** word_pile2_floor_gt0 — cut-level negative mixing result for the second
     pile in its positive regime: at word length at least seventeen the
-    second pile's sheet-endpoint reading of the word-cut distribution is at
+    second pile's card position's endpoint reading of the word-cut
+    distribution is at
     positive distance from global uniform, conditional on s5_rayleigh_Q2_R. *)
 Definition word_pile2_floor_gt0 := @s5x5_word_pile2_floor_gt0.
 

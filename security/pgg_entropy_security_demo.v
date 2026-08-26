@@ -51,7 +51,7 @@ Definition monster_entropy_witness_Lstar : EntropyWitness R R_monster :=
   @entropy_witness_inj R _ _ monster_sigmas _
     monster_weval_inj_Lstar monster_perm_endpoint_inj_Lstar.
 
-(* Perfect entropy: H(P_s) = log N at every sheet *)
+(* Perfect entropy: H(P_s) = log N at every card position *)
 Lemma monster_entropy_perfect (s : 'I_monster_n.+2) :
   fiber_entropy (R:=R) monster_Lstar monster_sigmas s = log monster_n.+2%:R.
 Proof.
@@ -91,15 +91,15 @@ Hypothesis Hpe : forall s : 'I_monster_n.+2,
   {in @achievable M_monster L &,
    injective (fun sigma : {perm 'I_monster_n.+2} => sigma s)}.
 
-(* H(P_s) = log(2^L) at every sheet when pe_inj holds *)
+(* H(P_s) = log(2^L) at every card position when pe_inj holds *)
 Lemma monster_entropy_short_L (s : 'I_monster_n.+2) :
   fiber_entropy (R:=R) L monster_sigmas s = log (2 ^ L)%:R.
 Proof. by rewrite fiber_entropy_injective. Qed.
 
-(** monster_leakage_short_L — at every sheet s, the information leakage
-    log N - H(P_s) for the monster-group instance at short L equals the
-    Kullback-Leibler divergence D(P_s || U_N) against the uniform
-    distribution on N sheets. *)
+(** monster_leakage_short_L — at every card position s, the information
+    leakage log N - H(P_s) for the monster-group instance at short L
+    equals the Kullback-Leibler divergence D(P_s || U_N) against the
+    uniform distribution on N card positions. *)
 Lemma monster_leakage_short_L (s : 'I_monster_n.+2) :
   log monster_n.+2%:R - fiber_entropy (R:=R) L monster_sigmas s =
   D(fdistmap (fun sigma : {perm 'I_monster_n.+2} => sigma s)
@@ -124,16 +124,18 @@ End monster_short_L.
 (*                                                                            *)
 (*  The OC(2,3) group has generators s0 = (0 1 2), s1 = (1 2 3) in S_4.     *)
 (*  At L=2, achievable(2) = {s0*s0, s0*s1, s1*s0, s1*s1} (4 permutations). *)
-(*  The endpoint distribution P_s at each sheet s is the pushforward of      *)
-(*  the uniform distribution over these 4 permutations through sigma(s).     *)
+(*  The endpoint distribution P_s at each card position s is the            *)
+(*  pushforward of the uniform distribution over these 4 permutations       *)
+(*  through sigma(s).                                                        *)
 (*                                                                            *)
 (*  Fiber counts (verified by direct permutation enumeration):               *)
-(*    Sheet 0: endpoints = {2,3,1,0} -> all distinct, H = log 4             *)
-(*    Sheet 1: endpoints = {0,3,0,3} -> fibers (2,0,0,2), H = log 2        *)
-(*    Sheet 2: endpoints = {1,0,3,2} -> all distinct, H = log 4             *)
-(*    Sheet 3: endpoints = {0,1,2,3} -> all distinct, H = log 4             *)
+(*    Card position 0: endpoints = {2,3,1,0} -> all distinct, H = log 4    *)
+(*    Card position 1: endpoints = {0,3,0,3} -> fibers (2,0,0,2), H = log 2 *)
+(*    Card position 2: endpoints = {1,0,3,2} -> all distinct, H = log 4    *)
+(*    Card position 3: endpoints = {0,1,2,3} -> all distinct, H = log 4    *)
 (*                                                                            *)
-(*  Worst case: sheet 1 with H = log 2 (1 bit of entropy out of log 4 = 2). *)
+(*  Worst case: card position 1 with H = log 2 (1 bit of entropy out of     *)
+(*  log 4 = 2).                                                               *)
 (*  This is a finite computation on 4 permutations of 4 elements, easily    *)
 (*  verified by GAP, SageMath, or Python:                                    *)
 (*    s0 = Perm([1,2,0,3]); s1 = Perm([0,2,3,1])                           *)
@@ -151,18 +153,19 @@ End monster_short_L.
    in the block above.  Not kernel-proved: the reduction needs #|imset| over
    {perm 'I_4} together with log over the reals. *)
 
-(* Every sheet of the OC(2,3) endpoint distribution at L = 2 carries at
-   least one bit, log 2 <= H(P_s) for each of the four sheets.  The bound is
-   attained, so it cannot be improved: sheet 1's four length-2 words land on
-   endpoints {0,3,0,3}, fiber sizes (2,0,0,2), giving H = log 4 - log 2 =
-   log 2, while the endpoint maps of sheets 0, 2 and 3 are injective and
-   reach log 4.
+(* Every card position of the OC(2,3) endpoint distribution at L = 2 carries
+   at least one bit, log 2 <= H(P_s) for each of the four card positions.
+   The bound is attained, so it cannot be improved: card position 1's four
+   length-2 words land on endpoints {0,3,0,3}, fiber sizes (2,0,0,2), giving
+   H = log 4 - log 2 = log 2, while the endpoint maps of card positions 0, 2
+   and 3 are injective and reach log 4.
 
    This is the entropy input the OC demo's security witness is built on.
-   security_witness_from_entropy converts a per-sheet entropy floor into a
-   marginal bound, and a floor is the right shape of hypothesis because a
-   coalition chooses which sheet to watch: what it learns about the dealt
-   position is capped by the worst sheet, never by the average. *)
+   security_witness_from_entropy converts an entropy floor at every card
+   position into a marginal bound, and a floor is the right shape of
+   hypothesis because a coalition chooses which card position to watch:
+   what it learns about the dealt position is capped by the worst card
+   position, never by the average. *)
 Axiom oc_entropy_bound_axiom : forall (R : realType) (s : 'I_4),
   (log 2%:R <=
    `H (fdistmap (fun sigma : {perm 'I_4} => sigma s)
@@ -195,7 +198,7 @@ Variable R : realType.
 Let M_oc := @Gen_PGGTypes 1 2 oc_sigmas.
 Let R_oc : MonodromyReprWithGeneratorType := M_oc.
 
-(* The endpoint distribution at each sheet *)
+(* The endpoint distribution at each card position *)
 Let P_s (s : 'I_4) : R.-fdist 'I_4 :=
   fdistmap (fun sigma : {perm 'I_4} => sigma s)
            (rho_from_words (R:=R) 2 oc_sigmas).
@@ -207,8 +210,8 @@ Lemma oc_entropy_bound :
 Proof. exact: oc_entropy_bound_axiom. Qed.
 
 (** oc_entropy_witness_2 — the OC(2,3) instance's EntropyWitness at L = 2,
-    packaging the axiomatized per-sheet floor log 2 (oc_entropy_bound) as
-    the record's entropy-floor field. *)
+    packaging the axiomatized floor log 2 on the entropy at each card
+    position (oc_entropy_bound) as the record's entropy-floor field. *)
 Definition oc_entropy_witness_2 : EntropyWitness R R_oc :=
   @entropy_witness_from_rho R R_oc 2
     (rho_from_words (R:=R) 2 oc_sigmas)

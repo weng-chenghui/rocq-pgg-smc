@@ -10,7 +10,8 @@
 (* marginal ttrans_point_uniform.                                             *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   pgl27_PI       == the eight-sheet starting interface (ord_tuple 8)       *)
+(*   pgl27_PI       == the starting interface on eight card positions        *)
+(*                     (ord_tuple 8)                                          *)
 (*   pgl27_rho_dist == the uniform distribution over the shuffle group        *)
 (*   pgl27_marginal_bound == the ShuffleMarginalBound at epsilon = 0          *)
 (*   pgl27_certificate_bundle == that bound with the exact certificate         *)
@@ -47,8 +48,9 @@ Local Open Scope fdist_scope.
 Lemma pgl27_starts_uniq : uniq (ord_tuple 8).
 Proof. by rewrite val_ord_tuple enum_uniq. Qed.
 
-(** pgl27_PI — the eight-sheet starting interface for the PGL(2,7) plug. The
-    identity start tuple driving the shared exchange program. *)
+(** pgl27_PI — the starting interface on eight card positions for the
+    PGL(2,7) plug. The identity start tuple driving the shared exchange
+    program. *)
 Definition pgl27_PI : PGGInterface pgl27_M :=
   @MkPGGI pgl27_M 7 (ord_tuple 8) pgl27_starts_uniq.
 

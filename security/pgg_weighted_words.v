@@ -11,7 +11,7 @@
 (*   rho_from_words_weighted W L == pushforward through word_eval              *)
 (*   fiber_weighted W g == preimage set {w | word_eval w = g}                  *)
 (*   fiber_prob_weighted W L g == P(word_eval = g) under weighted dist         *)
-(*   endpoint_dist_weighted W L s == marginal distribution at sheet s          *)
+(*   endpoint_dist_weighted W L s == marginal distribution at card position s  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -95,7 +95,7 @@ by rewrite !inE.
 Qed.
 
 (* Endpoint distribution: push rho_from_words_weighted through
-   sigma |-> sigma(s) for a given starting sheet s *)
+   sigma |-> sigma(s) for a given starting card position s *)
 Definition endpoint_dist_weighted (s : 'I_N) : R.-fdist 'I_N :=
   fdistmap (fun sigma : {perm 'I_N} => sigma s) rho_from_words_weighted.
 

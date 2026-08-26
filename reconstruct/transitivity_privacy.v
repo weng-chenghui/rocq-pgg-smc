@@ -930,7 +930,8 @@ Local Open Scope proba_scope.
 (** The deck a MonodromyProfile p deals for a two-valued secret: the
     threshold-scheme encoder of p's plug, read at the two secrets sel true
     and sel false, and cast along Hlen from the plug's share count to p's own
-    sheet count pgg_N' (mp_M p) .+1. This repackages an arbitrary
+    count of card positions pgg_N' (mp_M p) .+1. This repackages an
+    arbitrary
     MonodromyProfile's encoder into the encode : bool -> deck shape
     coalition_view and the sections above expect, so profile_view_indep below
     can instantiate the abstract bridge at any profile. *)
@@ -941,8 +942,9 @@ Definition profile_deck (p : MonodromyProfile) (sel : bool -> mp_secretT p)
 
 (** For a MonodromyProfile p, transitivity degree t, and per-secret deck
     selector sel, if p's own shuffle image pgg_rho (mp_M p) @* pgg_G (mp_M p)
-    is t-transitive on the sheets and the two decks profile_deck sel Hlen
-    true and false are each injective, then every coalition of at most t
+    is t-transitive on the card positions and the two decks
+    profile_deck sel Hlen true and false are each injective, then every
+    coalition of at most t
     positions has a view of the shuffled deal, read through p's own rho and
     deck, independent of the Boolean secret. This is ttrans_view_indep_gen
     with every one of its free group/rho/deck parameters replaced by a

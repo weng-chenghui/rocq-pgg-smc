@@ -4,7 +4,8 @@
 (* S_5 x S_5 spectral convergence via lazy-walk reduction                     *)
 (*                                                                            *)
 (* The S_5 x S_5 Schreier walk on 'I_10 with 8 pile-disjoint generators is    *)
-(* reducible: starting from a pile-1 sheet, the walk stays in pile-1 forever. *)
+(* reducible: starting from a pile-1 card position, the walk stays in       *)
+(* pile-1 forever.                                                           *)
 (* Consequently var_dist(sigma(s), uniform_10) does NOT decay to zero; it     *)
 (* converges to a constant floor of 1 (in infotheo's un-halved L^1            *)
 (* convention) corresponding to the gap between uniform_pile and uniform_10.  *)
@@ -530,7 +531,7 @@ End s5_lazy_TV.
 
 (******************************************************************************)
 (*  Section 6. Pile-1 equivalence between s5x5 and s5_lazy walks.             *)
-(*  On a pile-1 sheet (sheet with val < 5), s5x5_gen_tuple acts identically   *)
+(*  On a pile-1 card position (val < 5), s5x5_gen_tuple acts identically     *)
 (*  to s5_lazy_gen_tuple (after widening 'I_5 to 'I_10).                      *)
 (******************************************************************************)
 
@@ -618,9 +619,10 @@ Qed.
 End s5x5_rho_pile1.
 
 (******************************************************************************)
-(*  Section 6b. Pile-2 sheets and shifted lazy generator tuple.               *)
-(*  Pile-2 sheets are positions 5-9 in 'I_10. The action of s5x5_gen_tuple    *)
-(*  on a pile-2 sheet is the shifted analogue of pile-1: generators k in 4-7  *)
+(*  Section 6b. Pile-2 card positions and shifted lazy generator tuple.       *)
+(*  Pile-2 card positions are 5-9 in 'I_10. The action of s5x5_gen_tuple      *)
+(*  on a pile-2 card position is the shifted analogue of pile-1: generators   *)
+(*  k in 4-7                                                                  *)
 (*  act as path transpositions on the upper half, generators 0-3 are inert.   *)
 (******************************************************************************)
 
@@ -975,7 +977,8 @@ Qed.
 
 (******************************************************************************)
 (*  Section 8. Final triangle bound for s5x5 mixing.                          *)
-(*  For each starting sheet s : 'I_10, the var_dist between the s5x5 walk    *)
+(*  For each starting card position s : 'I_10, the var_dist between the      *)
+(*  s5x5 walk                                                                 *)
 (*  distribution and uniform_10 is bounded by                                  *)
 (*    1 + sqrt(5) * lazy_alpha^L                                               *)
 (*  via triangle inequality with the appropriate uniform_pile distribution.   *)

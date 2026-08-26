@@ -672,10 +672,10 @@ Definition five_card_exec_dealer_raw_trace (ab : bool * bool)
   @exec_dealer_trace mpF five_card_exec_plug ab w0 0.
 
 (** five_card_exec_dealer_raw_traceE — the dealer's executed row is the deck
-    index followed by the two committed sheets. The row is anti-chronological:
-    the head PGG_idx 0 is the dealer's own Init of the deck index, which
-    happens last, then party 8's sheet PGG_sheet (encode_bool b), then party
-    7's PGG_sheet (encode_bool a). *)
+    index followed by the two committed card positions. The row is
+    anti-chronological: the head PGG_idx 0 is the dealer's own Init of the
+    deck index, which happens last, then party 8's card position
+    PGG_sheet (encode_bool b), then party 7's PGG_sheet (encode_bool a). *)
 Lemma five_card_exec_dealer_raw_traceE (a b : bool)
     (w0 : pgg_gT FiveCardKim_M) :
   five_card_exec_dealer_raw_trace (a, b) w0
@@ -687,7 +687,8 @@ rewrite /den_boer_procs; vm_compute; reflexivity.
 Qed.
 
 (** five_card_exec_dealer_readout — the committed pair decoded from a dealer
-    row: decode_bool of the two sheets of a three-entry row, the second bit
+    row: decode_bool of the two card positions of a three-entry row, the
+    second bit
     at the head, and (false, false) elsewhere, the row-level companion of
     five_card_exec_dealer_trace. The (false, false) value returned on a
     malformed row coincides with a legitimate committed pair, so the readout

@@ -143,7 +143,8 @@ Record SecurityAsymptotic := MkSecurityAsymptotic {
 }.
 
 (** ShuffleMarginalBound — the single-position marginal bound of a shuffle
-    distribution against the uniform distribution on sheets. A constructor
+    distribution against the uniform distribution on card positions. A
+    constructor
     supplies a finite-word length, a stated epsilon, the analyzed
     distribution on permutation images, and the per-position proof that the
     one-card pushforward of that distribution is within epsilon of uniform.
@@ -294,14 +295,15 @@ End fiber_security.
 (******************************************************************************)
 (*     Direct Endpoint ShuffleMarginalBound Constructor                       *)
 (*                                                                            *)
-(* When perm_endpoint is injective on achievable(L) for each starting sheet s,       *)
+(* When perm_endpoint is injective on achievable(L) for each starting card   *)
+(* position s,                                                               *)
 (* the endpoint distribution is closer to uniform than the DPI bound gives.  *)
 (* Epsilon = 2*(N - Tg^L)/N (denominator N, not N!).                         *)
 (*                                                                            *)
 (* Applicable to: Cyclic (Tg=1, perm_endpoint trivially injective),                 *)
 (*                Abelian (Tg=2, N=4, perm_endpoint injective on achievable(1))     *)
-(* NOT applicable to: Star, S5, OC, Monster (perm_endpoint not injective on         *)
-(*                    achievable for all sheets)                              *)
+(* NOT applicable to: Star, S5, OC, Monster (perm_endpoint not injective on  *)
+(*                    achievable for all card positions)                     *)
 (******************************************************************************)
 
 Section direct_endpoint_security.
@@ -657,8 +659,9 @@ Local Open Scope ring_scope.
 
 (** Assembles a CertifiedSolution from any ShuffleMarginalBound together with
     a rational epsilon bound eps_n / eps_d that dominates it: the
-    SecurityParams are read off the group's own generator count, sheet
-    count, and the bound's length, so the only new input is the rational
+    SecurityParams are read off the group's own generator count, card
+    position count, and the bound's length, so the only new input is the
+    rational
     certificate itself. This is the generic route from a proof-level bound
     to a certified security parameter tuple, independent of whether the
     bound came from a RAAG solver or was proved by hand. *)

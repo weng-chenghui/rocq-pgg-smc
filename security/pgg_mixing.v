@@ -300,7 +300,8 @@ Variable R : realType.
 Variable N' : nat.
 Let N := N'.+1.
 
-(* The endpoint column vector P_L from starting sheet s: (Q^L) *m e_s. *)
+(* The endpoint column vector P_L from starting card position s:
+   (Q^L) *m e_s. *)
 (* Convention: we assume the bridge lemma supplies us with an fdist P whose
    column representation satisfies P a = (Q^L *m e_s) a 0.  See
    pgg-smc/security/pgg_schreier.v's schreier_walk_eq_endpoint for the concrete
@@ -347,8 +348,8 @@ Qed.
 Definition e_cV (s : 'I_N) : 'cV[R]_N := \col_i (i == s)%:R.
 
 (** e_cV_sum — the coordinates of the point-mass column e_s sum to 1: e_s
-    is a probability vector, the coalition's starting-sheet distribution
-    before any mixing step. *)
+    is a probability vector, the coalition's distribution on the starting
+    card position before any mixing step. *)
 Lemma e_cV_sum (s : 'I_N) : \sum_i (e_cV s) i ord0 = 1.
 Proof.
 rewrite /e_cV.
@@ -596,7 +597,7 @@ transitivity (\sum_i schreier_transition R sigmas j i).
 exact: schreier_transition_stochastic.
 Qed.
 
-(* The coalition's endpoint marginal probability at sheet s (from
+(* The coalition's endpoint marginal probability at card position s (from
    fdistmap ... rho_from_words, the probabilistic picture) equals the
    (a, ord0) entry of the L-step Schreier transition matrix applied to the
    point mass at s (Q^L *m e_s, the linear-algebra picture this file's
@@ -648,7 +649,7 @@ Hypothesis sigmas_invol :
 
 (** symm_ds_TV_bound — conditional on the Rayleigh hypothesis on Q^2
     holding with spectral bound alpha, the coalition's endpoint marginal
-    after L Schreier-walk steps from starting sheet s is within
+    after L Schreier-walk steps from starting card position s is within
     sqrt(N) * alpha^L of the fully uniform distribution. The spectral gap
     alpha drives the endpoint toward uniform exponentially in L, with the
     sqrt(N) prefactor coming from the L1-to-L2 bridge rather than the

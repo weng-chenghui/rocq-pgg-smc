@@ -7,7 +7,7 @@
 (* supports {0..4} and {5..9}, acting on 'I_10.                              *)
 (*                                                                            *)
 (*   Tg = 8 generators: (01),(12),(23),(34),(56),(67),(78),(89)               *)
-(*   N = 10 sheets                                                           *)
+(*   N = 10 card positions                                                   *)
 (*   Commutation: generators from different piles always commute;            *)
 (*     within-pile commutation follows path graph (|i-j| >= 2)              *)
 (*   |G| = |S_5|^2 = 14400                                                  *)

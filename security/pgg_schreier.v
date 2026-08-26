@@ -23,7 +23,7 @@
 (*   - The projection step is where tightness is lost                         *)
 (*                                                                            *)
 (* The Schreier graph of the action G -> Sym('I_N) works directly on 'I_N:   *)
-(*   - N vertices (sheets) instead of |G| vertices (group elements)           *)
+(*   - N vertices (card positions) instead of |G| vertices (group elements)  *)
 (*   - eps(L) <= sqrt(N) * (1 - gap_schreier)^L -- no DPI needed             *)
 (*   - gap(Schreier) >= gap(Cayley) -- Schreier eigenvalues are a SUBSET     *)
 (*     of Cayley eigenvalues (Ceccherini-Silberstein et al. 2008, Thm 5.5.3) *)
@@ -60,7 +60,8 @@
 (*                                                                            *)
 (* Bridge to rho_from_words:                                                  *)
 (*   schreier_walk_eq_endpoint == Q^L(s,x) = Pr[sigma_w(s) = x] (axiom)     *)
-(*     The Schreier walk starting at sheet s gives the same distribution      *)
+(*     The Schreier walk starting at card position s gives the same          *)
+(*     distribution                                                          *)
 (*     as the endpoint distribution from rho_from_words.                      *)
 (*                                                                            *)
 (* == Relationship to Cayley graph ==                                         *)
@@ -187,8 +188,8 @@ by rewrite ler0n.
 Qed.
 
 (* Each row sums to 1 (row-stochastic).
-   Proof: for each generator sigma_k and sheet x, there is exactly one y
-   such that sigma_k(x) = y (namely y = sigma_k(x)). So the total
+   Proof: for each generator sigma_k and card position x, there is exactly
+   one y such that sigma_k(x) = y (namely y = sigma_k(x)). So the total
    count across all y is Tg. *)
 Lemma schreier_transition_stochastic (i : 'I_N) :
   \sum_j schreier_transition i j = 1.
@@ -277,7 +278,7 @@ Record SchreierCertificate := MkSchreierCertificate {
   sc_lambda_pos : 0 < sc_lambda_gap ;
   sc_lambda_le1 : sc_lambda_gap <= 1 ;
 
-  (* The convergence bound: var_dist at each sheet bounded by
+  (* The convergence bound: var_dist at each card position bounded by
      sqrt(N) * (1 - lambda_gap)^L.
 
      NOTE: no weval_inj hypothesis. The Schreier walk convergence
@@ -418,15 +419,17 @@ Arguments MkSchreierCertificate {R m n' sigmas}.
 (******************************************************************************)
 (*     Section 4: Bridge — Schreier Walk and Endpoint Distribution            *)
 (*                                                                            *)
-(* The L-step random walk on the Schreier graph starting from sheet s         *)
-(* produces a random sheet y = sigma_w(s) where w is a uniform L-word         *)
+(* The L-step random walk on the Schreier graph starting from card          *)
+(* position s produces a random card position y = sigma_w(s) where w is a   *)
+(* uniform L-word                                                            *)
 (* over the generators:                                                       *)
 (*   Q^L(s, y) = Pr[sigma_w(s) = y]   where w ~ Uniform(Tg^L)              *)
 (*                                                                            *)
 (* The LHS is a matrix power on an N x N matrix; the RHS is the endpoint     *)
 (* distribution from rho_from_words. The equality holds by definition of      *)
 (* the Schreier walk: each step applies a uniformly random generator to       *)
-(* the current sheet, which is exactly what word_eval does coordinate-wise.   *)
+(* the current card position, which is exactly what word_eval does           *)
+(* coordinate-wise.                                                          *)
 (*                                                                            *)
 (* Note: this does NOT require weval_inj. The Schreier walk is well-defined  *)
 (* regardless of whether different words produce the same group element.      *)
@@ -457,7 +460,8 @@ apply: eq_bigr => j _.
 by rewrite tnthS.
 Qed.
 
-(* At a fixed sheet s, word_eval_cons becomes a walk step: applying the
+(* At a fixed card position s, word_eval_cons becomes a walk step: applying
+   the
    (L+1)-word i :: w to s equals applying the length-L tail w to
    sigma_i(s).  This is the one-generator-per-step form
    schreier_walk_eq_endpoint inducts on to match the matrix power against

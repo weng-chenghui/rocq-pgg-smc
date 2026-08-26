@@ -53,7 +53,7 @@ Local Open Scope ring_scope.
    ShuffleMarginalBound and ShuffleCertificateBundle. *)
 Record MonodromyProfile := MkMonodromyProfile {
   (* mp_M selects the finite group representation and its permutation action
-     on the sheets. *)
+     on the card positions. *)
   mp_M        : MonodromyReprWithGeneratorType ;
   (* mp_secretT is the dependent secret carrier used by the reconstruction
      plug. Being a field rather than a parameter, it permits profiles whose

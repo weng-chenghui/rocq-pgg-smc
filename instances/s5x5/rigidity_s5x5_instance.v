@@ -10,7 +10,7 @@
 (*      forces g >= 173                                                      *)
 (*                                                                            *)
 (* Parameters:                                                                *)
-(*   N = 10 sheets (two 5-card piles)                                        *)
+(*   N = 10 card positions (two 5-card piles)                                *)
 (*   Tg = 8 generators (adjacent transpositions, 4 per pile)                 *)
 (*   ShuffleMarginalBound (fiber): L=1, eps = 8/5 (fiber-counted, proved)    *)
 (*   ShuffleCertificateBundle (spectral): L=591,                             *)
@@ -95,18 +95,21 @@ Variable R : realType.
 Let M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 Let s5x5_M : MonodromyReprWithGeneratorType := M_s5x5.
 
-(* Fiber-counted endpoint bound: for each sheet s in 'I_10,
+(* Fiber-counted endpoint bound: for each card position s in 'I_10,
    var_dist(endpoint, uniform) <= 8/5.
    At L=1, achievable = {(01),(12),(23),(34),(56),(67),(78),(89)}.
-   Boundary sheets (0,4,5,9): only 1 generator moves them, image size = 2.
-   Inner sheets (1,2,3,6,7,8): 2 generators move them, image size = 3.
+   Boundary card positions (0,4,5,9): only 1 generator moves them, image
+   size = 2.
+   Inner card positions (1,2,3,6,7,8): 2 generators move them, image
+   size = 3.
    Worst case: img_min = 2, bound = 2*(10-2)/10 = 8/5. *)
 Let s5x5_eps := @GRing.natmul R 1 8 / @GRing.natmul R 1 5.
 
-(** s5x5_endpoint_bound_fiber — at word length 1, every sheet's endpoint law
-    has variation distance at most 8/5 = s5x5_eps from uniform on 'I_10 (the
-    fiber count above: boundary sheets have image size 2, interior sheets
-    image size 3, worst case 2*(10-2)/10). This is the hypothesis
+(** s5x5_endpoint_bound_fiber — at word length 1, every card position's
+    endpoint law has variation distance at most 8/5 = s5x5_eps from
+    uniform on 'I_10 (the fiber count above: boundary card positions have
+    image size 2, interior card positions image size 3, worst case
+    2*(10-2)/10). This is the hypothesis
     security_witness_fiber needs to build s5x5_security_witness_1, the L=1
     fiber-counted security witness for the S_5 x S_5 instance. *)
 Lemma s5x5_endpoint_bound_fiber :
@@ -211,7 +214,8 @@ End s5x5_security.
 (*                                                                            *)
 (* The Schreier graph of S_5 x S_5 on 'I_10 with 8 Coxeter generators       *)
 (* decomposes into two independent copies of the path P_5 (since pile-1      *)
-(* generators fix pile-2 sheets and vice versa). The transition matrix is:    *)
+(* generators fix pile-2 card positions and vice versa). The transition     *)
+(* matrix is:                                                                *)
 (*   A = I - (1/8) * L(P_5)                                                  *)
 (* where L(P_5) is the graph Laplacian of the 5-vertex path.                 *)
 (*                                                                            *)
@@ -238,7 +242,8 @@ Let M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 Let s5x5_M : MonodromyReprWithGeneratorType := M_s5x5.
 
 (* The S_5 x S_5 Schreier walk on 'I_10 is reducible: pile-1 generators
-   fix pile-2 sheets and vice versa. So the walk's stationary distribution
+   fix pile-2 card positions and vice versa. So the walk's stationary
+   distribution
    is uniform on the orbit (5 elements), not on all of 'I_10. The constant
    variation-distance floor against fdist_uniform(card_ord 10) is 1
    (in infotheo's un-halved L^1 convention; equivalent to TV-floor 1/2).
@@ -460,7 +465,8 @@ Proof. by []. Qed.
 
 (** s5x5_ts_recon_correct — for the S_5 x S_5 instance, reconstructing the
     dealt secret from the revealed endpoints of any group element P recovers
-    the sheet s that was cut, given the [G_stable] monodromy condition and
+    the card position s that was cut, given the [G_stable] monodromy
+    condition and
     covering-scheme validity. Interface-parametrised generalisation of
     ar_protocol_correct, specialised below at s5x5_PI to get the concrete
     unconditional guarantee s5x5_protocol_correct. *)
@@ -508,7 +514,8 @@ Qed.
 Lemma s5x5_starts_uniq : uniq (ord_tuple 10).
 Proof. by rewrite val_ord_tuple enum_uniq. Qed.
 
-(** s5x5_PI — the concrete ten-sheet (two piles of five) [PGGInterface]: the
+(** s5x5_PI — the concrete interface on ten card positions (two piles of
+    five) [PGGInterface]: the
     10 starting card positions, in identity order. Starting at the identity
     tuple is what makes the s5x5_G_stable condition reduce to reflexivity of
     pgg_rho, which is why s5x5_protocol_correct can be unconditional. *)
@@ -539,7 +546,8 @@ by rewrite tnth_mktuple !tnth_cast_tuple !tnth_ord_tuple !cast_ord_id.
 Qed.
 
 (** s5x5_protocol_correct — for the concrete S_5 x S_5 interface s5x5_PI,
-    reconstructing the secret sheet s from the revealed endpoints of any
+    reconstructing the secret card position s from the revealed endpoints
+    of any
     hidden group element P recovers s, unconditionally: no [G_stable]
     hypothesis is assumed, since s5x5_G_stable proves it. This is
     pgg_recon_monodromy_correct instantiated with the proved G_stable and

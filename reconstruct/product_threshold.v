@@ -407,7 +407,8 @@ Hypothesis preserves_pile1 :
   forall g, g \in G ->
   forall i : 'I_(T1 + T2), val i < T1 -> val (sigma g i) < T1.
 
-(* When T1 + T2 = N (parties = sheets), perm_compatible holds because:
+(* When T1 + T2 = N (parties = card positions), perm_compatible holds
+   because:
    1. sigma preserves piles (preserves_pile1)
    2. permuting shares within a pile preserves the pile sum
    3. sum_mod_recon only depends on the pile sum *)
@@ -416,7 +417,8 @@ Hypothesis preserves_pile1 :
     the pile partition (preserves_pile1): permuting positions within a
     pile leaves that pile's sum unchanged, and sum_mod_recon depends only
     on the sum. This is the perm-compatibility instance the S5 x S5-style
-    constructions in the file header need when parties equal sheets. *)
+    constructions in the file header need when parties equal card
+    positions. *)
 Lemma product_sum_mod_perm_compatible :
   @ts_recon_perm_invariant _ G _ _ pts sigma.
 Proof.

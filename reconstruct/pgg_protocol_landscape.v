@@ -116,7 +116,8 @@ Variable M : MonodromyReprWithGeneratorType.
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
-(** For a ShuffleMarginalBound sw, the endpoint distribution at sheet s is
+(** For a ShuffleMarginalBound sw, the endpoint distribution at card
+    position s is
     within sw_bound_eps sw of uniform in variational distance.  This is the
     landscape's security-axis entry, sw_bound restated at the granularity
     the tradeoff table quotes. *)
@@ -287,7 +288,7 @@ Let N := (pgg_N' M).+1.
 (** Protocol correctness spelled out without bundling the marginal bound,
     covering scheme and PGG interface into one record: given a group
     element whose monodromy action on the PGG interface's starting
-    contents matches the covering's expected action at every sheet
+    contents matches the covering's expected action at every card position
     (G_stable), and a starting-content tuple already ts_valid for secret s,
     reconstructing endpoints under any element of G recovers s.  This is
     the correctness fact instance authors can quote before assembling the
@@ -323,7 +324,7 @@ End protocol_correctness.
 (******************************************************************************)
 (*     Section 6: Landscape from AlgebraicRigidity                           *)
 (*                                                                            *)
-(*   ar_security_per_position == epsilon bound for each sheet                    *)
+(*   ar_security_per_position == epsilon bound for each card position            *)
 (*   ar_genus0_exact       == genus 0 -> exact threshold (T <= k)            *)
 (*   ar_genus1_gap2        == genus 1 -> gap <= 2 (T <= k + 2)              *)
 (*   ar_hurwitz            == genus >= 2 -> gap <= 2g AND |G| <= 84(g-1)    *)
@@ -339,9 +340,9 @@ Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 Let cs := tw_covering (ar_threshold ar).
 
-(** The per-sheet variational-distance bound, specialized to ar's own
-    security witness scb_bound (ar_security ar): the security row of the
-    landscape table once AlgebraicRigidity is in hand. *)
+(** The variational-distance bound at each card position, specialized to
+    ar's own security witness scb_bound (ar_security ar): the security
+    row of the landscape table once AlgebraicRigidity is in hand. *)
 Lemma ar_security_per_position (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
                       (sw_rho_dist (scb_bound (ar_security ar))))
@@ -450,7 +451,7 @@ End discovery_phase.
 (* The marginal bound inside ar carries sw_rho_dist — the endpoint           *)
 (* distribution. Its Shannon entropy gives an information-theoretic view     *)
 (* of the same security guarantee:                                           *)
-(*   - ar_entropy s = H(P_s): bits of uncertainty at sheet s                 *)
+(*   - ar_entropy s = H(P_s): bits of uncertainty at card position s        *)
 (*   - ar_entropy_gap s = D(P_s || U_N): leakage in bits                   *)
 (*   - ar_var_dist_from_entropy: Pinsker bridge (entropy -> var_dist)       *)
 (*                                                                            *)
@@ -467,11 +468,11 @@ Variable ar : AlgebraicRigidity R M.
 Let sw := scb_bound (ar_security ar).
 Let N := (pgg_N' M).+1.
 
-(* Endpoint distribution at sheet s, extracted from ar *)
+(* Endpoint distribution at card position s, extracted from ar *)
 Let P_s (s : 'I_N) : R.-fdist 'I_N :=
   fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw).
 
-(* Entropy of the endpoint distribution at sheet s *)
+(* Entropy of the endpoint distribution at card position s *)
 Definition ar_entropy (s : 'I_N) : R := `H (P_s s).
 
 (* Entropy is at most log N (maximum = uniform) *)

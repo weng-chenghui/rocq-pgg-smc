@@ -21,7 +21,8 @@
 (*   fcI_perm_compatible_kim == reconstruction invariance over the FULL group  *)
 (*     pgg_G FiveCardKim_M = <[fc_sigma]> (the five generators still generate   *)
 (*     the same C_5, so the rotation argument is identical to den Boer).        *)
-(*   FiveCardKim_PI          == the five-sheet starting interface (ord_tuple 5) *)
+(*   FiveCardKim_PI          == the starting interface on five card         *)
+(*                              positions (ord_tuple 5)                       *)
 (*   five_card_plug          == the bool/'I_5 ReconPlug on FiveCardKim_M        *)
 (*   five_card_profile       == the five-card MonodromyProfile                  *)
 (*   five_card_eps0_perfect  == at eps = 0 the security bound is 0              *)
@@ -128,8 +129,9 @@ Qed.
 Lemma ord_tuple5_uniq : uniq (ord_tuple 5).
 Proof. by rewrite val_ord_tuple enum_uniq. Qed.
 
-(** FiveCardKim_PI — the five-sheet starting interface for FiveCardKim_M,
-    with the identity start tuple ord_tuple 5 over the five card positions.
+(** FiveCardKim_PI — the starting interface on five card positions for
+    FiveCardKim_M, with the identity start tuple ord_tuple 5 over the five
+    card positions.
     The identity starts reduce the G_stable condition to reflexivity of
     pgg_rho (content = fc_content = id), exactly as for the s5x5 starting
     interface. *)

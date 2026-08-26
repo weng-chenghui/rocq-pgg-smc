@@ -11,8 +11,9 @@
 (* sum mod N, then sum e_i = sum s_i = m (mod N).                             *)
 (*                                                                            *)
 (* Section sum_mod_encoding:                                                  *)
-(*   sum_mod_check  == check that T sheets sum to m mod N                     *)
-(*   sum_mod_valid  == validity predicate: sheets sum to the target message   *)
+(*   sum_mod_check  == check that T card positions sum to m mod N             *)
+(*   sum_mod_valid  == validity predicate: card positions sum to the target   *)
+(*                     message                                                *)
 (*                                                                            *)
 (* Section reconstruction_correctness:                                        *)
 (*   reconstruct_sum  == compute sum sigma(s_i) mod N                         *)
@@ -34,7 +35,7 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 (******************************************************************************)
-(*     Section 1: Sum-mod-N Encoding of Starting Sheets                       *)
+(*     Section 1: Sum-mod-N Encoding of Starting Card Positions               *)
 (******************************************************************************)
 
 Section sum_mod_encoding.
@@ -45,18 +46,19 @@ Let N := N'.+2.  (* N >= 2 for non-trivial modular arithmetic *)
 Variable T' : nat.
 Let T := T'.+1.
 
-(* Starting sheets assigned to T parties, each an ordinal < N *)
+(* `sheets` (the players' starting card positions) assigned to T parties,
+   each an ordinal < N *)
 Variable sheets : T.-tuple 'I_N.
 
-(* The sum of starting sheet values modulo N *)
+(* The sum of the starting card positions' values modulo N *)
 Definition sheets_sum : nat :=
   (\sum_(i < T) (tnth sheets i : nat)) %% N.
 
-(* Check whether the sheets encode message m *)
+(* Check whether the card positions encode message m *)
 Definition sum_mod_check (m : 'I_N) : bool :=
   sheets_sum == m.
 
-(* Validity predicate: sheets encode the target message m *)
+(* Validity predicate: the card positions encode the target message m *)
 Definition sum_mod_valid (m : 'I_N) : Prop :=
   sheets_sum = m :> nat.
 
@@ -70,7 +72,7 @@ Qed.
 
 End sum_mod_encoding.
 
-(* Special case: single-sheet encoding *)
+(* Special case: encoding with a single card position *)
 Section sum_mod_single.
 
 Variable N' : nat.
@@ -79,9 +81,9 @@ Let N := N'.+2.
 Variable s : 'I_N.
 Let sheets := [tuple s].
 
-(** For a single-sheet tuple, sheets_sum reduces to s mod N: the T=1
-    degenerate case of the sum-mod encoding, where a lone party's card
-    position already determines the encoded residue. *)
+(** For a tuple holding a single card position, sheets_sum reduces to
+    s mod N: the T=1 degenerate case of the sum-mod encoding, where a
+    lone party's card position already determines the encoded residue. *)
 Lemma sum_mod_single_sheet :
   @sheets_sum N' 0 sheets = s %% N.
 Proof.
@@ -107,8 +109,8 @@ Let N := N'.+2.
 Variable T' : nat.
 Let T := T'.+1.
 
-(* A permutation "preserves sum mod N" if for all tuples of sheet indices,
-   the sum of their images equals the sum of the originals mod N *)
+(* A permutation "preserves sum mod N" if for all tuples of card-position
+   indices, the sum of their images equals the sum of the originals mod N *)
 Definition preserves_sum_mod (sigma : {perm 'I_N}) : Prop :=
   forall (s : T.-tuple 'I_N),
     (\sum_(i < T) (sigma (tnth s i) : nat)) %% N =
@@ -185,7 +187,7 @@ Let T := (pi_T' PI).+1.
 Let rho := @pgg_rho M.
 Let starts := pi_starts PI.
 
-(* The sum of starting sheet values mod N *)
+(* The sum of the starting card positions' values mod N *)
 Definition pgg_sheets_sum : nat :=
   (\sum_(i < T) (tnth starts i : nat)) %% N.
 
@@ -231,7 +233,7 @@ Let N := N'.+2.
 Variable T' : nat.
 Let T := T'.+1.
 
-(* Starting sheets *)
+(* Starting card positions *)
 Variable sheets : T.-tuple 'I_N.
 
 (* The permutation applied by the walk *)
@@ -256,13 +258,13 @@ Qed.
 
 (* Partial sums of strict subsets do not determine m.
    Informally: knowing sum_{i in C} e_i mod N does not reveal m
-   when |C| < T, because the remaining T - |C| unknown sheets
+   when |C| < T, because the remaining T - |C| unknown card positions
    can sum to any residue mod N. *)
 Lemma partial_sum_no_info :
   forall (m1 m2 : 'I_N),
     #|C| < T ->
     sum_mod_valid sheets m1 ->
-    (* There exist alternative sheets encoding m2 that agree on C *)
+    (* There exist alternative card positions encoding m2 that agree on C *)
     exists sheets' : T.-tuple 'I_N,
       sum_mod_valid sheets' m2 /\
       (forall i : 'I_T, i \in C -> tnth sheets' i = tnth sheets i) /\

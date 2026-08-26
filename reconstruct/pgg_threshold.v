@@ -47,7 +47,7 @@ Local Open Scope nat_scope.
 
 Record RampConfig := mkRamp {
   rc_T' : nat ;                    (* T = rc_T'.+1 parties *)
-  rc_N' : nat ;                    (* N = rc_N'.+1 sheets *)
+  rc_N' : nat ;                    (* N = rc_N'.+1 card positions *)
   rc_ag : AssignmentGraph rc_T'.+1 ;  (* assignment graph *)
   rc_num_bits : nat ;              (* total number of encoded bits = |edges|/2 *)
 }.
@@ -55,8 +55,9 @@ Record RampConfig := mkRamp {
 (** The party-index bound T = (rc_T' rc).+1 of a RampConfig: the carrier
     'I_T over which the ramp theorems below quantify coalitions. *)
 Definition rc_T (rc : RampConfig) : nat := (rc_T' rc).+1.
-(** The sheet-count bound N = (rc_N' rc).+1 of a RampConfig: the number of
-    card positions the ramp scheme's assignment graph encodes over. *)
+(** The bound N = (rc_N' rc).+1 on the number of card positions of a
+    RampConfig: the count the ramp scheme's assignment graph encodes
+    over. *)
 Definition rc_N (rc : RampConfig) : nat := (rc_N' rc).+1.
 
 (* ========================================================================= *)

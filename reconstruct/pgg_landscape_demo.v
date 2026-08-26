@@ -77,7 +77,7 @@ Let ar := monster_rigidity R.
 (* --- Security side --- *)
 
 (* Q: What security does the Monster achieve? *)
-(* A: For every sheet s, var_dist <= epsilon ~ 0. *)
+(* A: For every card position s, var_dist <= epsilon ~ 0. *)
 Lemma monster_security_demo (s : 'I_monster_n.+2) :
   (var_dist (fdistmap (fun sigma : {perm 'I_monster_n.+2} => sigma s)
                       (sw_rho_dist (scb_bound (ar_security ar))))
@@ -128,7 +128,7 @@ Proof. exact: ar_hurwitz ar. Qed.
 
 (* --- Phase 2: Certification — entropy view --- *)
 
-(* Q: What is the entropy at each sheet? *)
+(* Q: What is the entropy at each card position? *)
 (* A: H(P_s) <= log N — near-maximum for the Monster. *)
 Lemma monster_entropy_demo (s : 'I_monster_n.+2) :
   ar_entropy ar s <= log monster_n.+2%:R.
@@ -171,7 +171,7 @@ End monster_landscape.
 (*     discovery method for small groups where direct enumeration is fast.   *)
 (*                                                                            *)
 (*   Phase 2 (Certification, from oc_rigidity):                              *)
-(*     Security: eps = 1 (fiber-counted, worst-case sheet s=1)              *)
+(*     Security: eps = 1 (fiber-counted, worst-case card position s=1)      *)
 (*     Threshold: genus 0 -> exact (T = k), gap = 0                         *)
 (*                                                                            *)
 (*   OC is the opposite extreme from the Monster: small |G| allows          *)

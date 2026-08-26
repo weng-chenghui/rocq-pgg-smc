@@ -6,7 +6,8 @@
 (* The record-level privacy theorem profile_view_indep                        *)
 (* (reconstruct/transitivity_privacy.v) quantifies over an arbitrary          *)
 (* MonodromyProfile and carries two mathematical premises about its           *)
-(* projections: the image of the action is t-transitive on the sheets, and    *)
+(* projections: the image of the action is t-transitive on the card         *)
+(* positions, and                                                            *)
 (* the two dealt decks carry distinct cards. This file discharges that        *)
 (* theorem at the PGL(2,7) orbit scheme and shows that neither premise nor    *)
 (* the coalition bound can be relaxed.                                        *)
@@ -17,7 +18,8 @@
 (*                                                                            *)
 (* Non-vacuity. A t-transitive group is at least as large as the set of       *)
 (* distinct t-tuples of the acted set, so the transitivity premise fails for  *)
-(* a trivial group on the eight sheets; the PGL(2,7) action image has more    *)
+(* a trivial group on the eight card positions; the PGL(2,7) action image   *)
+(* has more                                                                  *)
 (* than one element.                                                          *)
 (*                                                                            *)
 (* Necessity. Both refutations are proved here because their witnesses are    *)
@@ -85,7 +87,8 @@ exact: (@profile_view_indep pgl27_profile 3 id erefl pgl27_3transitive
   R (fdist_uniform card_bool) pgl27_G_pos orbit_encode_deck C HC).
 Qed.
 
-(** dtuple3_ord8_gt1 == the eight sheets carry more than one three-tuple of
+(** dtuple3_ord8_gt1 == the eight card positions carry more than one
+    three-tuple of
     distinct positions. *)
 Lemma dtuple3_ord8_gt1 : (1 < #|3.-dtuple([set: 'I_8])|)%N.
 Proof.
@@ -97,7 +100,8 @@ exists [tuple ord0; ord8_1; ord8_2], [tuple ord8_1; ord0; ord8_2]; split.
 Qed.
 
 (** pgl27_action_nontrivial == the image of the PGL(2,7) representation in the
-    symmetric group on the eight sheets has more than one element. The
+    symmetric group on the eight card positions has more than one element.
+    The
     transitivity premise discharged at PGL(2,7) is met by a non-trivial
     group. *)
 Lemma pgl27_action_nontrivial :

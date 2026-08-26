@@ -37,9 +37,9 @@ Let rho_uniform : R.-fdist {perm 'I_N} :=
 
 Let img (s : 'I_N) := (eval_at s) @: rhoG.
 
-(* The orbit of sheet s under rhoG, the image of s under every permutation
-   in the representation's image group, is nonempty: it inherits a witness
-   from rhoG itself being nonempty. *)
+(* The orbit of card position s under rhoG, the image of s under every
+   permutation in the representation's image group, is nonempty: it
+   inherits a witness from rhoG itself being nonempty. *)
 Lemma img_pos2 (s : 'I_N) : (0 < #|img s|)%N.
 Proof.
 rewrite card_gt0; apply/set0Pn.
@@ -47,14 +47,15 @@ have /card_gt0P [g Hg] := HrhoG_pos.
 by exists (g s); apply/imsetP; exists g.
 Qed.
 
-(* Pushing the uniform law on rhoG forward through evaluation at sheet s
-   gives the uniform law on s's orbit, not merely a distribution supported
-   there: under Hregular, evaluation at s is injective on rhoG, so the
-   pushforward of a uniform source through an injection is exactly uniform
-   on the image. This is the probabilistic form of a regular monodromy
-   action's Item-3 guarantee (pgg_abelian_collapse.v): a coalition watching
-   one sheet under a regular action sees a perfectly uniform value over the
-   reachable set, not merely a value pinning down the acting element. *)
+(* Pushing the uniform law on rhoG forward through evaluation at card
+   position s gives the uniform law on s's orbit, not merely a distribution
+   supported there: under Hregular, evaluation at s is injective on rhoG,
+   so the pushforward of a uniform source through an injection is exactly
+   uniform on the image. This is the probabilistic form of a regular
+   monodromy action's Item-3 guarantee (pgg_abelian_collapse.v): a
+   coalition watching one card position under a regular action sees a
+   perfectly uniform value over the reachable set, not merely a value
+   pinning down the acting element. *)
 Lemma test_pushforward (s : 'I_N) :
   fdistmap (eval_at s) rho_uniform =
   @fdist_uniform_supp R _ (img s) (img_pos2 s).

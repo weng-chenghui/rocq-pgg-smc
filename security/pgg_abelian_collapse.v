@@ -10,7 +10,7 @@ From pgg_smc Require Import pgg_interface abelian_word_collapse.
 (* PGG: Abelian Security Collapse (Theorem 8, items (3)-(4))                 *)
 (*                                                                           *)
 (* Item 3: In a regular (free + transitive) monodromy action, knowing the    *)
-(* endpoint rho(g)(s) at a single sheet s determines g uniquely.             *)
+(* endpoint rho(g)(s) at a single card position s determines g uniquely.     *)
 (*                                                                           *)
 (* Item 4: For abelian groups with regular action, an adversary seeing one   *)
 (* endpoint can reconstruct the full permutation. Combined with B1           *)
@@ -39,16 +39,17 @@ Let N := (pgg_N' M).+1.
 Let G := pgg_G M.
 
 (* Regular action hypothesis: if two group elements act the same on any
-   single sheet, they must be equal. This is stronger than faithfulness
-   (which requires agreement on ALL points). Regularity = free + transitive. *)
+   single card position, they must be equal. This is stronger than
+   faithfulness (which requires agreement on ALL points). Regularity =
+   free + transitive. *)
 Hypothesis Hreg : forall (g1 g2 : gT) (s : 'I_N),
   g1 \in G -> g2 \in G ->
   endpoint g1 s = endpoint g2 s -> g1 = g2.
 
 (** one_eval_determines_perm — Item 3 of Theorem 8: a regular monodromy
-    action's endpoint at a single sheet already determines which group
-    element produced it, so two elements agreeing at one sheet must be
-    equal. *)
+    action's endpoint at a single card position already determines which
+    group element produced it, so two elements agreeing at one card
+    position must be equal. *)
 Lemma one_eval_determines_perm (g1 g2 : gT) (s : 'I_N) :
   g1 \in G -> g2 \in G ->
   endpoint g1 s = endpoint g2 s -> g1 = g2.

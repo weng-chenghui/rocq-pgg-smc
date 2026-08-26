@@ -34,7 +34,7 @@ Import Prenex Implicits.
 (*     Section 0: Utility Functions                                          *)
 (******************************************************************************)
 
-(* Orbit computation: reachable sheets from s under generators.
+(* Orbit computation: reachable card positions from s under generators.
    Iteratively applies all generators until fixed point. *)
 Fixpoint orbit_step (gens : nat -> nat -> nat) (Tg : nat)
     (current : seq nat) (fuel : nat) : seq nat :=
@@ -47,8 +47,9 @@ Fixpoint orbit_step (gens : nat -> nat -> nat) (Tg : nat)
     else orbit_step gens Tg new_pts fuel'
   end.
 
-(* The sorted orbit of starting sheet s: the sheets reachable by repeatedly
-   applying the RAAG description's generators, computed to a fixed point.
+(* The sorted orbit of starting card position s: the card positions
+   reachable by repeatedly applying the RAAG description's generators,
+   computed to a fixed point.
    Section 1 below reads orbit_of desc 0 for each demo family to tell a
    group whose orbit partition forces a positive eps floor (Section 2)
    from one where eps can converge to 0 (Section 3). *)
@@ -56,7 +57,7 @@ Definition orbit_of (desc : RAAGDesc) (s : nat) : seq nat :=
   sort leq (orbit_step (rd_gens desc) (rd_Tg desc) [:: s] (rd_N desc)).
 
 (* Decides whether the RAAG action is transitive: whether orbit_of desc 0
-   covers all N sheets.  This is the dichotomy the demo turns on:
+   covers all N card positions.  This is the dichotomy the demo turns on:
    non-transitive families (star, disjoint) are stuck at a positive eps
    floor for every L, while transitive families (path, OC, cyclic) admit
    eps -> 0 as L grows (Sections 2 and 3). *)
@@ -80,7 +81,7 @@ Definition achievable_scan (desc : RAAGDesc) (Ls : seq nat)
 (* PGL bound: N * (N^2 - 1), maximum |G| for genus=0 *)
 Definition pgl_bound_nat (N : nat) : nat := N * (N ^ 2 - 1).
 
-(* Threshold options: for N sheets and genus 0..max_g,
+(* Threshold options: for N card positions and genus 0..max_g,
    returns (genus, k, T, gap) where T=N, gap=2*genus, k=N-gap *)
 Definition threshold_options (N max_g : nat)
     : seq (nat * nat * nat * nat) :=
@@ -125,10 +126,10 @@ Eval vm_compute in orbit_of (oc_desc 2 5) 0.   (* = [0; 1; 2; 3; 4; 5] *)
 (*     Star(m) and Disjoint(k) have orbit partitions that force a positive   *)
 (*     eps floor.  Increasing L does NOT help: eps stays constant.           *)
 (*                                                                           *)
-(*     Star(2): orbits {0,1}, {2,3,4}. Sheet 0 always maps to {0,1},        *)
-(*     so var_dist from uniform >= 6/5.                                      *)
-(*     Disjoint(2): orbits {0,1}, {2,3}. Each sheet stays in its pair,      *)
-(*     so var_dist >= 1.                                                     *)
+(*     Star(2): orbits {0,1}, {2,3,4}. Card position 0 always maps to       *)
+(*     {0,1}, so var_dist from uniform >= 6/5.                               *)
+(*     Disjoint(2): orbits {0,1}, {2,3}. Each card position stays in its    *)
+(*     pair, so var_dist >= 1.                                               *)
 (******************************************************************************)
 
 (* Star(2): eps stuck at 6/5 for all L *)
@@ -150,7 +151,7 @@ Eval vm_compute in fiber_eps_scan (star_desc 5) [:: 1; 2; 3].
 (*     Path(3)/S5: generating set = adjacent transpositions of S5.           *)
 (*     As L grows, achievable set -> S5, eps -> 0.                           *)
 (*     BUT: at L=2, identity enters achievable (sigma^2=id for transpos.)    *)
-(*     creating a spike at the starting sheet.                               *)
+(*     creating a spike at the starting card position.                      *)
 (*                                                                           *)
 (*     OC(2,p): overlapping p-cycles. Converges faster due to larger cycles. *)
 (******************************************************************************)

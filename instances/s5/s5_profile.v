@@ -30,8 +30,9 @@ Import Prenex Implicits.
 Lemma s5_starts_uniq : uniq (ord_tuple 5).
 Proof. by rewrite val_ord_tuple enum_uniq. Qed.
 
-(** s5_PI — the [PGGInterface] for the S_5 plug: five sheets, the identity
-    start tuple [ord_tuple 5], certified distinct by [s5_starts_uniq]. Fixing
+(** s5_PI — the [PGGInterface] for the S_5 plug: five card positions, the
+    identity start tuple [ord_tuple 5], certified distinct by
+    [s5_starts_uniq]. Fixing
     this interface is what lets the shared card-exchange program run at
     S_5 instead of an abstract N. *)
 Definition s5_PI : PGGInterface (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) :=

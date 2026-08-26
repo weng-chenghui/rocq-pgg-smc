@@ -434,7 +434,8 @@ Definition dealt_hand (W : seq gT) (i : 'I_T) : seq ('I_N) :=
   [seq rho w (tnth starts i) | w <- W].
 
 (* The single card position player i reveals to the verifier once the
-   shuffle P has been selected: rho P applied to i's starting sheet. This is
+   shuffle P has been selected: rho P applied to i's starting card
+   position. This is
    the one entry of dealt_hand the protocol actually exposes. *)
 Definition compute (P : gT) (i : 'I_T) : 'I_N :=
   rho P (tnth starts i).

@@ -44,7 +44,8 @@ From pgg_reconstruct Require Import algebraic_rigidity.
 (*                                                                            *)
 (* How the hidden value is determined:                                        *)
 (* 1. The dealer encodes hidden value s as starting card positions: ts_encode(s).    *)
-(* 2. The word w scrambles these sheets: word_eval(w) applies a coordinate   *)
+(* 2. The word w scrambles these card positions: word_eval(w) applies a      *)
+(*    coordinate                                                             *)
 (*    permutation (invisible to reconstruction by ts_recon_perm_invariant).       *)
 (* 3. The verifier collects card positions and recovers s via ts_recon.      *)
 (* The hidden value is fixed by the starting card positions, not by the shuffle.     *)
@@ -68,7 +69,8 @@ From pgg_reconstruct Require Import algebraic_rigidity.
 (*                                                                            *)
 (* The dealer evaluates words into group elements, producing a lookup table  *)
 (* W : seq gT = [g_0, ..., g_{|W|-1}], and picks a selection index P_idx.   *)
-(* For each player i (starting at sheet s_i), the dealer deals the hand      *)
+(* For each player i (starting at card position s_i), the dealer deals the  *)
+(* hand                                                                      *)
 (* [rho(g_0)(s_i), ..., rho(g_{|W|-1})(s_i)] -- a list of card positions,   *)
 (* one per table entry -- together with P_idx.  Player i looks up entry      *)
 (* P_idx to get the card position rho(g_{P_idx})(s_i) and reveals it to the *)
@@ -129,7 +131,7 @@ Let data := pgg_data N.
 (* Player index convention: mirrors DSDP's alice_idx/bob_idx/charlie_idx.
    dealer  = 0: deals hands and announces selection
    verifier = 1: observes card positions and reconstructs
-   player i = i+2: compute players (one per starting sheet) *)
+   player i = i+2: compute players (one per starting card position) *)
 Definition dealer_idx : nat := 0.
 Definition verifier_idx : nat := 1.
 (* Maps player ordinal i to process id i+2: players occupy the process ids
