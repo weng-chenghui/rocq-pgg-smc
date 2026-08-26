@@ -15,10 +15,18 @@
 (*   posterior s0 s1 rho_dist F == posterior distribution over bool given      *)
 (*     observed output F, derived via Bayesian conditioning from the joint.   *)
 (*   posteriorE == evaluation lemma: posterior in terms of channel probs      *)
-(*   posterior_bias_le_var_dist == bridge: posterior bias bounded by var_dist *)
+(*   posterior_bias_le_var_dist_scaled == the posterior bias at an observed  *)
+(*     position, bounded by the two channels' variation distances from       *)
+(*     uniform, scaled by the mass the protocol puts on that position        *)
 (*                                                                            *)
-(* The key bridge theorem:                                                    *)
-(*   |posterior(true) - 1/2| <= var_dist(endpoint_dist, uniform)             *)
+(* The bridge theorem, at an output F of nonzero marginal:                    *)
+(*   |posterior F true - 1/2|                                                 *)
+(*     <= (d(ch_true,U) + d(ch_false,U)) / (2*(ch_false F + ch_true F))       *)
+(*                                                                            *)
+(* The denominator is four times output_marginal F, so the bound is sharp     *)
+(* where the protocol actually lands and vacuous where it does not.  The      *)
+(* unscaled inequality |posterior F true - 1/2| <= d(.,U) is not proved       *)
+(* here, and does not follow without a lower bound on the output mass.        *)
 (*                                                                            *)
 (* This lets us claim: PGG's spectral convergence bounds => Kim's posterior   *)
 (* security bounds, connecting the algebraic (PGG) and Bayesian (Kim)        *)
@@ -148,18 +156,20 @@ Qed.
 (** * Section 3: Bridge to Variation Distance                                 *)
 (******************************************************************************)
 
-(** The key bridge: when the endpoint distributions are close to uniform
-    (as measured by var_dist), the posterior is close to 1/2.
+(** This section turns a distributional guarantee into a Bayesian one.
+    Each channel sits within variation distance d_b of the uniform
+    distribution on the N card positions, and those two distances bound how
+    far the posterior on Alice's bit departs from its 1/2 prior at an
+    observed position, once divided by the mass the protocol puts there.
 
-    Strategy: By posteriorE, posterior F b = channel b F / sum_channels.
-    The bias |posterior F true - 1/2| can be bounded by how far
-    channel true F and channel false F are from 1/N.
-    var_dist(channel b, uniform) bounds |channel b F - 1/N| for each F
-    via leq_var_dist.
-
-    Full proof requires careful algebraic manipulation of the Bayes formula
-    under the constraint that channel probabilities sum properly.
-    We state this as an axiom and provide the proof sketch. *)
+    That is the bridge the file exists for: a mixing bound on the deck
+    permutation distribution is a statement about marginals, while the
+    card-protocol security notion is a statement about what a coalition
+    believes after seeing an exposed card.  The scaling is where the two
+    part company.  It degrades exactly at positions the protocol reaches
+    rarely, and says nothing at a position of zero output mass, which is
+    why the bias bound below carries output_marginal F != 0 as a premise
+    rather than holding at every F. *)
 
 (** Helper: channel b F is close to 1/N when var_dist is small *)
 Lemma channel_close_to_uniform (b : bool) (F : 'I_N) :
