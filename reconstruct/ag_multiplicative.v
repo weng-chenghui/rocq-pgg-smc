@@ -39,29 +39,24 @@ Section hadamard.
 Variable F : fieldType.
 Variable n : nat.
 
-(** hadamard — componentwise (Hadamard) product of two row vectors.
-    Kind: main.
-    Why: supports the multiplicative structure used to show that products of
-         AG-code codewords land in the doubled AG code.
-*)
+(** The coordinatewise (Hadamard) product of two row vectors: index i of the
+    result is the product of index i of each argument. This is the algebraic
+    operation underlying multiplicative secret sharing: multiplying two
+    players' shares locally corresponds to evaluating the pointwise product
+    of the underlying encoded functions. *)
 Definition hadamard (c1 c2 : 'rV[F]_n) : 'rV[F]_n :=
   \row_(i < n) (c1 ord0 i * c2 ord0 i).
 
-(** hadamard_comm — the Hadamard product is commutative.
-    Kind: helper.
-    Why waived: algebraic-law suffix (_comm aligns with MathComp conventions).
-    Used by: downstream rewrites that need to swap arguments of hadamard.
-*)
+(** The Hadamard product is commutative, so downstream rewrites may swap its
+    arguments freely. *)
 Lemma hadamard_comm (c1 c2 : 'rV[F]_n) :
   hadamard c1 c2 = hadamard c2 c1.
 Proof. by apply/rowP => i; rewrite !mxE mulrC. Qed.
 
-(** hadamardE — coordinate evaluation of a Hadamard product.
-    Kind: helper.
-    Why: exposes the defining pointwise product equation once so that later
-         reasoning can just rewrite hadamardE rather than unfold mxE.
-    Used by: hadamard_massey_codeword and ag_massey_mult.
-*)
+(** The defining coordinatewise equation: (hadamard c1 c2) at index i equals
+    c1 at i times c2 at i. Stated once so later coordinatewise arguments in
+    the Hadamard-Massey bridge can rewrite by this equation instead of
+    unfolding mxE by hand. *)
 Lemma hadamardE (c1 c2 : 'rV[F]_n) (i : 'I_n) :
   (hadamard c1 c2) ord0 i = c1 ord0 i * c2 ord0 i.
 Proof. by rewrite mxE. Qed.
@@ -82,11 +77,13 @@ Variables (k_1 k_2 : nat).
 Variable ev_k : 'M[F]_(k_1, n).
 Variable ev_2k : 'M[F]_(k_2, n).
 
-(* Multiplicative property: codeword * codeword lands in the doubled code.
-   This follows from: if f \in L(G) and g \in L(G'), then fg \in L(G+G').
-   Evaluating: ev(f)*ev(g) = ev(fg) coordinatewise.
-   Currently axiomatized — proving it requires the function-field
-   interpretation of AG codes, not just the generator matrix definition. *)
+(* The Hadamard product of two codewords of C(D,k) lands in C(D,2k): if
+   f \in L(G) and g \in L(G'), then fg \in L(G+G'), and evaluation commutes
+   with the coordinatewise product, ev(f)*ev(g) = ev(fg). Proving this from
+   the generator-matrix definition of ag_code alone needs the function-field
+   interpretation of AG codes, which is why it is axiomatized here rather
+   than derived; it is the algebraic fact that makes multiplying shares
+   locally implement multiplying secrets. *)
 Hypothesis ag_mult :
   forall c1 c2 : 'rV[F]_n,
     c1 \in ag_code ev_k -> c2 \in ag_code ev_k ->
@@ -106,6 +103,13 @@ Section mult_scheme_def.
 
 Variable F : finFieldType.
 
+(** A multiplicative secret-sharing scheme: two Massey ThresholdSchemes over
+    the same threshold ts_T' (a base scheme and a doubled scheme), together
+    with a proof that coordinatewise-multiplying two valid share tuples of
+    the base scheme produces a valid share tuple of the doubled scheme
+    carrying the product secret. This is the interface a BGW-style secure
+    multiplication protocol needs: local share multiplication that provably
+    tracks a global secret multiplication. *)
 Record MultiplicativeScheme := {
   ms_base : ThresholdScheme F F ;
   ms_doubled : ThresholdScheme F F ;
@@ -127,8 +131,8 @@ Arguments MultiplicativeScheme {F}.
 (*     Section 4: Hadamard-Massey Bridge                                      *)
 (******************************************************************************)
 
-(* Key lemma: Hadamard product of massey_codewords yields a massey_codeword
-   with secret = product of secrets. *)
+(* The Hadamard product of massey_codewords is itself a massey_codeword,
+   with secret equal to the product of the two secrets. *)
 
 Section hadamard_massey.
 
@@ -136,12 +140,12 @@ Variable F : finFieldType.
 Variable n' : nat.
 Let n := n'.+2.
 
-(** hadamard_massey_codeword — Hadamard of Massey codewords is Massey of products.
-    Kind: helper.
-    Why: aligns the two possible ways of combining secrets and shares so that
-         multiplicative security reduces to the underlying AG-code product.
-    Used by: ag_massey_mult (in the ag_mult_scheme construction).
-*)
+(** Applying hadamard to two massey_codeword outputs equals applying
+    massey_codeword to the product secret and the coordinatewise-multiplied
+    share vectors. This identifies "multiply the encoded codewords" with
+    "encode the multiplied secret and shares", which is what lets
+    multiplicative security reduce to the AG-code product property ag_mult
+    rather than to a separate argument about Massey encoding. *)
 Lemma hadamard_massey_codeword (s1 s2 : F)
     (sh1 sh2 : 'rV[F]_n'.+1) :
   hadamard (massey_codeword s1 sh1) (massey_codeword s2 sh2) =
@@ -176,6 +180,9 @@ Hypothesis Hkg : g < k.
 Hypothesis Hkgn : k + g < n.
 Hypothesis goppa_wt :
   forall m : 'rV[F]_k, m != 0 -> n - (k + g - 1) <= wH (m *m ev).
+(* For any coordinate set S smaller than (k - g).-1.+2 and any target
+   vector, some codeword of the base code ev agrees with target on S: a
+   coalition observing too few base shares cannot rule out any secret. *)
 Hypothesis ag_priv_surj :
   forall (S : {set 'I_n}) (target : 'rV[F]_n),
     #|S| < (k - g).-1.+2 ->
@@ -193,6 +200,9 @@ Hypothesis Hk2g : g2 < k2.
 Hypothesis Hk2gn : k2 + g2 < n.
 Hypothesis goppa_2k_wt :
   forall m : 'rV[F]_k2, m != 0 -> n - (k2 + g2 - 1) <= wH (m *m ev_2k).
+(* The same local-surjectivity property for the doubled code ev_2k: a
+   coalition observing fewer than (k2 - g2).-1.+2 doubled shares cannot rule
+   out any secret. *)
 Hypothesis ag_2k_priv_surj :
   forall (S : {set 'I_n}) (target : 'rV[F]_n),
     #|S| < (k2 - g2).-1.+2 ->
@@ -211,12 +221,15 @@ Hypothesis HT_eq : ts_T' (ag_massey ev_rank Hk Hkn Hkgn goppa_wt ag_priv_surj) =
 Let base := ag_massey ev_rank Hk Hkn Hkgn goppa_wt ag_priv_surj.
 Let doubled := ag_massey ev_2k_rank Hk2 Hk2n Hk2gn goppa_2k_wt ag_2k_priv_surj.
 
-(* Core: multiplying valid base shares gives valid doubled shares.
-   Proof: the Hadamard product of two massey_codewords is a massey_codeword
-   with secret = product (hadamard_massey_codeword), and ag_mult ensures
-   the result lies in the doubled code. The cast_tuple handles the
-   type-level equality ts_T' base = ts_T' doubled.
-   Currently axiomatized due to cast_tuple / tuple_to_rV alignment. *)
+(** Multiplying two valid base-scheme share tuples coordinatewise, and
+    casting across the ts_T' base = ts_T' doubled equality, gives a valid
+    doubled-scheme share tuple for the product secret s1 * s2. This is the
+    multiplicative correctness property MultiplicativeScheme packages:
+    local share multiplication implements secret multiplication. *)
+(* The Hadamard product of two massey_codewords is a massey_codeword with
+   secret = product (hadamard_massey_codeword), and ag_mult places that
+   codeword's coordinates in the doubled code; cast_tuple only bridges the
+   type-level equality ts_T' base = ts_T' doubled. *)
 Lemma ag_massey_mult (s1 s2 : F)
     (shares1 shares2 : (ts_T' base).+1.-tuple F) :
   ts_valid base s1 shares1 ->
@@ -236,12 +249,12 @@ rewrite -hadamard_massey_codeword.
 exact: ag_mult Hv1 Hv2.
 Qed.
 
-(** ag_mult_scheme — multiplicative sharing scheme built from AG codes.
-    Kind: main.
-    Why: packages the base and doubled ThresholdScheme together with
-         hadamard_massey_codeword into the MultiplicativeScheme record used
-         by downstream BGW-style secure multiplication.
-*)
+(** The MultiplicativeScheme built from a base AG code ev and a doubled AG
+    code ev_2k satisfying ag_mult: base and doubled Massey ThresholdSchemes
+    at equal ts_T', paired with ag_massey_mult as the proof that
+    coordinatewise share multiplication tracks secret multiplication. This
+    is the concrete instance a BGW-style secure-multiplication protocol runs
+    against. *)
 Definition ag_mult_scheme : MultiplicativeScheme :=
   {| ms_base := base ;
      ms_doubled := doubled ;

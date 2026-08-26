@@ -36,11 +36,11 @@ Variable F : finFieldType.
 Variable n : nat.
 Variable C : Lcode0.t F n.
 
-(** coord_perm_compatible — sigma preserves the linear code under column permutation.
-    Kind: main.
-    Why: abstracts "sigma is a coordinate automorphism of C" so that
-         per-instance compatibility proofs (RS, AG) share a common interface.
-*)
+(** A permutation sigma of coordinates is a code automorphism of C: applying
+    col_perm sigma to any codeword keeps it in C. This is the shared
+    interface RS and AG code instances each prove their own coordinate
+    symmetries satisfy, rather than re-deriving share-permutation
+    compatibility from scratch per code. *)
 Definition coord_perm_compatible (sigma : {perm 'I_n}) : Prop :=
   forall c : 'rV[F]_n, c \in C -> col_perm sigma c \in C.
 
@@ -60,12 +60,10 @@ Let n := n'.+2.
 Variable sigma : {perm 'I_n}.
 Hypothesis Hfix0 : sigma ord0 = ord0.
 
-(** sigma_lift_neq0 — sigma never sends a lifted index back to the fixed point 0.
-    Kind: helper.
-    Why: injectivity of sigma and the Hfix0 hypothesis together imply that
-         sigma (lift ord0 j) cannot equal ord0.
-    Used by: restrict_perm0_funE (where we need to unlift the image).
-*)
+(** sigma never sends a lifted (nonzero) index back to the fixed point 0,
+    since sigma is injective and already fixes 0. This is the
+    well-definedness fact that lets the unlift in restrict_perm0_fun below
+    always succeed. *)
 Lemma sigma_lift_neq0 (j : 'I_n'.+1) : sigma (lift ord0 j) != ord0.
 Proof.
 apply/eqP => Habs.
@@ -74,19 +72,18 @@ have := congr1 val Hlj0.
 by rewrite /= /bump leq0n add1n.
 Qed.
 
-(** restrict_perm0_fun — underlying function of the restriction of sigma to non-zero indices.
-    Kind: helper.
-    Why: implements "apply sigma, then unlift past the fixed point 0".
-    Used by: restrict_perm0_val (which wraps this into a {perm} structure).
-*)
+(** Applies sigma to a lifted index and unlifts the result past the fixed
+    point 0, defaulting to j itself in the (unreachable, by
+    sigma_lift_neq0) None case. This is the underlying function of the
+    permutation sigma induces on the n'.+1 share positions once 0 is set
+    aside as the code's own coordinate. *)
 Definition restrict_perm0_fun (j : 'I_n'.+1) : 'I_n'.+1 :=
   odflt j (unlift ord0 (sigma (lift ord0 j))).
 
-(** restrict_perm0_funE — the lift/restrict round trip equals sigma on non-zero indices.
-    Kind: helper.
-    Why: relates the restricted permutation to the original sigma after lifting.
-    Used by: restrict_perm0_inj (to recover injectivity of sigma via lifting).
-*)
+(** Lifting restrict_perm0_fun j back through ord0 recovers sigma applied to
+    the lifted j: the unlift/lift round trip is transparent to sigma. This
+    equation is what lets later proofs replace "apply sigma, then lift" by
+    "lift, then apply the restriction" wherever needed. *)
 Lemma restrict_perm0_funE (j : 'I_n'.+1) :
   lift ord0 (restrict_perm0_fun j) = sigma (lift ord0 j).
 Proof.
@@ -96,11 +93,9 @@ case: (unliftP ord0 (sigma (lift ord0 j))) => [k Hk | Habs].
 - by exfalso; move/eqP: (sigma_lift_neq0 j); rewrite Habs.
 Qed.
 
-(** restrict_perm0_inj — the restriction function is injective.
-    Kind: helper.
-    Why: required to wrap restrict_perm0_fun into a {perm} value.
-    Used by: restrict_perm0_val (passed to the perm constructor).
-*)
+(** restrict_perm0_fun is injective, inherited from sigma's injectivity via
+    restrict_perm0_funE. This is exactly what is needed to package the
+    function as a formal {perm 'I_n'.+1} value below. *)
 Lemma restrict_perm0_inj : injective restrict_perm0_fun.
 Proof.
 move=> j1 j2 Heq.
@@ -110,19 +105,19 @@ rewrite !restrict_perm0_funE => /perm_inj.
 exact: lift_inj.
 Qed.
 
-(** restrict_perm0_val — the restriction of sigma as a formal {perm 'I_n'.+1}.
-    Kind: main.
-    Why: supplies the share-side permutation that massey_perm_compatible
-         delivers once Hfix0 is known, i.e. the induced sharing map.
-*)
+(** The formal {perm 'I_n'.+1} built from restrict_perm0_fun: the
+    permutation sigma induces on the n'.+1 share positions once its fixed
+    coordinate 0 is set aside. This is the share-side permutation a
+    code-side automorphism sigma yields, the object the rest of the file
+    threads through Massey reconstruction and ts_recon_perm_invariant. *)
 Definition restrict_perm0_val : {perm 'I_n'.+1} :=
   perm restrict_perm0_inj.
 
-(** restrict_perm0_valE — lifting the restricted permutation recovers sigma.
-    Kind: helper.
-    Why: one-step unfolding needed in downstream rewrites.
-    Used by: massey_codeword_col_perm (to commute sigma with massey_codeword).
-*)
+(** The formal-permutation version of restrict_perm0_funE: lifting
+    restrict_perm0_val j back through ord0 recovers sigma applied to the
+    lifted j. Used wherever the code-side sigma and the share-side
+    restrict_perm0_val need to be equated directly, rather than only up to
+    the underlying function. *)
 Lemma restrict_perm0_valE (j : 'I_n'.+1) :
   lift ord0 (restrict_perm0_val j) = sigma (lift ord0 j).
 Proof. by rewrite permE restrict_perm0_funE. Qed.
@@ -151,12 +146,13 @@ Hypothesis Hfix0 : sigma ord0 = ord0.
 
 Let sigma_sh := restrict_perm0_val sigma Hfix0.
 
-(** massey_codeword_col_perm — col_perm commutes with massey_codeword when 0 is fixed.
-    Kind: helper.
-    Why: key algebraic identity relating the codeword-side and share-side
-         permutations, so that code automorphisms lift to share permutations.
-    Used by: massey_recon_col_perm, massey_perm_compatible.
-*)
+(** Applying the code-side permutation sigma (fixing 0) to a Massey codeword
+    equals building the codeword from the same secret with the share-side
+    permutation sigma_sh applied to the shares instead: col_perm commutes
+    with massey_codeword because sigma fixes exactly the secret's own
+    coordinate. This is the algebraic bridge that turns a code automorphism
+    into a share permutation without disturbing the secret, the fact every
+    result below about permutation-invariant reconstruction reduces to. *)
 Lemma massey_codeword_col_perm (s : F) (shares : 'rV[F]_n'.+1) :
   col_perm sigma (massey_codeword s shares) =
   massey_codeword s (col_perm sigma_sh shares).
@@ -181,12 +177,11 @@ suff Hlift : lift ord0 (inord (sigma (lift ord0 j)).-1) =
 by rewrite restrict_perm0_valE lift_inord // lift_inord //.
 Qed.
 
-(** massey_recon_col_perm — reconstruction is stable under permuted shares.
-    Kind: helper.
-    Why: combines massey_codeword_col_perm with code-automorphism to show
-         reconstruction still returns the original secret on permuted shares.
-    Used by: massey_perm_compatible (the ts_recon_perm_invariant witness).
-*)
+(** When sigma is a code automorphism of C and shares encode secret s as a
+    codeword of C, reconstructing from the sigma_sh-permuted shares still
+    returns s. This is reconstruction's actual permutation-invariance: a
+    coalition holding the shares in a different order, one related by a
+    code automorphism, recovers the same secret. *)
 Lemma massey_recon_col_perm (s : F) (shares : 'rV[F]_n'.+1) :
   coord_perm_compatible C sigma ->
   massey_codeword s shares \in C ->
@@ -232,23 +227,21 @@ Hypothesis sigma_fix0 :
 Hypothesis code_auto :
   forall g, g \in G -> coord_perm_compatible C (sigma_code g).
 
-(** massey_share_perm — share-side permutation induced by a group element g.
-    Kind: main.
-    Why: transforms a code-side automorphism sigma_code g into a sharing-side
-         permutation over 'I_n'.+1, so that code automorphisms interface with
-         ts_recon_perm_invariant.
-*)
+(** For g in G, the share-side permutation restrict_perm0_val (sigma_code g)
+    induced by g's code automorphism; for g outside G, the identity, an
+    arbitrary default that ts_recon_perm_invariant never queries. This
+    packages the per-group-element share permutation the group action
+    needs, derived from the group's own code automorphisms rather than
+    postulated separately. *)
 Definition massey_share_perm (g : gT) : {perm 'I_n'.+1} :=
   if Sumbool.sumbool_of_bool (g \in G) is left hg then
     restrict_perm0_val (sigma_code g) (sigma_fix0 hg)
   else 1%g.
 
-(** massey_share_permE — massey_share_perm reduces to restrict_perm0_val on G.
-    Kind: helper.
-    Why: exposes the unfold equation up to proof-irrelevance of gG, so proofs
-         downstream don't have to destruct Sumbool directly.
-    Used by: massey_perm_compatible.
-*)
+(** On g \in G, massey_share_perm reduces to restrict_perm0_val applied to
+    sigma_code g, independent of which membership proof is supplied. This
+    lets downstream proofs rewrite past the Sumbool case split defining
+    massey_share_perm instead of destructing it directly. *)
 Lemma massey_share_permE (g : gT) (gG : g \in G) :
   massey_share_perm g = restrict_perm0_val (sigma_code g) (sigma_fix0 gG).
 Proof.
@@ -257,12 +250,13 @@ case: (Sumbool.sumbool_of_bool _) => [hg | /negP]; last by rewrite gG.
 by congr (restrict_perm0_val _ _); exact: eq_irrelevance.
 Qed.
 
-(** massey_perm_compatible — Massey scheme is ts-perm-compatible via code automorphisms.
-    Kind: main.
-    Why: discharges the ts_recon_perm_invariant side-condition used by the
-         AlgebraicRigidity protocol-correctness theorems for Massey-based
-         covering schemes.
-*)
+(** The Massey ThresholdScheme built from C, Hd2 and priv_surj is
+    ts_recon_perm_invariant under G via massey_share_perm: reconstructing
+    after permuting a valid share tuple by any g's induced share
+    permutation returns the same secret. This discharges, for any Massey
+    scheme over a code carrying a G-action by automorphisms, exactly the
+    permutation-stability hypothesis the protocol-correctness argument
+    elsewhere in the batch needs from a covering scheme's plug. *)
 Lemma massey_perm_compatible :
   @ts_recon_perm_invariant gT G _ _
     (massey_scheme C_nt Hd2 priv_surj)
@@ -301,12 +295,12 @@ Let T := (ts_T' ts).+1.
 
 Variable perm_A : gT -> {perm 'I_T}.
 
-(** transport_perm_compatible — ts_recon_perm_invariant survives transport_scheme.
-    Kind: main.
-    Why: lets a compatibility proof on the source ThresholdScheme carry over
-         to the transported variant, so downstream codes can work on 'I_N
-         while compatibility is shown over the base field.
-*)
+(** ts_recon_perm_invariant transfers along transport_scheme: a
+    compatibility proof for ts under G and perm_A carries over unchanged to
+    the transported scheme on B. This is what lets compatibility be proved
+    once, on the concrete base type where the code lives, and then reused
+    for free on the ordinal-indexed presentation covering schemes actually
+    expose downstream. *)
 Lemma transport_perm_compatible :
   @ts_recon_perm_invariant gT G _ _ ts perm_A ->
   @ts_recon_perm_invariant gT G _ _ (transport_scheme Hgi Hfg ts) perm_A.

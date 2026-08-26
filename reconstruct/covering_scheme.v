@@ -87,7 +87,10 @@ Record CoveringData := MkCoveringData {
 Definition cd_fully_ramified (cd : CoveringData) (n : nat) : Prop :=
   cd_total_ramif cd = ((n.-1) * cd_n_branch cd)%N.
 
-(* Genus is determined by |G|, base genus, and ramification *)
+(* Rearranges the Riemann-Hurwitz constraint cd_hurwitz to solve for the
+   covering genus directly, given the group order, base genus, and total
+   ramification. This is the formula the base-genus-0 specializations below
+   build on. *)
 Lemma genus_from_hurwitz (cd : CoveringData) :
   2 * cd_genus cd = #|G| * (2 * cd_base_genus cd) + cd_total_ramif cd + 2 - 2 * #|G|.
 Proof.
@@ -105,15 +108,17 @@ Arguments MkCoveringData {M}.
 (*     Section 1b: ReconPlug — the pluggable reconstruction half             *)
 (******************************************************************************)
 
-(** ReconPlug — the pluggable reconstruction half of an instance. Kind: interface.
-    What: a threshold scheme whose SHARES live on 'I_N and whose SECRET is an
-    arbitrary [secretT], a fixed content readout 'I_N -> 'I_N, a monodromy->share
-    permutation, and perm-invariance of reconstruction over the FULL group pgg_G.
-    Why: the program run_* and correctness (pgg_recon_monodromy_correct) consume
-    this bare record; only the genus/tradeoff narrative needs CoveringScheme. The
-    heterogeneous secret lets a one-bit instance (den Boer: secretT = bool) plug
-    in alongside the position-model instances (secretT = 'I_N).
-    Used-by: CoveringScheme (at secretT = 'I_N), MonodromyProfile, every plug. *)
+(** ReconPlug: a ThresholdScheme whose shares live on 'I_N, paired with a
+    fixed content readout 'I_N -> 'I_N, a monodromy-to-share permutation
+    rp_monodromy, and a proof that reconstruction is invariant under the
+    permutation action of the full group pgg_G, not merely under some
+    coalition-sized subgroup. The secret type secretT is left arbitrary so
+    the same record shape covers both a one-bit secret (den Boer's
+    five-card protocol, secretT = bool) and a position-valued secret
+    (secretT = 'I_N, the instantiation CoveringScheme below builds on). This
+    is the minimal data a reconstruction-correctness proof needs; the
+    genus/threshold-gap narrative that CoveringData carries is not part of
+    it. *)
 Record ReconPlug (M : MonodromyReprType) (secretT : Type) := MkReconPlug {
   rp_scheme    : ThresholdScheme secretT 'I_(pgg_N' M).+1 ;
   rp_content   : 'I_(pgg_N' M).+1 -> 'I_(pgg_N' M).+1 ;
@@ -132,7 +137,12 @@ Arguments MkReconPlug {M secretT}.
 (* A CoveringScheme bundles:
    1. A ReconPlug — scheme + content + monodromy + full-group invariance
    2. Covering geometry (CoveringData) — connects G to genus via Riemann-Hurwitz
-   3. Gap bound — genus determines the threshold gap *)
+   3. Gap bound — genus determines the threshold gap
+   This is the single structural object the rest of the reconstruct/
+   development treats as "the covering scheme": its cs_data field's genus is
+   what classifies an instance into the genus-0/positive-genus regimes that
+   the security-threshold tradeoff (and algebraic rigidity built on top of
+   it) reasons about. *)
 Record CoveringScheme (M : MonodromyReprType) := MkCoveringScheme {
   cs_plug : ReconPlug M 'I_(pgg_N' M).+1 ;
   cs_data : CoveringData M ;
@@ -152,7 +162,9 @@ Notation cs_scheme cs := (rp_scheme (cs_plug cs)).
 Section covering_consequences.
 Variable M : MonodromyReprType.
 
-(* Genus 0 implies exact threshold (gap = 0) *)
+(* Genus 0 forces the gap to vanish: ts_T falls at or below ts_k with no
+   slack. This is the exact-threshold endpoint of the gap bound, the case a
+   scheme realizes when built over a rational (genus-0) covering curve. *)
 Lemma genus0_exact (cs : CoveringScheme M) :
   cd_genus (cs_data cs) = 0 ->
   ts_T (cs_scheme cs) <= ts_k (cs_scheme cs).
@@ -162,14 +174,21 @@ have := cs_gap cs.
 by rewrite Hg0 muln0 addn0.
 Qed.
 
-(* Higher genus allows a wider threshold gap *)
+(* Increasing the covering genus can only widen the allowed threshold gap,
+   never shrink it: the 2 * genus term is monotone. Moving to a
+   higher-genus curve is a real capacity/gap tradeoff, not a free
+   improvement. *)
 Lemma higher_genus_wider_gap (cs1 cs2 : CoveringScheme M) :
   cd_genus (cs_data cs1) <= cd_genus (cs_data cs2) ->
   ts_k (cs_scheme cs1) + 2 * cd_genus (cs_data cs1) <=
   ts_k (cs_scheme cs1) + 2 * cd_genus (cs_data cs2).
 Proof. by move=> Hle; rewrite leq_add2l leq_mul2l Hle orbT. Qed.
 
-(* The threshold gap is bounded by twice the genus *)
+(* The reconstruction/privacy gap ts_T - ts_k never exceeds twice the
+   genus, restated in subtraction form directly from cs_gap. This is the
+   CoveringScheme-level statement of the same price cap that
+   algebraic_rigidity.v's ar_gap_bound exposes at the AlgebraicRigidity
+   level. *)
 Lemma gap_bound (cs : CoveringScheme M) :
   ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <= 2 * cd_genus (cs_data cs).
 Proof. by have := cs_gap cs; rewrite -leq_subLR. Qed.
@@ -186,7 +205,10 @@ Let G := pgg_G M.
 
 (* When base = P^1 (genus 0), Riemann-Hurwitz simplifies:
    2g(C) + 2|G| = R + 2
-   i.e., 2g(C) = R + 2 - 2|G| *)
+   i.e., 2g(C) = R + 2 - 2|G|
+   This is the case relevant whenever the base curve is rational, the
+   setting where a genus-0 covering scheme (ts_T = ts_k, no gap) is even
+   possible; the two lemmas below read off exactly when that happens. *)
 
 Lemma hurwitz_base0 (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
@@ -196,7 +218,9 @@ move=> Hb0.
 by move: (cd_hurwitz cd); rewrite Hb0 !muln0 add0n.
 Qed.
 
-(* Genus 0 with base = P^1 forces ramification = 2|G| - 2 *)
+(* Genus 0 with base = P^1 forces ramification to equal exactly 2|G| - 2: a
+   gap-free (genus-0) covering scheme has no freedom in its ramification
+   once |G| is fixed. *)
 Lemma genus0_ramif (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
   cd_genus cd = 0 ->
@@ -207,7 +231,10 @@ rewrite Hg0 muln0 add0n => Heq.
 by rewrite -(addnK 2 (cd_total_ramif cd)) Heq addnK.
 Qed.
 
-(* Ramification exceeding 2|G|-2 forces positive genus *)
+(* Ramification strictly exceeding 2|G| - 2 forces positive genus. This is
+   the converse of genus0_ramif: a large enough ramification count alone
+   certifies that reconstruction carries a nonzero gap, without needing to
+   compute cd_genus directly. *)
 Lemma ramif_forces_genus (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
   2 * #|G| - 2 < cd_total_ramif cd ->

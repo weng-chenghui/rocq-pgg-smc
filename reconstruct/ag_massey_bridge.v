@@ -51,6 +51,11 @@ Hypothesis goppa_wt :
    Since g < k, we have k - g >= 1, so (k - g).-1.+2 = (k - g).+1. *)
 Let d_perp' := (k - g).-1.
 
+(* For any coordinate set S smaller than d_perp'.+2 and any target vector,
+   some codeword of ag_code agrees with target on S. This is the
+   privacy-side surjectivity Massey's construction needs: a coalition
+   observing fewer than d_perp'.+2 shares cannot rule out any secret, since
+   every pattern it could see is consistent with some codeword. *)
 Hypothesis ag_priv_surj :
   forall (S : {set 'I_n}) (target : 'rV[F]_n),
     #|S| < d_perp'.+2 ->
@@ -59,13 +64,13 @@ Hypothesis ag_priv_surj :
 Let C_nt := ag_not_trivial ev ev_rank Hk Hkn goppa_wt.
 Let Hd2 := ag_min_dist_ge2 ev ev_rank Hk Hkn goppa_wt Hkgn.
 
-(** ag_massey — ThresholdScheme obtained from an AG code via Massey's construction.
-    Kind: main.
-    Why: wires the code-level axiomatization (generator matrix plus Goppa bound)
-         into the ThresholdScheme interface that downstream covering proofs
-         consume, lowering the axiomatization boundary versus postulating a
-         ThresholdScheme directly.
-*)
+(** The ThresholdScheme built from ag_code via Massey's construction,
+    instantiated from the code's nontriviality, its distance-at-least-2
+    bound, and the local-surjectivity hypothesis ag_priv_surj. This replaces
+    axiomatizing a ThresholdScheme directly with axiomatizing only the
+    code-level data, the generator matrix and the Goppa weight bound, so a
+    higher-genus covering scheme's sharing structure is derived rather than
+    postulated. *)
 Definition ag_massey : ThresholdScheme F F :=
   massey_scheme C_nt Hd2 ag_priv_surj.
 
@@ -77,11 +82,10 @@ Proof. by rewrite prednK // subn_gt0. Qed.
    Need: n - 1 <= k - g + 2g = k + g. From Hparam: n <= k + g + 1. *)
 Hypothesis Hparam : n <= k + g + 1.
 
-(** ag_massey_gap — ts_T is at most ts_k + 2 * g for the AG-Massey scheme.
-    Kind: main.
-    Why: the headline privacy/recovery gap for higher-genus codes, showing how
-         the genus surcharge 2g rides on top of the privacy threshold.
-*)
+(** The reconstruction threshold ts_T exceeds the privacy threshold ts_k by
+    at most 2 * g. This is the AG-Massey scheme's privacy/recovery gap
+    bound, showing that a higher-genus curve widens the required share
+    margin by exactly the genus surcharge 2g. *)
 Lemma ag_massey_gap : ts_T ag_massey <= ts_k ag_massey + 2 * g.
 Proof.
 rewrite /ts_T /ts_k /= prednK ?subn_gt0 //.
@@ -103,19 +107,19 @@ Proof. by move=> x; rewrite /ag_ofF /ag_toF cast_ordKV enum_rankK. Qed.
 Let ag_toFK : cancel ag_toF ag_ofF.
 Proof. by move=> x; rewrite /ag_toF /ag_ofF enum_valK cast_ordK. Qed.
 
-(** ag_genus_scheme — AG-Massey scheme transported along the F-to-'I_N bijection.
-    Kind: main.
-    Why: presents the genus-aware scheme on the neutral ordinal domain that
-         other parts of pgg-smc use for sharing, avoiding per-consumer F casts.
-*)
+(** ag_massey transported along the bijection between F and 'I_N, so it acts
+    on ordinal-indexed shares rather than raw field elements. The transport
+    keeps this genus-aware scheme's outward interface identical to every
+    other covering scheme in pgg-smc, which is uniformly indexed by 'I_N, so
+    no field-specific casts leak past this bridge. *)
 Definition ag_genus_scheme : ThresholdScheme 'I_N 'I_N :=
   transport_scheme ag_toFK ag_ofFK ag_massey.
 
-(** ag_genus_gap — gap bound transported along the bijection.
-    Kind: main.
-    Why: exposes the same ts_T <= ts_k + 2 * g estimate on 'I_N, matching the
-         interface shape expected by downstream covering proofs.
-*)
+(** The same reconstruction/privacy gap ts_T <= ts_k + 2 * g, restated for
+    the transported scheme: ts_T and ts_k are invariant under
+    transport_scheme, so moving from F to 'I_N introduces no extra genus
+    dependence. Stating it here gives ordinal-indexed covering arguments the
+    gap bound in the type they actually use. *)
 Lemma ag_genus_gap :
   ts_T ag_genus_scheme <= ts_k ag_genus_scheme + 2 * g.
 Proof. exact: ag_massey_gap. Qed.

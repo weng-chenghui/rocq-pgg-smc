@@ -52,19 +52,11 @@ Record RampConfig := mkRamp {
   rc_num_bits : nat ;              (* total number of encoded bits = |edges|/2 *)
 }.
 
-(** rc_T - successor accessor for the coalition-index bound of a RampConfig.
-    Kind: helper.
-    Why: exposes the .+1-adjusted coalition-index bound stored in RampConfig,
-    mirroring rc_N for the sheet count.
-    Used by: ramp_config_threshold and ramp_config_mono when quantifying over
-    coalitions C : {set 'I_T}.
-*)
+(** The party-index bound T = (rc_T' rc).+1 of a RampConfig: the carrier
+    'I_T over which the ramp theorems below quantify coalitions. *)
 Definition rc_T (rc : RampConfig) : nat := (rc_T' rc).+1.
-(** rc_N - successor accessor for the sheet count of a RampConfig.
-    Kind: helper.
-    Why: exposes the .+1-adjusted sheet count stored in RampConfig.
-    Used by: ramp_config_threshold and ramp_config_mono when quantifying over sheets.
-*)
+(** The sheet-count bound N = (rc_N' rc).+1 of a RampConfig: the number of
+    card positions the ramp scheme's assignment graph encodes over. *)
 Definition rc_N (rc : RampConfig) : nat := (rc_N' rc).+1.
 
 (* ========================================================================= *)
@@ -207,16 +199,14 @@ End complete_ramp.
 (* Section 4: Combined Security-Reconstruction Statement                     *)
 (* ========================================================================= *)
 
-(** This section states the integration between the ramp structure
-    (which edges are secure vs. recovered) and the information-theoretic
-    security bound from pgg_collusion_bound.
-
-    The key idea: for each secure edge (i,j) not covered by coalition C,
-    at least one endpoint is outside C. The adversary's view of the
-    component encoded by that edge is bounded by the DPI (data processing
-    inequality) applied to the protocol distribution. Concretely,
-    var_dist(adversary_view, ideal) <= epsilon, where epsilon comes
-    from the collusion bound (Assumption 1). *)
+(** This section packages, for a fixed coalition C, the ramp-threshold facts
+    of Section 2 together with the covered/secure partition: every edge is
+    either covered by C or secure against it, and a secure edge always has
+    at least one endpoint outside C (secure_edge_witness below). What this
+    section does not formalize is the information-theoretic half of the
+    ramp scheme's security claim: bounding the coalition's view of a secure
+    edge's component by an entropy term derived from the collusion bound via
+    the data-processing inequality remains open. *)
 
 Section secure_reconstruction.
 
@@ -240,13 +230,15 @@ Qed.
    var_dist on e's component by epsilon, via collusion_bound_k (Section 6
    of pgg_collusion_bound) transported along DPI. *)
 
-(** Summary: the ramp scheme provides both reconstruction and security.
-    - For covered edges: the coalition can reconstruct the encoded bits
-      (via decode_encode_correct from pgg_deck_pairing)
-    - For secure edges: the coalition's view is bounded by epsilon
-      (via collusion_bound_k from pgg_collusion_bound)
-    - The partition (covered_secure_partition) is exhaustive:
-      every edge is either recoverable or secure. *)
+(** ramp_security_reconstruction bundles four facts about coalition C's
+    reconstruction power on ag: the covered and secure edges partition
+    ag's edge set; the recoverable-bit count equals half the covered-edge
+    count; covered edges grow monotonically as C grows; and a singleton
+    coalition covers no edges. It repackages Section 2's ramp threshold
+    together with the covered/secure partition into one statement. It
+    proves no bound on the coalition's view of the secure edges; the
+    epsilon-style security half of the ramp scheme's claim is not
+    formalized here. *)
 
 Theorem ramp_security_reconstruction :
   (* Every edge is either recoverable or secure *)
@@ -282,12 +274,11 @@ Variable rc : RampConfig.
 Let T := rc_T rc.
 Let ag := rc_ag rc.
 
-(** ramp_config_threshold - ramp threshold packaged over a RampConfig.
-    Kind: main.
-    Why: bundles recovery count, monotonicity of covered edges and completeness
-    into a single statement parameterised by the configuration record.
-    Used by: downstream protocol landscape statements quoting the ramp threshold.
-*)
+(** ramp_threshold restated for rc's own assignment graph: recoverable bits
+    equal half the covered-edge count, covered edges grow monotonically with
+    the coalition, and the full coalition recovers every edge. This is the
+    form of the threshold theorem quoted by files that hold a RampConfig
+    rather than a bare AssignmentGraph. *)
 Theorem ramp_config_threshold (C : {set 'I_T}) :
   recoverable_bits ag C = #|covered_edges ag C| %/ 2 /\
   (forall C' : {set 'I_T}, C \subset C' ->
@@ -295,11 +286,8 @@ Theorem ramp_config_threshold (C : {set 'I_T}) :
   (C = setT -> covered_edges ag C = ag_edges ag).
 Proof. exact: ramp_threshold. Qed.
 
-(** ramp_config_mono - recoverable-bits count is monotone in the coalition.
-    Kind: main.
-    Why: larger coalitions never recover fewer bits; clients rely on this
-    to extend availability arguments from small to larger coalitions.
-*)
+(** recoverable_mono restated over rc: growing the coalition from C to C'
+    never decreases the recoverable-bit count. *)
 Theorem ramp_config_mono (C C' : {set 'I_T}) :
   C \subset C' ->
   (recoverable_bits ag C <= recoverable_bits ag C')%N.

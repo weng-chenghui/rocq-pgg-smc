@@ -54,11 +54,10 @@ Hypothesis G_stable : forall g, g \in G ->
          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1]
       (mono g i).
 
-(** dealer_words_correct — word-based dealer correctness: reconstruction at endpoints.
-    Kind: main.
-    Why: instantiates ar_protocol_correct with an L-word defining the protocol
-         composition, showing endpoint reconstruction yields the original secret.
-*)
+(** For an L-tuple word w with P := word_eval w in G, if the content-mapped
+    starting shares are ts_valid at s, endpoint reconstruction along P
+    recovers s. This is ar_protocol_correct specialised to word-evaluation
+    elements of G, the case the session-typed protocol actually runs. *)
 Theorem dealer_words_correct
     (w : L.-tuple 'I_Tg) (s : 'I_N) :
   let P := @word_eval M L w in
@@ -72,11 +71,11 @@ move=> /= PG Hvalid.
 exact: (@ar_protocol_correct R M ar PI HT s (word_eval w) G_stable PG Hvalid).
 Qed.
 
-(** dealer_words_epsilon_bound — var_dist epsilon bound for the word-based dealer.
-    Kind: main.
-    Why: re-exports the marginal-bound var_dist bound at each secret position,
-         so dealer consumers do not need to unfold the AlgebraicRigidity record.
-*)
+(** The variation distance between (fun sigma => sigma s) pushed forward
+    along the marginal-bound distribution and the uniform distribution on
+    'I_N is at most sw_bound_eps. This is the AlgebraicRigidity security
+    witness surfaced at the dealer-bridge level, so a client can cite the
+    epsilon here without unfolding ar. *)
 Lemma dealer_words_epsilon_bound (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
                       (sw_rho_dist (scb_bound (ar_security ar))))

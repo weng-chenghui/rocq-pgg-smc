@@ -41,61 +41,48 @@ Variable n : nat.
 Variable rG : mx_representation F G n.
 Variable e0 : 'rV[F]_n.
 
-(** inv_dim — a G-invariant submodule of a given dimension exists.
-    Kind: main.
-    What: inv_dim d holds when some matrix U (with m rows) is a G-submodule of
-          the representation rG and has rank exactly d, i.e. the representation
-          admits an invariant subspace of dimension d.
-    Why: the unguarded "available dimensions" profile of the representation,
-         used as the substrate for the secret-encoding refinement secret_inv_dim
-         and, through it, for the feasibility gate. *)
+(** inv_dim d holds when some matrix U is a G-submodule of the
+    representation rG and has rank exactly d: the representation admits an
+    invariant subspace of dimension d. This is the unguarded "available
+    dimensions" profile of the representation, the substrate the
+    secret-encoding refinement secret_inv_dim narrows and, through it, the
+    feasibility gate consumes. *)
 Definition inv_dim (d : nat) : Prop :=
   exists m (U : 'M[F]_(m, n)), mxmodule rG U /\ \rank U = d.
 
-(** secret_inv_dim — a secret-encoding G-invariant submodule of a given
-    dimension exists.
-    Kind: main.
-    What: secret_inv_dim d holds when some G-submodule U of rG has rank d and
-          carries the secret coordinate e0, namely (e0 <= U)%MS (e0 lies in the
-          row space of U).
-    Why: only invariant submodules containing the secret direction can encode
-         the secret; the no-go theorem (s5_nogo.v) refutes this at the gate's
-         required dimensions, proving the wired instance impossible. The
-         membership form (e0 <= U)%MS is chosen over the "not inside the
-         secret-zero hyperplane" form because the no-go reduction works directly
-         with "U contains e0": such a U decomposes as <e0> (+) (U cap P),
-         reducing a dimension-d secret-encoding submodule to a dimension-(d-1)
-         submodule of the natural permutation module P. *)
+(** secret_inv_dim d holds when some G-submodule U of rG has rank d and
+    carries the secret coordinate e0, namely (e0 <= U)%MS: e0 lies in the
+    row space of U. Only invariant submodules containing the secret
+    direction can encode the secret; the no-go theorem (s5_nogo.v) refutes
+    this at the gate's required dimensions, proving the wired instance
+    impossible. The membership form (e0 <= U)%MS is chosen over the "not
+    inside the secret-zero hyperplane" form because the no-go reduction
+    works directly with "U contains e0": such a U decomposes as
+    <e0> (+) (U cap P), reducing a dimension-d secret-encoding submodule to
+    a dimension-(d-1) submodule of the natural permutation module P. *)
 Definition secret_inv_dim (d : nat) : Prop :=
   exists m (U : 'M[F]_(m, n)),
     [/\ mxmodule rG U, \rank U = d & (e0 <= U)%MS].
 
-(** feasible — some gate-required dimension is achievable as a secret-encoding
-    invariant submodule.
-    Kind: main.
-    What: feasible window holds when there is a dimension d in the list window
-          for which secret_inv_dim d holds.
-    Why: the gate side of early rejection. gap_dimension.v computes the window
-         of dimensions a feasible covering scheme would need; feasible window
-         asserts at least one of them is realised by a secret-encoding invariant
-         submodule. The no-go theorem proves ~ feasible rG e0 [:: 3; 4] for the
-         S_5 instance, so the gate rejects it before any code is built. *)
+(** feasible window holds when there is a dimension d in the list window for
+    which secret_inv_dim d holds. This is the gate side of early rejection:
+    gap_dimension.v computes the window of dimensions a feasible covering
+    scheme would need, and feasible window asserts at least one of them is
+    realised by a secret-encoding invariant submodule. The no-go theorem
+    proves ~ feasible rG e0 [:: 3; 4] for the S_5 instance, so the gate
+    rejects it before any code is built. *)
 Definition feasible (window : seq nat) : Prop :=
   exists d, d \in window /\ secret_inv_dim d.
 
-(** maschke_ss — Maschke's theorem in coprime characteristic: the full module
-    is completely reducible.
-    Kind: main.
-    What: when G is a p'-group for every p dividing the characteristic of F
-          (the hypothesis pgroup [pchar F]^' G), the regular module 1%:M of rG
-          is completely reducible; this is a direct specialisation of
-          mx_Maschke_pchar.
-    Why: documents the regime in which the available invariant dimensions are
-         closed under taking complements, so the cheap subset-sum reasoning over
-         the dimension profile is sound. The S_5-on-GF(5)^6 instance violates
-         this hypothesis (5 divides both the number of permuted points and the
-         characteristic of GF(5)), which is exactly why its profile is uniserial
-         and the no-go theorem bites. *)
+(** When G is a p'-group for every p dividing the characteristic of F (the
+    hypothesis pgroup [pchar F]^' G), the regular module 1%:M of rG is
+    completely reducible; this is a direct specialisation of
+    mx_Maschke_pchar. This documents the regime in which the available
+    invariant dimensions are closed under taking complements, so the cheap
+    subset-sum reasoning over the dimension profile is sound. The
+    S_5-on-GF(5)^6 instance violates this hypothesis, since 5 divides both
+    the number of permuted points and the characteristic of GF(5), which is
+    exactly why its profile is uniserial and the no-go theorem bites. *)
 Lemma maschke_ss :
   pgroup [pchar F]^' G -> mx_completely_reducible rG 1%:M.
 Proof. exact: mx_Maschke_pchar. Qed.

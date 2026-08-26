@@ -21,10 +21,13 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** InputEncoding — inputs determine a valid share layout for the plug, with
-    equal-output inputs in one cut orbit.
-    @intent: the deterministic half of a randomized encoding of ie_output; the
-    existing cut supplies the randomness. *)
+(** InputEncoding: inputs determine a valid share layout for the plug via
+    ie_assemble, with the layout's secret ie_output, and equal-output inputs
+    related by a monodromy permutation of that layout (ie_orbit). This is
+    the deterministic half of a randomized encoding of a function: the
+    input fixes the layout and its secret, while the acting group element
+    (the cut) supplies the randomness that moves between layouts sharing
+    the same output. *)
 Record InputEncoding (M : MonodromyReprType) (secretT : Type)
     (plug : ReconPlug M secretT) (inputT : Type) := MkInputEncoding {
   ie_assemble : inputT -> (ts_T' (rp_scheme plug)).+1.-tuple 'I_(pgg_N' M).+1 ;
@@ -41,9 +44,10 @@ Record InputEncoding (M : MonodromyReprType) (secretT : Type)
 Arguments InputEncoding M secretT plug inputT.
 Arguments MkInputEncoding {M secretT plug inputT}.
 
-(** ie_output_correct — the cut-permuted assembled layout reconstructs ie_output x,
-    for every cut element of the full group.
-    @composes: den_boer_run_output. *)
+(** Reconstructing from ie_assemble ie x permuted by any cut g0 in the group
+    returns ie_output ie x. This is the InputEncoding's self-consistency:
+    whichever group element supplies the randomness, the plug's
+    reconstruction recovers exactly the secret the input encodes. *)
 Lemma ie_output_correct (M : MonodromyReprType) (secretT : Type)
     (plug : ReconPlug M secretT) (inputT : Type)
     (ie : InputEncoding plug inputT) (x : inputT) (g0 : pgg_gT M) :
@@ -55,11 +59,11 @@ Proof.
 move=> Hg0. apply: (rp_recon_invariant Hg0). exact: ie_assemble_valid.
 Qed.
 
-(** recon_from_layout — the secret recovered from a layout viewed through the
-    cut P, in the reindex (position-permutation) form matching the scheme's
-    reconstruction invariance.
-    @intent: the operational recovery for input-dependent layouts, reading the
-    cut-permuted layout under the plug scheme. *)
+(** Reads a layout's coordinates through the monodromy action of cut P and
+    reconstructs via the plug's scheme. This is the generic
+    reindex-then-reconstruct operation any layout, encoded or not, is read
+    through, the shape ie_output_correct proves self-consistent for
+    InputEncoding's own layouts. *)
 Definition recon_from_layout (M : MonodromyReprType) (secretT : Type)
     (plug : ReconPlug M secretT)
     (layout : (ts_T' (rp_scheme plug)).+1.-tuple 'I_(pgg_N' M).+1)
@@ -68,9 +72,11 @@ Definition recon_from_layout (M : MonodromyReprType) (secretT : Type)
     [tuple tnth layout (rp_monodromy plug P i)
           | i < (ts_T' (rp_scheme plug)).+1].
 
-(** recon_from_layout_output — recovering an encoded input's layout returns
-    ie_output x, for every cut; generic over the plug and the encoded function.
-    @composes: ie_output_correct. *)
+(** recon_from_layout applied to an InputEncoding's own assembled layout
+    returns ie_output ie x, for every cut P. This restates
+    ie_output_correct in terms of the generic recon_from_layout operation,
+    so reasoning phrased at that operation inherits the same
+    self-consistency without unfolding the tuple comprehension by hand. *)
 Lemma recon_from_layout_output (M : MonodromyReprType) (secretT : Type)
     (plug : ReconPlug M secretT) (inputT : Type)
     (ie : InputEncoding plug inputT) (x : inputT) (P : pgg_gT M) :

@@ -44,19 +44,18 @@ Section rank_solvability.
 
 Variable R : fieldType.
 
-(** mxrank_sub_eqmx — a submatrix whose rank equals that of its supermatrix
-    spans the same row space.
-    @composes: rouche1 *)
+(** A submatrix whose rank equals that of its supermatrix spans the same row
+    space. *)
 Local Lemma mxrank_sub_eqmx m n p (A : 'M[R]_(m,n)) (B : 'M[R]_(p,n)) :
   \rank A = \rank B -> (A <= B)%MS -> (A == B)%MS.
 Proof.
 by move/eqP => Hr /mxrank_leqif_eq/leqifP; rewrite ltn_neqAle Hr; case: ifPn.
 Qed.
 
-(** rouche1 — the system x *m A = B is solvable exactly when adjoining the row
-    B to A leaves the rank unchanged; it turns the full-rank evaluation matrix
-    on a coordinate set into a codeword matching a prescribed target there.
-    @composes: hyp_priv_surj *)
+(** The system x *m A = B is solvable exactly when adjoining the row B to A
+    leaves the rank unchanged (Rouché-Capelli). This is what turns a
+    full-rank evaluation matrix restricted to a coordinate set into a
+    codeword matching a prescribed target on exactly that set. *)
 Local Lemma rouche1 m n (A : 'M[R]_(m,n)) (B : 'rV_n) :
   (exists x, x *m A = B) <-> (\rank A = \rank (col_mx A B)).
 Proof.
@@ -68,10 +67,10 @@ case/eqmxP/eqmx_sym/addsmx_idPl/submxP => x ->.
 by exists x.
 Qed.
 
-(** exists_nonzero_kernel — a matrix of rank below its row count annihilates
-    some nonzero row vector; it supplies the dual word whose support lies in
-    the coordinate set, contradicting the dual minimum distance.
-    @composes: hyp_priv_surj *)
+(** A matrix of rank below its row count annihilates some nonzero row
+    vector. This supplies the dual word, supported inside a coordinate set
+    too small to see, whose existence contradicts the dual minimum
+    distance. *)
 Local Lemma exists_nonzero_kernel m n (A : 'M[R]_(m, n)) :
   (\rank A < m)%N -> exists y : 'rV_m, y *m A = 0 /\ y != 0.
 Proof.
@@ -91,12 +90,10 @@ Section poly_size_lemmas.
 
 Variable R : idomainType.
 
-(** size_sqr — the size of a nonzero polynomial squared is 2 * size p - 1.
-    Kind: helper.
-    Why: computes the explicit polynomial degree needed when bounding
-         resultant sizes in the hyperelliptic Goppa argument.
-    Used by: hyp_goppa_wt_mdeg (resultant-degree bookkeeping).
-*)
+(** For a nonzero polynomial p, size (p ^+ 2) = (size p).*2.-1: squaring
+    doubles the degree exactly. This is the polynomial-degree arithmetic the
+    resultant-size bookkeeping in the hyperelliptic Goppa argument below
+    depends on. *)
 Lemma size_sqr (p : {poly R}) : p != 0 -> size (p ^+ 2) = (size p).*2.-1.
 Proof.
 move=> Hp.
@@ -107,12 +104,14 @@ rewrite size_exp muln2.
 by rewrite -(prednK HsP) doubleS.
 Qed.
 
-(* Odd-even parity contradiction: used for the resultant argument *)
+(* For n > 0, n.*2.-1 is odd: the parity fact the resultant nonvanishing
+   argument below uses to rule out A^2 = B^2*f. *)
 Lemma double_pred_odd (n : nat) : 0 < n -> odd n.*2.-1.
 Proof. by case: n => // n _; rewrite doubleS oddS odd_double. Qed.
 
-(* Key parity lemma: (2a-1) cannot equal (2b-1 + (2k+2)) - 1 = 2b + 2k
-   because the LHS is odd and the RHS is even. *)
+(* (2a-1) cannot equal (2b-1 + (2k+2)) - 1 = 2b + 2k, since the left side is
+   odd and the right side even. This is the parity contradiction
+   hyp_resultant_neq0 derives its nonvanishing conclusion from. *)
 Lemma parity_size_neq (a b k : nat) :
   0 < a -> 0 < b ->
   a.*2.-1 = (b.*2.-1 + (2 * k + 1).+1).-1 -> False.
@@ -172,16 +171,25 @@ Hypothesis pts_x_uniq : uniq pts_x.
 
 Hypothesis Hdeg_f_le : deg_f <= m_deg.
 
-(* The resultant polynomial *)
+(** The resultant polynomial R(x) = A(x)^2 - B(x)^2 * curve_poly(x),
+    obtained by setting A(x) + y*B(x) = 0 and eliminating y via
+    y^2 = curve_poly(x). This is the central object of the file's
+    Goppa-bound argument: every zero of a Riemann-Roch function
+    A(x) + y*B(x) on the curve becomes a root of R, so bounding R's roots
+    (via max_poly_roots) bounds the function's zero-set without invoking
+    Riemann-Roch directly. *)
 Definition hyp_resultant (A B : {poly F}) : {poly F} :=
   A ^+ 2 - B ^+ 2 * curve_poly.
 
-(* Degree bound on the resultant.
-   Key arithmetic:
-   - size(A^2) = 2*size(A) - 1 <= 2*floor(m/2) + 1 <= m + 1
-   - size(B^2*f) = 2*size(B) - 1 + (2g+1) + 1 - 1
-                  = 2*size(B) + 2g <= 2*floor((m-2g-1)/2) + 2g + 2 <= m + 1
-   - size(A^2 - B^2*f) <= max(size(A^2), size(B^2*f)) <= m + 1 *)
+(** The resultant R(x) = A(x)^2 - B(x)^2*curve_poly(x) has degree at most
+    m_deg when A and B individually satisfy the half-degree bounds
+    size A <= m_deg./2 + 1 and size B <= (m_deg - deg_f)./2 + 1. This is
+    the degree bound Section 3's Goppa argument feeds into max_poly_roots
+    to cap the number of zeros a Riemann-Roch function can have. *)
+(* size(A^2) = 2*size(A) - 1 <= 2*floor(m/2) + 1 <= m + 1;
+   size(B^2*f) = 2*size(B) - 1 + (2g+1) + 1 - 1
+               = 2*size(B) + 2g <= 2*floor((m-2g-1)/2) + 2g + 2 <= m + 1;
+   size(A^2 - B^2*f) <= max(size(A^2), size(B^2*f)) <= m + 1. *)
 Lemma hyp_resultant_deg (A B : {poly F}) :
   deg_f <= m_deg ->
   size A <= (m_deg./2).+1 ->
@@ -220,8 +228,11 @@ apply/andP; split.
   by rewrite (subnK Hdf) in H4. }
 Qed.
 
-(* Parity argument: R = A^2 - B^2*f != 0 when (A,B) != (0,0).
-   size(A^2) is odd, size(B^2*f) is even, so they cannot be equal. *)
+(** The resultant R = A^2 - B^2*curve_poly is nonzero whenever A and B are
+    not both zero: R can vanish identically only if A and B are both the
+    zero polynomial. *)
+(* size(A^2) is odd and size(B^2*curve_poly) is even, so A^2 = B^2*curve_poly
+   is impossible unless both sides collapse to size 0, i.e. A = B = 0. *)
 Lemma hyp_resultant_neq0 (A B : {poly F}) :
   (A != 0) || (B != 0) ->
   hyp_resultant A B != 0.
@@ -264,7 +275,11 @@ case/orP: HAB => [HA|HB].
     exact: (parity_size_neq HsA_pos HsB_pos Hsize).
 Qed.
 
-(* Zero-to-root mapping *)
+(** If the Riemann-Roch function A(x) + y*B(x) vanishes at the curve point
+    (tnth pts_x i, tnth pts_y i), then tnth pts_x i is a root of the
+    resultant hyp_resultant A B. This is the bridge that turns a zero of
+    the function on the curve into a root of a univariate polynomial, which
+    is what makes the zero-counting argument in Section 3 possible. *)
 Lemma hyp_zero_to_root (A B : {poly F}) (i : 'I_n) :
   A.[tnth pts_x i] + tnth pts_y i * B.[tnth pts_x i] = 0 ->
   root (hyp_resultant A B) (tnth pts_x i).
@@ -289,7 +304,11 @@ rewrite -(pts_on_curve i) /yi /xi.
 by rewrite subrr.
 Qed.
 
-(* Multiplicity: if (X-x0) | A and (X-x0) | B, then (X-x0)^2 | R *)
+(** If x0 is a common root of A and B, then (X - x0%:P) ^+ 2 divides
+    hyp_resultant A B: a shared zero of A and B doubles as a root of the
+    resultant. This is available for finer root-multiplicity bookkeeping
+    beyond the plain root-count max_poly_roots uses in the Goppa argument
+    below. *)
 Lemma hyp_multiplicity (A B : {poly F}) (x0 : F) :
   root A x0 -> root B x0 ->
   ('X - x0%:P) ^+ 2 %| hyp_resultant A B.
@@ -309,8 +328,13 @@ Qed.
 Variable k : nat.
 Variable ev : 'M[F]_(k, n).
 
-(* Every nonzero coefficient vector yields polynomials (A, B) with
-   the right degree bounds, and evaluation matches. *)
+(** Every nonzero message vector v corresponds to some pair of polynomials
+    A, B, not both zero, with bounded half-degrees, such that the codeword
+    v *m ev evaluates at each curve point as A(x) + y*B(x). This is the
+    curve-level trust boundary of the Goppa argument: it assumes every
+    codeword arises from an actual Riemann-Roch function representation,
+    the fact Riemann-Roch itself would supply, without formalizing
+    Riemann-Roch spaces directly. *)
 Hypothesis ev_encode :
   forall v : 'rV[F]_k, v != 0 ->
   exists A B : {poly F},
@@ -320,8 +344,13 @@ Hypothesis ev_encode :
     forall i : 'I_n,
       (v *m ev) 0 i = A.[tnth pts_x i] + tnth pts_y i * B.[tnth pts_x i].
 
-(* Goppa bound: nonzero codewords have Hamming weight >= n - m_deg.
-   Proved from resultant argument + max_poly_roots. *)
+(** Every nonzero codeword v *m ev has Hamming weight at least n - m_deg:
+    the hyperelliptic Goppa weight bound, stated at the internal parameter
+    m_deg rather than at k + g - 1. *)
+(* Each zero coordinate of v *m ev maps, via hyp_zero_to_root, to a root of
+   the resultant R = hyp_resultant A B; max_poly_roots then caps the number
+   of such roots by size R - 1 <= m_deg, so at most m_deg coordinates
+   vanish. *)
 Theorem hyp_goppa_wt_mdeg :
   forall v : 'rV[F]_k, v != 0 ->
   n - m_deg <= wH (v *m ev).
@@ -359,14 +388,15 @@ have : n <= wt + m_deg by rewrite -Hcompl leq_add2l.
 by rewrite addnC.
 Qed.
 
-(* The Goppa bound in the standard form used by ag_massey_bridge *)
+(* Identifies the internal degree parameter m_deg with the classical Goppa
+   design distance k + g - 1, translating the bookkeeping used above into
+   the standard AG-code parameterization. *)
 Hypothesis Hm_eq : m_deg = (k + g - 1)%N.
 
-(** hyp_goppa_wt — Goppa weight bound wH(v *m ev) >= n - (k + g - 1).
-    Kind: main.
-    Why: the central hyperelliptic bound in the form required by
-         ag_massey_bridge; removes the m_deg abstraction used internally.
-*)
+(** Every nonzero codeword v *m ev has Hamming weight at least
+    n - (k + g - 1): the hyperelliptic Goppa weight bound stated at the
+    standard AG-code design-distance parameterization (k, g, n) rather than
+    the internal m_deg bookkeeping variable. *)
 Theorem hyp_goppa_wt :
   forall v : 'rV[F]_k, v != 0 ->
   (n - (k + g - 1) <= wH (v *m ev))%N.
@@ -401,7 +431,13 @@ Hypothesis dual_ev_encode :
     forall i : 'I_n,
       w 0 i = A.[tnth pts_x i] + tnth pts_y i * B.[tnth pts_x i].
 
-(* Proved from dual_ev_encode using resultant machinery *)
+(** For any nonzero word w orthogonal to every codeword of ag_code ev, there
+    is a nonzero resultant polynomial R with size R <= m_deg_dual + 1 such
+    that every zero coordinate of w maps, via pts_x, to a root of R. This
+    transports the dual-orthogonality hypothesis into the same
+    root-counting setup Section 3 uses for the primal Goppa bound, so
+    dual_min_dist below can apply max_poly_roots exactly as
+    hyp_goppa_wt_mdeg does. *)
 Theorem dual_root_poly :
   forall w : 'rV[F]_n, w != 0 ->
   (forall c : 'rV[F]_n, c \in ag_code ev -> w *m c^T = 0) ->
@@ -420,11 +456,11 @@ exists (hyp_resultant A B); split; [|split].
   by have := Heval i; rewrite Hwi.
 Qed.
 
-(** dual_min_dist — dual-code minimum distance wH w >= k - g + 1 for orthogonal w.
-    Kind: main.
-    Why: the dual-side bound needed to derive privacy-surjectivity for the
-         hyperelliptic AG code, via a polynomial-root counting argument.
-*)
+(** For any nonzero word w orthogonal to every codeword of ag_code ev,
+    wH w >= (k - g) + 1: the dual code's minimum distance. This is the
+    bound hyp_priv_surj below needs, since a coalition small enough to
+    threaten privacy would correspond to a dual word too light for this
+    bound to allow. *)
 Theorem dual_min_dist :
   forall (w : 'rV[F]_n), w != 0 ->
   (forall c : 'rV[F]_n, c \in ag_code ev -> w *m c^T = 0) ->
@@ -464,7 +500,11 @@ have Hngk1 : k.+1 <= n + g := leq_trans Hk1n (leq_addr g n).
 by rewrite -subnDA addn1 (subnBA _ Hngk1) subnDl (subSn Hgk).
 Qed.
 
-(* Privacy: for small coalitions S, the projection is surjective *)
+(** For any coordinate set S with #|S| < (k - g).-1.+2 and any target
+    vector, some codeword of ag_code ev agrees with target on S. This is
+    the privacy-surjectivity property Massey's construction needs, proved
+    here from dual_min_dist rather than axiomatized as ag_priv_surj is in
+    ag_massey_bridge.v. *)
 Theorem hyp_priv_surj :
   forall (S : {set 'I_n}) (target : 'rV[F]_n),
     #|S| < (k - g).-1.+2 ->

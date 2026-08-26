@@ -63,25 +63,21 @@ Hypothesis HG : 1 < #|G|.
 
 Let ramif1 := (2 * #|G|)%N.
 
-(** genus1_hurwitz — Riemann-Hurwitz equality for the genus-1 covering instance.
-    Kind: helper.
-    Why: discharges the cd_hurwitz side-condition of CoveringData for the
-         elliptic cover, reducing to 2 + 2|G| = 2|G| + 2.
-    Used by: genus1_data.
-*)
+(** The Riemann-Hurwitz equality for the elliptic cover E -> P^1 of degree
+    #|G|, base genus 0, ramification ramif1 = 2|G|: 2*1 + 2|G| equals
+    #|G|*(2*0) + ramif1 + 2. This discharges the cd_hurwitz side-condition of
+    the genus-1 CoveringData, the algebraic check that the ramification
+    total is exactly what a genus-1 curve covering a genus-0 base of this
+    degree forces. *)
 Lemma genus1_hurwitz :
   (2 * 1 + 2 * #|G| = #|G| * (2 * 0) + ramif1 + 2)%N.
 Proof.
 by rewrite muln1 muln0 muln0 add0n /ramif1 addnC.
 Qed.
 
-(** genus1_ramif_ge_nbr — lower bound [3 <= ramif1] for the total ramification
-    [ramif1] of the genus-1 cover.
-    Kind: helper.
-    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-1
-    [CoveringData] record, which asserts that the number of branch points is
-    bounded by the total ramification.
-    Used by: genus1_data. *)
+(** The total ramification ramif1 = 2|G| of the genus-1 cover is at least 3,
+    matching cd_n_branch = 3: the elliptic cover has room for at least as
+    many branch points as the CoveringData record for it claims. *)
 Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.
 Proof.
 rewrite /ramif1.
@@ -89,11 +85,10 @@ have : (2 <= #|G|)%N by exact: HG.
 by case: #|G| => [|[|n]] //= _; rewrite mulnS.
 Qed.
 
-(** genus1_data — CoveringData record for the genus-1 (elliptic) covering.
-    Kind: main.
-    Why: supplies the Riemann-Hurwitz data used to assemble the genus-1
-         CoveringScheme built on an elliptic AG code.
-*)
+(** The CoveringData for the elliptic (genus-1) covering: base genus 0,
+    genus 1, total ramification ramif1 = 2|G|, discharged against
+    genus1_hurwitz and genus1_ramif_ge_nbr. This is the Riemann-Hurwitz
+    skeleton the elliptic AG code below is built on top of. *)
 Definition genus1_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := 3 ;   (* elliptic covers typically have 3+ branch points *)
@@ -246,12 +241,12 @@ Hypothesis code_auto_ec :
 Let ts1_perm : pgg_gT M -> {perm 'I_(ts_T' ts1).+1} :=
   massey_share_perm (G:=G) sigma_fix0_ec.
 
-(** ts1_perm_compatible — ts_recon_perm_invariant witness for the genus-1 scheme.
-    Kind: helper.
-    Why: feeds cs_recon_invariant in genus1_covering via transport +
-         massey_perm_compatible applied to the AG-based threshold scheme.
-    Used by: genus1_covering.
-*)
+(** The elliptic threshold scheme ts1's reconstruction is invariant under the
+    monodromy action ts1_perm: the AG code's automorphism-derived column
+    permutations transport, via massey_perm_compatible, to a permutation
+    compatible with Massey reconstruction. This is the reconstruction leg of
+    genus1_covering's CoveringScheme, the fact that lets players who
+    permute their view still recover the same secret. *)
 Lemma ts1_perm_compatible :
   @ts_recon_perm_invariant _ G _ _ ts1 ts1_perm.
 Proof.
@@ -260,12 +255,12 @@ apply: transport_perm_compatible.
 exact: massey_perm_compatible.
 Qed.
 
-(** genus1_covering — CoveringScheme instance for the genus-1 (elliptic) cover.
-    Kind: main.
-    Why: packages genus1_data together with the AG-based threshold scheme ts1
-         and its perm-compatibility into the CoveringScheme interface used by
-         the protocol landscape.
-*)
+(** The CoveringScheme for the elliptic (genus-1) cover: genus1_data paired
+    with the AG-Massey threshold scheme ts1 and its monodromy-compatibility
+    witness ts1_perm_compatible. This is the complete, checked instance a
+    PGG protocol at genus 1 runs against, distance bound, threshold gap,
+    and perm-invariance all traced back to the elliptic curve's code
+    parameters. *)
 Definition genus1_covering : CoveringScheme M := {|
   cs_plug := {|
     rp_scheme    := ts1 ;
@@ -276,12 +271,17 @@ Definition genus1_covering : CoveringScheme M := {|
   cs_gap  := ts1_gap2 ;
 |}.
 
-(* Quasi-(k, k+2) threshold *)
+(** The elliptic covering's reconstruction threshold exceeds its privacy
+    threshold by at most 2: a (k, k+2)-quasi-threshold scheme. This is
+    ar_gap_bound's genus formula, ts_T <= ts_k + 2*genus, made concrete at
+    genus 1. *)
 Lemma elliptic_gap :
   ts_T (cs_scheme genus1_covering) <= ts_k (cs_scheme genus1_covering) + 2.
 Proof. exact: ts1_gap2. Qed.
 
-(* The gap is strictly wider than genus-0 (when ts_T > ts_k) *)
+(** The genus recorded in genus1_covering's CoveringData is 1, not 0: this
+    instance sits on the positive-genus side of the algebraic-rigidity
+    dichotomy, where the gap is only bounded rather than forced to zero. *)
 Lemma genus1_vs_genus0 :
   cd_genus (cs_data genus1_covering) = 1.
 Proof. by []. Qed.
@@ -307,16 +307,17 @@ Variable ramif_g : nat.
 Hypothesis hurwitz_g :
   (2 * g + 2 * #|G| = #|G| * (2 * 0) + ramif_g + 2)%N.
 
-(* Naming: intentional; parallels genus1_ramif_ge_nbr / genus2_ramif_ge_nbr so
-   the higher-genus scaffolding exposes the same [_ramif_ge_nbr] field name in
-   its [CoveringData] record as the concrete genus-1 and genus-2 siblings. *)
+(* Lower bound on the genus-g cover's total ramification: at least g+2,
+   matching the branch-point count cd_n_branch assumed for CoveringData
+   validity at arbitrary genus. *)
 Hypothesis higher_genus_ramif_ge_nbr : (g + 2 <= ramif_g)%N.
 
-(** higher_genus_data — generic CoveringData for genus-g covers via AG codes.
-    Kind: main.
-    Why: abstract scaffold covering arbitrary g >= 1, parameterized by the
-         Riemann-Hurwitz witness hurwitz_g and branch-count bound.
-*)
+(** The generic CoveringData for a genus-g cover: base genus 0, genus g,
+    total ramification ramif_g, discharged against the caller-supplied
+    Riemann-Hurwitz witness hurwitz_g and branch bound
+    higher_genus_ramif_ge_nbr. This is genus1_data's pattern abstracted over
+    g, letting a covering be assembled at any genus once its
+    Riemann-Hurwitz data is in hand. *)
 Definition higher_genus_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := g + 2 ;   (* heuristic: more branch points for higher genus *)
@@ -454,12 +455,11 @@ Hypothesis code_auto_g :
 Let ts_g_perm : pgg_gT M -> {perm 'I_(ts_T' ts_g).+1} :=
   massey_share_perm (G:=G) sigma_fix0_g.
 
-(** ts_g_perm_compatible — ts_recon_perm_invariant witness for the generic genus-g scheme.
-    Kind: helper.
-    Why: feeds cs_recon_invariant in higher_genus_covering via transport +
-         massey_perm_compatible on the generic AG-based threshold scheme.
-    Used by: higher_genus_covering.
-*)
+(** The genus-g threshold scheme ts_g's reconstruction is invariant under the
+    monodromy action ts_g_perm, by the same transport +
+    massey_perm_compatible argument as ts1_perm_compatible, generalized past
+    genus 1. This is the reconstruction leg of higher_genus_covering's
+    CoveringScheme. *)
 Lemma ts_g_perm_compatible :
   @ts_recon_perm_invariant _ G _ _ ts_g ts_g_perm.
 Proof.
@@ -468,12 +468,10 @@ apply: transport_perm_compatible.
 exact: massey_perm_compatible.
 Qed.
 
-(** higher_genus_covering — CoveringScheme instance for a generic genus-g cover.
-    Kind: main.
-    Why: packages higher_genus_data together with the generic AG-based
-         threshold scheme and its perm-compatibility so the landscape can
-         instantiate a covering at arbitrary genus.
-*)
+(** The CoveringScheme for a generic genus-g cover: higher_genus_data paired
+    with the AG-Massey threshold scheme ts_g and ts_g_perm_compatible. This
+    is genus1_covering's construction abstracted over genus, the instance a
+    PGG protocol at arbitrary genus g runs against. *)
 Definition higher_genus_covering : CoveringScheme M := {|
   cs_plug := {|
     rp_scheme    := ts_g ;
@@ -484,11 +482,10 @@ Definition higher_genus_covering : CoveringScheme M := {|
   cs_gap  := ts_g_gap ;
 |}.
 
-(** higher_genus_gap_bound — ts_T <= ts_k + 2g for the generic genus-g cover.
-    Kind: main.
-    Why: headline gap bound that downstream complexity tables quote when
-         reasoning about privacy/recovery thresholds at arbitrary genus.
-*)
+(** The genus-g covering's reconstruction threshold exceeds its privacy
+    threshold by at most 2*g. This is the general form of elliptic_gap,
+    confirming the threshold leg of algebraic rigidity, ts_T <= ts_k +
+    2*genus, at arbitrary genus rather than only genus 1. *)
 Lemma higher_genus_gap_bound :
   ts_T (cs_scheme higher_genus_covering) <=
   ts_k (cs_scheme higher_genus_covering) + 2 * g.

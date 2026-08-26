@@ -47,13 +47,11 @@ Import GRing.Theory.
 Local Open Scope ring_scope.
 Local Open Scope group_scope.
 
-(* Coordinate action of a permutation matrix on a row vector.
-   Kind: helper.
-   What: post-multiplying a row vector by perm_mx s permutes its entries by
-         the inverse of s: coordinate j of v *m perm_mx s reads v at s^-1 j.
-   Why: the computational backbone of every action argument below (difference
-        vectors, transposition closure, constancy).
-   Used-by: diff_actE and the constancy argument of perm_module_no_dim23. *)
+(* v *m perm_mx s reads v at the inverse of s: coordinate j of the product
+   equals v 0 (s^-1 j), so post-multiplying by a permutation matrix permutes
+   a row vector's entries by the permutation's inverse. Every action
+   argument below, from the difference-vector identities to the constancy
+   case of perm_module_no_dim23, unfolds through this one rewrite. *)
 Lemma perm_mx_actE (n : nat) (v : 'rV['F_5]_n) (s : {perm 'I_n}) (j : 'I_n) :
   (v *m perm_mx s) 0 j = v 0 ((s^-1)%g j).
 Proof.
@@ -65,20 +63,15 @@ have -> : (s k == j) = (k == s^-1 j)
 by rewrite Hk mulr0.
 Qed.
 
-(* The four-row witness matrix of rank 4 inside the sum-zero subspace.
-   Kind: helper.
-   What: diff_basis_mx is the 4 x 5 matrix [ I_4 | -1 ], whose row i is the difference
-         vector e_i - e_4.
-   Why: provides a concrete rank-4 lower bound for any submodule that contains
-        every difference vector e_a - e_b.
-   Used-by: diff_basis_mx_rank, diff_basis_mx_row, and the rank-4 branch of the kernel fact. *)
+(* diff_basis_mx = [ I_4 | -1 ] is the 4 x 5 matrix whose row i is the
+   difference vector e_i - e_4: a concrete rank-4 witness that any
+   submodule containing every difference vector e_a - e_b must itself have
+   rank at least 4, the substance of the kernel fact's rank-4 branch below. *)
 Definition diff_basis_mx : 'M['F_5]_(4, 4 + 1) := row_mx 1%:M (const_mx (-1)).
 
-(* Rank of the witness matrix.
-   Kind: helper.
-   What: \rank diff_basis_mx = 4.
-   Why: the left block of diff_basis_mx is the identity, so its rank is full (4).
-   Used-by: rank-4 branch of perm_module_no_dim23. *)
+(* \rank diff_basis_mx = 4: the left I_4 block gives it full row rank, the
+   fact that turns "diff_basis_mx <= W" into the rank-4 lower bound used in
+   perm_module_no_dim23's rank-4 branch. *)
 Lemma diff_basis_mx_rank : \rank diff_basis_mx = 4.
 Proof.
 apply/eqP; rewrite eqn_leq rank_leq_row /=.
@@ -88,13 +81,10 @@ have := mxrankM_maxl diff_basis_mx (col_mx (1%:M : 'M['F_5]_4) (0 : 'M['F_5]_(1,
 by rewrite HM mxrank1.
 Qed.
 
-(* Rows of the witness matrix are difference vectors.
-   Kind: helper.
-   What: row i of diff_basis_mx equals e_(lshift 1 i) - e_(rshift 4 ord0), the difference
-         of the i-th and the last standard basis row vectors.
-   Why: connects the abstract rank-4 bound to the concrete membership "every
-        difference vector lies in W".
-   Used-by: rank-4 branch of perm_module_no_dim23. *)
+(* Row i of diff_basis_mx equals e_(lshift 1 i) - e_(rshift 4 ord0), the
+   difference of the i-th and the last standard basis row vectors: this
+   identifies diff_basis_mx's rows as literal difference vectors, so
+   "every difference vector lies in W" gives "diff_basis_mx <= W" directly. *)
 Lemma diff_basis_mx_row (i : 'I_4) :
   row i diff_basis_mx = delta_mx 0 (lshift 1 i) - delta_mx 0 (rshift 4 ord0).
 Proof.
@@ -111,28 +101,23 @@ Local Notation F := 'F_5.
 Local Notation gT := {perm 'I_5}.
 Local Notation G := [set: gT].
 
-(* The natural permutation representation of S_5 on GF(5)^5.
-   Kind: canonical.
-   What: perm_repr packages perm_mx as an mx_repr of the full symmetric group on
-         five points; rG is the corresponding mx_representation.
-   Why: the carrier of the kernel fact. *)
+(* perm_repr packages perm_mx as an mx_repr of the full symmetric group on
+   five points, and rG is the corresponding mx_representation: the natural
+   permutation module GF(5)^5 that the kernel fact perm_module_no_dim23 is
+   a statement about. *)
 Definition perm_repr : mx_repr G (fun s => perm_mx s : 'M[F]_5).
 Proof. split=> [|x y _ _]; [exact: perm_mx1 | exact: perm_mxM]. Defined.
 
 Definition rG : mx_representation F G 5 := MxRepresentation perm_repr.
 
-(* rG unfolds to perm_mx.
-   Kind: helper. What: rG s = perm_mx s. Why: rewriting bridge.
-   Used-by: every action lemma below. *)
+(* rG s = perm_mx s: the rewriting bridge every action lemma below unfolds
+   through to reach the concrete permutation-matrix computations. *)
 Lemma rGE s : rG s = perm_mx s. Proof. by []. Qed.
 
-(* Difference closure of a submodule.
-   Kind: helper.
-   What: a submodule W is closed under v |-> v - v *m perm_mx s, since both v
-         and its image under the group action lie in W and W is a subspace.
-   Why: turns the group action into the difference vectors that drive the
-        rank-4 branch.
-   Used-by: nonconst_diff_in. *)
+(* An rG-submodule W is closed under v |-> v - v *m perm_mx s: both v and
+   its image under the group action lie in W, and W is a subspace. This
+   turns the group action into the difference vectors that drive the
+   kernel fact's rank-4 branch. *)
 Lemma diff_in (m : nat) (W : 'M[F]_(m, 5)) (modW : mxmodule rG W)
     (v : 'rV[F]_5) (s : gT) :
   (v <= W)%MS -> (v - v *m perm_mx s <= W)%MS.
@@ -144,13 +129,10 @@ apply: addmx_sub => //.
 by rewrite -scaleN1r scalemx_sub.
 Qed.
 
-(* The transposition-difference identity.
-   Kind: helper.
-   What: v - v *m perm_mx (tperm i j) equals (v_i - v_j) scaled by the
-         difference vector e_i - e_j.
-   Why: shows the difference closure produces a scalar multiple of a single
-        difference vector e_i - e_j whenever v_i <> v_j.
-   Used-by: nonconst_diff_in. *)
+(* v - v *m perm_mx (tperm i j) = (v 0 i - v 0 j) *: (e_i - e_j): applying
+   diff_in with a transposition produces exactly a scalar multiple of the
+   single difference vector e_i - e_j, nonzero precisely when v's i-th and
+   j-th coordinates differ. *)
 Lemma tperm_diff (v : 'rV[F]_5) (i j : 'I_5) :
   (v - v *m perm_mx (tperm i j) =
    (v 0 i - v 0 j) *: (delta_mx 0 i - delta_mx 0 j))%R.
@@ -167,13 +149,10 @@ case: (eqVneq k i) => [->|Hki].
   + by rewrite tpermD 1?eq_sym //= subrr subrr mulr0.
 Qed.
 
-(* The group permutes difference vectors.
-   Kind: helper.
-   What: (e_i - e_j) *m perm_mx s = e_(s i) - e_(s j); the natural action sends
-         the difference vector indexed by (i,j) to the one indexed by (s i,s j).
-   Why: lets a single difference vector in W generate every difference vector by
-        2-transitivity of S_5.
-   Used-by: all_diff_in. *)
+(* (e_i - e_j) *m perm_mx s = e_(s i) - e_(s j): the natural action sends
+   the difference vector indexed by (i,j) to the one indexed by (s i, s j).
+   Together with S_5's 2-transitivity (pair_perm), this lets a single
+   difference vector in an invariant W generate every difference vector. *)
 Lemma diff_actE (i j : 'I_5) (s : gT) :
   ((delta_mx 0 i - delta_mx 0 j : 'rV[F]_5) *m perm_mx s
    = delta_mx 0 (s i) - delta_mx 0 (s j))%R.
@@ -182,13 +161,10 @@ apply/rowP => k; rewrite perm_mx_actE !mxE.
 by rewrite !(can2_eq (permKV s) (permK s)).
 Qed.
 
-(* A non-constant vector forces a difference vector into the submodule.
-   Kind: helper.
-   What: if v lies in W and its i-th and j-th coordinates differ, then the
-         difference vector e_i - e_j lies in W.
-   Why: this is the trigger of the rank-4 branch: any submodule that is not
-        contained in the constant line contains a difference vector.
-   Used-by: perm_module_no_dim23 (rank-4 branch). *)
+(* If v lies in W and v's i-th and j-th coordinates differ, then the
+   difference vector e_i - e_j lies in W: the trigger of the kernel fact's
+   rank-4 branch, since any submodule not contained in the constant line
+   contains such a v. *)
 Lemma nonconst_diff_in (m : nat) (W : 'M[F]_(m, 5)) (modW : mxmodule rG W)
     (v : 'rV[F]_5) (i j : 'I_5) :
   (v <= W)%MS -> v 0 i != v 0 j ->
@@ -202,13 +178,10 @@ have := scalemx_sub ((v 0 i - v 0 j)^-1) Hd.
 by rewrite scalerA mulVf // scale1r.
 Qed.
 
-(* Two-transitivity of the full symmetric group on an arbitrary index set.
-   Kind: helper.
-   What: for any two ordered pairs of distinct points (a,b) and (c,d), there is
-         a permutation sending a to c and b to d.
-   Why: realises the orbit of a difference vector under S_5 as all difference
-        vectors, which all_diff_in feeds into the rank-4 bound.
-   Used-by: all_diff_in. *)
+(* For any two ordered pairs of distinct points (a,b) and (c,d) in 'I_k,
+   there is a permutation sending a to c and b to d: the 2-transitivity
+   that lets all_diff_in realise the orbit of one difference vector under
+   S_5 as every difference vector. *)
 Lemma pair_perm (k : nat) (a b c d : 'I_k) :
   a != b -> c != d ->
   exists s : {perm 'I_k}, s a = c /\ s b = d.
@@ -224,13 +197,10 @@ split.
 - by rewrite tpermL.
 Qed.
 
-(* One difference vector in W forces them all.
-   Kind: helper.
-   What: if e_a - e_b lies in W (with a <> b) then e_c - e_d lies in W for every
-         c <> d.
-   Why: combines diff_actE and pair_perm; the difference vectors span the sum-
-        zero subspace, so this is the substance of the rank-4 bound.
-   Used-by: perm_module_no_dim23 (rank-4 branch). *)
+(* If e_a - e_b lies in W for some a != b, then e_c - e_d lies in W for
+   every c != d: combining diff_actE with pair_perm's 2-transitivity, one
+   difference vector in an invariant W drags in the whole spanning set of
+   the sum-zero subspace. *)
 Lemma all_diff_in (m : nat) (W : 'M[F]_(m, 5)) (modW : mxmodule rG W)
     (a b c d : 'I_5) :
   a != b -> c != d ->
@@ -243,13 +213,10 @@ have := mxmodule_trans modW (x := s) (in_setT s) Hin.
 by rewrite rGE diff_actE Hsa Hsb.
 Qed.
 
-(* The rank-4 lower bound: a single difference vector forces rank >= 4.
-   Kind: helper.
-   What: if some difference vector e_a - e_b (a <> b) lies in W, then rank W is
-         at least 4, because then every difference vector lies in W and the
-         witness matrix diff_basis_mx (rank 4) is contained in W.
-   Why: the substance of the rank-4 branch of the kernel fact.
-   Used-by: perm_module_no_dim23. *)
+(* If some difference vector e_a - e_b (a != b) lies in W, then rank W is
+   at least 4: by all_diff_in every difference vector lies in W, so the
+   rank-4 witness diff_basis_mx is contained in W. This is the rank-4
+   branch of the kernel fact perm_module_no_dim23 below. *)
 Lemma rank4_of_diff (m : nat) (W : 'M[F]_(m, 5)) (modW : mxmodule rG W)
     (a b : 'I_5) :
   a != b ->
@@ -265,21 +232,17 @@ have HDW : (diff_basis_mx <= W)%MS.
 by have := mxrankS HDW; rewrite diff_basis_mx_rank.
 Qed.
 
-(* The kernel fact: the S_5 permutation module over GF(5) has no submodule of
-   dimension 2 or 3.
-   Kind: main.
-   What: every G-submodule W of the natural permutation module GF(5)^5 has rank
-         either at most 1 or at least 4; equivalently, no submodule has rank 2
-         or 3.
-   Why: this is the single representation-theoretic obstruction that the whole
-        no-go reduces to.  Either W is contained in the all-ones line (rank <= 1)
-        or W carries a non-constant vector, which forces a difference vector into
-        W (nonconst_diff_in) and hence rank >= 4 (rank4_of_diff).  The all-ones
-        vector sits inside the sum-zero subspace precisely because char F = 5
-        divides the dimension 5, so the lattice is uniserial and the middle
-        dimensions never occur.
-   Used-by: s5_no_secret_dim3 and s5_no_secret_dim4 via the six-coordinate
-        reduction. *)
+(* The kernel fact: every G-submodule W of the natural permutation module
+   GF(5)^5 has rank at most 1 or at least 4, so no submodule has rank 2 or
+   3. Either W sits inside the all-ones line (rank <= 1), or W carries a
+   non-constant vector, which forces a difference vector into W
+   (nonconst_diff_in) and hence rank >= 4 (rank4_of_diff). The all-ones
+   vector lies inside the sum-zero subspace precisely because char F = 5
+   divides the dimension 5, making the submodule lattice uniserial with no
+   room for the middle dimensions. This is the single representation-
+   theoretic obstruction the whole file's no-go reduces to, applied to
+   s5_no_secret_dim3 and s5_no_secret_dim4 below via the six-coordinate
+   reduction. *)
 Lemma perm_module_no_dim23 (m : nat) (W : 'M['F_5]_(m,5)) :
   mxmodule rG W -> (\rank W <= 1)%N || (4 <= \rank W)%N.
 Proof.
@@ -317,22 +280,17 @@ Local Notation F := 'F_5.
 Local Notation gT := {perm 'I_5}.
 Local Notation G := [set: gT].
 
-(* The six-coordinate secret representation of S_5 over GF(5).
-   Kind: canonical.
-   What: secret_action s is the block-diagonal matrix that fixes coordinate 0 (the
-         secret slot) and permutes coordinates 1..5 by perm_mx s; under the 1+5
-         block layout this is block_mx 1 0 0 (perm_mx s).
-   Why: this is the representation actually wired into the S_5 covering scheme:
-        the secret lives in the fixed coordinate 0 and the shares are the five
-        permuted coordinates. *)
+(* secret_action s = block_mx 1 0 0 (perm_mx s), the block-diagonal matrix
+   under the 1+5 layout that fixes coordinate 0 (the secret slot) and
+   permutes coordinates 1..5 by perm_mx s: the representation actually
+   wired into the S_5 covering scheme, where the secret lives in the fixed
+   coordinate and the shares are the five permuted coordinates. *)
 Definition secret_action (s : gT) : 'M[F]_(1 + 5) :=
   block_mx 1%:M 0 0 (perm_mx s).
 
-(* secret_action is a matrix representation.
-   Kind: instance.
-   What: secret_action is multiplicative and unital, hence an mx_repr of G.
-   Why: packages the block-diagonal action as an mx_representation so the
-        invariant-submodule machinery applies. *)
+(* secret_action is multiplicative and unital, hence an mx_repr of G: this
+   packages the block-diagonal action as an mx_representation (rG_secret
+   below) so the invariant-submodule machinery applies to it. *)
 Lemma secret_action_repr : mx_repr G secret_action.
 Proof.
 split=> [|x y _ _].
@@ -343,42 +301,31 @@ Qed.
 
 Definition rG_secret : mx_representation F G (1 + 5) := MxRepresentation secret_action_repr.
 
-(* The secret direction.
-   Kind: canonical.
-   What: e0 is the standard basis row vector at coordinate 0 (the secret slot)
-         in the 1+5 layout.
-   Why: a covering scheme recovers the secret exactly when its invariant
-        submodule contains e0. *)
+(* e0 is the standard basis row vector at coordinate 0, the secret slot, in
+   the 1+5 layout: a covering scheme recovers the secret exactly when its
+   invariant submodule contains e0. *)
 Definition e0 : 'rV[F]_(1 + 5) := delta_mx 0 (lshift 5 0).
 
-(* The projection that discards the secret coordinate.
-   Kind: helper.
-   What: proj_share is the (1+5) x 5 matrix col_mx 0 1, so v *m proj_share keeps the last five
-         (share) coordinates of v and drops coordinate 0.
-   Why: the reduction sends a six-coordinate invariant submodule to its image
-        under proj_share, a submodule of the five-coordinate kernel module rG.
-   Used-by: secret_reduction and the no-go theorems. *)
+(* proj_share = col_mx 0 1 is the (1+5) x 5 matrix that keeps a vector's
+   last five (share) coordinates and drops coordinate 0: the six-coordinate
+   reduction sends a secret-side invariant submodule to its image under
+   proj_share, landing it in the five-coordinate kernel module rG. *)
 Definition proj_share : 'M[F]_(1 + 5, 5) := col_mx 0 1%:M.
 
-(* The projection intertwines the two actions.
-   Kind: helper.
-   What: rG_secret s *m proj_share = proj_share *m perm_mx s; projecting after the six-coordinate
-         action equals acting on the five share coordinates after projecting.
-   Why: this intertwining is what makes the projected submodule rG-invariant.
-   Used-by: proj_mxmodule. *)
+(* rG_secret s *m proj_share = proj_share *m perm_mx s: projecting after the
+   six-coordinate action equals acting on the five share coordinates after
+   projecting. This intertwining is exactly what makes proj_mxmodule's
+   projected submodule rG-invariant. *)
 Lemma secret_proj_comm (s : {perm 'I_5}) : rG_secret s *m proj_share = proj_share *m perm_mx s.
 Proof.
 rewrite /rG_secret /= /secret_action /proj_share mul_block_col mul_col_mx.
 by rewrite !mul0mx !mulmx0 !mulmx1 !mul1mx !addr0 !add0r.
 Qed.
 
-(* The secret direction lies in the kernel of the projection.
-   Kind: helper.
-   What: e0 *m proj_share = 0; projecting away coordinate 0 annihilates the secret
-         direction.
-   Why: this is why the rank drops by exactly one under projection: the
-        coordinate-0 line that e0 contributes to U is killed by proj_share.
-   Used-by: mxrank_proj_pred. *)
+(* e0 *m proj_share = 0: projecting away coordinate 0 annihilates the
+   secret direction, which is why mxrank_proj_pred's rank drops by exactly
+   one, the coordinate-0 line e0 contributes to U being exactly what
+   proj_share kills. *)
 Lemma e0_proj_share : e0 *m proj_share = 0.
 Proof.
 apply/rowP => k; rewrite !mxE big_split_ord /= big1 ?big1 ?addr0 //.
@@ -386,12 +333,9 @@ apply/rowP => k; rewrite !mxE big_split_ord /= big1 ?big1 ?addr0 //.
 - by move=> i _; rewrite !mxE (unsplitK (inl i)) mxE mulr0.
 Qed.
 
-(* The projection has full column rank.
-   Kind: helper.
-   What: \rank proj_share = 5.
-   Why: a full-rank projection has a one-dimensional kernel (mxrank_ker gives
-        6 - 5 = 1), which pins the rank drop to exactly one.
-   Used-by: mxrank_proj_pred. *)
+(* \rank proj_share = 5: full column rank, so proj_share has a
+   one-dimensional kernel (mxrank_ker gives 6 - 5 = 1), which is what pins
+   mxrank_proj_pred's rank drop to exactly one. *)
 Lemma proj_share_rank : \rank proj_share = 5.
 Proof.
 apply/eqP; rewrite eqn_leq rank_leq_col /=.
@@ -401,13 +345,9 @@ apply/submxP; exists (row_mx 0 1%:M : 'M['F_5]_(5, 1+5)).
 by rewrite /proj_share mul_row_col mul0mx mul1mx add0r.
 Qed.
 
-(* The projection of an invariant six-coordinate submodule is rG-invariant.
-   Kind: helper.
-   What: if U is an rG_secret-submodule then U *m proj_share is an rG-submodule of the five-
-         coordinate kernel module.
-   Why: the projected submodule is the object to which the kernel fact
-        perm_module_no_dim23 applies.
-   Used-by: s5_no_secret_dim3 and s5_no_secret_dim4. *)
+(* If U is an rG_secret-submodule then U *m proj_share is an rG-submodule
+   of the five-coordinate kernel module: the projected submodule is exactly
+   the object the kernel fact perm_module_no_dim23 applies to. *)
 Lemma proj_mxmodule (m : nat) (U : 'M['F_5]_(m, 1+5)) :
   mxmodule rG_secret U -> mxmodule rG (U *m proj_share).
 Proof.
@@ -417,14 +357,11 @@ apply: submxMr.
 by have := modU s (in_setT s).
 Qed.
 
-(* Projection drops the rank by exactly one when the secret is present.
-   Kind: helper.
-   What: if e0 <= U then \rank (U *m proj_share) = (\rank U).-1.
-   Why: the secret direction e0 is the unique direction U has inside the one-
-        dimensional kernel of proj_share, so exactly one dimension is lost.  This is the
-        rank bookkeeping that turns a dimension-d secret submodule into a
-        dimension-(d-1) submodule of the kernel module.
-   Used-by: s5_no_secret_dim3 and s5_no_secret_dim4. *)
+(* If e0 <= U then \rank (U *m proj_share) = (\rank U).-1: e0 is the unique
+   direction U has inside proj_share's one-dimensional kernel, so exactly
+   one dimension is lost. This is the rank bookkeeping that turns a
+   dimension-d secret submodule into a dimension-(d-1) submodule of the
+   kernel module. *)
 Lemma mxrank_proj_pred (m : nat) (U : 'M['F_5]_(m, 1+5)) :
   (e0 <= U)%MS -> \rank (U *m proj_share) = (\rank U).-1.
 Proof.
@@ -447,13 +384,10 @@ Qed.
 
 End SecretSixDim.
 
-(* No secret-encoding invariant submodule of dimension 3.
-   Kind: main.
-   What: there is no rG_secret-submodule of dimension 3 that contains the secret
-         direction e0.
-   Why: such a submodule U would project (proj_mxmodule, mxrank_proj_pred) to an rG-
-         submodule of dimension 3 - 1 = 2 of the kernel module, but
-         perm_module_no_dim23 forbids dimension 2. *)
+(* There is no rG_secret-submodule of dimension 3 that contains the secret
+   direction e0: such a U would project, via proj_mxmodule and
+   mxrank_proj_pred, to an rG-submodule of dimension 3 - 1 = 2 of the
+   kernel module, and perm_module_no_dim23 forbids dimension 2. *)
 Theorem s5_no_secret_dim3 : ~ secret_inv_dim rG_secret e0 3.
 Proof.
 case=> m [U [modU rkU He0]].
@@ -464,13 +398,10 @@ have := perm_module_no_dim23 modW.
 by rewrite rkW.
 Qed.
 
-(* No secret-encoding invariant submodule of dimension 4.
-   Kind: main.
-   What: there is no rG_secret-submodule of dimension 4 that contains the secret
-         direction e0.
-   Why: such a submodule U would project to an rG-submodule of dimension
-         4 - 1 = 3 of the kernel module, but perm_module_no_dim23 forbids
-         dimension 3. *)
+(* There is no rG_secret-submodule of dimension 4 that contains the secret
+   direction e0: such a U would project to an rG-submodule of dimension
+   4 - 1 = 3 of the kernel module, and perm_module_no_dim23 forbids
+   dimension 3. *)
 Theorem s5_no_secret_dim4 : ~ secret_inv_dim rG_secret e0 4.
 Proof.
 case=> m [U [modU rkU He0]].
@@ -481,14 +412,12 @@ have := perm_module_no_dim23 modW.
 by rewrite rkW.
 Qed.
 
-(* The S_5 gate rejects the gap window [:: 3; 4].
-   Kind: main.
-   What: the secret representation rG_secret is not feasible over the gap window
-         [:: 3; 4]; no recoverable secret-encoding invariant submodule has a
-         dimension in that window.
-   Why: feasibility over [:: 3; 4] would require a secret submodule of dimension
-        3 or 4, both refuted by s5_no_secret_dim3 and s5_no_secret_dim4.  This is
-        the no-go that disqualifies the wired S_5 instance from the gap window. *)
+(* The secret representation rG_secret is not feasible over the gap window
+   [:: 3; 4]: no recoverable secret-encoding invariant submodule has a
+   dimension in that window, because feasibility there would require a
+   secret submodule of dimension 3 or 4, both refuted by s5_no_secret_dim3
+   and s5_no_secret_dim4. This is the no-go that disqualifies the wired
+   S_5 instance from the gap window. *)
 Theorem s5_gap_window_infeasible : ~ feasible rG_secret e0 [:: 3; 4].
 Proof.
 case=> d [Hd Hsec].
@@ -497,19 +426,16 @@ move: Hd; rewrite !inE => /orP[] /eqP Hd; rewrite Hd in Hsec.
 - exact: s5_no_secret_dim4 Hsec.
 Qed.
 
-(* The S_5 wired gap is impossible: the gate fires on the whole gap regime.
-   Kind: main.
-   What: under the AG-Massey relations at length n = 6 (ts_T = n-1 = 5,
-         ts_k = k-g, code dimension k), any parameters admitting a strict
-         threshold gap force the required code dimension k into {3,4}
-         (gap_dim_window), and no secret-encoding S_5-invariant submodule of
-         either dimension exists (s5_no_secret_dim3/4). Hence no secret-encoding
-         invariant code of dimension k exists for a gap instance.
-   Why: this is the end-to-end prevention statement: it composes the gap-to-
-        dimension window (gap_dimension.v, the required dimensions) with the
-        representation-theoretic no-go (the available dimensions) to prove the
-        wired S_5 gap mathematically impossible, which is exactly the dead end
-        the cs_gap_feasible gate is meant to reject before any code is built. *)
+(* Under the AG-Massey relations at length n = 6 (ts_T = n-1 = 5,
+   ts_k = k-g, code dimension k), any parameters admitting a strict
+   threshold gap force the required code dimension k into {3,4}
+   (gap_dim_window), and no secret-encoding S_5-invariant submodule of
+   either dimension exists (s5_no_secret_dim3/4): no secret-encoding
+   invariant code of dimension k exists for a gap instance. This composes
+   the gap-to-dimension window (gap_dimension.v, the required dimensions)
+   with the representation-theoretic no-go (the available dimensions) to
+   prove the wired S_5 gap mathematically impossible, the dead end the
+   cs_gap_feasible gate is meant to reject before any code is built. *)
 Theorem s5_gap_infeasible (k g : nat) :
   (g < k)%N -> (k + g < 6)%N -> (6 <= k + g + 1)%N -> (k - g < 6 - 1)%N ->
   ~ secret_inv_dim rG_secret e0 k.

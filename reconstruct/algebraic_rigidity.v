@@ -90,10 +90,12 @@ Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 Let G := pgg_G M.
 
-(** SecurityExact: an optional exact-equality carrier.                         *)
-(* Parameterised by the distribution [rho] so that the exact-value proof is    *)
-(* tied to the same distribution the bound of a ShuffleCertificateBundle      *)
-(* is stated at. Constructed via MkSecurityExact; used via Some in scb_exact. *)
+(** SecurityExact: an optional exact-equality carrier. Parameterised by the
+    distribution rho so the exact-value proof is pinned to the same
+    distribution a ShuffleCertificateBundle's marginal bound is stated at.
+    Present exactly when a random walk's stationary marginal is known in
+    closed form rather than only bounded, e.g. structured group orbits;
+    absent for a fiber-counted or reducible-walk bound. *)
 Record SecurityExact (rho : R.-fdist {perm 'I_N'.+1}) := MkSecurityExact {
   se_eps : R;
   se_exact :
@@ -141,14 +143,13 @@ Record SecurityAsymptotic := MkSecurityAsymptotic {
 }.
 
 (** ShuffleMarginalBound — the single-position marginal bound of a shuffle
-    distribution against the uniform distribution on sheets.
-    Kind: interface.
-    A constructor supplies a finite-word length, a stated epsilon, the analyzed
+    distribution against the uniform distribution on sheets. A constructor
+    supplies a finite-word length, a stated epsilon, the analyzed
     distribution on permutation images, and the per-position proof that the
     one-card pushforward of that distribution is within epsilon of uniform.
-    The sw_ prefix abbreviates "shuffle witness bound"; the prefix is the
-    historical one of the record this one replaces and is retained on all four
-    fields. *)
+    This is the always-present bound layer of the endpoint-security
+    guarantee; ShuffleCertificateBundle below attaches optional exact and
+    asymptotic evidence on top of it without changing this bound. *)
 Record ShuffleMarginalBound := MkShuffleMarginalBound {
   (* sw_L is the finite-word length the distribution is read at. It is the
      length consumed by the dealer bridge (pgg_dealer_bridge.v) and by the
@@ -171,7 +172,6 @@ Record ShuffleMarginalBound := MkShuffleMarginalBound {
 (** ShuffleCertificateBundle — a marginal bound together with the optional
     exact-equality and asymptotic-convergence certificates of the same shuffle
     distribution.
-    Kind: interface.
     A constructor supplies a ShuffleMarginalBound and, indexed on that bound's
     own sw_rho_dist, an optional SecurityExact and an optional
     SecurityAsymptotic.
@@ -220,6 +220,12 @@ Record ThresholdWitness := MkThresholdWitness {
     cd_genus (cs_data tw_covering) = 0 -> #|G| <= klein_genus0_bound M
 }.
 
+(** AlgebraicRigidity: the single object pairing a security certificate
+    bundle (ar_security) with a structural threshold witness (ar_threshold),
+    both derived from the same monodromy representation M. Every derived
+    property below, complexity, security, and threshold gap, reads off one
+    of these two fields; the record exists so that one algebraic choice
+    (G, rho, sigmas) is the single input all three guarantees share. *)
 Record AlgebraicRigidity := MkAlgebraicRigidity {
   ar_security : ShuffleCertificateBundle;
   ar_threshold : ThresholdWitness
@@ -240,10 +246,10 @@ Arguments ShuffleCertificateBundle R M : clear implicits.
 Arguments ThresholdWitness M : clear implicits.
 Arguments AlgebraicRigidity R M : clear implicits.
 
-(** shuffle_bundle_of_bound — the bundle carrying a marginal bound and neither
-    optional certificate.
-    @intent: MkShuffleCertificateBundle at a bound with scb_exact and
-    scb_asymptotic both None. *)
+(** The certificate bundle carrying a marginal bound with neither optional
+    certificate attached: the mechanism-agnostic case, used when the bound
+    comes from fiber counting rather than from a random walk with known
+    exact or asymptotic behavior. *)
 Definition shuffle_bundle_of_bound R M (b : ShuffleMarginalBound R M)
   : ShuffleCertificateBundle R M := MkShuffleCertificateBundle b None None.
 
@@ -265,11 +271,13 @@ Variable m n' : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
 Let M := Gen_PGGTypes sigmas.
 
-(** security_witness_fiber — the marginal bound of a pointwise fiber estimate.
-    Kind: main.
-    Why: packages the generic fiber-based var_dist bound used by the OC, S5 and
-         Star instances, so callers only need to supply the epsilon estimate.
-*)
+(** The ShuffleMarginalBound assembled directly from a caller-supplied
+    epsilon and its per-position var_dist proof, independent of how that
+    proof was derived. Groups where perm_endpoint fails to be injective on
+    achievable(L) have no uniform closed-form epsilon and must fall back to
+    fiber counting (case analysis, vm_compute, parametric algebra); this
+    constructor is the common landing point for whatever proof that fiber
+    count produces. *)
 Definition security_witness_fiber (L : nat)
     (Hlfree : @weval_inj M L)
     (epsilon : R)
@@ -303,11 +311,11 @@ Variable m n' : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
 Let M := Gen_PGGTypes sigmas.
 
-(** security_witness_endpoint_inj — direct endpoint witness under injectivity.
-    Kind: main.
-    Why: when perm_endpoint is injective on achievable(L), the epsilon bound
-         improves to 2*(N - Tg^L)/N, handled by this specialized constructor.
-*)
+(** The ShuffleMarginalBound built when perm_endpoint is injective on
+    achievable(L): the epsilon improves from a generic fiber estimate to the
+    closed form 2*(N - Tg^L)/N (denominator N, not N!), since injectivity
+    lets the endpoint distribution be counted exactly rather than merely
+    bounded. *)
 Definition security_witness_endpoint_inj (L : nat)
     (Hlfree : @weval_inj M L)
     (Hinj_s : forall s : 'I_n'.+2,
@@ -338,12 +346,11 @@ Variable R : realType.
 Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
-(** security_witness_from_bound — the marginal bound of an arbitrary epsilon
-    proof.
-    Kind: main.
-    Why: convenience wrapper used when only spectral / Pinsker / DPI upper
-         bounds are available.
-*)
+(** The ShuffleMarginalBound built from an arbitrary epsilon and its
+    per-position var_dist proof, with no assumption on how that bound was
+    derived. This is the entry point for spectral-gap, Pinsker, or DPI
+    estimates, none of which come from fiber counting or endpoint
+    injectivity. *)
 Definition security_witness_from_bound (L : nat)
     (eps : R)
     (rho_dist : R.-fdist {perm 'I_N'.+1})
@@ -353,12 +360,11 @@ Definition security_witness_from_bound (L : nat)
     : ShuffleMarginalBound R M :=
   @MkShuffleMarginalBound R M L eps rho_dist Hbound.
 
-(** security_witness_with_exact — the certificate bundle of a bound and an
-    exact equality.
-    Kind: main.
-    Why: used when closed-form var_dist equalities are known (e.g., structured
-         group orbits), filling scb_exact with the equality proof.
-*)
+(** The ShuffleCertificateBundle built from a marginal bound together with a
+    closed-form var_dist equality at the same distribution, filling
+    scb_exact with that equality and leaving scb_asymptotic empty. Use when
+    the exact stationary marginal is known, e.g. for structured group
+    orbits, rather than only bounded. *)
 Definition security_witness_with_exact (L : nat)
     (bound_eps : R)
     (rho_dist : R.-fdist {perm 'I_N'.+1})
@@ -390,11 +396,21 @@ Variable ar : AlgebraicRigidity R M.
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
-(** Complexity: search space is bounded by |G| *)
+(** The adversary's search space at word length L is bounded by the group
+    order: search_space M L <= #|G|. This is the complexity leg of
+    algebraic rigidity: the same monodromy group G that fixes security and
+    threshold below also caps how large the brute-force search ever
+    gets. *)
 Lemma ar_complexity (L : nat) : @search_space M L <= #|G|.
 Proof. exact: search_space_leG. Qed.
 
-(** Tradeoff: either genus-0 with bounded |G|, or positive genus with gap *)
+(** Every AlgebraicRigidity instance falls into exactly one of two regimes:
+    genus 0, where the group order stays under the Klein bound and the
+    reconstruction threshold ts_T equals the privacy threshold ts_k, or
+    positive genus, where the gap ts_T - ts_k is only bounded, by twice the
+    genus. This is the threshold leg of algebraic rigidity: the same genus
+    that classifies the covering scheme also determines whether
+    reconstruction is exact or merely bounded. *)
 Lemma ar_genus_gap_dichotomy :
   let cs := tw_covering (ar_threshold ar) in
   (cd_genus (cs_data cs) = 0 /\
@@ -410,7 +426,12 @@ exact (@security_threshold_tradeoff M
   (@tw_genus0_klein M (ar_threshold ar))).
 Qed.
 
-(** Search-gap tradeoff: search space bounded or threshold has gap *)
+(** The same genus-0/positive-genus dichotomy as ar_genus_gap_dichotomy,
+    restated with the complexity bound in terms of the adversary's search
+    space at length L rather than the raw group order #|G|. This ties the
+    complexity leg directly to the threshold leg: bounded search space and
+    exact reconstruction come together, and so do unbounded search space
+    and a genus-dependent gap. *)
 Lemma ar_search_gap_dichotomy (L : nat) :
   let cs := tw_covering (ar_threshold ar) in
   (@search_space M L <= klein_genus0_bound M /\
@@ -425,14 +446,11 @@ exact (@search_gap_tradeoff M
   (@tw_genus0_klein M (ar_threshold ar)) L).
 Qed.
 
-(** ar_large_group_forces_gap — large monodromy groups force positive genus.
-    Kind: main.
-    Why: packages the "too many generators to fit in genus-zero" dichotomy as
-         an AlgebraicRigidity-indexed consequence used by landscape tables.
-    Naming: components describe the chain "AR + large group + forces + gap";
-            this domain-level phrase is clearer than any shortened MathComp-
-            suffix variant, so the 5-component name is retained intentionally.
-*)
+(** A monodromy group larger than the Klein genus-0 bound forces positive
+    genus: klein_genus0_bound M < #|G| implies 0 < cd_genus. This is the
+    contrapositive reading of the genus-0 branch of the tradeoff dichotomy:
+    once the group is too large to fit a genus-0 covering, the
+    reconstruction gap becomes unavoidable, not merely possible. *)
 Lemma ar_large_group_forces_gap :
   let cs := tw_covering (ar_threshold ar) in
   klein_genus0_bound M < #|G| ->
@@ -444,13 +462,26 @@ exact (@large_group_forces_gap M
   (@tw_genus0_klein M (ar_threshold ar))).
 Qed.
 
-(** Gap bound: threshold gap is bounded by twice the genus *)
+(** The reconstruction/privacy gap ts_T - ts_k is at most twice the genus,
+    unconditionally, whichever regime ar_genus_gap_dichotomy places the
+    scheme in. This is the numeric form of the threshold leg of algebraic
+    rigidity: genus is not just a classification but a literal price cap on
+    the gap. *)
 Lemma ar_gap_bound :
   let cs := tw_covering (ar_threshold ar) in
   ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <= 2 * cd_genus (cs_data cs).
 Proof. move=> /=. exact: gap_bound. Qed.
 
-(** Protocol correctness: perm-compatible scheme + valid shares + G-stable starts *)
+(** End-to-end protocol correctness: given a PGGInterface PI whose share
+    count matches the covering scheme's ts_T' (HT), and a G_stable
+    hypothesis that the scheme's per-position content reading of the group
+    action agrees with the monodromy structure at every coordinate, a valid
+    share tuple built by reading PI's starting positions through the plug
+    reconstructs, via pgg_recon_endpoints, exactly the secret s that
+    produced it. This closes the loop from algebraic rigidity's structural
+    threshold witness back to the dealer's original secret: the covering
+    scheme is not merely a legal parameter tuple, it actually
+    reconstructs. *)
 Lemma ar_protocol_correct (PI : PGGInterface M)
     (HT : ts_T' (cs_scheme (tw_covering (ar_threshold ar))) = pi_T' PI)
     (s : 'I_N) (P : pgg_gT M)
@@ -491,7 +522,12 @@ Variable ar : AlgebraicRigidity R M.
 
 Let Tg := (@pgg_ngens' M).+1.
 
-(** Search space chain: search_space <= n_traces <= Tg^L (RAAG-specific) *)
+(** For RAAG-typed monodromy representations, the search space is sandwiched
+    between the number of distinct traces reachable at length L and the
+    trivial exponential bound Tg^L, where Tg is the number of generators.
+    This refines the generic complexity bound ar_complexity with a
+    RAAG-specific intermediate quantity, n_traces, that can be computed
+    directly rather than only bounded by #|G|. *)
 Lemma ar_search_space_chain (L : nat) :
   (@search_space M L <= @n_traces M L) && (@n_traces M L <= Tg ^ L).
 Proof. exact: search_space_chain. Qed.
@@ -501,18 +537,20 @@ End raag_derived_properties.
 (******************************************************************************)
 (*     SecurityProfile: ShuffleMarginalBound + L* + nontriviality             *)
 (*                                                                            *)
-(* A SecurityProfile bundles a ShuffleMarginalBound with:                     *)
-(*   - sp_Lstar: the specific word length (turning point)                     *)
-(*   - sp_nontrivial: epsilon < 2 (strictly better than trivial bound)        *)
+(* A SecurityProfile bundles a ShuffleMarginalBound with a specific word      *)
+(* length sp_Lstar, the turning point at which the bound was established,    *)
+(* and a nontriviality witness sp_nontrivial that epsilon < 2, strictly       *)
+(* better than the trivial full-variation-distance bound.                    *)
 (*                                                                            *)
-(* Why < 2: The DPI epsilon is always < 2 when Tg^L >= 1 (trivially true).   *)
-(* The threshold < 1 requires the direct endpoint bound which only some       *)
-(* instances can provide. Using < 2 means ALL existing instances can build    *)
-(* a SecurityProfile immediately.                                             *)
+(* The threshold is 2 rather than 1 because the DPI epsilon is always < 2    *)
+(* once Tg^L >= 1, which holds trivially, while epsilon < 1 needs the        *)
+(* direct endpoint bound that only some instances can supply; fixing the     *)
+(* threshold at 2 lets every existing instance build a SecurityProfile       *)
+(* immediately.                                                              *)
 (*                                                                            *)
-(* Why no monotonicity: weval_inj(L) does NOT imply weval_inj(L+1).          *)
-(* OC has weval_inj(2) but not weval_inj(3) (generator cubes collide).       *)
-(* So SecurityProfile only requires weval_inj at L*, not everywhere.          *)
+(* The bound is required only at L*, not at every length, because weval_inj  *)
+(* is not monotone in L: OC satisfies weval_inj(2) but not weval_inj(3),     *)
+(* since its generator cubes collide there.                                  *)
 (******************************************************************************)
 
 Section security_profile.
@@ -524,6 +562,11 @@ Local Open Scope ring_scope.
 
 Let eps_bound := (2%:R : R).
 
+(** A ShuffleMarginalBound at a distinguished word length sp_Lstar, together
+    with a proof that its epsilon is strictly below the trivial bound of 2.
+    Existence at one length is deliberate: weval_inj need not hold beyond
+    sp_Lstar, so the profile makes no monotonicity claim about longer
+    words. *)
 Record SecurityProfile := MkSecurityProfile {
   sp_Lstar : nat ;
   sp_witness : ShuffleMarginalBound R M ;
@@ -531,7 +574,9 @@ Record SecurityProfile := MkSecurityProfile {
   sp_nontrivial : is_true (Num.lt (sw_bound_eps sp_witness) eps_bound)
 }.
 
-(* Constructor from AlgebraicRigidity, when epsilon < 2 can be proved *)
+(* Builds a SecurityProfile from an AlgebraicRigidity instance once its
+   security bound's epsilon is shown below 2: the profile's word length is
+   read off the bound's own sw_L, so no new length choice is introduced. *)
 Definition ar_security_profile (ar : AlgebraicRigidity R M)
     (Hlt2 : is_true
       (Num.lt (sw_bound_eps (scb_bound (ar_security ar))) eps_bound))
@@ -564,6 +609,13 @@ Variable M : MonodromyReprWithGeneratorType.
 
 Local Open Scope ring_scope.
 
+(** A nat-level SecurityParams (a rational epsilon at word length sp_L,
+    typically produced by vm_compute on the dealer solver) paired with a
+    proof-level ShuffleMarginalBound at the same length, and a proof that
+    the bound's epsilon does not exceed the rational one claimed by the
+    params. This is the bridge that turns a solver's numeric output into a
+    machine-checked security certificate rather than an unverified
+    assertion. *)
 Record CertifiedSolution := MkCertifiedSolution {
   cs_params    : SecurityParams ;
   cs_witness   : ShuffleMarginalBound R M ;
@@ -603,10 +655,13 @@ Local Open Scope ring_scope.
    them to implicit arguments; callers that pin the group write
    @certified_from_bound R M b .... *)
 
-(** certified_from_bound — assemble a CertifiedSolution from a marginal bound.
-    @intent: bundles the rational epsilon certificate together with the bound
-    into a CertifiedSolution, the interface consumed by the certified
-    security tables in pgg_protocol_landscape.v. *)
+(** Assembles a CertifiedSolution from any ShuffleMarginalBound together with
+    a rational epsilon bound eps_n / eps_d that dominates it: the
+    SecurityParams are read off the group's own generator count, sheet
+    count, and the bound's length, so the only new input is the rational
+    certificate itself. This is the generic route from a proof-level bound
+    to a certified security parameter tuple, independent of whether the
+    bound came from a RAAG solver or was proved by hand. *)
 Definition certified_from_bound
     (b : ShuffleMarginalBound R M)
     (eps_n eps_d : nat) (Hd : (0 < eps_d)%N)

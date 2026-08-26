@@ -75,9 +75,7 @@ Import Prenex Implicits.
 
     The record carries no monodromy-type parameter because all its fields
     are natural numbers; the connection to a specific monodromy is made
-    via [MultiCoveringData] below.
-
-    Kind: interface. *)
+    via [MultiCoveringData] below. *)
 Record MultiComponent := MkMultiComponent {
   mc_n_sheets    : nat ;
   mc_base_genus  : nat ;
@@ -99,28 +97,25 @@ Variable M : MonodromyReprType.
 
 (** MultiCoveringData — list of [MultiComponent] records, one per orbit
     of the monodromy action. The framework's [pgg_N' M].+1 sheets must
-    partition across the components.
-    Kind: interface. *)
+    partition across the components. *)
 Record MultiCoveringData := MkMultiCoveringData {
   mcd_components       : seq MultiComponent ;
   mcd_total_sheets_eq  : (\sum_(c <- mcd_components) mc_n_sheets c
                           = (pgg_N' M).+1)%N ;
 }.
 
-(** mcd_total_genus — sum of per-component genera. For a connected single-
-    component cover this equals the single component's genus; for a multi-
-    component cover this is the disjoint-union genus.
-    Kind: helper.
-    Why: gives a single nat invariant suitable for downstream gap-bound
-    comparisons (cf. cs_gap : ts_T <= ts_k + 2 * mcd_total_genus). *)
+(** mcd_total_genus is the sum of per-component genera: for a connected
+    single-component cover it equals that component's genus, and for a
+    multi-component cover it is the disjoint-union genus. It gives the
+    single nat invariant downstream gap-bound comparisons quote, playing the
+    role of cs_gap's genus term: ts_T <= ts_k + 2 * mcd_total_genus. *)
 Definition mcd_total_genus (mcd : MultiCoveringData) : nat :=
   (\sum_(c <- mcd_components mcd) mc_genus c)%N.
 
-(** mcd_max_genus — maximum per-component genus. For a single-component
-    cover this equals mcd_total_genus; for multi-component this is the
-    largest individual component genus. Useful when the gap bound applies
-    per-component rather than globally.
-    Kind: helper. *)
+(** mcd_max_genus is the maximum per-component genus: equal to
+    mcd_total_genus in the single-component case, and the largest
+    individual component genus otherwise. This is the invariant a
+    per-component, rather than global, gap bound would quote. *)
 Definition mcd_max_genus (mcd : MultiCoveringData) : nat :=
   \max_(c <- mcd_components mcd) mc_genus c.
 
@@ -133,13 +128,13 @@ Arguments MkMultiCoveringData {M}.
 (*     Section 3: Realisation marker for multi-component covers               *)
 (******************************************************************************)
 
-(** realised_by_multi_curve — opaque predicate asserting that a
-    [MultiCoveringData] record corresponds to a real disjoint union of
-    algebraic curves realising the per-component data.
-    Kind: interface.
-    Why: parallel to [realised_by_curve] (single-component), serves as a
-    documentation hook in instance files using the multi-component
-    extension. *)
+(** realised_by_multi_curve is an opaque predicate: it asserts that a
+    MultiCoveringData record corresponds to an actual disjoint union of
+    algebraic curves realising each component's Hurwitz data, without
+    supplying or requiring a witness curve. It parallels realised_by_curve
+    for the single-component case; instance files invoke it to record,
+    rather than prove, that a specific multi-component construction is
+    known to be geometrically realisable. *)
 Parameter realised_by_multi_curve :
   forall (M : MonodromyReprType), MultiCoveringData M -> Prop.
 

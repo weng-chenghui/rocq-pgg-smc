@@ -65,25 +65,20 @@ Hypothesis HG : 1 < #|G|.
 
 Let ramif2 := (2 * #|G| + 2)%N.
 
-(** genus2_hurwitz — Riemann-Hurwitz equality for the genus-2 covering instance.
-    Kind: helper.
-    Why: discharges cd_hurwitz for the hyperelliptic genus-2 data, reducing
-         to 4 + 2|G| = 2|G| + 2 + 2.
-    Used by: genus2_data.
-*)
+(** The Riemann-Hurwitz equality for the genus-2 hyperelliptic cover
+    C -> P^1 of degree #|G|, base genus 0, ramification
+    ramif2 = 2|G| + 2: 2*2 + 2|G| equals #|G|*(2*0) + ramif2 + 2. This
+    discharges the cd_hurwitz side-condition of the genus-2 CoveringData. *)
 Lemma genus2_hurwitz :
   (2 * 2 + 2 * #|G| = #|G| * (2 * 0) + ramif2 + 2)%N.
 Proof.
 by rewrite muln0 muln0 add0n /ramif2 -addnA addnC.
 Qed.
 
-(** genus2_ramif_ge_nbr — lower bound [5 <= ramif2] for the total ramification
-    [ramif2] of the genus-2 hyperelliptic cover.
-    Kind: helper.
-    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-2
-    [CoveringData] record; encodes the branch-count-vs-ramification bound for
-    the five-Weierstrass-point hyperelliptic model.
-    Used by: genus2_data. *)
+(** The total ramification ramif2 = 2|G| + 2 of the genus-2 hyperelliptic
+    cover is at least 5, matching cd_n_branch = 5: the five Weierstrass
+    points of the genus-2 model fit within the ramification the cover
+    actually carries. *)
 Lemma genus2_ramif_ge_nbr : (5 <= ramif2)%N.
 Proof.
 rewrite /ramif2.
@@ -92,11 +87,10 @@ case: #|G| => [|[|n]] //= _.
 by rewrite mulnS addn2 ltnS leq_addr.
 Qed.
 
-(** genus2_data — CoveringData record for the genus-2 hyperelliptic covering.
-    Kind: main.
-    Why: supplies the Riemann-Hurwitz data used to assemble the genus-2
-         CoveringScheme built on a hyperelliptic AG code.
-*)
+(** The CoveringData for the genus-2 hyperelliptic covering: base genus 0,
+    genus 2, total ramification ramif2 = 2|G| + 2, discharged against
+    genus2_hurwitz and genus2_ramif_ge_nbr. This is the Riemann-Hurwitz
+    skeleton the hyperelliptic AG code below is built on top of. *)
 Definition genus2_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := 5 ;   (* genus-2 hyperelliptic: 5 Weierstrass points *)
@@ -249,12 +243,12 @@ Hypothesis code_auto_g2 :
 Let ts2_perm : pgg_gT M -> {perm 'I_(ts_T' ts2).+1} :=
   massey_share_perm (G:=G) sigma_fix0_g2.
 
-(** ts2_perm_compatible — ts_recon_perm_invariant witness for the genus-2 scheme.
-    Kind: helper.
-    Why: feeds cs_recon_invariant in genus2_covering via transport +
-         massey_perm_compatible on the hyperelliptic AG scheme.
-    Used by: genus2_covering.
-*)
+(** The genus-2 threshold scheme ts2's reconstruction is invariant under the
+    monodromy action ts2_perm: the hyperelliptic AG code's
+    automorphism-derived column permutations transport, via
+    massey_perm_compatible, to a permutation compatible with Massey
+    reconstruction. This is the reconstruction leg of genus2_covering's
+    CoveringScheme. *)
 Lemma ts2_perm_compatible :
   @ts_recon_perm_invariant _ G _ _ ts2 ts2_perm.
 Proof.
@@ -263,12 +257,11 @@ apply: transport_perm_compatible.
 exact: massey_perm_compatible.
 Qed.
 
-(** genus2_covering — CoveringScheme instance for the genus-2 hyperelliptic cover.
-    Kind: main.
-    Why: packages genus2_data together with the AG-based threshold scheme ts2
-         and its perm-compatibility so the landscape can instantiate a
-         covering at genus 2 with gap bound ts_T <= ts_k + 4.
-*)
+(** The CoveringScheme for the genus-2 hyperelliptic cover: genus2_data
+    paired with the AG-Massey threshold scheme ts2 and its
+    monodromy-compatibility witness ts2_perm_compatible, giving gap bound
+    ts_T <= ts_k + 4. This is the complete, checked instance a PGG protocol
+    at genus 2 runs against. *)
 Definition genus2_covering : CoveringScheme M := {|
   cs_plug := {|
     rp_scheme    := ts2 ;
@@ -279,12 +272,18 @@ Definition genus2_covering : CoveringScheme M := {|
   cs_gap  := ts2_gap4 ;
 |}.
 
-(* Quasi-(k, k+4) threshold *)
+(** The genus-2 covering's reconstruction threshold exceeds its privacy
+    threshold by at most 4: a (k, k+4)-quasi-threshold scheme. This is
+    ar_gap_bound's genus formula, ts_T <= ts_k + 2*genus, made concrete at
+    genus 2, twice the elliptic-cover gap of elliptic_gap. *)
 Lemma genus2_gap :
   ts_T (cs_scheme genus2_covering) <= ts_k (cs_scheme genus2_covering) + 4.
 Proof. exact: ts2_gap4. Qed.
 
-(* The gap is strictly wider than genus-1 *)
+(** The genus recorded in genus2_covering's CoveringData is 2, giving a
+    strictly wider gap budget than the genus-1 instance: raising the curve's
+    genus raises the price of reconstruction over privacy, concretely
+    doubling it here. *)
 Lemma genus2_vs_genus1 :
   cd_genus (cs_data genus2_covering) = 2.
 Proof. by []. Qed.

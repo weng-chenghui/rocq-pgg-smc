@@ -120,18 +120,16 @@ Section equivariance.
 
 Variable N : nat.
 
-(** Key equivariance property: if sigma commutes with g (in the group sense),
-    then sigma preserves the action of g pointwise.
-
-    Proof sketch: commute g sigma means (g * sigma = sigma * g)%g.
-    Evaluating both sides at s using permM: (a * b) x = b (a x):
-    - LHS: (g * sigma) s = sigma (g s)
-    - RHS: (sigma * g) s = g (sigma s)
-    So sigma (g s) = g (sigma s). *)
+(** If sigma commutes with g, sigma preserves the action of g pointwise:
+    sigma (g s) = g (sigma s) for every s. This is the equivariance
+    condition decode_encode_1 and decode_encode_0 use to show that a
+    shuffle commuting with the pairing does not disturb the encoded bit. *)
 Lemma equivariant_commute (g sigma : {perm 'I_N}) (s : 'I_N) :
   commute g sigma ->
   sigma (g s) = g (sigma s).
 Proof.
+(* commute g sigma means (g * sigma = sigma * g)%g; evaluating both sides
+   at s via permM ((a * b) x = b (a x)) gives sigma (g s) = g (sigma s). *)
 move=> Hcomm.
 have := congr1 (fun f : {perm 'I_N} => f s) Hcomm.
 by rewrite !permM.

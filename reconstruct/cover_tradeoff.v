@@ -213,13 +213,12 @@ End tradeoff.
 (*     Section 4: Bridge to pgl_card in klein_genus0_bound.v                           *)
 (******************************************************************************)
 
-(** klein_genus0_bound_unfold — unfolding lemma exposing the Klein bound formula.
-    Kind: helper.
-    Why: rewrites the abstract [klein_genus0_bound] accessor into its concrete Klein
-    form [maxn (2 * N) 60] so instance files can discharge it by direct
-    numerical computation on the sheet count [N = (pgg_N' M).+1].
-    Used by: downstream instance PGL-bound discharges (rigidity_s5_instance,
-    rigidity_kim_instance). *)
+(** klein_genus0_bound unfolds definitionally to
+    maxn (2 * (pgg_N' M).+1) 60: the abstract accessor and the concrete
+    Klein formula are the same term, so a concrete instance proving
+    |G| <= klein_genus0_bound M can discharge it as ordinary numerical
+    computation on the sheet count, without re-deriving the definition each
+    time. *)
 Lemma klein_genus0_bound_unfold (M : MonodromyReprWithGeneratorType) :
   klein_genus0_bound M = maxn (2 * (pgg_N' M).+1) 60.
 Proof. by []. Qed.
@@ -228,13 +227,12 @@ Proof. by []. Qed.
 (*     Section 5: Uniform name for the genus-0 automorphism bound             *)
 (******************************************************************************)
 
-(** genus0_automorphism_bound — predicate asserting that, when the covering
-    genus is 0, the automorphism group cardinality [#|pgg_G M|] is bounded by
-    [klein_genus0_bound M].
-    Kind: interface.
-    Why: packages the genus-0 automorphism constraint as a named [Prop] so that
-    each concrete instance (five_card, kim, s5, s5x5) can discharge it by
-    direct proof or by unfolding [klein_genus0_bound_unfold]. *)
+(** The Prop that, at genus 0, the monodromy group's order is bounded by the
+    Klein genus-0 bound. This gives a name to the genus0_pgl hypothesis
+    shape that recurs across the tradeoff theorems, so a concrete covering
+    instance can state and discharge the bound once, by direct proof or by
+    unfolding klein_genus0_bound_unfold, rather than restate the
+    implication inline at each use. *)
 Definition genus0_automorphism_bound (M : MonodromyReprWithGeneratorType)
     (cd : CoveringData M) : Prop :=
   cd_genus cd = 0 -> (#|pgg_G M| <= klein_genus0_bound M)%N.

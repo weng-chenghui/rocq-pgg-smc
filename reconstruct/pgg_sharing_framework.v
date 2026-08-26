@@ -72,30 +72,23 @@ Arguments ts_correct {secretT shareT}.
 Arguments ts_private {secretT shareT}.
 Arguments ts_encode_valid {secretT shareT}.
 
-(** ts_recon_encode - reconstructing the encoding of a secret returns that secret.
-    Kind: helper.
-    Why: the standard encode/recon round-trip, derived from ts_correct and
-    ts_encode_valid, stated as a single rewrite for client proofs.
-    Used by: transport_correct and other scheme-composition lemmas.
-*)
+(** ts_recon ts (ts_encode ts s) = s for any secret s: reconstructing ts's
+    own encoding recovers it, the ts_correct/ts_encode_valid round-trip
+    packaged as one rewrite that composed-scheme correctness proofs can
+    apply directly instead of re-deriving it. *)
 Lemma ts_recon_encode {sT shT : Type} (ts : ThresholdScheme sT shT) (s : sT) :
   ts_recon ts (ts_encode ts s) = s.
 Proof. exact: ts_correct (ts_encode_valid ts s). Qed.
 
-(** ts_T - successor-adjusted total share count of a ThresholdScheme.
-    Kind: helper.
-    Why: exposes the concrete share count T = T' + 1 used in statements.
-    Used by: threshold inequalities such as ts_T <= ts_k in genus-0 schemes.
-*)
+(** The total share count T = (ts_T' ts).+1 of a ThresholdScheme, the
+    carrier size that threshold inequalities such as ts_T <= ts_k compare
+    against the reconstruction threshold. *)
 Definition ts_T {sT shT : Type} (ts : ThresholdScheme sT shT) : nat :=
   (ts_T' ts).+1.
 
-(** ts_k - successor-adjusted reconstruction threshold of a ThresholdScheme.
-    Kind: helper.
-    Why: exposes the concrete reconstruction threshold k = k' + 1 used in
-    landscape statements comparing T and k.
-    Used by: threshold bounds such as gap_bound and genus0_exact.
-*)
+(** The reconstruction threshold k = (ts_k' ts).+1 of a ThresholdScheme:
+    the coalition size at which ts_private's secrecy guarantee stops
+    applying. *)
 Definition ts_k {sT shT : Type} (ts : ThresholdScheme sT shT) : nat :=
   (ts_k' ts).+1.
 
@@ -111,17 +104,13 @@ Variable ts : ThresholdScheme secretT shareT.
 
 Let T := (ts_T' ts).+1.
 
-(** ts_recon_perm_invariant — reconstruction is invariant under a permutation
-    of the share-tuple positions induced by the group element [g].
-    Kind: interface.
-    Why: the framework-level perm-equivariance contract that connects abstract
-    threshold schemes to monodromy actions; satisfiable for monodromy groups
-    via coordinate permutation, unlike value-transformation compatibility
-    (which is not).
-    Used by: [cs_recon_invariant] field of [CoveringScheme] and the per-instance
-    perm-compatibility lemmas (e.g. [s5x5_perm_compatible],
-    [product_sum_mod_perm_compatible], [massey_perm_compatible],
-    [transport_perm_compatible]). *)
+(** ts_recon_perm_invariant perm ts holds when reordering a valid share
+    tuple by [perm g] before reconstruction yields the same secret, for
+    every g in G. This is the compatibility contract between an abstract
+    ThresholdScheme and a monodromy representation: a monodromy action
+    satisfies it because it only permutes coordinates, so the contract is
+    stated on coordinate permutations rather than on value-transformations
+    of the shares, which a monodromy walk need not respect. *)
 Definition ts_recon_perm_invariant (perm : gT -> {perm 'I_T}) : Prop :=
   forall (g : gT) (s : secretT) (shares : T.-tuple shareT),
     g \in G ->
@@ -152,11 +141,10 @@ Definition sum_mod_recon (shares : T.-tuple 'I_N) : 'I_N :=
 Definition sum_mod_valid_pred (s : 'I_N) (shares : T.-tuple 'I_N) : Prop :=
   (\sum_(i < T) (tnth shares i : nat)) %% N = s :> nat.
 
-(** sum_mod_scheme_correct - sum-mod-N reconstruction recovers the secret.
-    Kind: helper.
-    Why: correctness field of the ThresholdScheme record built from sum-mod-N.
-    Used by: sum_mod_scheme below as the ts_correct component.
-*)
+(** sum_mod_recon returns exactly the secret encoded by a valid share
+    tuple: sum_mod_valid_pred s shares gives sum_mod_recon shares = s.
+    This is sum-mod-N's correctness property, the ts_correct field of the
+    ThresholdScheme built below. *)
 Lemma sum_mod_scheme_correct (s : 'I_N) (shares : T.-tuple 'I_N) :
   sum_mod_valid_pred s shares ->
   sum_mod_recon shares = s.
@@ -165,12 +153,10 @@ rewrite /sum_mod_valid_pred /sum_mod_recon => Hvalid.
 by apply: val_inj.
 Qed.
 
-(** sum_mod_scheme_private - sub-threshold coalitions learn nothing about the secret.
-    Kind: helper.
-    Why: privacy field of the sum-mod-N ThresholdScheme, derived from
-    partial_sum_no_info with the identity permutation.
-    Used by: sum_mod_scheme below as the ts_private component.
-*)
+(** For any coalition C smaller than the threshold T and any two secrets
+    s1 s2, a share tuple valid for s1 has a share tuple valid for s2 that
+    agrees with it on C's coordinates: sum-mod-N's privacy property, the
+    ts_private field of the ThresholdScheme built below. *)
 Lemma sum_mod_scheme_private (s1 s2 : 'I_N)
     (shares : T.-tuple 'I_N) (C : {set 'I_T}) :
   #|C| < T ->
@@ -191,12 +177,9 @@ Qed.
 Definition sum_mod_encode (s : 'I_N) : T.-tuple 'I_N :=
   mktuple (fun i : 'I_T => if i == ord_max then s else ord0).
 
-(** sum_mod_encode_valid - canonical sum-mod-N encoding is a valid sharing.
-    Kind: helper.
-    Why: ts_encode_valid field of the sum-mod-N ThresholdScheme, verifying
-    that [0,...,0,s] sums to s modulo N.
-    Used by: sum_mod_scheme below as the ts_encode_valid component.
-*)
+(** sum_mod_encode s, the tuple [0,...,0,s], is a valid sharing of s: its
+    entries sum to s modulo N. This is the ts_encode_valid field of the
+    ThresholdScheme built below. *)
 Lemma sum_mod_encode_valid (s : 'I_N) :
   sum_mod_valid_pred s (sum_mod_encode s).
 Proof.
@@ -210,11 +193,12 @@ under eq_bigr do rewrite Hwiden.
 by rewrite big1 // add0n modn_small //; exact: ltn_ord.
 Qed.
 
-(** sum_mod_scheme - sum-mod-N threshold scheme on 'I_N.
-    Kind: instance.
-    Why: packages the sum-mod-N correctness, privacy and encoding lemmas as a
-    ThresholdScheme record usable by the generic framework.
-*)
+(** sum_mod_scheme is the ThresholdScheme built from sum_mod_valid_pred,
+    sum_mod_recon and sum_mod_encode with the three lemmas above as its
+    correctness, privacy and encoding-validity fields: the sum-mod-N
+    realization of the abstract Section 1 interface, letting the
+    framework's generic theorems apply to sum-mod-N without re-deriving
+    them. *)
 Definition sum_mod_scheme : ThresholdScheme 'I_N 'I_N :=
   @MkThresholdScheme 'I_N 'I_N T' T'
     sum_mod_valid_pred
@@ -237,12 +221,11 @@ Definition cast_tuple {A : Type} {n m : nat} (H : n = m)
     (t : n.-tuple A) : m.-tuple A :=
   eq_rect n (fun k => k.-tuple A) t m H.
 
-(** tnth_cast_tuple - tnth commutes with cast_tuple via cast_ord on the index.
-    Kind: helper.
-    Why: bridges tuple and index casts when composing schemes of syntactically
-    different but equal lengths.
-    Used by: transport-style scheme combinators that reindex tuples by casts.
-*)
+(** tnth (cast_tuple H t) i = tnth t (cast_ord (esym H) i): a tuple cast
+    along a length equality H composes with the matching index cast on
+    'I_m. Section 4 below reindexes protocol endpoints through casts of
+    this kind whenever the scheme's declared length and the protocol's
+    coordinate count are only propositionally, not definitionally, equal. *)
 Lemma tnth_cast_tuple {A : Type} {n m : nat} (H : n = m)
     (t : n.-tuple A) (i : 'I_m) :
   tnth (cast_tuple H t) i = tnth t (cast_ord (esym H) i).

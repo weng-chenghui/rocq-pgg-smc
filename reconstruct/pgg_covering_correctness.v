@@ -46,9 +46,12 @@ Let ts := cs_scheme cs.
 
 Hypothesis HT : ts_T' ts = pi_T' PI.
 
-(* Main correctness theorem: CoveringScheme + PGGInterface + G-stable starts
-   -> reconstruction recovers the hidden value. Uses pgg_recon_monodromy_correct
-   over the full group pgg_G with the plug's rp_recon_invariant and rp_content. *)
+(* Given monodromy-stable starting shares (G_stable) and a ts_valid share
+   vector, endpoint reconstruction along any group element P recovers the
+   encoded secret s. This is the capstone correctness result: it discharges
+   the protocol-layer PGGInterface against the algebraic-layer
+   CoveringScheme for an arbitrary MonodromyReprType, not a specific
+   instance. *)
 Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
     (G_stable : forall g, g \in pgg_G M ->
        forall i : 'I_(ts_T' ts).+1,
@@ -63,6 +66,8 @@ Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
                 | j < (ts_T' ts).+1] ->
   pgg_recon_endpoints HT (rp_content (cs_plug cs)) P = s.
 Proof.
+(* Applies pgg_recon_monodromy_correct over the full group pgg_G, using the
+   plug's rp_recon_invariant and rp_content. *)
 move=> PG Hvalid.
 apply: (pgg_recon_monodromy_correct (perm := rp_monodromy (cs_plug cs)));
   [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid

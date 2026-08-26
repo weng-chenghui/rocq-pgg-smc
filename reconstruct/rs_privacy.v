@@ -114,23 +114,22 @@ Let a_nuroot : not_uroot_on a n := prim_root_not_uroot_on an.
 Let C := RS.code a n d.
 Let C_nt := RS_not_trivial a dn.
 
-(* For MDS codes, the dual distance equals k + 1 = (n - d) + 1 *)
-(* This is the key structural property we need *)
+(* For MDS codes, the dual distance equals k + 1 = (n - d) + 1. *)
 
-(* Main result: privacy surjectivity for RS codes.
-   For any set S with |S| < (n-d)+1 (= dim(C)+1) and any target vector,
-   there exists a codeword agreeing with target on S.
-
-   Proof strategy:
-   1. Extract the positions in S and their target values
-   2. Lagrange-interpolate a polynomial of degree <= |S|-1 < n-d
-   3. The evaluation of this polynomial at (a^0, a^1, ..., a^{n-1})
-      gives an RS codeword matching target on S positions *)
+(* For any set S of positions with |S| < (n-d)+1 = dim(C)+1, some codeword
+   of C agrees with a given target vector on S. This discharges Massey's
+   privacy_surj hypothesis for Reed-Solomon codes: no adversary who sees
+   only positions outside S can pin down the codeword's values on S, since
+   every assignment on a sub-dual-distance set is realised by some
+   codeword. *)
 Lemma rs_privacy_surj :
   forall (S : {set 'I_n}) (target : 'rV[F]_n),
     #|S| < (n - d).+1 ->
     exists c : 'rV[F]_n, c \in C /\ vproj c S = vproj target S.
 Proof.
+(* Lagrange-interpolate a polynomial of degree <= |S|-1 < n-d through the
+   target values at S's positions, then show its evaluation vector at
+   (a^0, ..., a^{n-1}) is an RS codeword matching target on S. *)
 move=> S target HS.
 set sS := #|S|.
 (* Build tuples via mktuple for clean tnth access *)
@@ -163,7 +162,11 @@ split.
   by rewrite tnth_mktuple Hj.
 Qed.
 
-(* Corollary: instantiate massey_scheme for RS codes *)
+(* rs_privacy_surj at the strictly smaller bound #|S| < n - d, carrying an
+   unused min-distance hypothesis Hd2. Nothing downstream calls this
+   corollary; the massey_scheme instantiation in rs_massey_bridge.v uses
+   rs_privacy_surj directly, at the sharper bound #|S| < (n-d).+1 that
+   matches massey's d_perp = (n-d)+1 exactly. *)
 Lemma rs_privacy_surj_massey (Hd2 : 1 < min_dist C_nt) :
   forall (S : {set 'I_n}) (target : 'rV[F]_n),
     #|S| < (n - d) ->

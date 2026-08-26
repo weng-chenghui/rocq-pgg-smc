@@ -40,49 +40,36 @@ Open Scope ring_scope.
 Section tuple_rV.
 Variables (F : ringType) (m : nat).
 
-(** tuple_to_rV — view an m-tuple as a 1-by-m row vector.
-    Kind: helper.
-    Why: bridges the tuple-based ThresholdScheme interface with the row-vector
-         code-theory layer.
-    Used by: massey_valid_tuple, massey_recon_tuple, and their correctness proofs.
-*)
+(** A row vector of length m holding tuple t's entries in order:
+    tuple_to_rV t ord0 i = tnth t i.  This is the bridge letting the
+    tuple-facing ThresholdScheme interface invoke the row-vector
+    code-theory lemmas below. *)
 Definition tuple_to_rV (t : m.-tuple F) : 'rV[F]_m :=
   \row_(i < m) tnth t i.
 
-(** rV_to_tuple — view a 1-by-m row vector as an m-tuple.
-    Kind: helper.
-    Why: inverse of tuple_to_rV, needed to package the output of the
-         row-vector privacy argument as a tuple.
-    Used by: massey_private_tuple, massey_encode_tuple.
-*)
+(** The m-tuple of v's entries, inverse to tuple_to_rV.  Packages the
+    row-vector output of the privacy argument back into the tuple shape
+    the tuple-facing lemmas return. *)
 Definition rV_to_tuple (v : 'rV[F]_m) : m.-tuple F :=
   [tuple v ord0 i | i < m].
 
-(** rV_to_tupleK — tuple_to_rV is a left inverse of rV_to_tuple.
-    Kind: helper.
-    Why waived: cancellation-law suffix (_K).
-    Used by: massey_private_tuple, massey_encode_valid.
-*)
+(** tuple_to_rV cancels rV_to_tuple, one of the two round-trip identities
+    that let this file move freely between the tuple and row-vector views
+    of a share vector. *)
 Lemma rV_to_tupleK (v : 'rV[F]_m) : tuple_to_rV (rV_to_tuple v) = v.
 Proof. by apply/rowP => i; rewrite mxE tnth_mktuple. Qed.
 
-(** tuple_to_rVK — rV_to_tuple is a left inverse of tuple_to_rV.
-    Kind: helper.
-    Why waived: cancellation-law suffix (_K).
-    Used by: downstream tuple round-trips.
-*)
+(** rV_to_tuple cancels tuple_to_rV, the other round-trip identity
+    connecting the tuple and row-vector views of a share vector. *)
 Lemma tuple_to_rVK (t : m.-tuple F) : rV_to_tuple (tuple_to_rV t) = t.
 Proof.
 apply: eq_from_tnth => i.
 by rewrite tnth_mktuple mxE.
 Qed.
 
-(** tuple_to_rV_tnth — tuple_to_rV projects to the original tnth.
-    Kind: helper.
-    Why: exposes the defining equation tuple_to_rV t ord0 i = tnth t i once
-         so downstream rewrites can use it.
-    Used by: massey_private_tuple, coord_perm_compatible proofs.
-*)
+(** tuple_to_rV's defining equation as a standalone rewrite rule,
+    (tuple_to_rV t) ord0 i = tnth t i, unfolding the tuple/row-vector
+    correspondence one coordinate at a time for the privacy proofs below. *)
 Lemma tuple_to_rV_tnth (t : m.-tuple F) (i : 'I_m) :
   (tuple_to_rV t) ord0 i = tnth t i.
 Proof. by rewrite mxE. Qed.
@@ -110,11 +97,8 @@ Hypothesis Hd2 : 1 < d.
 Definition massey_codeword (s : F) (shares : 'rV[F]_n'.+1) : 'rV[F]_n :=
   \row_(i < n) if (i : nat) == 0%N then s else shares ord0 (inord i.-1).
 
-(** massey_codeword0 — position 0 of the Massey codeword is the secret.
-    Kind: helper.
-    Why: specializes the pointwise definition at the secret position.
-    Used by: massey_private, massey_secret_unique.
-*)
+(** massey_codeword s shares holds s at position 0: the specialization of
+    the pointwise definition that recovers the secret coordinate. *)
 Lemma massey_codeword0 (s : F) (shares : 'rV[F]_n'.+1) :
   (massey_codeword s shares) ord0 ord0 = s.
 Proof. by rewrite mxE /=. Qed.
@@ -129,11 +113,9 @@ rewrite /bump leq0n add1n inordK.
 by case: (val i) Hi (ltn_ord i) => //= k _ /ltnW.
 Qed.
 
-(** massey_codewordS — lifted positions of the Massey codeword are the shares.
-    Kind: helper.
-    Why: specializes the pointwise definition at non-zero positions.
-    Used by: massey_private, hadamard_massey_codeword.
-*)
+(** At every position past 0, massey_codeword s shares agrees with shares:
+    the specialization of the pointwise definition that recovers the
+    share coordinates. *)
 Lemma massey_codewordS (s : F) (shares : 'rV[F]_n'.+1) (j : 'I_n'.+1) :
   (massey_codeword s shares) ord0 (lift ord0 j) = shares ord0 j.
 Proof.
@@ -183,11 +165,10 @@ Qed.
 Definition massey_reconstruct (shares : 'rV[F]_n'.+1) : F :=
   odflt 0 [pick s0 : F | massey_codeword s0 shares \in C].
 
-(** massey_reconstruct_correct — reconstruction recovers the unique secret.
-    Kind: main.
-    Why: the correctness half of Massey's construction, combining uniqueness
-         of the valid secret with existence of the codeword witness.
-*)
+(** massey_reconstruct recovers the secret that was encoded: if s together
+    with shares is a codeword of C, massey_reconstruct shares = s.  This is
+    Massey's correctness half, combining the codeword witness with
+    massey_secret_unique. *)
 Lemma massey_reconstruct_correct (s : F) (shares : 'rV[F]_n'.+1) :
   massey_codeword s shares \in C ->
   massey_reconstruct shares = s.
@@ -228,38 +209,29 @@ Qed.
 (* Index mapping: share position j to codeword position *)
 Definition lift_share (j : 'I_n'.+1) : 'I_n := lift ord0 j.
 
-(** lift_coalition — image of a share-indexed coalition at codeword positions.
-    Kind: helper.
-    Why: translates coalitions (among shares) into subsets of the full codeword
-         so that privacy_surj can be applied uniformly.
-    Used by: card_S_bound, massey_private.
-*)
+(** The image of a share-index coalition under lift_share, viewed as a
+    subset of the n codeword positions.  Recasting a coalition of shares in
+    codeword coordinates is what lets privacy_surj, stated over codeword
+    positions, be applied to it. *)
 Definition lift_coalition (coal : {set 'I_n'.+1}) : {set 'I_n} :=
   [set lift_share j | j in coal].
 
-(** lift_share_inj — lift_share is injective.
-    Kind: helper.
-    Why: needed to relate cardinalities of coalitions before and after lifting.
-    Used by: lift_coalition_card.
-*)
+(** lift_share is injective, so lifting a coalition of shares to codeword
+    positions does not collapse distinct shares onto the same coordinate. *)
 Lemma lift_share_inj : injective lift_share.
 Proof. exact: lift_inj. Qed.
 
-(** lift_coalition_card — lifting preserves coalition cardinality.
-    Kind: helper.
-    Why: follows from injectivity of lift_share; needed for the card_S_bound.
-    Used by: card_S_bound.
-*)
+(** Lifting a coalition to codeword positions preserves its cardinality:
+    #|lift_coalition coal| = #|coal|.  This is what keeps the dual-distance
+    bound on shares meaningful after the coalition is recast in codeword
+    coordinates. *)
 Lemma lift_coalition_card (coal : {set 'I_n'.+1}) :
   #|lift_coalition coal| = #|coal|.
 Proof. by rewrite card_imset //; exact: lift_share_inj. Qed.
 
-(** ord0_notin_lift — position 0 never appears in a lifted coalition.
-    Kind: helper.
-    Why: because lift_share uses lift ord0 which avoids 0; needed to compute
-         the disjoint union cardinality in card_S_bound.
-    Used by: card_S_bound.
-*)
+(** Position 0, the secret's coordinate, never lies in a lifted coalition,
+    since lift_share always lands past 0.  This is what makes adding {0} to
+    a lifted coalition a genuine cardinality increase in card_S_bound. *)
 Lemma ord0_notin_lift (coal : {set 'I_n'.+1}) :
   (ord0 : 'I_n) \notin lift_coalition coal.
 Proof.
@@ -268,12 +240,9 @@ rewrite /lift_share => Habs.
 by move/negP: (neq_lift ord0 j); apply; rewrite -Habs.
 Qed.
 
-(** card_S_bound — bounding the enriched coalition size by the dual distance.
-    Kind: helper.
-    Why: expresses that adding the secret position to a lifted coalition still
-         stays within the privacy radius.
-    Used by: massey_private.
-*)
+(** Adding the secret's coordinate to a lifted coalition of at most
+    d_perp'-many shares still stays under the dual distance d_perp, so
+    privacy_surj applies to {0} union the lifted coalition. *)
 Lemma card_S_bound (coal : {set 'I_n'.+1}) :
   #|coal| < d_perp'.+1 ->
   #|[set ord0 : 'I_n] :|: lift_coalition coal| < d_perp.
@@ -330,20 +299,16 @@ rewrite (vproj_coord_eq Hvproj Hord0) mxE /=.
 exact: eqxx.
 Qed.
 
-(** massey_encode — the dealer's encoding of a secret into shares.
-    Kind: main.
-    Why: picks a codeword with the secret at position 0 and exposes its
-         non-zero coordinates as the share vector.
-*)
+(** The dealer's encoding of a secret s: a codeword with s at position 0,
+    chosen by first_coord_surj, with its remaining coordinates read off as
+    the share vector. *)
 Definition massey_encode (s : F) : 'rV[F]_n'.+1 :=
   let c := xchoose (first_coord_surj s) in
   \row_(j < n'.+1) c ord0 (lift ord0 j).
 
-(** massey_encode_codeword — massey_codeword of the encoding lies in C.
-    Kind: helper.
-    Why: correctness half of the encode/reconstruct pair on the row-vector side.
-    Used by: massey_encode_valid.
-*)
+(** massey_codeword s (massey_encode s) lies in C: the encoding
+    massey_encode produces is a genuine codeword sharing s, the row-vector
+    half of the encode/reconstruct correctness pair. *)
 Lemma massey_encode_codeword (s : F) :
   massey_codeword s (massey_encode s) \in C.
 Proof.
@@ -361,31 +326,24 @@ Qed.
 Definition massey_valid_tuple (s : F) (shares : n'.+1.-tuple F) : Prop :=
   massey_codeword s (tuple_to_rV shares) \in C.
 
-(** massey_recon_tuple — tuple-level reconstruction via the row-vector version.
-    Kind: main.
-    Why: packages massey_reconstruct behind the tuple-based ThresholdScheme API
-         so downstream code can work with tuples.
-*)
+(** massey_reconstruct read through the tuple/row-vector correspondence,
+    the reconstruction half of the tuple-facing ThresholdScheme interface. *)
 Definition massey_recon_tuple (shares : n'.+1.-tuple F) : F :=
   massey_reconstruct (tuple_to_rV shares).
 
-(** massey_correct_tuple — tuple-level correctness of reconstruction.
-    Kind: helper.
-    Why: correctness side of the ThresholdScheme instance, lifted from the
-         row-vector lemma massey_reconstruct_correct.
-    Used by: massey_scheme.
-*)
+(** Tuple-level correctness of reconstruction: restates
+    massey_reconstruct_correct through tuple_to_rV, the correctness field
+    massey_scheme is built from. *)
 Lemma massey_correct_tuple (s : F) (shares : n'.+1.-tuple F) :
   massey_valid_tuple s shares ->
   massey_recon_tuple shares = s.
 Proof. exact: massey_reconstruct_correct. Qed.
 
-(** massey_private_tuple — tuple-level privacy (share indistinguishability).
-    Kind: helper.
-    Why: packages massey_private into the ThresholdScheme tuple API: for any
-         secret s2, produce shares' agreeing with shares on the coalition.
-    Used by: massey_scheme.
-*)
+(** Tuple-level privacy: for any coalition of fewer than d_perp shares and
+    any target secret s2, there is a share tuple agreeing with the given
+    shares on the coalition and sharing s2.  Restates massey_private through
+    the tuple/row-vector correspondence, the privacy field massey_scheme
+    is built from. *)
 Lemma massey_private_tuple (s1 s2 : F) (shares : n'.+1.-tuple F)
     (coal : {set 'I_n'.+1}) :
   #|coal| < d_perp'.+1 ->
@@ -403,18 +361,14 @@ exists (rV_to_tuple shares_rV); split.
   exact: Hagree.
 Qed.
 
-(** massey_encode_tuple — tuple-level encoding of a secret.
-    Kind: main.
-    Why: the ThresholdScheme-facing counterpart of massey_encode.
-*)
+(** The tuple-facing counterpart of massey_encode: the dealer's encoding
+    of s read off through rV_to_tuple. *)
 Definition massey_encode_tuple (s : F) : n'.+1.-tuple F :=
   rV_to_tuple (massey_encode s).
 
-(** massey_encode_valid — the tuple encoding is a valid sharing of s.
-    Kind: helper.
-    Why: combines rV_to_tupleK with massey_encode_codeword.
-    Used by: massey_scheme.
-*)
+(** massey_encode_tuple s is a valid sharing of s, combining rV_to_tupleK
+    with massey_encode_codeword: the encode-validity field massey_scheme
+    is built from. *)
 Lemma massey_encode_valid (s : F) :
   massey_valid_tuple s (massey_encode_tuple s).
 Proof.
@@ -422,12 +376,11 @@ rewrite /massey_valid_tuple /massey_encode_tuple rV_to_tupleK.
 exact: massey_encode_codeword.
 Qed.
 
-(** massey_scheme — Massey's ThresholdScheme over a linear code.
-    Kind: main.
-    Why: the headline ThresholdScheme built from any nontrivial linear code
-         whose dual has sufficient minimum distance; foundational to the
-         AG/RS-based covering constructions.
-*)
+(** Massey's ThresholdScheme: the tuple-facing sharing scheme built from any
+    nontrivial linear code C whose dual distance exceeds the coalition size,
+    packaging massey_valid_tuple, massey_recon_tuple, massey_encode_tuple
+    and their correctness and privacy lemmas above into one ThresholdScheme
+    instance. *)
 Definition massey_scheme : ThresholdScheme F F :=
   @MkThresholdScheme F F n' d_perp'
     massey_valid_tuple

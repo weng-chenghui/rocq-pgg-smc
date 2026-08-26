@@ -35,11 +35,14 @@ Section combinatorial_rigidity.
 Variable R : realType.
 Variable M : MonodromyReprWithGeneratorType.
 
-(** CombinatorialRigidity — rigidity record for curve-free, non-abelian groups.
-    Kind: interface.
-    Why: the wreath instance cannot form an AlgebraicRigidity (its tw_genus0_klein
-    would be a false inequality). This record certifies the same security and
-    recovery content while replacing the curve cap with the order inequality. *)
+(** CombinatorialRigidity: the curve-free analogue of AlgebraicRigidity,
+    bundling the same security certificate and covering-scheme content but
+    replacing the curve-rigidity cap tw_genus0_klein with the order
+    inequality cr_klein_lt_card. A curve-free group such as the wreath
+    product Z_n wr S_m can have #|G| exceed the Klein genus-0 bound while
+    the recovery gap stays positive, exactly the conjunction tw_genus0_klein
+    would force to be false; CombinatorialRigidity certifies that
+    conjunction directly instead. *)
 Record CombinatorialRigidity := MkCombinatorialRigidity {
   cr_security : ShuffleCertificateBundle R M ;
   cr_covering : CoveringScheme M ;
@@ -47,12 +50,11 @@ Record CombinatorialRigidity := MkCombinatorialRigidity {
   cr_klein_lt_card : klein_genus0_bound M < #|pgg_G M|
 }.
 
-(** cr_large_group_with_gap — the positive dual of the s5_nogo no-go.
-    Kind: main.
-    Why: a CombinatorialRigidity realises a group whose order exceeds the
-    curve-rigidity bound together with a positive recovery gap, the exact
-    conjunction s5_nogo proves impossible for a genus-zero curve. This is the
-    headline structural property of the wreath instance. *)
+(** Every CombinatorialRigidity instance realises the group order exceeding
+    the curve-rigidity bound together with a positive recovery gap: exactly
+    the conjunction s5_nogo proves no genus-zero curve can satisfy. This is
+    CombinatorialRigidity's separation result, a witness lying outside what
+    curve-based AlgebraicRigidity instances can reach. *)
 Lemma cr_large_group_with_gap (cr : CombinatorialRigidity) :
   (klein_genus0_bound M < #|pgg_G M|) /\ (0 < cd_genus (cs_data (cr_covering cr))).
 Proof. by split; [exact: cr_klein_lt_card | exact: cr_genus_gt0]. Qed.

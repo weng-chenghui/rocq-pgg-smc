@@ -74,11 +74,9 @@ Let q := #|F|.
 Definition scalar_pred : pred {'GL_2[F]} :=
   fun u => is_scalar_mx (val u : 'M_2).
 
-(** scalar_pred_group_set - scalar GL_2 matrices form a subgroup.
-    Kind: helper.
-    Why: needed to build the scalar subgroup inside GL_2(F) as a bona fide group.
-    Used by: scalar_gl2 group definition and scalar_gl2_subset_center below.
-*)
+(** The scalar matrices in GL_2(F) are closed under identity and product,
+    so scalar_pred is a group_set. This closure is what lets scalar_gl2
+    below be built as a genuine subgroup rather than a bare predicate. *)
 Lemma scalar_pred_group_set : group_set [set u : {'GL_2[F]} | scalar_pred u].
 Proof.
 apply/group_setP; split.
@@ -118,7 +116,7 @@ Qed.
 (* The scalar subgroup is in bijection with F^* (units of F).
    Each unit a maps to a%:M in GL(2,F). *)
 
-(* Key helper: scalar matrix of a unit is in GL *)
+(* The scalar matrix (val a)%:M of a unit a of F is invertible in GL(2,F). *)
 Lemma scalar_unit_in_gl (a : {unit F}) :
   (val a)%:M \in @unitmx _ 2.
 Proof.
@@ -206,42 +204,31 @@ End pgl_connection.
 
 Definition pgl_card (q : nat) : nat := q * (q ^ 2 - 1).
 
-(** pgl_card_eq — equational identity [#|pgl2 F| = pgl_card #|F|] for any
-    [finFieldType] [F].
-    Kind: helper.
-    Why: repackages [pgl2_card_formula] as a definitional rewrite lemma so
-    later instance proofs (e.g. [pgl_card_5]) can fold the cardinality of
-    [pgl2 F] into the closed-form polynomial in [#|F|].
-    Used by: pgl_card_5 (and downstream S5 anchor lemmas). *)
+(** #|pgl2 F| = pgl_card #|F| for any finFieldType F: the group-theoretic
+    cardinality of PGL(2,F) equals the closed-form polynomial pgl_card
+    evaluated at |F|. Stating it as a rewrite lemma in terms of pgl_card
+    lets later instances, such as pgl_card_5, fold the cardinality into a
+    plain numeral computation instead of unfolding pgl2. *)
 Lemma pgl_card_eq (F : finFieldType) : #|pgl2 F| = pgl_card #|F|.
 Proof. exact: pgl2_card_formula. Qed.
 
-(** pgl_card_5 — numerical instance [pgl_card 5 = 120]. Definitionally true.
-    Kind: helper.
-    Why: used in combination with [card_set_S5] to identify the PGL(2,F_5)
-    order with the order of [S_5], which anchors the S_5 instance's PGL bound.
-    Used by: pgl2_5_eq_s5. *)
+(** pgl_card 5 = 120, decided by computation. Combined with card_set_S5
+    this identifies |PGL(2,F_5)| with |S_5|, the numerical anchor the S_5
+    instance's genus-0 PGL bound rests on. *)
 Lemma pgl_card_5 : pgl_card 5 = 120%N.
 Proof. by []. Qed.
 
-(** card_set_S5 — [#|[set: 'S_5]| = 120], i.e. the order of the symmetric
-    group on five letters.
-    Kind: helper.
-    Why: standard cardinality fact expressed in the [{set: _}] form so it can
-    be chained with [pgl_card_5] to bridge the PGL(2,F_5) cardinality to the
-    S_5 order without rewriting [card_Sn] in each caller.
-    Used by: pgl2_5_eq_s5. *)
+(** #|[set: 'S_5]| = 120, the order of the symmetric group on five letters,
+    stated in the {set: _} form so it composes with pgl_card_5 to bridge
+    the PGL(2,F_5) cardinality to the S_5 order without re-deriving
+    card_Sn at each call site. *)
 Lemma card_set_S5 : #|[set: 'S_5]| = 120%N.
 Proof. by rewrite cardsT card_Sn. Qed.
 
-(** pgl2_5_eq_s5 — bridge equation [pgl_card 5 = #|[set: 'S_5]|]; identifies
-    the PGL(2,F_5) cardinality with the order of S_5.
-    Kind: helper.
-    Why: exposes the PGL(2,F_5)-vs-S_5 isomorphism at the cardinality level,
-    which is the form downstream instance files (rigidity_s5_instance) need
-    to satisfy the genus-0 PGL bound by a simple rewrite rather than invoking
-    the full permutation isomorphism.
-    Used by: rigidity_s5_instance.v (PGL-bound discharge for the S_5 instance). *)
+(** pgl_card 5 = #|[set: 'S_5]|: the PGL(2,F_5)-versus-S_5 isomorphism at
+    the level of cardinalities. rigidity_s5_instance.v discharges the S_5
+    instance's genus-0 PGL bound with this rewrite instead of invoking the
+    full permutation isomorphism. *)
 Lemma pgl2_5_eq_s5 : pgl_card 5 = #|[set: 'S_5]|.
 Proof. by rewrite pgl_card_5 card_set_S5. Qed.
 

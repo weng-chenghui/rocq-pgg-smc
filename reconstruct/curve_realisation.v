@@ -65,8 +65,7 @@ Import Prenex Implicits.
 
 (** realised_by_curve — opaque predicate asserting that a [CoveringData] record
     corresponds to a real algebraic curve realising its (genus, ramification)
-    data. Never unfolded or used in tactics; serves as a documentation hook.
-    Kind: interface. *)
+    data. Never unfolded or used in tactics; serves as a documentation hook. *)
 Parameter realised_by_curve :
   forall (M : MonodromyReprType), CoveringData M -> Prop.
 
@@ -78,8 +77,7 @@ Arguments realised_by_curve {M} cd.
 
 (** RealisedCoveringData — packages a [CoveringData] with its realisation
     witness. Optional convenience wrapper for instance files; existing
-    constructions can pass [cd] and [realised_by_curve cd] separately.
-    Kind: interface. *)
+    constructions can pass [cd] and [realised_by_curve cd] separately. *)
 Record RealisedCoveringData (M : MonodromyReprType) := MkRealisedCoveringData {
   rcd_data     : CoveringData M ;
   rcd_realised : realised_by_curve rcd_data ;

@@ -80,7 +80,9 @@ rewrite /lagrange_numer /lagrange_denom horner_prod.
 by apply: eq_bigr => j Hj; rewrite hornerD hornerN hornerX hornerC.
 Qed.
 
-(* KEY LEMMA: Lagrange basis evaluation *)
+(* The i-th Lagrange basis polynomial evaluates to 1 at pts_i and 0 at every
+   other pts_j: the defining property that makes lagrange_basis a basis
+   for interpolation. *)
 Lemma lagrange_basis_eval (i j : 'I_n) :
   (lagrange_basis i).[tnth pts j] = (i == j)%:R.
 Proof.
@@ -135,7 +137,9 @@ Hypothesis pts_uniq : uniq pts.
 Definition lagrange_interp : {poly F} :=
   \sum_(i < n) (tnth vals i *: lagrange_basis pts i).
 
-(* KEY LEMMA: Interpolation matches the given values *)
+(* The interpolation polynomial reproduces the target values at every
+   interpolation point: lagrange_interp.[pts_i] = vals_i. This is the
+   correctness property Section 3's uniqueness lemma is stated against. *)
 Lemma lagrange_interp_eval (i : 'I_n) :
   lagrange_interp.[tnth pts i] = tnth vals i.
 Proof.

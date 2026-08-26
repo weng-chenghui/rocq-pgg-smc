@@ -139,20 +139,18 @@ Variable tw : ThresholdWitness M.
 Let cs := tw_covering tw.
 Let ts := cs_scheme cs.
 
-(** dw_dropout — the dropout count of a DropoutWitness: number of cards
-    that may be face-down while the recovery function still returns
-    the secret.
-    Kind: definition.
-    Why: the operational accessor on the card-protocol side, parallel
-    to [cs_gap] on the structural side. *)
+(** dw_dropout — the dropout count of a DropoutWitness: the number of cards
+    that may be left face-down while the recovery function still returns
+    the secret, T - dw_min_revealed. This is the operational accessor on
+    the card-protocol side, the counterpart to [cs_gap] on the structural
+    side. *)
 Definition dw_dropout (dw : DropoutWitness tw) : nat :=
   ts_T ts - dw_min_revealed dw.
 
 (** dw_dropout_leq_gap — the dropout count is bounded above by the
-    privacy-vs-reveal gap T - k.
-    Kind: helper.
-    Why: an honest dropout decoder cannot drop more cards than the
-    structural privacy-vs-reveal gap allows. *)
+    privacy-vs-reveal gap T - k: an honest dropout decoder cannot drop more
+    cards than the structural gap allows, since dw_min_revealed_ge_ts_k
+    already pins its floor above k. *)
 Lemma dw_dropout_leq_gap (dw : DropoutWitness tw) :
   (dw_dropout dw <= ts_T ts - ts_k ts)%N.
 Proof.
@@ -162,11 +160,12 @@ exact: (dw_min_revealed_ge_ts_k dw).
 Qed.
 
 (** dw_dropout_bound — the dropout count is bounded above by twice the
-    genus of the covering curve. Parallels [ar_gap_bound]
-    (algebraic_rigidity.v) on the structural side.
-    Kind: main.
-    Why: the operational rigidity statement on the card-protocol side;
-    binds the dropout count to the geometric invariant of the curve. *)
+    genus of the covering curve, the operational-side counterpart to
+    [ar_gap_bound] (algebraic_rigidity.v) and [gap_bound]
+    (covering_scheme.v) on the structural side: however a concrete recovery
+    function is eventually built, its tolerable card-dropout count cannot
+    exceed the genus-derived price cap that already governs the
+    reconstruction gap. *)
 Lemma dw_dropout_bound (dw : DropoutWitness tw) :
   (dw_dropout dw <= 2 * cd_genus (cs_data cs))%N.
 Proof.

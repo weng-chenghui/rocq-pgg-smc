@@ -67,12 +67,11 @@ Hypothesis HG : 1 < #|G|.  (* nontrivial group *)
 (* Ramification for 2 fully-ramified branch points *)
 Let ramif0 := (2 * #|G| - 2)%N.
 
-(** genus0_hurwitz — Riemann-Hurwitz equality for the genus-0 covering instance.
-    Kind: helper.
-    Why: discharges the cd_hurwitz side-condition of CoveringData for the
-         genus-0 data, reducing to 2|G| = (2|G|-2) + 2.
-    Used by: genus0_data.
-*)
+(** The Riemann-Hurwitz equality for the genus-0 covering instance:
+    2*0 + 2*#|G| = #|G|*(2*0) + ramif0 + 2, i.e. 2|G| = (2|G|-2) + 2 once
+    the genus and base-genus terms vanish. This discharges the cd_hurwitz
+    obligation genus0_data needs to assemble a well-formed CoveringData at
+    genus 0. *)
 Lemma genus0_hurwitz :
   2 * 0 + 2 * #|G| = #|G| * (2 * 0) + ramif0 + 2.
 Proof.
@@ -82,13 +81,9 @@ rewrite subnK //.
 by rewrite -[X in X <= _]muln1 leq_mul2l (ltnW HG).
 Qed.
 
-(** genus0_ramif_ge_nbr — lower bound [2 <= ramif0], where [ramif0] is the
-    total ramification in the genus-0 case.
-    Kind: helper.
-    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-0
-    [CoveringData] record; the inequality is the branch-count-vs-ramification
-    constraint required by the Riemann-Hurwitz witness.
-    Used by: genus0_data. *)
+(** The genus-0 total ramification ramif0 is at least 2, the minimum
+    ramification consistent with having 2 branch points. This discharges
+    the cd_ramif_ge_n_branch obligation genus0_data needs. *)
 Lemma genus0_ramif_ge_nbr : (2 <= ramif0)%N.
 Proof.
 rewrite /ramif0.
@@ -97,11 +92,11 @@ case: #|G| HG2 => [|[|n]] // _.
 by rewrite mulnS addKn mulnS leq_addr.
 Qed.
 
-(** genus0_data — CoveringData record for the genus-0 (projective-line) covering.
-    Kind: main.
-    Why: supplies the Riemann-Hurwitz data used to assemble the genus-0
-         CoveringScheme; base genus = 0 with two fully ramified branch points.
-*)
+(** The CoveringData for the genus-0 (projective-line) covering: base genus
+    0, two fully ramified branch points, total ramification ramif0, genus
+    0. This is the concrete Riemann-Hurwitz data for the P^1 -> P^1
+    covering that Shamir's secret sharing over Reed-Solomon codes
+    realises. *)
 Definition genus0_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := 2 ;
@@ -149,12 +144,11 @@ Hypothesis code_auto :
 Let ts0_perm : pgg_gT M -> {perm 'I_(ts_T' ts0).+1} :=
   massey_share_perm (G:=G) sigma_fix0.
 
-(** ts0_perm_compatible — ts_recon_perm_invariant witness for the genus-0 scheme.
-    Kind: helper.
-    Why: feeds cs_recon_invariant in genus0_covering via transport +
-         massey_perm_compatible applied to the RS-based threshold scheme.
-    Used by: genus0_covering.
-*)
+(** ts0_perm is a valid ts_recon_perm_invariant witness for the concrete
+    RS-based threshold scheme ts0, obtained by transporting
+    massey_perm_compatible along the Massey construction underlying
+    rs_genus0_scheme. This is the reconstruction-invariance certificate the
+    covering scheme's plug bundles as rp_recon_invariant. *)
 Lemma ts0_perm_compatible :
   @ts_recon_perm_invariant _ G _ _ ts0 ts0_perm.
 Proof.
@@ -163,7 +157,12 @@ apply: transport_perm_compatible.
 exact: massey_perm_compatible.
 Qed.
 
-(* The CoveringScheme instance (content = id: position model) *)
+(** The genus-0 CoveringScheme built from the concrete RS-based threshold
+    scheme ts0: content is the identity, since in this position model a
+    player's observation IS the share position itself, monodromy acts via
+    ts0_perm, and cs_gap follows from ts0's exactness ts_T = ts_k. This is
+    Shamir's secret sharing over a Reed-Solomon code, realised as a concrete
+    instance of the PGG covering-scheme interface. *)
 Definition genus0_covering : CoveringScheme M := {|
   cs_plug := {|
     rp_scheme    := ts0 ;
@@ -175,13 +174,23 @@ Definition genus0_covering : CoveringScheme M := {|
                (leq_trans (eq_leq ts0_exact) (leq_addr _ _)) ;
 |}.
 
-(* Exact threshold for genus-0 covering *)
+(** The assembled genus-0 covering has ts_T = ts_k: an exact threshold with
+    no gap between reconstruction and privacy. This is the file's genus-0
+    exact-threshold result, matching Shamir's classical exact-threshold
+    guarantee and instantiating the gap = 0 case of the genus-dependent gap
+    bound proved generically elsewhere in the batch. *)
 Lemma shamir_exact :
   ts_T (cs_scheme genus0_covering) = ts_k (cs_scheme genus0_covering).
 Proof. exact: ts0_exact. Qed.
 
-(* Protocol integration: reconstruction recovers the secret
-   (requires G-stable starts hypothesis) *)
+(** Genus-0 protocol correctness: given a PGGInterface PI whose share count
+    matches ts0's ts_T', and a G_stable hypothesis that the identity content
+    readout agrees with the monodromy action ts0_perm at every coordinate, a
+    valid share tuple built from PI's starting positions reconstructs, via
+    pgg_recon_endpoints, exactly the secret s that produced it. This is the
+    genus-0 specialization, concretely instantiated for the RS/Shamir
+    covering scheme, of the general end-to-end reconstruction-correctness
+    argument. *)
 Lemma genus0_secret_invariant (PI : PGGInterface M)
     (HT : ts_T' ts0 = pi_T' PI) (s : 'I_N) (P : pgg_gT M)
     (G_stable : forall g, g \in G ->
@@ -205,22 +214,26 @@ End genus0.
 (******************************************************************************)
 (*     Section 3: Packaged RS-code witness                                    *)
 (*                                                                            *)
-(* The 11-item Reed-Solomon code-automorphism block above (q, m', primeq,    *)
-(* n'', a, qn, an, HN, sigma_code, sigma_fix0, code_auto) is shared verbatim *)
-(* by every concrete instance (den Boer 1989, Kim 2025, S_5, OC). To avoid   *)
-(* per-instance duplication of the Section-Variable block, we package the    *)
-(* eleven obligations into a single Record `RSCodeWitness M`, and expose a   *)
-(* wrapper `genus0_covering_witness` that takes the record instead of 11    *)
-(* separate arguments.                                                        *)
-(*                                                                            *)
-(* The legacy `genus0_covering` constructor remains available; instances     *)
-(* migrate to `genus0_covering_witness` independently.                       *)
+(* The eleven Reed-Solomon code-automorphism obligations of Section 2 (field *)
+(* and generator data, plus the coordinate-permutation compatibility         *)
+(* hypotheses) are identical in shape across every concrete monodromy        *)
+(* instance built on an RS/Shamir covering. RSCodeWitness packages them into *)
+(* a single record so a concrete instance supplies one witness value instead *)
+(* of eleven separate arguments.                                             *)
 (******************************************************************************)
 
 Section RSCodeWitnessDef.
 
 Variable M : MonodromyReprType.
 
+(** RSCodeWitness bundles the eleven pieces of data genus0_covering needs
+    for M: the field, generator and non-divisibility data defining the RS
+    code (rsw_q through rsw_HN), and the coordinate-permutation
+    compatibility data (rsw_sigma, rsw_fix0, rsw_auto) witnessing that the
+    monodromy action on M lifts to code automorphisms fixing the secret
+    coordinate. Packaging them together lets a concrete monodromy instance
+    supply one witness value instead of repeating the eleven-argument
+    list. *)
 Record RSCodeWitness := MkRSCodeWitness {
   rsw_q       : nat;
   rsw_m'      : nat;
@@ -249,14 +262,9 @@ Variable M : MonodromyReprType.
 Hypothesis HG : 1 < #|pgg_G M|.
 Variable rsw : RSCodeWitness M.
 
-(** genus0_covering_witness — assembles a concrete [CoveringScheme M] from a
-    packaged [RSCodeWitness] by unfolding each witness field and feeding it
-    into [genus0_covering].
-    Kind: instance.
-    Why: provides a one-line constructor usable by concrete instance files
-    (rigidity_kim_instance, rigidity_s5_instance) so each
-    of them can instantiate a covering scheme by supplying a bare RS witness
-    rather than repeating the 11-field argument list. *)
+(** Unfolds each field of an RSCodeWitness and feeds them into
+    genus0_covering, producing the same concrete CoveringScheme M from a
+    single packaged witness rather than eleven positional arguments. *)
 Definition genus0_covering_witness : CoveringScheme M :=
   @genus0_covering M HG
     (rsw_q rsw) (rsw_m' rsw) (rsw_primeq rsw)

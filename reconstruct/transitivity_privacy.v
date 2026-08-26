@@ -32,14 +32,23 @@
 (*   coalition_view_mutual_info_le == leakage about the secret is monotone    *)
 (*     under coalition inclusion.                                             *)
 (*                                                                            *)
-(* Section 6 -- Record-level view independence:                               *)
+(* Section 6 -- All-decks dealer variant:                                     *)
+(*   ttrans_view_indep_alldecks == a dealer that redraws a fresh valid deck   *)
+(*     of the secret's class before shuffling gives every coalition of at    *)
+(*     most t positions a view independent of the secret.                    *)
+(*   alldecks_shuffle_absorb == shuffling a uniform valid deck yields another *)
+(*     uniform valid deck of the same class.                                 *)
+(*   ttrans_view_indep_deck == the same independence holds with no shuffle   *)
+(*     at all, once the deck itself is freshly and uniformly redrawn.         *)
+(*                                                                            *)
+(* Section 7 -- Record-level view independence:                               *)
 (*   profile_deck == the deck a MonodromyProfile deals for a two-valued       *)
 (*     secret, read off the threshold-scheme encoder of its plug.             *)
 (*   profile_view_indep == ttrans_view_indep_gen stated over an arbitrary     *)
 (*     MonodromyProfile, its hypotheses being premises about the projections  *)
 (*     of the profile rather than fields of the record.                       *)
 (*                                                                            *)
-(* Section 7 -- Strength of the transitivity premise:                         *)
+(* Section 8 -- Strength of the transitivity premise:                         *)
 (*   ntransitive_card_le == a t-transitive group has at least as many         *)
 (*     elements as the acted set has distinct t-tuples.                       *)
 (*   ntransitive_trivial_degenerate == the trivial group is t-transitive only *)
@@ -70,10 +79,12 @@ Local Open Scope ring_scope.
 Local Open Scope proba_scope.
 Variables (R : realType) (A B : finType) (P1 : R.-fdist A) (P2 : R.-fdist B).
 
-(** inde_prod_fst == over a product distribution, a random variable whose
-    conditional law given the first coordinate is constant is independent of
-    the first coordinate.
-    @composes: ttrans_view_indep *)
+(** Over a product law P1 `x P2, a random variable Z whose conditional law
+    given the first coordinate a is the same fixed law mu for every a is
+    independent of that first coordinate. This is the general independence
+    fact the file specializes throughout: every "coalition view independent
+    of the secret" result below reduces to checking that the view's
+    conditional law, given the secret, does not depend on the secret. *)
 Lemma inde_prod_fst (T : finType) (Z : A * B -> T) (mu : R.-fdist T) :
   (forall a, fdistmap (fun b => Z (a, b)) P2 = mu) ->
   (P1 `x P2) |= (Z : {RV (P1 `x P2) -> T})
@@ -122,8 +133,10 @@ End product_independence.
 Section uniform_bijection.
 Variables (R : realType) (A : finType) (n : nat).
 
-(** bij_uniform == a bijection pushes the uniform distribution to itself.
-    @composes: ttrans_view_indep *)
+(** A bijection f : A -> A pushes the uniform law on A to itself. Composing
+    the uniform shuffle output with the per-secret encoding's injective card
+    map (ttrans_view_indep) leaves the coalition's single observed value
+    uniform regardless of which secret was dealt. *)
 Lemma bij_uniform (H : #|A| = n.+1) (f : A -> A) : bijective f ->
   fdistmap f (fdist_uniform (R:=R) H) = fdist_uniform H.
 Proof.
@@ -145,10 +158,12 @@ Local Open Scope ring_scope.
 Local Open Scope proba_scope.
 Variables (R : realType) (A B : finType) (P : R.-fdist A) (W : A -> R.-fdist B).
 
-(** inde_prod_kernel_fst == over a kernel product, a random variable whose
-    conditional law given any first coordinate of positive mass is a fixed
-    law is independent of the first coordinate.
-    @composes: ttrans_view_indep_alldecks *)
+(** Over a kernel product P `X W, a random variable Z whose conditional law
+    given any positive-mass first coordinate a is the same fixed law mu is
+    independent of that first coordinate. This is inde_prod_fst generalized
+    from a plain product to a kernel product, needed once the dealt deck
+    itself, not only the shuffle, is drawn from a secret-dependent law
+    (ttrans_view_indep_alldecks). *)
 Lemma inde_prod_kernel_fst (T : finType) (Z : A * B -> T) (mu : R.-fdist T) :
   (forall a, P a != 0 -> fdistmap (fun b => Z (a, b)) (W a) = mu) ->
   (P `X W) |= (Z : {RV (P `X W) -> T})
@@ -194,9 +209,10 @@ have HZz : forall z0, `Pr[ (Z : {RV (P `X W) -> T}) = z0 ] = mu z0.
 by move=> z a; rewrite pfwd1E HZa HZz HfstA mulrC.
 Qed.
 
-(** fdistmap_prod_const == a kernel product pushes forward to the common law
-    of its positive-mass sections.
-    @composes: ttrans_view_indep_alldecks *)
+(** A kernel product P `X W pushes forward under f to mu whenever every
+    positive-mass first-coordinate section of f pushes W a to mu. Applied to
+    the all-decks dealer, this collapses the secret-dependent deck-and-shuffle
+    law to a single secret-independent law on coalition views. *)
 Lemma fdistmap_prod_const (T : finType) (f : A * B -> T) (mu : R.-fdist T) :
   (forall a, P a != 0 -> fdistmap (fun b => f (a, b)) (W a) = mu) ->
   fdistmap f (P `X W) = mu.
@@ -217,10 +233,11 @@ under eq_bigr => b _ do rewrite fdist_prodE /=.
 by rewrite -big_distrr /= -(Hf a Pa0) fdistmapE.
 Qed.
 
-(** fdistmap_prod_snd_const == over a product with a constant kernel, if every
-    positive-mass second-coordinate section pushes the first marginal to the
-    same law, the pair pushforward is that law.
-    @composes: alldecks_shuffle_absorb *)
+(** Over a plain product P `x P2, if every positive-mass second-coordinate
+    section of f pushes the first marginal to the same law mu, the pair
+    pushforward is mu. This is fdistmap_prod_const with the roles of the two
+    coordinates swapped, used to absorb the shuffle coordinate rather than the
+    deck coordinate (alldecks_shuffle_absorb). *)
 Lemma fdistmap_prod_snd_const (T : finType) (P2 : R.-fdist B)
     (f : A * B -> T) (mu : R.-fdist T) :
   (forall b, P2 b != 0 -> fdistmap (fun a => f (a, b)) P = mu) ->
@@ -249,9 +266,12 @@ Local Open Scope ring_scope.
 Variables (R : realType) (A : finType) (C : {set A}).
 Hypothesis HC : (0 < #|C|)%N.
 
-(** fdist_uniform_supp_bij == an injective endomap stabilising the support
-    pushes the uniform-support law to itself.
-    @composes: alldecks_shuffle_absorb *)
+(** An injective endomap of A that stabilizes a support set C, mapping C to C
+    and its complement to its complement, pushes the uniform law on C to
+    itself. Applied to a shuffle permutation stabilizing the valid-deck set of
+    a fixed orbit class, this shows shuffling a uniformly drawn valid deck
+    yields another uniformly drawn valid deck of the same class
+    (alldecks_shuffle_absorb). *)
 Lemma fdist_uniform_supp_bij (f : A -> A) :
   injective f -> (forall a, (f a \in C) = (a \in C)) ->
   fdistmap f (fdist_uniform_supp R HC) = fdist_uniform_supp R HC.
@@ -281,10 +301,13 @@ Variable rho : {morphism G >-> {perm 'I_N'.+1}}.
 Variable t : nat.
 Hypothesis Htrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
 
-(** rho_tuple_fiber_card == for k <= t, every fiber of the map sending a group
-    element to the k-tuple image of a fixed injective source tuple has size
-    #|G| %/ #|dtuple_on k [set: 'I_N'.+1]|.
-    @composes: ttrans_view_indep *)
+(** For k <= t and a fixed injective source k-tuple p, the map g |-> the
+    k-tuple image of p under rho g has every fiber of the same size
+    #|G| %/ #|dtuple_on k [set: 'I_N'.+1]|, uniformly over target tuples q in
+    dtuple_on k. This equal-fiber-size fact is the combinatorial core of the
+    file: it is what turns a uniform draw of the shuffle group element into a
+    uniform draw of the k-tuple it produces, the mechanism behind every
+    view-independence result below. *)
 Lemma rho_tuple_fiber_card (k : nat) (p q : k.-tuple 'I_N'.+1) :
   (k <= t)%N -> p \in dtuple_on k [set: 'I_N'.+1] ->
   q \in dtuple_on k [set: 'I_N'.+1] ->
@@ -344,10 +367,13 @@ Hypothesis Hdeck_stable : forall g sh, g \in G ->
 Hypothesis Hpopulated : forall b : bool,
   exists sh, deck_ok sh /\ orbit_class sh = b.
 
-(** ttrans_private == a t-transitive shuffle over a distinct-card deck admits,
-    for every coalition of at most t positions and every target secret, a
-    re-dealt valid arrangement agreeing with the coalition's exact view.
-    @main security: the transitivity privacy bridge discharging ts_private. *)
+(** For a t-transitive shuffle over a distinct-card deck, every coalition of
+    at most t positions, and every target secret s2, some re-dealt valid
+    arrangement agrees with the coalition's exact view while carrying secret
+    s2. This is exactly the shape of a ThresholdScheme's ts_private
+    obligation (pgg_sharing_framework.v): proved once here for any
+    t-transitive monodromy, so no scheme built from one needs to reprove
+    it. *)
 Theorem ttrans_private (s2 : bool) (sh : N'.+1.-tuple 'I_N'.+1)
     (C : {set 'I_N'.+1}) :
   (#|C| <= t)%N -> deck_ok sh ->
@@ -397,9 +423,12 @@ Section point_marginal.
 Local Open Scope ring_scope.
 Variable R : realType.
 
-(** ttrans_point_uniform == the single-point pushforward of the uniform draw
-    over a transitive permutation group is exactly uniform.
-    @main security: single-card perfect uniformity of the shuffle. *)
+(** For a shuffle drawn uniformly from G, the single card value a fixed
+    position s receives, rho g s, is itself exactly uniform over 'I_N'.+1.
+    This is the k = 1 case of rho_tuple_fiber_card: it says a single
+    corrupted party's observed card carries no information about which
+    element of G was drawn, before any secret-dependent encoding is applied
+    on top. *)
 Lemma ttrans_point_uniform (Hpos : (0 < #|G|)%N) (s : 'I_N'.+1) :
   (0 < t)%N ->
   fdistmap (fun g : gT => rho g s) (`U Hpos : R.-fdist gT)
@@ -456,21 +485,24 @@ Hypothesis HG : (0 < #|G|)%N.
 Variable encode : bool -> N'.+1.-tuple 'I_N'.+1.
 Let P : R.-fdist (bool * gT)%type := secretP `x (`U HG).
 
-(** coalition_view == the dealt card values seen by coalition C at a sample
-    (secret, shuffle), and ord0 outside C.
-    @intent: coalition observable random variable. *)
+(** The random variable of what coalition C observes at a sample (secret,
+    shuffle): the dealt card at each position rho g i for i in C, padded with
+    ord0 outside C so the codomain does not depend on C. This is the "view"
+    every independence result in the file names; proving it independent of
+    dealt_secret is the file's privacy claim. *)
 Definition coalition_view (C : {set 'I_N'.+1})
     : {RV P -> {ffun 'I_N'.+1 -> 'I_N'.+1}} :=
   fun u => [ffun i => if i \in C then tnth (encode u.1) (rho u.2 i) else ord0].
 
-(** dealt_secret == the dealt secret component of a sample.
-    @intent: secret random variable. *)
+(** The secret-component projection u.1 of a sample (secret, shuffle): the
+    random variable the coalition's view must be shown independent of. *)
 Definition dealt_secret : {RV P -> bool} := fun u => u.1.
 
-(** ttrans_view_indep == a single corrupted position's view of the uniformly
-    shuffled dealt arrangement is independent of the secret when the encoding
-    is injective per secret and the shuffle group is transitive.
-    @main security: distributional corollary of the transitivity bridge. *)
+(** A single corrupted position's view of the uniformly shuffled deal is
+    independent of the dealt secret, given a transitive shuffle group and an
+    injective per-secret card encoding. This is the size-1 coalition case;
+    Section 5 below (ttrans_view_indep_gen) generalizes it to every coalition
+    of at most t positions. *)
 Lemma ttrans_view_indep (i0 : 'I_N'.+1) :
   (0 < t)%N -> (forall b, uniq (encode b)) ->
   P |= coalition_view [set i0] _|_ dealt_secret.
@@ -509,9 +541,10 @@ Variables (secretT viewT viewT' : finType).
 Variables (secret : {RV P -> secretT}) (fullview : {RV P -> viewT}).
 Variable proj : viewT -> viewT'.
 
-(** centropy_pair_le == conditioning on a pair of observables cannot exceed
-    the conditional entropy given only the second observable.
-    @composes: view_mutual_info_le *)
+(** Conditioning on the pair (W, Z) cannot raise entropy above conditioning
+    on Z alone: `H(X | [%W, Z]) <= `H(X | Z). This monotonicity-in-conditioning
+    fact is the information-theoretic step view_mutual_info_le turns into the
+    data-processing inequality for a deterministic view reduction. *)
 Lemma centropy_pair_le (TX TW TZ : finType)
     (X : {RV P -> TX}) (W : {RV P -> TW}) (Z : {RV P -> TZ}) :
   `H(X | [% W, Z]) <= `H(X | Z).
@@ -520,10 +553,12 @@ move: (cond_mutual_info_ge0 `p_[% X, W, Z]).
 by rewrite /cond_mutual_info fdist_proj13_RV3 fdistA_RV3 subr_ge0.
 Qed.
 
-(** view_mutual_info_le == a deterministic reduction of the view cannot
-    increase the mutual information shared with the secret; the data-processing
-    inequality at the random-variable level.
-    @main bound: the monotone leakage ramp making (k, T) well-defined. *)
+(** A deterministic reduction proj of the full view cannot increase the
+    mutual information shared with the secret: `I(secret ; proj `o fullview)
+    <= `I(secret ; fullview). This is the data-processing inequality at the
+    random-variable level, and it is what makes a (k, T)-ramp ordering of
+    leakage well-defined: shrinking or coarsening what a coalition observes
+    never increases what it learns about the secret. *)
 Lemma view_mutual_info_le :
   `I(secret ; proj `o fullview) <= `I(secret ; fullview).
 Proof.
@@ -546,9 +581,13 @@ Variable secretP : R.-fdist bool.
 Hypothesis HG : (0 < #|G|)%N.
 Variable encode : bool -> N'.+1.-tuple 'I_N'.+1.
 
-(** ktuple_encode_uniform == the pushforward of the uniform shuffle by the
-    coalition's encoded value-tuple map is uniform over injective tuples.
-    @composes: ttrans_view_indep_gen *)
+(** The uniform shuffle, pushed forward through the coalition's encoded
+    k-tuple map g |-> the encode-b values at the k positions rho g moves the
+    source tuple p to, is uniform over dtuple_on k. This upgrades
+    rho_tuple_fiber_card's equal-fiber-size fact to an actual uniform
+    pushforward once the secret-dependent card encoding is composed on top of
+    the raw shuffle, and it is the computation ttrans_view_indep_gen reduces
+    to. *)
 Lemma ktuple_encode_uniform (k : nat) (p : k.-tuple 'I_N'.+1) (b : bool)
     (Hdt : (0 < #|dtuple_on k [set: 'I_N'.+1]|)%N) :
   (k <= t)%N -> uniq (encode b) ->
@@ -627,10 +666,11 @@ case/andP: Hg => _ /eqP Hgq.
 by move: (phi_in g); rewrite Hgq (negbTE Hq).
 Qed.
 
-(** ttrans_view_indep_gen == a t-transitive shuffle over a distinct-card deck
-    makes every coalition view of at most t positions independent of the
-    orbit secret.
-    @main security: the coalition-general distributional privacy bridge. *)
+(** For a t-transitive shuffle over a distinct-card deck, every coalition of
+    at most t positions has a view of the shuffled deal independent of the
+    dealt secret. This generalizes ttrans_view_indep from a single position to
+    an arbitrary coalition of size <= t, and is the coalition-general form of
+    the file's distributional privacy claim. *)
 Lemma ttrans_view_indep_gen (C : {set 'I_N'.+1}) :
   (#|C| <= t)%N -> (forall b, uniq (encode b)) ->
   secretP `x (`U HG) |= coalition_view rho secretP HG encode C _|_
@@ -670,13 +710,12 @@ Qed.
 
 Local Open Scope entropy_scope.
 
-(** coalition_view_mutual_info_le == a sub-coalition shares at most the mutual
-    information about the secret that the enclosing coalition shares; leakage
-    is monotone under coalition inclusion.
-    @main bound: leakage is monotone under coalition inclusion (the ramp
-    ordering).
-    Naming: extends view_mutual_info_le to coalitions; the shared
-    _mutual_info_le tail is kept for symmetry with that lemma. *)
+(** For C' a subset of C, the mutual information the sub-coalition C' shares
+    with the dealt secret is at most what the enclosing coalition C shares:
+    leakage about the secret is monotone under coalition inclusion. Proved by
+    instantiating view_mutual_info_le's deterministic-reduction bound at the
+    restriction of C's view to C', this is the ramp ordering that makes "more
+    colluders learn no less" a theorem rather than an assumption. *)
 Lemma coalition_view_mutual_info_le (C C' : {set 'I_N'.+1}) :
   C' \subset C ->
   `I(dealt_secret secretP HG ;
@@ -716,26 +755,30 @@ Hypothesis Hinv : forall g sh, g \in G ->
 Hypothesis Hdeck_stable : forall g sh, g \in G ->
   deck_ok [tuple tnth sh (rho g i) | i < N'.+1] = deck_ok sh.
 
-(** class_decks == the valid decks of orbit class s.
-    @intent: the support of the all-decks dealer at secret s. *)
+(** The set of valid decks belonging to orbit class s: deck_ok sh with
+    orbit_class sh = s. This is the support the all-decks dealer draws from
+    when it deals a fresh deck for secret s, rather than shuffling one fixed
+    deck. *)
 Definition class_decks (s : bool) : {set N'.+1.-tuple 'I_N'.+1} :=
   [set sh | deck_ok sh && (orbit_class sh == s)].
 
 Hypothesis Hpop : forall s : bool, (0 < #|class_decks s|)%N.
 
-(** alldecksP == the joint law of a secret, a uniform valid deck of that
-    class, and an independent uniform shuffle.
-    @intent: the all-decks dealer sample space. *)
+(** The joint law of a secret, an independently and uniformly drawn valid
+    deck of that secret's class, and an independent uniform shuffle. This is
+    the sample space of the all-decks dealer, which redraws the deck itself
+    per secret rather than fixing one deck and shuffling it. *)
 Definition alldecksP : R.-fdist (bool * (N'.+1.-tuple 'I_N'.+1 * gT)) :=
   secretP `X (fun s => ((`U (Hpop s)) `x (`U HG))).
 
-(** alldecks_secret == the dealt secret component.
-    @intent: the secret random variable of the all-decks dealer. *)
+(** The secret-component projection of an alldecksP sample: the random
+    variable the all-decks dealer's coalition view must be shown independent
+    of. *)
 Definition alldecks_secret : {RV alldecksP -> bool} := fun u => u.1.
 
-(** alldecks_view == the dealt card values a coalition C observes after the
-    shuffle, and ord0 outside C.
-    @intent: the coalition observable of the all-decks dealer. *)
+(** The card values coalition C observes after the deck is shuffled, padded
+    with ord0 outside C. This is alldecksP's analogue of coalition_view: the
+    view ttrans_view_indep_alldecks shows independent of the secret. *)
 Definition alldecks_view (C : {set 'I_N'.+1}) :
     {RV alldecksP -> {ffun 'I_N'.+1 -> 'I_N'.+1}} :=
   fun u => [ffun i => if i \in C then tnth u.2.1 (rho u.2.2 i) else ord0].
@@ -788,10 +831,12 @@ rewrite (@ktuple_encode_uniform N' gT G rho t Htrans R HG
 by [].
 Qed.
 
-(** ttrans_view_indep_alldecks == a dealer dealing a uniform valid deck of the
-    secret's class followed by a t-transitive uniform shuffle gives every
-    coalition of at most t positions a view independent of the secret.
-    @main security: the all-decks dealer privacy bridge. *)
+(** A dealer that deals a uniform valid deck of the secret's class and then
+    applies a t-transitive uniform shuffle gives every coalition of at most t
+    positions a view independent of the secret. This transports
+    ttrans_view_indep_gen's fixed-deck privacy claim across a secret-dependent
+    choice of deck, the extra freedom a real dealer has over the single-deck
+    model of the sections above. *)
 Lemma ttrans_view_indep_alldecks (C : {set 'I_N'.+1}) :
   (#|C| <= t)%N -> alldecksP |= alldecks_view C _|_ alldecks_secret.
 Proof.
@@ -806,9 +851,12 @@ apply: (inde_prod_kernel_fst
 exact: (alldecks_view_law s Hdt HC).
 Qed.
 
-(** alldecks_shuffle_absorb == the uniform shuffle preserves the uniform law
-    on the valid decks of a class.
-    @composes: ttrans_view_indep_deck *)
+(** Shuffling a uniformly drawn valid deck of orbit class s by an independent
+    uniform group element yields another uniformly drawn valid deck of the
+    same class. This is what lets a shuffle be dropped from the all-decks
+    model without changing the law of the dealt deck, the step
+    ttrans_view_indep_deck needs to pass from a shuffled to a
+    representative-free dealer. *)
 Lemma alldecks_shuffle_absorb (s : bool) :
   fdistmap (fun shg : N'.+1.-tuple 'I_N'.+1 * gT =>
               [tuple tnth shg.1 (rho shg.2 i) | i < N'.+1])
@@ -828,23 +876,27 @@ move=> sh; rewrite /class_decks !inE (@Hdeck_stable g sh gG) (@Hinv g sh gG).
 by [].
 Qed.
 
-(** uniform_deckP == the joint law of a secret and a uniform valid deck of
-    that class, with no shuffle.
-    @intent: the shuffle-free all-decks dealer sample space. *)
+(** The joint law of a secret and an independently, uniformly drawn valid
+    deck of that secret's class, with no shuffle applied. This is alldecksP
+    with the shuffle coordinate dropped: the sample space of a dealer that
+    hands out a fresh valid deck per secret without shuffling it. *)
 Definition uniform_deckP : R.-fdist (bool * N'.+1.-tuple 'I_N'.+1) :=
   secretP `X (fun s => `U (Hpop s)).
 
-(** uniform_deck_view == the dealt card values a coalition C reads directly
-    off the dealt deck, and ord0 outside C.
-    @intent: the coalition observable of the shuffle-free dealer. *)
+(** The card values coalition C reads directly off the dealt deck, padded
+    with ord0 outside C. This is uniform_deckP's analogue of coalition_view,
+    the view ttrans_view_indep_deck shows independent of the secret with no
+    shuffle in the model. *)
 Definition uniform_deck_view (C : {set 'I_N'.+1}) :
     {RV uniform_deckP -> {ffun 'I_N'.+1 -> 'I_N'.+1}} :=
   fun u => [ffun i => if i \in C then tnth u.2 i else ord0].
 
-(** ttrans_view_indep_deck == a dealer dealing a uniform valid deck of the
-    secret's class gives, with no further shuffle, every coalition of at most
-    t positions a view independent of the secret.
-    @main security: representative-free all-decks privacy. *)
+(** A dealer that deals a uniform valid deck of the secret's class, with no
+    shuffle applied afterward, gives every coalition of at most t positions a
+    view independent of the secret. This is the representative-free form of
+    the all-decks privacy claim: alldecks_shuffle_absorb already makes a
+    shuffled uniform deck indistinguishable from an unshuffled one, so the
+    shuffle in ttrans_view_indep_alldecks was never load-bearing. *)
 Lemma ttrans_view_indep_deck (C : {set 'I_N'.+1}) :
   (#|C| <= t)%N ->
   uniform_deckP |= uniform_deck_view C
@@ -875,23 +927,33 @@ End alldecks_view_indep.
 Section profile_view_privacy.
 Local Open Scope proba_scope.
 
-(** profile_deck == the deck a monodromy profile deals for a two-valued
-    secret: the threshold-scheme encoder of the profile's plug, read at the
-    two secrets selected by sel and cast from the share count to the deck
-    length.
-    @intent: presents the encoder of a MonodromyProfile as a deck indexed by
-    the profile's own sheet count. *)
+(** The deck a MonodromyProfile p deals for a two-valued secret: the
+    threshold-scheme encoder of p's plug, read at the two secrets sel true
+    and sel false, and cast along Hlen from the plug's share count to p's own
+    sheet count pgg_N' (mp_M p) .+1. This repackages an arbitrary
+    MonodromyProfile's encoder into the encode : bool -> deck shape
+    coalition_view and the sections above expect, so profile_view_indep below
+    can instantiate the abstract bridge at any profile. *)
 Definition profile_deck (p : MonodromyProfile) (sel : bool -> mp_secretT p)
     (Hlen : (ts_T' (rp_scheme (mp_plug p))).+1 = (pgg_N' (mp_M p)).+1)
     (b : bool) : (pgg_N' (mp_M p)).+1.-tuple 'I_(pgg_N' (mp_M p)).+1 :=
   tcast Hlen (ts_encode (rp_scheme (mp_plug p)) (sel b)).
 
-(** profile_view_indep == for a monodromy profile whose action image is
-    t-transitive on the sheets and whose two dealt decks carry distinct
-    cards, every coalition of at most t positions has a view of the shuffled
-    deal independent of the dealt secret.
-    @main security: coalition view independence stated over an arbitrary
-    MonodromyProfile through its projections. *)
+(** For a MonodromyProfile p, transitivity degree t, and per-secret deck
+    selector sel, if p's own shuffle image pgg_rho (mp_M p) @* pgg_G (mp_M p)
+    is t-transitive on the sheets and the two decks profile_deck sel Hlen
+    true and false are each injective, then every coalition of at most t
+    positions has a view of the shuffled deal, read through p's own rho and
+    deck, independent of the Boolean secret. This is ttrans_view_indep_gen
+    with every one of its free group/rho/deck parameters replaced by a
+    projection of a single MonodromyProfile record: a concrete instance
+    inherits the privacy guarantee by supplying only p, sel, Hlen, and the
+    transitivity and distinct-deck premises, rather than unpacking the group
+    by hand at each instantiation site. Both premises are load-bearing:
+    distinct-deck necessity is witnessed by profile_distinct_deck_necessary
+    (pgl27_profile_privacy.v); the transitivity premise is calibrated by
+    profile_view_indep_sharp, which refutes the coalition bound t.+1 at
+    3-transitive PGL(2,7). *)
 Lemma profile_view_indep (p : MonodromyProfile) (t : nat)
     (sel : bool -> mp_secretT p)
     (Hlen : (ts_T' (rp_scheme (mp_plug p))).+1 = (pgg_N' (mp_M p)).+1)
@@ -916,9 +978,10 @@ End profile_view_privacy.
 
 Section transitivity_premise_strength.
 
-(** ntransitive_card_le == a t-transitive group has at least as many elements
-    as the acted set has distinct t-tuples.
-    @composes: ntransitive_trivial_degenerate *)
+(** A group A that is t-transitive on S has at least as many elements as S
+    has distinct t-tuples: #|t.-dtuple(S)| <= #|A|. Immediate from
+    ntransitive as the image of a group action being onto the distinct
+    t-tuples. *)
 Lemma ntransitive_card_le (aT : finGroupType) (rT : finType)
     (to : {action aT &-> rT}) (A : {group aT}) (S : {set rT}) (t : nat) :
   ntransitive t A S to -> (#|t.-dtuple(S)| <= #|A|)%N.
@@ -927,10 +990,13 @@ rewrite /ntransitive => /imsetP[x Hx ->].
 exact: leq_imset_card.
 Qed.
 
-(** ntransitive_trivial_degenerate == the trivial group is t-transitive on a
-    set only when that set carries at most one distinct t-tuple.
-    @main architecture: the transitivity premise of profile_view_indep is not
-    satisfiable by a trivial monodromy unless the deck is degenerate. *)
+(** The trivial group 1%G is t-transitive on S only if S has at most one
+    distinct t-tuple: ntransitive t 1%G S to forces #|t.-dtuple(S)| <= 1.
+    This is the non-vacuity check on the file's central hypothesis: the
+    t-transitivity premise every privacy result above assumes cannot be
+    satisfied by a trivial monodromy group unless the deck itself is
+    degenerate, so the premise is doing real work whenever the deck has more
+    than one t-tuple of distinct cards. *)
 Lemma ntransitive_trivial_degenerate (aT : finGroupType) (rT : finType)
     (to : {action aT &-> rT}) (S : {set rT}) (t : nat) :
   ntransitive t 1%G S to -> (#|t.-dtuple(S)| <= 1)%N.

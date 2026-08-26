@@ -58,12 +58,10 @@ rewrite ltn_divLR // mulnC.
 exact: leq_trans addn_leq_muln.
 Qed.
 
-(** split_secret - decompose a secret in 'I_N into its pile-1 and pile-2 parts.
-    Kind: helper.
-    Why: supports the product ThresholdScheme by projecting secrets onto the
-    two factor alphabets via (mod N1, div N1).
-    Used by: combine_splitK, product_valid, product_encode below.
-*)
+(** split_secret s = (s mod N1, s div N1), decomposing a secret in 'I_N
+    into its pile-1 and pile-2 components. This is the encoding half of
+    the product scheme's secret correspondence between 'I_N and
+    'I_N1 * 'I_N2, inverted by combine_secret. *)
 Definition split_secret (s : 'I_N) : 'I_N1 * 'I_N2 :=
   (Ordinal (ltn_pmod (val s) (isT : 0 < N1)),
    Ordinal (divn_lt_N2 s)).
@@ -72,9 +70,9 @@ Definition split_secret (s : 'I_N) : 'I_N1 * 'I_N2 :=
 Definition combine_secret (s1 : 'I_N1) (s2 : 'I_N2) : 'I_N :=
   Ordinal (ltn_pmod (val s1 + N1 * val s2) (isT : 0 < N)).
 
-(** combine_splitK - split followed by combine is identity on 'I_N.
-    Kind: canonical.
-*)
+(** combine_secret (split_secret s).1 (split_secret s).2 = s: split then
+    combine is the identity on 'I_N, the fact that lets product_correct
+    recover a secret from its two independent factor reconstructions. *)
 Lemma combine_splitK (s : 'I_N) :
   combine_secret (split_secret s).1 (split_secret s).2 = s.
 Proof.
@@ -126,40 +124,25 @@ Let k := minn (ts_k ts1) (ts_k ts2).
 Definition embed_pile1 (x : 'I_N1) : 'I_N :=
   Ordinal (ltn_addr N2 (ltn_ord x)).
 
-(** embed_pile2_proof - side condition certifying that pile-2 embedding is in range.
-    Kind: helper.
-    Why: produces the boundedness proof `N1 + val x < N` needed to form the
-    Ordinal for embed_pile2; keeping the `_proof` suffix documents that this
-    lemma exists solely as the argument to an Ordinal constructor.
-    Used by: embed_pile2 below.
-    Naming: `_proof` is intentional here because the lemma's sole role is to
-    supply the Ordinal boundedness obligation to embed_pile2 on the next line.
-*)
+(** N1 + val x < N for x : 'I_N2: the pile-2 half of the product index
+    space 'I_N sits in the upper N2 slots above pile-1's N1 slots, the
+    range certificate embed_pile2 packages into an Ordinal. *)
 Lemma embed_pile2_proof (x : 'I_N2) : N1 + val x < N.
 Proof. by rewrite ltn_add2l; exact: ltn_ord. Qed.
 
-(** embed_pile2 - embed a pile-2 index into the product index space.
-    Kind: helper.
-    Why: builds the pile-2 half of the product share-index space by shifting
-    with N1.
-    Used by: product_encode below.
-*)
+(** embed_pile2 x = N1 + val x, embedding a pile-2 index into 'I_N by
+    shifting past pile-1's N1 slots. *)
 Definition embed_pile2 (x : 'I_N2) : 'I_N :=
   Ordinal (embed_pile2_proof x).
 
-(** project_pile1 - recover a pile-1 component from a product index.
-    Kind: helper.
-    Why: inverse on the pile-1 side of embed_pile1/embed_pile2.
-    Used by: pile1_shares below.
-*)
+(** project_pile1 x = val x mod N1, recovering the pile-1 component of a
+    product index x : 'I_N; the left inverse of embed_pile1. *)
 Definition project_pile1 (x : 'I_N) : 'I_N1 :=
   Ordinal (ltn_pmod (val x) (isT : 0 < N1)).
 
-(** project_pile2 - recover a pile-2 component from a product index.
-    Kind: helper.
-    Why: inverse on the pile-2 side, subtracting N1 before taking the mod.
-    Used by: pile2_shares below.
-*)
+(** project_pile2 x = (val x - N1) mod N2, recovering the pile-2
+    component of a product index x : 'I_N; the left inverse of
+    embed_pile2. *)
 Definition project_pile2 (x : 'I_N) : 'I_N2 :=
   Ordinal (ltn_pmod (val x - N1) (isT : 0 < N2)).
 
@@ -173,22 +156,16 @@ Proof. exact: ltn_addr T2 (ltn_ord i). Qed.
 Lemma pile2_idx_lt (i : 'I_T2) : T1 + val i < T.
 Proof. by rewrite ltn_add2l; exact: ltn_ord. Qed.
 
-(** pile1_shares - extract the pile-1 share-tuple from a product share-tuple.
-    Kind: helper.
-    Why: feeds the pile-1 factor scheme ts1 with its own shares pulled from
-    the product share-tuple.
-    Used by: product_valid, product_recon below.
-*)
+(** pile1_shares reads the pile-1 sub-tuple out of a product share-tuple
+    on 'I_T by projecting each of its first T1 entries through
+    project_pile1, giving ts1 the T1.-tuple of shares it operates on. *)
 Definition pile1_shares (sh : T.-tuple 'I_N) : T1.-tuple 'I_N1 :=
   mktuple (fun i : 'I_T1 =>
     project_pile1 (tnth sh (Ordinal (pile1_idx_lt i)))).
 
-(** pile2_shares - extract the pile-2 share-tuple from a product share-tuple.
-    Kind: helper.
-    Why: feeds the pile-2 factor scheme ts2 with its own shares pulled from
-    the product share-tuple.
-    Used by: product_valid, product_recon below.
-*)
+(** pile2_shares reads the pile-2 sub-tuple out of a product share-tuple
+    on 'I_T by projecting its last T2 entries through project_pile2,
+    giving ts2 the T2.-tuple of shares it operates on. *)
 Definition pile2_shares (sh : T.-tuple 'I_N) : T2.-tuple 'I_N2 :=
   mktuple (fun i : 'I_T2 =>
     project_pile2 (tnth sh (Ordinal (pile2_idx_lt i)))).
@@ -200,23 +177,18 @@ Definition product_valid (s : 'I_N) (sh : T.-tuple 'I_N) : Prop :=
   ts_valid ts1 p.1 (pile1_shares sh) /\
   ts_valid ts2 p.2 (pile2_shares sh).
 
-(** product_recon - reconstruct the product secret from a product share-tuple.
-    Kind: helper.
-    Why: reconstruct each factor independently on its pile shares, then
-    combine.
-    Used by: product_scheme below as the ts_recon field.
-*)
+(** product_recon reconstructs each factor secret independently, ts1 on
+    pile1_shares and ts2 on pile2_shares, then recombines them with
+    combine_secret. This is the ts_recon field of product_scheme below. *)
 Definition product_recon (sh : T.-tuple 'I_N) : 'I_N :=
   @combine_secret N1' N2'
     (ts_recon ts1 (pile1_shares sh))
     (ts_recon ts2 (pile2_shares sh)).
 
-(** product_encode - encode a secret into a product share-tuple.
-    Kind: helper.
-    Why: encode each factor separately on its split secret, then embed back
-    via pile indexing.
-    Used by: product_scheme below as the ts_encode field.
-*)
+(** product_encode splits a secret with split_secret, encodes each half
+    independently with ts1/ts2, and embeds the two factor share-tuples
+    back into the product index space via embed_pile1/embed_pile2. This
+    is the ts_encode field of product_scheme below. *)
 Definition product_encode (s : 'I_N) : T.-tuple 'I_N :=
   let p := @split_secret N1' N2' s in
   let sh1 := ts_encode ts1 p.1 in
@@ -386,11 +358,10 @@ Proof. by rewrite /T /T1 /T2 /ts_T addnS. Qed.
 Lemma k_gt0 : 0 < k.
 Proof. by rewrite /k /ts_k ltn_min. Qed.
 
-(** product_scheme - direct-product ThresholdScheme on 'I_N from ts1, ts2.
-    Kind: instance.
-    Why: combines two factor threshold schemes on 'I_N1 and 'I_N2 into a
-    single scheme on 'I_N by running them in parallel on disjoint share piles.
-*)
+(** product_scheme is the ThresholdScheme on 'I_N built from ts1 and ts2
+    running in parallel on disjoint share piles, with T = T1+T2 parties
+    and threshold k = min(k1,k2): the direct-product construction that
+    combines two factor schemes into one on their combined alphabet. *)
 Definition product_scheme : ThresholdScheme 'I_N 'I_N :=
   @MkThresholdScheme 'I_N 'I_N T.-1 k.-1
     product_valid
@@ -440,15 +411,12 @@ Hypothesis preserves_pile1 :
    1. sigma preserves piles (preserves_pile1)
    2. permuting shares within a pile preserves the pile sum
    3. sum_mod_recon only depends on the pile sum *)
-(** product_sum_mod_perm_compatible - perm-compatibility of product sum-mod-N.
-    Kind: main.
-    Why: shows the direct product of two sum-mod-N schemes is compatible with
-    any permutation that preserves the pile partition, which is the setting
-    required when parties = sheets.
-    Naming: the five-component name reflects the composite target
-    `product_scheme` over `sum_mod_scheme` and is kept verbatim because each
-    word identifies a distinct factor of the statement.
-*)
+(** pts, the product of the two sum-mod-N schemes ts1 and ts2, satisfies
+    ts_recon_perm_invariant for any G-permutation sigma that preserves
+    the pile partition (preserves_pile1): permuting positions within a
+    pile leaves that pile's sum unchanged, and sum_mod_recon depends only
+    on the sum. This is the perm-compatibility instance the S5 x S5-style
+    constructions in the file header need when parties equal sheets. *)
 Lemma product_sum_mod_perm_compatible :
   @ts_recon_perm_invariant _ G _ _ pts sigma.
 Proof.

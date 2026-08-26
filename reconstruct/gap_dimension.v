@@ -23,17 +23,15 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** gap_dim_window — a strict threshold gap forces the code-dimension band.
-    Kind: main.
-    What: under the AG-Massey relations ts_T = n-1, ts_k = k-g and code
-          dimension D = k, with the section constraints g < k, k+g < n and the
-          gap bound n <= k+g+1, a strict gap k-g < n-1 forces 0 < g, 1 < k and
-          k < n-1, i.e. D lies strictly inside the open band (1, n-1).
-    Why: the "required dimensions" half of early feasibility rejection; the
-         invariant-submodule profiler (invariant_profiler.v) intersects this
-         band with the available secret-encoding invariant dimensions, and an
-         empty intersection rejects the instance parameters as impossible.
-*)
+(** Under the AG-Massey relations ts_T = n-1, ts_k = k-g, and code dimension
+    D = k, with the section constraints g < k, k + g < n and the gap bound
+    n <= k+g+1, a strict threshold gap k-g < n-1 forces 0 < g, 1 < k and
+    k < n-1: the dimension D lies strictly inside the open band (1, n-1).
+    This is the "required dimensions" half of early feasibility rejection;
+    the invariant-submodule profiler (invariant_profiler.v) intersects this
+    band with the available secret-encoding invariant dimensions, and an
+    empty intersection rejects the instance's parameters as mathematically
+    impossible before any code is constructed. *)
 Lemma gap_dim_window (n k g : nat) :
   g < k -> k + g < n -> n <= k + g + 1 ->
   k - g < n - 1 ->
