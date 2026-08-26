@@ -15,6 +15,12 @@ From pgg_smc Require Import pgg_interface.
 (* c_j counts how often generator j appears. This collapses the exponential  *)
 (* search space r^L to at most 'C(L+r-1,r-1) distinct frequency vectors.    *)
 (*                                                                           *)
+(* The collapse is the negative result of the abelian instances: an          *)
+(* adversary enumerating shuffles faces a count polynomial in the number of  *)
+(* rounds, of degree the generator count, so rounds buy no exponential       *)
+(* growth.  The RAAG instances sit on the other side of this, where a        *)
+(* commutation graph with an independent set keeps the count exponential.    *)
+(*                                                                           *)
 (*   freq_vec w j   == number of positions in word w that use generator j    *)
 (*   freq_vecs L    == set of frequency vectors {f : 'I_Tg -> nat | sum=L}  *)
 (*   abelian_word_eval  == word evaluation depends only on frequency vector  *)
@@ -42,11 +48,16 @@ Let sigmas := @pgg_sigmas M.
 
 Variable L : nat.
 
-(* Frequency vector: count how often each generator index appears in a word *)
+(* The frequency vector of a word: how often each generator index occurs in
+   it.  It is the whole of what an abelian group can see of a word, since the
+   order of the letters is exactly what commutativity erases. *)
 Definition freq_vec (w : pgg_word M L) (j : 'I_Tg) : nat :=
   #|[set i : 'I_L | tnth w i == j]|.
 
-(* Sum of frequencies equals word length *)
+(* The frequencies sum to the word length: every position of the word is
+   counted once, under the letter it carries.  This is the constraint that
+   makes the set of reachable frequency vectors finite and countable by
+   stars and bars. *)
 Lemma freq_vec_sum (w : pgg_word M L) :
   \sum_(j < Tg) freq_vec w j = L.
 Proof.
@@ -60,6 +71,9 @@ Qed.
 (* MathComp's bigID / partition_big require Monoid.com_law but mulg is   *)
 (* only Monoid.law.  We reprove them under a runtime abelian hypothesis. *)
 
+(* A product of group elements stays in the group.  Stated with the abelian
+   hypothesis in scope because the reproved bigop lemmas below carry it
+   throughout, not because commutativity is used. *)
 Lemma abelian_prod_in (Habel : abelian G)
     (I : Type) (r : seq I) (P : pred I) (F : I -> gT) :
   (forall i, P i -> F i \in G) ->
@@ -70,11 +84,10 @@ rewrite big_cons; case HPa: (P a) => //.
 by apply: groupM; [exact: HF|exact: IHs].
 Qed.
 
-(** abelian_bigID — bigID reproved for group products under a runtime abelian hypothesis.
-    Kind: helper.
-    Why: MathComp's bigID needs Monoid.com_law but mulg is only Monoid.law, so we redo the derivation using centP + abelian_prod_in.
-    Used by: abelian_big_union, abelian_partition_big.
-*)
+(** abelian_bigID — a group product over a predicate splits into the product
+    over the elements satisfying a second predicate times the product over
+    those failing it, in an abelian group.  Splitting a product this way needs
+    the two halves to be interchangeable, which is exactly commutativity. *)
 Lemma abelian_bigID (Habel : abelian G)
     (I : Type) (r : seq I) (P Q : pred I) (F : I -> gT) :
   (forall i, P i -> F i \in G) ->
@@ -92,11 +105,8 @@ case HQa: (Q a) => /=.
   apply: (abelian_prod_in Habel) => i /andP [HPi _]; exact: HF.
 Qed.
 
-(** abelian_big_union — product over a disjoint union factors into independent products.
-    Kind: helper.
-    Why: Intermediate bigop manipulation lemma for abelian groups, derived from abelian_bigID.
-    Used by: abelian_partition_big.
-*)
+(** abelian_big_union — a group product over a disjoint union of two
+    predicates is the product over one times the product over the other. *)
 Lemma abelian_big_union (Habel : abelian G)
     (I : finType) (A B : pred I) (F : I -> gT) :
   (forall i, A i || B i -> F i \in G) ->
@@ -114,11 +124,10 @@ congr (_ * _)%g; apply: eq_bigl => i.
   + by case: (B i).
 Qed.
 
-(** abelian_partition_big — partition_big reproved for group products under a runtime abelian hypothesis.
-    Kind: helper.
-    Why: MathComp's partition_big requires Monoid.com_law; mulg is only Monoid.law, so we rederive it under abelian G.
-    Used by: abelian_word_eval.
-*)
+(** abelian_partition_big — a group product over a predicate regroups as an
+    iterated product over the fibers of any map out of the index type.  This
+    is the move that turns a word read left to right into a product organised
+    by which generator each position carries. *)
 Lemma abelian_partition_big (Habel : abelian G)
     (I J : finType) (P : pred I) (p : I -> J) (F : I -> gT) :
   (forall i, P i -> F i \in G) ->
@@ -147,11 +156,10 @@ congr (_ * _)%g; apply: eq_bigl => i;
 - by case: eqP => [->|_]; rewrite /= ?(negbTE Hjnin) ?andbT.
 Qed.
 
-(** big_const_expg — the group product of a constant g over a predicate equals g raised to the set cardinality.
-    Kind: helper.
-    Why: Concluding step of abelian_word_eval: collapse repeated multiplications of the same generator to an exponential.
-    Used by: abelian_word_eval.
-*)
+(** big_const_expg — a group product whose factors are all the same element
+    is that element raised to the number of factors.  Applied to one fiber of
+    the regrouping above, it replaces the repetitions of a single generator by
+    its multiplicity, which is the entry of the frequency vector. *)
 Lemma big_const_expg (n : nat) (P : pred 'I_n) (g : gT) :
   (\prod_(i < n | P i) g = g ^+ #|[set i : 'I_n | P i]|)%g.
 Proof.
@@ -161,9 +169,11 @@ rewrite !big_cons inE.
 by case HPa: (P a) => /=; rewrite ?add1n ?expgS IHs.
 Qed.
 
-(* Main theorem: abelian word evaluation depends only on frequency vector.
-   In an abelian group, the product \prod_i sigma_{w_i} can be rearranged
-   by collecting equal generators: sigma_j^{count of j in w}.             *)
+(* A word evaluates to the product of the generators raised to their
+   frequencies.  Commutativity lets the letters be regrouped by generator and
+   each group collapse to a power, so the word's order of letters leaves no
+   trace in the result.  Everything the file proves about the size of the
+   abelian search space follows from this one equation. *)
 Lemma abelian_word_eval (w : pgg_word M L) :
   abelian G ->
   word_eval w = (\prod_(j < Tg) tnth sigmas j ^+ freq_vec w j)%g.
@@ -181,7 +191,9 @@ transitivity (\prod_(i < L | tnth w i == j) tnth sigmas j)%g.
 exact: big_const_expg.
 Qed.
 
-(* Two words with the same frequency vector give the same group element *)
+(* Two words with the same frequency vector evaluate to the same shuffle.
+   The word-to-shuffle map therefore factors through the frequency vector,
+   which is why counting frequency vectors bounds the search space. *)
 Lemma freq_vec_det (w1 w2 : pgg_word M L) :
   abelian G ->
   (forall j, freq_vec w1 j = freq_vec w2 j) ->
@@ -209,12 +221,15 @@ Let sigmas := @pgg_sigmas M.
 
 Variable L : nat.
 
-(* The set of frequency vectors: functions 'I_Tg -> nat with sum = L *)
+(* The set of frequency vectors of length-L words: assignments of a
+   multiplicity to each generator whose total is L.  Bounded above by L in
+   each coordinate so that the carrier is finite and its size can be counted. *)
 Definition freq_vecs : {set {ffun 'I_Tg -> 'I_L.+1}} :=
   [set f : {ffun 'I_Tg -> 'I_L.+1} |
      \sum_(j < Tg) val (f j) == L].
 
 (* The frequency vector of a word, as a bounded function *)
+(* No generator occurs more often than the word is long. *)
 Lemma freq_vec_lt (w : pgg_word M L) (j : 'I_Tg) :
   freq_vec w j < L.+1.
 Proof.
@@ -222,28 +237,21 @@ rewrite ltnS /freq_vec.
 by apply: leq_trans (max_card _) _; rewrite card_ord.
 Qed.
 
-(** freq_vec_ffun — freq_vec packaged as a bounded ffun into 'I_L.+1.
-    Kind: helper.
-    Why: The abstract cardinality bound needs a finType domain/codomain, so we lift nat-valued freq_vec to an ffun over ordinals.
-    Used by: freq_vec_ffun_val, freq_vec_ffun_in, abelian_word_eval_freq.
-*)
+(** freq_vec_ffun — the frequency vector of a word as a bounded function from
+    generator indices to counts.  The counting argument needs the frequency
+    vectors to form a finite type, which unbounded natural-valued counts do
+    not. *)
 Definition freq_vec_ffun (w : pgg_word M L) : {ffun 'I_Tg -> 'I_L.+1} :=
   [ffun j => Ordinal (freq_vec_lt w j)].
 
-(** freq_vec_ffun_val — projecting the ffun-valued frequency vector recovers the raw count.
-    Kind: helper.
-    Why: Removes the ffun/Ordinal wrapper introduced for cardinality reasoning so downstream rewrites see freq_vec.
-    Used by: freq_vec_ffun_in, abelian_word_eval_freq.
-*)
+(** freq_vec_ffun_val — the bounded frequency vector carries the same counts
+    as the raw one. *)
 Lemma freq_vec_ffun_val (w : pgg_word M L) (j : 'I_Tg) :
   val (freq_vec_ffun w j) = freq_vec w j.
 Proof. by rewrite /freq_vec_ffun ffunE. Qed.
 
-(** freq_vec_ffun_in — every word's frequency-vector ffun lies in the freq_vecs set.
-    Kind: helper.
-    Why: Shows freq_vec_ffun w satisfies the sum-equals-L defining predicate of freq_vecs.
-    Used by: abelian_achievable_sub.
-*)
+(** freq_vec_ffun_in — every word's frequency vector is one of the vectors
+    summing to the word length, so the word space maps into freq_vecs. *)
 Lemma freq_vec_ffun_in (w : pgg_word M L) :
   freq_vec_ffun w \in freq_vecs.
 Proof.
@@ -252,15 +260,15 @@ under eq_bigr do rewrite freq_vec_ffun_val.
 exact: freq_vec_sum.
 Qed.
 
-(* The image of word_eval factors through freq_vecs *)
+(* The shuffle a frequency vector names: each generator raised to its
+   multiplicity, multiplied together.  It is the map through which word
+   evaluation factors in the abelian case. *)
 Definition freq_eval (f : {ffun 'I_Tg -> 'I_L.+1}) : gT :=
   (\prod_(j < Tg) tnth sigmas j ^+ val (f j))%g.
 
-(** abelian_word_eval_freq — word evaluation equals freq_eval on the word's frequency vector.
-    Kind: helper.
-    Why: Bridges the raw abelian_word_eval result to the ffun-valued freq_vec_ffun form needed for cardinality reasoning.
-    Used by: abelian_achievable_sub, abelian_search_space_le.
-*)
+(** abelian_word_eval_freq — evaluating a word is the same as evaluating its
+    frequency vector.  It states the factorization of word evaluation through
+    freq_vecs in the finite-type form the counting argument works in. *)
 Lemma abelian_word_eval_freq (w : pgg_word M L) :
   abelian G ->
   word_eval w = freq_eval (freq_vec_ffun w).
@@ -270,7 +278,9 @@ rewrite /freq_eval (abelian_word_eval _ Habel).
 by apply: eq_bigr => j _; rewrite freq_vec_ffun_val.
 Qed.
 
-(* Search space bound: achievable elements are at most the image of freq_vecs *)
+(* Every shuffle a length-L word can produce is the image of some frequency
+   vector.  The reachable set is thus contained in the image of a set whose
+   size is combinatorial rather than exponential. *)
 Lemma abelian_achievable_sub :
   abelian G ->
   achievable M L \subset [set freq_eval f | f in freq_vecs].
@@ -281,10 +291,10 @@ apply/imsetP; exists (freq_vec_ffun w); last by rewrite -abelian_word_eval_freq.
 exact: freq_vec_ffun_in.
 Qed.
 
-(** abelian_search_space_le — in an abelian group, the search space is bounded by #|freq_vecs|.
-    Kind: main.
-    Why: Intermediate form of the headline bound stated in terms of the freq_vecs set; combined with card_freq_vecs it yields abelian_search_space_bound.
-*)
+(** abelian_search_space_le — in an abelian group the number of reachable
+    shuffles at length L is at most the number of frequency vectors summing to
+    L.  This is the collapse itself, stated before the frequency vectors are
+    counted. *)
 Lemma abelian_search_space_le :
   abelian G ->
   search_space M L <= #|freq_vecs|.
@@ -313,46 +323,36 @@ Section stars_and_bars.
 Variable r : nat.  (* number of bins = r.+1 *)
 Variable L : nat.  (* total sum *)
 
+(* The compositions of L into r+1 ordered nonnegative parts, as bounded
+   functions.  Frequency vectors are compositions under another name; this
+   section counts them without reference to groups. *)
 Definition compositions : {set {ffun 'I_r.+1 -> 'I_L.+1}} :=
   [set f : {ffun 'I_r.+1 -> 'I_L.+1} | \sum_(j < r.+1) val (f j) == L].
 
-(** ffun_to_tuple — forward direction of the ffun/tuple bijection for stars-and-bars.
-    Kind: helper.
-    Why: Wraps an ffun domain as a tuple so MathComp's card_ord_partitions (tuple-based) can be applied.
-    Used by: ffun_to_tupleK, tuple_to_ffunK, card_compositions.
-*)
+(** ffun_to_tuple — a composition read as a tuple of its parts.  The classical
+    count is available on tuples, and the four lemmas that follow move the
+    counting question there and back. *)
 Definition ffun_to_tuple (f : {ffun 'I_r.+1 -> 'I_L.+1}) : r.+1.-tuple 'I_L.+1 :=
   [tuple f i | i < r.+1].
 
-(** tuple_to_ffun — reverse direction of the ffun/tuple bijection for stars-and-bars.
-    Kind: helper.
-    Why: Pairs with ffun_to_tuple to transport the classical tuple-based cardinality result to ffuns.
-    Used by: ffun_to_tupleK, tuple_to_ffunK, card_compositions.
-*)
+(** tuple_to_ffun — a tuple of parts read as a composition. *)
 Definition tuple_to_ffun (t : r.+1.-tuple 'I_L.+1) : {ffun 'I_r.+1 -> 'I_L.+1} :=
   [ffun i => tnth t i].
 
-(** ffun_to_tupleK — ffun_to_tuple is a right inverse of tuple_to_ffun.
-    Kind: helper.
-    Why: Half of the ffun/tuple bijection; used to inject freq-vec ffuns into tuples while preserving cardinality.
-    Used by: card_compositions.
-*)
+(** ffun_to_tupleK — reading a composition as a tuple and back returns the
+    composition. *)
 Lemma ffun_to_tupleK : cancel ffun_to_tuple tuple_to_ffun.
 Proof. move=> f; apply/ffunP => i; by rewrite ffunE tnth_mktuple. Qed.
 
-(** tuple_to_ffunK — tuple_to_ffun is a right inverse of ffun_to_tuple.
-    Kind: helper.
-    Why: Supplies the second half of the ffun/tuple bijection used in card_compositions.
-    Used by: card_compositions.
-*)
+(** tuple_to_ffunK — reading a tuple as a composition and back returns the
+    tuple, so the two readings are inverse and the two carriers have the same
+    size. *)
 Lemma tuple_to_ffunK : cancel tuple_to_ffun ffun_to_tuple.
 Proof. move=> t; apply: eq_from_tnth => i; by rewrite tnth_mktuple ffunE. Qed.
 
-(** sum_ffun_to_tuple — summing along the tuple projection matches summing over the ffun domain.
-    Kind: helper.
-    Why: Required to transport the sum-constraint from the ffun side to the tuple side in card_compositions.
-    Used by: card_compositions.
-*)
+(** sum_ffun_to_tuple — the parts sum to the same total on either reading, so
+    the constraint defining a composition is preserved by the correspondence
+    and not only the carrier. *)
 Lemma sum_ffun_to_tuple (f : {ffun 'I_r.+1 -> 'I_L.+1}) :
   \sum_(i <- ffun_to_tuple f) val i = \sum_(j < r.+1) val (f j).
 Proof.
@@ -360,10 +360,9 @@ rewrite /ffun_to_tuple big_tuple.
 by apply: eq_bigr => i _; rewrite tnth_mktuple.
 Qed.
 
-(** card_compositions — stars-and-bars: #|compositions r L| = 'C(L + r, r).
-    Kind: main.
-    Why: Classical stars-and-bars identity reproved on ffun-valued compositions via a bijection with MathComp's tuple-based card_ord_partitions.
-*)
+(** card_compositions — the number of ways to write L as an ordered sum of
+    r+1 nonnegative parts is 'C(L + r, r).  This is stars and bars, and it is
+    where the polynomial in L enters: for fixed r the count grows as L^r. *)
 Lemma card_compositions :
   #|compositions| = 'C(L + r, r).
 Proof.
@@ -391,30 +390,27 @@ Let Tg := (@pgg_ngens' M).+1.
 
 Variable L : nat.
 
-(** freq_vecs_eq_compositions — identifies freq_vecs with the compositions set for r = pgg_ngens' M.
-    Kind: helper.
-    Why: Transports the abstract stars-and-bars cardinality lemma to the frequency-vector setting.
-    Used by: card_freq_vecs.
-*)
+(** freq_vecs_eq_compositions — the frequency vectors of length-L words are
+    the compositions of L into as many parts as there are generators. *)
 Lemma freq_vecs_eq_compositions :
   freq_vecs M L = compositions (@pgg_ngens' M) L.
 Proof. by []. Qed.
 
-(** card_freq_vecs — cardinality of the frequency-vector set equals 'C(L + r, r).
-    Kind: main.
-    Why: Records the stars-and-bars count for frequency vectors, the final combinatorial bound used by [abelian_search_space_bound].
-*)
+(** card_freq_vecs — there are 'C(L + r, r) frequency vectors of length-L
+    words over r+1 generators. *)
 Lemma card_freq_vecs :
   #|freq_vecs M L| = 'C(L + (@pgg_ngens' M), (@pgg_ngens' M)).
 Proof.
 by rewrite freq_vecs_eq_compositions card_compositions.
 Qed.
 
-(* Combined bound *)
-(** abelian_search_space_bound — under abelian G the search space is bounded by 'C(L + r, r).
-    Kind: main.
-    Why: Top-level statement of Theorem 8 items (1)-(2): the exponential L -> r^L search collapses to a polynomial stars-and-bars count.
-*)
+(** abelian_search_space_bound — in an abelian group with r+1 generators, the
+    number of shuffles reachable by words of length L is at most
+    'C(L + r, r).  This is the abelian collapse in full: the generic ceiling
+    is (r+1)^L, exponential in the number of rounds, and commutativity brings
+    it down to a polynomial of degree r.  An abelian instance therefore cannot
+    make an adversary work harder by shuffling longer, which is what places
+    every abelian instance on the negative side of the family. *)
 Theorem abelian_search_space_bound :
   abelian (pgg_G M) ->
   search_space M L <= 'C(L + (@pgg_ngens' M), (@pgg_ngens' M)).

@@ -4,21 +4,22 @@
 (* Abelian (Disjoint Transpositions) Algebraic Rigidity Instance              *)
 (*                                                                            *)
 (* Constructs a concrete AlgebraicRigidity instance for the abelian group     *)
-(* Z/2Z x Z/2Z acting on 4 sheets via two disjoint transpositions            *)
+(* Z/2Z x Z/2Z acting on 4 card positions via two disjoint transpositions    *)
 (* sigma_1 = (0 1) and sigma_2 = (2 3).                                      *)
 (*                                                                            *)
-(* This instance demonstrates:                                                *)
-(*   - Abelian (commutative) generators with L = 1                           *)
-(*   - All generators commute, so round complexity = 1 in RAAG sense          *)
-(*   - Group = {id, (01), (23), (01)(23)} with |G| = 4                       *)
+(* The two generators commute, so the group they reach is the Klein          *)
+(* four-group {id, (01), (23), (01)(23)} and no word, however long, reaches   *)
+(* a fifth shuffle.  This is the negative corner of the family: the security  *)
+(* half assembles and its epsilon does not improve with the number of rounds. *)
 (*                                                                            *)
 (* Parameters:                                                                *)
-(*   Tg = 2 (generators), N = 4 (sheets), L = 1, depth = 1                  *)
-(*   epsilon_DPI = 2 * (4! - 2) / 4! = 44/24                                *)
+(*   Tg = 2 (generators), N = 4 (card positions), L = 1, depth = 1          *)
+(*   epsilon = 2 * (4 - 2) / 4 = 1, on the endpoint route                   *)
 (*                                                                            *)
-(* Note: a tighter endpoint bound is achievable by direct computation.        *)
-(* For s=0: endpoint dist is {0 -> 1/2, 1 -> 1/2}, giving epsilon = 1.0.    *)
-(* The DPI bound (44/24 ~ 1.83) is conservative.                             *)
+(* The instance takes the endpoint route rather than the data-processing one, *)
+(* whose epsilon here would be 2 * (4! - 2) / 4! = 44/24, nearly the maximum  *)
+(* distance of 2.  The endpoint epsilon of 1 is attained: at card position 0  *)
+(* the marginal is 1/2 on 0, 1/2 on 1 and nothing elsewhere.                  *)
 (*                                                                            *)
 (* Key properties:                                                            *)
 (*   abel_sigmas_distinct : generators are distinct permutations             *)
@@ -52,31 +53,27 @@ Local Open Scope fdist_scope.
 (*     Generator Definitions                                                  *)
 (******************************************************************************)
 
-(* Two disjoint transpositions on 'I_4:
-   sigma_1 = (0 1) : swaps sheets 0 and 1
-   sigma_2 = (2 3) : swaps sheets 2 and 3
-   These commute because their supports are disjoint. *)
+(* The two generators are the transpositions (0 1) and (2 3) of the four card
+   positions.  Their supports are disjoint, which is what makes them commute
+   and hence what makes this instance abelian. *)
 
+(** abel_s1 — the first generator, swapping card positions 0 and 1. *)
 Definition abel_s1 : {perm 'I_4} :=
   tperm (Ordinal (n:=4) (isT : (0 < 4)%N))
         (Ordinal (n:=4) (isT : (1 < 4)%N)).
 
-(** abel_s2 — second generator (2 3), a transposition of sheets 2 and 3.
-    Kind: instance.
-    Why: One of the two commuting generators exhibiting the Z/2 x Z/2 action on 4 sheets.
-*)
+(** abel_s2 — the second generator, swapping card positions 2 and 3. *)
 Definition abel_s2 : {perm 'I_4} :=
   tperm (Ordinal (n:=4) (isT : (2 < 4)%N))
         (Ordinal (n:=4) (isT : (3 < 4)%N)).
 
-(** abel_sigmas — 2-tuple of generators (0 1) and (2 3) for the abelian 4-sheet instance.
-    Kind: instance.
-    Why: Generator tuple feeding Gen_PGGTypes 1 2 to build the concrete abelian PGG.
-*)
+(** abel_sigmas — the two generators as a tuple, the shape a PGGTypes value
+    stores its generating family in. *)
 Definition abel_sigmas : 2.-tuple {perm 'I_4} :=
   [tuple abel_s1; abel_s2].
 
-(* Generators are distinct permutations *)
+(* The two generators are different permutations, as they move different
+   cards. *)
 Lemma abel_s1_neq_s2 : abel_s1 != abel_s2.
 Proof.
 apply/eqP => Habs.
@@ -85,11 +82,10 @@ have := congr1 (fun sigma : {perm 'I_4} =>
 by rewrite /abel_s1 tpermL /abel_s2 tpermD.
 Qed.
 
-(** abel_sigmas_distinct — the two disjoint-transposition generators give an injective tuple-lookup.
-    Kind: helper.
-    Why: Feeds gen_inj_weval_inj1 to conclude word-evaluation injectivity at L=1.
-    Used by: abel_weval_inj1.
-*)
+(** abel_sigmas_distinct — distinct generator indices name distinct
+    permutations.  The search-space theory counts group elements, so without
+    this the two indices could name one shuffle and the counts below would be
+    counting labels. *)
 Lemma abel_sigmas_distinct :
   injective (fun i : 'I_2 => tnth abel_sigmas i).
 Proof.
@@ -111,14 +107,18 @@ Variable R : realType.
 Let M_abel := @Gen_PGGTypes 1 2 abel_sigmas.
 Let R_abel : MonodromyReprWithGeneratorType := M_abel.
 
-(* Word-eval injectivity at L=1: follows from generator injectivity *)
+(* Distinct one-letter words evaluate to distinct shuffles.  At length 1 a
+   word is a generator index, so this is generator distinctness restated at
+   the word level; it fails at length 2, where the four words already reach
+   only the four group elements once. *)
 Lemma abel_weval_inj1 : @weval_inj M_abel 1.
 Proof. exact: gen_inj_weval_inj1 abel_sigmas_distinct. Qed.
 
-(* Direct endpoint ShuffleMarginalBound at L=1.
-   Epsilon = 2*(4-2)/4 = 1.0, tighter than DPI bound 44/24 ≈ 1.83.
-   Proof: (01) and (23) have disjoint support, so they map every sheet
-   to distinct values. *)
+(* For each card position, reading a permutation at that position is
+   injective on the two shuffles a one-letter word can produce: the two
+   generators have disjoint supports, so they never agree on any card.  This
+   is what buys the endpoint route its epsilon of 2*(4-2)/4 = 1, against the
+   data-processing route's 44/24. *)
 Lemma abel_perm_endpoint_inj1 :
   forall s : 'I_4,
   {in @achievable M_abel 1 &,
@@ -137,13 +137,14 @@ case: i => [[|[|i]] Hi]; case: j => [[|[|j]] Hj] //=;
   by have := congr1 val Hf; rewrite !permE.
 Qed.
 
-(** abel_security_witness_direct_1 — direct (non-DPI) marginal bound at L=1 for the abelian instance.
-    Kind: instance.
-    Why: Uses endpoint-injectivity to give a tighter epsilon than the generic DPI bound (44/24) for the disjoint-transposition case.
-    Naming: "direct" contrasts with the DPI-mediated construction and "1" marks the word length L=1 regime; both qualifiers are content-bearing and not redundant kind-suffixes.
-    @intent: security_witness_endpoint_inj at the abelian generators, word
-    length 1 and the endpoint-injectivity proof.
-*)
+(** abel_security_witness_direct_1 — the security half of the rigidity pair:
+    for every card position, the endpoint marginal of the length-1 word
+    distribution is within 1 of uniform in the full-L1 convention, where 2 is
+    the largest such distance.  The bound is attained, since the marginal puts
+    half its mass on the card and half on its image and none on the other two.
+    The epsilon does not fall with the word length, because the group has only
+    four elements to spread over; the bound is unconditional and does not rest
+    on any computational assumption. *)
 Definition abel_security_witness_direct_1 : ShuffleMarginalBound R R_abel :=
   security_witness_endpoint_inj R abel_weval_inj1 abel_perm_endpoint_inj1.
 
@@ -160,10 +161,13 @@ Variable R : realType.
 Let R_abel : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 1 2 abel_sigmas.
 
-(* Group nontriviality *)
+(* The monodromy group is nontrivial: the covering construction below needs
+   more than one group element to act with. *)
 Hypothesis HG_abel : (1 < #|pgg_G R_abel|)%N.
 
-(* Field parameters for RS code: F = GF(q^m') with |F| = N = 4 *)
+(* The Reed-Solomon alphabet: a finite field GF(q^m') with as many elements as
+   there are card positions, so that a card position can carry a field
+   element and the code's coordinates can be permuted by the monodromy. *)
 Variables (q m' : nat).
 Hypothesis primeq : prime q.
 Variable n'' : nat.
@@ -172,7 +176,10 @@ Hypothesis qn : ~~ (q %| n''.+3)%nat.
 Hypothesis an : (n''.+3).-primitive_root a.
 Hypothesis HN : (pgg_N' R_abel).+1 = #|GF m' primeq|.
 
-(* Code automorphism: monodromy action on RS code coordinates *)
+(* Every shuffle in the group acts on the code's coordinates by a permutation
+   that fixes the evaluation point 0 and carries codewords to codewords.  This
+   is the compatibility that lets the shares survive a shuffle: reconstructing
+   after a shuffle and shuffling after reconstruction agree. *)
 Variable sigma_code : pgg_gT R_abel -> {perm 'I_n''.+3}.
 Hypothesis sigma_fix0 :
   forall g, g \in pgg_G R_abel -> sigma_code g ord0 = ord0.
@@ -180,27 +187,34 @@ Hypothesis code_auto :
   forall g, g \in pgg_G R_abel ->
   coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
 
-(* Genus-0 covering scheme constructed from RS codes *)
+(* The covering the threshold half is read off: the Reed-Solomon code of the
+   parameters above, presented as a genus-0 covering, where reconstruction
+   needs no more shares than privacy already forbids. *)
 Definition abel_covering : CoveringScheme R_abel :=
   genus0_covering HG_abel qn an HN sigma_fix0 code_auto.
 
-(* PGL bound hypothesis *)
+(* The group is no larger than Klein's genus-0 automorphism bound.  This is
+   the one algebraic-geometry input the threshold half takes on trust.  A
+   four-element group meets it with room to spare, which is the other side of
+   the coupling: the group that gives the worst security half gives the best
+   threshold half. *)
 Hypothesis abel_genus0_klein :
   (#|pgg_G R_abel| <= klein_genus0_bound R_abel)%N.
 
-(** abel_threshold_witness — ThresholdWitness for the abelian instance using the genus-0 RS covering.
-    Kind: instance.
-    Why: Provides the threshold half of the AlgebraicRigidity pair via a covering plus the PGL collusion bound.
-*)
+(** abel_threshold_witness — the threshold half of the rigidity pair: the
+    genus-0 Reed-Solomon covering together with the Klein bound it needs.
+    Structural only, in the sense that it states that the covering's
+    parameters fit together and exhibits no erasure-tolerant decoder. *)
 Definition abel_threshold_witness : ThresholdWitness R_abel :=
   @MkThresholdWitness R_abel abel_covering (fun _ => abel_genus0_klein).
 
-(** abel_rigidity — AlgebraicRigidity instance for the disjoint-transpositions abelian example.
-    Kind: instance.
-    Why: Bundles the direct endpoint marginal bound with the genus-0 ThresholdWitness to exhibit a concrete rigidity certificate for the abelian case.
-    @intent: MkAlgebraicRigidity at the certificate-free bundle of
-    abel_security_witness_direct_1 and abel_threshold_witness.
-*)
+(** abel_rigidity — one algebraic choice, two commuting transpositions of
+    four cards, delivering both halves at once: the length-1 endpoint marginal
+    bound, whose epsilon is 1 and stays there, and the genus-0 threshold
+    witness, which is as good as the family allows.  It is the mirror of the
+    Monster instance, where the security half is perfect and the threshold
+    half catastrophic, and together the two mark the ends of the coupling the
+    rigidity record exists to expose.  No mixing certificate is attached. *)
 Definition abel_rigidity : AlgebraicRigidity R R_abel :=
   @MkAlgebraicRigidity R R_abel
     (shuffle_bundle_of_bound (abel_security_witness_direct_1 R))
@@ -208,14 +222,18 @@ Definition abel_rigidity : AlgebraicRigidity R R_abel :=
 
 (* Derived properties *)
 
+(* However long the words, no more shuffles are reachable than the group
+   holds, which here is four.  An adversary enumerating shuffles of this
+   instance faces four candidates at every round count. *)
 Lemma abel_complexity (L : nat) :
   (@search_space R_abel L <= #|pgg_G R_abel|)%N.
 Proof. exact: search_space_leG. Qed.
 
-(** abel_tradeoff — covering-scheme tradeoff for the abelian instance: either genus 0 with T <= k and collusion bound, or positive genus with extended T <= k + 2g.
-    Kind: main.
-    Why: Instantiates the generic security_threshold_tradeoff for the abelian example so it can be quoted directly.
-*)
+(** abel_tradeoff — the covering falls on one of two sides: at genus 0 the
+    group obeys the Klein bound and reconstruction needs exactly the privacy
+    threshold, so the gap is closed; at positive genus the gap is at most
+    twice the genus.  Read at the smallest group in the family, this is the
+    end of the dichotomy where the threshold half costs nothing. *)
 Lemma abel_tradeoff :
   let cs := tw_covering (ar_threshold abel_rigidity) in
   (cd_genus (cs_data cs) = 0 /\

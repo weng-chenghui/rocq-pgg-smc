@@ -35,7 +35,7 @@
 (* computability.                                                             *)
 (*                                                                            *)
 (* Axioms (8):                                                                *)
-(*   monster_n      : number of sheets (abstract, known to be ~ 10^20)       *)
+(*   monster_n      : number of card positions (abstract, ~ 10^20)           *)
 (*   monster_sigmas : two generators (exist by Steinberg's theorem)           *)
 (*   monster_sigmas_distinct : generators are distinct permutations          *)
 (*   monster_Lstar  : turning point L* (= 67, first L with 2^L >= N)        *)
@@ -76,7 +76,7 @@ Import GRing.Theory Num.Theory.
 (*     Group Axioms                                                           *)
 (******************************************************************************)
 
-(* monster_n.+2 = number of sheets in the smallest faithful permutation
+(* monster_n.+2 = number of card positions in the smallest faithful permutation
    representation of the Monster group (~ 10^20) *)
 Axiom monster_n : nat.
 
@@ -86,8 +86,11 @@ Axiom monster_sigmas : 2.-tuple {perm 'I_monster_n.+2}.
 Definition M_monster := @Gen_PGGTypes 1 monster_n monster_sigmas.
 Definition R_monster : MonodromyReprWithGeneratorType := M_monster.
 
-(* Generators are distinct: weaker than word-eval injectivity, implies it via
-   gen_inj_weval_inj1. Axiomatized because the generators are abstract. *)
+(* The two generators are distinct permutations.  It is the weakest form of
+   word-eval injectivity, enough to reach it at length 1, and it is
+   axiomatized only because the generators themselves are abstract: a
+   2-generating pair with equal entries would generate a cyclic group, which
+   the Monster is not.  Same source as monster_sigmas above. *)
 Axiom monster_sigmas_distinct :
   injective (fun i : 'I_2 => tnth monster_sigmas i).
 
@@ -102,17 +105,23 @@ Proof. exact: gen_inj_weval_inj1 monster_sigmas_distinct. Qed.
 (*   2^67 ~ 1.5 * 10^20 > N                                                 *)
 (* So L* = 67 is the first length where the search space saturates N.        *)
 (*                                                                            *)
-(* At L* = 67, every sheet maps to a distinct endpoint under each            *)
+(* At L* = 67, every card position maps to a distinct endpoint under each    *)
 (* achievable permutation (perm_endpoint injective on achievable(67)).              *)
 (* The direct endpoint epsilon = 2*(N - 2^67)/N = 0 since 2^67 > N.         *)
 (******************************************************************************)
 
+(* The word length at which the two-generator search space saturates the
+   deck.  It is 67 for N ~ 9.7 * 10^19, as computed in the section header
+   above, and is kept abstract so that the epsilon below is a formula in it
+   rather than a decimal. *)
 Axiom monster_Lstar : nat.
-(* monster_Lstar = 67 for N ~ 9.7 * 10^19, but kept abstract *)
 
+(* Distinct words of length L* evaluate to distinct group elements, so the
+   search space at L* is the full 2^L*.  Grounded by the header's arithmetic:
+   2^67 exceeds the permutation degree, so no two words need collide. *)
 Axiom monster_weval_inj_Lstar : @weval_inj M_monster monster_Lstar.
 
-(* Endpoint evaluation injective on achievable(L_star): for each starting sheet,
+(* Endpoint evaluation injective on achievable(L_star): for each start card,
    the map sigma |-> sigma(s) is injective on the set of achievable
    permutations at L*. This is a group-theoretic fact about the Monster's
    faithful permutation action. *)
@@ -129,14 +138,15 @@ Section monster_security.
 
 Variable R : realType.
 
-(* ShuffleMarginalBound at L* via direct endpoint bound.
-   Epsilon = 2 * (N - 2^Lstar) / N.
-   For the concrete Monster (N ~ 10^20, L* = 67, 2^67 > N):
-     epsilon = 2*(N - 2^67)/N = 0  (perfect endpoint security)
-   This is astronomically tighter than the DPI bound at L=1:
-     epsilon_DPI = 2*(N! - 2)/N! ≈ 2  (vacuous)
-   @intent: security_witness_endpoint_inj at the Monster generators, word
-   length L* and the endpoint-injectivity axiom. *)
+(* The security half of the rigidity pair: for every card position, the
+   endpoint marginal of the length-L* word distribution is within
+   2*(N - 2^Lstar)/N of uniform in the full-L1 convention.  At the concrete
+   Monster, where 2^67 exceeds the permutation degree, that epsilon is 0 and
+   the endpoint marginal is exactly uniform; the data-processing route at
+   length 1 gives 2*(N! - 2)/N!, which is nearly 2 and says nothing.  The
+   bound is information-theoretic and rests on no computational assumption,
+   but its two inputs, word-eval injectivity and endpoint injectivity at L*,
+   are axioms of this file rather than theorems. *)
 Definition monster_security_witness_Lstar : ShuffleMarginalBound R R_monster :=
   security_witness_endpoint_inj R
     monster_weval_inj_Lstar
@@ -153,15 +163,18 @@ Section monster_rigidity.
 
 Variable R : realType.
 
-(* Axiom: the Monster admits a covering scheme.
-   Like the star instance, this requires algebraic geometry (covering
-   spaces of Riemann surfaces) beyond this formalization. *)
+(* The Monster admits a covering scheme, the geometric object the threshold
+   half of the rigidity pair is read off.  Assumed rather than built, because
+   constructing one is algebraic geometry (covering spaces of Riemann
+   surfaces) that this formalization does not carry; the star instance takes
+   the same object from the Reed-Solomon construction instead. *)
 Axiom monster_covering : CoveringScheme R_monster.
 
-(* Axiom: for the monster covering, genus 0 implies |G| <= PGL(2,N).
-   This is about the SPECIFIC covering scheme, not universal.
-   For the Monster (|G| ~ 10^53), this is vacuously true since the
-   covering genus is necessarily > 0 for such a large group. *)
+(* If this particular covering has genus 0 then the group obeys Klein's
+   genus-0 automorphism bound.  It is a statement about the covering named
+   above and not a universal one.  At the Monster it is vacuous, since a group
+   of order about 10^53 forces the covering genus above 0, which is exactly
+   why this instance lands on the positive-genus side of the tradeoff. *)
 Axiom monster_genus0_klein :
   cd_genus (cs_data monster_covering) = 0 ->
   (#|pgg_G R_monster| <= klein_genus0_bound R_monster)%N.
@@ -169,20 +182,34 @@ Axiom monster_genus0_klein :
 Definition monster_threshold_witness : ThresholdWitness R_monster :=
   @MkThresholdWitness R_monster monster_covering monster_genus0_klein.
 
-(** monster_rigidity — the AlgebraicRigidity value of the Monster instance.
-    @intent: MkAlgebraicRigidity at the certificate-free bundle of
-    monster_security_witness_Lstar and monster_threshold_witness. *)
+(** monster_rigidity — one algebraic choice, the Monster acting on its
+    smallest faithful permutation degree, delivering both halves at once: the
+    endpoint marginal bound at L*, whose epsilon vanishes, and the threshold
+    witness, whose covering genus grows with the group order.  The instance is
+    the extreme case of the coupling the record exists to expose: the group
+    that makes the security half perfect is the group that makes the threshold
+    half worst.  No exact or asymptotic mixing certificate is attached. *)
 Definition monster_rigidity : AlgebraicRigidity R R_monster :=
   @MkAlgebraicRigidity R R_monster
     (shuffle_bundle_of_bound (monster_security_witness_Lstar R))
     monster_threshold_witness.
 
-(* Derived properties — all PROVED from the axioms *)
+(* Two consequences of the axioms above, established rather than assumed. *)
 
+(* However long the words, no more group elements are reachable than the group
+   holds.  For the Monster that ceiling is about 10^53, so the search space
+   keeps growing as 2^L until L*, which is what makes the security half
+   nonvacuous where the cyclic instance's is vacuous. *)
 Lemma monster_complexity (L : nat) :
   (@search_space R_monster L <= #|pgg_G R_monster|)%N.
 Proof. exact: search_space_leG. Qed.
 
+(* The covering falls on one of two sides: at genus 0 the group obeys the
+   Klein bound and reconstruction needs exactly the privacy threshold; at
+   positive genus the gap is at most twice the genus.  A group of order 10^53
+   cannot obey the Klein bound, so it is the second side that holds here, and
+   the gap it allows is the price the Monster pays for its perfect security
+   half. *)
 Lemma monster_tradeoff :
   let cs := tw_covering (ar_threshold monster_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
@@ -212,7 +239,7 @@ End monster_rigidity.
 (*                                                                            *)
 (* For the specific Monster generators (axiomatized), the spectral gap is     *)
 (* abstract but positive. The convergence bound uses the Schreier graph       *)
-(* directly on 'I_N (N sheets), giving prefactor sqrt(N) instead of          *)
+(* directly on 'I_N (N card positions), giving prefactor sqrt(N) instead of  *)
 (* sqrt(|G|). For the Monster: sqrt(N) ~ 10^10 vs sqrt(|G|) ~ 10^26.        *)
 (*                                                                            *)
 (* Mathematical source:                                                       *)
@@ -228,7 +255,7 @@ End monster_rigidity.
    The expander property of finite simple groups transfers to all
    transitive Schreier graphs (Lubotzky 2012, Theorem 4.2).
    Convergence bound from Diaconis 1988, Ch. 3B Proposition 2,
-   applied to the Schreier graph on N = monster_n.+2 sheets.
+   applied to the Schreier graph on N = monster_n.+2 card positions.
 
    Prefactor is sqrt(N), not sqrt(|G|) -- a major improvement for
    the Monster (sqrt(N) ~ 10^10 vs sqrt(|G|) ~ 10^26).
@@ -263,12 +290,15 @@ Definition monster_schreier_certificate :
     monster_lambda_gap_le1
     monster_spectral_convergence.
 
-(* Derived: ShuffleCertificateBundle at any L from Schreier certificate.
-   NOTE: weval_inj IS needed here for the bundle construction
-   (rho_from_words must be a valid distribution), even though the
-   Schreier spectral bound itself doesn't require it.
-   @intent: security_witness_schreier at the Monster Schreier certificate and
-   the word-eval injectivity at L. *)
+(* The asymptotic security half at an arbitrary word length: the marginal
+   bound of the Schreier walk together with its geometric-convergence
+   certificate.  Where monster_security_witness_Lstar is a single exact
+   statement at the saturation length, this one holds at every L and decays
+   as sqrt(N) * (1 - gap)^L, so it prices additional shuffle rounds.  Both
+   the gap and its positivity are hypotheses of this section, so the bound is
+   conditional on the expander property and not information-theoretic on its
+   own.  Word-eval injectivity enters here, not in the spectral bound: the
+   bundle is stated at rho_from_words, which needs it to be a distribution. *)
 Definition monster_security_witness_schreier (L : nat)
     (Hlfree : @weval_inj M_monster L) : ShuffleCertificateBundle R R_monster :=
   security_witness_schreier monster_schreier_certificate Hlfree.

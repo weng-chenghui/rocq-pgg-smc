@@ -6,14 +6,15 @@
 (* Constructs a concrete AlgebraicRigidity instance for the overlapping       *)
 (* 3-cycles group OC = <(0 1 2), (1 2 3)> in S_4.                            *)
 (*                                                                            *)
-(* This is the FIRST instance with L > 1 (L = 2), demonstrating the          *)
-(* word-eval injectivity hardness tradeoff: higher L means a larger search    *)
-(* space                                                                      *)
-(* (search_space 2 = 4) but also stronger security guarantees.               *)
+(* The security half is read at word length 2 rather than 1.  Two rounds     *)
+(* reach four distinct shuffles where one round reaches two, and the extra    *)
+(* round is what brings the fiber-counted epsilon down to 1 from the vacuous  *)
+(* value a single round leaves.  Length is the parameter the two halves of    *)
+(* this instance are traded against each other along.                        *)
 (*                                                                            *)
 (* Parameters:                                                                *)
-(*   Tg = 2 (generators), N = 4 (sheets), L = 2, depth = 2                  *)
-(*   epsilon (fiber) = 1 (fiber-counted, worst-case sheet s=1)               *)
+(*   Tg = 2 (generators), N = 4 (card positions), L = 2, depth = 2          *)
+(*   epsilon (fiber) = 1 (fiber-counted, worst-case card position s=1)       *)
 (*   epsilon (spectral) = 2 * (1/sqrt(2))^83 at L=83 (40-bit security)      *)
 (*                                                                            *)
 (* Spectral gap of the Schreier walk on 'I_4:                                *)
@@ -70,11 +71,15 @@ Let R_oc : MonodromyReprWithGeneratorType := M_oc.
 
 Local Open Scope ring_scope.
 
-(* Fiber-counted endpoint bound: for each sheet s in 'I_4,
-   var_dist(fdistmap perm_endpoint (rho_from_words 2 oc_sigmas), uniform) <= 1.
-   Achievable(2) = {s0^2, s0*s1, s1*s0, s1^2} (4 permutations).
-   Worst-case sheet s=1: fiber distribution P=(2/4,0,0,2/4), var_dist=1.
-   Other sheets s=0,2,3 have var_dist=1/2. *)
+(* For every card position, the endpoint marginal of the length-2 word
+   distribution is within 1 of uniform in the full-L1 convention.  The
+   epsilon is read off the fibers rather than from an injectivity argument:
+   the four achievable products send each position onto a set of at most two
+   images, and the worst position is 1, whose marginal is (1/2,0,0,1/2) at
+   distance exactly 1.  The bound is information-theoretic and holds with no
+   assumption; the number 1 out of a maximum of 2 is what a two-round
+   overlapping-cycle shuffle buys unconditionally, and it is the spectral
+   route below, not this one, that reaches cryptographic magnitudes. *)
 Lemma oc_endpoint_bound_fiber :
   forall s : 'I_4,
   (var_dist (fdistmap (fun sigma : {perm 'I_4} => sigma s)
@@ -120,10 +125,10 @@ case: s Hmem => [[|[|[|[|s]]]] Hs] //= Hmem.
     rewrite Hw00 Hw11 !permM !oc_s0E !oc_s1E].
 Qed.
 
-(* ShuffleMarginalBound at L=2 via fiber counting.
-   Epsilon = 1, tighter than DPI bound 40/24 ≈ 1.67.
-   @intent: security_witness_fiber at the overlapping-cycles generators, word
-   length 2 and the fiber-counted epsilon proof. *)
+(* The unconditional security half of the rigidity pair: the fiber-counted
+   marginal bound at word length 2, epsilon = 1.  The data-processing route
+   at the same length gives 40/24, so fiber counting is what makes the
+   statement say anything at all here. *)
 Definition oc_security_witness_2 : ShuffleMarginalBound R R_oc :=
   security_witness_fiber oc_weval_inj2 oc_endpoint_bound_fiber.
 
@@ -151,15 +156,22 @@ Variable R : realType.
 Let M_oc := @Gen_PGGTypes 1 2 oc_sigmas.
 Let R_oc : MonodromyReprWithGeneratorType := M_oc.
 
-(* Spectral gap: 1 - 1/sqrt(2) ~ 0.293 *)
+(* The gap between the largest and the second-largest eigenvalue modulus of
+   the Schreier walk, 1 - 1/sqrt(2) for these generators.  It is taken as a
+   parameter rather than computed, so every bound in this section is
+   conditional on it. *)
 Variable oc_spectral_gap : R.
 Hypothesis oc_gap_pos : (0 < oc_spectral_gap)%R.
 Hypothesis oc_gap_le1 : (oc_spectral_gap <= 1)%R.
 
-(* Schreier walk distribution family *)
+(* The law of the shuffle after L steps of the Schreier walk on the four card
+   positions, one distribution per number of rounds. *)
 Variable oc_schreier_rho : nat -> R.-fdist {perm 'I_4}.
 
-(* Spectral convergence: var_dist <= sqrt(4) * (1 - gap)^L *)
+(* The endpoint marginal of the L-round walk is within sqrt(4)*(1-gap)^L of
+   uniform.  This is the assumption that carries the whole asymptotic half of
+   the instance: the bounds below are exactly as strong as it is, and nothing
+   in this file derives it from the eigenvalues quoted in the section header. *)
 Hypothesis oc_spectral_convergence :
   forall (L : nat) (s : 'I_4),
   (var_dist (fdistmap (fun sigma : {perm 'I_4} => sigma s)
@@ -167,6 +179,10 @@ Hypothesis oc_spectral_convergence :
            (fdist_uniform (card_ord 4))
   <= Num.sqrt 4%:R * (1 - oc_spectral_gap) ^+ L)%O.
 
+(* The asymptotic certificate of the overlapping-cycles walk: geometric decay
+   at rate 1 - gap with no residual floor, the eps_inf slot being zero.  A
+   zero floor is what distinguishes a walk that reaches uniform in the limit
+   from one that stalls at a fixed distance, as the abelian instance does. *)
 Definition oc_asymptotic : @SecurityAsymptotic R R_oc.
 Proof.
 apply: (@MkSecurityAsymptotic R R_oc
@@ -179,10 +195,12 @@ rewrite add0r.
 exact: oc_spectral_convergence.
 Defined.
 
-(** oc_security_witness_schreier — the certificate bundle of the
-    overlapping-cycles Schreier walk at word length L.
-    @intent: MkShuffleCertificateBundle at the spectral marginal bound of the
-    walk distribution, with no exact certificate and oc_asymptotic attached. *)
+(** oc_security_witness_schreier — the security half read at an arbitrary
+    number of rounds: the endpoint marginal of the L-round walk is within
+    sqrt(4)*(1-gap)^L of uniform, with the asymptotic certificate attached
+    and no exact one.  Unlike the fiber bound at L = 2, whose epsilon is
+    fixed at 1, this one prices each additional round, and it is conditional
+    on the assumed spectral gap throughout. *)
 Definition oc_security_witness_schreier (L : nat) :
     ShuffleCertificateBundle R R_oc :=
   @MkShuffleCertificateBundle R R_oc
@@ -209,11 +227,13 @@ Variable R : realType.
 Let R_oc : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 1 2 oc_sigmas.
 
-(* Threshold witness — taken as parameter to avoid duplicating
-   genus-0 covering axioms (RS code, PGL bound, etc.) *)
+(* The threshold half enters as a parameter here: this section varies only
+   the security half, so any covering whose parameters fit will do, and the
+   genus-0 construction is left to the section below. *)
 Variable oc_tw : ThresholdWitness R_oc.
 
-(* Spectral parameters *)
+(* The same spectral data as above, re-declared because the section closes
+   over its own parameters. *)
 Variable oc_spectral_gap : R.
 Hypothesis oc_gap_pos : (0 < oc_spectral_gap)%R.
 Hypothesis oc_gap_le1 : (oc_spectral_gap <= 1)%R.
@@ -225,10 +245,13 @@ Hypothesis oc_spectral_convergence :
            (fdist_uniform (card_ord 4))
   <= Num.sqrt 4%:R * (1 - oc_spectral_gap) ^+ L)%O.
 
-(** oc_rigidity_cryptographically_secure — the AlgebraicRigidity value of the
-    overlapping-cycles instance at word length 83.
-    @intent: MkAlgebraicRigidity at the Schreier certificate bundle read at
-    L = 83 and the parametrised threshold witness. *)
+(** oc_rigidity_cryptographically_secure — the same algebraic choice read at
+    83 rounds, where the geometric bound falls below 2^-40.  The epsilon is
+    conditional on the assumed spectral gap and inherits nothing from the
+    unconditional fiber bound, so the security half here is a statement about
+    the Schreier walk under that hypothesis rather than an information-
+    theoretic guarantee; the threshold half is whatever witness the caller
+    supplies. *)
 Definition oc_rigidity_cryptographically_secure : AlgebraicRigidity R R_oc :=
   @MkAlgebraicRigidity R R_oc
     (@oc_security_witness_schreier R oc_spectral_gap oc_gap_pos
@@ -248,10 +271,13 @@ Variable R : realType.
 Let R_oc : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 1 2 oc_sigmas.
 
-(* Group nontriviality *)
+(* The monodromy group is nontrivial: the covering construction below needs
+   more than one group element to act with. *)
 Hypothesis HG_oc : (1 < #|pgg_G R_oc|)%N.
 
-(* Field parameters for RS code: F = GF(q^m') with |F| = N = 4 *)
+(* The Reed-Solomon alphabet: a finite field GF(q^m') with as many elements as
+   there are card positions, so that a card position can carry a field
+   element and the code's coordinates can be permuted by the monodromy. *)
 Variables (q m' : nat).
 Hypothesis primeq : prime q.
 Variable n'' : nat.
@@ -260,7 +286,10 @@ Hypothesis qn : ~~ (q %| n''.+3)%nat.
 Hypothesis an : (n''.+3).-primitive_root a.
 Hypothesis HN : (pgg_N' R_oc).+1 = #|GF m' primeq|.
 
-(* Code automorphism: monodromy action on RS code coordinates *)
+(* Every shuffle in the group acts on the code's coordinates by a permutation
+   that fixes the evaluation point 0 and carries codewords to codewords.  This
+   is the compatibility that lets the shares survive a shuffle: reconstructing
+   after a shuffle and shuffling after reconstruction agree. *)
 Variable sigma_code : pgg_gT R_oc -> {perm 'I_n''.+3}.
 Hypothesis sigma_fix0 :
   forall g, g \in pgg_G R_oc -> sigma_code g ord0 = ord0.
@@ -268,21 +297,30 @@ Hypothesis code_auto :
   forall g, g \in pgg_G R_oc ->
   coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
 
-(* Genus-0 covering scheme constructed from RS codes *)
+(* The covering the threshold half is read off: the Reed-Solomon code of the
+   parameters above, presented as a genus-0 covering, where reconstruction
+   needs no more shares than privacy already forbids. *)
 Definition oc_covering : CoveringScheme R_oc :=
   genus0_covering HG_oc qn an HN sigma_fix0 code_auto.
 
-(* PGL bound hypothesis *)
+(* The group is no larger than Klein's genus-0 automorphism bound.  This is
+   the one algebraic-geometry input the threshold half takes on trust. *)
 Hypothesis oc_genus0_klein :
   (#|pgg_G R_oc| <= klein_genus0_bound R_oc)%N.
 
+(* The threshold half of the rigidity pair: the covering above together with
+   the Klein bound it needs at genus 0.  Structural only, in the sense that it
+   states that the covering's parameters fit together and exhibits no
+   erasure-tolerant decoder. *)
 Definition oc_threshold_witness : ThresholdWitness R_oc :=
   @MkThresholdWitness R_oc oc_covering (fun _ => oc_genus0_klein).
 
-(** oc_rigidity — the AlgebraicRigidity value of the overlapping-cycles
-    instance.
-    @intent: MkAlgebraicRigidity at the certificate-free bundle of
-    oc_security_witness_2 and oc_threshold_witness. *)
+(** oc_rigidity — one algebraic choice, the two overlapping 3-cycles on four
+    card positions, delivering both halves at once: the unconditional
+    fiber-counted marginal bound at two rounds and the genus-0 threshold
+    witness.  This is the pair without any mixing certificate attached; the
+    spectral variant above trades the unconditional epsilon for a conditional
+    one that decays with the number of rounds. *)
 Definition oc_rigidity : AlgebraicRigidity R R_oc :=
   @MkAlgebraicRigidity R R_oc
     (shuffle_bundle_of_bound (oc_security_witness_2 R))
@@ -290,10 +328,18 @@ Definition oc_rigidity : AlgebraicRigidity R R_oc :=
 
 (* Derived properties *)
 
+(* However long the words, no more group elements are reachable than the group
+   holds.  The group here sits inside S_4, so the ceiling is 24 whatever the
+   number of rounds; more rounds buy mixing, not search space. *)
 Lemma oc_complexity (L : nat) :
   (@search_space R_oc L <= #|pgg_G R_oc|)%N.
 Proof. exact: search_space_leG. Qed.
 
+(* The covering falls on one of two sides: at genus 0 the group obeys the
+   Klein bound and reconstruction needs exactly the privacy threshold, so the
+   gap is closed; at positive genus the gap is at most twice the genus.  This
+   is the coupling the rigidity record exists to expose, read here at the
+   smallest group in the family for which the security half is nontrivial. *)
 Lemma oc_tradeoff :
   let cs := tw_covering (ar_threshold oc_rigidity) in
   (cd_genus (cs_data cs) = 0 /\

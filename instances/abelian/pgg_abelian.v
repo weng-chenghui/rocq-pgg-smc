@@ -42,27 +42,20 @@ Section ncycle_def.
 Variable n : nat.
 Let N := n.+2.
 
-(** shift_fun — the cyclic shift i |-> (i+1) mod N on 'I_N.
-    Kind: helper.
-    Why: Underlying function of the canonical N-cycle permutation; kept as a standalone definition to expose its arithmetic form.
-    Used by: unshift_fun (as inverse), shift_unshiftK, ncycle.
-*)
+(** shift_fun — moving every card one position up, wrapping the last to the
+    first.  Kept apart from the permutation it becomes so that the modular
+    arithmetic stays visible to the lemmas below. *)
 Definition shift_fun (i : 'I_N) : 'I_N :=
   Ordinal (ltn_pmod (i.+1) (isT : (0 < N)%N)).
 
-(** unshift_fun — inverse of shift_fun: decrement by 1 modulo N.
-    Kind: helper.
-    Why: Supplies the inverse witness that lets us build an injective permutation from shift_fun via can_inj.
-    Used by: shift_unshiftK, shift_fun_inj.
-*)
+(** unshift_fun — moving every card one position down, wrapping the first to
+    the last.  It exists to exhibit the shift as a bijection, which is what a
+    card shuffle has to be. *)
 Definition unshift_fun (i : 'I_N) : 'I_N :=
   Ordinal (ltn_pmod (i + n.+1) (isT : (0 < N)%N)).
 
-(** shift_unshiftK — unshift inverts shift on 'I_N.
-    Kind: helper.
-    Why: Cancellation lemma exhibiting shift_fun as a bijection, feeding injectivity.
-    Used by: shift_fun_inj.
-*)
+(** shift_unshiftK — moving a card up and then down returns it to where it
+    started. *)
 Lemma shift_unshiftK : cancel shift_fun unshift_fun.
 Proof.
 move=> i; apply: val_inj => /=.
@@ -70,30 +63,24 @@ rewrite modnDml addnC addSn addnS.
 by change ((N + i) %% N = i); rewrite modnDl modn_small.
 Qed.
 
-(** shift_fun_inj — the cyclic shift is injective.
-    Kind: helper.
-    Why: Required to package shift_fun as a {perm 'I_N} via MathComp's perm constructor.
-    Used by: ncycle.
-*)
+(** shift_fun_inj — the cyclic shift sends no two cards to one position. *)
 Lemma shift_fun_inj : injective shift_fun.
 Proof. exact: can_inj shift_unshiftK. Qed.
 
-(** ncycle — the canonical N-cycle permutation (0 1 2 ... N-1) on 'I_N.
-    Kind: instance.
-    Why: Packages shift_fun as a {perm 'I_N} via the injectivity witness; the main generator of the canonical cyclic PGG instance.
-*)
+(** ncycle — the N-cycle (0 1 2 ... N-1) as a permutation of the deck.  It is
+    the single generator of the cyclic instances, and the one shuffle from
+    which their whole reachable group is built. *)
 Definition ncycle : {perm 'I_N} := perm shift_fun_inj.
 
-(** ncycleE — evaluation of the canonical N-cycle on i as (i+1) mod N.
-    Kind: helper.
-    Why: Rewrite lemma that hides the permE/permute layer so reasoning about ncycle works with explicit modular arithmetic.
-    Used by: ncycle_iter.
-*)
+(** ncycleE — the N-cycle sends card i to card (i+1) mod N, stated on the
+    permutation rather than on the underlying function. *)
 Lemma ncycleE (i : 'I_N) :
   ncycle i = Ordinal (ltn_pmod (i.+1) (isT : (0 < N)%N)).
 Proof. by rewrite /ncycle permE. Qed.
 
-(* Iterated application of the N-cycle *)
+(* Applying the N-cycle k times moves every card up by k modulo N.  A word
+   of length k in the single generator is therefore the shift by k, so the
+   whole word space of length k collapses to one shuffle. *)
 Lemma ncycle_iter (k : nat) (x : 'I_N) :
   ((ncycle ^+ k)%g : {perm 'I_N}) x =
   Ordinal (ltn_pmod (x + k) (isT : (0 < N)%N)).
@@ -105,18 +92,17 @@ rewrite expgSr permM IHk ncycleE; apply val_inj => /=.
 by rewrite addnS -addn1 modnDml addn1.
 Qed.
 
-(** ncycle_expN — the N-th power of the canonical N-cycle is the identity permutation.
-    Kind: helper.
-    Why: Together with a non-divisibility check it pins down the order of ncycle to exactly N.
-    Used by: ncycle_order.
-*)
+(** ncycle_expN — N applications of the N-cycle return the deck to its
+    starting layout. *)
 Lemma ncycle_expN : (ncycle ^+ N = 1 :> {perm 'I_N})%g.
 Proof.
 apply/permP => x; rewrite ncycle_iter perm1; apply val_inj => /=.
 by rewrite modnDr modn_small.
 Qed.
 
-(* Full order of the canonical N-cycle *)
+(* The N-cycle has order exactly N, so it reaches N distinct shuffles and no
+   more.  This N is the ceiling on the cyclic instances' search space at
+   every word length. *)
 Lemma ncycle_order : #[ncycle]%g = N.
 Proof.
 apply/eqP; rewrite eqn_dvd.
@@ -147,41 +133,32 @@ Let G : {group gT} := <[sigma]>.
 Lemma incl_morphM : {in G &, {morph (@id gT) : x y / (x * y)%g}}.
 Proof. by []. Qed.
 
-(** incl_morph — the identity inclusion morphism from the cyclic subgroup G into {perm 'I_N}.
-    Kind: instance.
-    Why: Supplies the morphism data required by the isMonodromyRepr mixin on Cyclic_PGGTypes.
-*)
+(** incl_morph — the monodromy of a cyclic instance is the inclusion of the
+    subgroup into the permutations of the deck: the group is given as a group
+    of shuffles already, so its action on cards is the identity on elements. *)
 Definition incl_morph : {morphism G >-> {perm 'I_N}} :=
   Morphism incl_morphM.
 
-(** Cyclic_PGGTypes — PGGTypes record whose group is G = <[sigma]>, a cyclic subgroup of {perm 'I_N}.
-    Kind: instance.
-    Why: Concrete PGGTypes value used to equip the cyclic abelian case with the MonodromyRepr / Generators HB mixins.
-*)
+(** Cyclic_PGGTypes — the PGG whose group is the cyclic subgroup generated by
+    one shuffle sigma of the N card positions. *)
 Definition Cyclic_PGGTypes := @MkPGG gT N.-1 G.
 
 HB.instance Definition Cyclic_isMonodromyRepr :=
   @isMonodromyRepr.Build Cyclic_PGGTypes incl_morph.
 
-(** cyclic_sigmas — singleton generator tuple [sigma] for a 1-generator cyclic PGG.
-    Kind: instance.
-    Why: Generator tuple required by hasGenerators HB instance on the cyclic PGGTypes.
-*)
+(** cyclic_sigmas — the one-element generator tuple.  One generator is the
+    degenerate end of the generator-count parameter: with a single letter
+    every word of a given length is the same word. *)
 Definition cyclic_sigmas : 1.-tuple gT := [tuple sigma].
 
-(** tnth_cyclic_sigmas — tuple lookup in the singleton generator tuple always returns sigma.
-    Kind: helper.
-    Why: Rewrite lemma used to unfold cyclic_sigmas inside group products.
-    Used by: cyclic_sigmas_gen, cyclic_word_eval.
-*)
+(** tnth_cyclic_sigmas — every index of the one-element tuple returns
+    sigma. *)
 Lemma tnth_cyclic_sigmas (i : 'I_1) : tnth cyclic_sigmas i = sigma.
 Proof. by rewrite (tnth_nth sigma) /=; case: i => [[|]]. Qed.
 
-(** cyclic_sigmas_gen — the singleton tuple [sigma] generates the cyclic subgroup G = <[sigma]>.
-    Kind: helper.
-    Why: Required witness for the hasGenerators HB instance that equips Cyclic_PGGTypes with the generating tuple.
-    Used by: Cyclic_hasGenerators HB instance.
-*)
+(** cyclic_sigmas_gen — the one-element tuple generates the whole group, so
+    the tuple the search-space theory reads is a generating set and not a
+    proper subset of one. *)
 Lemma cyclic_sigmas_gen :
   <<[set tnth cyclic_sigmas i | i : 'I_1]>>%G = G.
 Proof.
@@ -194,11 +171,15 @@ Qed.
 HB.instance Definition Cyclic_hasGenerators :=
   @hasGenerators.Build Cyclic_PGGTypes 0 cyclic_sigmas cyclic_sigmas_gen.
 
-(* Key property: cyclic groups are abelian *)
+(* A cyclic group is abelian.  This puts every cyclic instance under the
+   word-collapse theorems, so its search space is bounded by a count of
+   frequency vectors, and with a single generator that count is 1. *)
 Lemma cyclic_G_abelian : abelian G.
 Proof. exact: cycle_abelian. Qed.
 
-(* Word evaluation in the cyclic (1-generator) instance *)
+(* Every word of length L evaluates to sigma raised to L.  With one
+   generator there is nothing for a word to record but its length, so the
+   reachable set at each length is a single shuffle. *)
 Lemma cyclic_word_eval (L : nat) (w : @pgg_word Cyclic_PGGTypes L) :
   @word_eval Cyclic_PGGTypes L w = (sigma ^+ L)%g.
 Proof.
@@ -206,10 +187,10 @@ rewrite /word_eval; under eq_bigr do rewrite tnth_cyclic_sigmas.
 by rewrite big_const card_ord iter_mulg_1.
 Qed.
 
-(** cyclic_search_space_le — in a cyclic instance, at most #[sigma] distinct elements are reachable.
-    Kind: main.
-    Why: Specialization of search_space_leG to cyclic groups; records the concrete collapse from L^r to #[sigma].
-*)
+(** cyclic_search_space_le — a cyclic instance reaches at most as many
+    shuffles as sigma has order, whatever the word length.  It is the
+    sharpest form of the abelian collapse: not merely polynomial in the number
+    of rounds but constant in it. *)
 Lemma cyclic_search_space_le (L : nat) :
   @search_space Cyclic_PGGTypes L <= #[sigma]%g.
 Proof.
@@ -220,25 +201,17 @@ Qed.
 (* 2-party interface: starts = [0, 1] *)
 Let M : MonodromyReprType := Cyclic_PGGTypes.
 
-(** cyclic_starts_2 — the canonical pair of starts [0; 1] for a 2-party cyclic instance.
-    Kind: instance.
-    Why: Concrete starts tuple used to instantiate the 2-party PGGInterface over a cyclic group.
-*)
+(** cyclic_starts_2 — the two players start at card positions 0 and 1. *)
 Definition cyclic_starts_2 : 2.-tuple 'I_N :=
   [tuple @Ordinal N 0 isT; @Ordinal N 1 isT].
 
-(** cyclic_starts_2_uniq — the two starts 0 and 1 are distinct (as ordinals in 'I_N).
-    Kind: helper.
-    Why: Uniqueness proof required by the PGGInterface constructor for the 2-party cyclic instance.
-    Used by: Cyclic_PGG_2.
-*)
+(** cyclic_starts_2_uniq — the two starting positions are distinct, so the
+    two players do not begin at the same card. *)
 Lemma cyclic_starts_2_uniq : uniq cyclic_starts_2.
 Proof. by vm_compute. Qed.
 
-(** Cyclic_PGG_2 — 2-party PGG interface for a cyclic instance with starts [0; 1].
-    Kind: instance.
-    Why: Packages the cyclic MonodromyReprType with a minimal 2-party dealer/relay start configuration.
-*)
+(** Cyclic_PGG_2 — the seating of a two-player cyclic instance: the smallest
+    configuration in which a deal and a relay can be distinguished. *)
 Definition Cyclic_PGG_2 : PGGInterface M :=
   @MkPGGI M 1 cyclic_starts_2 cyclic_starts_2_uniq.
 
@@ -257,10 +230,8 @@ Definition NCycle_PGGTypes := @Cyclic_PGGTypes n (ncycle n).
 
 Let M : MonodromyReprType := NCycle_PGGTypes.
 
-(** NCycle_PGG_2 — 2-party PGG interface for the canonical N-cycle permutation.
-    Kind: instance.
-    Why: Convenience wrapper that instantiates Cyclic_PGG_2 with the standard N-cycle ncycle n as the generator.
-*)
+(** NCycle_PGG_2 — the two-player seating over the canonical N-cycle, the
+    cyclic instance with sigma fixed to the shift by one. *)
 Definition NCycle_PGG_2 : PGGInterface M :=
   @Cyclic_PGG_2 n (ncycle n).
 
@@ -269,7 +240,7 @@ End ncycle_instance.
 (* ========================================================================== *)
 (* Parametric Abelian Instance: m+1 Disjoint Transpositions                   *)
 (*                                                                            *)
-(* sigma_i = tperm(2*i, 2*i+1) for i = 0, ..., m on N = 2*(m+1) sheets.    *)
+(* sigma_i = tperm(2*i, 2*i+1) for i = 0..m on N = 2*(m+1) card positions. *)
 (* All generators commute (disjoint support).                                 *)
 (* Existing abel_sigmas (in rigidity_abelian_instance.v) is the special case *)
 (* m=1 giving N=4.                                                           *)
@@ -281,40 +252,28 @@ Variable m : nat.
 Let Tg := m.+1.
 Let N := Tg.*2.
 
-(** dt_even_lt — the even endpoint 2i of the i-th disjoint transposition is a valid sheet index.
-    Kind: helper.
-    Why: Bound needed to build the Ordinal argument for the first tperm slot in dt_gen.
-    Used by: dt_gen.
-*)
+(** dt_even_lt — card position 2i lies in a deck of 2(m+1). *)
 Lemma dt_even_lt (i : 'I_Tg) : (val i).*2 < N.
 Proof. have := valP i; rewrite /N /Tg ltn_double; exact id. Qed.
 
-(** dt_odd_lt — the odd endpoint 2i+1 of the i-th disjoint transposition is a valid sheet index.
-    Kind: helper.
-    Why: Bound needed to build the Ordinal argument for the second tperm slot in dt_gen.
-    Used by: dt_gen.
-*)
+(** dt_odd_lt — card position 2i+1 lies in a deck of 2(m+1), so the deck
+    splits into m+1 disjoint pairs of adjacent cards. *)
 Lemma dt_odd_lt (i : 'I_Tg) : (val i).*2.+1 < N.
 Proof. have := valP i; rewrite /N /Tg ltn_Sdouble; exact id. Qed.
 
-(** dt_gen — the i-th generator in the disjoint-transposition abelian instance.
-    Kind: instance.
-    Why: Provides the concrete generator family sigma_i = tperm(2i, 2i+1) used to instantiate the parametric abelian PGG on 2(m+1) sheets.
-*)
+(** dt_gen — generator i swaps the pair of cards 2i and 2i+1 and fixes
+    everything else.  Distinct generators have disjoint supports, so they all
+    commute and the group they generate is a product of m+1 copies of Z/2Z.
+    This is the abelian family at an arbitrary generator count, of which the
+    four-card Klein instance is the case m = 1. *)
 Definition dt_gen (i : 'I_Tg) : {perm 'I_N} :=
   tperm (Ordinal (dt_even_lt i)) (Ordinal (dt_odd_lt i)).
 
-(** dt_gen_tuple — tuple view of the disjoint-transposition generator family dt_gen.
-    Kind: instance.
-    Why: Supplies the Tg-tuple form needed to instantiate hasGenerators for the parametric abelian PGG.
-*)
+(** dt_gen_tuple — the m+1 generators as a tuple, the shape a PGGTypes value
+    stores its generating family in. *)
 Definition dt_gen_tuple : Tg.-tuple {perm 'I_N} := gen_tuple_of dt_gen.
 
-(** dt_gen_tupleE — tuple lookup for dt_gen agrees with the defining function.
-    Kind: helper.
-    Why: Unfolds the gen_tuple_of wrapper so downstream rewrites can apply dt_gen directly.
-    Used by: downstream abelian instantiations using disjoint transposition generators.
-*)
+(** dt_gen_tupleE — tuple lookup at index i returns generator i. *)
 Lemma dt_gen_tupleE (i : 'I_Tg) : tnth dt_gen_tuple i = dt_gen i.
 Proof. exact: gen_tuple_ofE. Qed.
 

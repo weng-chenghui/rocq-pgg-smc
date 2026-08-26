@@ -3,11 +3,11 @@
 (******************************************************************************)
 (* abel_profile: the abelian (insecure) plug of the shared program            *)
 (*                                                                            *)
-(* Relocated from the wreath7 contrast file. The plug uses a sum-mod scheme on *)
-(* the 4 abelian sheets with the identity content readout, the abelian         *)
-(* monodromy pgg_rho, and a reconstruction invariance proved by the same       *)
-(* group-agnostic argument as s5_sum_mod_perm_compatible. The differentiator   *)
-(* from the secure plugs is the GROUP (commuting generators), not the scheme.  *)
+(* The plug uses a sum-mod scheme on the 4 abelian card positions with the     *)
+(* identity content readout, the abelian monodromy pgg_rho, and a              *)
+(* reconstruction invariance that holds for any group acting by permutations.  *)
+(* The differentiator from the secure plugs is the GROUP (commuting            *)
+(* generators), not the scheme.                                                *)
 (*                                                                            *)
 (* The protocol interface of the profile is abel_PI, the four-seat interface   *)
 (* whose starting layout is the four card positions in canonical order. Its    *)
@@ -23,13 +23,13 @@
 (* {1, s1, s2, s1 s2}, of order four and abelian.                              *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   abel_ts             == the sum-mod threshold scheme on the four sheets    *)
+(*   abel_ts             == the sum-mod scheme on the four card positions      *)
 (*   abel_plug           == the abelian reconstruction plug                    *)
 (*   abel_PI             == the four-seat abelian protocol interface           *)
 (*   abel_profile        == the abelian MonodromyProfile                       *)
 (*   abel_G4             == the set {1, s1, s2, s1 s2} of permutations         *)
 (*                                                                            *)
-(* Key results, one entry per @main declaration:                              *)
+(* Key results:                                                               *)
 (*   profile_k_abel      == the plug's privacy threshold is four               *)
 (*   abel_gens_commute   == the two generators commute                         *)
 (*   abel_G4_group_set   == abel_G4 is a subgroup                              *)
@@ -58,26 +58,22 @@ Import Prenex Implicits.
    Gen_PGGTypes form abel_ts, abel_plug and abel_profile are built over. *)
 Local Notation abel_M := (@Gen_PGGTypes 1 2 abel_sigmas).
 
-(** abel_ts — sum-mod threshold scheme on the 4 abelian sheets, one share per
-    sheet (k = 4). Kind: instance. What: @sum_mod_scheme 2 3 : ThresholdScheme
-    'I_4 'I_4 (ts_T' = 3, so the share-index space 'I_4 matches the sheet space
-    that the abelian monodromy pgg_rho permutes). Why: the plain scheme for the
-    abelian plug; the differentiator from the secure plugs is the group, not the
-    scheme. Used-by: abel_plug.
-    @intent: sum_mod_scheme at two sheets' worth of successor numerals, giving
-    four shares over 'I_4. *)
+(** abel_ts — the sum-mod threshold scheme on the four abelian card
+    positions: four shares over 'I_4, reconstructed as their sum modulo four,
+    so every share is needed and the privacy threshold is four.  The share
+    indices are the card positions themselves, which is what lets a shuffle of
+    the deck act on the shares at all.  The scheme is the one the secure
+    instances also carry; what makes this instance the negative example is the
+    group, not the sharing. *)
 Definition abel_ts : ThresholdScheme 'I_4 'I_4 := @sum_mod_scheme 2 3.
 
-(** abel_sum_mod_perm_compatible — sum-mod reconstruction is invariant under the
-    abelian monodromy. Kind: helper. What: ts_recon_perm_invariant over
-    pgg_G (Gen_PGGTypes abel_sigmas) for abel_ts and pgg_rho. Why: the
-    rp_recon_invariant field of abel_plug; the proof is the group-agnostic
-    single-reindex argument shared with s5_sum_mod_perm_compatible. Used-by:
-    abel_plug.
-    Naming: the name spells the scheme (sum_mod), the transported structure
-    (perm) and the property (compatible), matching the sibling
-    s5_sum_mod_perm_compatible; no MathComp suffix names this shape.
-    @composes: abel_plug *)
+(** abel_sum_mod_perm_compatible — reconstruction survives a shuffle: for
+    every g in the group, permuting the shares by pgg_rho g and then summing
+    modulo four returns what summing returned before.  A sum over all indices
+    does not see the order of its terms, so the fact holds for any group
+    acting by permutations and is not special to this one.  It is the
+    obligation the plug below has to discharge for its endpoints to decode
+    after the deck has been shuffled. *)
 Lemma abel_sum_mod_perm_compatible :
   @ts_recon_perm_invariant _ (pgg_G (@Gen_PGGTypes 1 2 abel_sigmas)) _ _ abel_ts
     (@pgg_rho (@Gen_PGGTypes 1 2 abel_sigmas)).
@@ -92,54 +88,51 @@ rewrite (reindex_inj (@perm_inj _ (@pgg_rho (@Gen_PGGTypes 1 2 abel_sigmas) g)))
 by apply: eq_bigr.
 Qed.
 
-(** abel_plug — the abelian reconstruction plug. Kind: instance. What: abel_ts +
-    id content + abelian monodromy + abel_sum_mod_perm_compatible. Why: routes
-    the abelian (insecure) example through the general MonodromyProfile program.
-    Used-by: abel_profile.
-    @intent: MkReconPlug at abel_M with scheme abel_ts, identity content
-    readout, monodromy pgg_rho and invariance abel_sum_mod_perm_compatible. *)
+(** abel_plug — the reconstruction layer of the abelian instance: the sum-mod
+    scheme, the identity readout of card content, the abelian monodromy, and
+    the invariance above.  Identity readout means an endpoint records the card
+    position itself rather than anything dealt onto it, so an observation of
+    this plug depends on the shuffle and on nothing else. *)
 Definition abel_plug : ReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 :=
   @MkReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 abel_ts id
     (@pgg_rho (@Gen_PGGTypes 1 2 abel_sigmas)) abel_sum_mod_perm_compatible.
 
-(** abel_starts_uniq — the four canonical starting card positions are
-    distinct.
-    @composes: abel_PI *)
+(** abel_starts_uniq — the four starting card positions are pairwise
+    distinct, so no two seats begin at the same card. *)
 Lemma abel_starts_uniq : uniq (ord_tuple 4).
 Proof. by rewrite val_ord_tuple enum_uniq. Qed.
 
-(** abel_PI — the four-seat abelian protocol interface.
-    @intent: MkPGGI at abel_M with pi_T' = 3 and the four card positions
-    0, 1, 2, 3 in canonical order as the starting layout. *)
+(** abel_PI — the seating of the abelian instance: four seats starting at
+    card positions 0, 1, 2 and 3 in that order.  Four seats against the four
+    shares of abel_ts, so an execution over this profile carries one share per
+    seat with no reindexing. *)
 Definition abel_PI : PGGInterface abel_M :=
   @MkPGGI abel_M 3 (ord_tuple 4) abel_starts_uniq.
 
-(** abel_profile — plug the abelian Z_2 x Z_2 (N = 4), paired with sum-mod.
-    Kind: instance. What: the MonodromyProfile bundling the group, the secret
-    type 'I_4, the four-seat interface abel_PI and abel_plug. Why: the insecure
-    plug; commuting generators, k = 4, the contrast to the secure plugs. The
-    seat count of abel_PI is the share count of abel_ts, so the seat/share
-    bridge of an execution over this profile is erefl; the two-generator value
-    Gen_PGG_2 abel_sigmas has seat count 1 and is not used here.
-    Used-by: abelian_exec, contrast demos.
-    @intent: MkMonodromyProfile at the abelian group, the secret type 'I_4,
-    the four-seat interface abel_PI and abel_plug. *)
+(** abel_profile — the abelian instance as a program profile: the Klein
+    four-group acting on four card positions, secrets in 'I_4, the four-seat
+    interface and the sum-mod plug.  Its generators commute, and that is the
+    property the whole negative analysis of this instance rests on.  The
+    interface here is abel_PI and not the two-generator value
+    Gen_PGG_2 abel_sigmas, which seats one player and so cannot be paired with
+    a four-share scheme. *)
 Definition abel_profile : MonodromyProfile :=
   @MkMonodromyProfile abel_M 'I_4 abel_PI abel_plug.
 
-(** profile_k_abel — the abelian plug's privacy threshold is 4 (one share per
-    sheet).
-    @main bound: contrast character against the S_5 plug's k = 5, read off
-    the shared profile_k. *)
+(** profile_k_abel — the profile's privacy threshold is four: sum-mod deals
+    one share per card position and reconstruction consumes all of them, so
+    no proper subset of the seats learns anything.  It is the sharing-layer
+    number that distinguishes this instance from the S_5 plug's five, the
+    groups differing separately. *)
 Lemma profile_k_abel : profile_k abel_profile = 4.
 Proof. by []. Qed.
 
-(** abel_gens_commute — the abelian plug's generators commute.
-    Kind: main. What: commute abel_s1 abel_s2. Why: the structural root of the
-    insecure character (commuting shuffles do not mix, eps floors), the opposite
-    of the non-abelian secure plugs. Used-by: abelian security narrative.
-    @main architecture: commute abel_s1 abel_s2, the two generators being
-    disjoint transpositions of the four sheets. *)
+(** abel_gens_commute — the two generators commute, being transpositions of
+    disjoint pairs of card positions.  This is the structural root of the
+    instance's negative character: commuting shuffles generate only four
+    permutations, and the word distribution over them keeps a fixed distance
+    from uniform that no number of rounds reduces.  The secure instances are
+    exactly the ones where this fails. *)
 Lemma abel_gens_commute : commute abel_s1 abel_s2.
 Proof.
 apply/permP => x; rewrite !permM /abel_s1 /abel_s2.
@@ -150,58 +143,60 @@ Qed.
 (*     The Klein four-group generated by the two disjoint transpositions      *)
 (******************************************************************************)
 
-(** abel_G4 — the four-element set {1, s1, s2, s1 s2}.
-    @intent: the concrete carrier of the group generated by the two disjoint
-    transpositions, the support of the uniform distribution the abelian
-    shuffle-analysis models are compared against. *)
+(** abel_G4 — the four permutations 1, s1, s2 and s1 s2, spelled out as a
+    set.  It is the Klein four-group, and it is the support the abelian
+    shuffle models are read against: the ideal distribution of this instance
+    is uniform on exactly these four and not on all of S_4, so the distance
+    measured downstream is a failure to mix inside the reachable group and not
+    the fact that the group is small. *)
 Definition abel_G4 : {set {perm 'I_4}} :=
   [set 1%g; abel_s1; abel_s2; (abel_s1 * abel_s2)%g].
 
-(** abel_s1K — the first generator is an involution.
-    @composes: abel_G4_group_set *)
+(* The eight identities below are the multiplication table of the Klein
+   four-group, written out one product at a time.  Two commuting involutions
+   generate a group of order four and no more, and these are the equations
+   that say so. *)
+
+(** abel_s1K — the first generator is an involution. *)
 Lemma abel_s1K : (abel_s1 * abel_s1 = 1)%g.
 Proof. exact: tperm2. Qed.
 
-(** abel_s2K — the second generator is an involution.
-    @composes: abel_G4_group_set *)
+(** abel_s2K — the second generator is an involution. *)
 Lemma abel_s2K : (abel_s2 * abel_s2 = 1)%g.
 Proof. exact: tperm2. Qed.
 
-(** abel_s21 — the two generators commute, in product form.
-    @composes: abel_G4_group_set *)
+(** abel_s21 — the product of the two generators is the same in either
+    order. *)
 Lemma abel_s21 : (abel_s2 * abel_s1)%g = (abel_s1 * abel_s2)%g.
 Proof. exact: esym abel_gens_commute. Qed.
 
-(** abel_s1_s1s2 — s1 (s1 s2) = s2.
-    @composes: abel_G4_group_set *)
+(** abel_s1_s1s2 — s1 absorbs the first factor of the product, leaving
+    s2. *)
 Lemma abel_s1_s1s2 : (abel_s1 * (abel_s1 * abel_s2))%g = abel_s2.
 Proof. by rewrite mulgA abel_s1K mul1g. Qed.
 
-(** abel_s2_s1s2 — s2 (s1 s2) = s1.
-    @composes: abel_G4_group_set *)
+(** abel_s2_s1s2 — s2 absorbs the second factor of the product, leaving
+    s1. *)
 Lemma abel_s2_s1s2 : (abel_s2 * (abel_s1 * abel_s2))%g = abel_s1.
 Proof. by rewrite mulgA abel_s21 -mulgA abel_s2K mulg1. Qed.
 
-(** abel_s1s2_s1 — (s1 s2) s1 = s2.
-    @composes: abel_G4_group_set *)
+(** abel_s1s2_s1 — the product followed by s1 is s2. *)
 Lemma abel_s1s2_s1 : (abel_s1 * abel_s2 * abel_s1)%g = abel_s2.
 Proof. by rewrite -mulgA abel_s21 mulgA abel_s1K mul1g. Qed.
 
-(** abel_s1s2_s2 — (s1 s2) s2 = s1.
-    @composes: abel_G4_group_set *)
+(** abel_s1s2_s2 — the product followed by s2 is s1. *)
 Lemma abel_s1s2_s2 : (abel_s1 * abel_s2 * abel_s2)%g = abel_s1.
 Proof. by rewrite -mulgA abel_s2K mulg1. Qed.
 
-(** abel_s1s2K — the product of the two generators is an involution.
-    @composes: abel_G4_group_set *)
+(** abel_s1s2K — the product of the two generators is itself an involution,
+    so every element of the group has order dividing two. *)
 Lemma abel_s1s2K : (abel_s1 * abel_s2 * (abel_s1 * abel_s2))%g = 1%g.
 Proof. by rewrite mulgA abel_s1s2_s1 abel_s2K. Qed.
 
-(** abel_G4_group_set — {1, s1, s2, s1 s2} is a subgroup of the permutations
-    of the four sheets.
-    @main architecture: group_set abel_G4, the set contains the identity and
-    is closed under the group law; the canonical structure below registers it
-    as a group. *)
+(** abel_G4_group_set — the four listed permutations contain the identity and
+    are closed under composition, so they form a subgroup of the permutations
+    of the four card positions.  This is the step from a set someone wrote
+    down to a group the fingroup theory applies to. *)
 Lemma abel_G4_group_set : group_set abel_G4.
 Proof.
 apply/group_setP; split; first by rewrite !inE eqxx.
@@ -217,8 +212,8 @@ Qed.
    notation of fingroup applies to the set spelled out above. *)
 Canonical abel_G4_group := group abel_G4_group_set.
 
-(** abel_gen_setE — the generator image set is the pair {s1, s2}.
-    @composes: abel_pgg_GE *)
+(** abel_gen_setE — the image of the generator tuple is the two-element set
+    {s1, s2}: the tuple names two permutations and no more. *)
 Lemma abel_gen_setE :
   [set tnth abel_sigmas i | i : 'I_2] = [set abel_s1; abel_s2].
 Proof.
@@ -230,9 +225,10 @@ case=> /eqP ->;
   by rewrite // (tnth_nth abel_s1).
 Qed.
 
-(** abel_pgg_GE — the generated group is the four-element Klein set.
-    @main architecture: pgg_G abel_M = {1, s1, s2, s1 s2} as sets of
-    permutations of the four sheets. *)
+(** abel_pgg_GE — the group the instance generates is exactly {1, s1, s2,
+    s1 s2}.  It replaces an abstractly generated subgroup by a listed set, so
+    every count and every distribution over the group below is finite
+    arithmetic on four named permutations. *)
 Lemma abel_pgg_GE : (pgg_G abel_M : {set {perm 'I_4}}) = abel_G4.
 Proof.
 have -> : (pgg_G abel_M : {set {perm 'I_4}})
@@ -248,64 +244,61 @@ move=> /orP[/orP[/orP[/eqP->|/eqP->]|/eqP->]|/eqP->].
 - by apply: groupM; apply: mem_gen; rewrite !inE eqxx ?orbT.
 Qed.
 
-(** abel_perm_eq0 — equal permutations agree at sheet 0.
-    @composes: abel_G4_card *)
+(* The two probes below separate the four group elements: reading a
+   permutation at card position 0 tells s1 and s1 s2 from the identity, and
+   reading it at position 2 tells s2 and s1 s2 from the identity. *)
+
+(** abel_perm_eq0 — equal permutations agree at card position 0. *)
 Lemma abel_perm_eq0 (g h : {perm 'I_4}) : g = h ->
   val (g (Ordinal (isT : (0 < 4)%N))) = val (h (Ordinal (isT : (0 < 4)%N))).
 Proof. by move=> ->. Qed.
 
-(** abel_perm_eq2 — equal permutations agree at sheet 2.
-    @composes: abel_G4_card *)
+(** abel_perm_eq2 — equal permutations agree at card position 2. *)
 Lemma abel_perm_eq2 (g h : {perm 'I_4}) : g = h ->
   val (g (Ordinal (isT : (2 < 4)%N))) = val (h (Ordinal (isT : (2 < 4)%N))).
 Proof. by move=> ->. Qed.
 
-(** abel_1_neq_s1 — the identity differs from the first generator.
-    @composes: abel_G4_card *)
+(** abel_1_neq_s1 — the identity differs from the first generator. *)
 Lemma abel_1_neq_s1 : (1%g == abel_s1) = false.
 Proof.
 by apply/negbTE/eqP => /abel_perm_eq0; rewrite perm1 /abel_s1 !permE.
 Qed.
 
-(** abel_1_neq_s2 — the identity differs from the second generator.
-    @composes: abel_G4_card *)
+(** abel_1_neq_s2 — the identity differs from the second generator. *)
 Lemma abel_1_neq_s2 : (1%g == abel_s2) = false.
 Proof.
 by apply/negbTE/eqP => /abel_perm_eq2; rewrite perm1 /abel_s2 !permE.
 Qed.
 
-(** abel_1_neq_s1s2 — the identity differs from the generator product.
-    @composes: abel_G4_card *)
+(** abel_1_neq_s1s2 — the identity differs from the generator product. *)
 Lemma abel_1_neq_s1s2 : (1%g == (abel_s1 * abel_s2)%g) = false.
 Proof.
 by apply/negbTE/eqP => /abel_perm_eq0;
    rewrite perm1 permM /abel_s1 /abel_s2 !permE.
 Qed.
 
-(** abel_s1_neq_s2E — the two generators differ.
-    @composes: abel_G4_card *)
+(** abel_s1_neq_s2E — the two generators differ. *)
 Lemma abel_s1_neq_s2E : (abel_s1 == abel_s2) = false.
 Proof.
 by apply/negbTE/eqP => /abel_perm_eq0; rewrite /abel_s1 /abel_s2 !permE.
 Qed.
 
-(** abel_s1_neq_s1s2 — the first generator differs from the product.
-    @composes: abel_G4_card *)
+(** abel_s1_neq_s1s2 — the first generator differs from the product. *)
 Lemma abel_s1_neq_s1s2 : (abel_s1 == (abel_s1 * abel_s2)%g) = false.
 Proof.
 by apply/negbTE/eqP => /abel_perm_eq2; rewrite permM /abel_s1 /abel_s2 !permE.
 Qed.
 
-(** abel_s2_neq_s1s2 — the second generator differs from the product.
-    @composes: abel_G4_card *)
+(** abel_s2_neq_s1s2 — the second generator differs from the product. *)
 Lemma abel_s2_neq_s1s2 : (abel_s2 == (abel_s1 * abel_s2)%g) = false.
 Proof.
 by apply/negbTE/eqP => /abel_perm_eq0; rewrite permM /abel_s1 /abel_s2 !permE.
 Qed.
 
-(** abel_G4_card — the four listed permutations are pairwise distinct.
-    @main architecture: #|abel_G4| = 4, the cardinality the uniform
-    distribution on the generated group is normalised by. *)
+(** abel_G4_card — the group has four elements, the six inequations above
+    showing the listed permutations pairwise distinct.  This four is the
+    normalising constant of the ideal uniform model, so every mass in the
+    abelian distance computations is a quarter or a multiple of one. *)
 Lemma abel_G4_card : #|abel_G4| = 4.
 Proof.
 rewrite /abel_G4 -!setUA !cardsU1 !inE cards1.
@@ -313,19 +306,21 @@ by rewrite abel_1_neq_s1 abel_1_neq_s2 abel_1_neq_s1s2 abel_s1_neq_s2E
            abel_s1_neq_s1s2 abel_s2_neq_s1s2.
 Qed.
 
-(** abel_G4_card_gt0 — the generated group is nonempty.
-    @composes: abel_group_uniform *)
+(** abel_G4_card_gt0 — the group is nonempty, which is what a uniform
+    distribution supported on it needs in order to exist. *)
 Lemma abel_G4_card_gt0 : (0 < #|abel_G4|)%N.
 Proof. by rewrite abel_G4_card. Qed.
 
-(** abel_pgg_G_card — the monodromy group has four elements.
-    @main architecture: #|pgg_G abel_M| = 4. *)
+(** abel_pgg_G_card — the monodromy group has four elements.  It is the
+    ceiling on the search space at every word length, so no number of rounds
+    puts an adversary in front of more than four candidate shuffles. *)
 Lemma abel_pgg_G_card : #|pgg_G abel_M| = 4.
 Proof. by rewrite abel_pgg_GE abel_G4_card. Qed.
 
-(** abel_G_abelian — the generated group is abelian.
-    @main architecture: abelian (pgg_G abel_M), the hypothesis of
-    abelian_word_eval and freq_vec_det. *)
+(** abel_G_abelian — the generated group is abelian.  It is the hypothesis
+    the word-collapse theorems are stated under, so from here a word over the
+    two generators is determined by how often each letter occurs and the
+    search space collapses to a count of frequency vectors. *)
 Lemma abel_G_abelian : abelian (pgg_G abel_M).
 Proof.
 have -> : (pgg_G abel_M : {set {perm 'I_4}})

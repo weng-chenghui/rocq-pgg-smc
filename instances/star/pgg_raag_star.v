@@ -10,21 +10,30 @@ From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 (* PGG: Star-Graph RAAG Instance                                             *)
 (* Group presentation: <g_0,...,g_m | g_0 g_i = g_i g_0 for i=1..m>         *)
 (*                                                                            *)
-(* Constructs a concrete PGG instance based on a star commutation graph:      *)
-(* one center generator commutes with all leaf generators, while leaves do    *)
-(* not commute with each other.  This gives a non-abelian RAAG with           *)
-(* independent set of size m (the leaves), yielding m^L <= n_traces.          *)
+(* The PGG whose m+1 generators are transpositions of m+3 card positions,     *)
+(* arranged so that their commutation graph is the star on m leaves: the      *)
+(* center generator moves positions 0 and 1, and leaf generator i moves       *)
+(* position 2 and position i+2.  The center's support meets no leaf's, so it  *)
+(* commutes with all of them; every two leaves share position 2, so no two of *)
+(* them commute.                                                              *)
+(*                                                                            *)
+(* The m leaves are an independent set of that graph, and the number of trace *)
+(* classes of length-L words is therefore at least m^L.  The chain            *)
+(* search_space L <= n_traces L <= Tg^L makes n_traces the ceiling of the     *)
+(* search space, so this is a lower bound on the ceiling and becomes a lower  *)
+(* bound on the search space itself only where word evaluation is injective   *)
+(* on trace classes.  The abelian instances sit at the opposite extreme,      *)
+(* where every pair of generators commutes and the count is polynomial in L.  *)
 (*                                                                            *)
 (*   star_gen i == generator permutation:                                     *)
 (*                 center (i=0): tperm n0 n1 (support {0,1})                  *)
 (*                 leaf (i>0):   tperm n2 (2+i) (support {2,2+i})             *)
-(*   star_comm i j == commutation relation (center commutes with leaves)      *)
-(*   star_Hcomm == star_comm implies group-level commutativity                *)
-(*   star_leaf_noncommute == leaves do not commute                            *)
+(*   star_comm i j == the star commutation graph on generator indices         *)
+(*   star_Hcomm == every edge of star_comm is a commuting generator pair      *)
+(*   star_leaf_noncommute == distinct leaves do not commute                   *)
+(*   star_gen_inj == the generators are pairwise distinct permutations        *)
 (*   star_G_nonabelian == the generated group is non-abelian (m >= 2)         *)
-(*   star_gen_inj == generators are injective                                 *)
-(*   star_search_space_1 == search_space 1 = T                                *)
-(*   star_weval_inj1 == word-eval injectivity at L=1                          *)
+(*   star_leaves == the leaf index set, an independent set of size m          *)
 (*   star_traces_lb == m^L <= n_traces (via indep_set_traces_lb)              *)
 (******************************************************************************)
 
@@ -40,45 +49,66 @@ Let T := m.+1.
 Let N := m.+3.
 Let gT : finGroupType := {perm 'I_N}.
 
-(* Helper ordinals *)
+(* The three card positions the center generator and the shared end of every
+   leaf generator occupy: 0 and 1 for the center, 2 for all leaves. *)
 Let n0 : 'I_N := Ordinal (isT : 0 < N).
 Let n1 : 'I_N := Ordinal (isT : 1 < N).
 Let n2 : 'I_N := Ordinal (isT : 2 < N).
 
+(* Generator index i, read as a card position shifted past the three reserved
+   positions, still lies in the deck of m+3.  This is what lets each of the m
+   leaves own a private card position i+2 while sharing position 2. *)
 Lemma i_plus_2_lt (i : 'I_T) : (val i).+2 < N.
 Proof. by case: i => v Hv. Qed.
 
-(* Generator definition *)
+(* Generator i as a permutation of the m+3 card positions: the center
+   generator, at index 0, transposes positions 0 and 1; leaf generator i
+   transposes position 2 with position i+2.  The supports carry the whole
+   commutation structure of the instance: the center's support {0,1} is
+   disjoint from every leaf's, and any two leaves meet at position 2. *)
 Definition star_gen (i : 'I_T) : gT :=
   if val i == 0 then tperm n0 n1
   else tperm n2 (Ordinal (i_plus_2_lt i)).
 
-(* Simplification lemmas *)
+(* The generator at index 0 is the transposition of positions 0 and 1. *)
 Lemma star_gen0 : star_gen ord0 = tperm n0 n1.
 Proof. by rewrite /star_gen /=. Qed.
 
+(* A generator at a nonzero index is the transposition of position 2 with
+   position i+2. *)
 Lemma star_gen_leaf (i : 'I_T) (Hi : val i != 0) :
   star_gen i = tperm n2 (Ordinal (i_plus_2_lt i)).
 Proof. by rewrite /star_gen (negbTE Hi). Qed.
 
-(* Generator tuple *)
+(* The m+1 generators as a tuple, the shape a PGGTypes instance stores its
+   generating family in. *)
 Definition star_gen_tuple : T.-tuple gT := gen_tuple_of star_gen.
 
+(* Tuple lookup at index i returns generator i. *)
 Lemma star_gen_tupleE (i : 'I_T) : tnth star_gen_tuple i = star_gen i.
 Proof. exact: gen_tuple_ofE. Qed.
 
-(* Involution: tperm^2 = 1 *)
+(* Every generator squares to the identity: each is a transposition, so the
+   group is generated by involutions and a word over the generator indices
+   needs no inverses to name a group element. *)
 Lemma star_gen_invol (i : 'I_T) : (star_gen i ^+ 2 = 1)%g.
 Proof. by rewrite /star_gen; case: ifP => _; exact: tperm2. Qed.
 
-(* --- Distinctness lemmas --- *)
+(* --- The three reserved card positions are pairwise distinct --- *)
 
+(* Positions 0, 1 and 2 are three different cards in a deck of m+3.  This is
+   the disjointness of the center's support from the position every leaf
+   moves, and hence the source of the star graph's edges. *)
 Let n0_ne_n1 : n0 != n1 := isT.
 Let n0_ne_n2 : n0 != n2 := isT.
 Let n1_ne_n2 : n1 != n2 := isT.
 
 (* --- Center commutes with leaves --- *)
 
+(* The center generator commutes with every leaf generator, their supports
+   {0,1} and {2,i+2} being disjoint.  These are exactly the edges of the star
+   graph, so the presented commutation relations all hold in the concrete
+   permutation group. *)
 Lemma star_center_commute (i : 'I_T) : 0 < val i ->
   (star_gen ord0 * star_gen i = star_gen i * star_gen ord0)%g.
 Proof.
@@ -96,6 +126,11 @@ Qed.
 
 (* --- Leaves do not commute --- *)
 
+(* Two distinct leaf generators do not commute: both move position 2, and the
+   two products send it to the two different private positions.  The
+   commutation graph is thus exact rather than merely sound, so the leaves
+   are an independent set in the group and not only in the graph, and the
+   trace count below is a statement about genuinely distinct shuffles. *)
 Lemma star_leaf_noncommute (i j : 'I_T) :
   0 < val i -> 0 < val j -> i != j ->
   (star_gen i * star_gen j != star_gen j * star_gen i)%g.
@@ -127,20 +162,32 @@ Qed.
 
 (* --- Commutativity relation --- *)
 
+(* The commutation graph on the m+1 generator indices: i and j are joined
+   exactly when they are distinct and one of them is the center index 0.
+   This is the star graph, whose edge set is the whole presentation of the
+   RAAG and whose m leaves span no edge. *)
 Definition star_comm : rel 'I_T :=
   fun i j => ((val i == 0) || (val j == 0)) && (i != j).
 
+(* The commutation graph is undirected. *)
 Lemma star_comm_sym : symmetric star_comm.
 Proof.
 move=> i j; rewrite /star_comm orbC; congr (_ && _).
 by rewrite /negb eq_sym.
 Qed.
 
+(* The commutation graph has no loops: a generator is never listed as
+   commuting with itself, which is what lets a repeated letter block a trace
+   swap and keeps the trace count from collapsing. *)
 Lemma star_comm_irrefl : irreflexive star_comm.
 Proof. by move=> i; rewrite /star_comm eqxx andbF. Qed.
 
 (* --- Hcomm: star_comm implies group-level commutativity --- *)
 
+(* Every edge of the star graph is a commuting pair of generator
+   permutations.  This is the soundness half of the RAAG presentation: the
+   relations asserted by the graph hold in the concrete group, so words
+   related by an adjacent swap evaluate to the same shuffle. *)
 Lemma star_Hcomm : forall i j : 'I_T,
   star_comm i j ->
   (tnth star_gen_tuple i * tnth star_gen_tuple j =
@@ -165,6 +212,10 @@ Qed.
 
 (* --- Generator injectivity --- *)
 
+(* Distinct indices name distinct permutations.  The counting arguments below
+   are stated over generator indices, so without this they would count index
+   patterns rather than group elements and the m in m^L would be a count of
+   labels. *)
 Lemma star_gen_inj : injective star_gen.
 Proof.
 move=> i j; rewrite /star_gen.
@@ -199,11 +250,18 @@ Qed.
 
 (* --- PGGTypes instance --- *)
 
+(* The PGG carried by the star generators: m+3 card positions, m+1
+   generators, and the group they generate inside the symmetric group on
+   those positions, acting by the inclusion monodromy. *)
 Local Notation Star_PGGTypes := (@Gen_PGGTypes m m.+1 star_gen_tuple).
 Let M_star : MonodromyReprWithGeneratorType := Star_PGGTypes.
 
 (* --- RAAG instance wrapper lemmas --- *)
 
+(* Generator distinctness and the star relations, restated through the
+   instance's own generator tuple pgg_sigmas.  The RAAG mixin reads its
+   fields there, so these are the two forms the instance registration
+   consumes. *)
 Lemma star_gen_inj_sigmas :
   injective (fun i : 'I_T => tnth (@pgg_sigmas M_star) i).
 Proof. by move=> i j; rewrite !star_gen_tupleE; exact: star_gen_inj. Qed.
@@ -216,6 +274,10 @@ Proof. by move=> i j; exact: star_Hcomm. Qed.
 
 (* --- Non-abelianity --- *)
 
+(* From two leaves on, the generated group is non-abelian.  This is what
+   places the instance away from the abelian family, where every pair of
+   generators commutes and the search space collapses to a stars-and-bars
+   count of frequency vectors; here no such collapse is available. *)
 Lemma star_G_nonabelian : 1 < m ->
   ~~ abelian (pgg_G M_star).
 Proof.
@@ -233,8 +295,12 @@ Qed.
 
 (* --- Independent set: leaves --- *)
 
+(* The set of leaf indices, that is every generator index other than the
+   center.  It is the independent set the trace lower bound is taken over. *)
 Definition star_leaves : {set 'I_T} := [set i : 'I_T | 0 < val i].
 
+(* There are m leaves, one fewer than the m+1 generators.  This m is the base
+   of the exponential in star_traces_lb. *)
 Lemma star_leaf_set_card : #|star_leaves| = m.
 Proof.
 suff -> : star_leaves = [set~ ord0 : 'I_T].
@@ -243,7 +309,10 @@ apply/setP => x; rewrite !inE.
 by case: x => [[|v] Hv].
 Qed.
 
-(* Leaves form an independent set *)
+(* No edge of the star graph joins two leaves: an edge needs the center at
+   one end.  This is the independence hypothesis of indep_set_traces_lb, and
+   it is what forbids an adjacent swap anywhere inside a word written in leaf
+   letters only. *)
 Lemma star_leaves_indep (i j : 'I_T) :
   i \in star_leaves -> j \in star_leaves -> i != j -> ~~ star_comm i j.
 Proof.
@@ -256,6 +325,9 @@ Qed.
 
 (* --- RAAG instance registration --- *)
 
+(* The star PGG as a RAAG: its commutation graph is star_comm, and the two
+   soundness obligations are the relation and injectivity lemmas above.  From
+   here the generic trace theory of pgg_raag.v applies to this instance. *)
 HB.instance Definition Star_isRAAG :=
   @isRAAG0.Build Star_PGGTypes
     star_comm star_comm_sym star_comm_irrefl
@@ -263,6 +335,13 @@ HB.instance Definition Star_isRAAG :=
 
 Let R_star : RAAGType := Star_PGGTypes.
 
+(* Length-L words fall into at least m^L trace classes.  n_traces is the
+   ceiling of the search space, since search_space L <= n_traces L <= Tg^L, so
+   the star graph keeps that ceiling exponential in L with the leaf count as
+   base, and the bound turns into one on the search space itself exactly where
+   word evaluation is injective on trace classes.  It is a combinatorial fact
+   about the commutation graph, carrying no probabilistic or cryptographic
+   assumption. *)
 Lemma star_traces_lb (L : nat) :
   m ^ L <= @n_traces R_star L.
 Proof.

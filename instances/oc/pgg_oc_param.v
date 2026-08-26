@@ -13,6 +13,17 @@ From pgg_smc Require Import pgg_interface.
 (*   sigma_i rotates positions [i, i+1, ..., i+p+2], fixing everything else. *)
 (*   Existing OC(2,3) (pgg_weval_inj.v) is the special case k=1, p=0, N=4.  *)
 (*                                                                            *)
+(* Consecutive generators share p+2 of their p+3 positions.  That overlap is  *)
+(* the whole content of the family: with disjoint windows the group would be  *)
+(* a direct product of cycles and abelian, so its search space would collapse *)
+(* to a frequency-vector count, whereas overlapping windows leave the         *)
+(* generators non-commuting.  The two parameters separate the two ways of     *)
+(* growing the deck: k adds generators at fixed cycle length, p lengthens     *)
+(* every cycle at a fixed generator count.                                    *)
+(*                                                                            *)
+(* The file supplies generator data only, in the tuple shape a PGGTypes value *)
+(* is built over; it registers no monodromy instance of its own.              *)
+(*                                                                            *)
 (*   oc_shift_fun i x == the windowed rotation function for generator i       *)
 (*   oc_gen i         == generator i as a permutation in S_N                  *)
 (*   oc_param_tuple   == (k+1)-tuple of generators                           *)
@@ -30,9 +41,15 @@ Let Tg := k.+1.
 Let cycle_len := p.+3.
 Let N := k + cycle_len.
 
+(* The deck is nonempty: a cycle of length p+3 already occupies three
+   positions. *)
 Lemma oc_N_pos : 0 < N.
 Proof. by rewrite /N addnC. Qed.
 
+(* A generator index is also a card position.  The family indexes its k+1
+   generators by the position each rotation window starts at, so the index
+   type embeds in the position type and the window bases are k+1 distinct
+   cards of the deck. *)
 Lemma oc_base_bound (i : 'I_Tg) : val i < N.
 Proof.
 have Hi := valP i.
@@ -41,16 +58,19 @@ change (k.+1 <= k + p.+3).
 by rewrite -{1}(addn0 k) ltn_add2l.
 Qed.
 
-(* Generator i acts on window [i, i + cycle_len - 1]:
-   maps j -> j+1 for j in [i, i+cycle_len-2], wraps i+cycle_len-1 -> i.
-   Proven injective via cancel with oc_unshift_fun. *)
-
+(* The rotation of the window [a, a + clen - 1] on raw card numbers: a
+   position inside the window moves up by one, the top of the window wraps to
+   its base, and a position outside the window is fixed.  Stated on nat
+   rather than on ordinals so that the window arithmetic is visible; the
+   bound argument records the deck size the caller will bound against. *)
 Definition oc_shift_fun_raw (a : nat) (clen : nat) (bound : nat)
     (x : nat) : nat :=
   if (a <= x) && (x < a + clen) then
     if x < a + clen - 1 then x.+1 else a
   else x.
 
+(* The rotation of generator i keeps a card inside the deck: its window ends
+   at i + p + 2, and i is at most k, so the window never runs past N - 1. *)
 Lemma oc_shift_fun_lt (i : 'I_Tg) (x : 'I_N) :
   oc_shift_fun_raw (val i) cycle_len N (val x) < N.
 Proof.
@@ -63,16 +83,21 @@ rewrite leq_add2r.
 exact: (valP i).
 Qed.
 
+(* Generator i's rotation as a map of card positions. *)
 Definition oc_shift_fun (i : 'I_Tg) (x : 'I_N) : 'I_N :=
   Ordinal (oc_shift_fun_lt i x).
 
-(* Inverse windowed rotation: undoes the shift *)
+(* The rotation of the same window in the opposite direction: inside the
+   window a position moves down by one and the base wraps to the top, outside
+   it nothing moves.  It exists to exhibit the rotation as a bijection, which
+   is what a card shuffle has to be. *)
 Definition oc_unshift_fun_raw (a : nat) (clen : nat) (bound : nat)
     (x : nat) : nat :=
   if (a <= x) && (x < a + clen) then
     if a < x then x.-1 else a + clen - 1
   else x.
 
+(* The reverse rotation of generator i also keeps a card inside the deck. *)
 Lemma oc_unshift_fun_lt (i : 'I_Tg) (x : 'I_N) :
   oc_unshift_fun_raw (val i) cycle_len N (val x) < N.
 Proof.
@@ -86,10 +111,12 @@ have H2 : val i + cycle_len <= N by rewrite leq_add2r; exact: valP i.
 exact: (@leq_trans (val i + cycle_len) _ _ H1 H2).
 Qed.
 
+(* Generator i's reverse rotation as a map of card positions. *)
 Definition oc_unshift_fun (i : 'I_Tg) (x : 'I_N) : 'I_N :=
   Ordinal (oc_unshift_fun_lt i x).
 
-(* Cancellation: unshift cancels shift on raw nats within bounds *)
+(* The reverse rotation undoes the rotation on every card position, inside
+   the window and outside it alike. *)
 Lemma oc_shift_unshiftK (i : 'I_Tg) : cancel (oc_shift_fun i) (oc_unshift_fun i).
 Proof.
 move=> x; apply: val_inj => /=.
@@ -124,13 +151,20 @@ case Hwin: ((val i <= val x) && (val x < val i + cycle_len)).
   by [].
 Qed.
 
+(* The rotation of generator i is injective, hence a permutation of the deck:
+   no two cards are sent to one position. *)
 Lemma oc_shift_fun_inj (i : 'I_Tg) : injective (oc_shift_fun i).
 Proof. apply: can_inj; exact: oc_shift_unshiftK. Qed.
 
+(* Generator i as an element of the symmetric group on the N card positions:
+   the (p+3)-cycle on the window based at i, identity elsewhere. *)
 Definition oc_gen (i : 'I_Tg) : {perm 'I_N} := perm (@oc_shift_fun_inj i).
 
+(* The k+1 generators as a tuple, the shape a PGGTypes value stores its
+   generating family in. *)
 Definition oc_param_tuple : Tg.-tuple {perm 'I_N} := gen_tuple_of oc_gen.
 
+(* Tuple lookup at index i returns generator i. *)
 Lemma oc_param_tupleE (i : 'I_Tg) : tnth oc_param_tuple i = oc_gen i.
 Proof. exact: gen_tuple_ofE. Qed.
 

@@ -80,13 +80,13 @@ Module AbelianAnalysis.
 (* ===== 1. Program ===== *)
 (******************************************************************************)
 
-(** profile — the probability-independent four-seat program profile.
-    @intent: alias of abel_profile. *)
+(** profile — the four-seat abelian program, group and sharing scheme
+    included, with no probability anywhere in it. *)
 Definition profile := abel_profile.
 
-(** profile_k — the profile's threshold character is four: the sum-mod scheme
-    deals one share per sheet, so all four shares are needed.
-    @intent: alias of profile_k_abel. *)
+(** profile_k — the privacy threshold is four: the sum-mod scheme deals one
+    share per card position and reconstruction consumes all of them, so no
+    proper subset of the seats learns anything. *)
 Definition profile_k := profile_k_abel.
 
 (******************************************************************************)
@@ -97,19 +97,19 @@ Definition profile_k := profile_k_abel.
 (* shuffle-analysis plug. Their process lists are not claimed equal.          *)
 (******************************************************************************)
 
-(** exec_plug — the secret-recovery execution plug over that profile.
-    @intent: alias of abel_exec_plug. *)
+(** exec_plug — the run that deals a secret in 'I_4 and recovers it. *)
 Definition exec_plug := abel_exec_plug.
 
-(** shuffle_plug — the identity-content execution plug over that profile, the
-    one the shuffle models of section 4 are attached to.
-    @intent: alias of abel_shuffle_plug. *)
+(** shuffle_plug — the run that deals nothing, so that its endpoints record
+    the shuffle itself.  It is the path the two probability models of section
+    4 are attached to, because it is the one whose observation is a function
+    of the shuffle alone. *)
 Definition shuffle_plug := abel_shuffle_plug.
 
 (******************************************************************************)
 (* ===== 3. Observers ===== *)
 (*                                                                            *)
-(* Carriers, kept distinct: a message list for the raw traces, a sheet        *)
+(* Carriers, kept distinct: a message list for the raw traces, a card         *)
 (* position 'I_4 for one seat's endpoint, a sequence of positions for the     *)
 (* verifier's endpoint list, and the tuple 4.-tuple 'I_4 for the complete     *)
 (* four-endpoint vector. The raw trace extractors carry a message list and    *)
@@ -118,44 +118,41 @@ Definition shuffle_plug := abel_shuffle_plug.
 (* at, and it is injective on all of {perm 'I_4}.                             *)
 (******************************************************************************)
 
-(** seat_endpoint — one seat's executed endpoint on the secret-recovery plug,
-    a sheet position.
-    @intent: exec_seat_endpoint specialized at abel_exec_plug. *)
+(** seat_endpoint — the card position one seat ends at in the
+    secret-recovery run. *)
 Definition seat_endpoint := @exec_seat_endpoint abel_profile abel_exec_plug.
 
-(** endpoint_vector — the complete four-endpoint observation of a cut, with
-    carrier 4.-tuple 'I_4.
-    @intent: alias of abel_reader. *)
+(** endpoint_vector — the four card positions a shuffle sends the four starts
+    to.  It withholds nothing about the shuffle, which is what lets the
+    limitation of section 6 be read at it without loss. *)
 Definition endpoint_vector := abel_reader.
 
-(** verifier_trace — the verifier's raw executed trace on the secret-recovery
-    plug, a message list.
-    @intent: exec_verifier_trace specialized at abel_exec_plug. *)
+(** verifier_trace — the verifier's message list in the secret-recovery run.
+    A message list is a navigation aid and not a finite random variable, so no
+    distance or entropy statement attaches to it. *)
 Definition verifier_trace := @exec_verifier_trace abel_profile abel_exec_plug.
 
-(** verifier_endpoints — the executed endpoint list of the secret-recovery
-    run, the sheet positions the verifier reads.
-    @intent: exec_endpoints specialized at abel_exec_plug. *)
+(** verifier_endpoints — the card positions the verifier reads at the end of
+    the secret-recovery run, one per seat. *)
 Definition verifier_endpoints := @exec_endpoints abel_profile abel_exec_plug.
 
-(** player_raw_trace — one seat's raw executed trace on the secret-recovery
-    plug, a message list.
-    @intent: exec_participant_trace specialized at abel_exec_plug. *)
+(** player_raw_trace — one seat's message list in the secret-recovery run,
+    again a navigation aid and not a random variable. *)
 Definition player_raw_trace :=
   @exec_participant_trace abel_profile abel_exec_plug.
 
-(** observed — the secret-recovery observed execution: the run, its static
-    observation and the value it recovers.
-    @intent: alias of abel_det_observed. *)
+(** observed — the secret-recovery run together with what it observes and the
+    secret it recovers. *)
 Definition observed := abel_det_observed.
 
-(** shuffle_observed — the identity-content observed execution.
-    @intent: alias of abel_shuffle_observed. *)
+(** shuffle_observed — the identity-content run together with what it
+    observes and the constant it recovers. *)
 Definition shuffle_observed := abel_shuffle_observed.
 
-(** endpoint_vector_inj — the complete four-endpoint observation determines the
-    cut.
-    @intent: alias of abel_reader_inj. *)
+(** endpoint_vector_inj — the four-endpoint observation determines the
+    shuffle, on all permutations of four cards and not only on the four the
+    group reaches.  Losing nothing, it carries every distance through
+    unchanged. *)
 Definition endpoint_vector_inj := abel_reader_inj.
 
 (******************************************************************************)
@@ -168,23 +165,24 @@ Definition endpoint_vector_inj := abel_reader_inj.
 (* the protocol's own generators reach.                                       *)
 (******************************************************************************)
 
-(** ideal_sample — the ideal shuffle model, uniform on the four-element
-    generated group.
-    @intent: alias of abel_ideal_adapter. *)
+(** ideal_sample — the ideal model: a shuffle drawn uniformly from the four
+    the generators reach.  The target is the reachable group and not all of
+    S_4, so the distance in section 6 measures failure to mix rather than the
+    group's size. *)
 Definition ideal_sample := abel_ideal_adapter.
 
-(** word_sample — the actual shuffle model at generator-word length L + 1.
-    @intent: alias of abel_actual_adapter. *)
+(** word_sample — the actual model: a shuffle produced by a uniformly random
+    generator word of length L + 1, which is where a real dealer's randomness
+    sits. *)
 Definition word_sample := abel_actual_adapter.
 
-(** word_family — the fixed-length word model family, indexed by the word
-    length.
-    @intent: alias of abel_word_family. *)
+(** word_family — the actual model as a family indexed by the number of
+    rounds, the object over which the limitation is quantified. *)
 Definition word_family := abel_word_family.
 
-(** actual_cut_distE — the actual model's cut distribution is the
-    word-induced shuffle distribution.
-    @intent: alias of abel_actual_cut_dist. *)
+(** actual_cut_distE — the shuffle the actual sampler produces is distributed
+    as the word-induced model, so the exact distance stated below is about the
+    distribution this sampler really draws. *)
 Definition actual_cut_distE := @abel_actual_cut_dist.
 
 (******************************************************************************)
@@ -200,24 +198,22 @@ Definition actual_cut_distE := @abel_actual_cut_dist.
 (* distribution rather than the recovered value.                              *)
 (******************************************************************************)
 
-(** exec_correct — termination, endpoint count and recovery of the
-    secret-recovery run together.
-    @intent: alias of abel_exec_correct. *)
+(** exec_correct — the secret-recovery run terminates, collects one endpoint
+    per seat, and decodes to the dealt secret. *)
 Definition exec_correct := @abel_exec_correct.
 
-(** exec_recovers — the secret-recovery executed run decodes to the dealt
-    secret.
-    @intent: alias of abel_exec_recovers. *)
+(** exec_recovers — the secret-recovery run decodes to the dealt secret, for
+    every secret in 'I_4 and every shuffle in the group. *)
 Definition exec_recovers := @abel_exec_recovers.
 
-(** observed_recovers — the secret-recovery observed run decodes to the dealt
-    secret.
-    @intent: alias of abel_observed_recovers. *)
+(** observed_recovers — the same arbitrary-secret recovery, read through the
+    packaged observed execution. *)
 Definition observed_recovers := @abel_observed_recovers.
 
-(** shuffle_recovers — the identity-content executed run decodes to the
-    constant abel_identity_recon_value at every cut in the group.
-    @intent: alias of abel_shuffle_recovers. *)
+(** shuffle_recovers — the identity-content run decodes to a fixed card
+    position at every shuffle in the group.  No secret is dealt on this path,
+    so this is recovery of one constant and not the arbitrary-secret
+    correctness above. *)
 Definition shuffle_recovers := @abel_shuffle_recovers.
 
 (******************************************************************************)
@@ -230,10 +226,11 @@ Definition shuffle_recovers := @abel_shuffle_recovers.
 (* The instance carries no privacy result at all.                             *)
 (******************************************************************************)
 
-(** word_mixing_limitation — fixed-length mixing limitation: the executed
-    four-endpoint observations of the actual and ideal shuffle models stay at
-    full-L1 distance exactly one at every finite word length.
-    @intent: alias of abel_executed_observation_distance. *)
+(** word_mixing_limitation — the four-endpoint observations of the actual and
+    the ideal model stay at full-L1 distance exactly one at every number of
+    rounds, out of a maximum of two.  It is an equality, so rounds buy nothing
+    here, and it is a statement about the law of what the verifier sees.  It
+    is not privacy, exact or approximate, and it names no coalition. *)
 Definition word_mixing_limitation := @abel_executed_observation_distance.
 
 (******************************************************************************)
@@ -249,39 +246,38 @@ Definition word_mixing_limitation := @abel_executed_observation_distance.
 (* together with the equality connecting the last two.                        *)
 (******************************************************************************)
 
-(** det_transfer_status — the secret-recovery path's transfer status.
-    @intent: NoModelComparison, the path carrying recovery only. *)
+(** det_transfer_status — the secret-recovery path compares no model with an
+    idealized one: it carries recovery and nothing else, so there is no
+    transfer claim to make or to fail. *)
 Definition det_transfer_status : TransferStatus := NoModelComparison.
 
-(** shuffle_transfer_status — the identity-content correctness path's transfer
-    status.
-    @intent: NoModelComparison, the path carrying constant recovery only. *)
+(** shuffle_transfer_status — the identity-content correctness path likewise
+    compares no model with an idealized one, carrying constant recovery
+    only. *)
 Definition shuffle_transfer_status : TransferStatus := NoModelComparison.
 
-(** limitation_transfer_status — the mixing-limitation path's transfer status.
-    @intent: NegativeTransfer, the path carrying an exact distance between the
-    actual and ideal shuffle models rather than a transfer theorem. *)
+(** limitation_transfer_status — the limitation path does compare two models,
+    and the comparison comes out negative: an exact distance, not a transfer
+    theorem.  Marking it so is what stops a reader taking the ideal model's
+    properties as holding of the finite one. *)
 Definition limitation_transfer_status : TransferStatus := NegativeTransfer.
 
-(** word_group_dist — the group form of the limitation: the actual and ideal
-    shuffle distributions on the generated group are at full-L1 distance one.
-    @intent: alias of abel_word_group_dist. *)
+(** word_group_dist — the limitation stated on the shuffles themselves: the
+    two distributions on the generated group are at full-L1 distance one. *)
 Definition word_group_dist := @abel_word_group_dist.
 
-(** executed_distance — the static endpoint-vector form of the limitation: the
-    same distance after the complete four-endpoint reader.
-    @intent: alias of abel_executed_distance. *)
+(** executed_distance — the limitation stated after the four-endpoint reader,
+    which is injective and so leaves the distance at the same one. *)
 Definition executed_distance := @abel_executed_distance.
 
-(** sample_reader_distE — the equality connecting the static form to the
-    executed one: the executed observation's distribution is the reader
-    pushforward of the cut distribution.
-    @intent: alias of abel_sample_reader_dist. *)
+(** sample_reader_distE — the law of the observed endpoints is the law of the
+    shuffle pushed through the reader.  It is what carries the distance from
+    the shuffle layer down to the observed one. *)
 Definition sample_reader_distE := @abel_sample_reader_dist.
 
-(** executed_observation_distance — the executed form of the limitation, at
-    the two models' own sample spaces.
-    @intent: alias of abel_executed_observation_distance. *)
+(** executed_observation_distance — the limitation stated over the two
+    samplers' own sample spaces, which is where the abelian negative chain
+    ends. *)
 Definition executed_observation_distance := @abel_executed_observation_distance.
 
 End AbelianAnalysis.
