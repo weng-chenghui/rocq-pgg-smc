@@ -62,7 +62,7 @@ Import Prenex Implicits.
 (* -------------------------------------------------------------------------- *)
 
 (* The image of a complement under a permutation is the complement of the
-   image. @composes: pgl27_five_subset_orbit, pgl27_six_subset_orbit *)
+   image. *)
 Local Lemma perm_imsetC (g : {perm 'I_8}) (A : {set 'I_8}) :
   g @: (~: A) = ~: (g @: A).
 Proof.
@@ -74,12 +74,11 @@ by rewrite (E (~: A)) (E A) preimsetC.
 Qed.
 
 (* A subset of the projective line and its complement have eight elements
-   between them. @composes: pgl27_five_subset_orbit, pgl27_six_subset_orbit *)
+   between them. *)
 Local Lemma cardsC8 (C : {set 'I_8}) : (#|C| + #|~: C|)%N = 8.
 Proof. by rewrite cardsC card_ord. Qed.
 
-(* An n-transitive action on the points is transitive on the n-subsets.
-   @composes: pgl27_five_subset_orbit, pgl27_six_subset_orbit *)
+(* An n-transitive action on the points is transitive on the n-subsets. *)
 Local Lemma ntransitive_subset_orbit (n : nat) (A B : {set 'I_8}) :
   ntransitive n (@pgg_rho pgl27_M @* pgg_G pgl27_M) [set: 'I_8] 'P ->
   #|A| = n -> #|B| = n ->
@@ -104,8 +103,8 @@ by exists x; rewrite // -mem_enum.
 Qed.
 
 (** pgl27_five_subset_orbit — any two five-subsets of the projective line are
-    shuffle images of one another.
-    @main architecture: the shuffle group is transitive on five-subsets. *)
+    shuffle images of one another. The shuffle group is transitive on
+    five-subsets. *)
 Lemma pgl27_five_subset_orbit (S T : {set 'I_8}) :
   #|S| = 5 -> #|T| = 5 ->
   exists2 g : pgg_gT pgl27_M, g \in pgg_G pgl27_M & T = g @: S.
@@ -119,8 +118,8 @@ by exists g => //; rewrite -[T]setCK Hg perm_imsetC setCK.
 Qed.
 
 (** pgl27_six_subset_orbit — any two six-subsets of the projective line are
-    shuffle images of one another.
-    @main architecture: the shuffle group is transitive on six-subsets. *)
+    shuffle images of one another. The shuffle group is transitive on
+    six-subsets. *)
 Lemma pgl27_six_subset_orbit (S T : {set 'I_8}) :
   #|S| = 6 -> #|T| = 6 ->
   exists2 g : pgg_gT pgl27_M, g \in pgg_G pgl27_M & T = g @: S.
@@ -134,9 +133,9 @@ by exists g => //; rewrite -[T]setCK Hg perm_imsetC setCK.
 Qed.
 
 (** pgl27_five_subset_orbitE — the orbit of a five-subset of the projective
-    line under the shuffle group is the set of all five-subsets.
-    @main architecture: the five-subsets are a single orbit, so no reveal
-    pattern of five positions is distinguished from another. *)
+    line under the shuffle group is the set of all five-subsets. The
+    five-subsets are a single orbit, so no reveal pattern of five positions is
+    distinguished from another. *)
 Lemma pgl27_five_subset_orbitE (S : {set 'I_8}) :
   #|S| = 5 ->
   orbit 'P^* (pgg_G pgl27_M) S = [set T : {set 'I_8} | #|T| == 5].
@@ -147,10 +146,10 @@ apply/orbitP/idP => [[g gG <-]|/eqP HT].
 by have [g gG ->] := pgl27_five_subset_orbit HS HT; exists g.
 Qed.
 
-(** pgl27_six_subset_orbitE — the orbit of a six-subset of the projective
-    line under the shuffle group is the set of all six-subsets.
-    @main architecture: the six-subsets are a single orbit, so no reveal
-    pattern of six positions is distinguished from another. *)
+(** pgl27_six_subset_orbitE — the orbit of a six-subset of the projective line
+    under the shuffle group is the set of all six-subsets. The six-subsets are
+    a single orbit, so no reveal pattern of six positions is distinguished
+    from another. *)
 Lemma pgl27_six_subset_orbitE (S : {set 'I_8}) :
   #|S| = 6 ->
   orbit 'P^* (pgg_G pgl27_M) S = [set T : {set 'I_8} | #|T| == 6].
@@ -165,36 +164,36 @@ Qed.
 (* The group as a table closure, self-validated.                              *)
 (* -------------------------------------------------------------------------- *)
 
-(** code_tr — the translation z |-> z + 1 as a table of the eight codes.
-    @intent: the first PGL(2,7) generator at the code level. *)
+(** code_tr — the translation z |-> z + 1 as a table of the eight codes. The
+    first PGL(2,7) generator at the code level. *)
 Definition code_tr : seq nat := [:: 1; 2; 3; 4; 5; 6; 0; 7].
 
-(** code_sc — the scaling z |-> 3 z as a table of the eight codes.
-    @intent: the second PGL(2,7) generator at the code level. *)
+(** code_sc — the scaling z |-> 3 z as a table of the eight codes. The second
+    PGL(2,7) generator at the code level. *)
 Definition code_sc : seq nat := [:: 0; 3; 6; 2; 5; 1; 4; 7].
 
-(** code_inv — the inversion z |-> -1 / z as a table of the eight codes.
-    @intent: the third PGL(2,7) generator at the code level. *)
+(** code_inv — the inversion z |-> -1 / z as a table of the eight codes. The
+    third PGL(2,7) generator at the code level. *)
 Definition code_inv : seq nat := [:: 7; 6; 3; 2; 5; 4; 1; 0].
 
-(** code_id — the identity table of the eight codes.
-    @intent: the code-level neutral element and the deal of the secret false. *)
+(** code_id — the identity table of the eight codes. The code-level neutral
+    element and the deal of the secret false. *)
 Definition code_id : seq nat := [:: 0; 1; 2; 3; 4; 5; 6; 7].
 
-(** code_tau — the transposition of the codes 3 and 4.
-    @intent: the code-level deal of the secret true, i.e. orbit_encode true. *)
+(** code_tau — the transposition of the codes 3 and 4. The code-level deal of
+    the secret true, i.e. orbit_encode true. *)
 Definition code_tau : seq nat := [:: 0; 1; 2; 4; 3; 5; 6; 7].
 
-(** code_gens — the three generator tables.
-    @intent: the code-level generating set of the shuffle group. *)
+(** code_gens — the three generator tables. The code-level generating set of
+    the shuffle group. *)
 Definition code_gens : seq (seq nat) := [:: code_tr; code_sc; code_inv].
 
-(** code_comp — the table of t2 after t1, that is i |-> t2 (t1 i).
-    @intent: composition of code tables, the code-level group law. *)
+(** code_comp — the table of t2 after t1, that is i |-> t2 (t1 i). Composition
+    of code tables, the code-level group law. *)
 Definition code_comp (t1 t2 : seq nat) : seq nat := [seq nth 0 t2 x | x <- t1].
 
-(* Fueled closure of a table set under right multiplication by the
-   generators. @intent: the code-level generation of pgl27_group_table. *)
+(* Fueled closure of a table set under right multiplication by the generators.
+   The code-level generation of pgl27_group_table. *)
 Local Fixpoint code_closure (fuel : nat) (seen : seq (seq nat)) :
     seq (seq nat) :=
   match fuel with
@@ -209,41 +208,36 @@ Local Fixpoint code_closure (fuel : nat) (seen : seq (seq nat)) :
   end.
 
 (** pgl27_group_table — the closure of the identity table under the three
-    generators, with thirty rounds of fuel.
-    @intent: the 336 elements of PGL(2,7) as permutation tables of the eight
-    codes. *)
+    generators, with thirty rounds of fuel. The 336 elements of PGL(2,7) as
+    permutation tables of the eight codes. *)
 Definition pgl27_group_table : seq (seq nat) := code_closure 30 [:: code_id].
 
-(** pgl27_group_table_size — the table list has 336 entries.
-    @main architecture: the tabulated shuffle group has the order of
-    PGL(2,7). *)
+(** pgl27_group_table_size — the table list has 336 entries. The tabulated
+    shuffle group has the order of PGL(2,7). *)
 Lemma pgl27_group_table_size : size pgl27_group_table = 336.
 Proof. by vm_compute. Qed.
 
-(** pgl27_group_table_uniq — the table list repeats no entry.
-    @main architecture: the tabulated shuffle group lists each element once,
-    so its size is its cardinality. *)
+(** pgl27_group_table_uniq — the table list repeats no entry. The tabulated
+    shuffle group lists each element once, so its size is its cardinality. *)
 Lemma pgl27_group_table_uniq : uniq pgl27_group_table.
 Proof. by vm_compute. Qed.
 
-(** pgl27_group_table_id — the identity table is listed.
-    @main architecture: the tabulated shuffle group contains the neutral
-    element. *)
+(** pgl27_group_table_id — the identity table is listed. The tabulated shuffle
+    group contains the neutral element. *)
 Lemma pgl27_group_table_id : code_id \in pgl27_group_table.
 Proof. by vm_compute. Qed.
 
 (** pgl27_group_table_closed — every listed table composed with every
-    generator is listed.
-    @main architecture: the tabulated shuffle group is closed under the
+    generator is listed. The tabulated shuffle group is closed under the
     generators, hence is the group they generate. *)
 Lemma pgl27_group_table_closed :
   all (fun t => all (fun g => code_comp t g \in pgl27_group_table) code_gens)
       pgl27_group_table.
 Proof. by vm_compute. Qed.
 
-(** pgl27_order_neq_335 — the table list does not have 335 entries.
-    @main architecture: the tabulated order is 336 and not the neighbouring
-    335, so the closure does not stop one element short. *)
+(** pgl27_order_neq_335 — the table list does not have 335 entries. The
+    tabulated order is 336 and not the neighbouring 335, so the closure does
+    not stop one element short. *)
 Lemma pgl27_order_neq_335 : size pgl27_group_table != 335.
 Proof. by vm_compute. Qed.
 
@@ -251,125 +245,117 @@ Proof. by vm_compute. Qed.
 (* The orbit census on four-, five- and six-subsets, at the code level.       *)
 (* -------------------------------------------------------------------------- *)
 
-(* All sublists of a list of codes. @intent: the enumeration that
-   code_subsets filters by length. *)
+(* All sublists of a list of codes. The enumeration that code_subsets filters
+   by length. *)
 Local Fixpoint code_powerset (l : seq nat) : seq (seq nat) :=
   match l with
   | [::] => [:: [::]]
   | x :: l' => let p := code_powerset l' in p ++ [seq x :: s | s <- p]
   end.
 
-(** code_subsets — the sublists of the eight codes that have length k.
-    @intent: the k-subsets of the projective line, in ascending code form. *)
+(** code_subsets — the sublists of the eight codes that have length k. The
+    k-subsets of the projective line, in ascending code form. *)
 Definition code_subsets (k : nat) : seq (seq nat) :=
   [seq s <- code_powerset (iota 0 8) | size s == k].
 
-(** code_restrict — the codes that the table t places at the positions S.
-    @intent: the observation of the position set S under the shuffle t. *)
+(** code_restrict — the codes that the table t places at the positions S. The
+    observation of the position set S under the shuffle t. *)
 Definition code_restrict (S t : seq nat) : seq nat := [seq nth 0 t x | x <- S].
 
-(** code_image — the image of a code subset under a table, sorted.
-    @intent: the action of a shuffle on a subset, in ascending code form. *)
+(** code_image — the image of a code subset under a table, sorted. The action
+    of a shuffle on a subset, in ascending code form. *)
 Definition code_image (t S : seq nat) : seq nat := sort leq (code_restrict S t).
 
 (** code_orbit — the distinct images of a code subset under the group table.
-    @intent: the orbit of a subset of the projective line under the shuffle
-    group, in ascending code form. *)
+    The orbit of a subset of the projective line under the shuffle group, in
+    ascending code form. *)
 Definition code_orbit (S : seq nat) : seq (seq nat) :=
   undup [seq code_image t S | t <- pgl27_group_table].
 
-(** rep_harmonic — the four-subset {0, 1, 2, 3}.
-    @intent: the representative of the harmonic orbit on four-subsets. *)
+(** rep_harmonic — the four-subset {0, 1, 2, 3}. The representative of the
+    harmonic orbit on four-subsets. *)
 Definition rep_harmonic : seq nat := [:: 0; 1; 2; 3].
 
-(** rep_equianharmonic — the four-subset {0, 1, 2, 4}.
-    @intent: the representative of the equianharmonic orbit. *)
+(** rep_equianharmonic — the four-subset {0, 1, 2, 4}. The representative of
+    the equianharmonic orbit. *)
 Definition rep_equianharmonic : seq nat := [:: 0; 1; 2; 4].
 
-(** rep_five — the five-subset {0, 1, 2, 3, 4}.
-    @intent: the representative of the single orbit on five-subsets. *)
+(** rep_five — the five-subset {0, 1, 2, 3, 4}. The representative of the
+    single orbit on five-subsets. *)
 Definition rep_five : seq nat := [:: 0; 1; 2; 3; 4].
 
-(** rep_six — the six-subset {0, 1, 2, 3, 4, 5}.
-    @intent: the representative of the single orbit on six-subsets. *)
+(** rep_six — the six-subset {0, 1, 2, 3, 4, 5}. The representative of the
+    single orbit on six-subsets. *)
 Definition rep_six : seq nat := [:: 0; 1; 2; 3; 4; 5].
 
-(** pgl27_subsets_four — the projective line has seventy four-subsets.
-    @main architecture: the seventy four-subsets are the domain that the
-    harmonic and equianharmonic orbits partition. *)
+(** pgl27_subsets_four — the projective line has seventy four-subsets. The
+    seventy four-subsets are the domain that the harmonic and equianharmonic
+    orbits partition. *)
 Lemma pgl27_subsets_four : size (code_subsets 4) = 70.
 Proof. by vm_compute. Qed.
 
-(** pgl27_subsets_five — the projective line has fifty-six five-subsets.
-    @main architecture: the fifty-six five-subsets are the domain that the
-    single five-subset orbit exhausts. *)
+(** pgl27_subsets_five — the projective line has fifty-six five-subsets. The
+    fifty-six five-subsets are the domain that the single five-subset orbit
+    exhausts. *)
 Lemma pgl27_subsets_five : size (code_subsets 5) = 56.
 Proof. by vm_compute. Qed.
 
-(** pgl27_subsets_six — the projective line has twenty-eight six-subsets.
-    @main architecture: the twenty-eight six-subsets are the domain that the
-    single six-subset orbit exhausts. *)
+(** pgl27_subsets_six — the projective line has twenty-eight six-subsets. The
+    twenty-eight six-subsets are the domain that the single six-subset orbit
+    exhausts. *)
 Lemma pgl27_subsets_six : size (code_subsets 6) = 28.
 Proof. by vm_compute. Qed.
 
-(** pgl27_orbit_harmonic_size — the orbit of {0, 1, 2, 3} has 42 elements.
-    @main architecture: the harmonic orbit on four-subsets has size 42. *)
+(** pgl27_orbit_harmonic_size — the orbit of {0, 1, 2, 3} has 42 elements. The
+    harmonic orbit on four-subsets has size 42. *)
 Lemma pgl27_orbit_harmonic_size : size (code_orbit rep_harmonic) = 42.
 Proof. by vm_compute. Qed.
 
 (** pgl27_orbit_equianharmonic_size — the orbit of {0, 1, 2, 4} has 28
-    elements.
-    @main architecture: the equianharmonic orbit on four-subsets has size 28. *)
+    elements. The equianharmonic orbit on four-subsets has size 28. *)
 Lemma pgl27_orbit_equianharmonic_size :
   size (code_orbit rep_equianharmonic) = 28.
 Proof. by vm_compute. Qed.
 
-(** pgl27_orbit_four_disjoint — no four-subset lies in both orbits.
-    @main architecture: the harmonic and equianharmonic orbits are
-    disjoint. *)
+(** pgl27_orbit_four_disjoint — no four-subset lies in both orbits. The
+    harmonic and equianharmonic orbits are disjoint. *)
 Lemma pgl27_orbit_four_disjoint :
   ~~ has (fun S => S \in code_orbit rep_equianharmonic)
          (code_orbit rep_harmonic).
 Proof. by vm_compute. Qed.
 
 (** pgl27_orbit_four_cover — every four-subset lies in one of the two orbits.
-    @main architecture: every four-subset lies in the harmonic or the
-    equianharmonic orbit. *)
+    Every four-subset lies in the harmonic or the equianharmonic orbit. *)
 Lemma pgl27_orbit_four_cover :
   all (fun S => (S \in code_orbit rep_harmonic)
              || (S \in code_orbit rep_equianharmonic)) (code_subsets 4).
 Proof. by vm_compute. Qed.
 
-(** pgl27_orbit_five_size — the orbit of {0, 1, 2, 3, 4} has 56 elements.
-    @main architecture: the single orbit on five-subsets has size 56. *)
+(** pgl27_orbit_five_size — the orbit of {0, 1, 2, 3, 4} has 56 elements. The
+    single orbit on five-subsets has size 56. *)
 Lemma pgl27_orbit_five_size : size (code_orbit rep_five) = 56.
 Proof. by vm_compute. Qed.
 
-(** pgl27_orbit_five_cover — every five-subset lies in the orbit of
-    {0, 1, 2, 3, 4}.
-    @main architecture: the five-subsets are a single orbit, at the code
-    level. *)
+(** pgl27_orbit_five_cover — every five-subset lies in the orbit of {0, 1, 2,
+    3, 4}. The five-subsets are a single orbit, at the code level. *)
 Lemma pgl27_orbit_five_cover :
   all (fun S => S \in code_orbit rep_five) (code_subsets 5).
 Proof. by vm_compute. Qed.
 
 (** pgl27_orbit_six_size — the orbit of {0, 1, 2, 3, 4, 5} has 28 elements.
-    @main architecture: the single orbit on six-subsets has size 28. *)
+    The single orbit on six-subsets has size 28. *)
 Lemma pgl27_orbit_six_size : size (code_orbit rep_six) = 28.
 Proof. by vm_compute. Qed.
 
-(** pgl27_orbit_six_cover — every six-subset lies in the orbit of
-    {0, 1, 2, 3, 4, 5}.
-    @main architecture: the six-subsets are a single orbit, at the code
-    level. *)
+(** pgl27_orbit_six_cover — every six-subset lies in the orbit of {0, 1, 2, 3,
+    4, 5}. The six-subsets are a single orbit, at the code level. *)
 Lemma pgl27_orbit_six_cover :
   all (fun S => S \in code_orbit rep_six) (code_subsets 6).
 Proof. by vm_compute. Qed.
 
-(** pgl27_four_not_transitive — some four-subset lies outside the orbit of
-    {0, 1, 2, 3}.
-    @main architecture: the four-subsets are not a single orbit, unlike the
-    five-subsets and the six-subsets. *)
+(** pgl27_four_not_transitive — some four-subset lies outside the orbit of {0,
+    1, 2, 3}. The four-subsets are not a single orbit, unlike the five-subsets
+    and the six-subsets. *)
 Lemma pgl27_four_not_transitive :
   ~~ all (fun S => S \in code_orbit rep_harmonic) (code_subsets 4).
 Proof. by vm_compute. Qed.
@@ -378,35 +364,33 @@ Proof. by vm_compute. Qed.
 (* The collision count of a reveal set.                                       *)
 (* -------------------------------------------------------------------------- *)
 
-(** code_deal — the arrangement dealt for the secret bit b.
-    @intent: code_id for the secret false and code_tau for the secret true. *)
+(** code_deal — the arrangement dealt for the secret bit b: code_id for the
+    secret false and code_tau for the secret true. *)
 Definition code_deal (b : bool) : seq nat := if b then code_tau else code_id.
 
-(** code_views — for each group element t, the codes that the deal of b
-    places at the positions S.
-    @intent: the list of observations of the reveal set S under the secret
-    bit b, one entry per shuffle. *)
+(** code_views — for each group element t, the codes that the deal of b places
+    at the positions S. The list of observations of the reveal set S under the
+    secret bit b, one entry per shuffle. *)
 Definition code_views (b : bool) (S : seq nat) : seq (seq nat) :=
   [seq code_restrict S (code_comp t (code_deal b)) | t <- pgl27_group_table].
 
-(** pgl27_collisions — the number of shuffles whose observation of S under
-    the secret true is also an observation of S under the secret false.
-    @intent: the cardinality of the intersection of the two observation sets
-    of the reveal set S, the two lists being repetition-free. *)
+(** pgl27_collisions — the number of shuffles whose observation of S under the
+    secret true is also an observation of S under the secret false. The
+    cardinality of the intersection of the two observation sets of the reveal
+    set S, the two lists being repetition-free. *)
 Definition pgl27_collisions (S : seq nat) : nat :=
   count (fun v => v \in code_views false S) (code_views true S).
 
 (** pgl27_views_uniq_harmonic — both deals restrict {0, 1, 2, 3} injectively.
-    @main security: at {0, 1, 2, 3} neither observation list repeats, so the
-    collision count below is a genuine set-intersection cardinality, out of
+    At {0, 1, 2, 3} neither observation list repeats, so the collision count
+    below is a genuine set-intersection cardinality, out of
     pgl27_group_table_size's 336. *)
 Lemma pgl27_views_uniq_harmonic :
   uniq (code_views false rep_harmonic) && uniq (code_views true rep_harmonic).
 Proof. by vm_compute. Qed.
 
 (** pgl27_views_uniq_equianharmonic — both deals restrict {0, 1, 2, 4}
-    injectively.
-    @main security: at {0, 1, 2, 4} neither observation list repeats, so the
+    injectively. At {0, 1, 2, 4} neither observation list repeats, so the
     collision count below is a genuine set-intersection cardinality. *)
 Lemma pgl27_views_uniq_equianharmonic :
   uniq (code_views false rep_equianharmonic)
@@ -414,90 +398,81 @@ Lemma pgl27_views_uniq_equianharmonic :
 Proof. by vm_compute. Qed.
 
 (** pgl27_views_uniq_five — both deals restrict {0, 1, 2, 3, 4} injectively.
-    @main security: at {0, 1, 2, 3, 4} neither observation list repeats, so
-    the collision count below is a genuine set-intersection cardinality. *)
+    At {0, 1, 2, 3, 4} neither observation list repeats, so the collision
+    count below is a genuine set-intersection cardinality. *)
 Lemma pgl27_views_uniq_five :
   uniq (code_views false rep_five) && uniq (code_views true rep_five).
 Proof. by vm_compute. Qed.
 
-(** pgl27_views_uniq_six — both deals restrict {0, 1, 2, 3, 4, 5}
-    injectively.
-    @main security: at {0, 1, 2, 3, 4, 5} neither observation list repeats,
-    so the collision count below is a genuine set-intersection cardinality. *)
+(** pgl27_views_uniq_six — both deals restrict {0, 1, 2, 3, 4, 5} injectively.
+    At {0, 1, 2, 3, 4, 5} neither observation list repeats, so the collision
+    count below is a genuine set-intersection cardinality. *)
 Lemma pgl27_views_uniq_six :
   uniq (code_views false rep_six) && uniq (code_views true rep_six).
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_harmonic — the four-subset {0, 1, 2, 3} has 96
-    collisions.
-    @main security: 96 of pgl27_group_table's 336 observations of
-    {0, 1, 2, 3} are common to the two deals. *)
+    collisions. 96 of pgl27_group_table's 336 observations of {0, 1, 2, 3} are
+    common to the two deals. *)
 Lemma pgl27_collisions_harmonic : pgl27_collisions rep_harmonic = 96.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_equianharmonic — the four-subset {0, 1, 2, 4} has 72
-    collisions.
-    @main security: 72 of pgl27_group_table's 336 observations of
-    {0, 1, 2, 4} are common to the two deals. *)
+    collisions. 72 of pgl27_group_table's 336 observations of {0, 1, 2, 4} are
+    common to the two deals. *)
 Lemma pgl27_collisions_equianharmonic :
   pgl27_collisions rep_equianharmonic = 72.
 Proof. by vm_compute. Qed.
 
-(** pgl27_collisions_five — the five-subset {0, 1, 2, 3, 4} has 36
-    collisions.
-    @main security: 36 of pgl27_group_table's 336 observations of
-    {0, 1, 2, 3, 4} are common to the two deals. *)
+(** pgl27_collisions_five — the five-subset {0, 1, 2, 3, 4} has 36 collisions.
+    36 of pgl27_group_table's 336 observations of {0, 1, 2, 3, 4} are common
+    to the two deals. *)
 Lemma pgl27_collisions_five : pgl27_collisions rep_five = 36.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_six — the six-subset {0, 1, 2, 3, 4, 5} has 12
-    collisions.
-    @main security: 12 of pgl27_group_table's 336 observations of
-    {0, 1, 2, 3, 4, 5} are common to the two deals. *)
+    collisions. 12 of pgl27_group_table's 336 observations of {0, 1, 2, 3, 4,
+    5} are common to the two deals. *)
 Lemma pgl27_collisions_six : pgl27_collisions rep_six = 12.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_three — the three-subset {0, 1, 2} has 336 collisions.
-    @main security: every one of pgl27_group_table's 336 observations of the
-    positions 0, 1, 2 is common to the two deals, the lower end of the ramp
-    that pgl27_view_indep states. *)
+    Every one of pgl27_group_table's 336 observations of the positions 0, 1, 2
+    is common to the two deals, the lower end of the ramp that
+    pgl27_view_indep states. *)
 Lemma pgl27_collisions_three : pgl27_collisions [:: 0; 1; 2] = 336.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_seven — the seven-subset {0, ..., 6} has no collision.
-    @main security: none of pgl27_group_table's 336 observations of the
-    positions 0 to 6 is common to the two deals, the upper end of the ramp
+    None of pgl27_group_table's 336 observations of the positions 0 to 6 is
+    common to the two deals, the upper end of the ramp
     pgl27_seven_reveal_class states. *)
 Lemma pgl27_collisions_seven :
   pgl27_collisions [:: 0; 1; 2; 3; 4; 5; 6] = 0.
 Proof. by vm_compute. Qed.
 
-(** pgl27_collisions_harmonic_neq — the four-subset {0, 1, 2, 3} does not
-    have 97 collisions.
-    @main security: the collision count of {0, 1, 2, 3} separates 96 from the
+(** pgl27_collisions_harmonic_neq — the four-subset {0, 1, 2, 3} does not have
+    97 collisions. The collision count of {0, 1, 2, 3} separates 96 from the
     neighbouring 97. *)
 Lemma pgl27_collisions_harmonic_neq : pgl27_collisions rep_harmonic != 97.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_equianharmonic_neq — the four-subset {0, 1, 2, 4} does
-    not have 96 collisions.
-    @main security: the collision counts of {0, 1, 2, 4} and {0, 1, 2, 3}
-    differ, so the two four-subset orbits do not share a count. *)
+    not have 96 collisions. The collision counts of {0, 1, 2, 4} and {0, 1, 2,
+    3} differ, so the two four-subset orbits do not share a count. *)
 Lemma pgl27_collisions_equianharmonic_neq :
   pgl27_collisions rep_equianharmonic != 96.
 Proof. by vm_compute. Qed.
 
-(** pgl27_collisions_five_neq — the five-subset {0, 1, 2, 3, 4} does not
-    have 35 collisions.
-    @main security: the collision count of {0, 1, 2, 3, 4} separates 36 from
+(** pgl27_collisions_five_neq — the five-subset {0, 1, 2, 3, 4} does not have
+    35 collisions. The collision count of {0, 1, 2, 3, 4} separates 36 from
     the neighbouring 35. *)
 Lemma pgl27_collisions_five_neq : pgl27_collisions rep_five != 35.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_six_neq — the six-subset {0, 1, 2, 3, 4, 5} has a
-    collision.
-    @main security: the collision count of {0, 1, 2, 3, 4, 5} is nonzero, so
-    these six revealed positions still leave the two deals confusable. *)
+    collision. The collision count of {0, 1, 2, 3, 4, 5} is nonzero, so these
+    six revealed positions still leave the two deals confusable. *)
 Lemma pgl27_collisions_six_neq : pgl27_collisions rep_six != 0.
 Proof. by vm_compute. Qed.
 
@@ -505,30 +480,26 @@ Proof. by vm_compute. Qed.
 (* The collision counts as exact rationals.                                   *)
 (* -------------------------------------------------------------------------- *)
 
-(** pgl27_collision_ratio_harmonic — (336 - 96) / 336 = 5 / 7.
-    @main security: the non-collision fraction of {0, 1, 2, 3} is five
-    sevenths. *)
+(** pgl27_collision_ratio_harmonic — (336 - 96) / 336 = 5 / 7. The
+    non-collision fraction of {0, 1, 2, 3} is five sevenths. *)
 Lemma pgl27_collision_ratio_harmonic :
   ((336 - pgl27_collisions rep_harmonic) * 7)%N = (5 * 336)%N.
 Proof. by vm_compute. Qed.
 
-(** pgl27_collision_ratio_equianharmonic — (336 - 72) / 336 = 11 / 14.
-    @main security: the non-collision fraction of {0, 1, 2, 4} is eleven
-    fourteenths. *)
+(** pgl27_collision_ratio_equianharmonic — (336 - 72) / 336 = 11 / 14. The
+    non-collision fraction of {0, 1, 2, 4} is eleven fourteenths. *)
 Lemma pgl27_collision_ratio_equianharmonic :
   ((336 - pgl27_collisions rep_equianharmonic) * 14)%N = (11 * 336)%N.
 Proof. by vm_compute. Qed.
 
-(** pgl27_collision_ratio_five — (336 - 36) / 336 = 25 / 28.
-    @main security: the non-collision fraction of {0, 1, 2, 3, 4} is
-    twenty-five twenty-eighths. *)
+(** pgl27_collision_ratio_five — (336 - 36) / 336 = 25 / 28. The non-collision
+    fraction of {0, 1, 2, 3, 4} is twenty-five twenty-eighths. *)
 Lemma pgl27_collision_ratio_five :
   ((336 - pgl27_collisions rep_five) * 28)%N = (25 * 336)%N.
 Proof. by vm_compute. Qed.
 
-(** pgl27_collision_ratio_six — (336 - 12) / 336 = 27 / 28.
-    @main security: the non-collision fraction of {0, 1, 2, 3, 4, 5} is
-    twenty-seven twenty-eighths. *)
+(** pgl27_collision_ratio_six — (336 - 12) / 336 = 27 / 28. The non-collision
+    fraction of {0, 1, 2, 3, 4, 5} is twenty-seven twenty-eighths. *)
 Lemma pgl27_collision_ratio_six :
   ((336 - pgl27_collisions rep_six) * 28)%N = (27 * 336)%N.
 Proof. by vm_compute. Qed.

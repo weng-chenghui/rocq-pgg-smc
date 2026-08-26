@@ -65,13 +65,13 @@ Local Definition crn (x1 x2 x3 x4 : nat) : nat :=
   else div7 (mul7 (sub7 x1 x3) (sub7 x2 x4)) (mul7 (sub7 x1 x4) (sub7 x2 x3)).
 
 (** cross_ratio — cross-ratio of four points of P^1(F_7) = 'I_8, point 7 the
-    point at infinity, valued in nat mod 7.
-    @intent: the PGL(2,7)-invariant of an ordered distinct quadruple. *)
+    point at infinity, valued in nat mod 7. The PGL(2,7)-invariant of an
+    ordered distinct quadruple. *)
 Definition cross_ratio (x1 x2 x3 x4 : 'I_8) : nat :=
   crn (val x1) (val x2) (val x3) (val x4).
 
-(** equianharmonic — a cross-ratio value lies in the equianharmonic orbit.
-    @intent: the two-valued orbit predicate {3,5} on distinct cross-ratios. *)
+(** equianharmonic — a cross-ratio value lies in the equianharmonic orbit. The
+    two-valued orbit predicate {3,5} on distinct cross-ratios. *)
 Definition equianharmonic (l : nat) : bool := (l == 3) || (l == 5).
 
 (* Verdict of a code list: equianharmonic cross-ratio of the sorted codes. *)
@@ -85,30 +85,30 @@ Local Definition nclass (L : seq nat) : bool :=
 (* Deck, hearts and the orbit classifier.                                     *)
 (* -------------------------------------------------------------------------- *)
 
-(** is_heart — the card c is a heart, i.e. carries a code below four.
-    @intent: the colour predicate splitting the deck into hearts and others. *)
+(** is_heart — the card c is a heart, i.e. carries a code below four. The
+    colour predicate splitting the deck into hearts and others. *)
 Definition is_heart (c : 'I_8) : bool := (val c < 4)%N.
 
-(** deck_ok — the arrangement sh deals eight distinct cards.
-    @intent: the valid-deck predicate of the eight-card scheme. *)
+(** deck_ok — the arrangement sh deals eight distinct cards. The valid-deck
+    predicate of the eight-card scheme. *)
 Definition deck_ok (sh : 8.-tuple 'I_8) : bool := uniq sh.
 
-(** heart_set — the set of positions of sh holding a heart.
-    @intent: the four-subset of P^1(F_7) carrying the secret. *)
+(** heart_set — the set of positions of sh holding a heart. The four-subset of
+    P^1(F_7) carrying the secret. *)
 Definition heart_set (sh : 8.-tuple 'I_8) : {set 'I_8} :=
   [set i | is_heart (tnth sh i)].
 
 (** subset_class — the equianharmonic verdict of the cross-ratio read on the
-    four positions of a subset in increasing order.
-    @intent: the PGL(2,7) orbit class of a four-subset of the deck. *)
+    four positions of a subset in increasing order. The PGL(2,7) orbit class
+    of a four-subset of the deck. *)
 Definition subset_class (S : {set 'I_8}) : bool :=
   match sort (fun i j : 'I_8 => (val i <= val j)%N) (enum S) with
   | [:: a; b; c; d] => equianharmonic (cross_ratio a b c d)
   | _ => false
   end.
 
-(** orbit_class — the orbit class of the heart four-subset of a deck.
-    @intent: the one-bit secret dealt by the eight-card PGL(2,7) scheme. *)
+(** orbit_class — the orbit class of the heart four-subset of a deck. The
+    one-bit secret dealt by the eight-card PGL(2,7) scheme. *)
 Definition orbit_class (sh : 8.-tuple 'I_8) : bool :=
   subset_class (heart_set sh).
 
@@ -284,8 +284,8 @@ Proof. by rewrite gen_subG; exact: gens_sub_stabp. Qed.
 (* -------------------------------------------------------------------------- *)
 
 (** orbit_class_invariant — the orbit classifier is invariant under the
-    coordinate action of any element of the shuffle group.
-    @main security: privacy rests on the shuffle not moving the orbit class. *)
+    coordinate action of any element of the shuffle group. Privacy rests on
+    the shuffle not moving the orbit class. *)
 Lemma orbit_class_invariant (g : pgg_gT pgl27_M) (sh : 8.-tuple 'I_8) :
   g \in pgg_G pgl27_M ->
   orbit_class [tuple tnth sh (@pgg_rho pgl27_M g i) | i < 8] = orbit_class sh.
@@ -303,8 +303,8 @@ have /stabpP Hstab : (g^-1)%g \in stabp by exact: (subsetP G_sub_stabp).
 by rewrite Hstab.
 Qed.
 
-(** deck_stable — the coordinate action of a shuffle keeps cards distinct.
-    @main correctness: a re-dealt arrangement is again a valid deck. *)
+(** deck_stable — the coordinate action of a shuffle keeps cards distinct. A
+    re-dealt arrangement is again a valid deck. *)
 Lemma deck_stable (g : pgg_gT pgl27_M) (sh : 8.-tuple 'I_8) :
   g \in pgg_G pgl27_M ->
   deck_ok [tuple tnth sh (@pgg_rho pgl27_M g i) | i < 8] = deck_ok sh.
@@ -345,7 +345,7 @@ by move=> x; rewrite mem_enum inE mem_filter -enum_ord8 mem_enum inE andbT.
 Qed.
 
 (** orbit_encode — a distinct-card deck whose heart four-subset has class b.
-    @intent: the encoder dealing a chosen one-bit secret. *)
+    The encoder dealing a chosen one-bit secret. *)
 Definition orbit_encode (b : bool) : 8.-tuple 'I_8 :=
   if b then [tuple @Ordinal 8 0 isT; @Ordinal 8 1 isT; @Ordinal 8 2 isT;
                    @Ordinal 8 4 isT; @Ordinal 8 3 isT; @Ordinal 8 5 isT;
@@ -354,18 +354,18 @@ Definition orbit_encode (b : bool) : 8.-tuple 'I_8 :=
               @Ordinal 8 3 isT; @Ordinal 8 4 isT; @Ordinal 8 5 isT;
               @Ordinal 8 6 isT; @Ordinal 8 7 isT].
 
-(** orbit_encodeK — orbit_encode is a section of orbit_class.
-    @main correctness: the encoder deals exactly the requested secret. *)
+(** orbit_encodeK — orbit_encode is a section of orbit_class. The encoder
+    deals exactly the requested secret. *)
 Lemma orbit_encodeK (s : bool) : orbit_class (orbit_encode s) = s.
 Proof. by case: s; rewrite orbit_classE; vm_compute. Qed.
 
-(** orbit_encode_deck — every encoded arrangement is a valid deck.
-    @main correctness: the encoder outputs distinct cards. *)
+(** orbit_encode_deck — every encoded arrangement is a valid deck. The encoder
+    outputs distinct cards. *)
 Lemma orbit_encode_deck (s : bool) : deck_ok (orbit_encode s).
 Proof. by case: s; vm_compute. Qed.
 
-(** orbit_populated — both orbit classes occur among distinct-card decks.
-    @main correctness: the secret space is covered by valid arrangements. *)
+(** orbit_populated — both orbit classes occur among distinct-card decks. The
+    secret space is covered by valid arrangements. *)
 Lemma orbit_populated (b : bool) :
   exists sh : 8.-tuple 'I_8, deck_ok sh /\ orbit_class sh = b.
 Proof.
@@ -394,7 +394,7 @@ Local Definition sorted4 : seq (seq nat) :=
     | b <- iota a.+1 (8 - a.+1)]
     | a <- iota 0 8].
 
-(* sorted4 lists no code quadruple twice. @composes: orbit_class_split *)
+(* sorted4 lists no code quadruple twice. *)
 Local Lemma sorted4_uniq : uniq sorted4.
 Proof. by vm_compute. Qed.
 
@@ -477,8 +477,8 @@ move=> A1 A2 Heq; apply: (irr_sorted_eq ltn_trans ltnn).
   by rewrite (perm_mem (@perm_list_to_set L2 A2)).
 Qed.
 
-(* A four-subset class count equals the code-level count over sorted4. *)
-(* @composes: orbit_class_split *)
+(* A four-subset class count equals the code-level count over sorted4, so a
+   census of the seventy four-subsets runs by vm_compute on code lists. *)
 Local Lemma class_count (p : {set 'I_8} -> bool) (pn : seq nat -> bool) :
   (forall L, asc4 L -> p (list_to_set L) = pn L) ->
   #|[set S : {set 'I_8} | (#|S| == 4) && p S]| = count pn sorted4.
@@ -510,10 +510,10 @@ by rewrite size_map size_filter.
 Qed.
 
 (** orbit_class_split — twenty-eight of the seventy four-subsets of the
-    projective line are equianharmonic.
-    @main architecture: the classifier splits the seventy four-subsets into
-    forty-two harmonic and twenty-eight equianharmonic, identifying the two
-    secret classes with the two PGL(2,7) orbit sizes on four-subsets. *)
+    projective line are equianharmonic. The classifier splits the seventy
+    four-subsets into forty-two harmonic and twenty-eight equianharmonic,
+    identifying the two secret classes with the two PGL(2,7) orbit sizes on
+    four-subsets. *)
 Lemma orbit_class_split :
   #|[set S : {set 'I_8} | (#|S| == 4) && subset_class S]| = 28.
 Proof.
@@ -522,9 +522,8 @@ by vm_compute.
 Qed.
 
 (** orbit_class_split_complement — forty-two of the seventy four-subsets of
-    the projective line are harmonic.
-    @main architecture: the harmonic orbit has size forty-two, the complement
-    of the twenty-eight equianharmonic four-subsets. *)
+    the projective line are harmonic. The harmonic orbit has size forty-two,
+    the complement of the twenty-eight equianharmonic four-subsets. *)
 Lemma orbit_class_split_complement :
   #|[set S : {set 'I_8} | (#|S| == 4) && ~~ subset_class S]| = 42.
 Proof.
@@ -539,10 +538,9 @@ Qed.
 (* Each Boolean fiber of the classifier is one orbit of the shuffle group.    *)
 (* -------------------------------------------------------------------------- *)
 
-(** subset_class_invariant — the four-subset classifier is invariant under
-    the image action of a shuffle-group element.
-    @main security: the shuffle moves a four-subset without moving its
-    orbit class. *)
+(** subset_class_invariant — the four-subset classifier is invariant under the
+    image action of a shuffle-group element. The shuffle moves a four-subset
+    without moving its orbit class. *)
 Lemma subset_class_invariant (g : pgg_gT pgl27_M) (S : {set 'I_8}) :
   g \in pgg_G pgl27_M -> subset_class (g @: S) = subset_class S.
 Proof. by move=> /(subsetP G_sub_stabp)/stabpP. Qed.
@@ -698,8 +696,8 @@ Proof. exact: (actK 'P^*). Qed.
 
 (** subset_class_orbit — two four-subsets of the projective line carry the
     same classifier value exactly when one is the shuffle image of the other.
-    @main architecture: each Boolean fiber of the classifier is a single
-    orbit of the PGL(2,7) shuffle group on four-subsets. *)
+    Each Boolean fiber of the classifier is a single orbit of the PGL(2,7)
+    shuffle group on four-subsets. *)
 Lemma subset_class_orbit (S T : {set 'I_8}) :
   #|S| = 4 -> #|T| = 4 ->
   (subset_class S = subset_class T <->
@@ -716,9 +714,9 @@ by rewrite Hw2 Hw1 imsetM perm_imsetK.
 Qed.
 
 (** subset_class_orbitE — the orbit of a four-subset under the shuffle group
-    is the classifier fiber it belongs to.
-    @main architecture: the equianharmonic fiber and the harmonic fiber are
-    the two orbits of the PGL(2,7) shuffle group on four-subsets. *)
+    is the classifier fiber it belongs to. The equianharmonic fiber and the
+    harmonic fiber are the two orbits of the PGL(2,7) shuffle group on
+    four-subsets. *)
 Lemma subset_class_orbitE (S : {set 'I_8}) :
   #|S| = 4 ->
   orbit 'P^* (pgg_G pgl27_M) S

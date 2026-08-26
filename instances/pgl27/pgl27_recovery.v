@@ -33,8 +33,7 @@ Import Prenex Implicits.
 
 (** pgl27_seven_reveal_determines — two valid decks agreeing everywhere off
     one position are equal: the eight distinct cards leave a unique missing
-    card for the hidden position.
-    @main correctness: seven revealed cards determine the deck. *)
+    card for the hidden position. Seven revealed cards determine the deck. *)
 Lemma pgl27_seven_reveal_determines (p : 'I_8) (sh1 sh2 : 8.-tuple 'I_8) :
   deck_ok sh1 -> deck_ok sh2 ->
   (forall i : 'I_8, i != p -> tnth sh1 i = tnth sh2 i) ->
@@ -65,7 +64,7 @@ Qed.
 
 (** pgl27_seven_reveal_class — two valid decks agreeing off one position have
     the same orbit class: a seven-position decoder for the secret exists.
-    @main correctness: seven revealed cards determine the orbit class. *)
+    Seven revealed cards determine the orbit class. *)
 Lemma pgl27_seven_reveal_class (p : 'I_8) (sh1 sh2 : 8.-tuple 'I_8) :
   deck_ok sh1 -> deck_ok sh2 ->
   (forall i : 'I_8, i != p -> tnth sh1 i = tnth sh2 i) ->
@@ -75,8 +74,7 @@ by move=> u1 u2 Hag; rewrite (@pgl27_seven_reveal_determines p _ _ u1 u2 Hag).
 Qed.
 
 (** pgl27_2transitive — the PGL(2,7) monodromy acts 2-transitively on the
-    eight projective points, weakened from sharp 3-transitivity.
-    @composes: pgl27_six_reveal_ambiguous *)
+    eight projective points, weakened from sharp 3-transitivity. *)
 Lemma pgl27_2transitive :
   ntransitive 2 (@pgg_rho pgl27_M @* pgg_G pgl27_M) [set: 'I_8] 'P.
 Proof. exact: ntransitive_weak (isT : (2 <= 3)%N) pgl27_3transitive. Qed.
@@ -91,8 +89,7 @@ Qed.
 
 (** pgl27_six_reveal_ambiguous — for every two hidden positions there are two
     valid decks of opposite orbit classes agreeing on the six revealed
-    positions.
-    @main security: six revealed cards never determine the orbit class. *)
+    positions. Six revealed cards never determine the orbit class. *)
 Lemma pgl27_six_reveal_ambiguous (p q : 'I_8) : p != q ->
   exists sh1 sh2 : 8.-tuple 'I_8,
     [/\ deck_ok sh1, deck_ok sh2, orbit_class sh1 != orbit_class sh2 &
@@ -129,9 +126,8 @@ Qed.
 
 (** pgl27_reveal_ambiguous — for every revealed position set of at most six
     positions there are two valid decks of opposite orbit classes agreeing on
-    all revealed positions.
-    @main security: at most six revealed cards never determine the orbit
-    class, for every choice of the revealed set. *)
+    all revealed positions. At most six revealed cards never determine the
+    orbit class, for every choice of the revealed set. *)
 Lemma pgl27_reveal_ambiguous (D : {set 'I_8}) : (#|D| <= 6)%N ->
   exists sh1 sh2 : 8.-tuple 'I_8,
     [/\ deck_ok sh1, deck_ok sh2, orbit_class sh1 != orbit_class sh2 &

@@ -4,6 +4,14 @@
 (* pgl27_word_privacy: coalition privacy of the eight-card orbit scheme under *)
 (* the two-hundred-letter word shuffle                                        *)
 (*                                                                            *)
+(* Definitions:                                                               *)
+(*   rho_word          == the law of the product of two hundred uniform       *)
+(*                        letters of the symmetrized alphabet                 *)
+(*   pgl27P_gen p      == the prior p times the uniform PGL(2,7) shuffle      *)
+(*   pgl27P_word_gen p == the prior p times the word shuffle                  *)
+(*   pgl27_equianharmonic_view == the coalition view at orbit_encode true     *)
+(*   pgl27_harmonic_view       == the coalition view at orbit_encode false    *)
+(*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_word_run_recovers == decoding the executed endpoints returns the   *)
 (*     dealt secret, for every two-hundred-letter generator word              *)
@@ -45,9 +53,8 @@ Notation pgl27_Msym := (Gen_PGGTypes pgl27_sym_sigmas).
 
 (** pgl27_word_run_recovers — the executed endpoints of a run whose shuffle is
     the product of a two-hundred-letter generator word decode to the dealt
-    secret.
-    @main correctness: correctness under the word shuffle is exact and holds
-    at probability one. *)
+    secret. Correctness under the word shuffle is exact and holds at
+    probability one. *)
 Corollary pgl27_word_run_recovers (s : bool) (w : 200.-tuple 'I_5) :
   ts_recon orbit_scheme
     (tcast (pgl27_endpoints_size s (@word_eval pgl27_Msym 200 w))
@@ -63,39 +70,38 @@ Section pgl27_word_privacy.
 Variable R : realType.
 
 (** rho_word — the law of the product of two hundred independent uniform
-    letters of the symmetrized five-letter generator alphabet.
-    @intent: the realistic word shuffle law on PGL(2,7). *)
+    letters of the symmetrized five-letter generator alphabet. The realistic
+    word shuffle law on PGL(2,7). *)
 Definition rho_word : R.-fdist (pgg_gT pgl27_M) :=
   @rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas (Wuni R).
 
 (** pgl27P_gen — the joint law of a secret drawn from secretP and an
-    independent uniform PGL(2,7) shuffle.
-    @intent: the exact-shuffle sample space at an arbitrary Boolean prior. *)
+    independent uniform PGL(2,7) shuffle. The exact-shuffle sample space at an
+    arbitrary Boolean prior. *)
 Definition pgl27P_gen (secretP : R.-fdist bool)
     : R.-fdist (bool * pgg_gT pgl27_M)%type := secretP `x (`U pgl27_G_pos).
 
 (** pgl27P_word_gen — the joint law of a secret drawn from secretP and an
-    independent word shuffle.
-    @intent: the word-shuffle sample space at an arbitrary Boolean prior. *)
+    independent word shuffle. The word-shuffle sample space at an arbitrary
+    Boolean prior. *)
 Definition pgl27P_word_gen (secretP : R.-fdist bool)
     : R.-fdist (bool * pgg_gT pgl27_M)%type := secretP `x rho_word.
 
 (** pgl27_equianharmonic_view — the coalition's observation at shuffle g when
-    the dealt deck is the equianharmonic representative orbit_encode true.
-    @intent: the equianharmonic branch of the coalition observable. *)
+    the dealt deck is the equianharmonic representative orbit_encode true. The
+    equianharmonic branch of the coalition observable. *)
 Definition pgl27_equianharmonic_view (C : {set 'I_8}) (g : pgg_gT pgl27_M)
     : {ffun 'I_8 -> 'I_8} := pgl27_view R C (true, g).
 
 (** pgl27_harmonic_view — the coalition's observation at shuffle g when the
-    dealt deck is the harmonic representative orbit_encode false.
-    @intent: the harmonic branch of the coalition observable. *)
+    dealt deck is the harmonic representative orbit_encode false. The harmonic
+    branch of the coalition observable. *)
 Definition pgl27_harmonic_view (C : {set 'I_8}) (g : pgg_gT pgl27_M)
     : {ffun 'I_8 -> 'I_8} := pgl27_view R C (false, g).
 
 (** pgl27_view_law_classes — under the uniform PGL(2,7) shuffle, a coalition
     of at most three positions sees the same law whether the dealt deck is the
-    equianharmonic representative or the harmonic one.
-    @composes: pgl27_view_law_const *)
+    equianharmonic representative or the harmonic one. *)
 Lemma pgl27_view_law_classes (C : {set 'I_8}) : (#|C| <= 3)%N ->
   fdistmap (pgl27_equianharmonic_view C)
     (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
@@ -143,8 +149,7 @@ Qed.
 
 (** pgl27_view_law_const — under the uniform PGL(2,7) shuffle the law of the
     view of a coalition of at most three positions does not depend on the
-    dealt secret.
-    @composes: pgl27_word_view_indist *)
+    dealt secret. *)
 Corollary pgl27_view_law_const (C : {set 'I_8}) (s s' : bool) : (#|C| <= 3)%N ->
   fdistmap (fun g : pgg_gT pgl27_M => pgl27_view R C (s, g))
     (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
@@ -162,9 +167,8 @@ Proof. by rewrite [RHS]splitr exprSr invfM. Qed.
 
 (** pgl27_word_view_indist — under the two-hundred-letter word shuffle the
     coalition-view laws of two secrets are within 2^-39 in variation distance,
-    for every coalition of at most three positions.
-    @main security: statistical coalition privacy under the realistic
-    shuffle. *)
+    for every coalition of at most three positions. Statistical coalition
+    privacy under the realistic shuffle. *)
 Theorem pgl27_word_view_indist (C : {set 'I_8}) (s s' : bool) :
   (#|C| <= 3)%N ->
   var_dist (fdistmap (fun g => pgl27_view R C (s, g)) rho_word)
@@ -184,9 +188,8 @@ Qed.
 
 (** pgl27_word_trace_indist — under the two-hundred-letter word shuffle the
     executed coalition traces of two secrets are within 2^-39 in variation
-    distance, for every coalition of at most three positions.
-    @main security: the coalition-view bound transported to the executed
-    interpreter trace. *)
+    distance, for every coalition of at most three positions. The
+    coalition-view bound transported to the executed interpreter trace. *)
 Theorem pgl27_word_trace_indist (C : {set 'I_8}) (s s' : bool) :
   (#|C| <= 3)%N ->
   var_dist (fdistmap (fun g => pgl27_coalition_trace R C (s, g)) rho_word)
@@ -198,8 +201,7 @@ Qed.
 
 (** pgl27_view_indep_gen — at every Boolean prior, a coalition of at most
     three positions has a view of the uniformly shuffled dealt arrangement
-    independent of the orbit secret.
-    @composes: pgl27_view_mixing *)
+    independent of the orbit secret. *)
 Lemma pgl27_view_indep_gen (secretP : R.-fdist bool) (C : {set 'I_8}) :
   (#|C| <= 3)%N -> pgl27P_gen secretP |= pgl27_view R C _|_ pgl27_secret R.
 Proof.
@@ -211,9 +213,8 @@ Qed.
 
 (** pgl27_view_mixing — at every Boolean prior, the joint view-and-secret law
     under the two-hundred-letter word shuffle is within 2^-40 of the product
-    of the two exact-shuffle marginals.
-    @main bound: proximity of the word-shuffle joint law to the ideal
-    independent execution. *)
+    of the two exact-shuffle marginals. Proximity of the word-shuffle joint
+    law to the ideal independent execution. *)
 Theorem pgl27_view_mixing (secretP : R.-fdist bool) (C : {set 'I_8}) :
   (#|C| <= 3)%N ->
   var_dist (fdistmap (fun u => (pgl27_view R C u, pgl27_secret R u))

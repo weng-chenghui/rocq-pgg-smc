@@ -25,6 +25,14 @@
 (* coalition bound, and constant_deck_profile, a monodromy profile over the   *)
 (* same group whose encoder repeats one card, for the distinct-deck premise.  *)
 (*                                                                            *)
+(* Definitions:                                                               *)
+(*   constant_deck_encode == the encoder dealing one repeated card            *)
+(*   constant_deck_recon  == the secret read off the card at position zero    *)
+(*   constant_deck_scheme == the ThresholdScheme built from those two         *)
+(*   constant_deck_monodromy == its trivial share-permutation map             *)
+(*   constant_deck_plug      == the ReconPlug carrying that scheme            *)
+(*   constant_deck_profile   == the MonodromyProfile dealing a constant deck  *)
+(*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_view_indep_via_profile == pgl27_view_indep obtained from           *)
 (*     profile_view_indep                                                     *)
@@ -65,12 +73,10 @@ Variable R : realType.
 Local Notation ord8_1 := (@Ordinal 8 1 isT).
 Local Notation ord8_2 := (@Ordinal 8 2 isT).
 
-(** pgl27_view_indep_via_profile == the eight-card orbit scheme discharges
-    the record-level theorem, reproving pgl27_view_indep.
-    @main security: instance coalition view independence at three cards
-    obtained from profile_view_indep.
-    Naming: the statement is pgl27_view_indep verbatim, so the name keeps
-    that lemma's components and marks the derivation route. *)
+(** pgl27_view_indep_via_profile == the eight-card orbit scheme discharges the
+    record-level theorem, reproving pgl27_view_indep.  The statement is
+    pgl27_view_indep verbatim; only the route differs, so the record-level
+    theorem costs the instance nothing beyond its two premises. *)
 Lemma pgl27_view_indep_via_profile (C : {set 'I_8}) : (#|C| <= 3)%N ->
   pgl27P R |= pgl27_view R C _|_ pgl27_secret R.
 Proof.
@@ -80,8 +86,7 @@ exact: (@profile_view_indep pgl27_profile 3 id erefl pgl27_3transitive
 Qed.
 
 (** dtuple3_ord8_gt1 == the eight sheets carry more than one three-tuple of
-    distinct positions.
-    @composes: pgl27_action_nontrivial *)
+    distinct positions. *)
 Lemma dtuple3_ord8_gt1 : (1 < #|3.-dtuple([set: 'I_8])|)%N.
 Proof.
 apply/card_gt1P.
@@ -91,10 +96,10 @@ exists [tuple ord0; ord8_1; ord8_2], [tuple ord8_1; ord0; ord8_2]; split.
 - by rewrite -val_eqE.
 Qed.
 
-(** pgl27_action_nontrivial == the image of the PGL(2,7) representation in
-    the symmetric group on the eight sheets has more than one element.
-    @main architecture: the transitivity premise discharged at PGL(2,7) is
-    met by a non-trivial group. *)
+(** pgl27_action_nontrivial == the image of the PGL(2,7) representation in the
+    symmetric group on the eight sheets has more than one element. The
+    transitivity premise discharged at PGL(2,7) is met by a non-trivial
+    group. *)
 Lemma pgl27_action_nontrivial :
   (1 < #|(@pgg_rho pgl27_M @* pgg_G pgl27_M)%g|)%N.
 Proof.
@@ -103,9 +108,8 @@ Qed.
 
 (** profile_view_indep_sharp == the coalition bound of profile_view_indep is
     sharp: replacing #|C| <= t by #|C| <= t.+1 makes the statement false,
-    witnessed at PGL(2,7) with t = 3 by pgl27_view_dep_k4.
-    @main security: the coalition-size bound of the record-level privacy
-    theorem cannot be weakened. *)
+    witnessed at PGL(2,7) with t = 3 by pgl27_view_dep_k4. The coalition-size
+    bound of the record-level privacy theorem cannot be weakened. *)
 Lemma profile_view_indep_sharp :
   ~ (forall (p : MonodromyProfile) (t : nat) (sel : bool -> mp_secretT p)
        (Hlen : (ts_T' (rp_scheme (mp_plug p))).+1 = (pgg_N' (mp_M p)).+1)
@@ -130,19 +134,19 @@ apply: (H pgl27_profile 3 id erefl pgl27_3transitive (fdist_uniform card_bool)
 by rewrite (proj1 (pgl27_view_dep_k4 R)).
 Qed.
 
-(** constant_deck_encode == the encoder dealing card one at every position
-    for the secret true and card zero at every position for false.
-    @intent: an encoder whose dealt deck repeats a single card. *)
+(** constant_deck_encode == the encoder dealing card one at every position for
+    the secret true and card zero at every position for false. An encoder
+    whose dealt deck repeats a single card. *)
 Definition constant_deck_encode (b : bool) : 8.-tuple 'I_8 :=
   [tuple (if b then ord8_1 else ord0) | i < 8].
 
 (** constant_deck_recon == reading the secret off the card at position zero.
-    @intent: the reconstruction map matching constant_deck_encode. *)
+    The reconstruction map matching constant_deck_encode. *)
 Definition constant_deck_recon (sh : 8.-tuple 'I_8) : bool :=
   tnth sh ord0 != ord0.
 
-(** constant_deck_reconK == reconstruction inverts the constant-deck encoder.
-    @composes: constant_deck_view_dep *)
+(** constant_deck_reconK == reconstruction inverts the constant-deck
+    encoder. *)
 Lemma constant_deck_reconK (s : bool) :
   constant_deck_recon (constant_deck_encode s) = s.
 Proof.
@@ -150,8 +154,7 @@ by rewrite /constant_deck_recon /constant_deck_encode tnth_mktuple; case: s.
 Qed.
 
 (** constant_deck_private == with no corrupted position the constant-deck
-    scheme re-deals any arrangement to either secret.
-    @composes: constant_deck_view_dep *)
+    scheme re-deals any arrangement to either secret. *)
 Lemma constant_deck_private (s1 s2 : bool) (shares : 8.-tuple 'I_8)
     (C : {set 'I_8}) :
   (#|C| < 1)%N -> constant_deck_recon shares = s1 ->
@@ -166,9 +169,8 @@ by move=> i; rewrite (cards0_eq HC0) inE.
 Qed.
 
 (** constant_deck_scheme == the eight-share threshold scheme whose encoder
-    deals a single repeated card.
-    @intent: a ThresholdScheme meeting every field of the record and dealing
-    a non-distinct deck. *)
+    deals a single repeated card. A ThresholdScheme meeting every field of the
+    record and dealing a non-distinct deck. *)
 Definition constant_deck_scheme :
     ThresholdScheme bool 'I_(pgg_N' pgl27_M).+1 :=
   @MkThresholdScheme bool 'I_8 7 0
@@ -177,13 +179,12 @@ Definition constant_deck_scheme :
     (fun s sh H => H) constant_deck_private constant_deck_reconK.
 
 (** constant_deck_monodromy == the trivial permutation action of the group on
-    the shares of constant_deck_scheme.
-    @intent: the share-permutation map of the counterexample plug. *)
+    the shares of constant_deck_scheme. The share-permutation map of the
+    counterexample plug. *)
 Definition constant_deck_monodromy (g : pgg_gT pgl27_M) : {perm 'I_8} := 1%g.
 
 (** constant_deck_recon_invariant == reconstruction from constant_deck_scheme
-    is invariant under constant_deck_monodromy.
-    @composes: constant_deck_view_dep *)
+    is invariant under constant_deck_monodromy. *)
 Lemma constant_deck_recon_invariant :
   @ts_recon_perm_invariant _ (pgg_G pgl27_M) _ _
     constant_deck_scheme constant_deck_monodromy.
@@ -193,31 +194,29 @@ by rewrite /constant_deck_monodromy perm1.
 Qed.
 
 (** constant_deck_plug == the reconstruction plug of the PGL(2,7) group
-    carrying constant_deck_scheme.
-    @intent: the ReconPlug of the counterexample profile. *)
+    carrying constant_deck_scheme. The ReconPlug of the counterexample
+    profile. *)
 Definition constant_deck_plug : ReconPlug pgl27_M bool :=
   @MkReconPlug pgl27_M bool constant_deck_scheme id
     constant_deck_monodromy constant_deck_recon_invariant.
 
 (** constant_deck_profile == the monodromy profile over the PGL(2,7) group
-    whose plug deals a constant deck.
-    @intent: a MonodromyProfile meeting every premise of profile_view_indep
-    except the distinct-deck one. *)
+    whose plug deals a constant deck. A MonodromyProfile meeting every premise
+    of profile_view_indep except the distinct-deck one. *)
 Definition constant_deck_profile : MonodromyProfile :=
   @MkMonodromyProfile pgl27_M bool pgl27_PI constant_deck_plug.
 
 (** profile_deck_constantE == the deck of constant_deck_profile is the
-    constant-deck encoder.
-    @composes: constant_deck_view_dep *)
+    constant-deck encoder. *)
 Lemma profile_deck_constantE (b : bool) :
   profile_deck (p := constant_deck_profile) id erefl b
   = constant_deck_encode b.
 Proof. by []. Qed.
 
 (** constant_deck_view_dep == under constant_deck_profile a single position
-    already has a view depending on the dealt secret.
-    @main security: a profile meeting every premise of profile_view_indep
-    except the distinct-deck one leaks the secret at one position. *)
+    already has a view depending on the dealt secret. A profile meeting every
+    premise of profile_view_indep except the distinct-deck one leaks the
+    secret at one position. *)
 Lemma constant_deck_view_dep :
   ~ pgl27P R |= coalition_view (@pgg_rho pgl27_M) (fdist_uniform card_bool)
                   pgl27_G_pos
@@ -261,9 +260,8 @@ Qed.
 
 (** profile_distinct_deck_necessary == the distinct-deck premise of
     profile_view_indep cannot be dropped: without it the statement is false,
-    witnessed by constant_deck_profile.
-    @main security: the distinct-deck obligation of the record-level privacy
-    theorem is load-bearing. *)
+    witnessed by constant_deck_profile. The distinct-deck obligation of the
+    record-level privacy theorem is load-bearing. *)
 Lemma profile_distinct_deck_necessary :
   ~ (forall (p : MonodromyProfile) (t : nat) (sel : bool -> mp_secretT p)
        (Hlen : (ts_T' (rp_scheme (mp_plug p))).+1 = (pgg_N' (mp_M p)).+1)

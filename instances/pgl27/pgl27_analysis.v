@@ -89,8 +89,7 @@ Module PGL27Analysis.
 (* ===== 1. Program ===== *)
 (******************************************************************************)
 
-(** profile — the probability-independent eight-card program profile.
-    @intent: alias of pgl27_profile. *)
+(** profile — the probability-independent eight-card program profile. *)
 Definition profile := pgl27_profile.
 
 (******************************************************************************)
@@ -98,13 +97,11 @@ Definition profile := pgl27_profile.
 (******************************************************************************)
 
 (** exec_plug — the execution plug over that profile, carrying the shared
-    piSMC run.
-    @intent: alias of pgl27_exec_plug. *)
+    piSMC run. *)
 Definition exec_plug := pgl27_exec_plug.
 
-(** verifier_trace — the verifier's raw executed trace, a message list read
-    at the verifier process of the run.
-    @intent: exec_verifier_trace specialized at pgl27_exec_plug. *)
+(** verifier_trace — the verifier's raw executed trace, a message list read at
+    the verifier process of the run. *)
 Definition verifier_trace := @exec_verifier_trace pgl27_profile pgl27_exec_plug.
 
 (******************************************************************************)
@@ -116,52 +113,42 @@ Definition verifier_trace := @exec_verifier_trace pgl27_profile pgl27_exec_plug.
 (* and bool for the orbit secret.                                             *)
 (******************************************************************************)
 
-(** player_raw_trace — one seat's raw executed trace, a message list.
-    @intent: alias of pgl27_exec_player_raw_trace. *)
+(** player_raw_trace — one seat's raw executed trace, a message list. *)
 Definition player_raw_trace := @pgl27_exec_player_raw_trace.
 
 (** coalition_raw_trace — a coalition's raw executed traces, a finfun of
-    message lists indexed by seats.
-    @intent: alias of pgl27_exec_coalition_raw_trace. *)
+    message lists indexed by seats. *)
 Definition coalition_raw_trace := @pgl27_exec_coalition_raw_trace.
 
-(** seat_endpoint — one seat's executed endpoint, a dealt card position.
-    @intent: exec_seat_endpoint specialized at pgl27_exec_plug. *)
+(** seat_endpoint — one seat's executed endpoint, a dealt card position. *)
 Definition seat_endpoint := @exec_seat_endpoint pgl27_profile pgl27_exec_plug.
 
 (** coalition_endpoints — a coalition's executed endpoints, a finfun of dealt
-    card positions indexed by seats.
-    @intent: exec_coalition_endpoints specialized at pgl27_exec_plug. *)
+    card positions indexed by seats. *)
 Definition coalition_endpoints :=
   @exec_coalition_endpoints pgl27_profile pgl27_exec_plug.
 
 (** content_trace — the coalition's executed interpreter rows read through
-    content_of, a finfun of card positions.
-    @intent: alias of pgl27_exec_content_trace, the executed finite reader. *)
+    content_of, a finfun of card positions. *)
 Definition content_trace := @pgl27_exec_content_trace.
 
-(** static_view — the static coalition view the word-shuffle bounds are
-    stated over, a random variable with carrier {ffun 'I_8 -> 'I_8}.
-    @intent: alias of pgl27_view. *)
+(** static_view — the static coalition view the word-shuffle bounds are stated
+    over, a random variable with carrier {ffun 'I_8 -> 'I_8}. *)
 Definition static_view := @pgl27_view.
 
 (** coalition_trace — the static coalition content trace, a random variable
-    with carrier {ffun 'I_8 -> 'I_8}.
-    @intent: alias of pgl27_coalition_trace. *)
+    with carrier {ffun 'I_8 -> 'I_8}. *)
 Definition coalition_trace := @pgl27_coalition_trace.
 
-(** secret — the dealt orbit secret read as a random variable.
-    @intent: alias of pgl27_secret. *)
+(** secret — the dealt orbit secret read as a random variable. *)
 Definition secret := @pgl27_secret.
 
 (** prior — the uniform joint distribution on secrets and group elements the
-    static observers are random variables on.
-    @intent: alias of pgl27P. *)
+    static observers are random variables on. *)
 Definition prior := @pgl27P.
 
 (** observed — the observed execution of the profile and plug: the run, its
-    static observation and the value it recovers.
-    @intent: alias of pgl27_observed. *)
+    static observation and the value it recovers. *)
 Definition observed := pgl27_observed.
 
 (******************************************************************************)
@@ -172,77 +159,62 @@ Definition observed := pgl27_observed.
 (* distribution can be attached to a named executed observer.                 *)
 (******************************************************************************)
 
-(** exact_sample — the exact-uniform model at the uniform secret prior.
-    @intent: alias of pgl27_sample. *)
+(** exact_sample — the exact-uniform model at the uniform secret prior. *)
 Definition exact_sample := @pgl27_sample.
 
 (** word_sample — the two-hundred-letter word model at an arbitrary secret
-    prior.
-    @intent: alias of pgl27_word_sample. *)
+    prior. *)
 Definition word_sample := @pgl27_word_sample.
 
-(** fixed_exact_sample — the exact-uniform model at a fixed secret.
-    @intent: alias of pgl27_fixed_sample. *)
+(** fixed_exact_sample — the exact-uniform model at a fixed secret. *)
 Definition fixed_exact_sample := @pgl27_fixed_sample.
 
-(** fixed_word_sample — the word model at a fixed secret.
-    @intent: alias of pgl27_fixed_word_sample. *)
+(** fixed_word_sample — the word model at a fixed secret. *)
 Definition fixed_word_sample := @pgl27_fixed_word_sample.
 
-(** exact_family — the exact-shuffle model as a unit-indexed typed family.
-    @intent: alias of pgl27_exact_family. *)
+(** exact_family — the exact-shuffle model as a unit-indexed typed family. *)
 Definition exact_family := pgl27_exact_family.
 
 (** word_family — the two-hundred-letter word model family, indexed by the
-    secret prior.
-    @intent: alias of pgl27_word_family. *)
+    secret prior. *)
 Definition word_family := pgl27_word_family.
 
 (** sample_cut_distE — the exact model's cut distribution is the marginal
-    bound's shuffle.
-    @intent: alias of pgl27_sample_cut_distE. *)
+    bound's shuffle. *)
 Definition sample_cut_distE := @pgl27_sample_cut_distE.
 
-(** word_cut_distE — the word model's cut distribution is the word shuffle.
-    @intent: alias of pgl27_word_cut_distE. *)
+(** word_cut_distE — the word model's cut distribution is the word shuffle. *)
 Definition word_cut_distE := @pgl27_word_cut_distE.
 
 (** fixed_cut_distE — the fixed-secret exact model's cut distribution is the
-    uniform distribution on the group.
-    @intent: alias of pgl27_fixed_cut_distE. *)
+    uniform distribution on the group. *)
 Definition fixed_cut_distE := @pgl27_fixed_cut_distE.
 
 (** fixed_word_cut_distE — the fixed-secret word model's cut distribution is
-    the word shuffle.
-    @intent: alias of pgl27_fixed_word_cut_distE. *)
+    the word shuffle. *)
 Definition fixed_word_cut_distE := @pgl27_fixed_word_cut_distE.
 
 (** exact_coalition_distE — the exact model's executed coalition distribution
-    is the pushforward of the uniform prior along the static view.
-    @intent: alias of pgl27_exact_coalition_distE. *)
+    is the pushforward of the uniform prior along the static view. *)
 Definition exact_coalition_distE := @pgl27_exact_coalition_distE.
 
 (** fixed_word_coalition_distE — the fixed-secret word model's executed
     coalition distribution is the pushforward of the word shuffle along the
-    static view.
-    @intent: alias of pgl27_fixed_word_coalition_distE. *)
+    static view. *)
 Definition fixed_word_coalition_distE := @pgl27_fixed_word_coalition_distE.
 
 (** fixed_word_content_trace_distE — the fixed-secret word model's executed
     content trace has the distribution of the coalition trace under the word
-    shuffle.
-    @intent: alias of pgl27_fixed_word_content_trace_distE. *)
+    shuffle. *)
 Definition fixed_word_content_trace_distE :=
   @pgl27_fixed_word_content_trace_distE.
 
 (** word_joint_viewE — the joint executed view-and-secret distribution of the
-    arbitrary-prior word model is the static joint distribution.
-    @intent: alias of pgl27_word_joint_viewE. *)
+    arbitrary-prior word model is the static joint distribution. *)
 Definition word_joint_viewE := @pgl27_word_joint_viewE.
 
 (** word_sample_joint_distE — the word model's joint sample distribution is
-    the static word-generated joint distribution.
-    @intent: alias of pgl27_word_sample_joint_distE. *)
+    the static word-generated joint distribution. *)
 Definition word_sample_joint_distE := @pgl27_word_sample_joint_distE.
 
 (******************************************************************************)
@@ -253,97 +225,78 @@ Definition word_sample_joint_distE := @pgl27_word_sample_joint_distE.
 (* exec_correct below, and OE.oe_run_correct applies to observed generically. *)
 (******************************************************************************)
 
-(** exec_correct — termination, endpoint count and recovery together.
-    @intent: alias of pgl27_exec_correct. *)
+(** exec_correct — termination, endpoint count and recovery together. *)
 Definition exec_correct := @pgl27_exec_correct.
 
-(** exec_recovers — the executed run decodes to the dealt secret.
-    @intent: alias of pgl27_exec_recovers. *)
+(** exec_recovers — the executed run decodes to the dealt secret. *)
 Definition exec_recovers := @pgl27_exec_recovers.
 
-(** observed_recovers — the observed run decodes to the dealt secret.
-    @intent: alias of pgl27_observed_recovers. *)
+(** observed_recovers — the observed run decodes to the dealt secret. *)
 Definition observed_recovers := @pgl27_observed_recovers.
 
 (******************************************************************************)
 (* ===== 6. Security ===== *)
 (******************************************************************************)
 
-(** content_traceE — the executed content reader is the static coalition
-    trace random variable, the equation that carries a static result to the
-    executed observer.
-    @intent: alias of pgl27_content_traceE. *)
+(** content_traceE — the executed content reader is the static coalition trace
+    random variable, the equation that carries a static result to the executed
+    observer. *)
 Definition content_traceE := @pgl27_content_traceE.
 
-(** word_view_indist — two secrets give static coalition views within 2^-39
-    in variation distance under the word shuffle, at three cards.
-    @intent: alias of pgl27_word_view_indist. *)
+(** word_view_indist — two secrets give static coalition views within 2^-39 in
+    variation distance under the word shuffle, at three cards. *)
 Definition word_view_indist := @pgl27_word_view_indist.
 
 (** word_trace_indist — the same bound for the static coalition content
-    trace.
-    @intent: alias of pgl27_word_trace_indist. *)
+    trace. *)
 Definition word_trace_indist := @pgl27_word_trace_indist.
 
-(** exec_view_indist — two fixed secrets give executed coalition
-    distributions within 2^-39 in variation distance, at three cards.
-    @intent: alias of pgl27_exec_view_indist. *)
+(** exec_view_indist — two fixed secrets give executed coalition distributions
+    within 2^-39 in variation distance, at three cards. *)
 Definition exec_view_indist := @pgl27_exec_view_indist.
 
-(** exec_trace_indist — the same bound for the executed content trace.
-    @intent: alias of pgl27_exec_trace_indist. *)
+(** exec_trace_indist — the same bound for the executed content trace. *)
 Definition exec_trace_indist := @pgl27_exec_trace_indist.
 
 (** view_mixing — the joint view-and-secret distribution under the word
-    shuffle is within 2^-40 of the product of its marginals.
-    @intent: alias of pgl27_view_mixing. *)
+    shuffle is within 2^-40 of the product of its marginals. *)
 Definition view_mixing := @pgl27_view_mixing.
 
-(** word_mixing — the word shuffle is within 2^-40 of the uniform
-    distribution on the group.
-    @intent: alias of pgl27_word_mixing. *)
+(** word_mixing — the word shuffle is within 2^-40 of the uniform distribution
+    on the group. *)
 Definition word_mixing := @pgl27_word_mixing.
 
 (** coalition_trace_secrecy — the conditional entropy of the secret given a
-    coalition trace equals its entropy, at three cards and the uniform prior.
-    @intent: alias of pgl27_coalition_trace_secrecy. *)
+    coalition trace equals its entropy, at three cards and the uniform
+    prior. *)
 Definition coalition_trace_secrecy := @pgl27_coalition_trace_secrecy.
 
 (** exact_view_indep — at three cards the exact model's executed coalition
-    observation and the orbit secret have a product joint distribution.
-    @intent: alias of pgl27_exec_exact_view_indep. *)
+    observation and the orbit secret have a product joint distribution. *)
 Definition exact_view_indep := @pgl27_exec_exact_view_indep.
 
-(** marginal_bound — the shuffle marginal bound of the exact model.
-    @intent: alias of pgl27_marginal_bound. *)
+(** marginal_bound — the shuffle marginal bound of the exact model. *)
 Definition marginal_bound := @pgl27_marginal_bound.
 
 (** certificate_bundle — the shuffle certificate bundle of the exact model,
-    carrying that marginal bound and its exactness attachment.
-    @intent: alias of pgl27_certificate_bundle. *)
+    carrying that marginal bound and its exactness attachment. *)
 Definition certificate_bundle := @pgl27_certificate_bundle.
 
 (******************************************************************************)
 (* ===== 7. Transfer ===== *)
 (******************************************************************************)
 
-(** var_dist_transfer — the generic exact-to-finite transfer inequality.
-    @intent: alias of var_dist_fdistmap_transfer. *)
+(** var_dist_transfer — the generic exact-to-finite transfer inequality. *)
 Definition var_dist_transfer := @var_dist_fdistmap_transfer.
 
-(** word_view_indist_via_transfer — the 2^-39 coalition-view bound obtained
-    as an instance of the generic transfer inequality.
-    @intent: alias of pgl27_word_view_indist_via_transfer.
-    Naming: intentional; the alias keeps the landed name so that the facade
-    and the theorem it exposes are searchable by one string, and the
-    _via_transfer suffix records the derivation that distinguishes this
-    corollary from word_view_indist, whose statement it reproduces. *)
+(** word_view_indist_via_transfer — the 2^-39 coalition-view bound obtained as
+    an instance of the generic transfer inequality. *)
 Definition word_view_indist_via_transfer :=
   @pgl27_word_view_indist_via_transfer.
 
-(** word_transfer_status — the word path's transfer status.
-    @intent: IdealFinite, the path carrying a public model-transfer theorem
-    whose base-distribution premise is discharged by word_mixing. *)
+(** word_transfer_status — the word path's transfer status. IdealFinite, the
+    path carrying a public model-transfer theorem whose base-distribution
+    premise is discharged by word_mixing. *)
 Definition word_transfer_status : TransferStatus := IdealFinite.
 
 End PGL27Analysis.

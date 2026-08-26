@@ -53,8 +53,8 @@ Import Prenex Implicits.
 
 (** pgl27_sym_sigmas — the inverse-closed symmetrized generator tuple of the
     realistic word shuffle: translation, scaling, inversion and the two
-    inverses of translation and scaling.
-    @intent: the letter alphabet of the L-word shuffle. *)
+    inverses of translation and scaling. The letter alphabet of the L-word
+    shuffle. *)
 Definition pgl27_sym_sigmas : 5.-tuple {perm 'I_8} :=
   [tuple tnth pgl27_gens (@Ordinal 3 0 isT);
          ((tnth pgl27_gens (@Ordinal 3 0 isT))^-1)%g;
@@ -70,8 +70,10 @@ Local Definition mtbl (j : nat) : seq nat :=
              ; [:: 0; 5; 3; 1; 6; 4; 2; 7]
              ; [:: 7; 6; 3; 2; 5; 4; 1; 0]] j.
 
-(* An inverse permutation reads off the composition-inverse of a forward
-   table, matched value by value. *)
+(* A permutation whose forward images are read off the table F has (g^-1) x
+   at Finv, whenever Finv is a right inverse of F on the eight codes.  The two
+   inverse letters of the symmetrized alphabet are given by tables this way,
+   so no permutation is ever inverted inside a kernel computation. *)
 Local Lemma perm_inv_val (g : {perm 'I_8}) (F Finv : seq nat) (x : 'I_8) :
   (forall y : 'I_8, val (g y) = nth 0 F (val y)) ->
   (forall k, k < 8 -> nth 0 F (nth 0 Finv k) = k) ->
@@ -98,7 +100,9 @@ Local Lemma gfwd2 (x : 'I_8) :
   val (tnth pgl27_gens (@Ordinal 3 2 isT) x) = nth 0 (mtbl 4) (val x).
 Proof. by case: x => -[|[|[|[|[|[|[|[|//]]]]]]]] Hx; rewrite permE. Qed.
 
-(* Each letter agrees with its table, the inverses via [perm_inv_val]. *)
+(* Each of the five letters sends a code to the entry of its own table at that
+   code.  The alphabet is therefore described entirely by mtbl, which is the
+   form the BFS closure and the walk recursion compute in. *)
 Local Lemma mtbl_val (j : 'I_5) (x : 'I_8) :
   val (tnth pgl27_sym_sigmas j x) = nth 0 (mtbl j) (val x).
 Proof.
@@ -172,6 +176,10 @@ Local Definition elem_table_ok : bool :=
           elem_table
     & all (fun sw : seq nat * seq nat =>
              all (fun j => j < 5) sw.2) elem_table].
+(* Every conjunct of elem_table_ok holds.  This single kernel computation is
+   what the group order and the walk's 336-state indexing both rest on: it
+   fixes the number of states, their uniqueness, the state of the identity,
+   and closure of the state set under the five letters. *)
 Local Lemma elem_table_okT : elem_table_ok.
 Proof. by vm_compute. Qed.
 
@@ -193,17 +201,22 @@ Local Fixpoint walkN (L : nat) : seq N :=
 Local Definition absdiffN (a b : N) : N :=
   if (a <? b)%num then (b - a)%num else (a - b)%num.
 
-(* The length-200 walk's total variation to the uniform meets 2^-40. *)
+(* The integer form of the mixing bound: 2^40 times the total absolute
+   deviation of the 336 walk counts from the uniform value 5^200 / 336, taken
+   over the common denominator, is at most 336 * 5^200. *)
 Local Definition mixing_bound_ok : bool :=
   let D := (5 ^ 200)%num in
   ((2 ^ 40) * foldl (fun acc c => (acc + absdiffN (336 * c) D)%num) 0%num
                     (walkN 200)
    <=? 336 * D)%num.
+(* The length-200 walk meets that integer bound.  It is the only quantitative
+   input to the mixing theorem; everything after it is exact rewriting. *)
 Local Lemma mixing_bound_okT : mixing_bound_ok.
 Proof. by vm_compute. Qed.
 
 (* -------------------------------------------------------------------------- *)
-(* Small facts read off the closure checker.                                  *)
+(* Small facts read off the closure checker: the six conjuncts of             *)
+(* elem_table_ok, each projected out for use on its own.                      *)
 (* -------------------------------------------------------------------------- *)
 
 Local Lemma size_elem_table : size elem_table = 336.
@@ -246,6 +259,7 @@ have gen : forall (w' : seq nat) (t : seq nat), size t = 8 ->
   by elim=> [|j w' IH] t Ht //=; apply: IH; rewrite size_mcomp.
 by apply: gen.
 Qed.
+(* Every closure key is a table of the eight codes. *)
 Local Lemma elem_key_size (sw : seq nat * seq nat) :
   sw \in elem_table -> size sw.1 = 8.
 Proof. by move=> Hsw; rewrite -(elem_fold_key Hsw) size_fold. Qed.
@@ -263,6 +277,8 @@ rewrite ltnNge; apply/negP => Hge.
 move: Heq; rewrite (nth_default _ Hge) => Habs.
 by move: Hsz8; rewrite -Habs.
 Qed.
+(* The identity table is a key, and by elem_table0 it is the key at index 0,
+   so state 0 of the walk is the identity shuffle. *)
 Local Lemma idt_in_keys : idt \in unzip1 elem_table.
 Proof.
 have -> : idt = nth [::] (unzip1 elem_table) 0.
@@ -275,7 +291,9 @@ Qed.
 (* The permutation-table map and its group structure.                         *)
 (* -------------------------------------------------------------------------- *)
 
-(* The table of a permutation of 'I_8. *)
+(* The table of a permutation of 'I_8: its list of images in code order.
+   This is the transport between {perm 'I_8}, where the shuffle group lives,
+   and seq nat, where vm_compute reduces. *)
 Local Definition ptbl (g : {perm 'I_8}) : seq nat := [seq val (g x) | x <- enum 'I_8].
 Local Lemma ptbl_nth (g : {perm 'I_8}) (x : 'I_8) : nth 0 (ptbl g) (val x) = val (g x).
 Proof.
@@ -292,6 +310,8 @@ by case: i Hi => [|[|[|[|[|[|[|[|k]]]]]]]].
 Qed.
 Local Lemma size_mtbl (j : nat) : j < 5 -> size (mtbl j) = 8.
 Proof. by case: j => [|[|[|[|[|//]]]]]. Qed.
+(* A permutation whose images are read off a length-eight list has that list
+   as its table. *)
 Local Lemma ptbl_of_fwd (g : {perm 'I_8}) (F : seq nat) :
   (forall x, val (g x) = nth 0 F (val x)) -> size F = 8 -> ptbl g = F.
 Proof.
@@ -300,6 +320,9 @@ move=> i; rewrite ptbl_size => Hi.
 transitivity (val (g (Ordinal Hi))); first by rewrite -ptbl_nth.
 by rewrite Hfwd.
 Qed.
+(* The tables of the three generators and of the five letters are the mtbl
+   entries they were written down as, so the alphabet the BFS closes under is
+   the alphabet of the shuffle. *)
 Local Lemma ptbl_gen0 : ptbl (tnth pgl27_gens (@Ordinal 3 0 isT)) = mtbl 0.
 Proof. by apply: ptbl_of_fwd => //; exact: gfwd0. Qed.
 Local Lemma ptbl_gen1 : ptbl (tnth pgl27_gens (@Ordinal 3 1 isT)) = mtbl 2.
@@ -308,6 +331,10 @@ Local Lemma ptbl_gen2 : ptbl (tnth pgl27_gens (@Ordinal 3 2 isT)) = mtbl 4.
 Proof. by apply: ptbl_of_fwd => //; exact: gfwd2. Qed.
 Local Lemma ptbl_sym (j : 'I_5) : ptbl (tnth pgl27_sym_sigmas j) = mtbl (val j).
 Proof. by apply: ptbl_of_fwd; [exact: mtbl_val | rewrite size_mtbl // ltn_ord]. Qed.
+(* ptbl is a morphism: the table of a product is the composition of the two
+   tables.  With ptbl_inj this makes ptbl a faithful representation of the
+   shuffle group inside seq nat, which is what lets a computation on the 336
+   tables settle a question about the group. *)
 Local Lemma ptbl_morph (g h : {perm 'I_8}) :
   ptbl (g * h)%g = mcomp (ptbl g) (ptbl h).
 Proof.
@@ -318,6 +345,8 @@ rewrite permM /mcomp (nth_map 0) ?ptbl_size //.
 have -> : nth 0 (ptbl g) i = val (g (Ordinal Hi)) by rewrite -ptbl_nth.
 by rewrite ptbl_nth.
 Qed.
+(* Distinct shuffles have distinct tables, so an identity of tables is an
+   identity of shuffles. *)
 Local Lemma ptbl_inj : injective ptbl.
 Proof.
 move=> g h Heq; apply/permP => x; apply: val_inj.
@@ -336,6 +365,7 @@ Local Lemma keys_closed_mem (t : seq nat) (j : nat) :
 Proof. by move=> /mapP[sw Hsw ->] Hj; exact: elem_closed_mem. Qed.
 Local Lemma double_lt3_mem (i0 : 'I_3) : (val i0).*2 \in [:: 0; 1; 2; 3; 4].
 Proof. by move: i0 => [[|[|[|m]]] Hm]. Qed.
+(* Composing a key with the table of a generator gives a key. *)
 Local Lemma gen_key_mem (h : {perm 'I_8}) (t : seq nat) :
   h \in [set tnth pgl27_gens i0 | i0 : 'I_3] ->
   t \in unzip1 elem_table ->
@@ -345,7 +375,9 @@ move=> /imsetP[i0 _ ->] Ht; rewrite ptbl_gen.
 exact: (keys_closed_mem Ht (double_lt3_mem i0)).
 Qed.
 
-(* Every group element has its table among the closure keys. *)
+(* Every group element has its table among the closure keys: a group element
+   is a product of generators, and the keys are closed under the generators
+   and contain the identity.  The keys therefore cover the group. *)
 Local Lemma group_key (g : {perm 'I_8}) :
   g \in pgg_G pgl27_M -> ptbl g \in unzip1 elem_table.
 Proof.
@@ -370,6 +402,9 @@ Proof. by apply: mem_gen; apply/imsetP; exists i. Qed.
 
 (* The perm-level letter selected by a nat index. *)
 Local Definition gen5_of (j : nat) : {perm 'I_8} := tnth pgl27_sym_sigmas (inord j).
+(* Every letter of the symmetrized alphabet lies in the shuffle group, the
+   two inverse letters because a group is closed under inversion.  So
+   symmetrizing the alphabet does not enlarge the state space. *)
 Local Lemma gen5_of_mem (j : nat) : gen5_of j \in pgg_G pgl27_M.
 Proof.
 rewrite /gen5_of; move: (inord j : 'I_5) => [[|[|[|[|[|m]]]]] Hm] //;
@@ -391,6 +426,9 @@ have g1 : (1%g : {perm 'I_8}) \in pgg_G pgl27_M by exact: group1.
 elim: w (1%g) g1 => [|j w IH] g gG //=.
 by apply: IH; apply: groupM => //; exact: gen5_of_mem.
 Qed.
+(* The table of the permutation of a letter word is the fold of the letters'
+   tables from the identity table.  The BFS's fold over words and the group's
+   product over letters are the same object, read through ptbl. *)
 Local Lemma ptbl_word5 (w : seq nat) :
   all (fun j => j < 5) w ->
   ptbl (word5_perm w) = foldl (fun t j => mcomp t (mtbl j)) idt w.
@@ -412,6 +450,9 @@ Local Definition entry_perm (k : nat) : {perm 'I_8} :=
   word5_perm (nth ([::], [::]) elem_table k).2.
 Local Lemma entry_perm_mem (k : nat) : entry_perm k \in pgg_G pgl27_M.
 Proof. exact: word5_perm_mem. Qed.
+(* The table of entry_perm k is the k-th key.  entry_perm is thus a section of
+   the key indexing: every state index the walk uses names an actual shuffle,
+   which is the direction group_key does not give. *)
 Local Lemma ptbl_entry (k : nat) : k < 336 ->
   ptbl (entry_perm k) = nth [::] (unzip1 elem_table) k.
 Proof.
@@ -428,6 +469,9 @@ Qed.
 
 Local Lemma keys_size : size (unzip1 elem_table) = 336.
 Proof. by rewrite /unzip1 size_map size_elem_table. Qed.
+(* Every group element is entry_perm k for some index k below 336.  With
+   entry_perm_inj this makes k |-> entry_perm k a bijection from the 336 walk
+   states onto the shuffle group. *)
 Local Lemma mem_G_Ps (g : {perm 'I_8}) :
   g \in pgg_G pgl27_M -> g \in [seq entry_perm k | k <- iota 0 336].
 Proof.
@@ -441,6 +485,8 @@ have Hkey : ptbl (entry_perm k) = ptbl g.
 have Hgk : g = entry_perm k by apply: ptbl_inj; rewrite Hkey.
 rewrite Hgk; apply: map_f; by rewrite mem_iota /= Hklt.
 Qed.
+(* Distinct indices below 336 name distinct shuffles, because their keys are
+   distinct. *)
 Local Lemma entry_perm_inj : {in iota 0 336 &, injective entry_perm}.
 Proof.
 move=> k1 k2; rewrite !mem_iota /= => Hk1 Hk2 Heq.
@@ -452,8 +498,10 @@ by apply/eqP; rewrite -(ptbl_entry Hk1) -(ptbl_entry Hk2) Heq.
 Qed.
 
 (** pgl27_gen5_eq — the symmetrized five-letter alphabet generates the same
-    group as the three PGL(2,7) generators.
-    @composes: pgl27_card *)
+    group as the three PGL(2,7) generators.  The realistic word shuffle
+    therefore explores exactly the PGL(2,7) shuffle group, neither a subgroup
+    nor a larger one, so uniformity on that group is the right mixing
+    target. *)
 Lemma pgl27_gen5_eq :
   <<[set tnth pgl27_sym_sigmas j | j : 'I_5]>>%G = pgg_G pgl27_M.
 Proof.
@@ -468,9 +516,9 @@ apply: group_inj => /=; apply/eqP; rewrite eqEsubset; apply/andP; split.
   + by exists (@Ordinal 5 4 isT).
 Qed.
 
-(** pgl27_card — the PGL(2,7) shuffle group has exactly 336 elements.
-    @main architecture: the in-kernel order of the generated group, tying the
-    walk's 336-entry state space to the whole group. *)
+(** pgl27_card — the PGL(2,7) shuffle group has exactly 336 elements. The
+    in-kernel order of the generated group, tying the walk's 336-entry state
+    space to the whole group. *)
 Lemma pgl27_card : #|pgg_G pgl27_M| = 336.
 Proof.
 have Hii : pgg_G pgl27_M =i [seq entry_perm k | k <- iota 0 336].
@@ -513,15 +561,25 @@ Qed.
 
 Local Notation Msym := (Gen_PGGTypes pgl27_sym_sigmas).
 
+(* The shuffle a length-L letter word evaluates to: the ordered product of its
+   letters. *)
 Local Definition weval (L : nat) (w : L.-tuple 'I_5) : {perm 'I_8} :=
   (\prod_(i < L) tnth pgl27_sym_sigmas (tnth w i))%g.
 
+(* The fibre count of g at length L: how many of the 5^L letter words have
+   product g.  Under the uniform letter law every word carries probability
+   5^-L, so fibc L g / 5^L is the word-shuffle law at g exactly.  The whole
+   certificate is a statement about this one integer sequence. *)
 Local Definition fibc (L : nat) (g : {perm 'I_8}) : nat :=
   #|[set w : L.-tuple 'I_5 | weval w == g]|.
 
+(* A word with one further letter appended. *)
 Local Definition rc (L : nat) (p : L.-tuple 'I_5 * 'I_5) : L.+1.-tuple 'I_5 :=
   [tuple of rcons p.1 p.2].
 
+(* Appending a letter multiplies the evaluation on the right by that letter.
+   The last letter of a word is the last factor of the product, which is why
+   the fibre recursion below walks backwards through inverse letters. *)
 Local Lemma weval_last (L : nat) (w : L.-tuple 'I_5) (j : 'I_5) :
   weval (rc (w, j)) = (weval w * tnth pgl27_sym_sigmas j)%g.
 Proof.
@@ -532,6 +590,9 @@ rewrite /weval big_ord_recr /=; congr (_ * _)%g.
   by rewrite (tnth_nth ord0) /= nth_rcons size_tuple ltnn eqxx.
 Qed.
 
+(* Appending a letter is a bijection from word-and-letter pairs onto words one
+   letter longer, so a sum over the longer words may be reindexed as a double
+   sum over shorter words and letters. *)
 Local Lemma rc_bij (L : nat) : bijective (@rc L).
 Proof.
 exists (fun w : L.+1.-tuple 'I_5 =>
@@ -552,6 +613,10 @@ exists (fun w : L.+1.-tuple 'I_5 =>
   by rewrite eqxx (tnth_nth ord0).
 Qed.
 
+(* fibc L.+1 g is the sum over the five letters j of fibc L (g * sigma_j^-1).
+   This is the backward recursion the certificate runs: the words reaching g
+   in L+1 steps are the words reaching each of g's five predecessors in L.  It
+   is stated on the group; walk_step is its image on the 336 state indices. *)
 Local Lemma fibc_rec (L : nat) (g : {perm 'I_8}) :
   fibc L.+1 g = \sum_(j < 5) fibc L (g * (tnth pgl27_sym_sigmas j)^-1)%g.
 Proof.
@@ -570,6 +635,9 @@ apply: eq_bigr => j _.
 by rewrite -big_mkcond /= sum1dep_card.
 Qed.
 
+(* At length zero the only word is empty, so the fibre count is one at the
+   identity and zero elsewhere.  This is the initial condition walkN 0 encodes
+   as 1 :: nseq 335 0. *)
 Local Lemma fibc0 (g : {perm 'I_8}) : fibc 0 g = (g == 1%g).
 Proof.
 rewrite /fibc.
@@ -584,6 +652,8 @@ Qed.
 (* The inverse of each letter reads off the reverse-walk letter's table.      *)
 (* -------------------------------------------------------------------------- *)
 
+(* The inversion generator is an involution, so its inverse has its own
+   table. *)
 Local Lemma ptbl_geninv2 :
   ptbl ((tnth pgl27_gens (@Ordinal 3 2 isT))^-1)%g = mtbl 4.
 Proof.
@@ -593,6 +663,10 @@ move=> x; apply: (perm_inv_val (F := mtbl 4)); first exact: gfwd2.
 - by case=> [|[|[|[|[|[|[|[|k]]]]]]]].
 Qed.
 
+(* The inverse of letter j has the table of letter inv_letter j.  The five
+   reverse steps of the walk are again letters of the alphabet, which is the
+   reason the alphabet was symmetrized: the reverse walk needs no table the
+   forward walk does not already have. *)
 Local Lemma ptbl_inv_letter (j : 'I_5) :
   ptbl ((tnth pgl27_sym_sigmas j)^-1)%g = mtbl (inv_letter (val j)).
 Proof.
@@ -613,16 +687,20 @@ Local Lemma mem_unzip1_has (t : seq nat) :
   = has (fun sw : seq nat * seq nat => sw.1 == t) elem_table.
 Proof. by rewrite /unzip1 -has_pred1 has_map. Qed.
 
+(* A key is found at an index below 336, so tbl_index lands in the walk's
+   state range. *)
 Local Lemma tbl_index_lt (t : seq nat) :
   t \in unzip1 elem_table -> (tbl_index t < 336)%N.
 Proof. by rewrite mem_unzip1_has /tbl_index -size_elem_table -has_find. Qed.
 
-(* Side conditions carrying [elem_table]/[pred_table] must be supplied as
-   premises: letting done touch them forces the BFS through lazy kernel
-   reduction instead of vm_compute. *)
+(* Reading the key list at the index tbl_index assigns a key returns that key,
+   so the indexing is a section of the key list. *)
 Local Lemma tbl_index_key (t : seq nat) :
   t \in unzip1 elem_table -> nth [::] (unzip1 elem_table) (tbl_index t) = t.
 Proof.
+(* The side conditions carrying elem_table must be supplied as premises:
+   letting done touch them forces the BFS through lazy kernel reduction
+   instead of vm_compute. *)
 move=> Ht.
 have Hh : has (fun sw : seq nat * seq nat => sw.1 == t) elem_table
   by rewrite -mem_unzip1_has.
@@ -635,6 +713,8 @@ Local Lemma inv_letter_mem (jn : nat) :
   (jn < 5)%N -> inv_letter jn \in [:: 0; 1; 2; 3; 4].
 Proof. by move: jn => [|[|[|[|[|]]]]]. Qed.
 
+(* The index of the jn-th reverse-walk predecessor of state k: the key at k
+   composed with the table of the inverse of letter jn, looked up again. *)
 Local Definition predk (k jn : nat) : nat :=
   tbl_index (mcomp (nth [::] (unzip1 elem_table) k) (mtbl (inv_letter jn))).
 
@@ -650,6 +730,10 @@ Local Lemma predk_lt (k jn : nat) :
   (k < 336)%N -> (jn < 5)%N -> (predk k jn < 336)%N.
 Proof. by move=> Hk Hjn; apply: tbl_index_lt; exact: predk_mem. Qed.
 
+(* entry_perm k * sigma_j^-1 is entry_perm (predk k j), for k below 336.  The
+   index arithmetic of pred_table is right multiplication by the inverse
+   letter on the group, so the five predecessor slots the walk reads at k name
+   the five group predecessors of the shuffle entry_perm k. *)
 Local Lemma entry_pred (k : nat) (j : 'I_5) : (k < 336)%N ->
   (entry_perm k * (tnth pgl27_sym_sigmas j)^-1)%g = entry_perm (predk k (val j)).
 Proof.
@@ -667,6 +751,7 @@ Qed.
 Local Lemma size_pred_table : size pred_table = 336.
 Proof. by rewrite /pred_table size_map size_elem_table. Qed.
 
+(* Row k of pred_table lists the five predecessor indices of state k. *)
 Local Lemma nth_pred_table (k : nat) : (k < 336)%N ->
   nth [::] pred_table k = [seq predk k j | j <- [:: 0; 1; 2; 3; 4]].
 Proof.
@@ -677,18 +762,24 @@ apply: eq_map => j; rewrite /predk.
 by rewrite /unzip1 (nth_map ([::], [::]) _ _ Hk').
 Qed.
 
+(* One step of the walk rereads pred_table: each new entry is the sum of the
+   previous vector over that state's five predecessor slots. *)
 Local Lemma walkS (L : nat) :
   walkN L.+1
   = [seq foldl (fun acc i => (acc + nth 0%num (walkN L) i)%num) 0%num preds
     | preds <- pred_table].
 Proof. by []. Qed.
 
+(* The walk vector has one entry per state at every length. *)
 Local Lemma size_walkN (L : nat) : size (walkN L) = 336.
 Proof.
 case: L => [|L']; first by [].
 by rewrite walkS size_map size_pred_table.
 Qed.
 
+(* Read in nat, walkN L.+1 at k is the sum of walkN L over the five entries of
+   row k of pred_table.  This is fibc_rec transported to the state indices,
+   with the walk's binary-N additions read as nat sums. *)
 Local Lemma walk_step (L k : nat) : (k < 336)%N ->
   N.to_nat (nth 0%num (walkN L.+1) k)
   = \sum_(j < 5) N.to_nat (nth 0%num (walkN L) (predk k (val j))).
@@ -701,7 +792,11 @@ rewrite -[ [:: 0; 1; 2; 3; 4] ]/(index_iota 0 5) big_mkord.
 exact: erefl.
 Qed.
 
-(* The fibre of length L over the identity is the walk's L-step count. *)
+(* fibc L (entry_perm k) is the k-th entry of walkN L, for every k below 336.
+   This is the bridge between the two layers: the binary-N vector the kernel
+   computes is the fibre-count function of the shuffle group, so the 336
+   numbers vm_compute produced at L = 200 are the unnormalized word-shuffle
+   law. *)
 Local Lemma fiber_count (L k : nat) : (k < 336)%N ->
   fibc L (entry_perm k) = N.to_nat (nth 0%num (walkN L) k).
 Proof.
@@ -739,13 +834,15 @@ Qed.
 Local Lemma sym_in_G (j : 'I_5) : tnth pgl27_sym_sigmas j \in pgg_G pgl27_M.
 Proof. by move: (gen5_of_mem (val j)); rewrite /gen5_of inord_val. Qed.
 
+(* Every letter word evaluates inside the shuffle group, so the word shuffle
+   puts no mass outside the support of the uniform law it is compared with. *)
 Local Lemma word_eval_in_G (L : nat) (w : L.-tuple 'I_5) :
   weval w \in pgg_G pgl27_M.
 Proof. by apply: group_prod => i _; exact: sym_in_G. Qed.
 
-(* Decode the binary certificate over an ABSTRACT vector: with v free, the
-   numeral rewrites' match attempts fail fast instead of forcing the walk
-   through lazy kernel reduction. *)
+(* A 336-vector meeting the binary-N certificate inequality meets it in nat:
+   2^40 times the total absolute deviation of its entries from the uniform
+   value, over the common denominator, is at most 336 * 5^200. *)
 Local Lemma cert_decode (v : seq N) :
   size v = 336 ->
   ((2 ^ 40) * foldl (fun acc c => (acc + absdiffN (336 * c) (5 ^ 200)%num)%num)
@@ -754,6 +851,9 @@ Local Lemma cert_decode (v : seq N) :
        N.to_nat (absdiffN (336 * nth 0%num v k) (5 ^ 200)%num))
    <= 336 * 5 ^ 200)%N.
 Proof.
+(* The vector v is kept abstract: with v free the numeral rewrites' match
+   attempts fail fast instead of forcing the walk through lazy kernel
+   reduction. *)
 move=> Hsz /N.leb_le/Nle_nat H.
 have e2 : N.to_nat 2 = 2 by [].
 have e5 : N.to_nat 5 = 5 by [].
@@ -767,6 +867,8 @@ rewrite (big_nth 0%num) Hsz big_mkord.
 move=> H; exact: H.
 Qed.
 
+(* The length-200 walk vector meets the nat certificate.  This is the only
+   fact about the 336 computed numbers that the real-valued argument uses. *)
 Local Lemma mixing_cert_nat :
   (2 ^ 40 * (\sum_(k < 336)
        N.to_nat (absdiffN (336 * nth 0%num (walkN 200) k) (5 ^ 200)%num))
@@ -786,10 +888,13 @@ Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 
-(** Wuni — the uniform letter distribution of the realistic word shuffle.
-    @intent: the letter law of the L-word shuffle. *)
+(** Wuni — the uniform letter distribution of the realistic word shuffle. The
+    letter law of the L-word shuffle. *)
 Definition Wuni : R.-fdist 'I_5 := fdist_uniform (card_ord 5).
 
+(* The nat image of a binary-N absolute difference is the real absolute
+   difference of the two images.  It carries the certificate's absolute values
+   into the variation-distance sum. *)
 Local Lemma absN_toR (a b : N) :
   (N.to_nat (absdiffN a b))%:R = `|(N.to_nat a)%:R - (N.to_nat b)%:R| :> R.
 Proof.
@@ -808,6 +913,9 @@ rewrite /absdiffN; case: ifPn => H.
   by rewrite Hsub natrB // ger0_norm ?subr_ge0 ?ler_nat.
 Qed.
 
+(* c / D - 1 / 336 = (336 c - D) / (336 D).  Each of the 336 deviations from
+   uniform is put over the single denominator 336 * 5^200, so their sum is the
+   one integer the certificate bounds. *)
 Local Lemma frac_diff (c D : nat) : (0 < D)%N ->
   c%:R / D%:R - 336%:R^-1 = ((336 * c)%:R - D%:R) / (336 * D)%:R :> R.
 Proof.
@@ -821,6 +929,9 @@ rewrite divfK // natrM mulrBl natrM; congr (_ - _).
 by rewrite mulrA mulVf // mul1r.
 Qed.
 
+(* A numerator meeting 2^40 * SN <= 336 * D has SN / (336 D) <= 2^-40.  The
+   last step of the chain, turning the integer certificate into the stated
+   real bound. *)
 Local Lemma final_bound_gen (SN D : nat) :
   (0 < D)%N -> (2 ^ 40 * SN <= 336 * D)%N ->
   SN%:R / (336 * D)%:R <= 2%:R^-40 :> R.
@@ -834,6 +945,10 @@ rewrite ler_pdivlMr ?ltr0n ?expn_gt0 //.
 by rewrite -natrM ler_nat mulnC.
 Qed.
 
+(* The word-shuffle law at g is fibc 200 g / 5^200: under the uniform letter
+   law each of the 5^200 words has the same probability, so the law of the
+   product is the fibre count divided by the number of words.  This is where
+   the counting layer meets the probability layer. *)
 Local Lemma rho_valE (g : {perm 'I_8}) :
   @rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas Wuni g
   = (fibc 200 g)%:R / (5 ^ 200)%:R.
@@ -847,6 +962,14 @@ rewrite (eq_bigr (fun=> (5 ^ 200)%:R^-1)); last first.
 by rewrite sumr_const [X in _ = X]mulrC mulr_natr; congr (_ *+ _).
 Qed.
 
+(* The word-shuffle law is within 2^-40 of the uniform law on Gg in variation
+   distance, given that Gg has 336 elements injectively enumerated by ep, that
+   every word evaluates inside Gg, that the fibre count of ep k is the k-th
+   entry of vN, and that vN meets the nat certificate.  The bound is
+   unconditional and information-theoretic: no computational assumption enters
+   at any point.  Stated over abstract Gg, ep and vN so that the single
+   vm_compute of the 336 counts is all the real-valued argument depends on;
+   pgl27_word_mixing supplies the four PGL(2,7) witnesses. *)
 Local Lemma mixing_bound_gen
   (Gg : {group {perm 'I_8}}) (ep : nat -> {perm 'I_8}) (vN : nat -> N)
   (GposH : (0 < #|Gg|)%N) :
@@ -890,8 +1013,11 @@ by apply: final_bound_gen; [rewrite expn_gt0 | exact: Hcert].
 Qed.
 
 (** pgl27_word_mixing — the law of a uniform 200-letter generator word is
-    within 2^-40 of the uniform shuffle in variation distance.
-    @main security: the realistic-shuffle mixing certificate. *)
+    within 2^-40 of the uniform shuffle in variation distance.  The bound is
+    unconditional and information-theoretic, a counting fact about the 5^200
+    words with no computational assumption anywhere, so any statement proved
+    of the idealised uniform shuffle transfers to the shuffle a dealer can
+    actually perform at a cost of 2^-40. *)
 Lemma pgl27_word_mixing :
   var_dist (@rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas Wuni)
            (`U pgl27_G_pos)
@@ -904,8 +1030,10 @@ apply: (@mixing_bound_gen (pgg_G pgl27_M)%G entry_perm
 Qed.
 
 (** pgl27_endpoint_mixing — each single-card marginal of the 200-letter word
-    shuffle is within 2^-40 of uniform.
-    @main security: the realistic-shuffle single-card mixing bound. *)
+    shuffle is within 2^-40 of uniform.  What one seat holds after the
+    realistic shuffle is a uniformly dealt card to within 2^-40; the exact
+    shuffle makes that marginal exactly uniform, and this is the price of
+    replacing it by a finite word. *)
 Lemma pgl27_endpoint_mixing (s : 'I_8) :
   var_dist (@endpoint_dist_weighted R 6 4 200 pgl27_sym_sigmas Wuni s)
            (fdist_uniform (card_ord 8))
@@ -916,7 +1044,9 @@ apply: Order.POrderTheory.le_trans pgl27_word_mixing.
 exact: (var_dist_fdistmap (fun sigma : {perm 'I_8} => sigma s)).
 Qed.
 
-(* var_dist of products with equal first marginal factorizes. *)
+(* Two products with the same first marginal are as far apart as their second
+   marginals.  Tensoring the shuffle law with an independent secret prior
+   therefore neither creates nor destroys variation distance. *)
 Local Lemma var_dist_prodR (A B : finType) (P : R.-fdist A)
     (Q1 Q2 : R.-fdist B) :
   var_dist (P `x Q1) (P `x Q2) = var_dist Q1 Q2.
@@ -931,9 +1061,9 @@ by rewrite -big_distrl /= FDist.f1 mul1r.
 Qed.
 
 (** pgl27_joint_mixing — the joint secret-and-shuffle law of the 200-letter
-    word run is within 2^-40 of the exact-shuffle joint law.
-    @main security: every observable of the realistic-shuffle run differs
-    from the exact-shuffle one by at most 2^-40 in variation distance. *)
+    word run is within 2^-40 of the exact-shuffle joint law. Every observable
+    of the realistic-shuffle run differs from the exact-shuffle one by at most
+    2^-40 in variation distance. *)
 Lemma pgl27_joint_mixing (secretP : R.-fdist bool) :
   var_dist
     (secretP `x (@rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas Wuni))

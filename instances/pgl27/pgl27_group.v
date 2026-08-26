@@ -60,24 +60,21 @@ Local Definition sc_inv_tbl : seq nat := [:: 0; 5; 3; 1; 6; 4; 2; 7].
 Local Definition tbl_fun (tbl : seq nat) (i : 'I_8) : 'I_8 :=
   Imod (nth 0 tbl i).
 
-(** tr_inj — the translation table defines an injective self-map of 'I_8.
-    @composes: pgl27_gens *)
+(** tr_inj — the translation table defines an injective self-map of 'I_8. *)
 Lemma tr_inj : injective (tbl_fun tr_tbl).
 Proof.
 apply: (can_inj (g := tbl_fun tr_inv_tbl)).
 by move=> x; apply: val_inj; case: x => -[|[|[|[|[|[|[|[|?]]]]]]]] ?.
 Qed.
 
-(** sc_inj — the scaling table defines an injective self-map of 'I_8.
-    @composes: pgl27_gens *)
+(** sc_inj — the scaling table defines an injective self-map of 'I_8. *)
 Lemma sc_inj : injective (tbl_fun sc_tbl).
 Proof.
 apply: (can_inj (g := tbl_fun sc_inv_tbl)).
 by move=> x; apply: val_inj; case: x => -[|[|[|[|[|[|[|[|?]]]]]]]] ?.
 Qed.
 
-(** inv_inj — the inversion table is an involution, hence injective.
-    @composes: pgl27_gens *)
+(** inv_inj — the inversion table is an involution, hence injective. *)
 Lemma inv_inj : injective (tbl_fun inv_tbl).
 Proof.
 apply: (can_inj (g := tbl_fun inv_tbl)).
@@ -89,8 +86,8 @@ Local Definition sc_perm  : {perm 'I_8} := perm sc_inj.
 Local Definition inv_perm : {perm 'I_8} := perm inv_inj.
 
 (** pgl27_gens — the three PGL(2,7) generators translation, scaling and
-    inversion, packaged as the generator tuple of the monodromy.
-    @intent: the generator tuple driving [pgl27_M]. *)
+    inversion, packaged as the generator tuple of the monodromy. The generator
+    tuple driving [pgl27_M]. *)
 Definition pgl27_gens : 3.-tuple {perm 'I_8} :=
   [tuple tr_perm; sc_perm; inv_perm].
 
@@ -99,8 +96,7 @@ Definition pgl27_gens : 3.-tuple {perm 'I_8} :=
    ShuffleMarginalBound needs downstream. *)
 Notation pgl27_M := (@Gen_PGGTypes 2 6 pgl27_gens).
 
-(** pgl27_N' — the deck of [pgl27_M] has eight card positions ('I_8).
-    @composes: pgl27_gens *)
+(** pgl27_N' — the deck of [pgl27_M] has eight card positions ('I_8). *)
 Lemma pgl27_N' : pgg_N' pgl27_M = 7.
 Proof. by []. Qed.
 
@@ -116,23 +112,22 @@ Local Definition inf_pt : 'I_8 := ord_max.
 Local Definition to_F7 (i : 'I_8) : 'F_7 := (val i)%:R.
 Local Definition of_F7 (x : 'F_7) : 'I_8 := widen_ord (isT : (7 <= 8)%N) x.
 
-(** moebius — the Moebius map z |-> (a z + b) / (c z + d) on P^1(F_7),
-    total via the infinity case split.
-    @intent: the matrix-parameterised action of PGL(2,7) on the deck. *)
+(** moebius — the Moebius map z |-> (a z + b) / (c z + d) on P^1(F_7), total
+    via the infinity case split. The matrix-parameterised action of PGL(2,7)
+    on the deck. *)
 Definition moebius (a b c d : 'F_7) (z : 'I_8) : 'I_8 :=
   if z == inf_pt then (if c == 0 then inf_pt else of_F7 (a / c))
   else let x := to_F7 z in let den := c * x + d in
        if den == 0 then inf_pt else of_F7 ((a * x + b) / den).
 
-(** moebius_id — the identity matrix induces the identity map on the deck.
-    @composes: tr_moebius *)
+(** moebius_id — the identity matrix induces the identity map on the deck. *)
 Lemma moebius_id : moebius 1 0 0 1 =1 id.
 Proof.
 by move=> i; apply/val_inj; case: i => -[|[|[|[|[|[|[|[|?]]]]]]]] ?; vm_compute.
 Qed.
 
 (** tr_moebius — the translation generator is the Moebius map z |-> z + 1.
-    @main architecture: identifies the first generator with a PGL(2,7) map. *)
+    Identifies the first generator with a PGL(2,7) map. *)
 Lemma tr_moebius : tr_perm =1 moebius 1 1 0 1.
 Proof.
 by move=> i; rewrite permE; apply/val_inj;
@@ -140,7 +135,7 @@ by move=> i; rewrite permE; apply/val_inj;
 Qed.
 
 (** sc_moebius — the scaling generator is the Moebius map z |-> 3 z.
-    @main architecture: identifies the second generator with a PGL(2,7) map. *)
+    Identifies the second generator with a PGL(2,7) map. *)
 Lemma sc_moebius : sc_perm =1 moebius (3%:R) 0 0 1.
 Proof.
 by move=> i; rewrite permE; apply/val_inj;
@@ -148,16 +143,17 @@ by move=> i; rewrite permE; apply/val_inj;
 Qed.
 
 (** inv_moebius — the inversion generator is the Moebius map z |-> -1/z.
-    @main architecture: identifies the third generator with a PGL(2,7) map. *)
+    Identifies the third generator with a PGL(2,7) map. *)
 Lemma inv_moebius : inv_perm =1 moebius 0 (-1) 1 0.
 Proof.
 by move=> i; rewrite permE; apply/val_inj;
    case: i => -[|[|[|[|[|[|[|[|?]]]]]]]] ?; vm_compute.
 Qed.
 
-(** pgl27_pgl2_order — the abstract PGL(2,7) quotient has order
-    336 = 7*(7^2-1) = 8*7*6, the order of the action on P^1(F_7).
-    @main bound: the machine-checked |PGL(2,7)| = 336. *)
+(** pgl27_pgl2_order — the abstract PGL(2,7) quotient has order 336 =
+    7*(7^2-1) = 8*7*6, the order of the action on P^1(F_7).  This is the
+    abstract order the in-kernel enumeration of the generated permutation
+    group has to match if that group is to be all of PGL(2,7). *)
 Lemma pgl27_pgl2_order : #|pgl2 'F_7| = 336.
 Proof. by rewrite card_pgl2 card_Fp. Qed.
 
@@ -290,8 +286,7 @@ by case=> -> -> ->.
 Qed.
 
 (** pgl27_rho_im — the permutation image of the monodromy morphism is the
-    generated shuffle group itself.
-    @composes: pgl27_3transitive *)
+    generated shuffle group itself. *)
 Lemma pgl27_rho_im :
   (@pgg_rho pgl27_M @* pgg_G pgl27_M)%g = pgg_G pgl27_M.
 Proof. by rewrite morphimEdom imset_id. Qed.
@@ -303,9 +298,8 @@ Proof. by rewrite morphimEdom imset_id. Qed.
 (* -------------------------------------------------------------------------- *)
 
 (** pgl27_3transitive — the PGL(2,7) monodromy group acts 3-transitively on
-    the eight projective points.
-    @main security: the transitivity feeding every coalition-privacy result
-    of the pgl27 instance. *)
+    the eight projective points. The transitivity feeding every
+    coalition-privacy result of the pgl27 instance. *)
 Lemma pgl27_3transitive :
   ntransitive 3 (@pgg_rho pgl27_M @* pgg_G pgl27_M) [set: 'I_8] 'P.
 Proof.

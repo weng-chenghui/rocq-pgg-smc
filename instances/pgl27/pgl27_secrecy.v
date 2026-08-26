@@ -10,6 +10,13 @@
 (* The all-decks results remove the fixed-representative scope limit: the     *)
 (* dealt deck is uniform over ALL valid decks of the class.                   *)
 (*                                                                            *)
+(* Definitions:                                                               *)
+(*   pgl27P           == the joint law of a uniform orbit secret and a        *)
+(*                       uniform PGL(2,7) shuffle                             *)
+(*   pgl27_secret     == the dealt orbit-class secret of a sample             *)
+(*   pgl27_view C     == the cards a coalition C sees, ord0 outside C         *)
+(*   pgl27_leak_coalition == the four heart seats of the identity deal        *)
+(*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_view_indep == the PGL(2,7) coalition view independence at three    *)
 (*     cards                                                                  *)
@@ -55,25 +62,23 @@ Local Open Scope proba_scope.
 Variable R : realType.
 
 (** pgl27P == the joint law of a uniform orbit secret and a uniform PGL(2,7)
-    shuffle.
-    @intent: the joint sample space of the eight-card orbit scheme. *)
+    shuffle. The joint sample space of the eight-card orbit scheme. *)
 Definition pgl27P : R.-fdist (bool * pgg_gT pgl27_M)%type :=
   (fdist_uniform card_bool) `x (`U pgl27_G_pos).
 
-(** pgl27_secret == the dealt orbit-class secret component of a sample.
-    @intent: the orbit-secret random variable. *)
+(** pgl27_secret == the dealt orbit-class secret component of a sample. The
+    orbit-secret random variable. *)
 Definition pgl27_secret : {RV pgl27P -> bool} := fun u => u.1.
 
 (** pgl27_view == the dealt card values a coalition C observes at a sample,
-    and ord0 outside C.
-    @intent: the coalition observable random variable. *)
+    and ord0 outside C. The coalition observable random variable. *)
 Definition pgl27_view (C : {set 'I_8}) : {RV pgl27P -> {ffun 'I_8 -> 'I_8}} :=
   fun u => [ffun i => if i \in C then
               tnth (orbit_encode u.1) (@pgg_rho pgl27_M u.2 i) else ord0].
 
 (** pgl27_view_indep == any coalition of at most three cards has a view of the
-    shuffled dealt arrangement independent of the orbit secret.
-    @main security: instance coalition view independence from the bridge. *)
+    shuffled dealt arrangement independent of the orbit secret. Instance
+    coalition view independence from the bridge. *)
 Lemma pgl27_view_indep (C : {set 'I_8}) : (#|C| <= 3)%N ->
   pgl27P |= pgl27_view C _|_ pgl27_secret.
 Proof.
@@ -86,10 +91,10 @@ Qed.
 Local Open Scope ring_scope.
 Local Open Scope entropy_scope.
 
-(** pgl27_view_leakage_le == the mutual information a coalition shares with the
-    orbit secret is monotone under coalition inclusion, for every coalition
-    size including above the privacy threshold.
-    @main bound: instance leakage is monotone in the observed position set. *)
+(** pgl27_view_leakage_le == the mutual information a coalition shares with
+    the orbit secret is monotone under coalition inclusion, for every
+    coalition size including above the privacy threshold. Instance leakage is
+    monotone in the observed position set. *)
 Lemma pgl27_view_leakage_le (C C' : {set 'I_8}) : C' \subset C ->
   `I(pgl27_secret ; pgl27_view C') <= `I(pgl27_secret ; pgl27_view C).
 Proof.
@@ -100,15 +105,14 @@ exact: (@coalition_view_mutual_info_le (pgg_N' pgl27_M) (pgg_gT pgl27_M)
 Qed.
 
 (** pgl27_leak_coalition == the four heart seats, the positions carrying a
-    card of code below four in the identity deal.
-    @intent: the size-four coalition witnessing sharpness of the privacy
-    threshold three. *)
+    card of code below four in the identity deal. The size-four coalition
+    witnessing sharpness of the privacy threshold three. *)
 Definition pgl27_leak_coalition : {set 'I_8} := [set i | (val i < 4)%N].
 
 (** pgl27_view_dep_k4 == a four-card coalition whose view of the shuffled
-    dealt arrangement is not independent of the orbit secret.
-    @main security: the privacy threshold three is sharp, a coalition of four
-    cards already depends on the orbit secret. *)
+    dealt arrangement is not independent of the orbit secret. The privacy
+    threshold three is sharp, a coalition of four cards already depends on the
+    orbit secret. *)
 Lemma pgl27_view_dep_k4 :
   #|pgl27_leak_coalition| = 4 /\
   ~ pgl27P |= pgl27_secret _|_ pgl27_view pgl27_leak_coalition.
@@ -182,9 +186,9 @@ by move/lt0r_neq0; rewrite eqxx.
 Qed.
 
 (** pgl27_view_leak_k4 == a four-card coalition sharing strictly positive
-    mutual information with the orbit secret.
-    @main security: above the privacy threshold three the coalition view of
-    the shuffled dealt arrangement leaks the orbit secret. *)
+    mutual information with the orbit secret. Above the privacy threshold
+    three the coalition view of the shuffled dealt arrangement leaks the orbit
+    secret. *)
 Lemma pgl27_view_leak_k4 :
   #|pgl27_leak_coalition| = 4 /\
   0 < `I(pgl27_secret ; pgl27_view pgl27_leak_coalition).
@@ -195,9 +199,8 @@ apply/eqP => HI0.
 exact: (proj2 pgl27_view_dep_k4) (mutual_info_RV0_indep HI0).
 Qed.
 
-(** pgl27_class_decks_pos — both orbit classes are realised by valid decks,
-    so each class-conditional uniform deck law is well defined.
-    @composes: pgl27_view_indep_alldecks *)
+(** pgl27_class_decks_pos — both orbit classes are realised by valid decks, so
+    each class-conditional uniform deck law is well defined. *)
 Lemma pgl27_class_decks_pos (s : bool) :
   (0 < #|class_decks orbit_class deck_ok s|)%N.
 Proof.
@@ -208,7 +211,7 @@ Qed.
 (** pgl27_view_indep_alldecks — a dealer dealing a uniform valid deck of the
     secret's class followed by the uniform PGL(2,7) shuffle gives every
     coalition of at most three cards a view independent of the orbit secret.
-    @main security: all-decks dealer coalition privacy at three cards. *)
+    All-decks dealer coalition privacy at three cards. *)
 Lemma pgl27_view_indep_alldecks (C : {set 'I_8}) : (#|C| <= 3)%N ->
   alldecksP (fdist_uniform card_bool) pgl27_G_pos (R:=R) pgl27_class_decks_pos
   |= alldecks_view (@pgg_rho pgl27_M) (fdist_uniform card_bool) pgl27_G_pos
@@ -224,8 +227,8 @@ Qed.
 
 (** pgl27_view_indep_deck — a dealer dealing a uniform valid deck of the
     secret's class gives, with no further shuffle, every coalition of at most
-    three cards a view independent of the orbit secret.
-    @main security: representative-free all-decks privacy at three cards. *)
+    three cards a view independent of the orbit secret. Representative-free
+    all-decks privacy at three cards. *)
 Lemma pgl27_view_indep_deck (C : {set 'I_8}) : (#|C| <= 3)%N ->
   uniform_deckP (fdist_uniform card_bool) (R:=R) pgl27_class_decks_pos
   |= uniform_deck_view (fdist_uniform card_bool) pgl27_class_decks_pos C
@@ -242,9 +245,7 @@ Qed.
 (** pgl27_view_indep_deck_prior — for every secret prior, a dealer dealing a
     uniform valid deck of the secret's class gives, with no further shuffle,
     every coalition of at most three cards a view independent of the secret.
-    @main security: prior-free representative-free all-decks privacy.
-    Naming: extends pgl27_view_indep_deck with the prior parameter; the
-    shared prefix is kept for symmetry with that lemma family. *)
+    Prior-free representative-free all-decks privacy. *)
 Lemma pgl27_view_indep_deck_prior (secretP : R.-fdist bool)
     (C : {set 'I_8}) : (#|C| <= 3)%N ->
   uniform_deckP secretP (R:=R) pgl27_class_decks_pos
@@ -258,16 +259,15 @@ exact: (ttrans_view_indep_deck pgl27_3transitive secretP pgl27_G_pos
   pgl27_class_decks_pos HC).
 Qed.
 
-(** pgl27_decks_pos — the valid decks form a nonempty set.
-    @composes: pgl27_deck_marginal *)
+(** pgl27_decks_pos — the valid decks form a nonempty set. *)
 Lemma pgl27_decks_pos : (0 < #|[set sh : 8.-tuple 'I_8 | deck_ok sh]|)%N.
 Proof.
 by apply/card_gt0P; exists (orbit_encode false); rewrite inE orbit_encode_deck.
 Qed.
 
 (** pgl27_deck_marginal — at the class-proportional prior the dealt-deck
-    marginal of the shuffle-free dealer is uniform over all valid decks.
-    @main security: the uniform-over-valid-decks reading of the dealer. *)
+    marginal of the shuffle-free dealer is uniform over all valid decks. The
+    uniform-over-valid-decks reading of the dealer. *)
 Lemma pgl27_deck_marginal (secretP : R.-fdist bool) :
   (forall s : bool,
      secretP s = #|class_decks orbit_class deck_ok s|%:R

@@ -111,18 +111,18 @@ Let mpP : MonodromyProfile := pgl27_profile.
    prior, with cut distribution pgl27_word_cut_distE. The two models below fix
    the dealt secret and randomise the cut alone. *)
 
-(** pgl27_fixed_sample — the exact model at a fixed secret.
-    @intent: the sample layer over pgl27_exec_plug whose sample space is the
-    group pgg_gT pgl27_M under the uniform distribution, the run argument the
-    constant s and the cut the sampled group element. *)
+(** pgl27_fixed_sample — the exact model at a fixed secret. The sample layer
+    over pgl27_exec_plug whose sample space is the group pgg_gT pgl27_M under
+    the uniform distribution, the run argument the constant s and the cut the
+    sampled group element. *)
 Definition pgl27_fixed_sample (s : bool) : SampleAdapter R pgl27_exec_plug :=
   @MkSampleAdapter R mpP pgl27_exec_plug
     (pgg_gT pgl27_M : finType) (`U pgl27_G_pos) (fun _ => s) idfun.
 
-(** pgl27_fixed_word_sample — the word model at a fixed secret.
-    @intent: the sample layer over pgl27_exec_plug whose sample space is the
-    two-hundred-letter words under pgl27_word_wordP, the run argument the
-    constant s and the cut the evaluated word. *)
+(** pgl27_fixed_word_sample — the word model at a fixed secret. The sample
+    layer over pgl27_exec_plug whose sample space is the two-hundred-letter
+    words under pgl27_word_wordP, the run argument the constant s and the cut
+    the evaluated word. *)
 Definition pgl27_fixed_word_sample (s : bool)
     : SampleAdapter R pgl27_exec_plug :=
   @MkSampleAdapter R mpP pgl27_exec_plug
@@ -130,16 +130,18 @@ Definition pgl27_fixed_word_sample (s : bool)
     (fun w => @word_eval pgl27_Msym 200 w).
 
 (** pgl27_fixed_cut_distE — the fixed-secret exact model draws its cut
-    uniformly from the group.
-    @main architecture: sa_cut_dist (pgl27_fixed_sample s) = `U pgl27_G_pos. *)
+    uniformly from the group.  Fixing the dealt secret leaves the cut as the
+    model's only randomness, which is what a two-secret indistinguishability
+    statement needs. *)
 Lemma pgl27_fixed_cut_distE (s : bool) :
   @sa_cut_dist R mpP pgl27_exec_plug (pgl27_fixed_sample s)
   = (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)).
 Proof. rewrite /sa_cut_dist /=; exact: fdistmap_id. Qed.
 
 (** pgl27_fixed_word_cut_distE — the fixed-secret word model draws its cut
-    from the word shuffle.
-    @main architecture: sa_cut_dist (pgl27_fixed_word_sample s) = rho_word R. *)
+    from the word shuffle.  Fixing the dealt secret leaves the word shuffle as
+    the model's only randomness, and that law is the one the mixing
+    certificate bounds. *)
 Lemma pgl27_fixed_word_cut_distE (s : bool) :
   @sa_cut_dist R mpP pgl27_exec_plug (pgl27_fixed_word_sample s)
   = rho_word R.
@@ -148,8 +150,7 @@ by rewrite /sa_cut_dist /rho_word /rho_from_words_weighted /pgl27_word_wordP.
 Qed.
 
 (** pgl27_word_rho_wordE — the image of the word distribution under word
-    evaluation is the word shuffle.
-    @composes: pgl27_fixed_word_content_trace_distE *)
+    evaluation is the word shuffle. *)
 Lemma pgl27_word_rho_wordE :
   fdistmap (fun w : 200.-tuple 'I_5 => @word_eval pgl27_Msym 200 w)
     (pgl27_word_wordP R) = rho_word R.
@@ -160,14 +161,10 @@ Proof. exact: (pgl27_fixed_word_cut_distE false). Qed.
 (******************************************************************************)
 
 (** pgl27_exec_content_trace — the coalition's executed trace read through
-    content_of.
-    @intent: the finfun sending a seat in C to the content of that seat's
-    executed interpreter row and every seat outside C to ord0.
-    Naming: intentional; _content_trace names the content reading of the
-    executed trace, matching content_of and pgl27_coalition_trace, and the seat
-    index type of the profile is 'I_8 by pgl27_exec_seat_countE, so no
-    transport appears between the execution layer and the eight-seat coalition
-    view. *)
+    content_of: the finfun sending a seat in C to the content of that seat's
+    executed interpreter row, and every seat outside C to ord0.  The profile's
+    seat index type is 'I_8, the same as the coalition view's, so no transport
+    stands between the execution layer and the eight-seat view. *)
 Definition pgl27_exec_content_trace (C : {set 'I_8}) (s : bool)
     (w0 : pgg_gT pgl27_M) : {ffun 'I_8 -> 'I_8} :=
   [ffun i => if i \in C
@@ -176,8 +173,7 @@ Definition pgl27_exec_content_trace (C : {set 'I_8}) (s : bool)
              else ord0].
 
 (** pgl27_exec_rowE — the executed participant trace at seat i is the
-    interpreter row of pgl27_procs at process 2 + i.
-    @composes: pgl27_content_traceE *)
+    interpreter row of pgl27_procs at process 2 + i. *)
 Lemma pgl27_exec_rowE (s : bool) (w0 : pgg_gT pgl27_M) (i : 'I_8) :
   @exec_participant_trace mpP pgl27_exec_plug s w0 0 i
   = nth [::] (run_interp pgl27_fuel (pgl27_procs s w0)).2 (2 + i).
@@ -191,9 +187,10 @@ exact: (pgl27_exec_raw_traceE s w0 i).
 Qed.
 
 (** pgl27_content_traceE — the executed content reader is the coalition trace
-    random variable.
-    @main architecture: pgl27_exec_content_trace C u.1 u.2 =
-    pgl27_coalition_trace R C u. *)
+    random variable.  What a coalition's interpreter rows actually contain is
+    the static coalition trace, so the entropy and variation-distance
+    statements proved about that random variable are statements about the
+    executed run. *)
 Lemma pgl27_content_traceE (C : {set 'I_8}) (u : bool * pgg_gT pgl27_M) :
   pgl27_exec_content_trace C u.1 u.2 = pgl27_coalition_trace R C u.
 Proof.
@@ -213,9 +210,9 @@ Qed.
 (******************************************************************************)
 
 (** pgl27_static_coalition_viewE — the executed coalition endpoints are the
-    static coalition view.
-    @main architecture: exec_coalition_endpoints s w0 0 C = pgl27_view R C
-    (s, w0). *)
+    static coalition view.  The endpoints the execution layer collects for a
+    coalition are the observable every privacy statement of this family is
+    proved about. *)
 Lemma pgl27_static_coalition_viewE (C : {set 'I_8}) (s : bool)
     (w0 : pgg_gT pgl27_M) :
   @exec_coalition_endpoints mpP pgl27_exec_plug s w0 0 C
@@ -234,11 +231,9 @@ Qed.
 
 (** pgl27_fixed_word_coalition_distE — the executed coalition distribution of
     the fixed-secret word model is the pushforward of the word shuffle along
-    the static view at secret s.
-    @main architecture: sa_coalition_dist (pgl27_fixed_word_sample s) 0 C =
-    fdistmap (fun g => pgl27_view R C (s, g)) (rho_word R).
-    Naming: intentional; _coalition_distE names the coalition distribution
-    equation, and the _fixed_word_ infix names the model it is stated at. *)
+    the static view at secret s.  A variation-distance bound between two
+    static views at two secrets is therefore a bound between two executed
+    coalition distributions. *)
 Lemma pgl27_fixed_word_coalition_distE (C : {set 'I_8}) (s : bool) :
   @sa_coalition_dist R mpP pgl27_exec_plug (pgl27_fixed_word_sample s) 0 C
   = fdistmap (fun g => pgl27_view R C (s, g)) (rho_word R).
@@ -258,13 +253,8 @@ Qed.
 
 (** pgl27_fixed_word_content_trace_distE — the executed content trace of the
     fixed-secret word model has the distribution of the coalition trace under
-    the word shuffle.
-    @main architecture: fdistmap (fun w => pgl27_exec_content_trace C s
-    (word_eval w)) (pgl27_word_wordP R) = fdistmap (fun g =>
-    pgl27_coalition_trace R C (s, g)) (rho_word R).
-    Naming: intentional; _content_trace_distE names the distribution equation
-    of the content reader, and the _fixed_word_ infix names the model it is
-    stated at. *)
+    the word shuffle.  The same transfer as for the endpoints, for the reader
+    that goes through the interpreter rows instead. *)
 Lemma pgl27_fixed_word_content_trace_distE (C : {set 'I_8}) (s : bool) :
   fdistmap (fun w : 200.-tuple 'I_5 =>
               pgl27_exec_content_trace C s (@word_eval pgl27_Msym 200 w))
@@ -285,11 +275,9 @@ by rewrite pgl27_word_rho_wordE.
 Qed.
 
 (** pgl27_word_joint_viewE — the joint executed view-and-secret distribution
-    over the arbitrary-prior word sample is the static joint distribution
-    pgl27_view_mixing is stated at.
-    @main architecture: fdistmap (fun u => (exec_coalition_endpoints u.1
-    (word_eval u.2) 0 C, u.1)) (pgl27_word_sampleP secretP) = fdistmap (fun v
-    => (pgl27_view R C v, pgl27_secret R v)) (pgl27P_word_gen secretP). *)
+    over the arbitrary-prior word sample is the static joint distribution the
+    mixing theorem is stated at.  The joint law, not only the two marginals,
+    is carried across, which is what an independence statement needs. *)
 Lemma pgl27_word_joint_viewE (secretP : R.-fdist bool) (C : {set 'I_8}) :
   fdistmap (fun u : bool * 200.-tuple 'I_5 =>
               (@exec_coalition_endpoints mpP pgl27_exec_plug u.1
@@ -323,9 +311,9 @@ Qed.
 (******************************************************************************)
 
 (** pgl27_exec_view_indist — two fixed secrets give executed coalition
-    distributions within 2^-39 in variation distance, at three cards.
-    @main security: the word-shuffle coalition-privacy bound stated over the
-    executed sample layer. *)
+    distributions within 2^-39 in variation distance, at three cards. The
+    word-shuffle coalition-privacy bound stated over the executed sample
+    layer. *)
 Lemma pgl27_exec_view_indist (C : {set 'I_8}) (s s' : bool) : (#|C| <= 3)%N ->
   var_dist
     (@sa_coalition_dist R mpP pgl27_exec_plug
@@ -341,9 +329,9 @@ exact: pgl27_word_view_indist.
 Qed.
 
 (** pgl27_exec_trace_indist — two fixed secrets give executed content-trace
-    distributions within 2^-39 in variation distance, at three cards.
-    @main security: the word-shuffle trace-privacy bound stated over the
-    executed content reader. *)
+    distributions within 2^-39 in variation distance, at three cards. The
+    word-shuffle trace-privacy bound stated over the executed content
+    reader. *)
 Lemma pgl27_exec_trace_indist (C : {set 'I_8}) (s s' : bool) : (#|C| <= 3)%N ->
   var_dist
     (fdistmap (fun w : 200.-tuple 'I_5 =>
@@ -361,9 +349,9 @@ exact: pgl27_word_trace_indist.
 Qed.
 
 (** pgl27_exact_coalition_distE — the exact model's executed coalition
-    distribution is the pushforward of pgl27P along the static view.
-    @main architecture: sa_coalition_dist (pgl27_sample R) 0 C = fdistmap
-    (pgl27_view R C) (pgl27P R). *)
+    distribution is the pushforward of pgl27P along the static view.  The
+    coalition independence proved at the static layer is thereby a statement
+    about the executed exact model. *)
 Lemma pgl27_exact_coalition_distE (C : {set 'I_8}) :
   @sa_coalition_dist R mpP pgl27_exec_plug (pgl27_sample R) 0 C
   = fdistmap (pgl27_view R C) (pgl27P R).
@@ -374,11 +362,8 @@ Qed.
 
 (** pgl27_exec_exact_view_indep — at three cards the executed coalition
     observation of the exact model and the orbit secret have a product joint
-    distribution.
-    @main security: pgl27_view_indep read over the executed sample layer.
-    Naming: intentional; _view_indep names the independence of the coalition
-    view from the secret, matching pgl27_view_indep, and the _exec_exact_ infix
-    names the layer and the model it is read at. *)
+    distribution.  This is pgl27_view_indep read over the executed sample
+    layer. *)
 Corollary pgl27_exec_exact_view_indep (C : {set 'I_8}) : (#|C| <= 3)%N ->
   fdistmap (fun u => (pgl27_view R C u, pgl27_secret R u)) (pgl27P R)
   = ((@sa_coalition_dist R mpP pgl27_exec_plug (pgl27_sample R) 0 C)
@@ -399,13 +384,12 @@ Let pow2_split : (2%:R : R)^-40 + 2%:R^-40 = 2%:R^-39.
 Proof. by rewrite [RHS]splitr exprSr invfM. Qed.
 
 (** pgl27_word_view_indist_via_transfer — under the two-hundred-letter word
-    shuffle the coalition-view distributions of two secrets are within 2^-39 in
-    variation distance, for every coalition of at most three positions.
-    @main security: statistical coalition privacy under the realistic shuffle,
-    obtained as an instance of var_dist_fdistmap_transfer.
-    Naming: intentional; the suffix records the derivation, not the statement:
-    the statement is pgl27_word_view_indist verbatim and _via_transfer
-    distinguishes this derivation from the theorem it reproduces. *)
+    shuffle the coalition-view distributions of two secrets are within 2^-39
+    in variation distance, for every coalition of at most three positions.
+    Statistical coalition privacy under the realistic shuffle, obtained as an
+    instance of var_dist_fdistmap_transfer.  The statement is that of
+    pgl27_word_view_indist verbatim; only the route differs, which is what
+    exercises the generic transfer bound at a real instance. *)
 Corollary pgl27_word_view_indist_via_transfer (C : {set 'I_8}) (s s' : bool) :
   (#|C| <= 3)%N ->
   var_dist (fdistmap (fun g => pgl27_view R C (s, g)) (rho_word R))
@@ -426,17 +410,16 @@ End pgl27_sample_models.
 (*     The typed model families of the eight-card orbit analysis paths        *)
 (******************************************************************************)
 
-(** pgl27_exact_family — the exact-shuffle model as a unit-indexed family.
-    @intent: the AnalysisModelFamily over pgl27_observed whose one member at
-    every real field is pgl27_sample. *)
+(** pgl27_exact_family — the exact-shuffle model as a unit-indexed family. The
+    AnalysisModelFamily over pgl27_observed whose one member at every real
+    field is pgl27_sample. *)
 Definition pgl27_exact_family : AnalysisModelFamily pgl27_observed :=
   @MkAnalysisModelFamily pgl27_observed (fun _ => unit)
     (fun R _ => pgl27_sample R).
 
 (** pgl27_word_family — the two-hundred-letter word model family, indexed by
-    the secret prior.
-    @intent: the AnalysisModelFamily over pgl27_observed sending a secret
-    prior to pgl27_word_sample at that prior. *)
+    the secret prior. The AnalysisModelFamily over pgl27_observed sending a
+    secret prior to pgl27_word_sample at that prior. *)
 Definition pgl27_word_family : AnalysisModelFamily pgl27_observed :=
   @MkAnalysisModelFamily pgl27_observed (fun R => R.-fdist bool)
     (fun R p => @pgl27_word_sample R p).
