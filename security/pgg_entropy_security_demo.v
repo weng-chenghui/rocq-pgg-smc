@@ -151,12 +151,24 @@ End monster_short_L.
 (*  theory kernel for terms involving {perm 'I_N} and log over reals.       *)
 (******************************************************************************)
 
-(* Axiom: H(P_s) >= log 2 for all sheets of OC(2,3) at L=2.
-   Verified by permutation enumeration (see comment block above).
-   Sheets 0,2,3: pe_inj holds -> H = log 4 >= log 2.
-   Sheet 1: fibers = (2,0,0,2) -> H = log 4 - (1/4)(2*log 2 + 2*log 2)
-            = log 4 - log 2 = log 2 >= log 2.
-   Source: pgg_security_demo.v computes fiber_eps_nat for OC at L=2. *)
+(* Computational-verification axiom.  Evidence: the fiber_eps_scan
+   vm_compute enumeration of oc_desc 2 3 in security/pgg_security_demo.v,
+   cross-checkable outside Rocq by the four-permutation GAP/SageMath script
+   in the block above.  Not kernel-proved: the reduction needs #|imset| over
+   {perm 'I_4} together with log over the reals. *)
+
+(* Every sheet of the OC(2,3) endpoint distribution at L = 2 carries at
+   least one bit, log 2 <= H(P_s) for each of the four sheets.  The bound is
+   attained, so it cannot be improved: sheet 1's four length-2 words land on
+   endpoints {0,3,0,3}, fiber sizes (2,0,0,2), giving H = log 4 - log 2 =
+   log 2, while the endpoint maps of sheets 0, 2 and 3 are injective and
+   reach log 4.
+
+   This is the entropy input the OC demo's security witness is built on.
+   security_witness_from_entropy converts a per-sheet entropy floor into a
+   marginal bound, and a floor is the right shape of hypothesis because a
+   coalition chooses which sheet to watch: what it learns about the dealt
+   position is capped by the worst sheet, never by the average. *)
 Axiom oc_entropy_bound_axiom : forall (R : realType) (s : 'I_4),
   (log 2%:R <=
    `H (fdistmap (fun sigma : {perm 'I_4} => sigma s)
