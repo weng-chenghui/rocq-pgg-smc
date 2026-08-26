@@ -33,19 +33,20 @@ Hypothesis N_pos : (0 < N)%N.
 Definition prescribed (k : nat) (s v : 'I_k -> 'I_N) : {set {perm 'I_N}} :=
   [set sigma : {perm 'I_N} | [forall i, sigma (s i) == v i]].
 
-(** prescribedP — reflection view for prescribed-set membership.
-    Kind: canonical.
-    Statement: sigma \in prescribed s v iff forall i, sigma (s i) = v i. *)
+(** Membership in prescribed s v is exactly agreement with v at each of the
+    k coordinates named by s. This reflection view is what lets the counting
+    arguments below manipulate membership as elementwise equalities instead
+    of as a boolean predicate. *)
 Lemma prescribedP k (s v : 'I_k -> 'I_N) (sigma : {perm 'I_N}) :
   reflect (forall i, sigma (s i) = v i) (sigma \in prescribed s v).
 Proof.
 rewrite inE; apply: (iffP forallP) => H i; by [apply/eqP | apply/eqP].
 Qed.
 
-(** prescribed0 — the empty prescription is trivially satisfied.
-    Kind: helper.
-    Why: base case of the k-transitivity induction in Sn_k_transitive.
-    Used by: Sn_k_transitive. *)
+(** With zero coordinates named, the prescription is vacuous: every
+    permutation satisfies it, so prescribed s v is the whole symmetric
+    group. This is the k = 0 floor of the counting layer, where the
+    conditioning event carries no constraint yet. *)
 Lemma prescribed0 (s v : 'I_0 -> 'I_N) : prescribed s v = [set: {perm 'I_N}].
 Proof.
 apply/setP => sigma; rewrite inE in_setT.
@@ -154,20 +155,22 @@ Definition s_ext (s_new : 'I_N) : 'I_k.+1 -> 'I_N :=
            | None => s_new
            end.
 
-(** v_ext — extend an indexed family v : 'I_k -> 'I_N by one more value.
-    Kind: helper.
-    Why: mirrors s_ext so prescribed-set extensions can be stated uniformly.
-    Used by: prescribed_extend, prescribed_value_count. *)
+(** v_ext v_new sends the top index to v_new and agrees with v elsewhere via
+    the unlift/lift correspondence, extending the k-tuple v to a (k+1)-tuple.
+    Paired with s_ext, this recasts "one more prescribed value" as an
+    ordinary (k+1)-coordinate prescription, the shape the induction step of
+    the counting argument needs. *)
 Definition v_ext (v_new : 'I_N) : 'I_k.+1 -> 'I_N :=
   fun i => match unlift ord_max i with
            | Some j => v j
            | None => v_new
            end.
 
-(** s_ext_inj — injectivity is preserved when extending s by a fresh value.
-    Kind: helper.
-    Why: feeds the k+1 step of card_prescribed via prescribed_extend.
-    Used by: prescribed_value_count. *)
+(** s_ext s_new stays injective whenever s is injective and s_new falls
+    outside s's image: the freshness hypothesis is exactly what keeps the
+    extended (k+1)-tuple injective. This supplies the injectivity hypothesis
+    card_prescribed needs at k+1, so extending the prescription by one fresh
+    coordinate stays inside the counting lemma's domain. *)
 Lemma s_ext_inj (s_new : 'I_N) :
   injective s -> s_new \notin s @: setT ->
   injective (s_ext s_new).
@@ -183,10 +186,10 @@ case: (unliftP ord_max i) => [i' ->|->];
   by rewrite negbK; apply/imsetP; exists j'; rewrite ?inE.
 Qed.
 
-(** v_ext_inj — injectivity is preserved when extending v by a fresh value.
-    Kind: helper.
-    Why: paired with s_ext_inj to discharge the k+1 step of card_prescribed.
-    Used by: prescribed_value_count. *)
+(** v_ext v_new stays injective whenever v is injective and v_new falls
+    outside v's image, by the same freshness argument as s_ext_inj. Paired
+    with it, this supplies both injectivity hypotheses card_prescribed needs
+    at k+1. *)
 Lemma v_ext_inj (v_new : 'I_N) :
   injective v -> v_new \notin v @: setT ->
   injective (v_ext v_new).
@@ -266,17 +269,15 @@ Context {R : realType}.
 Variable N_minus_1 : nat.
 Let N := N_minus_1.+1.
 
-(** N_pos — positivity of the ambient size N used in the probabilistic layer.
-    Kind: helper.
-    Why: several fdist constructions below need 0 < N.
-    Used by: Pr_prescribed, perm_cond_uniform. *)
+(** N is N_minus_1.+1, so positivity holds by construction. It records that
+    the permutation domain is non-degenerate; the uniform law below is built
+    from card_permT_N, which supplies its own positivity witness. *)
 Lemma N_pos : (0 < N)%N. Proof. by []. Qed.
 
-(** card_permT_N — the symmetric group S_N has N! elements, written (N!-1).+1 to
-    expose positivity.
-    Kind: helper.
-    Why: needed as the cardinality hypothesis for fdist_uniform over {perm 'I_N}.
-    Used by: perm_fdist definition, Pr_prescribed, perm_cond_uniform. *)
+(** #|{perm 'I_N}| equals N!, restated as (N`!.-1).+1 so the positivity is
+    visible in the term itself rather than a separate side condition. This
+    is the cardinality witness fdist_uniform needs to build perm_fdist, the
+    dealer's uniform law over permutations of 'I_N. *)
 Lemma card_permT_N : #|{perm 'I_N}| = (N`!.-1).+1.
 Proof.
 transitivity (#|perm_on [set: 'I_N]|).
@@ -307,10 +308,11 @@ set c := (#|{perm 'I_N}|%:R^-1 : R)%R.
 by rewrite -[LHS]mulr_natr mulrC /c card_permT_N prednK ?fact_gt0.
 Qed.
 
-(** Pr_prescribed_ne0 — the prescribed event has positive probability.
-    Kind: helper.
-    Why: needed to avoid division-by-zero in the conditional-probability rewrites.
-    Used by: perm_cond_uniform. *)
+(** Pr perm_fdist obs_set is nonzero, since both (N - k)! and N! are
+    positive factorials. This nonvanishing is what keeps the conditional
+    probability `Pr_perm_fdist[ target | obs_set ]` a genuine ratio rather
+    than a division by zero when the argument passes from the joint count to
+    the conditional law. *)
 Lemma Pr_prescribed_ne0 : Pr perm_fdist obs_set != (0 : R)%R.
 Proof.
 rewrite Pr_prescribed mulf_neq0 //.
@@ -373,10 +375,10 @@ Qed.
 (* The remaining values are exactly ~: (v @: setT) *)
 Definition remaining_values : {set 'I_N} := ~: (v @: setT).
 
-(** card_remaining — the complement of v's image has cardinality N - k.
-    Kind: helper.
-    Why: identifies the support of the uniform conditional distribution.
-    Used by: collusion_uniform, external collusion-bound proofs. *)
+(** The complement of v's image among 'I_N has cardinality N - k: exactly
+    the k already-revealed values are excluded. remaining_values is the
+    support the colluders' posterior spreads over once those k values are
+    known, which is what collusion_uniform below states is uniform. *)
 Lemma card_remaining : #|remaining_values| = (N - k)%N.
 Proof.
 rewrite /remaining_values.
@@ -389,10 +391,12 @@ rewrite Hvi card_ord.
 by move/(congr1 (subn^~ k)); rewrite addKn.
 Qed.
 
-(** collusion_uniform — main statement of Proposition 4 on the uniform face.
-    Kind: main.
-    Why: the colluders' posterior on a fresh coordinate is uniform over remaining
-    values, which is the core security ingredient for the collusion bound. *)
+(** Conditioned on obs_set, the event that a fresh coordinate s_new maps to
+    a value v_new not yet assigned has probability exactly (N - k)^-1: the
+    colluders' posterior on any one remaining value is uniform. This is the
+    dealer-randomness guarantee the collusion bound needs: having observed k
+    coordinate assignments, a coalition learns nothing that favors one
+    unused value over another. *)
 Lemma collusion_uniform (s_new : 'I_N) (v_new : 'I_N) :
   s_new \notin s @: setT ->
   v_new \in remaining_values ->
@@ -403,10 +407,11 @@ move=> Hs Hv; apply: perm_cond_uniform => //.
 by move: Hv; rewrite inE.
 Qed.
 
-(** collusion_zero — zero-probability face of Proposition 4 for used values.
-    Kind: main.
-    Why: complements collusion_uniform: colluders assign probability zero to any
-    already-revealed value. *)
+(** Conditioned on obs_set, the event that a fresh coordinate s_new maps to
+    a value v_new already assigned to some earlier coordinate has
+    probability zero. Together with collusion_uniform, this pins down the
+    posterior completely: uniform on the N - k unused values, zero on the k
+    already revealed ones. *)
 Lemma collusion_zero (s_new : 'I_N) (v_new : 'I_N) :
   s_new \notin s @: setT ->
   v_new \notin remaining_values ->

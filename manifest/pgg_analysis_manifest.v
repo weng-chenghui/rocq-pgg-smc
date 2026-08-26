@@ -53,17 +53,17 @@
 (* covers the public results of the path, not only the values the row stores. *)
 (*                                                                            *)
 (* (2) Completion levels are cumulative and are stated at the level the       *)
-(* theorems actually reach. Since the user-approved 2026-08-13 amendment the  *)
-(* S_5 and S_5 x S_5 word and limitation rows are AnalysisBridged: their      *)
-(* executed theorems are stated at sa_seat_dist of the interpreter-executed   *)
-(* finite-word adapter, against the encoder-image ideals, next to the kept    *)
-(* cut-level results at the sheet-endpoint reader of the word-cut             *)
-(* distribution. The Abelian limitation row is AnalysisBridged for its        *)
-(* distance-one theorem at the two adapters' own executed observation.        *)
+(* theorems actually reach. The S_5 and S_5 x S_5 word and limitation rows    *)
+(* are AnalysisBridged: their executed theorems are stated at sa_seat_dist    *)
+(* of the interpreter-executed finite-word adapter, against the               *)
+(* encoder-image ideals, next to the kept cut-level results at the            *)
+(* sheet-endpoint reader of the word-cut distribution. The Abelian limitation *)
+(* row is AnalysisBridged for its distance-one theorem at the two adapters'   *)
+(* own executed observation.                                                 *)
 (*                                                                            *)
 (* (3) A capability line uses the narrowest label the theorem statement       *)
-(* supports, from the list of section 11 of the request: correctness, exact   *)
-(* privacy, approximate privacy, trace secrecy, conditional entropy, mutual   *)
+(* supports, from the closed vocabulary correctness, exact privacy,           *)
+(* approximate privacy, trace secrecy, conditional entropy, mutual            *)
 (* information, endpoint marginal mixing, negative mixing result, anonymity   *)
 (* or privacy limitation. A theorem conditional on the trusted analytical     *)
 (* certificate s5_rayleigh_Q2_R is described as conditional in every          *)
@@ -849,10 +849,10 @@ Local Open Scope ring_scope.
 (* | exec_pile1_floor_gt0 | sa_seat_dist of word_sample | the executed        *)
 (*     observer | executed negative result in the same regime |               *)
 (*                                                                            *)
-(* Level justification. Since the 2026-08-13 amendment the row reaches        *)
-(* AnalysisBridged: exec_pile1_floor is stated at sa_seat_dist of the         *)
-(* interpreter-executed finite-word adapter, the row's own executed           *)
-(* observer. The transported obstruction is the encoder-image pile ideal's    *)
+(* Level justification. The row reaches AnalysisBridged: exec_pile1_floor is  *)
+(* stated at sa_seat_dist of the interpreter-executed finite-word adapter,    *)
+(* the row's own executed observer. The transported obstruction is the       *)
+(* encoder-image pile ideal's                                                *)
 (* SUPPORT CONFINEMENT, the deterministic encoder confining the ideal to the  *)
 (* pile's five of ten values; it is not a spectral mixing failure, and the    *)
 (* executed floor also holds unconditionally with constant one by the same    *)
@@ -1030,9 +1030,9 @@ Local Open Scope ring_scope.
 (* | executed_distance | the same two cut distributions                       *)
 (*   | endpoint_vector | negative mixing result, full-L1 distance one |       *)
 (*                                                                            *)
-(* Level justification. Like the S_5 x S_5 limitation rows since the          *)
-(* 2026-08-13 amendment, this limitation row reaches AnalysisBridged, its     *)
-(* theorem being stated at its own executed observation. ideal_sample and    *)
+(* Level justification. Like the S_5 x S_5 limitation rows, this limitation   *)
+(* row reaches AnalysisBridged, its theorem being stated at its own executed  *)
+(* observation. ideal_sample and                                             *)
 (* word_sample are SampleAdapters over shuffle_plug and                       *)
 (* actual_cut_distE names the second one's cut distribution, giving Sampled.  *)
 (* word_mixing_limitation is stated at fdistmap of abel_sample_reader over    *)
@@ -1130,16 +1130,16 @@ Local Open Scope ring_scope.
 (*     The typed rows                                                         *)
 (******************************************************************************)
 
-(** AnalysisPathRow — one analysis path of the repository.
-    Kind: interface.
-    A constructor supplies the observed execution apr_observed of the path,
-    which carries its profile and its execution plug as projections, the
-    completion level apr_completion, the model slot apr_model, whose type
-    AnalysisModelSlot makes a typed model-family witness mandatory at
-    Sampled and AnalysisBridged and optional below, and the two remaining
-    statuses apr_transfer and apr_assumptions. The record stores no theorem:
-    theorems are facade aliases, pinned by spelled type in the checker
-    below. *)
+(** A record bundling, per analysis path, its observed execution
+    apr_observed (which carries the path's profile and execution plug as
+    projections), its completion level apr_completion, its model slot
+    apr_model of dependent type AnalysisModelSlot apr_observed
+    apr_completion, and the two remaining statuses apr_transfer and
+    apr_assumptions. It stores no theorem: theorems stay facade aliases,
+    named separately and pinned by spelled type in the checker below. This
+    is the manifest's row type; each value below is read off the path's
+    typed witnesses rather than asserted, so a row cannot silently drift
+    from the code it describes. *)
 Record AnalysisPathRow := MkAnalysisPathRow {
   (* apr_observed is the executed run of the path together with its static
      observation and the value it recovers. *)
@@ -1160,150 +1160,182 @@ Record AnalysisPathRow := MkAnalysisPathRow {
   apr_assumptions : AssumptionStatus ;
 }.
 
-(** pgl27_row_exact — row 1: the eight-card orbit instance under its exact
-    uniform shuffle.
-    @intent: the observed execution of that instance, its exact-uniform
-    model family, and the statuses of row 1. *)
+(** The AnalysisPathRow for the eight-card orbit instance under its exact
+    uniform shuffle: PGL27Analysis.observed paired with the exact-uniform
+    model family PGL27Analysis.exact_family, AnalysisBridged,
+    StaticExecutedOnly, BaselineClassicalOnly. exact_view_indep is proved at
+    this row's own sample distribution and observer, which is what reaches
+    AnalysisBridged; the shuffle is already the exact uniform distribution
+    on the group, so no idealized model is compared. *)
 Definition pgl27_row_exact : AnalysisPathRow :=
   @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
     PGL27Analysis.exact_family StaticExecutedOnly BaselineClassicalOnly.
 
-(** pgl27_row_word — row 2: the same instance under its two-hundred-letter
-    word shuffle.
-    @intent: the observed execution of that instance, the word model family
-    indexed by the secret prior the row's theorems quantify over, and the
-    statuses of row 2. *)
+(** The AnalysisPathRow for the same instance under its two-hundred-letter
+    word shuffle: PGL27Analysis.observed paired with the word model family
+    indexed by the secret prior, AnalysisBridged, IdealFinite,
+    BaselineClassicalOnly. word_mixing supplies the base-distribution bound
+    the generic transfer inequality needs on the cut carrier itself, which
+    is what makes the transfer status IdealFinite rather than merely
+    StaticExecutedOnly. *)
 Definition pgl27_row_word : AnalysisPathRow :=
   @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
     PGL27Analysis.word_family IdealFinite BaselineClassicalOnly.
 
-(** five_card_row_uniform — row 3: the five-card development under the
-    uniform rotation cut.
-    @intent: the observed execution of that development, its uniform model
-    family, and the statuses of row 3. *)
+(** The AnalysisPathRow for the five-card development under the uniform
+    rotation cut: FiveCardAnalysis.observed paired with the uniform model
+    family, AnalysisBridged, StaticExecutedOnly, BaselineClassicalOnly.
+    exec_trace_secrecy is stated at this row's own random variable
+    content_trace R ord0 over its own sample distribution, reaching
+    AnalysisBridged; the development supplies no ideal-distribution
+    equality, so no model transfer is claimed. *)
 Definition five_card_row_uniform : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.uniform_family StaticExecutedOnly BaselineClassicalOnly.
 
-(** five_card_row_biased — row 4: the same development under one biased cut.
-    @intent: the observed execution of that development, the single-biased
-    model family at bias one hundredth, the one member the repository fixes
-    of the bias family the row's theorem quantifies over, and the statuses
-    of row 4. *)
+(** The AnalysisPathRow for the same development under one biased cut at
+    Kim's input distribution: FiveCardAnalysis.observed paired with the
+    single-biased model family at bias one hundredth, AnalysisBridged,
+    StaticExecutedOnly, BaselineClassicalOnly. colour_view_leak_bound bounds
+    a conditional mutual information over that same biased distribution at
+    the row's own executed reader colour_view, reaching AnalysisBridged. *)
 Definition five_card_row_biased : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.biased_family StaticExecutedOnly BaselineClassicalOnly.
 
-(** five_card_row_repeated — row 5: the same development under repeated
-    biased cuts.
-    @intent: the observed execution of that development, the seven-cut model
-    family at bias one hundredth, and the statuses of row 5. *)
+(** The AnalysisPathRow for the same development under repeated biased
+    cuts: FiveCardAnalysis.observed paired with the seven-cut model family
+    at bias one hundredth, Sampled, NoModelComparison,
+    BaselineClassicalOnly. endpoint_bound and deal_centi_lt bound one
+    seat's endpoint distribution, not a coalition or a second secret, so
+    the row stops at Sampled rather than reaching AnalysisBridged. *)
 Definition five_card_row_repeated : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed Sampled
     FiveCardAnalysis.centi_family NoModelComparison BaselineClassicalOnly.
 
-(** s5_row_det — row 6: the five-seat S_5 instance dealing a position.
-    @intent: the deterministic observed execution of that instance and the
-    statuses of row 6. The path has no sample layer, so the optional
-    lower-level slot is empty. *)
+(** The AnalysisPathRow for the five-seat S_5 instance dealing a position
+    deterministically: S5Analysis.observed, Observed, no model witness,
+    NoModelComparison, AcceptsAxioms [:: AxS5GroupOrder]. The path names no
+    sample layer, so the model slot is None; the axiom is the instance's
+    group-order fact, needed because the profile's threshold data is
+    proved from the order of the generated group. *)
 Definition s5_row_det : AnalysisPathRow :=
   @MkAnalysisPathRow S5Analysis.observed Observed None
     NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder]).
 
-(** s5_row_rand — row 7: the same instance dealing an additive sharing.
-    @intent: the randomized observed execution of that instance, its
-    randomized model family, and the statuses of row 7. *)
+(** The AnalysisPathRow for the same instance dealing an additive sharing:
+    S5Analysis.rand_observed paired with the randomized model family
+    S5Analysis.rand_family, AnalysisBridged, StaticExecutedOnly,
+    AcceptsAxioms [:: AxS5GroupOrder]. exec_coalition_secrecy is stated at
+    sa_coalition_view of rand_sample itself, the row's own distribution and
+    observer, reaching AnalysisBridged; no idealized model is compared. *)
 Definition s5_row_rand : AnalysisPathRow :=
   @MkAnalysisPathRow S5Analysis.rand_observed AnalysisBridged
     S5Analysis.rand_family StaticExecutedOnly
     (AcceptsAxioms [:: AxS5GroupOrder]).
 
-(** s5_row_word — row 8: the same instance under a finite generator word.
-    @intent: the deterministic observed execution the finite-word model
-    stands over, the word model family indexed by a secret prior and a word
-    length, and the statuses of row 8. *)
+(** The AnalysisPathRow for the same instance under a finite generator
+    word: S5Analysis.observed paired with the word model family indexed by
+    a secret prior and a word length, AnalysisBridged, IdealFinite,
+    AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]. exec_endpoint_bound
+    is a mixing theorem at the row's own executed observer against the
+    encoder-image ideal, conditional on the trusted analytical certificate
+    s5_rayleigh_Q2_R, which is why that axiom joins the group-order one. *)
 Definition s5_row_word : AnalysisPathRow :=
   @MkAnalysisPathRow S5Analysis.observed AnalysisBridged
     S5Analysis.word_family IdealFinite
     (AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
 
-(** s5x5_row_det — row 9: the ten-seat S_5 x S_5 instance dealing a
-    position.
-    @intent: the deterministic observed execution of that instance and the
-    statuses of row 9. *)
+(** The AnalysisPathRow for the ten-seat S_5 x S_5 instance dealing a
+    position deterministically: S5x5Analysis.observed, Observed, no model
+    witness, NoModelComparison, AcceptsAxioms [:: AxS5x5GroupOrder]. As
+    with row 6, no sample adapter stands over this plug, so the model slot
+    is None. *)
 Definition s5x5_row_det : AnalysisPathRow :=
   @MkAnalysisPathRow S5x5Analysis.observed Observed None
     NoModelComparison (AcceptsAxioms [:: AxS5x5GroupOrder]).
 
-(** s5x5_row_rand — row 10: the same instance dealing two pile sharings.
-    @intent: the randomized observed execution of that instance, its product
-    model family, and the statuses of row 10. *)
+(** The AnalysisPathRow for the same instance dealing two pile sharings:
+    S5x5Analysis.rand_observed paired with the product model family
+    S5x5Analysis.rand_family, AnalysisBridged, StaticExecutedOnly,
+    AcceptsAxioms [:: AxS5x5GroupOrder]. exec_joint_secrecy is proved as a
+    single joint statement at joint_view, the row's own executed reader,
+    and is not inferred by flattening the two per-pile secrecy results. *)
 Definition s5x5_row_rand : AnalysisPathRow :=
   @MkAnalysisPathRow S5x5Analysis.rand_observed AnalysisBridged
     S5x5Analysis.rand_family StaticExecutedOnly
     (AcceptsAxioms [:: AxS5x5GroupOrder]).
 
-(** s5x5_row_pile1_word — row 11: the first pile under a finite generator
-    word.
-    @intent: the deterministic observed execution the finite-word model
-    stands over, the word model family shared by rows 11 to 14, and the
-    statuses of row 11. *)
+(** The AnalysisPathRow for the first pile under a finite generator word:
+    S5x5Analysis.observed paired with the word model family
+    S5x5Analysis.word_family (shared by rows 11 to 14), AnalysisBridged,
+    IdealFinite, AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R].
+    exec_pile1_bound is a mixing theorem at the row's own executed observer
+    against the first-pile encoder-image ideal. *)
 Definition s5x5_row_pile1_word : AnalysisPathRow :=
   @MkAnalysisPathRow S5x5Analysis.observed AnalysisBridged
     S5x5Analysis.word_family IdealFinite
     (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
-(** s5x5_row_pile2_word — row 12: the second pile under a finite generator
-    word.
-    @intent: the same observed execution, the same shared word model family,
-    and the statuses of row 12. *)
+(** The AnalysisPathRow for the second pile under the same finite generator
+    word: the same observed execution and the same shared word model
+    family as row 11, AnalysisBridged, IdealFinite,
+    AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]. exec_pile2_bound is
+    the second-pile counterpart of row 11's exec_pile1_bound. *)
 Definition s5x5_row_pile2_word : AnalysisPathRow :=
   @MkAnalysisPathRow S5x5Analysis.observed AnalysisBridged
     S5x5Analysis.word_family IdealFinite
     (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
-(** s5x5_row_pile1_limitation — row 13: the first pile against global
-    uniform.
-    @intent: the same observed execution, the same shared word model family,
-    and the statuses of row 13, whose transfer status is negative because a
-    floor transports the obstruction to the row's own observer. *)
+(** The AnalysisPathRow for the first pile measured against global uniform:
+    the same observed execution and the same shared word model family as
+    row 11, AnalysisBridged, NegativeTransfer,
+    AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]. exec_pile1_floor
+    transports the encoder-image pile ideal's support confinement (distance
+    at least one from global uniform, since the deterministic encoder
+    confines the ideal to that pile's five of ten values) to the row's own
+    executed reading, which is why the transfer is negative rather than
+    IdealFinite. *)
 Definition s5x5_row_pile1_limitation : AnalysisPathRow :=
   @MkAnalysisPathRow S5x5Analysis.observed AnalysisBridged
     S5x5Analysis.word_family NegativeTransfer
     (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
-(** s5x5_row_pile2_limitation — row 14: the second pile against global
-    uniform.
-    @intent: the same observed execution, the same shared word model family,
-    and the statuses of row 14. *)
+(** The AnalysisPathRow for the second pile measured against global
+    uniform: the same observed execution and the same shared word model
+    family as row 11, AnalysisBridged, NegativeTransfer,
+    AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]. exec_pile2_floor is
+    the second-pile counterpart of row 13's exec_pile1_floor. *)
 Definition s5x5_row_pile2_limitation : AnalysisPathRow :=
   @MkAnalysisPathRow S5x5Analysis.observed AnalysisBridged
     S5x5Analysis.word_family NegativeTransfer
     (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
-(** abel_row_recovery — row 15: the four-seat abelian instance recovering a
-    dealt secret.
-    @intent: the secret-recovery observed execution of that instance and the
-    statuses of row 15. *)
+(** The AnalysisPathRow for the four-seat abelian instance recovering a
+    dealt secret: AbelianAnalysis.observed, Observed, no model witness,
+    NoModelComparison, BaselineClassicalOnly. The path names no model, so
+    there is no distribution to compare with an idealized one. *)
 Definition abel_row_recovery : AnalysisPathRow :=
   @MkAnalysisPathRow AbelianAnalysis.observed Observed None
     NoModelComparison BaselineClassicalOnly.
 
-(** abel_row_identity — row 16: the same instance dealing identity card
-    content.
-    @intent: the identity-content observed execution of that instance and
-    the statuses of row 16. The two shuffle models of that plug belong to
-    row 17. *)
+(** The AnalysisPathRow for the same instance dealing identity card
+    content: AbelianAnalysis.shuffle_observed, Observed, no model witness,
+    NoModelComparison, BaselineClassicalOnly. This row attaches no
+    distribution of its own; the two shuffle models standing over the same
+    plug belong to row 17, where the probability lives. *)
 Definition abel_row_identity : AnalysisPathRow :=
   @MkAnalysisPathRow AbelianAnalysis.shuffle_observed Observed None
     NoModelComparison BaselineClassicalOnly.
 
-(** abel_row_limitation — row 17: the fixed-length mixing limitation of that
-    instance.
-    @intent: the identity-content observed execution, the length-indexed
-    word model family the limitation is stated about, and the statuses of
-    row 17. The ideal shuffle model stays a Models alias of the facade; the
-    row's evidence is the actual model. *)
+(** The AnalysisPathRow for the fixed-length mixing limitation of that
+    instance: AbelianAnalysis.shuffle_observed paired with the
+    length-indexed word model family AbelianAnalysis.word_family,
+    AnalysisBridged, NegativeTransfer, BaselineClassicalOnly. The ideal
+    shuffle model stays a Models alias of the facade; this row's own
+    evidence is the actual (word) model, over which word_mixing_limitation
+    is stated at the two adapters' own executed observation, a full-L1
+    distance of exactly one from the ideal at every finite word length. *)
 Definition abel_row_limitation : AnalysisPathRow :=
   @MkAnalysisPathRow AbelianAnalysis.shuffle_observed AnalysisBridged
     AbelianAnalysis.word_family NegativeTransfer BaselineClassicalOnly.
@@ -2770,11 +2802,12 @@ Timeout 60 Check
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)
 (*                                                                            *)
-(* One application per parameterized family pins the section 5.2 index type  *)
-(* (a wrong index type is a compile error at the pair), and one application  *)
-(* at tt pins a unit family. The generic check below them establishes that   *)
-(* every family's adapter is typed at the execution projected from its own   *)
-(* row's observed execution, for every row and every family.                 *)
+(* One application per parameterized family pins each family's own index     *)
+(* type (a wrong index type is a compile error at the pair), and one         *)
+(* application at tt pins a unit family. The generic check below them        *)
+(* establishes that every family's adapter is typed at the execution         *)
+(* projected from its own row's observed execution, for every row and every  *)
+(* family.                                                                   *)
 (******************************************************************************)
 
 Timeout 60 Check (fun (R : realType) (p : R.-fdist bool) =>
@@ -2801,10 +2834,10 @@ Timeout 60 Check (fun (row : AnalysisPathRow)
 (******************************************************************************)
 (*     The executed finite-word theorem family at its spelled types           *)
 (*                                                                            *)
-(* Request 5.3 check 5 (amended): the S_5 and S_5 x S_5 word and limitation  *)
-(* rows name executed theorem aliases; each is pinned here at its full        *)
-(* spelled type, the observer being sa_seat_dist of the interpreter-executed  *)
-(* finite-word adapter and the ideals the encoder-image readings.             *)
+(* The S_5 and S_5 x S_5 word and limitation rows name executed theorem      *)
+(* aliases; each is pinned here at its full spelled type, the observer being *)
+(* sa_seat_dist of the interpreter-executed finite-word adapter and the      *)
+(* ideals the encoder-image readings.                                        *)
 (******************************************************************************)
 
 Timeout 60 Check (S5Analysis.exec_endpoint_bound :
@@ -2906,11 +2939,13 @@ Timeout 60 Check (S5x5Analysis.exec_pile2_uniform_ge :
 (******************************************************************************)
 (*     Mutation guards: the states the dependent model slot must reject       *)
 (*                                                                            *)
-(* Request 5.3: a Sampled or AnalysisBridged row with no model witness, a    *)
-(* family over the wrong execution, and an executed word theorem alias       *)
-(* reverted to the cut-level type are compile errors, demonstrated by Fail.  *)
-(* The fourth guard is satisfiable since the user-approved 2026-08-13        *)
-(* amendment landed the executed theorem family.                             *)
+(* A Sampled or AnalysisBridged row with no model witness, a family over the *)
+(* wrong execution, and an executed word theorem alias reverted to the       *)
+(* cut-level type are compile errors, demonstrated by Fail. The fourth guard *)
+(* is satisfiable because the executed theorem family exists at the          *)
+(* seat-indexed executed type, so reverting it to the cut-level pushforward  *)
+(* shape (an ordinary fdistmap of sa_cut_dist) is a real type mismatch and   *)
+(* not a vacuous check.                                                      *)
 (******************************************************************************)
 
 Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled None

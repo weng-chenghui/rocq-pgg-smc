@@ -90,14 +90,13 @@ Inductive AssumptionStatus : Set :=
 (*     The typed model-family witness of an analysis path                     *)
 (******************************************************************************)
 
-(** AnalysisModelFamily — a family of sample adapters over one observed
-    execution.
-    Kind: interface.
-    A constructor supplies the index type amf_index R of the family at each
-    real field and the sample map amf_sample sending an index to a sample
-    adapter over the execution projected from the observed execution. A
-    fixed model is a family with unit index; a parameterized model uses its
-    real index type. *)
+(** A family of sample adapters over one observed execution: for each real
+    field R, an index type amf_index R and a map amf_sample sending each
+    index to a SampleAdapter over the execution OE.oe_execution observed
+    projects out. A fixed model is the unit-indexed case, one witness; a
+    parameterized model uses a genuine index type ranging over several.
+    This is the model witness AnalysisModelSlot below attaches to a
+    manifest row at the levels where a typed sample adapter is required. *)
 Record AnalysisModelFamily (observed : OE.ObservedExecution) :=
   MkAnalysisModelFamily {
     amf_index  : realType -> Type ;
@@ -111,11 +110,13 @@ Record AnalysisModelFamily (observed : OE.ObservedExecution) :=
    call form amf_sample f R x, with only the observed execution inferred. *)
 Arguments amf_sample {observed} f R x : rename.
 
-(** AnalysisModelSlot — the completion-indexed model slot of a manifest row.
-    @intent: at Sampled and AnalysisBridged the slot is a mandatory
-    AnalysisModelFamily over the row's observed execution, so a row at those
-    levels cannot be constructed without a typed model witness; at the three
-    lower levels the slot is an optional family. *)
+(** AnalysisModelSlot observed c is AnalysisModelFamily observed at Sampled
+    and AnalysisBridged, and option (AnalysisModelFamily observed) at the
+    three lower levels. The dependency on c makes the model witness
+    mandatory exactly where CompletionLevel records a distribution-to-
+    observer bridge: a row cannot reach Sampled or AnalysisBridged without
+    producing a typed sample-adapter family, while a row still at Algebraic,
+    Executable or Observed may leave the slot empty. *)
 Definition AnalysisModelSlot (observed : OE.ObservedExecution)
     (c : CompletionLevel) : Type :=
   match c with
