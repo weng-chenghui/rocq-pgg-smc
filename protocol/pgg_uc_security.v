@@ -77,12 +77,23 @@ Definition uc_distance (Sim : Simulator R N) (Adv : Adversary N) (s : 'I_N) : R 
 (*     UC simulation Conjecture                                               *)
 (******************************************************************************)
 
-(* The UC-security composition statement: for any algebraic-rigidity
-   witness, there exists a simulator whose ideal execution is ε-close
-   to the real execution, where ε is the security witness bound.
+(* UC framework: R. Canetti, "Universally Composable Security: A New
+   Paradigm for Cryptographic Protocols", FOCS 2001. *)
 
-   This is stated here as a Conjecture. A future PR would discharge
-   it from collusion_bound + ar_protocol_correct + G_stable hypotheses. *)
+(* In the UC frame, security is the existence of a simulator whose ideal
+   execution no environment can separate from the real one.  Conjectured
+   here: for every nonnegative epsilon some simulator keeps the ideal
+   execution within epsilon of the real one, at every coalition and every
+   target secret.
+
+   The statement is weaker than the notion it is named for, and the gap is
+   in the placeholder types above rather than in the bound.  ideal_exec
+   drops its Simulator argument and returns the uniform weight 1/N, so
+   uc_distance does not mention Sim and the existential is vacuous: what
+   is conjectured reduces to real_exec landing uniformly within epsilon of
+   1/N.  real_exec is itself a Section Variable, so no property of the PGG
+   protocol constrains it here either.  Read this as naming the obligation
+   for Print Assumptions, not as an epsilon-close simulation result. *)
 Conjecture uc_simulation :
   forall (epsilon : R),
   0 <= epsilon ->
