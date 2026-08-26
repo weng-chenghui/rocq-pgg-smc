@@ -262,9 +262,17 @@ Local Notation s5_brings_M :=
      - [s5_brings_covering_realised]: Bring's curve is the (genus-4)
        algebraic curve realising this CoveringData. Edge (1978). *)
 
-(** s5_group_order_eq — the path-A_4 adjacent-transposition generators of
-    [s5_brings_M] span the full S_5, of order 120.
-    Kind: axiom. *)
+(* Adjacent transpositions generate the symmetric group, being the Coxeter
+   generators of type A_4, so the group they span has order 5! = 120.
+   Standard; any group theory text, e.g. through the bubble-sort argument. *)
+
+(** The deck group of the S_5 Bring's instance, spanned by the four
+    adjacent transpositions of the five card positions, is the whole
+    symmetric group; what is asserted here is its cardinality, 120.
+    That number is the degree of the covering, which is how it enters the
+    argument: Riemann-Hurwitz ties the genus of Bring's curve to the genus
+    of the base through the degree, so s5_hurwitz has no arithmetic to
+    state without it. *)
 Axiom s5_group_order_eq :
   #|pgg_G s5_brings_M| = 120.
 
