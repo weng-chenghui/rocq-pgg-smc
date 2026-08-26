@@ -1228,25 +1228,23 @@ Proof. by vm_compute. Qed.
 (* Part 5: Reflection to abstract n_traces                                    *)
 (* ========================================================================== *)
 
-(* The clique polynomial recurrence computes the same values as n_traces.
-   This is the Cartier-Foata theorem: the generating function for traces of
-   a partially commutative monoid is the reciprocal of the clique polynomial
-   of the commutation graph.
+(* Cartier-Foata at the nat level: for a commutation relation symmetric and
+   irreflexive on the Tg generators,
+     clique_traces Tg L comm = n_traces_natB Tg L comm,
+   the generating function for the traces of a partially commutative monoid
+   being the reciprocal of the clique polynomial of its commutation graph.
 
-   We state this as an axiom at the nat level.  The identity is verified by
-   vm_compute for all concrete instances used in this development (free,
-   abelian, star, path graphs, for Tg up to 4 and L up to 5).
+   Both hypotheses are load-bearing rather than customary: without symmetry
+   the identity already fails at L = 3.
 
-   The theorem requires comm to be symmetric and irreflexive (the standard
-   assumptions for a commutation relation on generators).  Without symmetry,
-   vm_compute gives counterexamples already at L=3.
-
-   The abstract bridge from clique_traces to n_traces follows by composing
-   with n_traces_of_natB. *)
-
-(* The Cartier-Foata theorem is proven in pgg_raag_cartier_foata.v *)
-
-(* vm_compute verification of cartier_foata for all concrete instances *)
+   The proof is cartier_foata in pgg_raag_cartier_foata.v, which imports
+   this file, so the identity reaches consumers of the clique polynomial but
+   is not itself available here.  The checks below instead pin the two sides
+   against each other at the commutation graphs this development uses --
+   free, abelian, star and path, Tg up to 4 and L up to 5 -- which is the
+   range every concrete instance of the trace bound falls in.  From the nat
+   level, n_traces_of_natB carries the identity to the abstract n_traces of
+   a RAAGType. *)
 
 Lemma cartier_foata_check_free3 :
   [seq (clique_traces 3 L (fun _ _ => false) ==
