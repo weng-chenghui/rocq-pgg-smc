@@ -26,8 +26,10 @@ From pgg_reconstruct Require Import pgg_assignment pgg_deck_pairing pgg_sum_mod.
 (*   complete_ramp_max == full coalition on the complete graph recovers all  *)
 (*                                                                            *)
 (* Section 4: Combined security-reconstruction statement                      *)
-(*   secure_edge_bound == for each secure edge, the adversary's observation  *)
-(*                        has var_dist at most epsilon from ideal (via DPI)   *)
+(*   ramp_security_reconstruction == the covered and secure edges partition   *)
+(*                        the assignment graph, the covered count fixes the   *)
+(*                        recoverable bits, coverage is monotone in the       *)
+(*                        coalition, and a singleton coalition covers nothing *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -234,24 +236,9 @@ by case: (e \in ag_edges ag) => //=; case: (e.1 \in C) => //=;
    case: (e.2 \in C).
 Qed.
 
-(** For each secure edge, the adversary cannot distinguish the
-    encoded bit from random. The var_dist bound from the collusion
-    bound applies per component via DPI.
-
-    This is a structural statement: the proof that the adversary's
-    observation of the component encoded by edge e has bounded
-    variational distance from ideal requires instantiating the
-    collusion_bound_k theorem with the appropriate observation
-    function. We state the connection here; the full integration
-    with rho_dist requires Section 6 of pgg_collusion_bound. *)
-Theorem secure_edge_bound (e : 'I_T * 'I_T) :
-  e \in secure_edges ag C ->
-  (* The adversary's view of the component encoded by this edge
-     is bounded: it cannot distinguish the encoded bit.
-     The bound follows from DPI (var_dist_fdistmap) applied to
-     the protocol distribution rho_dist. *)
-  True.
-Proof. by []. Qed.
+(* TODO: edge security. For e in secure_edges ag C, bound the coalition's
+   var_dist on e's component by epsilon, via collusion_bound_k (Section 6
+   of pgg_collusion_bound) transported along DPI. *)
 
 (** Summary: the ramp scheme provides both reconstruction and security.
     - For covered edges: the coalition can reconstruct the encoded bits
