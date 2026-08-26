@@ -26,27 +26,31 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** s5x5_plug — the S_5 x S_5 reconstruction plug. Kind: instance. What: the
-    product covering plug (product sum-mod scheme on 'I_10, id content, the
-    S_5 x S_5 monodromy pgg_rho, proven invariance s5x5_perm_compatible). Why:
-    routes S_5 x S_5 through the general MonodromyProfile program. Used-by:
-    s5x5_profile. *)
+(** s5x5_plug — the S_5 x S_5 [ReconPlug]: the product covering plug (the
+    product sum-mod scheme on ['I_10], identity content readout, the S_5 x
+    S_5 monodromy [pgg_rho], and the proven full-group reconstruction
+    invariance [s5x5_perm_compatible]) specialized via [cs_plug]. Supplying
+    this plug is what routes the two-pile product instance through the
+    shared [MonodromyProfile] program rather than re-deriving reconstruction
+    for S_5 x S_5 from scratch. *)
 Definition s5x5_plug : ReconPlug (@Gen_PGGTypes 7 8 s5x5_gen_tuple) 'I_10 :=
   cs_plug s5x5_covering.
 
-(** s5x5_profile — plug the S_5 x S_5 product monodromy (N = 10, two piles of
-    five). Kind: instance. What: the MonodromyProfile bundling the group, the
-    secret type 'I_10, s5x5_PI and s5x5_plug. Why: the S_5 x S_5 plug of the
-    shared program; its privacy threshold is k = 5 (per-pile sum-mod).
-    Used-by: contrast demos.
-    @intent: MkMonodromyProfile at the S_5 x S_5 group, the secret type 'I_10,
-    s5x5_PI and s5x5_plug. *)
+(** s5x5_profile — the [MonodromyProfile] for S_5 x S_5: the product
+    two-pile generator action, secret type ['I_10], interface [s5x5_PI], and
+    plug [s5x5_plug]. The S_5 x S_5 instance's mixing and secrecy results
+    are obtained by specializing the shared [MonodromyProfile] program at
+    this profile; its privacy threshold is k = 5 per pile
+    ([profile_k_s5x5] below), read off the per-pile sum-mod scheme. *)
 Definition s5x5_profile : MonodromyProfile :=
   @MkMonodromyProfile (@Gen_PGGTypes 7 8 s5x5_gen_tuple) 'I_10 s5x5_PI
     s5x5_plug.
 
-(** profile_k_s5x5 — the S_5 x S_5 plug's privacy threshold is 5.
-    @main bound: coalitions below five in a pile learn nothing; k = 5 per
-    pile, read off the shared profile_k. *)
+(** profile_k_s5x5 — the S_5 x S_5 plug's privacy threshold, [profile_k
+    s5x5_profile], is 5: reconstructing the secret within either pile needs
+    the full five-seat coalition for that pile, so a coalition of fewer than
+    five seats in a pile learns nothing about that pile's content. This is
+    the same per-pile threshold as the single-pile S_5 instance
+    ([profile_k_s5]), since the product plug's sum-mod scheme is per-pile. *)
 Lemma profile_k_s5x5 : profile_k s5x5_profile = 5.
 Proof. by []. Qed.

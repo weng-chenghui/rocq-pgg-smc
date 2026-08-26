@@ -35,6 +35,11 @@ Import Prenex Implicits.
 (*     Pile preservation lemma                                                *)
 (******************************************************************************)
 
+(** [s5x5_pile1_stab] — every element of the generated group [pgg_G] for the
+    S_5 x S_5 eight-generator tuple fixes pile-1 (the indices with
+    [val i < 5]) setwise under the [pgg_rho] permutation action.  Generator-
+    level pile preservation lifts to the whole group because the setwise
+    stabiliser of pile-1 is itself a group (astabs). *)
 Lemma s5x5_pile1_stab :
   forall g, g \in pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) ->
   forall i : 'I_10, (val i < 5)%N ->
@@ -59,16 +64,11 @@ rewrite /= apermE !inE Hi.
 by move=> ->.
 Qed.
 
-(** s5x5_preserves_pile2_proved — every [g \in pgg_G] preserves the upper
-    half of [`I_10] (indices >= 5) setwise under the [pgg_rho] action.
-    Kind: helper.
-    Why: companion to [s5x5_preserves_pile1]; together they discharge the
-    pile-decomposition invariance required by downstream S_5 x S_5 rigidity
-    witnesses.
-    Used by: (no caller committed yet; parallel to [s5x5_preserves_pile1]).
-    Naming: intentional; the `_proved` suffix keeps parity with the
-    pile-1 naming in the adjacent file, even though [_stab] would be the
-    canonical MathComp suffix for a set-stabiliser. *)
+(** [s5x5_preserves_pile2_proved] — every element of [pgg_G] also fixes
+    pile-2 (the indices with [val i >= 5]) setwise under the [pgg_rho]
+    action, the mirror of [s5x5_pile1_stab] on the upper half of ['I_10].
+    Together the two lemmas give the pile-decomposition invariance the
+    S_5 x S_5 rigidity development needs. *)
 Lemma s5x5_preserves_pile2_proved :
   forall g, g \in pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) ->
   forall i : 'I_10, ~~ (val i < 5)%N ->

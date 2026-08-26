@@ -133,10 +133,16 @@ Definition s5x5_comm_nat (i j : nat) : bool :=
 (*     Trace count demonstrations                                             *)
 (******************************************************************************)
 
+(** s5x5_nt_L1 — [n_traces_natB] evaluated at the S_5 x S_5 independence
+    relation counts 8 length-1 commutation classes, one per generator: at
+    length 1 no commutation identifies distinct words, so the trace count is
+    just the generator count. *)
 Lemma s5x5_nt_L1 : n_traces_natB 8 1 s5x5_comm_nat = 8.
 Proof. by vm_compute. Qed.
 
-(** s5x5_nt_L2 — trace count at length 2 for the S_5 x S_5 RAAG.
-    Kind: example. *)
+(** s5x5_nt_L2 — [n_traces_natB] evaluated at the S_5 x S_5 independence
+    relation counts 42 distinct commutation classes of length-2 words: a
+    decidable, [vm_compute]-checked instance of the general trace-counting
+    machinery at this eight-generator, two-pile generator set. *)
 Lemma s5x5_nt_L2 : n_traces_natB 8 2 s5x5_comm_nat = 42.
 Proof. by vm_compute. Qed.

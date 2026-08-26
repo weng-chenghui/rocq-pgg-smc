@@ -27,11 +27,12 @@ Variable R : realType.
 Variable U : finType.
 Variable P : R.-fdist U.
 
-(** s5x5_view_secrecy — each 5-of-5 component of the product scheme keeps its
-    own secret position hidden from any sub-threshold coalition on that
-    component.
-    @main security: zero mutual information and unchanged conditional entropy on
-    both components of the product sharing. *)
+(** s5x5_view_secrecy — for each of the two 5-of-5 components of the product
+    scheme, a coalition below that component's threshold has zero mutual
+    information with, and gains no reduction in entropy about, that
+    component's secret: the plain additive-sharing secrecy bound
+    (leakage_of_view_indep) applied to each pile in turn, ahead of any
+    statement about the coalition's combined view across both piles. *)
 Lemma s5x5_view_secrecy (rs1 rs2 : RandomizedSharing P 3 4)
     (C1 C2 : {set 'I_5}) (HC1 : (#|C1| < 5)%N) (HC2 : (#|C2| < 5)%N) :
   (`I( lw_secret (mechanism_leakage (Additive rs1 HC1)) ;
@@ -46,10 +47,10 @@ Lemma s5x5_view_secrecy (rs1 rs2 : RandomizedSharing P 3 4)
      = `H `p_ (lw_secret (mechanism_leakage (Additive rs2 HC2)))).
 Proof. split; apply: leakage_of_view_indep; exact: lw_indep _. Qed.
 
-(** s5x5_view_secrecy_concrete — the per-component S_5 x S_5 secrecy with the
-    concrete uniform iid sampler on each component, no abstract sharing hypothesis.
-    @main security: zero mutual information and unchanged conditional entropy on
-    both uniform iid components. *)
+(** s5x5_view_secrecy_concrete — s5x5_view_secrecy instantiated at the
+    concrete uniform iid sampler on each component in place of an abstract
+    RandomizedSharing hypothesis, so the per-pile secrecy bound applies
+    directly to the plug's actual sampler. *)
 Lemma s5x5_view_secrecy_concrete (C1 C2 : {set 'I_5})
     (HC1 : (#|C1| < 5)%N) (HC2 : (#|C2| < 5)%N) :
   (`I( lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC1)) ;
@@ -64,11 +65,13 @@ Lemma s5x5_view_secrecy_concrete (C1 C2 : {set 'I_5})
      = `H `p_ (lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)))).
 Proof. split; apply: leakage_of_view_indep; exact: lw_indep _. Qed.
 
-(** s5x5_joint_view_secrecy — the combined coalition view across both 5-of-5
-    components is independent of the joint secret (s1, s2), with the two
-    components on independent uniform tapes. No abstract sharing hypothesis.
-    @main security: zero mutual information and unchanged conditional entropy for
-    the combined view against the joint secret of the product scheme. *)
+(** s5x5_joint_view_secrecy — the coalition's combined view across both
+    5-of-5 components, each on an independent uniform tape, has zero mutual
+    information with the joint secret (s1, s2) and leaves its entropy
+    unchanged: the actual secrecy statement the S_5 x S_5 instance needs,
+    since a real coalition reads the pile-1 and pile-2 views together, not
+    one component at a time, obtained by combining the two independent
+    per-pile leakage witnesses with leakage_product. *)
 Lemma s5x5_joint_view_secrecy (C1 C2 : {set 'I_5})
     (HC1 : (#|C1| < 5)%N) (HC2 : (#|C2| < 5)%N) :
   let lw := leakage_product

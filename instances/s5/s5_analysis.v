@@ -77,13 +77,11 @@ Module S5Analysis.
 (* ===== 1. Program ===== *)
 (******************************************************************************)
 
-(** profile — the probability-independent five-seat program profile.
-    @intent: alias of s5_profile. *)
+(** profile — the probability-independent five-seat program profile. *)
 Definition profile := s5_profile.
 
 (** profile_k — the profile's privacy threshold is five: fewer than five
-    shares cannot distinguish two secrets.
-    @intent: alias of profile_k_s5. *)
+    shares cannot distinguish two secrets. *)
 Definition profile_k := profile_k_s5.
 
 (******************************************************************************)
@@ -95,12 +93,10 @@ Definition profile_k := profile_k_s5.
 (* equal.                                                                     *)
 (******************************************************************************)
 
-(** exec_plug — the deterministic execution plug over that profile.
-    @intent: alias of s5_exec_plug. *)
+(** exec_plug — the deterministic execution plug over that profile. *)
 Definition exec_plug := s5_exec_plug.
 
-(** rand_exec_plug — the randomized execution plug over that profile.
-    @intent: alias of s5_rand_exec_plug. *)
+(** rand_exec_plug — the randomized execution plug over that profile. *)
 Definition rand_exec_plug := s5_rand_exec_plug.
 
 (******************************************************************************)
@@ -117,73 +113,61 @@ Definition rand_exec_plug := s5_rand_exec_plug.
 (******************************************************************************)
 
 (** seat_endpoint — one seat's deterministic executed endpoint, a dealt
-    position.
-    @intent: exec_seat_endpoint specialized at s5_exec_plug. *)
+    position. *)
 Definition seat_endpoint := @exec_seat_endpoint s5_profile s5_exec_plug.
 
 (** coalition_endpoints — a coalition's deterministic executed endpoints, a
-    finfun of dealt positions indexed by seats.
-    @intent: exec_coalition_endpoints specialized at s5_exec_plug. *)
+    finfun of dealt positions indexed by seats. *)
 Definition coalition_endpoints :=
   @exec_coalition_endpoints s5_profile s5_exec_plug.
 
 (** verifier_trace — the verifier's raw executed trace on the deterministic
-    plug, a message list.
-    @intent: exec_verifier_trace specialized at s5_exec_plug. *)
+    plug, a message list. *)
 Definition verifier_trace := @exec_verifier_trace s5_profile s5_exec_plug.
 
 (** verifier_endpoints — the deterministic executed endpoint list of the run,
-    the dealt positions the verifier reads.
-    @intent: exec_endpoints specialized at s5_exec_plug. *)
+    the dealt positions the verifier reads. *)
 Definition verifier_endpoints := @exec_endpoints s5_profile s5_exec_plug.
 
 (** player_raw_trace — one seat's raw executed trace on the deterministic
-    plug, a message list.
-    @intent: exec_participant_trace specialized at s5_exec_plug. *)
+    plug, a message list. *)
 Definition player_raw_trace := @exec_participant_trace s5_profile s5_exec_plug.
 
 (** observed — the deterministic observed execution: the run, its static
-    observation and the value it recovers.
-    @intent: alias of s5_observed. *)
+    observation and the value it recovers. *)
 Definition observed := s5_observed.
 
 (** rand_seat_endpoint — one seat's randomized executed endpoint, an additive
-    share read as a position.
-    @intent: exec_seat_endpoint specialized at s5_rand_exec_plug. *)
+    share read as a position. *)
 Definition rand_seat_endpoint :=
   @exec_seat_endpoint s5_profile s5_rand_exec_plug.
 
 (** rand_coalition_endpoints — a coalition's randomized executed endpoints, a
-    finfun of additive shares indexed by seats.
-    @intent: exec_coalition_endpoints specialized at s5_rand_exec_plug. *)
+    finfun of additive shares indexed by seats. *)
 Definition rand_coalition_endpoints :=
   @exec_coalition_endpoints s5_profile s5_rand_exec_plug.
 
 (** rand_content_trace — seat i's randomized executed trace content, a random
-    variable on the tape distribution with carrier 'I_5.
-    @intent: alias of s5_sample_content_trace, the executed finite reader. *)
+    variable on the tape distribution with carrier 'I_5: the one finite
+    content-trace reader among section 3's observers. *)
 Definition rand_content_trace := @s5_sample_content_trace.
 
 (** rand_verifier_trace — the verifier's raw executed trace on the randomized
-    plug, a message list.
-    @intent: exec_verifier_trace specialized at s5_rand_exec_plug. *)
+    plug, a message list. *)
 Definition rand_verifier_trace :=
   @exec_verifier_trace s5_profile s5_rand_exec_plug.
 
 (** rand_verifier_endpoints — the randomized executed endpoint list of the
-    run, the additive shares the verifier reads.
-    @intent: exec_endpoints specialized at s5_rand_exec_plug. *)
+    run, the additive shares the verifier reads. *)
 Definition rand_verifier_endpoints :=
   @exec_endpoints s5_profile s5_rand_exec_plug.
 
 (** rand_player_raw_trace — one seat's raw executed trace on the randomized
-    plug, a message list.
-    @intent: exec_participant_trace specialized at s5_rand_exec_plug. *)
+    plug, a message list. *)
 Definition rand_player_raw_trace :=
   @exec_participant_trace s5_profile s5_rand_exec_plug.
 
-(** rand_observed — the randomized observed execution.
-    @intent: alias of s5_rand_observed. *)
+(** rand_observed — the randomized observed execution. *)
 Definition rand_observed := s5_rand_observed.
 
 (******************************************************************************)
@@ -196,43 +180,35 @@ Definition rand_observed := s5_rand_observed.
 (******************************************************************************)
 
 (** rand_sample — the randomized exact-secrecy model at the uniform iid tape
-    distribution and the identity cut.
-    @intent: alias of s5_rand_sample. *)
+    distribution and the identity cut. *)
 Definition rand_sample := @s5_rand_sample.
 
 (** word_sample — the finite-word endpoint model at an arbitrary secret prior
-    and word length.
-    @intent: alias of s5_word_sample. *)
+    and word length. *)
 Definition word_sample := @s5_word_sample.
 
-(** rand_family — the randomized tape model as a unit-indexed typed family.
-    @intent: alias of s5_rand_family. *)
+(** rand_family — the randomized tape model as a unit-indexed typed family. *)
 Definition rand_family := s5_rand_family.
 
 (** word_family — the finite-word model family, indexed by a secret prior
-    and a word length.
-    @intent: alias of s5_word_family. *)
+    and a word length. *)
 Definition word_family := s5_word_family.
 
 (** ideal_reading — the encoder-image ideal reading: the content one seat
     reads when the dealt position is exactly uniform, mixed over the secret
-    prior; neither uniform nor secret-independent.
-    @intent: alias of s5_ideal_reading. *)
+    prior; neither uniform nor secret-independent. *)
 Definition ideal_reading := @s5_ideal_reading.
 
 (** rand_cut_distE — the randomized model's cut distribution is the point
-    distribution at the identity.
-    @intent: alias of s5_rand_cut_distE. *)
+    distribution at the identity. *)
 Definition rand_cut_distE := @s5_rand_cut_distE.
 
 (** word_cut_distE — the finite-word model's cut distribution is the
-    word-induced shuffle distribution.
-    @intent: alias of s5_word_cut_distE. *)
+    word-induced shuffle distribution. *)
 Definition word_cut_distE := @s5_word_cut_distE.
 
 (** word_cut_imageE — the finite-word model's shuffle-image distribution is
-    that same word-induced distribution.
-    @intent: alias of s5_word_cut_imageE. *)
+    that same word-induced distribution. *)
 Definition word_cut_imageE := @s5_word_cut_imageE.
 
 (******************************************************************************)
@@ -245,33 +221,27 @@ Definition word_cut_imageE := @s5_word_cut_imageE.
 (******************************************************************************)
 
 (** exec_correct — deterministic termination, endpoint count and recovery
-    together.
-    @intent: alias of s5_exec_correct. *)
+    together. *)
 Definition exec_correct := @s5_exec_correct.
 
 (** exec_recovers — the deterministic executed run decodes to the dealt
-    position.
-    @intent: alias of s5_exec_recovers. *)
+    position. *)
 Definition exec_recovers := @s5_exec_recovers.
 
 (** observed_recovers — the deterministic observed run decodes to the dealt
-    position.
-    @intent: alias of s5_observed_recovers. *)
+    position. *)
 Definition observed_recovers := @s5_observed_recovers.
 
 (** rand_correct — randomized termination, endpoint count and recovery
-    together.
-    @intent: alias of s5_rand_correct. *)
+    together. *)
 Definition rand_correct := @s5_rand_correct.
 
 (** rand_recovers — the randomized executed run decodes to the encoded tape
-    secret.
-    @intent: alias of s5_rand_exec_recovers. *)
+    secret. *)
 Definition rand_recovers := @s5_rand_exec_recovers.
 
 (** rand_observed_recovers — the randomized observed run decodes to the
-    encoded tape secret.
-    @intent: alias of s5_rand_observed_recovers. *)
+    encoded tape secret. *)
 Definition rand_observed_recovers := @s5_rand_observed_recovers.
 
 (******************************************************************************)
@@ -287,15 +257,13 @@ Definition rand_observed_recovers := @s5_rand_observed_recovers.
 
 (** exec_trace_secrecy — trace secrecy in conditional entropy form: one seat's
     executed trace content leaves the tape secret's conditional entropy equal
-    to its entropy.
-    @intent: alias of s5_exec_trace_secrecy. *)
+    to its entropy. *)
 Definition exec_trace_secrecy := @s5_exec_trace_secrecy.
 
 (** exec_coalition_secrecy — exact privacy in mutual information and
     conditional entropy form: a coalition of fewer than five seats has zero
     mutual information with the tape secret and leaves its conditional
-    entropy equal to its entropy.
-    @intent: alias of s5_exec_coalition_secrecy. *)
+    entropy equal to its entropy. *)
 Definition exec_coalition_secrecy := @s5_exec_coalition_secrecy.
 
 (******************************************************************************)
@@ -313,8 +281,7 @@ Definition exec_coalition_secrecy := @s5_exec_coalition_secrecy.
 (** word_endpoint_bound — cut-level endpoint marginal mixing of the
     finite-word model at word length L, conditional on s5_rayleigh_Q2_R: the
     bound is on a position pushforward of the cut distribution, not on an
-    interpreter-executed observer.
-    @intent: alias of s5_word_endpoint_bound. *)
+    interpreter-executed observer. *)
 Definition word_endpoint_bound := @s5_word_endpoint_bound.
 
 (** exec_endpoint_bound — executed endpoint marginal mixing, conditional on
@@ -323,8 +290,7 @@ Definition word_endpoint_bound := @s5_word_endpoint_bound.
     one seat and the encoder-image ideal reading is at most sqrt 5 times
     alpha to the power L. One endpoint marginal; the ideal is neither
     uniform nor secret-independent; no coalition, privacy, secrecy or
-    leakage conclusion is claimed.
-    @intent: alias of s5_exec_endpoint_bound. *)
+    leakage conclusion is claimed. *)
 Definition exec_endpoint_bound := @s5_exec_endpoint_bound.
 
 (******************************************************************************)
@@ -340,47 +306,44 @@ Definition exec_endpoint_bound := @s5_exec_endpoint_bound.
 (* word_missing_premise, and for the group-uniform ideal is unsatisfiable.    *)
 (******************************************************************************)
 
-(** det_transfer_status — the deterministic path's transfer status.
-    @intent: NoModelComparison, the path carrying recovery only. *)
+(** det_transfer_status — the deterministic path's transfer status,
+    NoModelComparison: this path carries recovery results only, comparing
+    against no idealized model. *)
 Definition det_transfer_status : TransferStatus := NoModelComparison.
 
-(** rand_transfer_status — the randomized path's transfer status.
-    @intent: StaticExecutedOnly, the path carrying its landed static secrecy
-    results to its executed observers and no ideal-to-finite theorem. *)
+(** rand_transfer_status — the randomized path's transfer status,
+    StaticExecutedOnly: this path carries its landed static secrecy results
+    forward to its executed observers, with no ideal-to-finite transfer
+    theorem. *)
 Definition rand_transfer_status : TransferStatus := StaticExecutedOnly.
 
 (** rand_content_traceE — the executed content reader is the landed
     player-trace random variable, one of the two equalities witnessing
-    rand_transfer_status.
-    @intent: alias of s5_sample_content_traceE. *)
+    rand_transfer_status. *)
 Definition rand_content_traceE := @s5_sample_content_traceE.
 
 (** rand_coalition_viewE — the executed coalition endpoint reader is the
     randomized sharing's coalition view, the other equality witnessing
-    rand_transfer_status.
-    @intent: alias of s5_sample_coalition_viewE. *)
+    rand_transfer_status. *)
 Definition rand_coalition_viewE := @s5_sample_coalition_viewE.
 
-(** word_transfer_status — the finite-word path's transfer status.
-    @intent: IdealFinite, the path carrying the observer-level public
-    model-transfer theorem exec_endpoint_bound to the encoder-image ideal
-    reading on the endpoint carrier 'I_5. That ideal is not the
-    group-uniform ideal: the base premise word_missing_premise on the cut
-    carrier {perm 'I_5} remains absent and, for the uniform distribution on
-    the generated group, unsatisfiable at every delta below one by
-    sign-coset confinement. No bound against group uniform on any carrier
-    is stated or implied. *)
+(** word_transfer_status — the finite-word path's transfer status,
+    IdealFinite: this path carries the observer-level model-transfer theorem
+    exec_endpoint_bound to the encoder-image ideal reading on the endpoint
+    carrier 'I_5. That ideal is not the group-uniform ideal: the base
+    premise word_missing_premise on the cut carrier {perm 'I_5} remains
+    absent, and for the uniform distribution on the generated group is
+    unsatisfiable at every delta below one by sign-coset confinement. No
+    bound against group-uniform on any carrier is stated or implied. *)
 Definition word_transfer_status : TransferStatus := IdealFinite.
 
-(** word_missing_premise — the absent premise named as a proposition.
-    @intent: alias of s5_word_base_premise, a variation-distance bound
-    between the finite-word cut distribution on {perm 'I_5} and a reference
-    distribution on that carrier. *)
+(** word_missing_premise — the absent premise named as a proposition: a
+    variation-distance bound between the finite-word cut distribution on
+    {perm 'I_5} and a reference distribution on that carrier. *)
 Definition word_missing_premise := @s5_word_base_premise.
 
 (** word_transfer_conditional — the generic transfer inequality at the
-    finite-word cut distribution, under that premise.
-    @intent: alias of s5_word_transfer_conditional. *)
+    finite-word cut distribution, under that premise. *)
 Definition word_transfer_conditional := @s5_word_transfer_conditional.
 
 End S5Analysis.

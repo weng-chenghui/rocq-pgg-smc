@@ -82,13 +82,11 @@ Module S5x5Analysis.
 (* ===== 1. Program ===== *)
 (******************************************************************************)
 
-(** profile — the probability-independent ten-seat two-pile program profile.
-    @intent: alias of s5x5_profile. *)
+(** profile — the probability-independent ten-seat two-pile program profile. *)
 Definition profile := s5x5_profile.
 
 (** profile_k — the profile's privacy threshold is five: inside one pile,
-    fewer than five shares cannot distinguish two secrets.
-    @intent: alias of profile_k_s5x5. *)
+    fewer than five shares cannot distinguish two secrets. *)
 Definition profile_k := profile_k_s5x5.
 
 (******************************************************************************)
@@ -100,12 +98,10 @@ Definition profile_k := profile_k_s5x5.
 (* not claimed equal.                                                         *)
 (******************************************************************************)
 
-(** exec_plug — the deterministic execution plug over that profile.
-    @intent: alias of s5x5_exec_plug. *)
+(** exec_plug — the deterministic execution plug over that profile. *)
 Definition exec_plug := s5x5_exec_plug.
 
-(** rand_exec_plug — the randomized execution plug over that profile.
-    @intent: alias of s5x5_rand_exec_plug. *)
+(** rand_exec_plug — the randomized execution plug over that profile. *)
 Definition rand_exec_plug := s5x5_rand_exec_plug.
 
 (******************************************************************************)
@@ -122,108 +118,87 @@ Definition rand_exec_plug := s5x5_rand_exec_plug.
 (******************************************************************************)
 
 (** seat_endpoint — one seat's deterministic executed endpoint, a dealt
-    position.
-    @intent: exec_seat_endpoint specialized at s5x5_exec_plug. *)
+    position. *)
 Definition seat_endpoint := @exec_seat_endpoint s5x5_profile s5x5_exec_plug.
 
 (** coalition_endpoints — a coalition's deterministic executed endpoints, a
-    finfun of dealt positions indexed by seats.
-    @intent: exec_coalition_endpoints specialized at s5x5_exec_plug. *)
+    finfun of dealt positions indexed by seats. *)
 Definition coalition_endpoints :=
   @exec_coalition_endpoints s5x5_profile s5x5_exec_plug.
 
 (** verifier_trace — the verifier's raw executed trace on the deterministic
-    plug, a message list.
-    @intent: exec_verifier_trace specialized at s5x5_exec_plug. *)
+    plug, a message list. *)
 Definition verifier_trace := @exec_verifier_trace s5x5_profile s5x5_exec_plug.
 
 (** verifier_endpoints — the deterministic executed endpoint list of the run,
-    the dealt positions the verifier reads.
-    @intent: exec_endpoints specialized at s5x5_exec_plug. *)
+    the dealt positions the verifier reads. *)
 Definition verifier_endpoints := @exec_endpoints s5x5_profile s5x5_exec_plug.
 
 (** player_raw_trace — one seat's raw executed trace on the deterministic
-    plug, a message list.
-    @intent: exec_participant_trace specialized at s5x5_exec_plug. *)
+    plug, a message list. *)
 Definition player_raw_trace :=
   @exec_participant_trace s5x5_profile s5x5_exec_plug.
 
 (** observed — the deterministic observed execution: the run, its static
-    observation and the value it recovers.
-    @intent: alias of s5x5_observed. *)
+    observation and the value it recovers. *)
 Definition observed := s5x5_observed.
 
 (** rand_seat_endpoint — one seat's randomized executed endpoint, a two-pile
-    layout entry read as a position.
-    @intent: exec_seat_endpoint specialized at s5x5_rand_exec_plug. *)
+    layout entry read as a position. *)
 Definition rand_seat_endpoint :=
   @exec_seat_endpoint s5x5_profile s5x5_rand_exec_plug.
 
 (** rand_coalition_endpoints — a ten-seat coalition's randomized executed
-    endpoints, a finfun of layout entries indexed by seats.
-    @intent: exec_coalition_endpoints specialized at s5x5_rand_exec_plug. *)
+    endpoints, a finfun of layout entries indexed by seats. *)
 Definition rand_coalition_endpoints :=
   @exec_coalition_endpoints s5x5_profile s5x5_rand_exec_plug.
 
 (** rand_content_trace — seat j's randomized executed trace content, a random
-    variable on the product tape distribution with carrier 'I_10.
-    @intent: alias of s5x5_sample_content_trace, the executed finite
-    reader. *)
+    variable on the product tape distribution with carrier 'I_10. *)
 Definition rand_content_trace := @s5x5_sample_content_trace.
 
 (** rand_verifier_trace — the verifier's raw executed trace on the randomized
-    plug, a message list.
-    @intent: exec_verifier_trace specialized at s5x5_rand_exec_plug. *)
+    plug, a message list. *)
 Definition rand_verifier_trace :=
   @exec_verifier_trace s5x5_profile s5x5_rand_exec_plug.
 
 (** rand_verifier_endpoints — the randomized executed endpoint list of the
-    run, the layout entries the verifier reads.
-    @intent: exec_endpoints specialized at s5x5_rand_exec_plug. *)
+    run, the layout entries the verifier reads. *)
 Definition rand_verifier_endpoints :=
   @exec_endpoints s5x5_profile s5x5_rand_exec_plug.
 
 (** rand_player_raw_trace — one seat's raw executed trace on the randomized
-    plug, a message list.
-    @intent: exec_participant_trace specialized at s5x5_rand_exec_plug. *)
+    plug, a message list. *)
 Definition rand_player_raw_trace :=
   @exec_participant_trace s5x5_profile s5x5_rand_exec_plug.
 
-(** rand_observed — the randomized observed execution.
-    @intent: alias of s5x5_rand_observed. *)
+(** rand_observed — the randomized observed execution. *)
 Definition rand_observed := s5x5_rand_observed.
 
-(** pile1_seats — the ten-seat image of a first-pile coalition.
-    @intent: alias of s5x5_p1_seats. *)
+(** pile1_seats — the ten-seat image of a first-pile coalition. *)
 Definition pile1_seats := s5x5_p1_seats.
 
-(** pile2_seats — the ten-seat image of a second-pile coalition.
-    @intent: alias of s5x5_p2_seats. *)
+(** pile2_seats — the ten-seat image of a second-pile coalition. *)
 Definition pile2_seats := s5x5_p2_seats.
 
 (** pile1_seat_view — one first-pile party's executed share, a random variable
-    on the product tape distribution with carrier 'Z_5.
-    @intent: alias of s5x5_p1_seat_view. *)
+    on the product tape distribution with carrier 'Z_5. *)
 Definition pile1_seat_view := @s5x5_p1_seat_view.
 
 (** pile2_seat_view — one second-pile party's executed share, a random
-    variable on the product tape distribution with carrier 'Z_5.
-    @intent: alias of s5x5_p2_seat_view. *)
+    variable on the product tape distribution with carrier 'Z_5. *)
 Definition pile2_seat_view := @s5x5_p2_seat_view.
 
 (** pile1_coalition_view — a first-pile coalition's executed shares, a random
-    variable with carrier {ffun 'I_5 -> 'Z_5} indexed by first-pile parties.
-    @intent: alias of s5x5_p1_view. *)
+    variable with carrier {ffun 'I_5 -> 'Z_5} indexed by first-pile parties. *)
 Definition pile1_coalition_view := @s5x5_p1_view.
 
 (** pile2_coalition_view — a second-pile coalition's executed shares, a random
-    variable with carrier {ffun 'I_5 -> 'Z_5} indexed by second-pile parties.
-    @intent: alias of s5x5_p2_view. *)
+    variable with carrier {ffun 'I_5 -> 'Z_5} indexed by second-pile parties. *)
 Definition pile2_coalition_view := @s5x5_p2_view.
 
 (** joint_view — the pair of the two executed pile coalition readers, the two
-    pile memberships kept separate.
-    @intent: alias of s5x5_joint_view. *)
+    pile memberships kept separate. *)
 Definition joint_view := @s5x5_joint_view.
 
 (******************************************************************************)
@@ -236,47 +211,38 @@ Definition joint_view := @s5x5_joint_view.
 (******************************************************************************)
 
 (** rand_sample — the randomized product exact-secrecy model at the product
-    uniform iid tape distribution and the identity cut.
-    @intent: alias of s5x5_rand_sample. *)
+    uniform iid tape distribution and the identity cut. *)
 Definition rand_sample := @s5x5_rand_sample.
 
 (** word_sample — the finite-word endpoint model at an arbitrary secret prior
-    and word length.
-    @intent: alias of s5x5_word_sample. *)
+    and word length. *)
 Definition word_sample := @s5x5_word_sample.
 
 (** rand_family — the randomized product-tape model as a unit-indexed typed
-    family.
-    @intent: alias of s5x5_rand_family. *)
+    family. *)
 Definition rand_family := s5x5_rand_family.
 
 (** word_family — the finite-word model family, indexed by a secret prior
-    and a word length; shared by the endpoint and limitation rows.
-    @intent: alias of s5x5_word_family. *)
+    and a word length; shared by the endpoint and limitation rows. *)
 Definition word_family := s5x5_word_family.
 
 (** ideal_pile1_reading — the encoder-image ideal reading of a first-pile
     seat: the content it reads when its pile position is exactly uniform,
-    mixed over the secret prior; neither uniform nor secret-independent.
-    @intent: alias of s5x5_ideal_pile1_reading. *)
+    mixed over the secret prior; neither uniform nor secret-independent. *)
 Definition ideal_pile1_reading := @s5x5_ideal_pile1_reading.
 
-(** ideal_pile2_reading — the second-pile encoder-image ideal reading.
-    @intent: alias of s5x5_ideal_pile2_reading. *)
+(** ideal_pile2_reading — the second-pile encoder-image ideal reading. *)
 Definition ideal_pile2_reading := @s5x5_ideal_pile2_reading.
 
-(** ideal_seat_reading — the seat's own pile's encoder-image ideal reading.
-    @intent: alias of s5x5_ideal_seat_reading. *)
+(** ideal_seat_reading — the seat's own pile's encoder-image ideal reading. *)
 Definition ideal_seat_reading := @s5x5_ideal_seat_reading.
 
 (** rand_cut_distE — the randomized model's cut distribution is the point
-    distribution at the identity.
-    @intent: alias of s5x5_rand_cut_distE. *)
+    distribution at the identity. *)
 Definition rand_cut_distE := @s5x5_rand_cut_distE.
 
 (** word_cut_distE — the finite-word model's cut distribution is the
-    word-induced shuffle distribution.
-    @intent: alias of s5x5_word_cut_distE. *)
+    word-induced shuffle distribution. *)
 Definition word_cut_distE := @s5x5_word_cut_distE.
 
 (******************************************************************************)
@@ -293,38 +259,31 @@ Definition word_cut_distE := @s5x5_word_cut_distE.
 (******************************************************************************)
 
 (** exec_correct — deterministic termination, endpoint count and recovery
-    together.
-    @intent: alias of s5x5_exec_correct. *)
+    together. *)
 Definition exec_correct := @s5x5_exec_correct.
 
 (** exec_recovers — the deterministic executed run decodes to the dealt
-    position.
-    @intent: alias of s5x5_exec_recovers. *)
+    position. *)
 Definition exec_recovers := @s5x5_exec_recovers.
 
 (** observed_recovers — the deterministic observed run decodes to the dealt
-    position.
-    @intent: alias of s5x5_observed_recovers. *)
+    position. *)
 Definition observed_recovers := @s5x5_observed_recovers.
 
 (** rand_correct — randomized termination, endpoint count and recovery
-    together.
-    @intent: alias of s5x5_rand_correct. *)
+    together. *)
 Definition rand_correct := @s5x5_rand_correct.
 
 (** rand_recovers — the randomized executed run decodes to the combined pile
-    secrets.
-    @intent: alias of s5x5_rand_exec_recovers. *)
+    secrets. *)
 Definition rand_recovers := @s5x5_rand_exec_recovers.
 
 (** rand_observed_recovers — the randomized observed run decodes to the
-    combined pile secrets.
-    @intent: alias of s5x5_rand_observed_recovers. *)
+    combined pile secrets. *)
 Definition rand_observed_recovers := @s5x5_rand_observed_recovers.
 
 (** combine_not_injectiveE — two distinct pile pairs have the same combined
-    secret.
-    @intent: alias of s5x5_combine_not_injectiveE. *)
+    secret. *)
 Definition combine_not_injectiveE := s5x5_combine_not_injectiveE.
 
 (******************************************************************************)
@@ -344,26 +303,22 @@ Definition combine_not_injectiveE := s5x5_combine_not_injectiveE.
 
 (** exec_trace_secrecy — trace secrecy in conditional entropy form: one seat's
     executed trace content leaves the pile pair's conditional entropy equal to
-    its entropy.
-    @intent: alias of s5x5_exec_trace_secrecy. *)
+    its entropy. *)
 Definition exec_trace_secrecy := @s5x5_exec_trace_secrecy.
 
 (** exec_p1_secrecy — exact privacy in mutual information and conditional
     entropy form: a first-pile coalition of fewer than five parties has zero
-    mutual information with the pile pair.
-    @intent: alias of s5x5_exec_p1_secrecy. *)
+    mutual information with the pile pair. *)
 Definition exec_p1_secrecy := @s5x5_exec_p1_secrecy.
 
 (** exec_p2_secrecy — exact privacy in mutual information and conditional
     entropy form: a second-pile coalition of fewer than five parties has zero
-    mutual information with the pile pair.
-    @intent: alias of s5x5_exec_p2_secrecy. *)
+    mutual information with the pile pair. *)
 Definition exec_p2_secrecy := @s5x5_exec_p2_secrecy.
 
 (** exec_joint_secrecy — exact privacy in mutual information and conditional
     entropy form for the two pile coalitions read together, under the two
-    per-pile cardinality bounds.
-    @intent: alias of s5x5_exec_joint_secrecy. *)
+    per-pile cardinality bounds. *)
 Definition exec_joint_secrecy := @s5x5_exec_joint_secrecy.
 
 (******************************************************************************)
@@ -385,21 +340,18 @@ Definition exec_joint_secrecy := @s5x5_exec_joint_secrecy.
 
 (** word_pile1_bound — cut-level endpoint marginal mixing inside the first
     pile at word length L, conditional on s5_rayleigh_Q2_R; a position
-    pushforward of the cut distribution, not an executed observer.
-    @intent: alias of s5x5_word_pile1_bound. *)
+    pushforward of the cut distribution, not an executed observer. *)
 Definition word_pile1_bound := @s5x5_word_pile1_bound.
 
 (** word_pile2_bound — cut-level endpoint marginal mixing inside the second
     pile at word length L, conditional on s5_rayleigh_Q2_R; a position
-    pushforward of the cut distribution, not an executed observer.
-    @intent: alias of s5x5_word_pile2_bound. *)
+    pushforward of the cut distribution, not an executed observer. *)
 Definition word_pile2_bound := @s5x5_word_pile2_bound.
 
 (** word_seat_bound — the cut-level one-seat endpoint marginal bound against
     global uniform on ten seats at word length L, conditional on
     s5_rayleigh_Q2_R; a position pushforward of the cut distribution, not an
-    executed observer.
-    @intent: alias of s5x5_word_seat_bound. *)
+    executed observer. *)
 Definition word_seat_bound := @s5x5_word_seat_bound.
 
 (** exec_pile1_bound — executed endpoint marginal mixing, conditional on
@@ -408,25 +360,21 @@ Definition word_seat_bound := @s5x5_word_seat_bound.
     one first-pile seat and the first-pile encoder-image ideal reading is at
     most sqrt 5 times the lazy coefficient to the power L. One endpoint
     marginal; no coalition, privacy, secrecy or leakage conclusion is
-    claimed.
-    @intent: alias of s5x5_exec_pile1_bound. *)
+    claimed. *)
 Definition exec_pile1_bound := @s5x5_exec_pile1_bound.
 
 (** exec_pile2_bound — the second-pile executed endpoint marginal mixing
-    bound, conditional on s5_rayleigh_Q2_R.
-    @intent: alias of s5x5_exec_pile2_bound. *)
+    bound, conditional on s5_rayleigh_Q2_R. *)
 Definition exec_pile2_bound := @s5x5_exec_pile2_bound.
 
 (** exec_seat_bound — the per-seat executed endpoint marginal mixing bound
     against the seat's own pile's encoder-image ideal reading, conditional
-    on s5_rayleigh_Q2_R.
-    @intent: alias of s5x5_exec_seat_bound. *)
+    on s5_rayleigh_Q2_R. *)
 Definition exec_seat_bound := @s5x5_exec_seat_bound.
 
 (** exec_seat_uniform_ub — the executed ceiling against global uniform: the
     ideal-to-uniform distance plus the mixing term, the leading term being
-    the ideal's own distance and deliberately not a constant.
-    @intent: alias of s5x5_exec_seat_uniform_ub. *)
+    the ideal's own distance and deliberately not a constant. *)
 Definition exec_seat_uniform_ub := @s5x5_exec_seat_uniform_ub.
 
 (******************************************************************************)
@@ -449,127 +397,113 @@ Definition exec_seat_uniform_ub := @s5x5_exec_seat_uniform_ub.
 (* confinement at the executed reading itself.                                *)
 (******************************************************************************)
 
-(** det_transfer_status — the deterministic path's transfer status.
-    @intent: NoModelComparison, the path carrying recovery only. *)
+(** det_transfer_status — the deterministic path's transfer status is
+    NoModelComparison: the path carries recovery only and is never checked
+    against an idealized model. *)
 Definition det_transfer_status : TransferStatus := NoModelComparison.
 
-(** rand_transfer_status — the randomized path's transfer status.
-    @intent: StaticExecutedOnly, the path carrying its landed static secrecy
-    results to its executed observers and no ideal-to-finite theorem. *)
+(** rand_transfer_status — the randomized path's transfer status is
+    StaticExecutedOnly: the path carries its landed static secrecy results
+    to its executed observers, with no ideal-to-finite transfer theorem. *)
 Definition rand_transfer_status : TransferStatus := StaticExecutedOnly.
 
 (** rand_content_traceE — the executed content reader is the landed
     player-trace random variable, one of the equalities witnessing
-    rand_transfer_status.
-    @intent: alias of s5x5_sample_content_traceE. *)
+    rand_transfer_status. *)
 Definition rand_content_traceE := @s5x5_sample_content_traceE.
 
 (** rand_pile1_seat_viewE — the executed first-pile seat reader is that
     party's first-pile share, one of the equalities witnessing
-    rand_transfer_status.
-    @intent: alias of s5x5_p1_seat_viewE. *)
+    rand_transfer_status. *)
 Definition rand_pile1_seat_viewE := @s5x5_p1_seat_viewE.
 
 (** rand_pile2_seat_viewE — the executed second-pile seat reader is that
     party's second-pile share, one of the equalities witnessing
-    rand_transfer_status.
-    @intent: alias of s5x5_p2_seat_viewE. *)
+    rand_transfer_status. *)
 Definition rand_pile2_seat_viewE := @s5x5_p2_seat_viewE.
 
 (** rand_pile1_viewE — the executed first-pile coalition reader is the first
     pile's randomized sharing view, one of the equalities witnessing
-    rand_transfer_status.
-    @intent: alias of s5x5_p1_viewE. *)
+    rand_transfer_status. *)
 Definition rand_pile1_viewE := @s5x5_p1_viewE.
 
 (** rand_pile2_viewE — the executed second-pile coalition reader is the second
     pile's randomized sharing view, one of the equalities witnessing
-    rand_transfer_status.
-    @intent: alias of s5x5_p2_viewE. *)
+    rand_transfer_status. *)
 Definition rand_pile2_viewE := @s5x5_p2_viewE.
 
 (** rand_joint_viewE — the executed joint reader is the product leakage
-    witness's view, the joint equality witnessing rand_transfer_status.
-    @intent: alias of s5x5_joint_viewE. *)
+    witness's view, the joint equality witnessing rand_transfer_status. *)
 Definition rand_joint_viewE := @s5x5_joint_viewE.
 
-(** pile1_word_transfer_status — the first pile's finite-word path's transfer
-    status.
-    @intent: IdealFinite, the path carrying the observer-level public
-    model-transfer theorem exec_pile1_bound to the first-pile encoder-image
-    ideal reading on the endpoint carrier 'I_10. That ideal is not the
+(** pile1_word_transfer_status — the first pile's finite-word path's
+    transfer status is IdealFinite: the path carries the observer-level
+    transfer theorem exec_pile1_bound to the first-pile encoder-image ideal
+    reading on the endpoint carrier 'I_10. That ideal is not the
     group-uniform ideal: the base premise word_missing_premise on the cut
     carrier {perm 'I_10} remains absent and, for the uniform distribution on
-    the generated group, unsatisfiable at every delta below one. No bound
-    against group uniform on any carrier is stated or implied. *)
+    the generated group, is unsatisfiable at every delta below one, so no
+    bound against group uniform on any carrier is stated or implied. *)
 Definition pile1_word_transfer_status : TransferStatus := IdealFinite.
 
-(** pile2_word_transfer_status — the second pile's finite-word path's transfer
-    status.
-    @intent: IdealFinite, for the observer-level transfer exec_pile2_bound to
-    the second-pile encoder-image ideal, under the same absent and, for the
-    group-uniform ideal, unsatisfiable cut-carrier premise. *)
+(** pile2_word_transfer_status — the second pile's finite-word path's
+    transfer status is IdealFinite, for the observer-level transfer
+    exec_pile2_bound to the second-pile encoder-image ideal, under the same
+    absent and, for the group-uniform ideal, unsatisfiable cut-carrier
+    premise. *)
 Definition pile2_word_transfer_status : TransferStatus := IdealFinite.
 
-(** word_missing_premise — the absent premise named as a proposition.
-    @intent: alias of s5x5_word_base_premise, a variation-distance bound
-    between the finite-word cut distribution on {perm 'I_10} and a reference
-    distribution on that carrier. *)
+(** word_missing_premise — the absent premise, named as a proposition: a
+    variation-distance bound between the finite-word cut distribution on
+    {perm 'I_10} and a reference distribution on that carrier. *)
 Definition word_missing_premise := @s5x5_word_base_premise.
 
 (** word_transfer_conditional — the generic transfer inequality at the
-    finite-word cut distribution, under that premise.
-    @intent: alias of s5x5_word_transfer_conditional. *)
+    finite-word cut distribution, under that premise. *)
 Definition word_transfer_conditional := @s5x5_word_transfer_conditional.
 
 (** pile1_limitation_transfer_status — the first pile's global-uniform
-    limitation path's transfer status.
-    @intent: NegativeTransfer, the path carrying exec_pile1_floor, which
-    transports the first-pile encoder-image ideal's support confinement to
-    the executed seat reading by the reverse triangle inequality. *)
+    limitation path's transfer status is NegativeTransfer: the path carries
+    exec_pile1_floor, which transports the first-pile encoder-image ideal's
+    support confinement to the executed seat reading by the reverse
+    triangle inequality. *)
 Definition pile1_limitation_transfer_status : TransferStatus :=
   NegativeTransfer.
 
 (** pile2_limitation_transfer_status — the second pile's global-uniform
-    limitation path's transfer status.
-    @intent: NegativeTransfer, for the second-pile transport
-    exec_pile2_floor. *)
+    limitation path's transfer status is NegativeTransfer, for the
+    second-pile transport exec_pile2_floor. *)
 Definition pile2_limitation_transfer_status : TransferStatus :=
   NegativeTransfer.
 
 (** word_pile1_floor — cut-level negative mixing result for the first pile:
     the reverse triangle lower bound to global uniform on ten seats at the
     sheet-endpoint reader of the word-cut distribution, conditional on
-    s5_rayleigh_Q2_R.
-    @intent: alias of s5x5_word_pile1_floor. *)
+    s5_rayleigh_Q2_R. *)
 Definition word_pile1_floor := @s5x5_word_pile1_floor.
 
 (** word_pile2_floor — cut-level negative mixing result for the second pile:
     the reverse triangle lower bound to global uniform on ten seats at the
     sheet-endpoint reader of the word-cut distribution, conditional on
-    s5_rayleigh_Q2_R.
-    @intent: alias of s5x5_word_pile2_floor. *)
+    s5_rayleigh_Q2_R. *)
 Definition word_pile2_floor := @s5x5_word_pile2_floor.
 
 (** word_positive_regime — the word lengths at which the two floors are
-    positive, named by the numeric fact that delimits them.
-    @intent: alias of s5x5_lazy_bound_lt1, the statement that the mixing
-    factor sqrt 5 times the L-th power of the lazy coefficient is below one
-    from word length seventeen on. *)
+    positive: sqrt 5 times the L-th power of the lazy mixing coefficient
+    drops below one from word length seventeen on, which is the numeric
+    fact that delimits the positive regime. *)
 Definition word_positive_regime := @s5x5_lazy_bound_lt1.
 
 (** word_pile1_floor_gt0 — cut-level negative mixing result for the first
     pile in its positive regime: at word length at least seventeen the
     first pile's sheet-endpoint reading of the word-cut distribution is at
-    positive distance from global uniform, conditional on s5_rayleigh_Q2_R.
-    @intent: alias of s5x5_word_pile1_floor_gt0. *)
+    positive distance from global uniform, conditional on s5_rayleigh_Q2_R. *)
 Definition word_pile1_floor_gt0 := @s5x5_word_pile1_floor_gt0.
 
 (** word_pile2_floor_gt0 — cut-level negative mixing result for the second
     pile in its positive regime: at word length at least seventeen the
     second pile's sheet-endpoint reading of the word-cut distribution is at
-    positive distance from global uniform, conditional on s5_rayleigh_Q2_R.
-    @intent: alias of s5x5_word_pile2_floor_gt0. *)
+    positive distance from global uniform, conditional on s5_rayleigh_Q2_R. *)
 Definition word_pile2_floor_gt0 := @s5x5_word_pile2_floor_gt0.
 
 (** exec_pile1_floor — negative result against global uniform at the
@@ -578,38 +512,32 @@ Definition word_pile2_floor_gt0 := @s5x5_word_pile2_floor_gt0.
     global uniform is at least one minus the mixing term, transported by
     the reverse triangle inequality from the encoder-image pile ideal's
     support confinement. One endpoint marginal; no coalition or privacy
-    conclusion is claimed.
-    @intent: alias of s5x5_exec_pile1_floor. *)
+    conclusion is claimed. *)
 Definition exec_pile1_floor := @s5x5_exec_pile1_floor.
 
 (** exec_pile2_floor — the second-pile executed negative result against
     global uniform, conditional on s5_rayleigh_Q2_R for the stated
-    constant.
-    @intent: alias of s5x5_exec_pile2_floor. *)
+    constant. *)
 Definition exec_pile2_floor := @s5x5_exec_pile2_floor.
 
 (** exec_pile1_floor_gt0 — the first-pile executed floor in its positive
     regime, at word length at least seventeen, conditional on
-    s5_rayleigh_Q2_R.
-    @intent: alias of s5x5_exec_pile1_floor_gt0. *)
+    s5_rayleigh_Q2_R. *)
 Definition exec_pile1_floor_gt0 := @s5x5_exec_pile1_floor_gt0.
 
 (** exec_pile2_floor_gt0 — the second-pile executed floor in its positive
     regime, at word length at least seventeen, conditional on
-    s5_rayleigh_Q2_R.
-    @intent: alias of s5x5_exec_pile2_floor_gt0. *)
+    s5_rayleigh_Q2_R. *)
 Definition exec_pile2_floor_gt0 := @s5x5_exec_pile2_floor_gt0.
 
 (** exec_pile1_uniform_ge — the unconditional first-pile support floor at
     the executed observer: distance at least one from global uniform at
     every word length, by encoder support confinement alone, with no
-    analytical certificate.
-    @intent: alias of s5x5_exec_pile1_uniform_ge. *)
+    analytical certificate. *)
 Definition exec_pile1_uniform_ge := @s5x5_exec_pile1_uniform_ge.
 
 (** exec_pile2_uniform_ge — the unconditional second-pile support floor at
-    the executed observer.
-    @intent: alias of s5x5_exec_pile2_uniform_ge. *)
+    the executed observer. *)
 Definition exec_pile2_uniform_ge := @s5x5_exec_pile2_uniform_ge.
 
 End S5x5Analysis.

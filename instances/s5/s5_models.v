@@ -85,9 +85,9 @@ Local Open Scope entropy_scope.
 
 Section s5_sample_layers.
 
-(** s5_M — the S_5 adjacent-transposition monodromy template at N = 5.
-    @intent: the Gen_PGGTypes form s5_PI and s5_plug carry, spelled out here
-    because the instance files keep it section-local. *)
+(** s5_M — the Gen_PGGTypes instance for the S_5 adjacent-transposition
+    monodromy template, the group carrier every sample layer and executed
+    bound in this file is stated against. *)
 Local Notation s5_M := (@Gen_PGGTypes 3 3 (path_gen_tuple 3)).
 
 Let mpS : MonodromyProfile := s5_profile.
@@ -98,36 +98,36 @@ Variable R : realType.
 (*     The randomized exact-secrecy sample layer                              *)
 (******************************************************************************)
 
-(** s5_rand_sampleP — the uniform iid sampler distribution over the tape.
-    @intent: the distribution of s5_trace's secrecy results respelled, that
-    file keeping it as a section-local Let: fdist_uniform (card_ZN_subproof 3)
-    raised to the fifth power. *)
+(** s5_rand_sampleP — the uniform iid distribution on the tape
+    'rV['Z_5]_5, the fifth power of fdist_uniform on 'Z_5. It is the base
+    distribution s5_trace's secrecy results are proved against, restated
+    here as a standalone definition so the randomized sample layer below
+    can be built over it. *)
 Definition s5_rand_sampleP : R.-fdist 'rV['Z_5]_5 :=
   fdist_uniform (pgg_canonical_sharing.card_ZN_subproof 3) `^ 5.
 
-(** s5_rand_sample — the S_5 randomized exact-secrecy sample adapter.
-    @intent: the sample layer over s5_rand_exec_plug whose sample space is the
-    tape 'rV['Z_5]_5 under s5_rand_sampleP, the run argument being the tape
-    itself and the cut the identity, the cut the landed executed results are
-    stated at. *)
+(** s5_rand_sample — the sample adapter over s5_rand_exec_plug with sample
+    space 'rV['Z_5]_5 under s5_rand_sampleP, run argument the tape itself,
+    and cut the identity permutation. The identity cut is the cut the
+    landed executed-security results below are stated at. *)
 Definition s5_rand_sample : SampleAdapter R s5_rand_exec_plug :=
   @MkSampleAdapter R mpS s5_rand_exec_plug [the finType of 'rV['Z_5]_5]
     s5_rand_sampleP idfun (fun _ => 1%g).
 
-(** s5_rand_sample_argE — the randomized adapter's run argument is the tape.
-    @composes: s5_sample_content_traceE *)
+(** s5_rand_sample_argE — the randomized adapter's run argument is the
+    tape itself. *)
 Lemma s5_rand_sample_argE (u : 'rV['Z_5]_5) : s5_rand_sample.(sa_arg) u = u.
 Proof. by []. Qed.
 
-(** s5_rand_sample_cutE — the randomized adapter's cut is the identity.
-    @composes: s5_sample_content_traceE, s5_sample_coalition_viewE *)
+(** s5_rand_sample_cutE — the randomized adapter's cut is the identity
+    permutation. *)
 Lemma s5_rand_sample_cutE (u : 'rV['Z_5]_5) :
   s5_rand_sample.(sa_cut) u = (1%g : pgg_gT s5_M).
 Proof. by []. Qed.
 
-(** s5_rand_cut_distE — the randomized adapter's cut distribution is the point
-    distribution at the identity.
-    @main architecture: sa_cut_dist s5_rand_sample = fdist1 1. *)
+(** s5_rand_cut_distE — the randomized adapter's cut distribution is the
+    point mass at the identity, since the cut map ignores the tape and
+    always returns 1. *)
 Lemma s5_rand_cut_distE :
   @sa_cut_dist R mpS s5_rand_exec_plug s5_rand_sample
   = fdist1 (1%g : pgg_gT s5_M).
@@ -143,20 +143,21 @@ Qed.
 (*     The finite content-trace reader on the randomized layer                *)
 (******************************************************************************)
 
-(** s5_sample_content_trace — seat i's executed trace content as a random
-    variable on the tape distribution.
-    @intent: s5_trace.content_of applied to the plug's raw participant trace
-    at the sample's argument and cut, a finite reader of a sequence-carried
-    trace. *)
+(** s5_sample_content_trace — seat i's executed trace content, read by
+    s5_trace.content_of off the plug's raw participant trace at the
+    sample's run argument and cut, as a random variable on the tape
+    distribution s5_rand_sampleP. *)
 Definition s5_sample_content_trace (i : 'I_(pi_T' (mp_PI mpS)).+1)
     : {RV s5_rand_sampleP -> 'I_(pgg_N' (mp_M mpS)).+1} :=
   fun u => s5_trace.content_of (@exec_participant_trace mpS s5_rand_exec_plug
                          (s5_rand_sample.(sa_arg) u)
                          (s5_rand_sample.(sa_cut) u) 0 i).
 
-(** s5_sample_content_traceE — the executed content reader is the landed
-    player-trace random variable.
-    @composes: s5_exec_trace_secrecy *)
+(** s5_sample_content_traceE — the executed content reader
+    s5_sample_content_trace i equals the player-trace random variable
+    s5_player_trace R i already proved secret. The identification lets
+    s5_exec_trace_secrecy below reuse s5_trace_secrecy unchanged instead
+    of re-deriving conditional independence for the executed adapter. *)
 Lemma s5_sample_content_traceE (i : 'I_(pi_T' (mp_PI mpS)).+1) :
   s5_sample_content_trace i = s5_player_trace R i.
 Proof.
@@ -167,12 +168,11 @@ rewrite /s5_sample_content_trace /exec_participant_trace /exec_seat_id
 by rewrite /s5_player_trace.
 Qed.
 
-(** s5_exec_trace_secrecy — a single corrupted seat's executed trace leaves the
-    tape secret's conditional entropy equal to its plain entropy.
-    @main security: trace secrecy in conditional-entropy form, at the executed
-    content reader of s5_rand_sample: `H( rsh_secret (unif_randomized_sharing
-    R 3 4) | s5_sample_content_trace i ) = `H `p_ (rsh_secret
-    (unif_randomized_sharing R 3 4)), for every seat i. *)
+(** s5_exec_trace_secrecy — for every seat i, conditioning the tape
+    secret's entropy on that seat's executed trace content leaves the
+    entropy unchanged: a single corrupted seat learns nothing about the
+    secret from its own executed trace. This is exact information-theoretic
+    secrecy, not a computational or asymptotic bound. *)
 Theorem s5_exec_trace_secrecy (i : 'I_(pi_T' (mp_PI mpS)).+1) :
   `H( rsh_secret (@unif_randomized_sharing R 3 4)
       | s5_sample_content_trace i )
@@ -183,9 +183,11 @@ Proof. by rewrite s5_sample_content_traceE; exact: s5_trace_secrecy. Qed.
 (*     The coalition endpoint reader on the randomized layer                  *)
 (******************************************************************************)
 
-(** s5_sample_coalition_viewE — the executed coalition endpoint reader is the
-    randomized sharing's coalition view.
-    @composes: s5_exec_coalition_secrecy *)
+(** s5_sample_coalition_viewE — the executed coalition endpoint reader
+    sa_coalition_view s5_rand_sample 0 C equals the randomized sharing's
+    coalition view rsh_view C. The identification lets
+    s5_exec_coalition_secrecy below reuse the sharing-level secrecy
+    result for the executed adapter's coalition reading. *)
 Lemma s5_sample_coalition_viewE (C : {set 'I_(pi_T' (mp_PI mpS)).+1}) :
   @sa_coalition_view R mpS s5_rand_exec_plug s5_rand_sample 0 C
   = rsh_view (@unif_randomized_sharing R 3 4) C.
@@ -198,13 +200,12 @@ rewrite /s5_rcontent_obs s5_rand_sample_cutE s5_rho1_index.
 by rewrite /s5_rfree_layout tnth_mktuple s5_rfree_shareE.
 Qed.
 
-(** s5_exec_coalition_secrecy — a coalition of fewer than five seats reads its
-    executed endpoints without learning anything about the tape secret.
-    @main security: exact secrecy at the executed coalition reader of
-    s5_rand_sample, in both forms: the mutual information of the tape secret
-    and sa_coalition_view s5_rand_sample 0 C is zero, and the conditional
-    entropy of the tape secret given that reading is its entropy, whenever
-    #|C| < 5. *)
+(** s5_exec_coalition_secrecy — a coalition of fewer than five seats reads
+    its executed endpoints with zero mutual information about the tape
+    secret, and the same reading leaves the secret's conditional entropy
+    equal to its entropy. This is the full-coalition strengthening of
+    s5_exec_trace_secrecy: it holds for any proper subset of seats acting
+    together, not only for a single seat. *)
 Theorem s5_exec_coalition_secrecy (C : {set 'I_(pi_T' (mp_PI mpS)).+1})
     (HC : (#|C| < 5)%N) :
   `I( rsh_secret (@unif_randomized_sharing R 3 4) ;
@@ -226,41 +227,44 @@ Qed.
 Variable secretP : R.-fdist 'I_5.
 Variable L : nat.
 
-(** s5_word_sampleT — the finite-word sample space.
-    @intent: pairs of a dealt position and an L-letter word over the four
-    path-graph generators. *)
+(** s5_word_sampleT — the finite-word sample space: pairs of a dealt
+    position in 'I_5 and an L-letter word over the four path-graph
+    generators. *)
 Definition s5_word_sampleT : finType :=
   [the finType of ('I_5 * L.-tuple 'I_4)%type].
 
-(** s5_word_sampleP — the finite-word sample distribution.
-    @intent: the product of the secret prior with the uniform word
-    distribution word_uniform 3 L, the distribution rho_from_words is the
-    image of. *)
+(** s5_word_sampleP — the finite-word sample distribution: the secret
+    prior times the uniform word distribution word_uniform 3 L, the
+    distribution rho_from_words is the pushforward of. *)
 Definition s5_word_sampleP : R.-fdist s5_word_sampleT :=
   (secretP `x (@word_uniform R 3 L))%fdist.
 
-(** s5_word_cut — the finite-word cut map.
-    @intent: the evaluation in S_5 of the sampled generator word. *)
+(** s5_word_cut — the finite-word cut map: the evaluation in S_5 of the
+    sampled generator word. *)
 Definition s5_word_cut (u : s5_word_sampleT) : pgg_gT (mp_M mpS) :=
   @word_eval s5_M L u.2.
 
-(** s5_word_sample — the S_5 finite-word endpoint sample adapter.
-    @intent: the sample layer over s5_exec_plug whose sample space is
-    s5_word_sampleT under s5_word_sampleP, the run argument being the dealt
-    position and the cut the evaluated word. *)
+(** s5_word_sample — the sample adapter over s5_exec_plug with sample
+    space s5_word_sampleT under s5_word_sampleP, run argument the dealt
+    position, and cut the evaluated generator word. This is the finite
+    fixed-length-word layer, distinct from the randomized tape layer
+    above: no theorem in this file relates their two base
+    distributions. *)
 Definition s5_word_sample : SampleAdapter R s5_exec_plug :=
   @MkSampleAdapter R mpS s5_exec_plug s5_word_sampleT s5_word_sampleP
     fst s5_word_cut.
 
-(** s5_word_sndE — the word marginal of the finite-word sample distribution is
-    the uniform word distribution.
-    @composes: s5_word_cut_distE *)
+(** s5_word_sndE — the word marginal of the finite-word sample
+    distribution s5_word_sampleP is the uniform word distribution
+    word_uniform 3 L. *)
 Lemma s5_word_sndE : fdist_snd s5_word_sampleP = @word_uniform R 3 L.
 Proof. by rewrite /s5_word_sampleP -fdistX_prod fdistX2 fdist_prod1. Qed.
 
-(** s5_word_cut_distE — the finite-word adapter's cut distribution is the
-    word-induced shuffle distribution the spectral theorem bounds.
-    @composes: s5_word_endpoint_bound, s5_word_cut_imageE *)
+(** s5_word_cut_distE — the finite-word adapter's cut distribution equals
+    rho_from_words L (path_gen_tuple 3), the word-induced shuffle
+    distribution the S_5 spectral theorem bounds. This is what lets
+    s5_word_endpoint_bound below invoke s5_spectral_convergence_proved
+    directly. *)
 Lemma s5_word_cut_distE :
   @sa_cut_dist R mpS s5_exec_plug s5_word_sample
   = rho_from_words L (path_gen_tuple 3).
@@ -269,11 +273,11 @@ rewrite /sa_cut_dist /rho_from_words -s5_word_sndE /fdist_snd fdistmap_comp.
 by [].
 Qed.
 
-(** s5_word_cut_imageE — the finite-word adapter's shuffle-image distribution
-    is the same word-induced distribution.
-    @main architecture: sa_cut_dist_image s5_word_sample = rho_from_words L
-    (path_gen_tuple 3), the representation of this instance being the
-    identity. *)
+(** s5_word_cut_imageE — the finite-word adapter's shuffle-image
+    distribution sa_cut_dist_image s5_word_sample equals rho_from_words L
+    (path_gen_tuple 3): the representation this instance uses to read the
+    cut back into the shuffle carrier is the identity, so image and cut
+    distribution coincide. *)
 Lemma s5_word_cut_imageE :
   @sa_cut_dist_image R mpS s5_exec_plug s5_word_sample
   = rho_from_words L (path_gen_tuple 3).
@@ -283,15 +287,13 @@ rewrite -[in RHS](fdistmap_id (rho_from_words L (path_gen_tuple 3))).
 by congr fdistmap; exact: boolp.funext.
 Qed.
 
-(** s5_word_endpoint_bound — the endpoint marginal bound at the finite-word
-    adapter's own cut distribution.
-    @main bound: endpoint marginal mixing, conditional on the trusted
-    analytical certificate s5_rayleigh_Q2_R: the variation distance between
-    the position pushforward of sa_cut_dist s5_word_sample and the uniform
-    distribution on 'I_5 is at most sqrt 5 times alpha to the power L, in the
-    repository's full-L1 convention. The statement quantifies over one
-    position, so it bounds one seat's endpoint marginal and not a coalition
-    view. *)
+(** s5_word_endpoint_bound — at the finite-word adapter's own cut
+    distribution, one seat's position marginal sits within
+    sqrt 5 * alpha^L of uniform, in variation distance under the
+    repository's full-L1 convention. This is the S_5 spectral mixing
+    bound (s5_spectral_convergence_proved) transported to the sample
+    layer; it is conditional on the trusted certificate s5_rayleigh_Q2_R
+    and bounds one seat's endpoint marginal only, not a coalition view. *)
 Lemma s5_word_endpoint_bound (s : 'I_5) :
   (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
                (@sa_cut_dist R mpS s5_exec_plug s5_word_sample))
@@ -303,22 +305,24 @@ Proof. by rewrite s5_word_cut_distE; exact: s5_spectral_convergence_proved. Qed.
 (*     The generic transfer theorem at the cut carrier                        *)
 (******************************************************************************)
 
-(** s5_word_base_premise — the base-distribution premise of the generic
-    transfer theorem at the cut carrier.
-    @intent: a variation-distance bound between the finite-word adapter's cut
-    distribution on {perm 'I_5} and a reference distribution on the same
-    carrier. The landed spectral theorem bounds the pushforward along a
-    position reader, on the carrier 'I_5, and therefore does not instantiate
-    this proposition. The bound is read in the repository's full-L1
-    convention, the convention of s5_word_endpoint_bound. *)
+(** s5_word_base_premise — a variation-distance bound, in the
+    repository's full-L1 convention, between the finite-word adapter's
+    cut distribution on the group carrier {perm 'I_5} and a reference
+    distribution on that same carrier. The landed spectral theorem
+    (s5_spectral_convergence_proved) bounds a position pushforward on
+    'I_5, a different carrier, so it does not discharge this premise:
+    s5_word_transfer_conditional below stays conditional on a hypothesis
+    this file supplies no proof of. *)
 Definition s5_word_base_premise (Q : R.-fdist {perm 'I_5}) (delta : R) : Prop :=
   (var_dist (@sa_cut_dist R mpS s5_exec_plug s5_word_sample) Q <= delta)%R.
 
-(** s5_word_transfer_conditional — the generic transfer theorem applies to any
-    pair of cut readers once the base-distribution premise is supplied.
-    @main bound: two readers of the finite-word cut distribution whose
-    pushforwards along Q agree have pushforwards within delta + delta, in the
-    repository's full-L1 convention, provided s5_word_base_premise Q delta. *)
+(** s5_word_transfer_conditional — given s5_word_base_premise Q delta,
+    any two readers of the finite-word cut distribution whose
+    pushforwards along Q agree have pushforwards within delta + delta of
+    each other, in the repository's full-L1 convention. The premise is a
+    hypothesis, not a fact this file proves (see s5_word_base_premise):
+    this lemma is the generic transfer machinery kept ready for whichever
+    future proof discharges that premise. *)
 Lemma s5_word_transfer_conditional
     (Q : R.-fdist {perm 'I_5}) (delta : R) (B : finType)
     (fx fy : {perm 'I_5} -> B) :
@@ -348,10 +352,9 @@ End s5_sample_layers.
 (******************************************************************************)
 (*     The executed endpoint bound against the encoder-image ideal            *)
 (*                                                                            *)
-(* Amended work package A (user-approved 2026-08-13): the executed seat      *)
-(* reading is compared with the encoder-image ideal, not with uniform. The   *)
-(* uniform-ideal form is false for this plug's deterministic encoder; its    *)
-(* compiled refutation is recorded in the 2026-08-13 completion response.    *)
+(* The executed seat reading is compared against the encoder-image ideal,    *)
+(* not against uniform: the uniform-ideal statement is false for this        *)
+(* plug's deterministic encoder.                                             *)
 (******************************************************************************)
 
 Section s5_exec_ideal.
@@ -364,26 +367,25 @@ Local Open Scope ring_scope.
 
 Local Notation s5_M := (@Gen_PGGTypes 3 3 (path_gen_tuple 3)).
 
-(** s5_ideal_reading — the encoder-image ideal reading: the content one seat
-    reads when the dealt position is exactly uniform, mixed over the secret
-    prior.
-    @intent: the pushforward of secretP times the uniform position along the
-    encoder tnth (ts_encode s5_scheme). The ideal is neither uniform nor
-    secret-independent. *)
+(** s5_ideal_reading — the content one seat reads when the dealt
+    position is exactly uniform, mixed over the secret prior: the
+    pushforward of secretP times the uniform position on 'I_5 along the
+    encoder tnth (ts_encode s5_scheme). This ideal is neither uniform nor
+    secret-independent, which is why the executed bound below is stated
+    against it rather than against the uniform distribution. *)
 Definition s5_ideal_reading (secretP : R.-fdist 'I_5) : R.-fdist 'I_5 :=
   fdistmap (fun sq : 'I_5 * 'I_5 => tnth (ts_encode s5_scheme sq.1) sq.2)
     (secretP `x (fdist_uniform (card_ord 5))).
 
-(** s5_exec_endpoint_bound — executed endpoint marginal mixing, conditional
-    on the trusted analytical certificate s5_rayleigh_Q2_R.
-    @main bound: the variation distance, in the repository's full-L1
-    convention, between sa_seat_dist of the interpreter-executed finite-word
-    adapter at one seat and the encoder-image ideal reading, the content
-    that seat reads when the dealt position is exactly uniform mixed over
-    the secret prior, is at most sqrt 5 times alpha to the power L. The
-    statement bounds one seat's endpoint marginal, the ideal reading is
-    neither uniform nor secret-independent, and no coalition, privacy,
-    secrecy or leakage conclusion is claimed. *)
+(** s5_exec_endpoint_bound — one seat's interpreter-executed reading,
+    under the finite-word adapter, sits within sqrt 5 * alpha^L of the
+    encoder-image ideal reading s5_ideal_reading, in variation distance
+    under the repository's full-L1 convention. This is
+    s5_spectral_convergence_proved transported through the executed
+    interpreter, so it is conditional on the trusted certificate
+    s5_rayleigh_Q2_R. It bounds one seat's endpoint marginal only: the
+    ideal reading is neither uniform nor secret-independent, and no
+    coalition, privacy, secrecy, or leakage conclusion follows from it. *)
 Lemma s5_exec_endpoint_bound (secretP : R.-fdist 'I_5) (L : nat)
     (i : 'I_(pi_T' (mp_PI mpS)).+1) :
   var_dist
@@ -439,17 +441,17 @@ End s5_exec_ideal.
 (*     The typed model families of the S_5 analysis paths                     *)
 (******************************************************************************)
 
-(** s5_rand_family — the randomized tape model as a unit-indexed family.
-    @intent: the AnalysisModelFamily over s5_rand_observed whose one member
-    at every real field is s5_rand_sample. *)
+(** s5_rand_family — the randomized tape model packaged as an
+    AnalysisModelFamily over s5_rand_observed, a trivial unit-indexed
+    family whose one member at every real field R is s5_rand_sample R. *)
 Definition s5_rand_family : AnalysisModelFamily s5_rand_observed :=
   @MkAnalysisModelFamily s5_rand_observed (fun _ => unit)
     (fun R _ => s5_rand_sample R).
 
-(** s5_word_family — the finite-word model family, indexed by a secret prior
-    and a word length.
-    @intent: the AnalysisModelFamily over s5_observed sending an index
-    (secretP, L) to s5_word_sample secretP L. *)
+(** s5_word_family — the finite-word model, packaged as an
+    AnalysisModelFamily over s5_observed and indexed by a secret prior
+    and a word length: the index (secretP, L) sends to
+    s5_word_sample secretP L. *)
 Definition s5_word_family : AnalysisModelFamily s5_observed :=
   @MkAnalysisModelFamily s5_observed
     (fun R => (R.-fdist 'I_5 * nat)%type)

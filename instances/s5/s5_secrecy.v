@@ -28,9 +28,10 @@ Variable U : finType.
 Variable P : R.-fdist U.
 
 (** s5_view_secrecy — a sub-threshold coalition of the S_5 5-of-5 additive
-    sharing learns nothing about the dealt position.
-    @main security: zero mutual information and unchanged conditional entropy
-    for any coalition below the threshold. *)
+    sharing learns nothing about the dealt position: zero mutual information
+    and unchanged conditional entropy between the secret and the
+    coalition's view, for any coalition below the full five-seat
+    threshold. *)
 Lemma s5_view_secrecy (rs : RandomizedSharing P 3 4)
     (C : {set 'I_5}) (HC : (#|C| < 5)%N) :
   `I( lw_secret (mechanism_leakage (Additive rs HC)) ;
@@ -40,10 +41,11 @@ Lemma s5_view_secrecy (rs : RandomizedSharing P 3 4)
     = `H `p_ (lw_secret (mechanism_leakage (Additive rs HC))).
 Proof. apply: leakage_of_view_indep; exact: lw_indep _. Qed.
 
-(** s5_view_secrecy_concrete — the S_5 secrecy with the concrete uniform iid
-    sampler, with no abstract sharing hypothesis.
-    @main security: zero mutual information and unchanged conditional entropy for
-    any sub-threshold coalition over the uniform iid 5-of-5 sharing. *)
+(** s5_view_secrecy_concrete — the same S_5 secrecy statement instantiated
+    at the concrete uniform iid sampler, with no abstract sharing
+    hypothesis: zero mutual information and unchanged conditional entropy
+    between the secret and the view, for any sub-threshold coalition over
+    the uniform iid 5-of-5 sharing. *)
 Lemma s5_view_secrecy_concrete (C : {set 'I_5}) (HC : (#|C| < 5)%N) :
   `I( lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC)) ;
       lw_view  (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC)) ) = 0%R /\

@@ -149,10 +149,10 @@ case: s Hmem => [[|[|[|[|[|s]]]]] Hs] //= Hmem.
   rewrite tpermR; rewrite -?val_eqE //.
 Qed.
 
-(* ShuffleMarginalBound at L=1 via fiber counting.
-   Epsilon = 6/5, much tighter than DPI bound 2*(5!-4)/5! ≈ 1.93.
-   @intent: security_witness_fiber at the adjacent-transposition generators,
-   word length 1 and the fiber-counted epsilon proof. *)
+(* ShuffleMarginalBound at L=1 via fiber counting: epsilon = 6/5, tighter
+   than the generic DPI bound of 2*(5!-4)/5! ~ 1.93. This is the S_5
+   instance's certificate-free security witness, built from the fiber
+   count in s5_endpoint_bound_fiber. *)
 Definition s5_security_witness_1 : ShuffleMarginalBound R s5_M :=
   security_witness_fiber s5_weval_inj1 s5_endpoint_bound_fiber.
 
@@ -197,10 +197,11 @@ rewrite add0r.
 exact: s5_spectral_convergence_gap.
 Defined.
 
-(** s5_security_witness_schreier — Schreier-based certificate bundle for S_5 at length [L].
-    Kind: instance.
-    @intent: MkShuffleCertificateBundle at the spectral marginal bound of the
-    word distribution, with no exact certificate and s5_asymptotic attached. *)
+(** s5_security_witness_schreier — the S_5 certificate bundle at word
+    length [L]: the spectral marginal bound sqrt(5)*(1-gap)^L on the
+    word-endpoint distribution, paired with the asymptotic rate
+    [s5_asymptotic] and no exact certificate. This is the security input
+    [s5_rigidity_cryptographically_secure] reads at L = 286. *)
 Definition s5_security_witness_schreier (L : nat) :
     ShuffleCertificateBundle R s5_M :=
   @MkShuffleCertificateBundle R s5_M
@@ -276,31 +277,35 @@ Local Notation s5_brings_M :=
 Axiom s5_group_order_eq :
   #|pgg_G s5_brings_M| = 120.
 
-(** s5_n_branch_le — branch-count vs total-ramification inequality for the
-    S_5 Bring's cover (4 <= 246).
-    Kind: helper.
-    Why: discharges [cd_ramif_ge_n_branch] in [s5_brings_covering_data]. *)
+(** s5_n_branch_le — the S_5 Bring's cover has 4 branch points against
+    246 total ramification, so branch count does not exceed ramification.
+    Discharges the [cd_ramif_ge_n_branch] field of [CoveringData] when
+    building [s5_brings_covering_data]. *)
 Lemma s5_n_branch_le : (4 <= 246)%N. Proof. by []. Qed.
 
-(** s5_hurwitz — Riemann-Hurwitz arithmetic for the S_5 cover at genus 4:
-    2*4 + 2*120 = 120*(2*0) + 246 + 2, i.e. 248 = 248.
-    Kind: helper. *)
+(** s5_hurwitz — the Riemann-Hurwitz identity holds for the claimed S_5
+    Bring's cover: 2*4 + 2*120 = 120*(2*0) + 246 + 2, i.e. 248 = 248.
+    Checks that genus 4, base genus 0, degree 120 and total ramification
+    246 are a geometrically consistent covering before they are packaged
+    into [s5_brings_covering_data]. *)
 Lemma s5_hurwitz :
   (2 * 4 + 2 * #|pgg_G s5_brings_M| =
    #|pgg_G s5_brings_M| * (2 * 0) + 246 + 2)%N.
 Proof. by rewrite muln0 muln0 add0n s5_group_order_eq. Qed.
 
-(** s5_brings_covering_data — covering-data record for the S_5 instance
-    (genus = 4, base genus = 0, branches = 4, total ramification = 246).
-    Kind: instance. *)
+(** s5_brings_covering_data — the CoveringData for the S_5 instance:
+    genus 4, base genus 0, 4 branch points, total ramification 246, the
+    numbers [s5_hurwitz] checks and [s5_brings_covering] packages into a
+    covering scheme. *)
 Definition s5_brings_covering_data : CoveringData s5_brings_M :=
   @MkCoveringData s5_brings_M 0 4 246 4 s5_n_branch_le s5_hurwitz.
 
-(** s5_brings_covering_realised — Bring's curve realises
-    [s5_brings_covering_data].
-    Kind: axiom.
-    Why: the sole remaining geometry axiom. Edge (1978), "Bring's curve",
-    J. London Math. Soc. s2-18(3):539-545. *)
+(** s5_brings_covering_realised — Bring's curve, the genus-4 curve in
+    P^4 admitting a faithful S_5 action by coordinate permutation,
+    realises the covering described by [s5_brings_covering_data]. One
+    of the two irreducible geometry axioms of this section, alongside
+    [s5_group_order_eq]. Edge (1978), "Bring's curve", J. London Math.
+    Soc. s2-18(3):539-545. *)
 Axiom s5_brings_covering_realised :
   realised_by_curve s5_brings_covering_data.
 
@@ -309,19 +314,20 @@ Axiom s5_brings_covering_realised :
    regime; only the [s5x5] instance exercises the strict-gap branch. *)
 Let s5_ts : ThresholdScheme 'I_5 'I_5 := @sum_mod_scheme 3 4.
 
-(** s5_cs_gap — the cs_gap obligation: ts_T <= ts_k + 2*cd_genus.
-    With ts_T = ts_k = 5 and cd_genus = 4, the bound reads 5 <= 13.
-    Kind: helper. *)
+(** s5_cs_gap — the [cs_gap] obligation ts_T <= ts_k + 2*cd_genus holds
+    for the S_5 threshold scheme: with ts_T = ts_k = 5 and cd_genus = 4,
+    the bound reads 5 <= 13. Discharges the gap field of
+    [s5_brings_covering]. *)
 Lemma s5_cs_gap :
   (ts_T s5_ts <= ts_k s5_ts + 2 * cd_genus s5_brings_covering_data)%N.
 Proof. by []. Qed.
 
-(** s5_sum_mod_perm_compatible — sum-mod reconstruction is invariant under
-    the monodromy permutation of the share-index tuple. Single-pile analogue
-    of [product_sum_mod_perm_compatible] in reconstruct/product_threshold.v;
-    the absence of a pile partition makes the proof a single reindex.
-    Kind: helper.
-    Why: discharges [cs_recon_invariant] for [s5_brings_covering]. *)
+(** s5_sum_mod_perm_compatible — sum-mod reconstruction of the S_5 shares
+    is invariant under the monodromy permutation of the share-index
+    tuple. The single-pile analogue of [product_sum_mod_perm_compatible]
+    in reconstruct/product_threshold.v: with no pile partition to track,
+    the proof is a single reindex. Discharges the [cs_recon_invariant]
+    obligation of [s5_brings_covering]. *)
 Lemma s5_sum_mod_perm_compatible :
   @ts_recon_perm_invariant _ (pgg_G s5_brings_M) _ _ s5_ts
     (@pgg_rho s5_brings_M).
@@ -335,12 +341,11 @@ symmetry; rewrite (reindex_inj (@perm_inj _ (@pgg_rho s5_brings_M g))).
 by apply: eq_bigr.
 Qed.
 
-(** s5_brings_covering — concrete CoveringScheme for the S_5 instance,
-    built on Bring's curve (genus 4) with a sum-mod threshold scheme.
-    Kind: instance.
-    Why: replaces the previous opaque [Axiom s5_brings_covering]. Threshold
-    values, monodromy, reconstruction invariance and gap bound are all
-    proved; only the curve realisation remains an axiom. *)
+(** s5_brings_covering — the CoveringScheme for the S_5 instance: Bring's
+    curve (genus 4) paired with the sum-mod threshold scheme. Threshold
+    values, monodromy compatibility, reconstruction invariance and the
+    gap bound are all proved; only the curve realisation
+    ([s5_brings_covering_realised]) remains an axiom. *)
 Definition s5_brings_covering : CoveringScheme s5_brings_M := {|
   cs_plug := @MkReconPlug s5_brings_M 'I_5 s5_ts id (@pgg_rho s5_brings_M)
                s5_sum_mod_perm_compatible ;
@@ -348,11 +353,11 @@ Definition s5_brings_covering : CoveringScheme s5_brings_M := {|
   cs_gap  := s5_cs_gap ;
 |}.
 
-(** s5_brings_covering_genus — Bring's covering scheme has genus 4.
-    Kind: helper.
-    Why: definitional consequence of [s5_brings_covering_data]; retains the
-    statement of the previous axiom so that downstream callers
-    ([s5_genus0_klein], [s5_genus0_automorphism]) need no edit. *)
+(** s5_brings_covering_genus — [s5_brings_covering] has genus 4, a
+    definitional consequence of [s5_brings_covering_data]. Feeds the
+    genus-0 vacuity arguments in [s5_genus0_klein] and
+    [s5_genus0_automorphism]: since the true genus is 4, any premise
+    asking for genus 0 is false, so those obligations hold vacuously. *)
 Lemma s5_brings_covering_genus :
   cd_genus (cs_data s5_brings_covering) = 4.
 Proof. by []. Qed.
@@ -374,30 +379,31 @@ Lemma s5_HN5_crypto : (pgg_N' s5_M).+1 = 5.
 Proof. by []. Qed.
 
 (** s5_genus0_klein — the genus-0 PGL automorphism obligation for the
-    Bring's-curve-based s5 covering. Vacuously true because the covering
-    has [cd_genus = 4] (per [s5_brings_covering_genus]); the implication's
-    premise [4 = 0] is false, so the conclusion is unconstrained.
-    Kind: helper.
-    Why: feeds [genus0_automorphism_bound] in the threshold witness
-    construction below. *)
+    Bring's-curve-based S_5 covering holds vacuously: the covering has
+    [cd_genus = 4] (per [s5_brings_covering_genus]), so the premise
+    [4 = 0] is false and the conclusion is unconstrained. Discharges the
+    automorphism-bound field that [s5_threshold_witness_concrete]
+    packages below. *)
 Lemma s5_genus0_klein :
   cd_genus (cs_data s5_brings_covering) = 0 ->
   (#|pgg_G s5_M| <= klein_genus0_bound s5_M)%N.
 Proof. by rewrite s5_brings_covering_genus. Qed.
 
-(** s5_threshold_witness_concrete — threshold witness for the cryptographic
-    s5 rigidity, packaging the Bring's-curve covering with its (vacuous)
-    genus-0 PGL bound.
-    Kind: instance. *)
+(** s5_threshold_witness_concrete — the threshold witness for the
+    cryptographically-secure S_5 rigidity instance, packaging the
+    Bring's-curve covering [s5_brings_covering] with its vacuous
+    genus-0 PGL bound [s5_genus0_klein]. *)
 Definition s5_threshold_witness_concrete : ThresholdWitness s5_M :=
   @MkThresholdWitness s5_M s5_brings_covering s5_genus0_klein.
 
 (* The spectral content is discharged by s5_mixing.v. *)
 
-(** s5_rigidity_cryptographically_secure — the AlgebraicRigidity value of the
-    S_5 instance at word length 286.
-    @intent: MkAlgebraicRigidity at the Schreier certificate bundle read at
-    L = 286 and the concrete threshold witness. *)
+(** s5_rigidity_cryptographically_secure — the AlgebraicRigidity value
+    for the S_5 instance at word length 286: the Schreier spectral
+    security bundle [s5_security_witness_schreier] read at L = 286,
+    paired with the concrete Bring's-curve threshold witness. At gap ~
+    0.0955 this delivers the instance's 40-bit security bound,
+    var_dist < 2^{-40}. *)
 Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R s5_M :=
   @MkAlgebraicRigidity R s5_M
     (@s5_security_witness_schreier R 286)
@@ -430,26 +436,26 @@ Proof. by []. Qed.
    above for the Bring's-curve (genus 4) axioms. *)
 Definition s5_covering : CoveringScheme s5_M := s5_brings_covering.
 
-(** s5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
-    S_5 instance vacuously, since [s5_brings_covering] has [cd_genus = 4]
-    (per [s5_brings_covering_genus]).
-    Kind: helper.
-    Why: required to instantiate [s5_threshold_witness], which packages the
-    covering scheme with its automorphism-bound obligation.
-    Used by: s5_threshold_witness. *)
+(** s5_genus0_automorphism — the genus-0 PGL automorphism obligation for
+    [s5_covering] holds vacuously, since [s5_brings_covering] has
+    [cd_genus = 4] (per [s5_brings_covering_genus]) and the premise
+    [4 = 0] is false. Instantiates [s5_threshold_witness]. *)
 Lemma s5_genus0_automorphism :
   genus0_automorphism_bound s5_M (cs_data s5_covering).
 Proof. by rewrite /genus0_automorphism_bound /s5_covering s5_brings_covering_genus. Qed.
 
-(** s5_threshold_witness — threshold-covering witness for the S_5 instance.
-    Kind: instance. *)
+(** s5_threshold_witness — the threshold-covering witness for the S_5
+    instance, packaging [s5_covering] with its vacuous genus-0
+    automorphism bound [s5_genus0_automorphism]. *)
 Definition s5_threshold_witness : ThresholdWitness s5_M :=
   @MkThresholdWitness s5_M s5_covering s5_genus0_automorphism.
 
-(** s5_rigidity — algebraic rigidity record for the S_5 instance.
-    Kind: instance.
-    @intent: MkAlgebraicRigidity at the certificate-free bundle of
-    s5_security_witness_1 and s5_threshold_witness. *)
+(** s5_rigidity — the AlgebraicRigidity value for the S_5 instance,
+    pairing the certificate-free fiber-counted security witness
+    [s5_security_witness_1] (epsilon = 6/5 at word length 1) with the
+    threshold witness [s5_threshold_witness]. The Hypothesis-gated
+    counterpart of [s5_rigidity_cryptographically_secure], which instead
+    uses the spectral certificate at L = 286. *)
 Definition s5_rigidity : AlgebraicRigidity R s5_M :=
   @MkAlgebraicRigidity R s5_M
     (shuffle_bundle_of_bound (s5_security_witness_1 R))
@@ -463,18 +469,23 @@ Proof. exact: search_space_leG. Qed.
 
 Let s5_raag_M : RAAGType := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 
-(** s5_search_chain — search-space / trace-count / alphabet-power chain for S_5.
-    Kind: helper.
-    Why: instantiates the generic [search_space_chain] at the S_5 path RAAG.
-    Used by: downstream tightness bounds for the S_5 instance. *)
+(** s5_search_chain — for the S_5 path RAAG, search space is sandwiched
+    between trace count and the naive alphabet power: search_space L <=
+    n_traces L <= 4^L. The S_5 instantiation of the generic
+    [search_space_chain], quantifying how much the RAAG's commutation
+    relations shrink the search space below the free-monoid bound. *)
 Lemma s5_search_chain (L : nat) :
   ((@search_space s5_raag_M L <= @n_traces s5_raag_M L) &&
    (@n_traces s5_raag_M L <= 4 ^ L))%N.
 Proof. exact: search_space_chain. Qed.
 
-(** s5_tradeoff — security/complexity trade-off for the S_5 instance.
-    Kind: main.
-    Why: specialises the generic [security_threshold_tradeoff] to S_5. *)
+(** s5_tradeoff — the S_5 instance sits in exactly one of two regimes: a
+    genus-0 cover with ts_T <= ts_k, giving perfect reconstruction with
+    no share overhead, or a positive-genus cover where the
+    reconstruction slack ts_T <= ts_k + 2*cd_genus absorbs the genus.
+    The S_5 specialisation of [security_threshold_tradeoff]; since
+    [s5_covering] has genus 4, the actual instance falls in the second
+    disjunct. *)
 Lemma s5_tradeoff :
   let cs := tw_covering (ar_threshold s5_rigidity) in
   (cd_genus (cs_data cs) = 0 /\

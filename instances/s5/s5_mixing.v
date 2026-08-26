@@ -14,7 +14,7 @@
 (*   (iii) Rayleigh bound on Q^2 at alpha^2 for mean-zero column vectors.    *)
 (*                                                                            *)
 (* Ingredients (i) and (ii) are proved in Rocq below: generators are         *)
-(* transpositions (tperm2) and alpha = ratr (181/200) is a closed-form        *)
+(* transpositions (tperm2) and alpha = 181%:R / 200%:R is a closed-form       *)
 (* rational in [0, 1].  Ingredient (iii) is the Rayleigh-on-Q^2 premise; it  *)
 (* is imported from an external sum-of-squares certificate (see               *)
 (* s5_spectral_certificate.py and s5_spectral_certificate.md in the same     *)
@@ -52,30 +52,27 @@ Import GRing.Theory Num.Theory.
 
 Definition s5_alpha_R (R : realType) : R := 181%:R / 200%:R.
 
-(** s5_alpha_R_ge0 — the S_5 mixing coefficient [alpha] is non-negative.
-    Kind: helper.
-    Why: non-negativity is used when rearranging the [1 - alpha] bound.
-    Used by: [s5_gap_R_le1]. *)
+(** s5_alpha_R_ge0 — [alpha], the S_5 mixing coefficient 181/200, is
+    non-negative, being a ratio of naturals. Needed to place [alpha] in
+    [0,1] before it can serve as a Rayleigh contraction rate. *)
 Lemma s5_alpha_R_ge0 (R : realType) : 0 <= s5_alpha_R R.
 Proof.
 rewrite /s5_alpha_R.
 apply divr_ge0; by rewrite ler0n.
 Qed.
 
-(** s5_alpha_R_le1 — the S_5 mixing coefficient [alpha] is at most one.
-    Kind: helper.
-    Why: together with [s5_alpha_R_ge0] locates [alpha] in [0,1].
-    Used by: [s5_gap_R_le1] and downstream bound manipulations. *)
+(** s5_alpha_R_le1 — [alpha] is at most one, since 181 <= 200. Together
+    with [s5_alpha_R_ge0] this locates [alpha] in [0,1], the range
+    [symm_ds_TV_bound] requires of a contraction rate. *)
 Lemma s5_alpha_R_le1 (R : realType) : s5_alpha_R R <= 1.
 Proof.
 rewrite /s5_alpha_R ler_pdivrMr ?mul1r; last by rewrite ltr0n.
 by rewrite ler_nat.
 Qed.
 
-(** s5_alpha_R_lt1 — the S_5 mixing coefficient [alpha] is strictly below one.
-    Kind: helper.
-    Why: strict inequality is required for the spectral gap to be positive.
-    Used by: [s5_gap_R_pos]. *)
+(** s5_alpha_R_lt1 — [alpha] is strictly below one, since 181 < 200. The
+    strict inequality keeps the S_5 spectral gap [s5_gap_R] positive, which
+    a bare [<= 1] would not. *)
 Lemma s5_alpha_R_lt1 (R : realType) : s5_alpha_R R < 1.
 Proof.
 rewrite /s5_alpha_R ltr_pdivrMr ?mul1r; last by rewrite ltr0n.
@@ -86,12 +83,10 @@ Qed.
 (*  Section 2. Involutivity of the four path-graph generators.               *)
 (******************************************************************************)
 
-(** path_gen_tuple_3_invol — every entry of the path-3 generator tuple is an involution.
-    Kind: helper.
-    Why: feeds Schreier mixing arguments that require generator^2 = 1.
-    Used by: s5_lazy_count_eq, the S_5 lazy-walk discharge.
-    Naming: the component [tuple_3] names the concrete arity (4 generators,
-    indexed by 'I_4), which is load-bearing for rewrite targeting. *)
+(** path_gen_tuple_3_invol — every one of the four adjacent transpositions
+    generating the path-3 tuple is its own inverse. Discharges premise (i)
+    of [symm_ds_TV_bound]: the mixing lemma is stated for involutive
+    generator families, and a transposition squares to the identity. *)
 Lemma path_gen_tuple_3_invol :
   forall k : 'I_4,
   (tnth (path_gen_tuple 3) k * tnth (path_gen_tuple 3) k)%g = 1%g.
@@ -113,7 +108,7 @@ Qed.
 (*    For every real-typed column 5-vector v with v_0 + ... + v_4 = 0,       *)
 (*      <v, Q^2 v>  <=  alpha^2 * <v,v>,                                    *)
 (*    where Q is schreier_transition R (path_gen_tuple 3) and               *)
-(*    alpha = ratr (181/200).  Equivalently, (alpha^2 * I_5 - Q^2) is      *)
+(*    alpha = 181%:R / 200%:R.  Equivalently, (alpha^2 * I_5 - Q^2) is     *)
 (*    positive semidefinite on the mean-zero hyperplane.                     *)
 (*                                                                            *)
 (*  CERTIFICATE.                                                              *)
@@ -151,22 +146,17 @@ Definition s5_sos_lower_triangular : seq (seq rat) :=
       [:: 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ; 0%:Q ] ;
       [:: 0%:Q ; 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ] ].
 
-(** s5_sos_diagonal — the 4-entry diagonal [D] of the rational SoS certificate,
-    namely the list [1; 1; 1; 1] in [rat]. Companion to [s5_sos_lower_triangular].
-    Kind: instance.
-    Why: rational witness data consumed by the spectral-certificate machinery
-    that discharges the Rayleigh-bound hypothesis for the S_5 lazy walk.
-    Used by: s5_rayleigh_Q2_R (axiom statement relies on this diagonal data). *)
+(** s5_sos_diagonal — the diagonal [D] of the LDL^T certificate for the
+    reduced 4x4 Gram matrix, namely the constant list [1; 1; 1; 1] in
+    [rat]. Paired with [s5_sos_lower_triangular], it is the rational
+    witness a future entrywise sum-of-squares expansion would consume to
+    discharge [s5_rayleigh_Q2_R] as a proof rather than an axiom. *)
 Definition s5_sos_diagonal : seq rat :=
   [:: 1%:Q ; 1%:Q ; 1%:Q ; 1%:Q ].
 
-(** s5_sos_diagonal_nonneg — every entry of [s5_sos_diagonal] is nonneg in [rat].
-    Kind: helper.
-    Why: discharges the D-nonnegativity premise needed when the SoS
-    certificate is consumed to prove a Rayleigh-bound inequality; entrywise
-    nonnegativity is a prerequisite for reading the diagonal as an SoS form.
-    Used by: downstream SoS-expansion lemmas that will eventually replace the
-    [s5_rayleigh_Q2_R] axiom. *)
+(** s5_sos_diagonal_nonneg — every entry of [s5_sos_diagonal] is nonneg.
+    A positive-semidefinite LDL^T decomposition needs D >= 0 entrywise;
+    this checks the certificate's own witness meets that requirement. *)
 Lemma s5_sos_diagonal_nonneg : forall k,
   (0%:Q <= nth 0%:Q s5_sos_diagonal k)%Q.
 Proof.
@@ -232,36 +222,36 @@ Qed.
 
 Definition s5_gap_R (R : realType) : R := 1 - s5_alpha_R R.
 
-(** s5_gap_R_pos — the S_5 spectral gap is strictly positive.
-    Kind: helper.
-    Why: positivity of the gap drives geometric convergence.
-    Used by: convergence-rate consumers of [s5_gap_R]. *)
+(** s5_gap_R_pos — the S_5 spectral gap [1 - alpha] is strictly positive,
+    since [alpha < 1]. A zero or negative gap would make the (1 - gap)^L
+    convergence rate below fail to decay with the walk length L. *)
 Lemma s5_gap_R_pos (R : realType) : 0 < s5_gap_R R.
 Proof.
 rewrite /s5_gap_R subr_gt0.
 exact: s5_alpha_R_lt1.
 Qed.
 
-(** s5_gap_R_le1 — the S_5 spectral gap is at most one.
-    Kind: helper.
-    Why: together with [s5_gap_R_pos], establishes [gap in [0,1]] for the convergence bound.
-    Used by: convergence-rate consumers of [s5_gap_R]. *)
+(** s5_gap_R_le1 — the S_5 spectral gap is at most one, since [alpha >= 0].
+    Together with [s5_gap_R_pos] this places the gap in [0,1], the range a
+    geometric convergence rate must occupy. *)
 Lemma s5_gap_R_le1 (R : realType) : s5_gap_R R <= 1.
 Proof.
 rewrite /s5_gap_R lerBlDr addrC -lerBlDr subrr.
 exact: s5_alpha_R_ge0.
 Qed.
 
-(** s5_gap_R_one_minus — the complement of the S_5 spectral gap is [alpha].
-    Kind: helper.
-    Why: algebraic bridge for translating bounds between [alpha] and [1 - gap].
-    Used by: [s5_spectral_convergence_gap]. *)
+(** s5_gap_R_one_minus — [1 - gap] equals [alpha]. The algebraic identity
+    that rewrites [s5_spectral_convergence_proved]'s [alpha^L] bound into
+    the [(1 - gap)^L] shape [rigidity_s5_instance.v] consumes. *)
 Lemma s5_gap_R_one_minus (R : realType) : 1 - s5_gap_R R = s5_alpha_R R.
 Proof. by rewrite /s5_gap_R opprB addrA addrAC subrr add0r. Qed.
 
-(** s5_spectral_convergence_gap — spectral-gap form of the S_5 convergence bound.
-    Kind: main.
-    Why: rephrases [s5_spectral_convergence_proved] in terms of the gap [1 - alpha]. *)
+(** s5_spectral_convergence_gap — the endpoint-uniform variation distance
+    of the length-L S_5 lazy walk is at most sqrt(5) * (1 - gap)^L, where
+    gap = 1 - alpha = 19/200. This is [s5_spectral_convergence_proved]
+    rephrased in spectral-gap form, matching the shape the Hypothesis in
+    [rigidity_s5_instance.v] used to assume before this file discharged
+    it as a proof. *)
 Lemma s5_spectral_convergence_gap
     (R : realType) (L : nat) (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)

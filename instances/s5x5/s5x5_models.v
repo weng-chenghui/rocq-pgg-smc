@@ -130,47 +130,47 @@ Variable R : realType.
 (*     The randomized product exact-secrecy sample layer                      *)
 (******************************************************************************)
 
-(** s5x5_rand_sampleP — the product uniform iid sampler distribution over the
-    two pile tapes.
-    @intent: the s5x5_trace secrecy distribution respelled, that file keeping
-    one factor as a section-local Let: the square of fdist_uniform
-    (card_ZN_subproof 3) raised to the fifth power. *)
+(** s5x5_rand_sampleP — the product uniform iid distribution over the pair
+    of pile tapes 'rV['Z_5]_5 * 'rV['Z_5]_5: five independent uniform draws
+    from 'Z_5 per pile, the two piles independent of each other. It is
+    s5x5_trace's secrecy distribution assembled as one product instead of
+    that file's section-local factored form; s5x5_rand_samplePE identifies
+    the two. *)
 Definition s5x5_rand_sampleP : R.-fdist ('rV['Z_5]_5 * 'rV['Z_5]_5)%type :=
   ((fdist_uniform (pgg_canonical_sharing.card_ZN_subproof 3) `^ 5)
    `x (fdist_uniform (pgg_canonical_sharing.card_ZN_subproof 3) `^ 5))%fdist.
 
-(** s5x5_rand_samplePE — the respelled product distribution is the trace
-    file's product sampler.
-    @composes: s5x5_exec_trace_secrecy *)
+(** s5x5_rand_samplePE — the respelled product distribution equals the trace
+    file's product sampler Pprod R, so the two files' distributions can be
+    exchanged freely; s5x5_exec_trace_secrecy uses this to import the trace
+    file's secrecy bound onto the executed layer's distribution. *)
 Lemma s5x5_rand_samplePE : s5x5_rand_sampleP = Pprod R.
 Proof. by []. Qed.
 
-(** s5x5_rand_sample — the S_5 x S_5 randomized exact-secrecy sample adapter.
-    @intent: the sample layer over s5x5_rand_exec_plug whose sample space is
-    the product tape under s5x5_rand_sampleP, the run argument being the tape
-    itself and the cut the identity, the cut the landed executed results are
-    stated at. *)
+(** s5x5_rand_sample — the sample adapter for s5x5_rand_exec_plug: sample
+    space the product tape under s5x5_rand_sampleP, run argument the tape
+    itself, and cut the identity permutation, the cut at which the landed
+    executed results below are stated. *)
 Definition s5x5_rand_sample : SampleAdapter R s5x5_rand_exec_plug :=
   @MkSampleAdapter R mpX s5x5_rand_exec_plug
     [the finType of ('rV['Z_5]_5 * 'rV['Z_5]_5)%type]
     s5x5_rand_sampleP idfun (fun _ => 1%g).
 
 (** s5x5_rand_sample_argE — the randomized adapter's run argument is the
-    product tape.
-    @composes: s5x5_sample_content_traceE *)
+    product tape itself. *)
 Lemma s5x5_rand_sample_argE (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type) :
   s5x5_rand_sample.(sa_arg) uv = uv.
 Proof. by []. Qed.
 
-(** s5x5_rand_sample_cutE — the randomized adapter's cut is the identity.
-    @composes: s5x5_sample_content_traceE, s5x5_p1_viewE *)
+(** s5x5_rand_sample_cutE — the randomized adapter's cut is the identity. *)
 Lemma s5x5_rand_sample_cutE (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type) :
   s5x5_rand_sample.(sa_cut) uv = (1%g : pgg_gT s5x5_M).
 Proof. by []. Qed.
 
 (** s5x5_rand_cut_distE — the randomized adapter's cut distribution is the
-    point distribution at the identity.
-    @main architecture: sa_cut_dist s5x5_rand_sample = fdist1 1. *)
+    point mass at the identity permutation: the adapter never randomizes
+    which group element it cuts through, so every landed result below is
+    read at pgg_rho evaluated at the identity. *)
 Lemma s5x5_rand_cut_distE :
   @sa_cut_dist R mpX s5x5_rand_exec_plug s5x5_rand_sample
   = fdist1 (1%g : pgg_gT s5x5_M).
@@ -187,10 +187,9 @@ Qed.
 (******************************************************************************)
 
 (** s5x5_sample_content_trace — seat j's executed trace content as a random
-    variable on the product tape distribution.
-    @intent: s5x5_trace.content_of applied to the plug's raw participant trace
-    at the sample's argument and cut, a finite reader of a sequence-carried
-    trace. *)
+    variable on the product tape distribution: s5x5_trace.content_of applied
+    to the plug's raw participant trace at the sample's argument and cut, a
+    finite reader of what is otherwise a sequence-carried trace. *)
 Definition s5x5_sample_content_trace (j : 'I_(pi_T' (mp_PI mpX)).+1)
     : {RV s5x5_rand_sampleP -> 'I_(pgg_N' (mp_M mpX)).+1} :=
   fun uv => s5x5_trace.content_of
@@ -198,11 +197,10 @@ Definition s5x5_sample_content_trace (j : 'I_(pi_T' (mp_PI mpX)).+1)
                  (s5x5_rand_sample.(sa_arg) uv)
                  (s5x5_rand_sample.(sa_cut) uv) 0 j).
 
-(** s5x5_sample_content_traceE — the executed content reader is the landed
-    player-trace random variable.
-    @main architecture: s5x5_sample_content_trace j = s5x5_player_trace R j,
-    the equality identifying the executed observer with the observer of
-    s5x5_trace_secrecy. *)
+(** s5x5_sample_content_traceE — the executed content reader coincides with
+    the landed player-trace random variable s5x5_player_trace R j, which
+    identifies the executed observer with the observer s5x5_trace_secrecy
+    already bounds, letting that bound transfer to the executed layer below. *)
 Lemma s5x5_sample_content_traceE (j : 'I_(pi_T' (mp_PI mpX)).+1) :
   s5x5_sample_content_trace j = s5x5_player_trace R j.
 Proof.
@@ -214,11 +212,10 @@ by rewrite /s5x5_player_trace.
 Qed.
 
 (** s5x5_exec_trace_secrecy — a single corrupted seat's executed trace leaves
-    the joint product secret's conditional entropy equal to its plain entropy.
-    @main security: trace secrecy in conditional-entropy form, at the executed
-    content reader of s5x5_rand_sample: `H( JointSecret R |
-    s5x5_sample_content_trace j ) = `H `p_ (JointSecret R), for every seat
-    j. *)
+    the joint product secret's conditional entropy exactly equal to its
+    unconditioned entropy, for every seat j: trace secrecy in
+    conditional-entropy form, transferred from s5x5_trace_secrecy onto the
+    executed content reader via s5x5_sample_content_traceE. *)
 Theorem s5x5_exec_trace_secrecy (j : 'I_(pi_T' (mp_PI mpX)).+1) :
   `H( JointSecret R | s5x5_sample_content_trace j ) = `H `p_ (JointSecret R).
 Proof. by rewrite s5x5_sample_content_traceE; exact: s5x5_trace_secrecy. Qed.
@@ -227,16 +224,16 @@ Proof. by rewrite s5x5_sample_content_traceE; exact: s5x5_trace_secrecy. Qed.
 (*     The pile-restricted executed readers                                   *)
 (******************************************************************************)
 
-(** s5x5_p1_idx_inj — the pile-1 seat embedding is injective.
-    @composes: s5x5_p1_viewE *)
+(** s5x5_p1_idx_inj — the pile-1 seat embedding s5x5_p1_idx into the ten
+    shared seats is injective. *)
 Lemma s5x5_p1_idx_inj : injective s5x5_p1_idx.
 Proof.
 move=> a b H; apply: ord_inj.
 by rewrite -(s5x5_p1_idx_val a) -(s5x5_p1_idx_val b) H.
 Qed.
 
-(** s5x5_p2_idx_inj — the pile-2 seat embedding is injective.
-    @composes: s5x5_p2_viewE *)
+(** s5x5_p2_idx_inj — the pile-2 seat embedding s5x5_p2_idx into the ten
+    shared seats is injective. *)
 Lemma s5x5_p2_idx_inj : injective s5x5_p2_idx.
 Proof.
 move=> a b H.
@@ -245,19 +242,18 @@ have Hv : (5 + a)%N = (5 + b)%N
 by apply: ord_inj; exact: addnI Hv.
 Qed.
 
-(** s5x5_p1_seats — the ten-seat image of a pile-1 coalition.
-    @intent: the seats of the first pile occupied by the coalition C1. *)
+(** s5x5_p1_seats — the ten-seat image under s5x5_p1_idx of a pile-1
+    coalition C1: the seats among the shared ten that C1 occupies. *)
 Definition s5x5_p1_seats (C1 : {set 'I_5})
     : {set 'I_(pi_T' (mp_PI mpX)).+1} := [set s5x5_p1_idx j | j in C1].
 
-(** s5x5_p2_seats — the ten-seat image of a pile-2 coalition.
-    @intent: the seats of the second pile occupied by the coalition C2. *)
+(** s5x5_p2_seats — the ten-seat image under s5x5_p2_idx of a pile-2
+    coalition C2: the seats among the shared ten that C2 occupies. *)
 Definition s5x5_p2_seats (C2 : {set 'I_5})
     : {set 'I_(pi_T' (mp_PI mpX)).+1} := [set s5x5_p2_idx j | j in C2].
 
-(** s5x5_p1_seatsE — a pile-1 seat is in the image exactly when its party is
-    in the coalition.
-    @composes: s5x5_p1_viewE *)
+(** s5x5_p1_seatsE — a pile-1 seat lies in the image s5x5_p1_seats C1 exactly
+    when its party lies in the coalition C1. *)
 Lemma s5x5_p1_seatsE (C1 : {set 'I_5}) (j : 'I_5) :
   (s5x5_p1_idx j \in s5x5_p1_seats C1) = (j \in C1).
 Proof.
@@ -265,9 +261,8 @@ apply/idP/idP; last by move=> Hj; apply/imsetP; exists j.
 by case/imsetP => k Hk /s5x5_p1_idx_inj ->.
 Qed.
 
-(** s5x5_p2_seatsE — a pile-2 seat is in the image exactly when its party is
-    in the coalition.
-    @composes: s5x5_p2_viewE *)
+(** s5x5_p2_seatsE — a pile-2 seat lies in the image s5x5_p2_seats C2 exactly
+    when its party lies in the coalition C2. *)
 Lemma s5x5_p2_seatsE (C2 : {set 'I_5}) (j : 'I_5) :
   (s5x5_p2_idx j \in s5x5_p2_seats C2) = (j \in C2).
 Proof.
@@ -275,34 +270,33 @@ apply/idP/idP; last by move=> Hj; apply/imsetP; exists j.
 by case/imsetP => k Hk /s5x5_p2_idx_inj ->.
 Qed.
 
-(** s5x5_proj_pile0 — the pile projection sends the default card to zero.
-    @composes: s5x5_p1_viewE, s5x5_p2_viewE *)
+(** s5x5_proj_pile0 — the pile projection proj_pile sends the shared-seat
+    default card (ord0 : 'I_10) to the pile-carrier zero. *)
 Lemma s5x5_proj_pile0 : proj_pile (ord0 : 'I_10) = 0%R.
 Proof. by apply: ord_inj; rewrite /proj_pile inordK. Qed.
 
-(** s5x5_p1_view — the executed pile-1 coalition reader.
-    @intent: the pile shares read off the executed coalition endpoints at the
-    pile-1 seats of C1, through the codec left inverse proj_pile. *)
+(** s5x5_p1_view — the executed pile-1 coalition reader: the pile shares read
+    off the executed coalition endpoints at C1's pile-1 seats, decoded through
+    the codec left inverse proj_pile. *)
 Definition s5x5_p1_view (C1 : {set 'I_5})
     : {RV s5x5_rand_sampleP -> {ffun 'I_5 -> 'Z_5}} :=
   fun uv => [ffun j : 'I_5 =>
     proj_pile (@sa_coalition_view R mpX s5x5_rand_exec_plug s5x5_rand_sample 0
                  (s5x5_p1_seats C1) uv (s5x5_p1_idx j))].
 
-(** s5x5_p2_view — the executed pile-2 coalition reader.
-    @intent: the pile shares read off the executed coalition endpoints at the
-    pile-2 seats of C2, through the codec left inverse proj_pile. *)
+(** s5x5_p2_view — the executed pile-2 coalition reader: the pile shares read
+    off the executed coalition endpoints at C2's pile-2 seats, decoded through
+    the codec left inverse proj_pile. *)
 Definition s5x5_p2_view (C2 : {set 'I_5})
     : {RV s5x5_rand_sampleP -> {ffun 'I_5 -> 'Z_5}} :=
   fun uv => [ffun j : 'I_5 =>
     proj_pile (@sa_coalition_view R mpX s5x5_rand_exec_plug s5x5_rand_sample 0
                  (s5x5_p2_seats C2) uv (s5x5_p2_idx j))].
 
-(** s5x5_p1_viewE — the executed pile-1 coalition reader is the first pile's
-    randomized sharing view on the first tape.
-    @main architecture: s5x5_p1_view C1 = fun uv => rsh_view rs1 C1 uv.1, the
-    two readers sharing the finfun carrier {ffun 'I_5 -> 'Z_5} and the party
-    indexing of the first pile. *)
+(** s5x5_p1_viewE — the executed pile-1 coalition reader equals the first
+    pile's randomized sharing view rsh_view rs1 C1 on the first tape. This is
+    what lets s5x5_exec_p1_secrecy below invoke the randomized-sharing
+    independence machinery directly on the executed reader. *)
 Lemma s5x5_p1_viewE (C1 : {set 'I_5}) :
   s5x5_p1_view C1 = (fun uv => rsh_view (rs1 R) C1 uv.1).
 Proof.
@@ -319,11 +313,10 @@ case: (ltnP (s5x5_p1_idx j) 5) => Hc; last by rewrite (leq_gtF Hc) in Hlt.
 by rewrite cancel_p1 s5x5_p1_idx_val inord_val /rs1 s5_rfree_shareE.
 Qed.
 
-(** s5x5_p2_viewE — the executed pile-2 coalition reader is the second pile's
-    randomized sharing view on the second tape.
-    @main architecture: s5x5_p2_view C2 = fun uv => rsh_view rs2 C2 uv.2, the
-    two readers sharing the finfun carrier {ffun 'I_5 -> 'Z_5} and the party
-    indexing of the second pile. *)
+(** s5x5_p2_viewE — the executed pile-2 coalition reader equals the second
+    pile's randomized sharing view rsh_view rs2 C2 on the second tape. This is
+    what lets s5x5_exec_p2_secrecy below invoke the randomized-sharing
+    independence machinery directly on the executed reader. *)
 Lemma s5x5_p2_viewE (C2 : {set 'I_5}) :
   s5x5_p2_view C2 = (fun uv => rsh_view (rs2 R) C2 uv.2).
 Proof.
@@ -340,25 +333,23 @@ case: (ltnP (s5x5_p2_idx j) 5) => Hc;
 by rewrite cancel_p2 s5x5_p2_idx_val addKn inord_val /rs2 s5_rfree_shareE.
 Qed.
 
-(** s5x5_p1_seat_view — the executed pile-1 seat reader.
-    @intent: the pile share read off the executed seat endpoint of pile-1
-    party j, through the codec left inverse proj_pile. *)
+(** s5x5_p1_seat_view — the executed pile-1 seat reader: the pile share read
+    off the executed seat endpoint of pile-1 party j, decoded through the
+    codec left inverse proj_pile. *)
 Definition s5x5_p1_seat_view (j : 'I_5) : {RV s5x5_rand_sampleP -> 'Z_5} :=
   fun uv => proj_pile (@sa_seat_view R mpX s5x5_rand_exec_plug
                          s5x5_rand_sample 0 (s5x5_p1_idx j) uv).
 
-(** s5x5_p2_seat_view — the executed pile-2 seat reader.
-    @intent: the pile share read off the executed seat endpoint of pile-2
-    party j, through the codec left inverse proj_pile. *)
+(** s5x5_p2_seat_view — the executed pile-2 seat reader: the pile share read
+    off the executed seat endpoint of pile-2 party j, decoded through the
+    codec left inverse proj_pile. *)
 Definition s5x5_p2_seat_view (j : 'I_5) : {RV s5x5_rand_sampleP -> 'Z_5} :=
   fun uv => proj_pile (@sa_seat_view R mpX s5x5_rand_exec_plug
                          s5x5_rand_sample 0 (s5x5_p2_idx j) uv).
 
-(** s5x5_p1_seat_viewE — the executed pile-1 seat reader is that party's
-    first-pile share.
-    @main architecture: s5x5_p1_seat_view j = fun uv => rsh_share rs1 j uv.1,
-    a reader with the pile carrier 'Z_5 and the party indexing of the first
-    pile. *)
+(** s5x5_p1_seat_viewE — the executed pile-1 seat reader for party j equals
+    that party's first-pile share rsh_share rs1 j uv.1, the seat-level
+    analogue of s5x5_p1_viewE. *)
 Lemma s5x5_p1_seat_viewE (j : 'I_5) :
   s5x5_p1_seat_view j = (fun uv => rsh_share (rs1 R) j uv.1).
 Proof.
@@ -373,11 +364,9 @@ case: (ltnP (s5x5_p1_idx j) 5) => Hc; last by rewrite (leq_gtF Hc) in Hlt.
 by rewrite cancel_p1 s5x5_p1_idx_val inord_val /rs1 s5_rfree_shareE.
 Qed.
 
-(** s5x5_p2_seat_viewE — the executed pile-2 seat reader is that party's
-    second-pile share.
-    @main architecture: s5x5_p2_seat_view j = fun uv => rsh_share rs2 j uv.2,
-    a reader with the pile carrier 'Z_5 and the party indexing of the second
-    pile. *)
+(** s5x5_p2_seat_viewE — the executed pile-2 seat reader for party j equals
+    that party's second-pile share rsh_share rs2 j uv.2, the seat-level
+    analogue of s5x5_p2_viewE. *)
 Lemma s5x5_p2_seat_viewE (j : 'I_5) :
   s5x5_p2_seat_view j = (fun uv => rsh_share (rs2 R) j uv.2).
 Proof.
@@ -402,9 +391,8 @@ Qed.
    view with the pile-1 secret alone at the first tape: the secret carrier
    here is ('Z_5 * 'Z_5) and the reader is the executed one. *)
 
-(** s5x5_p1_view_indep — a sub-threshold pile-1 coalition view is independent
-    of the joint product secret.
-    @composes: s5x5_exec_p1_secrecy *)
+(** s5x5_p1_view_indep — a sub-threshold pile-1 coalition view (#|C1| < 5) is
+    independent of the joint product secret JointSecret R under Pprod R. *)
 Lemma s5x5_p1_view_indep (C1 : {set 'I_5}) (HC1 : (#|C1| < 5)%N) :
   Pprod R |= (fun uv => rsh_view (rs1 R) C1 uv.1) _|_ JointSecret R.
 Proof.
@@ -418,9 +406,8 @@ rewrite Hview Hsec.
 apply: inde_RV_comp; exact: lw_indep lw.
 Qed.
 
-(** s5x5_p2_view_indep — a sub-threshold pile-2 coalition view is independent
-    of the joint product secret.
-    @composes: s5x5_exec_p2_secrecy *)
+(** s5x5_p2_view_indep — a sub-threshold pile-2 coalition view (#|C2| < 5) is
+    independent of the joint product secret JointSecret R under Pprod R. *)
 Lemma s5x5_p2_view_indep (C2 : {set 'I_5}) (HC2 : (#|C2| < 5)%N) :
   Pprod R |= (fun uv => rsh_view (rs2 R) C2 uv.2) _|_ JointSecret R.
 Proof.
@@ -434,11 +421,10 @@ rewrite Hview Hsec.
 apply: inde_RV_comp; exact: lw_indep lw.
 Qed.
 
-(** s5x5_exec_p1_secrecy — a sub-threshold pile-1 coalition's executed
-    endpoint readings leave the joint product secret's entropy unchanged.
-    @main security: exact privacy in mutual information and conditional
-    entropy form, at the executed pile-1 coalition reader of s5x5_rand_sample
-    and against the joint product secret JointSecret R, whenever #|C1| < 5. *)
+(** s5x5_exec_p1_secrecy — a sub-threshold pile-1 coalition (#|C1| < 5) has
+    exact privacy against the joint product secret at the executed reader
+    s5x5_p1_view: zero mutual information and unchanged conditional entropy,
+    not merely a small-advantage bound. *)
 Theorem s5x5_exec_p1_secrecy (C1 : {set 'I_5}) (HC1 : (#|C1| < 5)%N) :
   `I( JointSecret R ; s5x5_p1_view C1 ) = 0%R /\
   `H( JointSecret R | s5x5_p1_view C1 ) = `H `p_ (JointSecret R).
@@ -447,11 +433,10 @@ rewrite s5x5_p1_viewE; apply: leakage_of_view_indep.
 exact: s5x5_p1_view_indep HC1.
 Qed.
 
-(** s5x5_exec_p2_secrecy — a sub-threshold pile-2 coalition's executed
-    endpoint readings leave the joint product secret's entropy unchanged.
-    @main security: exact privacy in mutual information and conditional
-    entropy form, at the executed pile-2 coalition reader of s5x5_rand_sample
-    and against the joint product secret JointSecret R, whenever #|C2| < 5. *)
+(** s5x5_exec_p2_secrecy — a sub-threshold pile-2 coalition (#|C2| < 5) has
+    exact privacy against the joint product secret at the executed reader
+    s5x5_p2_view: zero mutual information and unchanged conditional entropy,
+    not merely a small-advantage bound. *)
 Theorem s5x5_exec_p2_secrecy (C2 : {set 'I_5}) (HC2 : (#|C2| < 5)%N) :
   `I( JointSecret R ; s5x5_p2_view C2 ) = 0%R /\
   `H( JointSecret R | s5x5_p2_view C2 ) = `H `p_ (JointSecret R).
@@ -460,18 +445,18 @@ rewrite s5x5_p2_viewE; apply: leakage_of_view_indep.
 exact: s5x5_p2_view_indep HC2.
 Qed.
 
-(** s5x5_joint_view — the executed joint coalition reader.
-    @intent: the pair of the two executed pile coalition readers, keeping the
-    two pile memberships separate. *)
+(** s5x5_joint_view — the executed joint coalition reader: the pair of the
+    two executed pile coalition readers, keeping the two pile memberships
+    C1 and C2 separate rather than merging them into one ten-seat coalition. *)
 Definition s5x5_joint_view (C1 C2 : {set 'I_5})
     : {RV s5x5_rand_sampleP
        -> ({ffun 'I_5 -> 'Z_5} * {ffun 'I_5 -> 'Z_5})%type} :=
   fun uv => (s5x5_p1_view C1 uv, s5x5_p2_view C2 uv).
 
-(** s5x5_joint_viewE — the executed joint reader is the product leakage
-    witness's view.
-    @main architecture: s5x5_joint_view C1 C2 = lw_view (leakage_product ...),
-    the reader of s5x5_joint_view_secrecy. *)
+(** s5x5_joint_viewE — the executed joint reader equals the view of the
+    product leakage witness pairing the two piles' additive-sharing
+    mechanisms. This is what lets s5x5_exec_joint_secrecy below import
+    s5x5_joint_view_secrecy's bound directly onto the executed reader. *)
 Lemma s5x5_joint_viewE (C1 C2 : {set 'I_5})
     (HC1 : (#|C1| < 5)%N) (HC2 : (#|C2| < 5)%N) :
   s5x5_joint_view C1 C2
@@ -482,11 +467,12 @@ Lemma s5x5_joint_viewE (C1 C2 : {set 'I_5})
                   (Additive (@unif_randomized_sharing R 3 4) HC2))).
 Proof. by rewrite /s5x5_joint_view s5x5_p1_viewE s5x5_p2_viewE. Qed.
 
-(** s5x5_exec_joint_secrecy — two sub-threshold pile coalitions' executed
-    endpoint readings leave the joint product secret's entropy unchanged.
-    @main security: exact privacy in mutual information and conditional
-    entropy form, at the executed joint coalition reader of s5x5_rand_sample,
-    under the two per-pile coalition bounds #|C1| < 5 and #|C2| < 5. *)
+(** s5x5_exec_joint_secrecy — two sub-threshold pile coalitions (#|C1| < 5 and
+    #|C2| < 5), read jointly across both piles at once via s5x5_joint_view,
+    still have exact privacy against the joint product secret: zero mutual
+    information and unchanged conditional entropy. Reading both piles
+    together, not just each alone, is the content beyond
+    s5x5_exec_p1_secrecy and s5x5_exec_p2_secrecy. *)
 Theorem s5x5_exec_joint_secrecy (C1 C2 : {set 'I_5})
     (HC1 : (#|C1| < 5)%N) (HC2 : (#|C2| < 5)%N) :
   `I( JointSecret R ; s5x5_joint_view C1 C2 ) = 0%R /\
@@ -511,8 +497,7 @@ Section s5x5_lazy_numeric.
 
 Local Open Scope ring_scope.
 
-(** s5x5_lazy_alphaE — the lazy mixing coefficient is 381/400.
-    @composes: s5x5_lazy_pow1 *)
+(** s5x5_lazy_alphaE — the lazy mixing coefficient is 381/400. *)
 Lemma s5x5_lazy_alphaE : s5_lazy_alpha_R R = 381%:R / 400%:R.
 Proof.
 rewrite /s5_lazy_alpha_R /s5_alpha_R.
@@ -521,10 +506,11 @@ have -> : (1 + 181%:R / 200%:R : R) = 381%:R / 200%:R.
 by rewrite -mulrA -invfM -natrM.
 Qed.
 
-(** s5x5_lazy_sq_step — squaring a rational upper bound of a power of the lazy
-    coefficient, at denominator 1000.
-    @composes: s5x5_lazy_pow2, s5x5_lazy_pow4, s5x5_lazy_pow8,
-    s5x5_lazy_pow16, s5x5_lazy_pow32 *)
+(** s5x5_lazy_sq_step — squaring step for a rational upper bound (denominator
+    1000) of a power of the lazy coefficient: doubling the exponent from k to
+    2k roughly squares the numerator. This is the repeated-squaring engine
+    behind the pow1 -> pow2 -> pow4 -> ... -> pow32 chain below, which reaches
+    exponent 32 in five steps instead of thirty-two multiplications. *)
 Lemma s5x5_lazy_sq_step (k p q : nat) : (p * p <= q * 1000)%N ->
   (s5_lazy_alpha_R R ^+ k * 1000%:R <= p%:R)%R ->
   (s5_lazy_alpha_R R ^+ (2 * k) * 1000%:R <= q%:R)%R.
@@ -542,51 +528,51 @@ rewrite natrM expr2 mulrA in Hchain.
 by rewrite mulnC -(@ler_pM2r _ (1000%:R : R)) ?ltr0n.
 Qed.
 
-(** s5x5_lazy_pow1 — the lazy coefficient is at most 953/1000.
-    @composes: s5x5_lazy_pow2 *)
+(** s5x5_lazy_pow1 — the lazy coefficient is at most 953/1000. *)
 Lemma s5x5_lazy_pow1 : (s5_lazy_alpha_R R ^+ 1 * 1000%:R <= 953%:R)%R.
 Proof.
 rewrite s5x5_lazy_alphaE expr1 mulrAC ler_pdivrMr ?ltr0n // -!natrM ler_nat.
 by vm_compute.
 Qed.
 
-(** s5x5_lazy_pow2 — the second power is at most 909/1000.
-    @composes: s5x5_lazy_pow4, s5x5_lazy_pow34 *)
+(** s5x5_lazy_pow2 — the second power of the lazy coefficient is at most
+    909/1000. *)
 Lemma s5x5_lazy_pow2 : (s5_lazy_alpha_R R ^+ 2 * 1000%:R <= 909%:R)%R.
 Proof.
 apply: (@s5x5_lazy_sq_step 1 953 909); [by vm_compute | exact: s5x5_lazy_pow1].
 Qed.
 
-(** s5x5_lazy_pow4 — the fourth power is at most 827/1000.
-    @composes: s5x5_lazy_pow8 *)
+(** s5x5_lazy_pow4 — the fourth power of the lazy coefficient is at most
+    827/1000. *)
 Lemma s5x5_lazy_pow4 : (s5_lazy_alpha_R R ^+ 4 * 1000%:R <= 827%:R)%R.
 Proof.
 apply: (@s5x5_lazy_sq_step 2 909 827); [by vm_compute | exact: s5x5_lazy_pow2].
 Qed.
 
-(** s5x5_lazy_pow8 — the eighth power is at most 684/1000.
-    @composes: s5x5_lazy_pow16 *)
+(** s5x5_lazy_pow8 — the eighth power of the lazy coefficient is at most
+    684/1000. *)
 Lemma s5x5_lazy_pow8 : (s5_lazy_alpha_R R ^+ 8 * 1000%:R <= 684%:R)%R.
 Proof.
 apply: (@s5x5_lazy_sq_step 4 827 684); [by vm_compute | exact: s5x5_lazy_pow4].
 Qed.
 
-(** s5x5_lazy_pow16 — the sixteenth power is at most 468/1000.
-    @composes: s5x5_lazy_pow32 *)
+(** s5x5_lazy_pow16 — the sixteenth power of the lazy coefficient is at most
+    468/1000. *)
 Lemma s5x5_lazy_pow16 : (s5_lazy_alpha_R R ^+ 16 * 1000%:R <= 468%:R)%R.
 Proof.
 apply: (@s5x5_lazy_sq_step 8 684 468); [by vm_compute | exact: s5x5_lazy_pow8].
 Qed.
 
-(** s5x5_lazy_pow32 — the thirty-second power is at most 220/1000.
-    @composes: s5x5_lazy_pow34 *)
+(** s5x5_lazy_pow32 — the thirty-second power of the lazy coefficient is at
+    most 220/1000. *)
 Lemma s5x5_lazy_pow32 : (s5_lazy_alpha_R R ^+ 32 * 1000%:R <= 220%:R)%R.
 Proof.
 apply: (@s5x5_lazy_sq_step 16 468 220); [by vm_compute | exact: s5x5_lazy_pow16].
 Qed.
 
-(** s5x5_lazy_pow34 — five times the thirty-fourth power is below one.
-    @composes: s5x5_lazy_bound_lt1 *)
+(** s5x5_lazy_pow34 — five times the thirty-fourth power of the lazy
+    coefficient is below one. Squaring alpha^17 gives alpha^34, so this is
+    the pre-square-root form of the bound s5x5_lazy_sqrt17 below extracts. *)
 Lemma s5x5_lazy_pow34 : (5%:R * s5_lazy_alpha_R R ^+ 34 < 1 :> R)%R.
 Proof.
 have Ha0 : (0 <= s5_lazy_alpha_R R)%R := s5_lazy_alpha_R_ge0 R.
@@ -608,9 +594,8 @@ rewrite -natrM -natrM ltr_nat.
 by vm_compute.
 Qed.
 
-(** s5x5_lazy_sqrt17 — the mixing factor at word length seventeen is below
-    one.
-    @composes: s5x5_lazy_bound_lt1 *)
+(** s5x5_lazy_sqrt17 — the mixing factor sqrt 5 * lazy^17 is below one at
+    word length seventeen, the square root of s5x5_lazy_pow34's bound. *)
 Lemma s5x5_lazy_sqrt17 :
   (Num.sqrt 5%:R * s5_lazy_alpha_R R ^+ 17 < 1 :> R)%R.
 Proof.
@@ -622,10 +607,11 @@ rewrite exprMn sqr_sqrtr ?ler0n // -exprM expr1n.
 exact: s5x5_lazy_pow34.
 Qed.
 
-(** s5x5_lazy_bound_lt1 — the mixing factor of the two pile bounds is below
-    one from word length seventeen on.
-    @main bound: Num.sqrt 5%:R * s5_lazy_alpha_R R ^+ n < 1 whenever
-    17 <= n. *)
+(** s5x5_lazy_bound_lt1 — the mixing factor sqrt 5 * lazy^n is below one for
+    every word length n >= 17: seventeen letters is enough for the lazy walk
+    on S_5 x S_5 to leave the trivial regime where the bound exceeds one and
+    says nothing. This is the threshold s5x5_word_pile1_floor_gt0 and
+    s5x5_word_pile2_floor_gt0 below invoke. *)
 Lemma s5x5_lazy_bound_lt1 (n : nat) : (17 <= n)%N ->
   (Num.sqrt 5%:R * s5_lazy_alpha_R R ^+ n < 1 :> R)%R.
 Proof.
@@ -647,42 +633,37 @@ End s5x5_lazy_numeric.
 Variable secretP : R.-fdist 'I_10.
 Variable L : nat.
 
-(** s5x5_word_sampleT — the finite-word sample space.
-    @intent: pairs of a dealt position and an L-letter word over the eight
-    pile-local generators. *)
+(** s5x5_word_sampleT — the finite-word sample space: pairs of a dealt
+    position and an L-letter word over the eight pile-local generators. *)
 Definition s5x5_word_sampleT : finType :=
   [the finType of ('I_10 * L.-tuple 'I_8)%type].
 
-(** s5x5_word_sampleP — the finite-word sample distribution.
-    @intent: the product of the secret prior with the uniform word
-    distribution word_uniform 7 L, the distribution rho_from_words is the
-    image of. *)
+(** s5x5_word_sampleP — the finite-word sample distribution: the product of
+    the secret prior with the uniform word distribution word_uniform 7 L, the
+    distribution rho_from_words is the pushforward image of. *)
 Definition s5x5_word_sampleP : R.-fdist s5x5_word_sampleT :=
   (secretP `x (@word_uniform R 7 L))%fdist.
 
-(** s5x5_word_cut — the finite-word cut map.
-    @intent: the evaluation in S_5 x S_5 of the sampled generator word. *)
+(** s5x5_word_cut — the finite-word cut map: the evaluation in S_5 x S_5 of
+    the sampled generator word. *)
 Definition s5x5_word_cut (u : s5x5_word_sampleT) : pgg_gT (mp_M mpX) :=
   @word_eval s5x5_M L u.2.
 
-(** s5x5_word_sample — the S_5 x S_5 finite-word endpoint sample adapter.
-    @intent: the sample layer over s5x5_exec_plug whose sample space is
-    s5x5_word_sampleT under s5x5_word_sampleP, the run argument being the
-    dealt position and the cut the evaluated word. *)
+(** s5x5_word_sample — the sample adapter for s5x5_exec_plug: sample space
+    s5x5_word_sampleT under s5x5_word_sampleP, run argument the dealt
+    position, and cut the evaluated word. *)
 Definition s5x5_word_sample : SampleAdapter R s5x5_exec_plug :=
   @MkSampleAdapter R mpX s5x5_exec_plug s5x5_word_sampleT s5x5_word_sampleP
     fst s5x5_word_cut.
 
 (** s5x5_word_sndE — the word marginal of the finite-word sample distribution
-    is the uniform word distribution.
-    @composes: s5x5_word_cut_distE *)
+    is the uniform word distribution word_uniform 7 L. *)
 Lemma s5x5_word_sndE : fdist_snd s5x5_word_sampleP = @word_uniform R 7 L.
 Proof. by rewrite /s5x5_word_sampleP -fdistX_prod fdistX2 fdist_prod1. Qed.
 
-(** s5x5_word_cut_distE — the finite-word adapter's cut distribution is the
-    word-induced shuffle distribution the spectral theorems bound.
-    @main architecture: sa_cut_dist s5x5_word_sample = rho_from_words L
-    s5x5_gen_tuple. *)
+(** s5x5_word_cut_distE — the finite-word adapter's cut distribution equals
+    rho_from_words L s5x5_gen_tuple, the word-induced shuffle distribution
+    the spectral theorems below bound. *)
 Lemma s5x5_word_cut_distE :
   @sa_cut_dist R mpX s5x5_exec_plug s5x5_word_sample
   = @rho_from_words R 8 7 L s5x5_gen_tuple.
@@ -692,15 +673,14 @@ by [].
 Qed.
 
 (** s5x5_word_pile1_bound — the landed pile-1 spectral bound holds at the
-    finite-word adapter's own cut distribution.
-    @main bound: endpoint marginal mixing inside the first pile, conditional
-    on the trusted analytical certificate s5_rayleigh_Q2_R: the variation
-    distance between the pile-1 position pushforward of
-    sa_cut_dist s5x5_word_sample and the pile-1 uniform distribution is at
-    most sqrt 5 times the lazy spectral ratio to the power L, in the
-    repository's full-L1 convention. The statement quantifies over one pile-1
-    position, so it bounds one seat's endpoint marginal and not a coalition
-    view. *)
+    finite-word adapter's own cut distribution: endpoint marginal mixing
+    inside the first pile, conditional on the trusted analytical certificate
+    s5_rayleigh_Q2_R. The variation distance between the pile-1 position
+    pushforward of sa_cut_dist s5x5_word_sample and the pile-1 uniform
+    distribution is at most sqrt 5 times the lazy spectral ratio to the power
+    L, in the repository's full-L1 convention. The statement quantifies over
+    one pile-1 position, so it bounds one seat's endpoint marginal and not a
+    coalition view. *)
 Lemma s5x5_word_pile1_bound (s : 'I_5) :
   (var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma (widen5to10 s))
                (@sa_cut_dist R mpX s5x5_exec_plug s5x5_word_sample))
@@ -709,15 +689,14 @@ Lemma s5x5_word_pile1_bound (s : 'I_5) :
 Proof. by rewrite s5x5_word_cut_distE; exact: s5x5_pile1_TV_bound. Qed.
 
 (** s5x5_word_pile2_bound — the landed pile-2 spectral bound holds at the
-    finite-word adapter's own cut distribution.
-    @main bound: endpoint marginal mixing inside the second pile, conditional
-    on the trusted analytical certificate s5_rayleigh_Q2_R: the variation
-    distance between the pile-2 position pushforward of
-    sa_cut_dist s5x5_word_sample and the pile-2 uniform distribution is at
-    most sqrt 5 times the lazy spectral ratio to the power L, in the
-    repository's full-L1 convention. The statement quantifies over one pile-2
-    position, so it bounds one seat's endpoint marginal and not a coalition
-    view. *)
+    finite-word adapter's own cut distribution: endpoint marginal mixing
+    inside the second pile, conditional on the trusted analytical certificate
+    s5_rayleigh_Q2_R. The variation distance between the pile-2 position
+    pushforward of sa_cut_dist s5x5_word_sample and the pile-2 uniform
+    distribution is at most sqrt 5 times the lazy spectral ratio to the power
+    L, in the repository's full-L1 convention. The statement quantifies over
+    one pile-2 position, so it bounds one seat's endpoint marginal and not a
+    coalition view. *)
 Lemma s5x5_word_pile2_bound (s : 'I_5) :
   (var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma (rshift5to10 s))
                (@sa_cut_dist R mpX s5x5_exec_plug s5x5_word_sample))
@@ -726,16 +705,15 @@ Lemma s5x5_word_pile2_bound (s : 'I_5) :
 Proof. by rewrite s5x5_word_cut_distE; exact: s5x5_pile2_TV_bound. Qed.
 
 (** s5x5_word_seat_bound — the landed one-seat spectral bound holds at the
-    finite-word adapter's own cut distribution.
-    @main bound: endpoint marginal mixing of one of the ten seats against
-    global uniform on ten seats, conditional on the trusted analytical
-    certificate s5_rayleigh_Q2_R: the variation distance is at most
-    1 + sqrt 5 times the lazy spectral ratio to the power L, in the
-    repository's full-L1 convention. The leading summand 1 is the distance
-    between a pile-uniform distribution and global uniform, the shuffle
-    preserving each pile; the bound therefore does not vanish with L. The
-    statement quantifies over one seat and is not a joint statement about two
-    seats. *)
+    finite-word adapter's own cut distribution: endpoint marginal mixing of
+    one of the ten seats against global uniform on ten seats, conditional on
+    the trusted analytical certificate s5_rayleigh_Q2_R. The variation
+    distance is at most 1 + sqrt 5 times the lazy spectral ratio to the power
+    L, in the repository's full-L1 convention. The leading summand 1 is the
+    distance between a pile-uniform distribution and global uniform, since
+    the shuffle preserves each pile; the bound therefore does not vanish with
+    L. The statement quantifies over one seat and is not a joint statement
+    about two seats. *)
 Lemma s5x5_word_seat_bound (s : 'I_10) :
   (var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma s)
                (@sa_cut_dist R mpX s5x5_exec_plug s5x5_word_sample))
@@ -748,13 +726,11 @@ Proof. by rewrite s5x5_word_cut_distE; exact: s5x5_spectral_TV_bound. Qed.
 (******************************************************************************)
 
 (** s5x5_word_pile1_floor — the reverse-triangle lower bound between the
-    pile-1 endpoint distribution and global uniform on ten seats.
-    @main bound: negative mixing result for the first pile, conditional on the
-    trusted analytical certificate s5_rayleigh_Q2_R:
-    1 - sqrt 5 * lazy ^+ L is a lower bound on the variation distance between
-    the pile-1 position pushforward of the word-induced cut distribution and
-    the uniform distribution on ten seats, in the repository's full-L1
-    convention. *)
+    pile-1 endpoint distribution and global uniform on ten seats: conditional
+    on the trusted analytical certificate s5_rayleigh_Q2_R, 1 - sqrt 5 * lazy
+    ^+ L lower-bounds the variation distance between the pile-1 position
+    pushforward of the word-induced cut distribution and the uniform
+    distribution on ten seats, in the repository's full-L1 convention. *)
 Lemma s5x5_word_pile1_floor (s : 'I_5) :
   (1 - Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L
    <= var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma (widen5to10 s))
@@ -778,13 +754,11 @@ by rewrite lerBlDl.
 Qed.
 
 (** s5x5_word_pile2_floor — the reverse-triangle lower bound between the
-    pile-2 endpoint distribution and global uniform on ten seats.
-    @main bound: negative mixing result for the second pile, conditional on
-    the trusted analytical certificate s5_rayleigh_Q2_R:
-    1 - sqrt 5 * lazy ^+ L is a lower bound on the variation distance between
-    the pile-2 position pushforward of the word-induced cut distribution and
-    the uniform distribution on ten seats, in the repository's full-L1
-    convention. *)
+    pile-2 endpoint distribution and global uniform on ten seats: conditional
+    on the trusted analytical certificate s5_rayleigh_Q2_R, 1 - sqrt 5 * lazy
+    ^+ L lower-bounds the variation distance between the pile-2 position
+    pushforward of the word-induced cut distribution and the uniform
+    distribution on ten seats, in the repository's full-L1 convention. *)
 Lemma s5x5_word_pile2_floor (s : 'I_5) :
   (1 - Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L
    <= var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma (rshift5to10 s))
@@ -808,13 +782,12 @@ by rewrite lerBlDl.
 Qed.
 
 (** s5x5_word_pile1_floor_gt0 — the pile-1 floor is positive from word length
-    seventeen on.
-    @main bound: negative mixing result for the first pile in its positive
-    regime, conditional on the trusted analytical certificate
-    s5_rayleigh_Q2_R: at 17 <= L the pile-1 position pushforward of the
+    seventeen on: conditional on the trusted analytical certificate
+    s5_rayleigh_Q2_R, at 17 <= L the pile-1 position pushforward of the
     word-induced cut distribution is at positive variation distance from the
     uniform distribution on ten seats, in the repository's full-L1
-    convention. *)
+    convention. This is s5x5_word_pile1_floor made useful, since the raw
+    lower bound is vacuous below the s5x5_lazy_bound_lt1 threshold. *)
 Lemma s5x5_word_pile1_floor_gt0 (s : 'I_5) : (17 <= L)%N ->
   (0 < var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma (widen5to10 s))
                    (@sa_cut_dist R mpX s5x5_exec_plug s5x5_word_sample))
@@ -828,13 +801,12 @@ by rewrite subr_gt0; exact: (s5x5_lazy_bound_lt1 HL).
 Qed.
 
 (** s5x5_word_pile2_floor_gt0 — the pile-2 floor is positive from word length
-    seventeen on.
-    @main bound: negative mixing result for the second pile in its positive
-    regime, conditional on the trusted analytical certificate
-    s5_rayleigh_Q2_R: at 17 <= L the pile-2 position pushforward of the
+    seventeen on: conditional on the trusted analytical certificate
+    s5_rayleigh_Q2_R, at 17 <= L the pile-2 position pushforward of the
     word-induced cut distribution is at positive variation distance from the
     uniform distribution on ten seats, in the repository's full-L1
-    convention. *)
+    convention. This is s5x5_word_pile2_floor made useful, since the raw
+    lower bound is vacuous below the s5x5_lazy_bound_lt1 threshold. *)
 Lemma s5x5_word_pile2_floor_gt0 (s : 'I_5) : (17 <= L)%N ->
   (0 < var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma (rshift5to10 s))
                    (@sa_cut_dist R mpX s5x5_exec_plug s5x5_word_sample))
@@ -852,21 +824,22 @@ Qed.
 (******************************************************************************)
 
 (** s5x5_word_base_premise — the base-distribution premise of the generic
-    transfer theorem at the cut carrier.
-    @intent: a variation-distance bound between the finite-word adapter's cut
-    distribution on {perm 'I_10} and a reference distribution on the same
-    carrier. The landed spectral theorems bound pushforwards along position
-    readers, on the carrier 'I_10, and therefore do not instantiate this
-    proposition. The bound is read in the repository's full-L1 convention,
-    the convention of s5x5_word_pile1_bound. *)
+    transfer theorem at the cut carrier: a variation-distance bound between
+    the finite-word adapter's cut distribution on {perm 'I_10} and a
+    reference distribution on the same carrier. The landed spectral theorems
+    above bound pushforwards along position readers, on the carrier 'I_10,
+    and therefore do not instantiate this proposition; the Check/Fail Check
+    pair below pins that mismatch down. The bound is read in the
+    repository's full-L1 convention, the convention of
+    s5x5_word_pile1_bound. *)
 Definition s5x5_word_base_premise (Q : R.-fdist {perm 'I_10}) (delta : R)
     : Prop :=
   (var_dist (@sa_cut_dist R mpX s5x5_exec_plug s5x5_word_sample) Q <= delta)%R.
 
 (** s5x5_word_transfer_conditional — the generic transfer theorem applies to
-    any pair of cut readers once the base-distribution premise is supplied.
-    @main bound: two readers of the finite-word cut distribution whose
-    pushforwards along Q agree have pushforwards within delta + delta, in the
+    any pair of cut readers once the base-distribution premise is supplied:
+    two readers of the finite-word cut distribution whose pushforwards along
+    Q agree have pushforwards within delta + delta of each other, in the
     repository's full-L1 convention, provided s5x5_word_base_premise
     Q delta. *)
 Lemma s5x5_word_transfer_conditional
@@ -898,13 +871,11 @@ End s5x5_sample_layers.
 (******************************************************************************)
 (*     Executed endpoint bounds against the encoder-image pile ideals         *)
 (*                                                                            *)
-(* Amended work package A (user-approved 2026-08-13): the executed seat      *)
-(* readings are compared with the encoder-image pile ideals, not with        *)
-(* uniform. The uniform-ideal forms are false for this plug's deterministic  *)
-(* encoder; their compiled refutations are recorded in the 2026-08-13        *)
-(* completion response. The floors against global uniform transport the      *)
-(* ideals' support confinement, and hold unconditionally with constant one   *)
-(* by the same confinement at the executed observer.                         *)
+(* The executed seat readings are compared against the encoder-image pile    *)
+(* ideals, not against uniform: the uniform-ideal forms are false for this   *)
+(* plug's deterministic encoder. The floors against global uniform transport *)
+(* the ideals' support confinement, and hold unconditionally with constant   *)
+(* one by the same confinement at the executed observer.                     *)
 (******************************************************************************)
 
 Section s5x5_exec_ideal.
@@ -916,18 +887,18 @@ Local Open Scope ring_scope.
 
 (** s5x5_ideal_pile1_reading — the first-pile encoder-image ideal reading:
     the content a first-pile seat reads when its pile position is exactly
-    uniform, mixed over the secret prior.
-    @intent: the pushforward of secretP times the uniform pile position
-    along the product encoder; neither uniform nor secret-independent. *)
+    uniform, mixed over the secret prior — the pushforward of secretP times
+    the uniform pile position along the product encoder. Neither uniform nor
+    secret-independent. *)
 Definition s5x5_ideal_pile1_reading (secretP : R.-fdist 'I_10)
     : R.-fdist 'I_10 :=
   fdistmap (fun sq : 'I_10 * 'I_5 =>
               tnth (ts_encode s5x5_scheme sq.1) (widen5to10 sq.2))
     (secretP `x (fdist_uniform (card_ord 5))).
 
-(** s5x5_ideal_pile2_reading — the second-pile encoder-image ideal reading.
-    @intent: the pushforward of secretP times the uniform pile position
-    along the product encoder at second-pile positions. *)
+(** s5x5_ideal_pile2_reading — the second-pile encoder-image ideal reading:
+    the pushforward of secretP times the uniform pile position along the
+    product encoder at second-pile positions. *)
 Definition s5x5_ideal_pile2_reading (secretP : R.-fdist 'I_10)
     : R.-fdist 'I_10 :=
   fdistmap (fun sq : 'I_10 * 'I_5 =>
@@ -935,8 +906,7 @@ Definition s5x5_ideal_pile2_reading (secretP : R.-fdist 'I_10)
     (secretP `x (fdist_uniform (card_ord 5))).
 
 (** s5x5_ideal_seat_reading — the seat's own pile's encoder-image ideal
-    reading.
-    @intent: the first-pile ideal at a first-pile seat, the second-pile
+    reading: the first-pile ideal at a first-pile seat, the second-pile
     ideal otherwise. *)
 Definition s5x5_ideal_seat_reading (secretP : R.-fdist 'I_10)
     (i : 'I_(pi_T' (mp_PI mpX)).+1) : R.-fdist 'I_10 :=
@@ -944,8 +914,7 @@ Definition s5x5_ideal_seat_reading (secretP : R.-fdist 'I_10)
   else s5x5_ideal_pile2_reading secretP.
 
 (** prod_encode_pile1_lt — the product encoder carries a first-pile
-    position to a first-pile content value, for every secret.
-    @composes: s5x5_ideal_pile1_uniform_ge *)
+    position to a first-pile content value, for every secret. *)
 Lemma prod_encode_pile1_lt (s : 'I_10) (j : 'I_10) : (val j < 5)%N ->
   (val (tnth (ts_encode s5x5_scheme s) j) < 5)%N.
 Proof.
@@ -954,8 +923,7 @@ by set y := tnth _ _; exact: (ltn_ord y).
 Qed.
 
 (** prod_encode_pile2_ge — the product encoder carries a second-pile
-    position to a second-pile content value, for every secret.
-    @composes: s5x5_ideal_pile2_uniform_ge *)
+    position to a second-pile content value, for every secret. *)
 Lemma prod_encode_pile2_ge (s : 'I_10) (j : 'I_10) : (val j < 5)%N = false ->
   (5 <= val (tnth (ts_encode s5x5_scheme s) j))%N.
 Proof.
@@ -964,12 +932,11 @@ by set y := tnth _ _; exact: leq_addr.
 Qed.
 
 (** s5x5_exec_pile1_bound — executed endpoint marginal mixing, conditional
-    on the trusted analytical certificate s5_rayleigh_Q2_R.
-    @main bound: the variation distance, in the repository's full-L1
-    convention, between sa_seat_dist of the interpreter-executed
-    finite-word adapter at one first-pile seat and the first-pile
-    encoder-image ideal reading is at most sqrt 5 times the lazy
-    coefficient to the power L. One endpoint marginal; the ideal is
+    on the trusted analytical certificate s5_rayleigh_Q2_R: the variation
+    distance, in the repository's full-L1 convention, between sa_seat_dist
+    of the interpreter-executed finite-word adapter at one first-pile seat
+    and the first-pile encoder-image ideal reading is at most sqrt 5 times
+    the lazy coefficient to the power L. One endpoint marginal; the ideal is
     neither uniform nor secret-independent; no coalition, privacy, secrecy
     or leakage conclusion is claimed. *)
 Lemma s5x5_exec_pile1_bound (secretP : R.-fdist 'I_10) (L : nat)
@@ -1016,9 +983,8 @@ exact: s5x5_pile1_TV_bound.
 Qed.
 
 (** s5x5_exec_pile2_bound — the second-pile executed endpoint marginal
-    mixing bound, conditional on s5_rayleigh_Q2_R.
-    @main bound: the second-pile mirror of s5x5_exec_pile1_bound, at the
-    second-pile encoder-image ideal reading. *)
+    mixing bound, conditional on s5_rayleigh_Q2_R: the second-pile mirror of
+    s5x5_exec_pile1_bound, at the second-pile encoder-image ideal reading. *)
 Lemma s5x5_exec_pile2_bound (secretP : R.-fdist 'I_10) (L : nat)
     (s : 'I_5) :
   var_dist
@@ -1064,10 +1030,10 @@ Qed.
 
 (** s5x5_exec_seat_bound — the per-seat executed endpoint marginal mixing
     bound against the seat's own pile's encoder-image ideal reading,
-    conditional on s5_rayleigh_Q2_R.
-    @main bound: at every seat, the executed reading is within sqrt 5 times
-    the lazy coefficient to the power L of the seat's pile ideal; the
-    refuted global-uniform target is deliberately not reproduced. *)
+    conditional on s5_rayleigh_Q2_R: at every seat, the executed reading is
+    within sqrt 5 times the lazy coefficient to the power L of the seat's
+    pile ideal. The refuted global-uniform target is deliberately not
+    reproduced. *)
 Lemma s5x5_exec_seat_bound (secretP : R.-fdist 'I_10) (L : nat)
     (i : 'I_(pi_T' (mp_PI mpX)).+1) :
   var_dist
@@ -1090,10 +1056,7 @@ Qed.
 (** s5x5_ideal_pile1_uniform_ge — the first-pile encoder-image ideal is at
     full-L1 distance at least one from global uniform, because the
     deterministic encoder confines it to that pile's five of ten values;
-    the obstruction the executed floors transport.
-    @composes: s5x5_exec_pile1_floor
-    Naming: intentional; _uniform_ge names the compared distribution and
-    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+    this is the obstruction the executed floors below transport. *)
 Lemma s5x5_ideal_pile1_uniform_ge (secretP : R.-fdist 'I_10) :
   1 <= var_dist (s5x5_ideal_pile1_reading secretP)
                 (fdist_uniform (card_ord 10)).
@@ -1121,10 +1084,7 @@ by lra.
 Qed.
 
 (** s5x5_ideal_pile2_uniform_ge — the second-pile mirror of
-    s5x5_ideal_pile1_uniform_ge.
-    @composes: s5x5_exec_pile2_floor
-    Naming: intentional; _uniform_ge names the compared distribution and
-    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+    s5x5_ideal_pile1_uniform_ge. *)
 Lemma s5x5_ideal_pile2_uniform_ge (secretP : R.-fdist 'I_10) :
   1 <= var_dist (s5x5_ideal_pile2_reading secretP)
                 (fdist_uniform (card_ord 10)).
@@ -1157,8 +1117,7 @@ Qed.
 
 (** s5x5_exec_pile1_floor — negative result against global uniform at the
     executed observer, conditional on s5_rayleigh_Q2_R for the stated
-    constant.
-    @main bound: the variation distance, in the full-L1 convention, between
+    constant: the variation distance, in the full-L1 convention, between
     the first-pile executed seat reading and the uniform distribution on
     ten values is at least one minus sqrt 5 times the lazy coefficient to
     the power L, transported by the reverse triangle inequality from the
@@ -1189,8 +1148,7 @@ Qed.
 
 (** s5x5_exec_pile2_floor — the second-pile executed negative result
     against global uniform, conditional on s5_rayleigh_Q2_R for the stated
-    constant.
-    @main bound: the second-pile mirror of s5x5_exec_pile1_floor. *)
+    constant: the second-pile mirror of s5x5_exec_pile1_floor. *)
 Lemma s5x5_exec_pile2_floor (secretP : R.-fdist 'I_10) (L : nat)
     (s : 'I_5) :
   1 - Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L
@@ -1217,10 +1175,7 @@ Qed.
 (** s5x5_exec_pile1_floor_gt0 — the first-pile executed floor in its
     positive regime: at word length at least seventeen the first-pile
     executed seat reading is at strictly positive distance from global
-    uniform, conditional on s5_rayleigh_Q2_R.
-    @composes: s5x5_exec_pile1_floor
-    Naming: intentional; _floor_gt0 mirrors the pre-existing
-    word_pile1_floor_gt0 and word_pile2_floor_gt0 pair. *)
+    uniform, conditional on s5_rayleigh_Q2_R. *)
 Lemma s5x5_exec_pile1_floor_gt0 (secretP : R.-fdist 'I_10) (L : nat)
     (s : 'I_5) : (17 <= L)%N ->
   0 < var_dist
@@ -1235,10 +1190,7 @@ Qed.
 
 (** s5x5_exec_pile2_floor_gt0 — the second-pile executed floor in its
     positive regime, at word length at least seventeen, conditional on
-    s5_rayleigh_Q2_R.
-    @composes: s5x5_exec_pile2_floor
-    Naming: intentional; _floor_gt0 mirrors the pre-existing
-    word_pile1_floor_gt0 and word_pile2_floor_gt0 pair. *)
+    s5_rayleigh_Q2_R: the second-pile mirror of s5x5_exec_pile1_floor_gt0. *)
 Lemma s5x5_exec_pile2_floor_gt0 (secretP : R.-fdist 'I_10) (L : nat)
     (s : 'I_5) : (17 <= L)%N ->
   0 < var_dist
@@ -1262,11 +1214,8 @@ Local Open Scope ring_scope.
 
 (** s5x5_exec_seat_uniform_ub — the executed distance to global uniform is
     at most the seat's ideal-to-uniform distance plus the mixing term, the
-    global-uniform ceiling companion of the floors; the leading term is the
-    ideal's own distance, deliberately not a constant.
-    @composes: s5x5_exec_seat_bound
-    Naming: intentional; _uniform_ub names the compared distribution and
-    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+    global-uniform ceiling companion of the floors above; the leading term
+    is the ideal's own distance, deliberately not a constant. *)
 Lemma s5x5_exec_seat_uniform_ub (secretP : R.-fdist 'I_10) (L : nat)
     (i : 'I_(pi_T' (mp_PI mpX)).+1) :
   var_dist
@@ -1285,12 +1234,8 @@ Qed.
     executed observer: the deterministic encoder confines a first-pile
     seat's executed reading to that pile's five of ten values, so its
     full-L1 distance from global uniform is at least one, at every word
-    length and every secret prior, with no analytical certificate.
-    @main bound: negative result against global uniform at the executed
-    observer by encoder support confinement; one endpoint marginal; no
-    coalition or privacy conclusion is claimed.
-    Naming: intentional; _uniform_ge names the compared distribution and
-    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+    length and every secret prior, with no analytical certificate needed.
+    One endpoint marginal; no coalition or privacy conclusion is claimed. *)
 Lemma s5x5_exec_pile1_uniform_ge (secretP : R.-fdist 'I_10) (L : nat)
     (s : 'I_5) :
   1 <= var_dist
@@ -1333,12 +1278,10 @@ by lra.
 Qed.
 
 (** s5x5_exec_pile2_uniform_ge — the second-pile unconditional support
-    floor at the executed observer.
-    @main bound: negative result against global uniform at the executed
-    observer by encoder support confinement; one endpoint marginal; no
-    coalition or privacy conclusion is claimed.
-    Naming: intentional; _uniform_ge names the compared distribution and
-    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+    floor at the executed observer: negative result against global uniform
+    by encoder support confinement alone, with no analytical certificate
+    needed. One endpoint marginal; no coalition or privacy conclusion is
+    claimed. *)
 Lemma s5x5_exec_pile2_uniform_ge (secretP : R.-fdist 'I_10) (L : nat)
     (s : 'I_5) :
   1 <= var_dist
@@ -1401,8 +1344,7 @@ End s5x5_exec_ideal_corollaries.
 (******************************************************************************)
 
 (** s5x5_rand_family — the randomized product-tape model as a unit-indexed
-    family.
-    @intent: the AnalysisModelFamily over s5x5_rand_observed whose one
+    family: the AnalysisModelFamily over s5x5_rand_observed whose one
     member at every real field is s5x5_rand_sample. *)
 Definition s5x5_rand_family : AnalysisModelFamily s5x5_rand_observed :=
   @MkAnalysisModelFamily s5x5_rand_observed (fun _ => unit)
@@ -1410,9 +1352,8 @@ Definition s5x5_rand_family : AnalysisModelFamily s5x5_rand_observed :=
 
 (** s5x5_word_family — the finite-word model family, indexed by a secret
     prior and a word length; the one family shared by the two endpoint and
-    the two limitation rows.
-    @intent: the AnalysisModelFamily over s5x5_observed sending an index
-    (secretP, L) to s5x5_word_sample secretP L. *)
+    the two limitation rows: the AnalysisModelFamily over s5x5_observed
+    sending an index (secretP, L) to s5x5_word_sample secretP L. *)
 Definition s5x5_word_family : AnalysisModelFamily s5x5_observed :=
   @MkAnalysisModelFamily s5x5_observed
     (fun R => (R.-fdist 'I_10 * nat)%type)

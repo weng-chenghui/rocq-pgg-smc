@@ -4,9 +4,10 @@
 (* S_5 × S_5 Algebraic Rigidity Instance                                     *)
 (*                                                                            *)
 (* First concrete group instance with genus > 0. The product structure        *)
-(* S_5 × S_5 ⊂ S_10 forces genus >= 3 because:                              *)
-(*   1. |G| = 14400 > klein_genus0_bound(10) = 990 → genus > 0                       *)
-(*   2. Product sum_mod gives (5,10)-threshold with gap 5 → genus >= 3      *)
+(* S_5 × S_5 ⊂ S_10 forces genus >= 173 because:                            *)
+(*   1. |G| = 14400 > klein_genus0_bound(10) = 60 → genus > 0                *)
+(*   2. Hurwitz's automorphism bound |Aut(C)| <= 84(g-1) at |G| = 14400      *)
+(*      forces g >= 173                                                      *)
 (*                                                                            *)
 (* Parameters:                                                                *)
 (*   N = 10 sheets (two 5-card piles)                                        *)
@@ -16,7 +17,7 @@
 (*     eps = 1 + sqrt(10)*lazy_alpha^591                                     *)
 (*     var_dist floors at 1 (orbit-vs-global gap), not 0                    *)
 (*   ThresholdScheme: product of two sum_mod on 'I_5                         *)
-(*   CoveringData: genus 3, base genus 0, ramif = 28804                      *)
+(*   CoveringData: genus 173, base genus 0, ramif = 29144                    *)
 (*                                                                            *)
 (* Spectral gap of the Schreier walk on 'I_10:                               *)
 (*   The 10x10 Schreier matrix decomposes into two 5x5 blocks (one per      *)
@@ -70,15 +71,10 @@ Axiom s5x5_group_order_eq :
   #|pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple)| = 14400.
 
 (** s5x5_group_order_bound — the S_5 x S_5 group order strictly exceeds the
-    Klein PGL bound for genus-0 covers on 10 sheets.
-    Kind: helper.
-    Why: forces the s5x5 instance into the positive-genus branch of the
-    AlgebraicRigidity tradeoff theorem. With klein_genus0_bound = max(2*10, 60) = 60
-    and |S_5 x S_5| = 14400 (from s5x5_group_order_eq), the strict
-    inequality 60 < 14400 is immediate; combined with
-    [ar_large_group_forces_gap], this discharges the genus > 0 conclusion.
-    Used by: downstream callers that rely on the genus > 0 branch of
-    [ar_genus_gap_dichotomy] for s5x5. *)
+    Klein PGL bound for genus-0 covers on 10 sheets: klein_genus0_bound =
+    max(2*10, 60) = 60 while |S_5 x S_5| = 14400. Combined with
+    ar_large_group_forces_gap, this is what forces the s5x5 instance onto
+    the positive-genus branch of the AlgebraicRigidity tradeoff. *)
 Lemma s5x5_group_order_bound :
   (klein_genus0_bound (@Gen_PGGTypes 7 8 s5x5_gen_tuple) <
    #|pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple)|)%N.
@@ -107,10 +103,12 @@ Let s5x5_M : MonodromyReprWithGeneratorType := M_s5x5.
    Worst case: img_min = 2, bound = 2*(10-2)/10 = 8/5. *)
 Let s5x5_eps := @GRing.natmul R 1 8 / @GRing.natmul R 1 5.
 
-(** s5x5_endpoint_bound_fiber — endpoint variational-distance bound at L=1 for S_5 x S_5.
-    Kind: helper.
-    Why: instantiates the unbalanced endpoint-image bound at the specific S_5 x S_5 generating tuple.
-    Used by: the L=1 security witness for the S_5 x S_5 instance. *)
+(** s5x5_endpoint_bound_fiber — at word length 1, every sheet's endpoint law
+    has variation distance at most 8/5 = s5x5_eps from uniform on 'I_10 (the
+    fiber count above: boundary sheets have image size 2, interior sheets
+    image size 3, worst case 2*(10-2)/10). This is the hypothesis
+    security_witness_fiber needs to build s5x5_security_witness_1, the L=1
+    fiber-counted security witness for the S_5 x S_5 instance. *)
 Lemma s5x5_endpoint_bound_fiber :
   forall s : 'I_10,
   (var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma s)
@@ -201,9 +199,8 @@ case: m Hm Hmem => [|[|[|[|[|m']]]]] Hm Hmem.
   + by [].
 Qed.
 
-(* ShuffleMarginalBound at L=1 via fiber counting. Epsilon = 8/5.
-   @intent: security_witness_fiber at the eight product generators, word
-   length 1 and the fiber-counted epsilon proof. *)
+(* ShuffleMarginalBound at L=1 via fiber counting over the eight product
+   generators: epsilon = 8/5, established by s5x5_endpoint_bound_fiber. *)
 Definition s5x5_security_witness_1 : ShuffleMarginalBound R s5x5_M :=
   security_witness_fiber s5x5_weval_inj1 s5x5_endpoint_bound_fiber.
 
@@ -274,10 +271,9 @@ apply: (@MkSecurityAsymptotic R s5x5_M
   + by rewrite Num.Theory.ler_sqrt ?Num.Theory.ler0n // Num.Theory.ler_nat.
 Defined.
 
-(* ShuffleCertificateBundle at any word length L, parametrised only by R.
-   @intent: MkShuffleCertificateBundle at the spectral marginal bound of the
-   word distribution, with no exact certificate and s5x5_asymptotic
-   attached. *)
+(* ShuffleCertificateBundle at any word length L, parametrised only by R:
+   MkShuffleCertificateBundle at the spectral marginal bound of the word
+   distribution, with no exact certificate and s5x5_asymptotic attached. *)
 Definition s5x5_security_witness_schreier (L : nat) :
     ShuffleCertificateBundle R s5x5_M.
 Proof.
@@ -312,11 +308,10 @@ Let s5x5_M : MonodromyReprWithGeneratorType :=
 
 (* Hurwitz lower bound on the genus of any S_5 x S_5 Galois cover of P^1:
    for g >= 2, |Aut(C)| <= 84 * (g - 1), so g >= 1 + |G|/84. With |G| = 14400,
-   g >= 1 + 14400/84 = 172.43, hence g >= 173. The previous cd_genus = 3 was
-   a cooked underestimate that violated this bound; cd_genus = 173 is the
-   minimum genus consistent with both Hurwitz arithmetic and the Hurwitz
-   automorphism bound. The actual realising curve (an inverse-Galois
-   construction for S_5 x S_5) is named in the realisation axioms below.
+   g >= 1 + 14400/84 = 172.43, hence g >= 173: the minimum genus consistent
+   with both Hurwitz arithmetic and the Hurwitz automorphism bound. The
+   actual realising curve (an inverse-Galois construction for S_5 x S_5) is
+   named in the realisation axioms below.
 
    Riemann-Hurwitz: 2*173 + 2*14400 = 14400*(2*0) + 29144 + 2.
    Check: 346 + 28800 = 29146; 29144 + 2 = 29146. *)
@@ -328,31 +323,26 @@ by rewrite muln0 muln0 add0n s5x5_group_order_eq.
 Qed.
 
 (** s5x5_n_branch_le — 6 <= 29144, the concrete branch-count-vs-total-ramif
-    inequality for the S_5 x S_5 instance.
-    Kind: helper.
-    Why: discharges the [cd_ramif_ge_n_branch] field required when building
-    the [CoveringData] record for s5x5_M.
-    Used by: s5x5_covering_data. *)
+    inequality for the S_5 x S_5 instance. This discharges the
+    [cd_ramif_ge_n_branch] field of the [CoveringData] record
+    s5x5_covering_data below. *)
 Lemma s5x5_n_branch_le : (6 <= 29144)%N. Proof. by []. Qed.
 
-(** s5x5_covering_data — covering-data record for the S_5 x S_5 instance
-    (genus = 173, branches = 6, total ramification = 29144).
-    Kind: instance.
-    Why: Hurwitz lower bound forces genus >= 173 for any S_5 x S_5 Galois
-    cover of P^1; see [s5x5_inverse_galois_realised] below for the
-    realisation axiom citing the inverse-Galois construction. *)
+(** s5x5_covering_data — covering-data record for the S_5 x S_5 instance:
+    genus 173, 6 branches, total ramification 29144. The genus is forced by
+    the Hurwitz lower bound (s5x5_hurwitz) for any S_5 x S_5 Galois cover of
+    P^1; s5x5_inverse_galois_realised below is the realisation axiom for
+    this specific cover. *)
 Definition s5x5_covering_data : CoveringData s5x5_M :=
   @MkCoveringData s5x5_M 0 6 29144 173 s5x5_n_branch_le s5x5_hurwitz.
 
-(** s5x5_inverse_galois_realised — the [s5x5_covering_data] record corresponds
-    to a real Galois cover of P^1 with deck group S_5 x S_5 and genus 173.
-    Kind: helper.
-    Why: documentation hook for the realisation marker. The inverse Galois
-    problem for S_5 x S_5 over Q is solved (S_5 x S_5 is realisable as a
-    Galois group of a number-field extension; via Belyi-style constructions
-    this lifts to a Galois cover of P^1_Q with the specified deck group).
-    The minimum genus realising this Galois group is bounded below by
-    Hurwitz at 173. The full Coq formalisation of the curve is deferred. *)
+(** s5x5_inverse_galois_realised — s5x5_covering_data corresponds to an
+    actual Galois cover of P^1 with deck group S_5 x S_5 and genus 173, not
+    merely a formally consistent record. The trust boundary: the inverse
+    Galois problem for S_5 x S_5 over Q is solved, so S_5 x S_5 is
+    realisable as a Galois group of a number-field extension, and a
+    Belyi-style construction lifts that to a Galois cover of P^1_Q with this
+    deck group at the Hurwitz-minimal genus 173. *)
 Axiom s5x5_inverse_galois_realised :
   realised_by_curve s5x5_covering_data.
 
@@ -367,14 +357,10 @@ Let s5x5_ts : ThresholdScheme 'I_10 'I_10 :=
 
 (* --- CoveringScheme --- *)
 
-(** s5x5_cs_gap — the recovery gap bound for the S_5 x S_5 covering scheme.
-    Kind: helper.
-    Why: discharges the [cs_gap] field of [CoveringScheme] for s5x5_M. The
-    genus is the Hurwitz-honest cd_genus s5x5_covering_data = 173, so the
-    bound is ts_T <= ts_k + 2 * 173 = 5 + 346 = 351 >= 10, immediate by
-    computation. (Reconciled from the stale literal 3 to the actual record
-    genus 173, keeping s5x5_covering_data unchanged.)
-    Used by: s5x5_covering. *)
+(** s5x5_cs_gap — the [cs_gap] obligation ts_T <= ts_k + 2*cd_genus holds
+    for the S_5 x S_5 product threshold scheme: with ts_T = 10, ts_k = 5
+    and cd_genus = 173, the bound reads 10 <= 5 + 346 = 351, immediate by
+    computation. Discharges the gap field of [s5x5_covering]. *)
 Lemma s5x5_cs_gap :
   (ts_T s5x5_ts <= ts_k s5x5_ts + 2 * cd_genus s5x5_covering_data)%N.
 Proof. by []. Qed.
@@ -385,18 +371,20 @@ Lemma s5x5_preserves_pile1 :
   forall i : 'I_10, (val i < 5)%N -> (val (@pgg_rho s5x5_M g i) < 5)%N.
 Proof. exact: s5x5_pile1_stab. Qed.
 
-(** s5x5_perm_compatible — monodromy permutation-compatibility for S_5 x S_5.
-    Kind: helper.
-    Why: closes the [ts_recon_perm_invariant] obligation of the covering scheme.
-    Used by: [s5x5_covering]. *)
+(** s5x5_perm_compatible — the S_5 x S_5 monodromy action is
+    permutation-compatible with the product sum-mod threshold scheme
+    s5x5_ts, closing the [ts_recon_perm_invariant] obligation the
+    covering-scheme record s5x5_covering needs. *)
 Lemma s5x5_perm_compatible :
   @ts_recon_perm_invariant _ (pgg_G s5x5_M) _ _ s5x5_ts (@pgg_rho s5x5_M).
 Proof.
 exact: (@product_sum_mod_perm_compatible 3 3 4 4 _ _ (@pgg_rho s5x5_M) s5x5_preserves_pile1).
 Qed.
 
-(** s5x5_covering — covering-scheme record for the S_5 x S_5 instance.
-    Kind: instance. *)
+(** s5x5_covering — the [CoveringScheme] record for the S_5 x S_5 instance:
+    the product threshold plug, s5x5_covering_data, and the recovery-gap
+    bound s5x5_cs_gap, bundled for the [AlgebraicRigidity] construction
+    below. *)
 Definition s5x5_covering : CoveringScheme s5x5_M := {|
   cs_plug := @MkReconPlug s5x5_M 'I_10 s5x5_ts id (@pgg_rho s5x5_M)
                s5x5_perm_compatible ;
@@ -406,35 +394,36 @@ Definition s5x5_covering : CoveringScheme s5x5_M := {|
 
 (* --- ThresholdWitness --- *)
 
-(* genus = 3 ≠ 0 → the PGL hypothesis is vacuously true *)
+(* genus = 173 <> 0, so the PGL hypothesis is vacuously true. *)
 Lemma s5x5_genus0_klein :
   cd_genus (cs_data s5x5_covering) = 0 ->
   (#|pgg_G s5x5_M| <= klein_genus0_bound s5x5_M)%N.
 Proof. by []. Qed.
 
-(** s5x5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
-    S_5 x S_5 instance. Because the genus is 3, the genus-0 branch is
-    vacuous and the obligation is discharged by [s5x5_genus0_klein] directly.
-    Kind: helper.
-    Why: required to instantiate [s5x5_threshold_witness].
-    Used by: s5x5_threshold_witness. *)
+(** s5x5_genus0_automorphism — the [genus0_automorphism_bound] obligation for
+    the S_5 x S_5 instance. Because the covering genus is 173, not 0, the
+    genus-0 hypothesis is vacuous and s5x5_genus0_klein discharges the
+    obligation directly. This is what s5x5_threshold_witness needs to
+    package s5x5_covering into a [ThresholdWitness]. *)
 Lemma s5x5_genus0_automorphism :
   genus0_automorphism_bound s5x5_M (cs_data s5x5_covering).
 Proof. exact: s5x5_genus0_klein. Qed.
 
-(** s5x5_threshold_witness — threshold witness for the S_5 x S_5 instance,
-    packaging [s5x5_covering] with its genus-0 automorphism discharge.
-    Kind: instance.
-    Why: bundles [s5x5_covering] and [s5x5_genus0_automorphism] into a
-    single [ThresholdWitness] consumed by [s5x5_rigidity] below. *)
+(** s5x5_threshold_witness — the [ThresholdWitness] for the S_5 x S_5
+    instance: s5x5_covering paired with its genus0_automorphism discharge.
+    s5x5_rigidity below consumes it as the recovery half of the
+    [AlgebraicRigidity] value. *)
 Definition s5x5_threshold_witness : ThresholdWitness s5x5_M :=
   @MkThresholdWitness s5x5_M s5x5_covering s5x5_genus0_automorphism.
 
 (* --- AlgebraicRigidity --- *)
 
-(** s5x5_rigidity — the AlgebraicRigidity value of the S_5 x S_5 instance.
-    @intent: MkAlgebraicRigidity at the certificate-free bundle of
-    s5x5_security_witness_1 and s5x5_threshold_witness. *)
+(** s5x5_rigidity — the [AlgebraicRigidity] value of the S_5 x S_5 instance:
+    the certificate-free L=1 fiber security bundle
+    (s5x5_security_witness_1) paired with the recovery witness
+    s5x5_threshold_witness. This is the instance's security/recovery
+    package at word length 1; s5x5_rigidity_cryptographically_secure below
+    is the same package at the spectral bound, word length 591. *)
 Definition s5x5_rigidity : AlgebraicRigidity R s5x5_M :=
   @MkAlgebraicRigidity R s5x5_M
     (shuffle_bundle_of_bound (s5x5_security_witness_1 R))
@@ -446,9 +435,12 @@ Lemma s5x5_complexity (L : nat) :
   (@search_space s5x5_M L <= #|pgg_G s5x5_M|)%N.
 Proof. exact: search_space_leG. Qed.
 
-(** s5x5_tradeoff — security/complexity trade-off for the S_5 x S_5 instance.
-    Kind: main.
-    Why: specialises the generic [security_threshold_tradeoff] to S_5 x S_5. *)
+(** s5x5_tradeoff — the security/complexity trade-off for the S_5 x S_5
+    instance: either the covering genus is 0 and the group order stays below
+    the Klein bound with ts_T <= ts_k, or the genus is positive and ts_T is
+    only bounded by ts_k plus twice the genus. This instance realises the
+    second, positive-genus disjunct (s5x5_large_group), specialising the
+    generic security_threshold_tradeoff dichotomy. *)
 Lemma s5x5_tradeoff :
   let cs := tw_covering (ar_threshold s5x5_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
@@ -461,13 +453,17 @@ Proof.
 exact: (@security_threshold_tradeoff s5x5_M s5x5_covering s5x5_genus0_klein).
 Qed.
 
-(* The main point: genus > 0 is forced by |G| > klein_genus0_bound *)
+(* Genus > 0 is forced by |G| > klein_genus0_bound. *)
 Lemma s5x5_large_group :
   (0 < cd_genus (cs_data s5x5_covering))%N.
 Proof. by []. Qed.
 
-(** Protocol reconstruction correctness: named instance-level re-export of
-    [ar_protocol_correct]. Takes a [PGGInterface] as a parameter. *)
+(** s5x5_ts_recon_correct — for the S_5 x S_5 instance, reconstructing the
+    dealt secret from the revealed endpoints of any group element P recovers
+    the sheet s that was cut, given the [G_stable] monodromy condition and
+    covering-scheme validity. Interface-parametrised generalisation of
+    ar_protocol_correct, specialised below at s5x5_PI to get the concrete
+    unconditional guarantee s5x5_protocol_correct. *)
 Lemma s5x5_ts_recon_correct (PI : PGGInterface s5x5_M)
     (HT : ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) = pi_T' PI)
     (s : 'I_10) (P : pgg_gT s5x5_M)
@@ -493,46 +489,43 @@ Proof. exact: ar_protocol_correct. Qed.
 (*     Non-abelianness, concrete interface, and unconditional correctness     *)
 (******************************************************************************)
 
-(** s5x5_nonabelian — the S_5 x S_5 monodromy group is non-abelian.
-    Kind: main.
-    Why: the security character of the instance; the order |G| = 14400 alone
-    does not force non-abelianness, so it is proven, not assumed. Two adjacent
-    transpositions in the same 5-card pile (the cut at 0--1 and the cut at
-    1--2) fail to commute, witnessed at card 0. Mirrors wreath_nonabelian. *)
+(** s5x5_nonabelian — the S_5 x S_5 monodromy group is non-abelian: two
+    adjacent transpositions in the same five-card pile, the cuts (0 1) and
+    (1 2), fail to commute, witnessed at card 0. The order alone,
+    |G| = 14400, does not force non-abelianness, so this is proved
+    separately; it is the S_5 x S_5 analogue of wreath_nonabelian's
+    argument, and it is what gives the instance a non-trivial commutator
+    structure. *)
 Lemma s5x5_nonabelian : ~~ abelian (pgg_G s5x5_M).
 Proof.
 apply: (@gen_nonabelian s5x5_M (@Ordinal 8 0 isT) (@Ordinal 8 1 isT)) => //.
 by apply/eqP => /permP /(_ (@Ordinal 10 0 isT)); rewrite !permM !permE.
 Qed.
 
-(** s5x5_starts_uniq — the ten starting card positions are distinct.
-    Kind: helper.
-    Why: the uniqueness witness for s5x5_PI.
-    Used by: s5x5_PI. *)
+(** s5x5_starts_uniq — the ten starting card positions are pairwise
+    distinct, the uniqueness witness s5x5_PI needs for its [PGGInterface]
+    record. *)
 Lemma s5x5_starts_uniq : uniq (ord_tuple 10).
 Proof. by rewrite val_ord_tuple enum_uniq. Qed.
 
-(** s5x5_PI — the concrete ten-sheet (two piles of five) starting interface.
-    Kind: instance.
-    Why: the 10 starting card positions, in order. The identity start tuple
-    makes the G_stable condition reduce to reflexivity of pgg_rho.
-    Used by: s5x5_protocol_correct, s5x5_profile. *)
+(** s5x5_PI — the concrete ten-sheet (two piles of five) [PGGInterface]: the
+    10 starting card positions, in identity order. Starting at the identity
+    tuple is what makes the s5x5_G_stable condition reduce to reflexivity of
+    pgg_rho, which is why s5x5_protocol_correct can be unconditional. *)
 Definition s5x5_PI : PGGInterface s5x5_M :=
   @MkPGGI s5x5_M 9 (ord_tuple 10) s5x5_starts_uniq.
 
-(** s5x5_HT — the scheme and interface party counts agree (both 9).
-    Kind: helper.
-    Why: the cast witness; kept as erefl so the tuple casts reduce away.
-    Used by: s5x5_G_stable, s5x5_protocol_correct. *)
+(** s5x5_HT — the threshold scheme's and the interface's party counts agree
+    (both 9). Kept as [erefl] rather than an opaque proof so the tuple casts
+    it feeds in s5x5_G_stable and s5x5_protocol_correct reduce away by
+    computation. *)
 Definition s5x5_HT : ts_T' s5x5_ts = pi_T' s5x5_PI := erefl.
 
-(** s5x5_G_stable — the monodromy permutes the starts as the share permutation
-    (content = id form).
-    Kind: main.
-    Why: the structural condition of protocol correctness, proven (not assumed).
-    With starts = ord_tuple 10 and content = id, both sides collapse to
-    pgg_rho g i. Closes the audit gap that G_stable was a hypothesis.
-    Used by: s5x5_protocol_correct. *)
+(** s5x5_G_stable — the monodromy permutes the starting card positions
+    exactly as it permutes the identity-content shares: with starts =
+    ord_tuple 10 and content = id, both sides of the [G_stable] condition
+    collapse to pgg_rho g i. This is the structural premise
+    s5x5_protocol_correct needs, proved here rather than assumed. *)
 Lemma s5x5_G_stable :
   forall g, g \in pgg_G s5x5_M ->
   forall i : 'I_(ts_T' s5x5_ts).+1,
@@ -545,13 +538,13 @@ move=> g Hg i.
 by rewrite tnth_mktuple !tnth_cast_tuple !tnth_ord_tuple !cast_ord_id.
 Qed.
 
-(** s5x5_protocol_correct — recovery of the dealt endpoints returns the secret
-    (unconditional, concrete interface).
-    Kind: main.
-    Why: the end-to-end protocol guarantee. For any hidden element P of the
-    full group, reconstructing the revealed endpoints recovers the secret,
-    via the generic pgg_recon_monodromy_correct fed the proven G_stable and the
-    covering's recon-invariance. No G_stable hypothesis is assumed. *)
+(** s5x5_protocol_correct — for the concrete S_5 x S_5 interface s5x5_PI,
+    reconstructing the secret sheet s from the revealed endpoints of any
+    hidden group element P recovers s, unconditionally: no [G_stable]
+    hypothesis is assumed, since s5x5_G_stable proves it. This is
+    pgg_recon_monodromy_correct instantiated with the proved G_stable and
+    the covering's permutation-compatibility (s5x5_perm_compatible), and is
+    the end-to-end correctness guarantee for the S_5 x S_5 instance. *)
 Theorem s5x5_protocol_correct (s : 'I_10) (P : pgg_gT s5x5_M) :
   P \in pgg_G s5x5_M ->
   ts_valid s5x5_ts s
@@ -571,16 +564,12 @@ Qed.
 (******************************************************************************)
 
 (** s5x5_combinatorial_rigidity — the CombinatorialRigidity value for
-    S_5 x S_5.
-    Kind: main.
-    Why: certifies security (the L=1 fiber witness), recovery (the covering
-    with its positive gap), the positive genus (173 > 0), and the order
-    inequality (60 < 14400), in one record. The positive dual of s5_nogo:
-    the product realises an order inequality with a positive gap that no
-    genus-zero curve admits.
-    @intent: MkCombinatorialRigidity at the certificate-free bundle of
-    s5x5_security_witness_1, s5x5_covering and its two order side
-    conditions. *)
+    S_5 x S_5: certifies security (the L=1 fiber witness), recovery (the
+    covering with its positive gap), the positive genus (173 > 0), and
+    the strict order inequality (60 < 14400), in one record. This is the
+    positive dual of the single-pile S_5 no-go result: the product
+    instance realises a strict order inequality with a positive genus gap
+    that no genus-zero curve could admit. *)
 Definition s5x5_combinatorial_rigidity : CombinatorialRigidity R s5x5_M :=
   @MkCombinatorialRigidity R s5x5_M
     (shuffle_bundle_of_bound (s5x5_security_witness_1 R)) s5x5_covering
@@ -605,13 +594,11 @@ Variable R : realType.
 Let s5x5_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 
-(* Honest spectral certificate bundle at L=591, fully discharged.
-   The bound is var_dist <= 1 + sqrt(10) * lazy_alpha^591, where lazy_alpha
-   = (1 + 181/200) / 2 = 0.9525. The 1 floor is the orbit-vs-global gap
-   (the walk preserves piles), not a security weakness in the threshold
-   sense (the product threshold scheme reconstructs per-pile).
-   @intent: MkAlgebraicRigidity at the Schreier certificate bundle read at
-   L = 591 and s5x5_threshold_witness. *)
+(* The spectral certificate bundle at L=591: var_dist <= 1 + sqrt(10) *
+   lazy_alpha^591, where lazy_alpha = (1 + 181/200) / 2 = 0.9525. The +1
+   floor is the orbit-vs-global gap (the walk preserves piles), not a
+   security weakness in the threshold sense, since the product threshold
+   scheme reconstructs per pile. *)
 Definition s5x5_rigidity_cryptographically_secure : AlgebraicRigidity R s5x5_M :=
   @MkAlgebraicRigidity R s5x5_M
     (s5x5_security_witness_schreier R 591)
@@ -642,56 +629,49 @@ Section s5x5_multi_realisation.
 
 Local Notation s5x5_multi_M := (@Gen_PGGTypes 7 8 s5x5_gen_tuple).
 
-(** s5x5_brings_pile_component — one Bring's curve at genus 4 acting on
-    5 sheets (one s5x5 pile) as a degree-5 cover of P^1.
-    Kind: instance.
-    Why: per-pile component for the multi-component realisation of s5x5.
-    Riemann-Hurwitz check: 2*4 + 2*5 = 5*0 + 16 + 2 -> 18 = 18. *)
+(** s5x5_brings_pile_component — one Bring's curve at genus 4 acting on five
+    sheets (one s5x5 pile) as a degree-5 cover of P^1. Riemann-Hurwitz check:
+    2*4 + 2*5 = 5*0 + 16 + 2, i.e. 18 = 18. This is the per-pile building
+    block of the multi-component realisation s5x5_multi_data. *)
 Definition s5x5_brings_pile_component : MultiComponent.
 refine (@MkMultiComponent 5 0 5 16 4 _ _).
 - by [].
 - by [].
 Defined.
 
-(** s5x5_multi_data — the s5x5 protocol's operational covering: TWO disjoint
-    Bring's curves, one per pile, with total sheet count 10.
-    Kind: instance.
-    Why: makes explicit that s5x5 is operationally a 2-component cover with
-    each component at the realisable genus 4 (Bring's), not a single
-    connected curve at the Galois-closure genus 173. *)
+(** s5x5_multi_data — the S_5 x S_5 protocol's operational covering: two
+    disjoint copies of s5x5_brings_pile_component, one per pile, ten sheets
+    total. This makes explicit that the protocol is operationally a
+    two-component cover at the realisable genus 4 per component, not the
+    single connected curve at Galois-closure genus 173 that
+    s5x5_covering_data uses. *)
 Definition s5x5_multi_data : MultiCoveringData s5x5_multi_M.
 refine (@MkMultiCoveringData s5x5_multi_M
           [:: s5x5_brings_pile_component ; s5x5_brings_pile_component] _).
 by rewrite big_cons big_cons big_nil.
 Defined.
 
-(** mcd_total_genus_s5x5_E — the total genus of the two-component
-    Bring's realisation of s5x5 is 4 + 4 = 8.
-    Kind: main.
-    Why: demonstrates that the multi-component formulation gives a small,
-    operationally-meaningful genus (8) rather than the Galois-closure
-    genus (173). Equational form `_E` per MathComp convention; main
-    symbol `mcd_total_genus`, condition `s5x5`. *)
+(** mcd_total_genus_s5x5_E — the total genus of the two-component Bring's
+    realisation of s5x5 is 4 + 4 = 8, a small operationally-meaningful genus
+    rather than the Galois-closure genus 173 that s5x5_covering_data uses. *)
 Lemma mcd_total_genus_s5x5_E :
   mcd_total_genus s5x5_multi_data = 8.
 Proof. by rewrite /mcd_total_genus /= big_cons big_cons big_nil. Qed.
 
 (** mcd_max_genus_s5x5_E — the maximum per-component genus of the s5x5
-    two-Bring's realisation is 4.
-    Kind: main.
-    Why: any per-component gap bound applies at this maximum, NOT at the
-    sum or the Galois-closure value. *)
+    two-Bring's realisation is 4. Any per-component recovery-gap bound must
+    be stated at this maximum, not at the total (mcd_total_genus_s5x5_E = 8)
+    or at the Galois-closure genus 173. *)
 Lemma mcd_max_genus_s5x5_E :
   mcd_max_genus s5x5_multi_data = 4.
 Proof. by rewrite /mcd_max_genus /= big_cons big_cons big_nil maxn0 maxnn. Qed.
 
-(** s5x5_multi_realised — documentation marker tying [s5x5_multi_data] to
-    two disjoint copies of Bring's curve.
-    Kind: helper.
-    Why: parallel to [s5x5_inverse_galois_realised], but for the multi-
-    component (operational) interpretation. Two genus-4 Bring's components
-    acting via S_5 per pile is the natural mathematical realisation of
-    the s5x5 protocol's two-pile structure. *)
+(** s5x5_multi_realised — s5x5_multi_data corresponds to an actual pair of
+    disjoint genus-4 Bring's curves, each carrying an S_5 action on its five
+    sheets, not merely formally consistent record data. This is the
+    multi-component counterpart of s5x5_inverse_galois_realised: the same
+    trust boundary, stated for the two-piece operational cover rather than
+    the single Galois-closure curve. *)
 Axiom s5x5_multi_realised :
   realised_by_multi_curve s5x5_multi_data.
 

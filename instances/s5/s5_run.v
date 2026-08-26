@@ -23,48 +23,46 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** s5_M — the S_5 adjacent-transposition monodromy template (N = 5).
-    @intent: a notation for the Gen_PGGTypes form s5_PI and s5_plug carry, so
-    the run definitions share their type. s5_M is a section-local Let in the
-    rigidity instance, hence not exported; spelled out here. *)
+(** s5_M — a local notation for the [Gen_PGGTypes] instance at S_5 (N = 5),
+    matching the type [s5_PI] and [s5_plug] carry. The canonical form is a
+    section-local [Let] in the rigidity instance and so is not exported;
+    spelling it out here lets the run definitions below share that type. *)
 Local Notation s5_M := (@Gen_PGGTypes 3 3 (path_gen_tuple 3)).
 
-(** s5_scheme — the S_5 sum-mod sharing scheme on 'I_5, convertible to
-    rp_scheme s5_plug.
-    @intent: the threshold scheme the dealer shares and the verifier
-    reconstructs; the five-party sum-mod scheme. Named directly (rather than
-    rp_scheme s5_plug) so the operational lemmas stay closed under the global
-    context: s5_plug bundles the genus gap field, whose proof uses the
-    justified Bring-curve facts, which are never exercised by the run. *)
+(** s5_scheme — the S_5 five-party sum-mod sharing scheme on 'I_5, the
+    threshold scheme the dealer shares and the verifier reconstructs;
+    convertible to [rp_scheme s5_plug] via [s5_scheme_plug]. Named directly
+    rather than written as [rp_scheme s5_plug] so the operational lemmas
+    below stay closed under the global context: [s5_plug] bundles the
+    genus-gap field, whose proof rests on the Bring's-curve facts, and those
+    are never exercised by the run. *)
 Definition s5_scheme : ThresholdScheme 'I_5 'I_5 := @sum_mod_scheme 3 4.
 
-(** s5_scheme_plug — s5_scheme is the scheme dealt by the s5 plug.
-    @composes: s5_endpoints. *)
+(** s5_scheme_plug — [s5_scheme] is definitionally the scheme dealt by
+    [s5_plug]: the two names for the sharing scheme agree. *)
 Lemma s5_scheme_plug : rp_scheme s5_plug = s5_scheme.
 Proof. by []. Qed.
 
-(** s5_players — the five-player list for the S_5 dealing phase.
-    @intent: the explicit five-element list of 'I_5 player ordinals; a concrete
-    list (rather than enum 'I_5) lets the dealer's fold_senv reduce under
-    vm_compute. Used-by: s5_dealer_run, s5_saprocs. *)
+(** s5_players — the explicit five-element list of the S_5 player ordinals
+    for the dealing phase. Given as a concrete list rather than
+    [enum 'I_5] so the dealer's [fold_senv] reduces under [vm_compute]. *)
 Definition s5_players : seq 'I_(pi_T' s5_PI).+1 :=
   [:: @Ordinal 5 0 isT; @Ordinal 5 1 isT; @Ordinal 5 2 isT;
       @Ordinal 5 3 isT; @Ordinal 5 4 isT].
 
-(** s5_dealer_run — the S_5 dealer via the generic input-encoding dealer
-    (identity cut, empty input prologue, position-model content reading the
-    shares ts_encode s5_scheme s of the dealt secret s).
-    @intent: deals the encoded shares of the secret position s; the empty
-    prologue [::] makes this a pure position-model dealer. Used-by:
-    s5_saprocs. *)
+(** s5_dealer_run — the S_5 dealer instantiated from the generic
+    input-encoding dealer: identity cut, an empty input prologue, and
+    position-model content reading the shares [ts_encode s5_scheme s] of
+    the dealt secret position [s]. The empty prologue [[::]] is what makes
+    this a pure position-model dealer, with no input committed ahead of
+    the deal. *)
 Definition s5_dealer_run (s : 'I_5) (w0 : pgg_gT s5_M) :=
   dealer_with_input_encoding s5_PI
     (fun _ => tnth (ts_encode s5_scheme s))
     [:: w0] [::] s5_players 0.
 
-(** s5_saprocs — dealer ++ verifier ++ five players, ordered by process id
-    (0..6). @intent: the seven session-typed processes of one S_5 run.
-    Used-by: s5_procs. *)
+(** s5_saprocs — the seven session-typed processes of one S_5 run: dealer,
+    verifier, and the five players, ordered by process id 0..6. *)
 Definition s5_saprocs (s : 'I_5) (w0 : pgg_gT s5_M) :=
   [:: mk_aproc (s5_dealer_run s w0)
     ; mk_aproc (exchange_verifier s5_PI s5_players)
@@ -83,8 +81,8 @@ Lemma s5_run_terminates (s : 'I_5) (w0 : pgg_gT s5_M) :
 Proof. by vm_compute. Qed.
 
 (** s5_verifier_endpoints — the verifier's executed endpoints are the dealt
-    content readout at the deck cut and starts, one per player.
-    @composes: s5_endpoints. *)
+    content readout at the deck cut [w0] and the interface's start tuple,
+    one endpoint per player. *)
 Lemma s5_verifier_endpoints
     (g : seq 'I_(pgg_N' s5_M).+1 -> ('I_5 -> 'I_5))
     (w0 : pgg_gT s5_M)
@@ -102,9 +100,10 @@ Lemma s5_verifier_endpoints
   = [seq g [::] (@pgg_rho s5_M w0 (tnth st i)) | i <- s5_players].
 Proof. move=> PI'; rewrite /PI'; vm_compute; reflexivity. Qed.
 
-(** s5_endpoints — the verifier's collected endpoints are the dealt shares of
-    the secret position s (identity cut, ord_tuple starts).
-    @composes: s5_run_recovers. *)
+(** s5_endpoints — specializing [s5_verifier_endpoints] to the identity cut
+    and the [ord_tuple 5] starts: the verifier's collected endpoints are
+    exactly the dealt shares [ts_encode s5_scheme s] of the secret
+    position [s]. *)
 Lemma s5_endpoints (s : 'I_5) (w0 : pgg_gT s5_M) :
   endpoints_of_trace (nth [::] (run_interp 150 (s5_procs s w0)).2 1)
   = [seq tnth (ts_encode s5_scheme s)
@@ -119,18 +118,22 @@ have Hde : s5_players = enum 'I_5 by apply: (inj_map val_inj); rewrite val_enum_
 by rewrite Hde.
 Qed.
 
-(** s5_endpoints_size — the verifier collects exactly ts_T'.+1 endpoints.
-    @composes: s5_run_recovers. *)
+(** s5_endpoints_size — the verifier collects exactly
+    [(ts_T' s5_scheme).+1] endpoints, matching the shape [ts_recon] needs
+    to reconstruct. *)
 Lemma s5_endpoints_size (s : 'I_5) (w0 : pgg_gT s5_M) :
   size (endpoints_of_trace (nth [::] (run_interp 150 (s5_procs s w0)).2 1))
   = (ts_T' s5_scheme).+1.
 Proof. by rewrite s5_endpoints size_map size_enum_ord. Qed.
 
-(** s5_run_recovers — reconstructing the verifier's executed endpoints returns
-    the dealt secret position s, for ANY cut w0 in the group.
-    @main correctness: the running S_5 protocol recovers the dealt secret
-    position s : 'I_5 from the verifier's cut-permuted endpoints, via the
-    scheme's reconstruction perm-invariance (rp_recon_invariant) at w0. *)
+(** s5_run_recovers — reconstructing the verifier's executed endpoints
+    returns the dealt secret position [s], for ANY group element [w0] used
+    as the deck cut. This is the correctness theorem for the S_5 run: the
+    protocol recovers the dealt secret from the verifier's cut-permuted
+    endpoints because the sum-mod scheme's reconstruction is invariant
+    under exactly the group action [pgg_rho] applies to the cut, so
+    permuting the deck by [w0] before dealing and reading it back through
+    the same [w0] cancels. *)
 Lemma s5_run_recovers (s : 'I_5) (w0 : pgg_gT s5_M) :
   w0 \in pgg_G s5_M ->
   ts_recon s5_scheme
