@@ -26,11 +26,10 @@ batch, not per file (11-agent fan-out; per-file commits would have
 raced). Undo granularity is per batch.
 
 ## Deferred follow-ups (not part of P0/P1)
-1. Terminology: unify "sheet" -> "card position" in COMMENT prose
-   tree-wide (~200 tokens, 43 files), EXCEPT covering-theory files
-   (multi_covering, covering_scheme, curve_realisation, cover_genus*)
-   where "sheet" is the branched-cover concept. 16 files currently mix
-   both. Separate commit.
+1. DONE (commit 41fa5ed): "sheet" -> "card position" unified in
+   comment prose, 191 replacements / 38 files; covering-theory sense
+   kept (multi_covering, cover_tradeoff Klein bound, rigidity_s5x5
+   Bring's-curve section); identifier glosses per file.
 2. Docstring carrier policy: batches disagreed on (** *) coqdoc vs
    (* *) plain (net 3399 -> 3154 docstrings). Pick a policy per
    generated-docs intent.
