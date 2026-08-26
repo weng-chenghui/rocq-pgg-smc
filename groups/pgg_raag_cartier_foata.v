@@ -7,34 +7,43 @@ From Stdlib Require Import Wf_nat.
 From pgg_smc Require Import pgg_weval_inj pgg_raag pgg_raag_clique.
 
 (******************************************************************************)
-(* PGG: Cartier-Foata Theorem Infrastructure                                 *)
+(* PGG: The Cartier-Foata Theorem                                             *)
 (*                                                                            *)
-(* Re-proves infrastructure lemmas about foata_pairs/foata_nf that are        *)
-(* section-local in pgg_raag.v, plus new NF properties:                       *)
+(* For a commutation relation symmetric and irreflexive on Tg generators, the *)
+(* number of traces of length L is the number the clique polynomial of the    *)
+(* commutation graph predicts:                                                *)
 (*                                                                            *)
-(* Section foata_infrastructure:                                              *)
-(*   foata_pairs_split' == foata_pairs distributes over concatenation         *)
-(*   foata_pairs_vals == values of foata_pairs = prev values ++ w             *)
-(*   size_foata_pairs == size of foata_pairs = size prev + size w             *)
-(*   dv_leq_trans/anti/total == dv_leq is a total order                      *)
-(*   sort_perm_eq_dv == perm_eq inputs give equal sorted outputs              *)
-(*   foata_depth_at_bigop == depth as bigop (perm invariant)                  *)
-(*   foata_depth_at_perm == depth invariant under prefix permutation          *)
-(*   foata_depth_comm_rcons == commuting element doesn't affect depth         *)
-(*   foata_pairs_perm_prefix == permuted prefix gives permuted output         *)
-(*   foata_pairs_swap_adj == adjacent commuting swap preserves multiset       *)
-(*   foata_nf_swap_adj == adjacent commuting swap preserves NF                *)
-(*   foata_nf_sorted == sorted pairs implies NF = identity                    *)
-(*   foata_nf_sound == NF reachable via adjacent commuting swaps             *)
+(*   clique_traces Tg L comm = n_traces_natB Tg L comm       (cartier_foata)  *)
 (*                                                                            *)
-(* Section foata_nf_properties:                                               *)
-(*   size_foata_nf == size (foata_nf comm w) = size w                         *)
-(*   foata_nf_perm_eq == perm_eq (foata_nf comm w) w                          *)
-(*   foata_nf_idempotent == foata_nf (foata_nf w) = foata_nf w               *)
-(*   foata_nf_prepend_compat == equal NFs imply equal NFs after prepend       *)
+(* equivalently  Sum_L m_L z^L = 1 / P_Gamma(z).  This is the identity the    *)
+(* whole clique-polynomial development rests on: it makes the trace count of  *)
+(* a commutation graph computable from the graph alone, at lengths where      *)
+(* enumerating Tg^L words is out of reach, and composed with n_traces_of_natB *)
+(* it reaches the abstract trace count of a RAAG instance.                    *)
 (*                                                                            *)
-(* Section cartier_foata:                                                     *)
-(*   foata_first_layer/rest infrastructure with Tg and comm_sym               *)
+(* The proof is the Krattenthaler/Viennot sign-reversing involution.  A pair  *)
+(* (S, nf) of a sorted clique S and a Foata normal form nf, with |S| + |nf| = *)
+(* L, carries the sign (-1)^|S|; the valid pairs with |S| = k number          *)
+(* c_k * m_{L-k}, so their signed count is the alternating sum the clique     *)
+(* recurrence asserts to vanish.  sri_map moves one letter, the pivot, across *)
+(* the two components: it changes |S| by one and so reverses the sign, it     *)
+(* fixes no pair, and it is its own inverse because it leaves the normal form *)
+(* of S ++ nf untouched.  Signed cancellation gives the recurrence, and       *)
+(* strong induction on L gives the theorem.                                   *)
+(*                                                                            *)
+(* Section foata_infrastructure  properties of foata_pairs and foata_nf, with *)
+(*   no bound on the letters.  These restate lemmas that are section-local in *)
+(*   pgg_raag.v, which cannot export them.                                    *)
+(* Section foata_nf_properties   the normal form preserves length and letter  *)
+(*   multiset, is idempotent, and survives prepending a common prefix.        *)
+(* Section cartier_foata         the depth-0 layer of a word's Foata pairs.   *)
+(* Section sri_krattenthaler     the pivot, the move, and the three facts     *)
+(*   about it the counting principle needs.                                   *)
+(* Section involution_counting   a fixpoint-free sign-reversing involution on *)
+(*   a duplicate-free list equalises the two sign counts.                     *)
+(* Section sri_alternating       the enumeration of valid pairs and the       *)
+(*   alternating identity it yields.                                          *)
+(* Closing                       n_traces_recurrence, then cartier_foata.     *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -49,11 +58,16 @@ Section foata_infrastructure.
 
 (* --- foata_pairs structural lemmas --- *)
 
+(* Assigning pairs to a concatenation is assigning them to the first part and
+   continuing with the result as prefix: the computation is a left fold and
+   never revisits a letter. *)
 Lemma foata_pairs_split' (crel : nat -> nat -> bool) prev w1 w2 :
   foata_pairs crel prev (w1 ++ w2) =
   foata_pairs crel (foata_pairs crel prev w1) w2.
 Proof. by elim: w1 prev => [|x w1 IH] prev //=. Qed.
 
+(* Reading the letter component back gives the word: the pairs record depths
+   without disturbing the letters. *)
 Lemma foata_pairs_vals (crel : nat -> nat -> bool) prev w :
   map snd (foata_pairs crel prev w) = map snd prev ++ w.
 Proof.
@@ -61,6 +75,7 @@ elim: w prev => [|x w IH] prev /=; first by rewrite cats0.
 by rewrite IH map_rcons -cats1 -catA.
 Qed.
 
+(* One pair per letter. *)
 Lemma size_foata_pairs (crel : nat -> nat -> bool) prev w :
   size (foata_pairs crel prev w) = size prev + size w.
 Proof.
@@ -70,6 +85,9 @@ Qed.
 
 (* --- dv_leq properties --- *)
 
+(* dv_leq is a total order on (depth, value).  Totality and antisymmetry
+   together are what make sorting by it produce one canonical list per
+   multiset of pairs, hence one normal form per trace class. *)
 Lemma dv_leq_trans : transitive dv_leq.
 Proof.
 move=> [d2 v2] [d1 v1] [d3 v3]; rewrite /dv_leq /=.
@@ -97,6 +115,7 @@ move=> [d1 v1] [d2 v2]; rewrite /dv_leq /=.
 by case: ltngtP => //= E; rewrite ?E ?eqxx /= ?leq_total ?orbT.
 Qed.
 
+(* Permuted pair lists sort to the same list. *)
 Lemma sort_perm_eq_dv (s1 s2 : seq (nat * nat)) :
   perm_eq s1 s2 -> sort dv_leq s1 = sort dv_leq s2.
 Proof.
@@ -110,6 +129,9 @@ Qed.
 
 (* --- foata_depth_at as bigop --- *)
 
+(* Rewriting the fold as a maximum over the prefix exposes what the depth
+   really depends on: the multiset of non-commuting predecessors, not the
+   order in which they were read. *)
 Let foldl_maxn_shift (s : seq nat) (a : nat) :
   foldl maxn a s = maxn a (foldl maxn 0 s).
 Proof.
@@ -130,6 +152,8 @@ elim: prev => [|dv prev IH] acc /=; first by rewrite big_nil maxn0.
 by rewrite big_cons; case: (crel dv.2 x) => /=; rewrite IH -?maxnA.
 Qed.
 
+(* Depth is therefore invariant under permutation of the prefix, which is
+   what lets two orders of processing a commuting pair be compared. *)
 Lemma foata_depth_at_perm (crel : nat -> nat -> bool) prev1 prev2 x :
   perm_eq prev1 prev2 ->
   foata_depth_at crel prev1 x = foata_depth_at crel prev2 x.
@@ -175,6 +199,7 @@ by rewrite -(IH (rcons prev (foata_depth_at crel prev x, x)) k Hk)
            size_rcons addSnnS.
 Qed.
 
+(* The depth at a position is computed from the strict prefix alone. *)
 Lemma nth_foata_pairs_depth (crel : nat -> nat -> bool) prev w k :
   k < size w ->
   (nth (0, 0) (foata_pairs crel prev w) (size prev + k)).1 =
@@ -300,11 +325,15 @@ Qed.
 
 (* --- Foata inversion count --- *)
 
+(* The number of position pairs whose Foata pairs stand out of dv_leq order.
+   It vanishes exactly on a word already in normal form and drops at every
+   licensed swap, so it is the measure that makes normalisation terminate. *)
 Definition foata_inv (crel : nat -> nat -> bool) (w : seq nat) : nat :=
   let ps := foata_pairs crel [::] w in
   \sum_(i < size w) \sum_(j < size w | i < j)
     (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
 
+(* A word with no inversion has sorted pairs, hence is its own normal form. *)
 Lemma foata_inv_zero (crel : nat -> nat -> bool) w :
   foata_inv crel w = 0 ->
   sorted dv_leq (foata_pairs crel [::] w).
@@ -660,16 +689,14 @@ End foata_infrastructure.
 
 Section foata_nf_properties.
 
-(* --- size_foata_nf --- *)
-
+(* Normalisation is a rearrangement: the normal form has the length of the
+   word and the same letters with the same multiplicities. *)
 Lemma size_foata_nf (crel : nat -> nat -> bool) w :
   size (foata_nf crel w) = size w.
 Proof.
 rewrite /foata_nf size_map size_sort size_foata_pairs /=.
 by rewrite add0n.
 Qed.
-
-(* --- foata_nf_perm_eq --- *)
 
 Lemma foata_nf_perm_eq (crel : nat -> nat -> bool) w :
   perm_eq (foata_nf crel w) w.
@@ -684,8 +711,9 @@ have Hpe : perm_eq [seq p.2 | p <- sort dv_leq (foata_pairs crel [::] w)]
 by rewrite Hvals in Hpe.
 Qed.
 
-(* --- swap chain preserves size --- *)
-
+(* A chain of adjacent commuting swaps leaves the length of the word, and its
+   normal form, where they were.  These package foata_nf_sound so that a whole
+   normalisation path can be used at once. *)
 Lemma swap_chain_size (crel : nat -> nat -> bool) w ws :
   (forall i, i < size ws ->
     let w0 := nth [::] (w :: ws) i in
@@ -704,8 +732,6 @@ rewrite Heq size_cat /= size_drop.
 have Hksz : k < size (nth [::] (w :: ws) i) := ltn_trans (ltnSn k) Hk.
 by rewrite (size_takel (ltnW Hksz)) -addn2 addnCA addn2 subnK.
 Qed.
-
-(* --- swap chain preserves foata_nf --- *)
 
 Lemma swap_chain_nf (crel : nat -> nat -> bool) w ws :
   (forall a b, crel a b -> crel b a) ->
@@ -730,8 +756,9 @@ have Hw0 := @w_split_nat k w0 Hk; rewrite -{}Hw0.
 exact: IH (ltnW Hi').
 Qed.
 
-(* --- foata_nf_idempotent --- *)
-
+(* Normalising a normal form changes nothing, so the normal forms are exactly
+   the fixed points of foata_nf.  That characterisation is what lets a trace
+   class be named by a fixed point rather than by a class of words. *)
 Lemma foata_nf_idempotent (crel : nat -> nat -> bool) w :
   (forall a b, crel a b -> crel b a) ->
   foata_nf crel (foata_nf crel w) = foata_nf crel w.
@@ -747,10 +774,8 @@ have Hnf_eq : foata_nf crel (last w ws) = foata_nf crel w.
 by rewrite -Hlast Hnf_eq.
 Qed.
 
-(* --- foata_nf_prepend_compat --- *)
-
-(* Helper: a single swap at position k in w becomes a swap at position
-   |u| + k in u ++ w *)
+(* A swap at position k of w is a swap at position |u| + k of u ++ w, so a
+   prefix neither creates nor destroys licensed moves in the suffix. *)
 Lemma foata_nf_prepend_swap (crel : nat -> nat -> bool) u w k :
   (forall a b, crel a b -> crel b a) ->
   k.+1 < size w ->
@@ -771,6 +796,12 @@ have -> : u ++ w = u' ++ nth 0 w k :: nth 0 w k.+1 :: drop k.+2 w.
 exact: foata_nf_swap_adj.
 Qed.
 
+(* Words with the same normal form still have the same normal form after a
+   common prefix is prepended.
+   Trace equivalence is a congruence for concatenation on the left.  Every
+   step of the involution rewrites one component of S ++ nf while the other
+   stands, so this is the lemma that lets those rewrites be performed in
+   place. *)
 Lemma foata_nf_prepend_compat (crel : nat -> nat -> bool) u w1 w2 :
   (forall a b, crel a b -> crel b a) ->
   foata_nf crel w1 = foata_nf crel w2 ->
@@ -818,15 +849,25 @@ End foata_nf_properties.
 
 Section cartier_foata.
 
+(* comm is symmetric and irreflexive on the Tg generators.  Neither
+   hypothesis is consumed by the four statements of this section, which are
+   arithmetic identities about a filter; they are declared because the
+   first-layer notion is only the depth-0 clique of a word when they hold. *)
 Variable Tg : nat.
 Variable comm : nat -> nat -> bool.
 
-(* Hypothesis: comm is symmetric and irreflexive on {0,...,Tg-1} *)
 Hypothesis comm_sym : forall a b, a < Tg -> b < Tg -> comm a b -> comm b a.
 Hypothesis comm_irrefl : forall a, ~~ comm a a.
 
-(* --- First layer: depth-0 elements of Foata pairs --- *)
+(* --- First layer: the depth-0 letters of a word --- *)
 
+(* The depth-0 pairs of a word, the letters they carry, and the rest.
+   Depth 0 means no earlier letter fails to commute with this one, so under
+   irreflexivity the first layer holds no repeated letter and its letters
+   pairwise commute: it is a clique of the commutation graph.  Splitting a
+   word into first layer and rest is the decomposition the clique polynomial
+   sums over, and it is the shape the pairs (S, nf) of the involution
+   imitate. *)
 Definition foata_first_layer_pairs (w : seq nat) : seq (nat * nat) :=
   [seq dv <- foata_pairs comm [::] w | dv.1 == 0].
 
@@ -841,6 +882,7 @@ Definition foata_rest (w : seq nat) : seq nat :=
 
 (* --- Size lemmas --- *)
 
+(* The two parts of the split account for every letter exactly once. *)
 Lemma size_foata_pairs_nil w :
   size (foata_pairs comm [::] w) = size w.
 Proof. by rewrite size_foata_pairs /= add0n. Qed.
@@ -867,10 +909,17 @@ End cartier_foata.
 
 Section sri_krattenthaler.
 
+(* Symmetry is assumed here on all of nat, not only below Tg as in the
+   previous section: the involution rewrites words whose letters it does not
+   separately bound, and comm_b at the end of the file supplies a relation
+   that is symmetric everywhere from one that is symmetric on the
+   generators. *)
 Variable Tg : nat.
 Variable comm : nat -> nat -> bool.
 Hypothesis comm_sym : forall a b, comm a b -> comm b a.
 Hypothesis comm_irrefl : forall a, ~~ comm a a.
+
+(* --- Moving one letter in and out of a list --- *)
 
 (* Remove the first occurrence of b from a list *)
 Fixpoint rem_first_occ (b : nat) (s : seq nat) : seq nat :=
@@ -964,14 +1013,36 @@ have Hxb : x < b by rewrite ltnNge Hle.
 exact: path_insort Hpath Hxb Hnotin.
 Qed.
 
-(* --- The Krattenthaler/Viennot SRI --- *)
+(* --- The Krattenthaler/Viennot sign-reversing involution --- *)
 
+(* The pair (S, nf) read as one word, clique first, and normalised.
+   Every quantity the involution must preserve is a function of this word,
+   and sri_map is built to leave it fixed. *)
 Definition composed_nf (S nf : seq nat) : seq nat :=
   foata_nf comm (S ++ nf).
 
+(** The pivot of a pair: the first letter of the normal form of S ++ nf.
+    The normal form sorts by (depth, value), so the pivot is the
+    least-labelled letter of the depth-0 layer of the composed word, and it
+    commutes with everything that precedes it there.  It is the one letter the
+    move below transfers, and reading it off the composed word rather than
+    off S or nf separately is exactly what makes the choice survive the
+    transfer. *)
 Definition sri_pivot (S nf : seq nat) : nat :=
   head 0 (composed_nf S nf).
 
+(** The move on a pair (S, nf): take the pivot b and send it across.  If b
+    lies in the clique S, delete one occurrence from S and push b onto the
+    front of nf, renormalising; otherwise b lies in nf, so insert it into the
+    sorted clique S and delete it from nf, renormalising the remainder.
+    One letter changes side, so |S| shifts by one and the sign (-1)^|S| is
+    reversed.  The composed word keeps its normal form
+    (sri_composed_nf_invariant), so the image has the same pivot b and a
+    second application undoes the first.
+    This is the engine of the argument: it is the pairing that cancels the
+    alternating sum sum_k (-1)^k c_k m_{L-k} term against term, and everything
+    else in this section exists to establish that it is well defined, that it
+    is an involution, that it reverses the sign, and that it fixes nothing. *)
 Definition sri_map (S nf : seq nat) : seq nat * seq nat :=
   let b := sri_pivot S nf in
   if b \in S then
@@ -981,6 +1052,8 @@ Definition sri_map (S nf : seq nat) : seq nat * seq nat :=
 
 (* --- Pivot membership --- *)
 
+(* The pivot is one of the letters of the pair, so on a non-empty pair the
+   move always has something to transfer. *)
 Lemma sri_pivot_mem S nf :
   0 < size S + size nf ->
   sri_pivot S nf \in S ++ nf.
@@ -1006,6 +1079,8 @@ Qed.
 
 (* --- Total size preservation --- *)
 
+(* The move conserves |S| + |nf|, so it acts within the pairs of one total
+   length L and the two sums it cancels are indexed by the same L. *)
 Lemma sri_map_total_size S nf :
   0 < size S + size nf ->
   let '(S', nf') := sri_map S nf in
@@ -1025,6 +1100,8 @@ Qed.
 
 (* --- Sign-reversing property --- *)
 
+(* The clique either loses or gains exactly one letter, which is the parity
+   change that reverses the sign of the pair. *)
 Lemma sri_map_sign S nf :
   0 < size S + size nf ->
   let '(S', nf') := sri_map S nf in
@@ -1038,6 +1115,9 @@ Qed.
 
 (* --- Helper: bubble element to front via commuting swaps --- *)
 
+(* A letter that commutes with every distinct letter before it may be carried
+   to the front without changing the normal form.  This is how the pivot is
+   moved between the two components while the composed word stands. *)
 Lemma foata_nf_bubble_front (prefix : seq nat) (a : nat) (rest : seq nat) :
   (forall x, x \in prefix -> x != a -> comm x a) ->
   foata_nf comm (prefix ++ a :: rest) =
@@ -1103,6 +1183,8 @@ Qed.
 
 (* --- Sorted head is minimum --- *)
 
+(* The head of a dv_leq-sorted list is dv_leq every member, so the pivot's
+   pair is minimal among the pairs of the composed word. *)
 Lemma sorted_head_leq (s : seq (nat * nat)) (dv : nat * nat) :
   sorted dv_leq s -> dv \in s -> dv_leq (head (0,0) s) dv.
 Proof.
@@ -1115,6 +1197,10 @@ Qed.
 
 (* --- Depth bound from non-commuting predecessor --- *)
 
+(* A letter blocked by an earlier non-commuting letter has strictly greater
+   depth than that letter.  Contrapositively, a letter of minimal depth is
+   blocked by nothing, which is the fact the next lemma turns into
+   commutation. *)
 Lemma depth_noncomm_ge (w : seq nat) (j k : nat) :
   j < k -> k < size w ->
   ~~ comm (nth 0 w j) (nth 0 w k) ->
@@ -1159,6 +1245,10 @@ Qed.
 
 (* --- Pivot commutes with all predecessors in the original word --- *)
 
+(* The pivot commutes with every letter standing before it in the word.
+   Its pair is dv_leq-minimal, so it cannot have a non-commuting predecessor
+   without exceeding that minimum in depth.  This is what licenses bubbling
+   the pivot to the front of S ++ nf, and hence the whole transfer. *)
 Lemma pivot_comm_predecessor (w : seq nat) (j : nat) :
   0 < size w ->
   let b := head 0 (foata_nf comm w) in
@@ -1213,6 +1303,7 @@ rewrite /dv_leq in Hmin; case/orP: Hmin => [Hlt | /andP [/eqP Heq _]].
 - by have := Hdepth; rewrite Heq ltnn.
 Qed.
 
+(* Removing the first occurrence of b splits the list at that occurrence. *)
 Lemma rem_first_occ_take_drop (b : nat) (s : seq nat) :
   b \in s ->
   rem_first_occ b s = take (index b s) s ++ drop (index b s).+1 s.
@@ -1225,11 +1316,13 @@ case Hbx : (b == x) => /=.
 Qed.
 
 (* --- Composed NF invariant for the SRI map --- *)
-(* Requires S to be a clique (all elements pairwise commute) *)
 
+(* All elements of s pairwise commute: s spans a clique of the commutation
+   graph.  The condition under which the pivot may be bubbled across S. *)
 Definition all_pairs_comm (s : seq nat) : bool :=
   all (fun i => all (fun j => (i == j) || comm i j) s) s.
 
+(* The boolean clique test read as a statement about pairs. *)
 Lemma all_pairs_commP s :
   reflect (forall a b, a \in s -> b \in s -> a != b -> comm a b) (all_pairs_comm s).
 Proof.
@@ -1243,6 +1336,14 @@ apply: (iffP idP).
   by apply: H => //; rewrite Hab.
 Qed.
 
+(** The move leaves the normal form of the composed word unchanged, provided
+    S is a clique.
+    This is the load-bearing invariant.  Being a clique is what lets the pivot
+    be carried across the whole of S, and its depth-0 position is what lets it
+    be carried across the part of nf standing before it; the two together mean
+    S ++ nf and its image normalise alike.  With the composed word fixed, the
+    image has the same pivot, so a second application of the move sends the
+    letter straight back and the map is an involution. *)
 Lemma sri_composed_nf_invariant S nf :
   0 < size S + size nf ->
   all_pairs_comm S ->
@@ -1381,6 +1482,10 @@ Qed.
 
 (* --- Helper lemmas for the involution --- *)
 
+(* insort and rem_first_occ cancel each other on a strictly sorted list, and
+   preserve the clique property.  Strict sortedness is what makes a clique a
+   set with one listing rather than a sequence, so that removing and
+   reinserting a letter returns the original list. *)
 Lemma ltn_trans' : transitive ltn.
 Proof. by move=> b a c; exact: ltn_trans. Qed.
 
@@ -1467,8 +1572,10 @@ Lemma all_pairs_comm_rem b s :
   all_pairs_comm s -> all_pairs_comm (rem_first_occ b s).
 Proof. exact: all_pairs_comm_sub (fun x => @mem_rem_first_occ b s x). Qed.
 
-(* Swap chain projection: removing b from a swap chain yields a swap chain *)
-(* Key property: adjacent commuting swaps preserve foata_nf after removing b *)
+(* An adjacent commuting swap still leaves the normal form fixed after one
+   occurrence of b is deleted: deleting a letter neither creates nor destroys
+   the swap.  Iterated along a normalisation path, this is what makes the two
+   cancellation lemmas below go through. *)
 Lemma foata_nf_rem_swap b w k :
   k.+1 < size w ->
   comm (nth 0 w k) (nth 0 w k.+1) ->
@@ -1608,7 +1715,9 @@ rewrite Hrem_w Hrem_sw.
 exact: foata_nf_swap_adj _ _ Hc2 Hc1.
 Qed.
 
-(* Core NF roundtrip: removing b from foata_nf(b :: nf) and renormalizing gives nf *)
+(* Pushing b onto a normal form and then deleting it again recovers the
+   normal form.  One of the two round trips the involution needs: it is the
+   ADD case undoing the REMOVE case. *)
 Lemma foata_nf_rem_head_cancel b nf0 :
   foata_nf comm nf0 = nf0 ->
   foata_nf comm (rem_first_occ b (foata_nf comm (b :: nf0))) = nf0.
@@ -1653,8 +1762,10 @@ rewrite (IH w' Hbw' Hsteps') Heq.
 exact: foata_nf_rem_swap Hk Hc1 Hc2 Hbv.
 Qed.
 
-(* Dual: adding b to nf and renormalizing after removing b gives nf *)
-(* Requires that b commutes with all elements before it in nf0 (depth-0 condition) *)
+(* Deleting b from a normal form and pushing it back recovers the normal form,
+   provided b commutes with everything preceding it there.  The other round
+   trip, and the point at which the pivot's depth-0 position is spent: without
+   it b would return to a different place in the layer order. *)
 Lemma foata_nf_add_head_cancel b nf0 :
   foata_nf comm nf0 = nf0 ->
   b \in nf0 ->
@@ -1697,6 +1808,11 @@ Qed.
 
 (* --- Involution property --- *)
 
+(** Applying the move twice to a valid pair returns the original pair.
+    The composed word is unchanged, so the second application selects the same
+    pivot and sends it back where it came from; the two cancellation lemmas
+    above are what make the return an identity rather than a reinsertion
+    somewhere else in the layer. *)
 Lemma sri_involution S nf :
   0 < size S + size nf ->
   all_pairs_comm S ->
@@ -1818,6 +1934,9 @@ Qed.
 
 (* --- No fixed points --- *)
 
+(** The move fixes no pair, since it changes the size of the clique by one.
+    Without this the signed cancellation would leave the fixed points behind
+    as an unpaired remainder. *)
 Lemma Sn_neq_n n : n.+1 <> n.
 Proof. by move/eqP; rewrite eqn_leq leqNgt ltnSn /=. Qed.
 
@@ -1835,6 +1954,8 @@ Qed.
 
 (* --- Pivot commutes with clique elements (when pivot not in S) --- *)
 
+(* When the pivot comes from nf it commutes with every letter of S, so
+   inserting it there yields a clique again. *)
 Lemma sri_pivot_comm_clique S nf :
   0 < size S + size nf ->
   all_pairs_comm S ->
@@ -1884,6 +2005,10 @@ Qed.
 
 (* --- SRI map preserves validity --- *)
 
+(** The move sends a valid pair to a valid pair: the clique stays a clique and
+    stays strictly sorted, and the second component stays a normal form.
+    Closure of the pairing on the set being counted, without which the two
+    sign classes it matches would not both lie inside that set. *)
 Lemma sri_map_valid S nf :
   0 < size S + size nf ->
   all_pairs_comm S ->
@@ -1946,6 +2071,8 @@ End sri_krattenthaler.
 
 (* --- Basic lemmas about all_words --- *)
 
+(* The enumeration lists exactly the words of length L with letters below Tg,
+   and lists each once. *)
 Lemma all_words_bounded Tg L w :
   w \in all_words Tg L -> all (fun i => i < Tg) w.
 Proof.
@@ -1974,6 +2101,11 @@ Qed.
 
 (* --- Bounded comm relation --- *)
 
+(* comm restricted to letters below Tg, false elsewhere.
+   A relation symmetric only on the generators becomes symmetric everywhere
+   once cut down this way, which is what the involution of the previous
+   section demands.  The four lemmas after it show the cut changes no normal
+   form, no trace count and no clique count, so the restriction is free. *)
 Definition comm_b (Tg : nat) (comm : nat -> nat -> bool) (a b : nat) : bool :=
   (a < Tg) && (b < Tg) && comm a b.
 
@@ -2044,8 +2176,13 @@ by rewrite mem_iota add0n.
 Qed.
 
 (* --- Involution counting principle --- *)
-(* If f is a fixpoint-free involution on a list, and sign flips on each pair,
-   then the two halves have equal count. *)
+
+(* On a duplicate-free list closed under a fixpoint-free involution that
+   reverses the sign, the two signs occur equally often.
+   Pairing each element with its image partitions the list into two-element
+   blocks of opposite sign.  This is the abstract cancellation the whole proof
+   is aimed at; the localised variant below asks for the three properties only
+   at elements of the list, which is all the valid pairs supply. *)
 
 Lemma perm_count_pred (T : eqType) (p : pred T) (s1 s2 : seq T) :
   perm_eq s1 s2 -> count p s1 = count p s2.
@@ -2112,7 +2249,9 @@ Qed.
 
 End involution_counting.
 
-(* Localized version: properties only required for elements of s *)
+(* The same principle with the involution, fixpoint-freeness and sign reversal
+   demanded only on the list.  sri_map has those properties on valid pairs and
+   nowhere else, so this is the form that applies. *)
 Lemma involution_sign_count_local (A : eqType) (f : A -> A) (sign : A -> bool) (s : seq A) :
   uniq s ->
   (forall x, x \in s -> f (f x) = x) ->
@@ -2172,6 +2311,8 @@ Qed.
 
 (* --- The recurrence for n_traces_natB --- *)
 
+(* The empty word is the only word of length 0, so there is one trace: the
+   base case both counts share. *)
 Lemma n_traces_natB_0 (Tg : nat) (crel : nat -> nat -> bool) :
   n_traces_natB Tg 0 crel = 1.
 Proof.
@@ -2187,12 +2328,24 @@ Variable crel : nat -> nat -> bool.
 Hypothesis crel_sym : forall a b, crel a b -> crel b a.
 Hypothesis crel_irrefl : forall a, ~~ crel a a.
 
-(* An SRI pair is (clique, normal_form) — use seq nat * seq nat for eqType *)
+(* A clique paired with a normal form, carried as a pair of sequences so that
+   the generic counting principle, which needs an eqType, applies. *)
 Definition sri_pair := (seq nat * seq nat)%type.
 
 Definition sp_clique (p : sri_pair) : seq nat := p.1.
 Definition sp_nf (p : sri_pair) : seq nat := p.2.
 
+(** A pair is valid at length L when its two components have lengths summing
+    to L, the first is a clique of the commutation graph listed in strictly
+    increasing order, the second is its own Foata normal form, and both draw
+    their letters from the Tg generators.
+    These conditions are what make the valid pairs with a k-element clique
+    number exactly c_k * m_{L-k}: sorted-and-clique picks out each k-clique
+    once rather than once per ordering, and being a fixed point of foata_nf
+    picks out each trace class of length L-k once rather than once per word.
+    So the count of valid pairs signed by the parity of the clique size is the
+    alternating sum sum_k (-1)^k c_k m_{L-k} that the clique recurrence says
+    vanishes, and the involution is a proof that it does. *)
 Definition sri_pair_valid (p : sri_pair) (L : nat) : bool :=
   let cl := sp_clique p in
   let nf := sp_nf p in
@@ -2203,29 +2356,28 @@ Definition sri_pair_valid (p : sri_pair) (L : nat) : bool :=
   all (fun i => i < Tg) cl &&
   all (fun i => i < Tg) nf.
 
-(* Enumerate all valid pairs for a given L *)
+(* All valid pairs of total length L: for each clique size k from 0 to L, each
+   k-clique of the graph paired with each distinct normal form of length L-k.
+   The enumeration is what turns the signed count into the two sums of the
+   recurrence.  all_sri_pairs_valid and valid_in_all_sri_pairs below show it
+   lists the valid pairs and nothing besides. *)
 Definition all_sri_pairs (L : nat) : seq sri_pair :=
   [seq (cl, nf)
   | cl <- flatten [seq cliques_of_size Tg k crel | k <- iota 0 L.+1],
     nf <- undup (map (foata_nf crel) (all_words Tg (L - size cl)))].
 
-(* The SRI map lifted to sri_pair *)
+(* The move, applied to a pair. *)
 Definition sri_pair_map (p : sri_pair) : sri_pair :=
   @sri_map crel (sp_clique p) (sp_nf p).
 
-(* Sign of a pair: even |S| = positive *)
+(* The sign of a pair: positive when the clique has even size.  This is the
+   (-1)^k of the clique polynomial. *)
 Definition sri_pair_sign (p : sri_pair) : bool :=
   ~~ odd (size (sp_clique p)).
 
-(* The alternating identity: for L > 0, the signed sum over valid pairs = 0 *)
-(* This means: count positive = count negative *)
-
-(* To prove this, we need:
-   1. sri_pair_map is an involution on valid pairs
-   2. It has no fixed points
-   3. It flips the sign *)
-
-(* 1. sri_map preserves validity *)
+(* The four properties the counting principle asks of sri_pair_map on valid
+   pairs: it stays inside them, it is an involution, it fixes none, and it
+   reverses the sign. *)
 Lemma sri_map_preserves_valid (p : sri_pair) (L : nat) :
   0 < L ->
   sri_pair_valid p L ->
@@ -2301,8 +2453,6 @@ apply/andP; split; last first.
 by rewrite Htotal Hsz.
 Qed.
 
-(* Common tactic for extracting fields from sri_pair_valid *)
-(* 2. sri_map is an involution on valid pairs *)
 Lemma sri_pair_map_invol (p : sri_pair) (L : nat) :
   0 < L ->
   sri_pair_valid p L ->
@@ -2320,7 +2470,6 @@ have := @sri_involution crel crel_sym crel_irrefl cl nf Hpos Hapc' Hsorted Hnf.
 by case: (@sri_map crel cl nf) => [cl' nf'] /= ->.
 Qed.
 
-(* 3. sri_map has no fixed points *)
 Lemma sri_pair_map_no_fix (p : sri_pair) (L : nat) :
   0 < L ->
   sri_pair_valid p L ->
@@ -2338,7 +2487,6 @@ apply/eqP => /= [] [Hcl Hnf].
 by apply: Hne; congr pair.
 Qed.
 
-(* 4. sri_map flips sign *)
 Lemma sri_pair_map_flip (p : sri_pair) (L : nat) :
   0 < L ->
   sri_pair_valid p L ->
@@ -2360,7 +2508,7 @@ case HbS : (@sri_pivot crel cl nf \in cl).
   by rewrite /= size_insort oddS negbK.
 Qed.
 
-(* --- Helper lemmas for alternating count proof --- *)
+(* --- The enumeration lists the valid pairs, each once --- *)
 
 (* Completeness of all_words: if size and bounds match, word is in all_words *)
 Lemma all_words_complete (Tg' L : nat) (w : seq nat) :
@@ -2563,7 +2711,10 @@ apply: valid_in_all_sri_pairs.
 exact: sri_map_preserves_valid HL (all_sri_pairs_valid Hp).
 Qed.
 
-(* The alternating identity in terms of counts over the pair list *)
+(** For L > 0, as many valid pairs have even clique size as have odd.
+    The counting principle applied to sri_pair_map.  Everything above this
+    line establishes its four hypotheses; everything below reads the two
+    counts as the two halves of the clique recurrence. *)
 Lemma sri_alternating_count (L : nat) :
   0 < L ->
   let pairs := all_sri_pairs L in
@@ -2599,10 +2750,11 @@ rewrite count_map /preim /=.
 by case: (p x); [rewrite count_predT | rewrite count_pred0].
 Qed.
 
-(* Convert the count identity to the nat-level alternating sum *)
-(* Decomposition of pair count by sign *)
-(* count positive = sum_{k even} c_k * m_{L-k} *)
-(* count negative = sum_{k odd} c_k * m_{L-k} *)
+(* The pairs of even clique size number sum_{k even} c_k * m_{L-k}, and those
+   of odd clique size sum_{k odd} c_k * m_{L-k}: grouping the enumeration by
+   clique size turns each group into a product of a clique count and a trace
+   count.  This is where the combinatorial pairing becomes the arithmetic of
+   the recurrence. *)
 Lemma count_sign_decomp (L : nat) :
   0 < L ->
   count sri_pair_sign (all_sri_pairs L) =
@@ -2701,9 +2853,15 @@ have sumn_if_filter : forall (p : pred nat) (f : nat -> nat) (s : seq nat),
 exact: sumn_if_filter.
 Qed.
 
+(* c_0 = 1, so the k = 0 term of the even sum is m_L itself. *)
 Lemma clique_count_0 : clique_count Tg 0 crel = 1.
 Proof. exact: clique_count0. Qed.
 
+(** For L > 0, m_L plus the even-k part of the recurrence equals the odd-k
+    part, where m_L is n_traces_natB Tg L crel.
+    This is sum_{k=0}^{L} (-1)^k c_k m_{L-k} = 0 written without negative
+    numbers, and it is the whole content of the involution: valid pairs of
+    even clique size are as many as those of odd clique size. *)
 Lemma sri_alternating_identity (L : nat) :
   0 < L ->
   n_traces_natB Tg L crel +
@@ -2733,6 +2891,11 @@ End sri_alternating.
 
 (* --- clique_traces_aux properties --- *)
 
+(* The memo recursion appends one entry per unit of fuel, never revises an
+   entry already written, and computes each new entry from the table so far.
+   Together these make clique_traces read entry L of any sufficiently long
+   run, which is what lets the recurrence below be stated on a memo table
+   built from clique_traces itself. *)
 Lemma cta_size (Tg : nat) (crel : nat -> nat -> bool) fuel memo :
   size (clique_traces_aux Tg crel fuel memo) = size memo + fuel.
 Proof.
@@ -2783,6 +2946,8 @@ Qed.
 
 (* --- clique_traces recurrence --- *)
 
+(* The clique-polynomial count starts at 1 and satisfies one recurrence step
+   on the table of its own earlier values. *)
 Lemma clique_traces_0 (Tg : nat) (crel : nat -> nat -> bool) :
   clique_traces Tg 0 crel = 1.
 Proof. by rewrite /clique_traces /=. Qed.
@@ -2806,7 +2971,7 @@ have -> : nth 0 [seq clique_traces Tg i0 crel | i0 <- iota 0 L.+1] i =
 rewrite cta_nth_eq //; exact: ltnW.
 Qed.
 
-(* --- Extensionality: clique_traces and n_traces_natB are same for comm and comm_b --- *)
+(* --- Restricting comm to the generators changes neither count --- *)
 
 Lemma sumn_map_ext2 {A : eqType} (f g : A -> nat) (s : seq A) :
   (forall x, x \in s -> f x = g x) -> sumn (map f s) = sumn (map g s).
@@ -2841,7 +3006,6 @@ by rewrite -(@clique_step_comm_b Tg crel _ Hsym Hirr) -IH.
 Qed.
 
 (* --- The SRI recurrence for n_traces_natB --- *)
-(* This is the key lemma: n_traces_natB satisfies the same recurrence as clique_traces *)
 
 Lemma nth_map_iota_sub (f : nat -> nat) L k :
   0 < k -> k <= L ->
@@ -2853,6 +3017,12 @@ rewrite (nth_map 0); last by rewrite size_iota.
 by rewrite nth_iota // add0n.
 Qed.
 
+(** The enumerative trace count satisfies the same recurrence step as the
+    clique-polynomial count.
+    The alternating identity restated in the shape clique_step consumes.  The
+    two counts now share a base value and a step, so they agree at every
+    length; this is the last mathematical content of the proof, and what
+    follows is the induction. *)
 Lemma n_traces_recurrence (Tg : nat) (crel : nat -> nat -> bool) L :
   (forall a b, crel a b -> crel b a) ->
   (forall a, ~~ crel a a) ->
@@ -2896,6 +3066,19 @@ Qed.
 
 (* --- Main theorem --- *)
 
+(** For a commutation relation symmetric and irreflexive on the Tg
+    generators, the trace count predicted by the clique polynomial of the
+    commutation graph equals the count obtained by enumerating words and
+    collecting distinct Foata normal forms.  Equivalently
+    sum_L m_L z^L = 1/P_Gamma(z).
+    Both hypotheses are load-bearing rather than customary: without symmetry
+    the identity already fails at L = 3.
+    This is what makes trace counting tractable in the search-space analysis.
+    The clique polynomial depends on the commutation graph alone and its cost
+    does not grow with L, while the enumerative side costs Tg^L.  Composed
+    with n_traces_of_natB it delivers the number of trace classes of a RAAG
+    instance from its graph, and hence the bound on the space a coalition
+    must search. *)
 Lemma cartier_foata (Tg L : nat) (comm : nat -> nat -> bool) :
   (forall a b, a < Tg -> b < Tg -> comm a b -> comm b a) ->
   (forall a, ~~ comm a a) ->
@@ -2922,6 +3105,8 @@ apply: IH; rewrite /Wf_nat.ltof /=.
 exact/ltP.
 Qed.
 
+(** The same identity under the name the clique-polynomial development refers
+    to it by. *)
 Lemma clique_traces_eq_natB (Tg L : nat) (comm : nat -> nat -> bool) :
   (forall a b, a < Tg -> b < Tg -> comm a b -> comm b a) ->
   (forall a, ~~ comm a a) ->

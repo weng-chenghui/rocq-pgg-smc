@@ -39,10 +39,13 @@ From pgg_smc Require Import pgg_weval_inj pgg_raag.
 (*   clique_traces_free : free case gives Tg^L                               *)
 (*   clique_traces_abelian : abelian case gives C(L+Tg-1, Tg-1)             *)
 (*                                                                            *)
-(* Part 5: Reflection to abstract n_traces (Cartier-Foata axiom)             *)
-(*   cartier_foata : clique_traces = n_traces_natB                           *)
-(*     (axiom, requires comm_sym + comm_irrefl, vm_compute-verified)         *)
-(*   clique_traces_eq_natB : clique_traces = n_traces_natB (from axiom)      *)
+(* Part 5: Cross-checks against the abstract trace count                      *)
+(*   clique_traces Tg L comm = n_traces_natB Tg L comm is the Cartier-Foata   *)
+(*   theorem for a symmetric irreflexive comm.  It is proved as               *)
+(*   cartier_foata in pgg_raag_cartier_foata.v, which imports this file, so   *)
+(*   it is not available here; what this part contains is vm_compute evidence *)
+(*   pinning the two sides against each other at the graphs and lengths this  *)
+(*   development uses.                                                        *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -53,7 +56,9 @@ Import Prenex Implicits.
 (* Part 1: Nat-level clique enumeration                                       *)
 (* ========================================================================== *)
 
-(* All subsequences of s of exactly size k, preserving order *)
+(* Every length-k subsequence of s, in the order s lists them.  Applied to
+   iota 0 Tg it enumerates the k-element vertex sets of the commutation
+   graph, each sorted, which is where the clique search starts. *)
 Fixpoint subseqs_k (k : nat) (s : seq nat) : seq (seq nat) :=
   match k with
   | 0 => [:: [::]]
@@ -66,19 +71,25 @@ Fixpoint subseqs_k (k : nat) (s : seq nat) : seq (seq nat) :=
     end
   end.
 
-(* Check that all elements pairwise commute (or are equal) *)
+(* All elements of s pairwise commute, an element being allowed to meet
+   itself.  On a duplicate-free s this is exactly the condition that s spans
+   a clique of the commutation graph. *)
 Definition all_pairs_comm_sorted (comm : nat -> nat -> bool) (s : seq nat)
     : bool :=
   all (fun i =>
     all (fun j => (i == j) || comm i j) s) s.
 
-(* All k-cliques: k-element subsets of {0,...,Tg-1} that are cliques *)
+(* The k-cliques of the commutation graph: the k-element subsets of the
+   generator indices all of whose pairs commute.  A clique is a set of
+   generators that may be freely reordered among themselves, which is why the
+   Cartier-Foata count depends on the graph only through these. *)
 Definition cliques_of_size (Tg k : nat) (comm : nat -> nat -> bool)
     : seq (seq nat) :=
   [seq s <- subseqs_k k (iota 0 Tg)
   | all_pairs_comm_sorted comm s].
 
-(* c_k = number of k-cliques *)
+(* c_k, the number of k-cliques: the k-th coefficient of the clique
+   polynomial P(z) = sum_k (-1)^k c_k z^k. *)
 Definition clique_count (Tg k : nat) (comm : nat -> nat -> bool) : nat :=
   size (cliques_of_size Tg k comm).
 
@@ -86,14 +97,14 @@ Definition clique_count (Tg k : nat) (comm : nat -> nat -> bool) : nat :=
 (* Part 2: Clique recurrence for trace counts                                 *)
 (* ========================================================================== *)
 
-(* The recurrence m_L = Sum_{k=1}^{min(L,Tg)} (-1)^{k+1} c_k m_{L-k}
-   = Sum_{k odd} c_k m_{L-k} - Sum_{k even, k>=2} c_k m_{L-k}
-
-   At the nat level, we split into positive and negative parts:
-   pos = Sum_{k odd <= L} c_k * m_{L-k}
-   neg = Sum_{k even, 2<=k<=L} c_k * m_{L-k}
-   m_L = pos - neg  (valid when pos >= neg, guaranteed by theory)
-*)
+(* One step of the recurrence that 1/P(z) imposes on the trace counts:
+   m_L = sum_{k=1}^{min(L,Tg)} (-1)^{k+1} c_k m_{L-k}, read off the memo
+   table of earlier values.
+   Since nat has no subtraction below zero, the alternating sum is split into
+   its odd-k part and its even-k part and the difference taken at the end.
+   That difference is the intended value only when the odd part dominates,
+   which the Cartier-Foata theorem guarantees but nothing in this definition
+   enforces. *)
 
 Definition clique_step (Tg : nat) (comm : nat -> nat -> bool)
     (memo : seq nat) : nat :=
@@ -104,7 +115,9 @@ Definition clique_step (Tg : nat) (comm : nat -> nat -> bool)
                    | k <- iota 1 L & ~~ odd k] in
   pos - neg.
 
-(* Build memo table [m_0, m_1, ..., m_L] *)
+(* Extend a memo table [m_0, ..., m_j] by one entry per unit of fuel.  The
+   recurrence reaches back up to Tg steps, so the whole table has to be
+   carried rather than a fixed window. *)
 Fixpoint clique_traces_aux (Tg : nat) (comm : nat -> nat -> bool)
     (fuel : nat) (memo : seq nat) : seq nat :=
   match fuel with
@@ -114,7 +127,12 @@ Fixpoint clique_traces_aux (Tg : nat) (comm : nat -> nat -> bool)
     clique_traces_aux Tg comm fuel' (rcons memo mL)
   end.
 
-(* m_L via the clique polynomial recurrence *)
+(* The number of traces of length L predicted by the clique polynomial of the
+   commutation graph.
+   This is a count computed from the graph alone, with no word ever
+   enumerated.  Its agreement with the enumerative count n_traces_natB is the
+   Cartier-Foata theorem, and it is what makes trace counts tractable at
+   lengths where enumerating Tg^L words is not. *)
 Definition clique_traces (Tg L : nat) (comm : nat -> nat -> bool) : nat :=
   nth 0 (clique_traces_aux Tg comm L [:: 1]) L.
 
@@ -124,290 +142,192 @@ Definition clique_traces (Tg L : nat) (comm : nat -> nat -> bool) : nat :=
 
 (* --- Star graph with m leaves: center 0 commutes with leaves 1..m --- *)
 
+(* Generator 0 commutes with every other generator and no two others commute:
+   the star K_{1,m}.  Its cliques are the empty set, the m+1 vertices and the
+   m centre-leaf edges, so P(z) = 1 - (m+1)z + m z^2. *)
 Definition star_comm_nat (m : nat) (i j : nat) : bool :=
   ((i == 0) || (j == 0)) && (i != j).
 
 (* --- Complete graph: all distinct pairs commute --- *)
 
+(* Every pair of distinct generators commutes: the abelian extreme, whose
+   k-cliques are all 'C(Tg,k) vertex subsets and whose clique polynomial is
+   (1-z)^Tg. *)
 Definition complete_comm_nat (i j : nat) : bool := i != j.
 
 (* --- Path graph on Tg generators: |i-j| >= 2 --- *)
 
+(* Generators commute exactly when their indices differ by at least 2: the
+   commutation graph of the adjacent transpositions realised in
+   pgg_raag_path.v. *)
 Definition path_comm_nat (i j : nat) : bool :=
   (2 <= (maxn i j - minn i j)) && (i != j).
 
 (* ---- Clique counts for star K_{1,3} (4 generators) ---- *)
 
+(* The empty set, the four vertices, and the three centre-leaf edges are all
+   the cliques: no triangle exists because no two leaves commute.  So
+   P(z) = 1 - 4z + 3z^2 = (1-z)(1-3z). *)
 Lemma star3_cc0 : clique_count 4 0 (star_comm_nat 3) = 1.
 Proof. by vm_compute. Qed.
 
-(** star3_cc1 — vm_compute check: the star K_{1,3} has 4 singletons
-    (1-cliques).
-    Kind: example.
-*)
 Lemma star3_cc1 : clique_count 4 1 (star_comm_nat 3) = 4.
 Proof. by vm_compute. Qed.
 
-(** star3_cc2 — vm_compute check: the star K_{1,3} has 3 edges (2-cliques),
-    each pairing the center 0 with a leaf.
-    Kind: example.
-*)
 Lemma star3_cc2 : clique_count 4 2 (star_comm_nat 3) = 3.
 Proof. by vm_compute. Qed.
 
-(** star3_cc3 — vm_compute check: the star K_{1,3} has no triangle because
-    its three leaves do not pairwise commute.
-    Kind: example.
-*)
 Lemma star3_cc3 : clique_count 4 3 (star_comm_nat 3) = 0.
 Proof. by vm_compute. Qed.
 
-(** star3_cc4 — vm_compute check: no 4-clique exists in K_{1,3}.
-    Kind: example.
-*)
 Lemma star3_cc4 : clique_count 4 4 (star_comm_nat 3) = 0.
 Proof. by vm_compute. Qed.
 
-(* P(z) = 1 - 4z + 3z^2 = (1-z)(1-3z) *)
-
 (* ---- Clique counts for complete graph on 3 generators ---- *)
 
+(* Every vertex subset of K_3 is a clique, so c_k = 'C(3,k) = 1, 3, 3, 1 and
+   P(z) = (1-z)^3. *)
 Lemma complete3_cc0 : clique_count 3 0 complete_comm_nat = 1.
 Proof. by vm_compute. Qed.
 
-(** complete3_cc1 — vm_compute check: K_3 has 3 singletons.
-    Kind: example.
-*)
 Lemma complete3_cc1 : clique_count 3 1 complete_comm_nat = 3.
 Proof. by vm_compute. Qed.
 
-(** complete3_cc2 — vm_compute check: K_3 has 3 edges.
-    Kind: example.
-*)
 Lemma complete3_cc2 : clique_count 3 2 complete_comm_nat = 3.
 Proof. by vm_compute. Qed.
 
-(** complete3_cc3 — vm_compute check: K_3 has exactly one triangle.
-    Kind: example.
-*)
 Lemma complete3_cc3 : clique_count 3 3 complete_comm_nat = 1.
 Proof. by vm_compute. Qed.
 
-(* c_k = C(3,k): 1, 3, 3, 1 — confirms P(z) = (1-z)^3 *)
-
 (* ---- Clique counts for empty graph on 3 generators ---- *)
 
+(* With no edges the only cliques are the empty set and the three vertices,
+   so P(z) = 1 - 3z and 1/P(z) is the generating function of 3^L. *)
 Lemma empty3_cc0 : clique_count 3 0 (fun _ _ => false) = 1.
 Proof. by vm_compute. Qed.
 
-(** empty3_cc1 — vm_compute check: the empty graph on 3 vertices has 3
-    singletons.
-    Kind: example.
-*)
 Lemma empty3_cc1 : clique_count 3 1 (fun _ _ => false) = 3.
 Proof. by vm_compute. Qed.
 
-(** empty3_cc2 — vm_compute check: the empty graph on 3 vertices has no
-    edge.
-    Kind: example.
-*)
 Lemma empty3_cc2 : clique_count 3 2 (fun _ _ => false) = 0.
 Proof. by vm_compute. Qed.
 
-(* c_0=1, c_1=3, c_k=0 for k>=2 — confirms P(z) = 1-3z *)
-
 (* ---- Clique counts for path on 3 generators ---- *)
 
+(* On three generators the only commuting pair is {0,2}, so the cliques are
+   the empty set, three vertices and one edge, and P(z) = 1 - 3z + z^2. *)
 Lemma path3_cc0 : clique_count 3 0 path_comm_nat = 1.
 Proof. by vm_compute. Qed.
 
-(** path3_cc1 — vm_compute check: the path P_3 has 3 singletons.
-    Kind: example.
-*)
 Lemma path3_cc1 : clique_count 3 1 path_comm_nat = 3.
 Proof. by vm_compute. Qed.
 
-(** path3_cc2 — vm_compute check: the path P_3 has exactly one edge between
-    its two non-adjacent vertices (the diagonal of the commutation graph).
-    Kind: example.
-*)
 Lemma path3_cc2 : clique_count 3 2 path_comm_nat = 1.
 Proof. by vm_compute. Qed.
 
-(** path3_cc3 — vm_compute check: the path P_3 has no triangle.
-    Kind: example.
-*)
 Lemma path3_cc3 : clique_count 3 3 path_comm_nat = 0.
 Proof. by vm_compute. Qed.
 
-(* P(z) = 1 - 3z + z^2 *)
-
 (* ---- Trace counts: star K_{1,3} ---- *)
 
+(* P(z) = (1-z)(1-3z) gives 1/P(z) = sum_L ((3^{L+1}-1)/2) z^L, so the trace
+   counts run 1, 4, 13, 40: a coalition facing four generators with a star
+   commutation graph searches 40 classes at length 3 rather than the 64 words.
+   The predicted values, from the clique polynomial. *)
 Lemma star3_ct0 : clique_traces 4 0 (star_comm_nat 3) = 1.
 Proof. by vm_compute. Qed.
 
-(** star3_ct1 — vm_compute trace count m_1 = 4 for star K_{1,3}.
-    Kind: example.
-*)
 Lemma star3_ct1 : clique_traces 4 1 (star_comm_nat 3) = 4.
 Proof. by vm_compute. Qed.
 
-(** star3_ct2 — vm_compute trace count m_2 = 13 for star K_{1,3}.
-    Kind: example.
-*)
 Lemma star3_ct2 : clique_traces 4 2 (star_comm_nat 3) = 13.
 Proof. by vm_compute. Qed.
 
-(** star3_ct3 — vm_compute trace count m_3 = 40 for star K_{1,3}.
-    Kind: example.
-*)
 Lemma star3_ct3 : clique_traces 4 3 (star_comm_nat 3) = 40.
 Proof. by vm_compute. Qed.
 
-(* Cross-check with n_traces_natB *)
+(* The same four numbers obtained by enumerating words and counting distinct
+   normal forms, with no clique polynomial involved.  Agreement of the two
+   columns is Cartier-Foata at these lengths. *)
 Lemma star3_ntB0 : n_traces_natB 4 0 (star_comm_nat 3) = 1.
 Proof. by vm_compute. Qed.
 
-(** star3_ntB1 — cross-check: n_traces_natB agrees with clique_traces at
-    L=1 for K_{1,3}.
-    Kind: example.
-*)
 Lemma star3_ntB1 : n_traces_natB 4 1 (star_comm_nat 3) = 4.
 Proof. by vm_compute. Qed.
 
-(** star3_ntB2 — cross-check: n_traces_natB agrees with clique_traces at
-    L=2 for K_{1,3}.
-    Kind: example.
-*)
 Lemma star3_ntB2 : n_traces_natB 4 2 (star_comm_nat 3) = 13.
 Proof. by vm_compute. Qed.
 
-(** star3_ntB3 — cross-check: n_traces_natB agrees with clique_traces at
-    L=3 for K_{1,3}.
-    Kind: example.
-*)
 Lemma star3_ntB3 : n_traces_natB 4 3 (star_comm_nat 3) = 40.
 Proof. by vm_compute. Qed.
 
 (* ---- Trace counts: free group (3 generators) ---- *)
 
+(* No edges means no word may be reordered, so each class is a single word and
+   the counts are 3^L.  The free extreme, where the trace count gives a
+   coalition no reduction at all. *)
 Lemma free3_ct0 : clique_traces 3 0 (fun _ _ => false) = 1.
 Proof. by vm_compute. Qed.
 
-(** free3_ct1 — vm_compute trace count m_1 = 3 for the free group on 3
-    generators.
-    Kind: example.
-*)
 Lemma free3_ct1 : clique_traces 3 1 (fun _ _ => false) = 3.
 Proof. by vm_compute. Qed.
 
-(** free3_ct2 — vm_compute trace count m_2 = 9 for the free group on 3
-    generators (matches 3^2).
-    Kind: example.
-*)
 Lemma free3_ct2 : clique_traces 3 2 (fun _ _ => false) = 9.
 Proof. by vm_compute. Qed.
 
-(** free3_ct3 — vm_compute trace count m_3 = 27 for the free group on 3
-    generators (matches 3^3).
-    Kind: example.
-*)
 Lemma free3_ct3 : clique_traces 3 3 (fun _ _ => false) = 27.
 Proof. by vm_compute. Qed.
 
-(** free3_ntB2 — cross-check that the natural-B trace count for free-3 at L = 2
-    matches the expected 9.
-    Kind: example.
-    Naming: [natB] names the alternative trace count defined via natural-B
-    enumeration, cross-checking the [clique_traces] result above. *)
+(* The enumerative count agrees at L = 2. *)
 Lemma free3_ntB2 : n_traces_natB 3 2 (fun _ _ => false) = 9.
 Proof. by vm_compute. Qed.
 
 (* ---- Trace counts: abelian (3 generators) ---- *)
 
+(* Everything commutes, so a class is a multiset of L letters and the counts
+   are 'C(L+2,2) = 1, 3, 6, 10.  Polynomial in L against the free case's 3^L:
+   the abelian extreme is where a commutation graph gives a coalition the
+   most. *)
 Lemma abelian3_ct0 : clique_traces 3 0 complete_comm_nat = 1.
 Proof. by vm_compute. Qed.
 
-(** abelian3_ct1 — vm_compute trace count m_1 = 3 for the free abelian
-    group on 3 generators.
-    Kind: example.
-*)
 Lemma abelian3_ct1 : clique_traces 3 1 complete_comm_nat = 3.
 Proof. by vm_compute. Qed.
 
-(** abelian3_ct2 — vm_compute trace count m_2 = 6 for the free abelian
-    group on 3 generators (matches C(L+2,2) = C(4,2) = 6).
-    Kind: example.
-*)
 Lemma abelian3_ct2 : clique_traces 3 2 complete_comm_nat = 6.
 Proof. by vm_compute. Qed.
 
-(** abelian3_ct3 — vm_compute trace count m_3 = 10 for the free abelian
-    group on 3 generators (matches C(L+2,2) = C(5,2) = 10).
-    Kind: example.
-*)
 Lemma abelian3_ct3 : clique_traces 3 3 complete_comm_nat = 10.
 Proof. by vm_compute. Qed.
 
-(* C(L+2, 2) = 1, 3, 6, 10 for L = 0, 1, 2, 3 *)
-
-(** abelian3_ntB2 — cross-check: n_traces_natB for the free abelian group on
-    3 generators at L=2 equals C(L+2,2)=6.
-    Kind: example.
-    Why: vm_compute sanity check that n_traces_natB tracks the abelian
-    closed form, complementing abelian3_ct2 / abelian3_ntB3.
-*)
+(* The enumerative count agrees at L = 2 and L = 3. *)
 Lemma abelian3_ntB2 : n_traces_natB 3 2 complete_comm_nat = 6.
 Proof. by vm_compute. Qed.
 
-(** abelian3_ntB3 — cross-check: n_traces_natB for the abelian case at L=3
-    matches clique_traces = 10.
-    Kind: example.
-*)
 Lemma abelian3_ntB3 : n_traces_natB 3 3 complete_comm_nat = 10.
 Proof. by vm_compute. Qed.
 
 (* ---- Trace counts: path (3 generators) ---- *)
 
-(** path3_ct0 — vm_compute trace count m_0 = 1 for the path graph P_3
-    (the empty-word clique).
-    Kind: example.
-    Why: base case of the path recurrence m_L = 3*m_{L-1} - m_{L-2},
-    paired with path3_ct1 / path3_ct2 / path3_ct3.
-*)
+(* P(z) = 1 - 3z + z^2 makes the counts satisfy m_L = 3 m_{L-1} - m_{L-2},
+   giving 1, 3, 8, 21, with growth rate (3+sqrt 5)/2, strictly between the
+   abelian polynomial and the free 3^L. *)
 Lemma path3_ct0 : clique_traces 3 0 path_comm_nat = 1.
 Proof. by vm_compute. Qed.
 
-(** path3_ct1 — vm_compute trace count m_1 = 3 for the path P_3.
-    Kind: example.
-*)
 Lemma path3_ct1 : clique_traces 3 1 path_comm_nat = 3.
 Proof. by vm_compute. Qed.
 
-(** path3_ct2 — vm_compute trace count m_2 = 8 for the path P_3.
-    Kind: example.
-*)
 Lemma path3_ct2 : clique_traces 3 2 path_comm_nat = 8.
 Proof. by vm_compute. Qed.
 
-(** path3_ct3 — vm_compute trace count m_3 = 21 for the path P_3.
-    Kind: example.
-*)
 Lemma path3_ct3 : clique_traces 3 3 path_comm_nat = 21.
 Proof. by vm_compute. Qed.
 
-(** path3_ntB2 — cross-check that n_traces_natB for the path P_3 at L=2 equals 8.
-    Kind: example.
-    Naming: [natB] names the alternative trace count defined via natural-B
-    enumeration, cross-checking the [clique_traces] result above. *)
+(* The enumerative count agrees at L = 2 and L = 3. *)
 Lemma path3_ntB2 : n_traces_natB 3 2 path_comm_nat = 8.
 Proof. by vm_compute. Qed.
 
-(** path3_ntB3 — cross-check: n_traces_natB for the path P_3 at L=3 matches
-    clique_traces = 21.
-    Kind: example.
-*)
 Lemma path3_ntB3 : n_traces_natB 3 3 path_comm_nat = 21.
 Proof. by vm_compute. Qed.
 
@@ -417,6 +337,7 @@ Proof. by vm_compute. Qed.
 
 (* --- Helper lemma: size of elements in subseqs_k --- *)
 
+(* Everything subseqs_k k enumerates has length k. *)
 Lemma subseqs_k_size k s t : t \in subseqs_k k s -> size t = k.
 Proof.
 elim: s k t => [|a s IHs] [|k] t //=.
@@ -429,62 +350,38 @@ Qed.
 
 (* --- Empty graph: clique_count Tg 0 = 1, clique_count Tg 1 = Tg --- *)
 
-(** filter_pred1T — filtering a singleton by a predicate that holds on the
-    element returns the singleton unchanged.
-    Kind: helper.
-    Why: cosmetic base-case lemma for singleton filters used inside
-    clique-count reductions.
-    Used by: clique_count1 and related singleton-filter reductions in this
-             section.
-*)
+(** Filtering a singleton by a predicate its element satisfies keeps it. *)
 Lemma filter_pred1T (T : Type) (p : pred T) (x : T) :
   p x -> [seq s <- [:: x] | p s] = [:: x].
 Proof. by move=> /= ->. Qed.
 
-(** all_pairs_comm_nil — the empty sequence trivially satisfies the
-    pairwise-commuting predicate.
-    Kind: helper.
-    Used by: clique_count0 and downstream base-case reasoning.
-*)
+(** The empty set is a clique of any graph. *)
 Lemma all_pairs_comm_nil comm : all_pairs_comm_sorted comm [::] = true.
 Proof. by []. Qed.
 
-(** subseqs_k0 — the only zero-length subsequence is the empty one.
-    Kind: helper.
-    Used by: clique_count0, empty_clique_countk, size_subseqs_k base case.
-*)
+(** The empty sequence is the only subsequence of length 0. *)
 Lemma subseqs_k0 s : subseqs_k 0 s = [:: [::]].
 Proof. by case: s. Qed.
 
-(** clique_count0 — there is exactly one 0-clique (the empty set) in any
-    commutation graph.
-    Kind: helper.
-    Used by: clique_traces recurrence base case; starting condition of the
-             memo table in clique_traces_aux.
-*)
+(** Every commutation graph has exactly one 0-clique.
+    c_0 = 1 is the constant term of the clique polynomial, which is what makes
+    P(z) invertible as a power series and the recurrence solvable for m_L. *)
 Lemma clique_count0 Tg comm : clique_count Tg 0 comm = 1.
 Proof.
 by rewrite /clique_count /cliques_of_size subseqs_k0
            (filter_pred1T (all_pairs_comm_nil comm)).
 Qed.
 
-(** subseqs_k1 — length-1 subsequences of s are exactly the singletons of
-    its elements.
-    Kind: helper.
-    Used by: empty_clique_count1 and any length-1 clique enumeration.
-*)
+(** The length-1 subsequences of s are the singletons of its elements. *)
 Lemma subseqs_k1 s : subseqs_k 1 s = [seq [:: x] | x <- s].
 Proof.
 elim: s => [|a s IH] //=.
 by rewrite subseqs_k0 /= IH.
 Qed.
 
-(** empty_clique_count1 — in the empty commutation graph on Tg vertices
-    there are exactly Tg singleton cliques.
-    Kind: helper.
-    Used by: clique_step_free; this is the c_1 coefficient in the free-case
-             trace recurrence.
-*)
+(** The edgeless graph on Tg vertices has Tg singleton cliques.
+    The coefficient c_1 = Tg, which with c_k = 0 for k >= 2 makes P(z) = 1-Tgz
+    and the recurrence collapse to m_L = Tg m_{L-1}. *)
 Lemma empty_clique_count1 Tg :
   clique_count Tg 1 (fun _ _ => false) = Tg.
 Proof.
@@ -493,12 +390,9 @@ rewrite (eq_in_filter (a2 := predT)); first by rewrite filter_predT size_map siz
 by move=> s /mapP [x _ ->]; rewrite /all_pairs_comm_sorted /= eqxx.
 Qed.
 
-(** subseqs_k_subseq — every element of subseqs_k k s is a genuine
-    subsequence of s.
-    Kind: helper.
-    Used by: empty_clique_countk, complete_clique_count, and any argument
-             that needs uniqueness or membership of clique entries.
-*)
+(** Everything subseqs_k enumerates really is a subsequence of s, so entries
+    of a clique are vertices of the graph and a clique inherits
+    duplicate-freeness from iota. *)
 Lemma subseqs_k_subseq k s t : t \in subseqs_k k s -> subseq t s.
 Proof.
 elim: s k t => [|a s IHs] [|k] t //=.
@@ -509,11 +403,8 @@ elim: s k t => [|a s IHs] [|k] t //=.
   + exact: subseq_trans (IHs _ _ Ht) (subseq_cons _ _).
 Qed.
 
-(** mem_subseqs_k — converse of subseqs_k_subseq: every subsequence of s of
-    size k is enumerated by subseqs_k k s.
-    Kind: helper.
-    Used by: completeness arguments for clique enumeration.
-*)
+(** Every length-k subsequence of s is enumerated: completeness of the clique
+    search. *)
 Lemma mem_subseqs_k k s t :
   subseq t s -> size t = k -> t \in subseqs_k k s.
 Proof.
@@ -535,11 +426,8 @@ elim: s k t => [|a s IHs] [|k] t.
     apply: IHs Hsub _; by rewrite /= Hsz.
 Qed.
 
-(** all_pairs_false_neq — if s contains two distinct values and the
-    commutation relation is trivially false, the pairwise predicate fails.
-    Kind: helper.
-    Used by: empty_clique_countk to certify absence of k-cliques for k>=2.
-*)
+(** Under the everywhere-false relation, two distinct members already break
+    the clique condition. *)
 Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :
   a \in s -> b \in s -> a != b ->
   all_pairs_comm_sorted (fun _ _ => false) s = false.
@@ -550,12 +438,9 @@ rewrite /all_pairs_comm_sorted => /allP /(_ a Ha) /allP /(_ b Hb).
 by rewrite (negbTE Hab).
 Qed.
 
-(** empty_clique_countk — for k >= 2 the empty commutation graph has no
-    k-clique, so c_k = 0.
-    Kind: helper.
-    Used by: clique_step_free, the key simplification that makes the free
-             trace recurrence collapse to m_L = Tg * m_{L-1}.
-*)
+(** The edgeless graph has no clique of size 2 or more.
+    The clique polynomial is therefore linear, and every term of the
+    recurrence beyond k = 1 vanishes. *)
 Lemma empty_clique_countk Tg k :
   2 <= k -> clique_count Tg k (fun _ _ => false) = 0.
 Proof.
@@ -575,10 +460,10 @@ by move: Ha; rewrite in_cons negb_or => /andP [].
 Qed.
 
 (* --- Free case: clique_traces Tg L (fun _ _ => false) = Tg^L --- *)
-(* For empty graph: c_0=1, c_1=Tg, c_k=0 for k>=2.
-   Recurrence: m_L = Tg * m_{L-1}, m_0 = 1, so m_L = Tg^L. *)
+(* With c_0 = 1, c_1 = Tg and c_k = 0 beyond, the recurrence reads
+   m_L = Tg * m_{L-1} with m_0 = 1, whose solution is Tg^L. *)
 
-(* Helper: sumn of all-zero map is 0 *)
+(* A sum of terms that all vanish is zero. *)
 Lemma sumn_map_0 {A : eqType} (f : A -> nat) (s : seq A) :
   (forall x, x \in s -> f x = 0) -> sumn [seq f x | x <- s] = 0.
 Proof.
@@ -587,7 +472,8 @@ rewrite Hf ?IH // ?mem_head //.
 by move=> x Hx; apply: Hf; rewrite in_cons Hx orbT.
 Qed.
 
-(* clique_step for empty graph = Tg * previous element *)
+(* On the edgeless graph a recurrence step multiplies the last entry by Tg:
+   the only surviving term is k = 1. *)
 Lemma clique_step_free Tg memo :
   0 < size memo ->
   clique_step Tg (fun _ _ => false) memo = Tg * nth 0 memo (size memo - 1).
@@ -618,7 +504,8 @@ have Hrest : sumn [seq clique_count Tg k (fun _ _ => false) *
 by rewrite Hrest addn0.
 Qed.
 
-(* Invariant: clique_traces_aux extends memo with powers of Tg *)
+(* Run on the edgeless graph from a memo table of powers of Tg, the recursion
+   appends the next powers of Tg. *)
 Lemma clique_traces_aux_inv Tg n memo :
   0 < size memo ->
   (forall i, i < size memo -> nth 0 memo i = Tg ^ i) ->
@@ -647,11 +534,10 @@ rewrite IH.
   by rewrite -expnS subn1 prednK.
 Qed.
 
-(** clique_traces_free — the free case: clique_traces gives Tg^L.
-    Kind: main.
-    Why: closes the free case of the Cartier-Foata counting formula and
-         validates the clique recurrence against the known answer.
-*)
+(** On the edgeless graph the clique recurrence gives Tg^L.
+    The free extreme: no word can be reordered, so trace classes are words and
+    the count is the raw alphabet power.  Together with clique_traces_abelian
+    this brackets what any commutation graph can produce. *)
 Lemma clique_traces_free Tg L :
   clique_traces Tg L (fun _ _ => false) = Tg ^ L.
 Proof.
@@ -667,7 +553,7 @@ Qed.
 (* For complete graph: c_k = C(Tg,k), P(z) = (1-z)^Tg.
    1/P(z) = Sum C(L+Tg-1,Tg-1) z^L. *)
 
-(* All distinct pairs commute in a complete graph *)
+(* In the complete graph any duplicate-free set is a clique. *)
 Lemma all_pairs_complete (s : seq nat) :
   uniq s -> all_pairs_comm_sorted complete_comm_nat s.
 Proof.
@@ -677,12 +563,8 @@ case Heq: (i == j); first by left.
 by right; rewrite /complete_comm_nat Heq.
 Qed.
 
-(** size_subseqs_k — for a duplicate-free list s, the number of length-k
-    subsequences is the binomial C(|s|, k).
-    Kind: helper.
-    Used by: complete_clique_count (in turn used by the abelian trace
-             formula).
-*)
+(** A duplicate-free list of n elements has 'C(n,k) subsequences of length
+    k. *)
 Lemma size_subseqs_k k s :
   uniq s -> size (subseqs_k k s) = 'C(size s, k).
 Proof.
@@ -692,11 +574,9 @@ case/andP => _ Hu; case: k => [|k] //=.
 by rewrite size_cat size_map IHs // IHs // addnC -binS.
 Qed.
 
-(** complete_clique_count — in the complete commutation graph on Tg
-    vertices, the k-clique count is C(Tg, k).
-    Kind: helper.
-    Used by: clique_step_abelian, which drives clique_traces_abelian.
-*)
+(** The complete graph on Tg vertices has 'C(Tg,k) cliques of size k.
+    So P(z) = (1-z)^Tg, whose reciprocal expands with coefficients
+    'C(L+Tg-1, Tg-1): the abelian trace count. *)
 Lemma complete_clique_count Tg k :
   clique_count Tg k complete_comm_nat = 'C(Tg, k).
 Proof.
@@ -708,20 +588,18 @@ apply: all_pairs_complete.
 exact: subseq_uniq (subseqs_k_subseq Hs) (iota_uniq 0 Tg).
 Qed.
 
-(* Alternating-sum decomposition of the binomial inversion identity.
-   spos n r L = Sum_{k even, 0<=k<=L} C(n,k) * C(L-k+r, r)
-   sneg n r L = Sum_{k odd,  0<=k<=L} C(n,k) * C(L-k+r, r)
-   The key identity: spos n.+1 n L.+1 = sneg n.+1 n L.+1
-   which implies the clique recurrence with c_k = C(Tg,k). *)
+(* The alternating sum sum_k (-1)^k 'C(n,k) 'C(L-k+r, r) has no nat form, so
+   it is carried as the pair of its even-index and odd-index halves, spos and
+   sneg.  That the two halves are equal at n = r+1 is the binomial inversion
+   behind the abelian case, and it is stated over nat without ever forming a
+   negative quantity. *)
 
+(* Even-index half: sum over even k <= L of 'C(n,k) * 'C(L-k+r, r). *)
 Definition spos (n r L : nat) : nat :=
   sumn [seq 'C(n, k) * 'C(L - k + r, r)
        | k <- [seq k <- iota 0 L.+1 | ~~ odd k]].
 
-(** sneg — alternating-sum decomposition: odd-index part of the binomial
-    identity used in the abelian-case clique recurrence proof.
-    Kind: canonical.
-*)
+(** Odd-index half: sum over odd k <= L of 'C(n,k) * 'C(L-k+r, r). *)
 Definition sneg (n r L : nat) : nat :=
   sumn [seq 'C(n, k) * 'C(L - k + r, r)
        | k <- [seq k <- iota 0 L.+1 | odd k]].
@@ -729,56 +607,38 @@ Definition sneg (n r L : nat) : nat :=
 Arguments spos : simpl never.
 Arguments sneg : simpl never.
 
-(** filter_iota_head_even — unfold the head of the even-filtered iota 0
-    L.+1 into 0 :: tail.
-    Kind: helper.
-    Used by: spos_split and the spos/sneg Pascal decomposition.
-*)
+(** The even filter of iota 0 L.+1 keeps its leading 0. *)
 Lemma filter_iota_head_even L :
   [seq k <- iota 0 L.+1 | ~~ odd k] = 0 :: [seq k <- iota 1 L | ~~ odd k].
 Proof. by case: L. Qed.
 
-(** filter_iota_head_odd — odd-filter drops the leading 0, so filtering
-    iota 0 L.+1 agrees with filtering iota 1 L.
-    Kind: helper.
-    Used by: sneg_eq_tail and companions.
-*)
+(** The odd filter of iota 0 L.+1 drops the leading 0. *)
 Lemma filter_iota_head_odd L :
   [seq k <- iota 0 L.+1 | odd k] = [seq k <- iota 1 L | odd k].
 Proof. by case: L. Qed.
 
-(** sumn_filter_map — convert a filtered sum to a sum with a conditional
-    summand, avoiding the filter.
-    Kind: helper.
-    Used by: spos_unfold, sneg_unfold, and related sumn rewrites.
-*)
+(** A filtered sum equals the unfiltered sum of a summand guarded by the
+    predicate. *)
 Lemma sumn_filter_map {A : eqType} (p : pred A) (f : A -> nat) (s : seq A) :
   sumn [seq f x | x <- [seq x <- s | p x]] =
   sumn [seq (if p x then f x else 0) | x <- s].
 Proof. by elim: s => [|a s IH] //=; case: (p a) => /=; rewrite IH. Qed.
 
-(** spos_unfold — filter-free rewrite of spos as a conditional sum.
-    Kind: helper.
-    Used by: spos_split, spos0, spos_pascal_core, neg_eq_spos_sub.
-*)
+(** spos with its filter turned into a guard on the summand. *)
 Lemma spos_unfold n r L :
   spos n r L = sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
                      | k <- iota 0 L.+1].
 Proof. by rewrite /spos sumn_filter_map. Qed.
 
-(** sneg_unfold — filter-free rewrite of sneg as a conditional sum.
-    Kind: helper.
-    Used by: sneg0, sneg_pascal_core, pos_eq_sneg_range.
-*)
+(** sneg with its filter turned into a guard on the summand. *)
 Lemma sneg_unfold n r L :
   sneg n r L = sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
                      | k <- iota 0 L.+1].
 Proof. by rewrite /sneg sumn_filter_map. Qed.
 
-(** spos_split — isolates the k=0 term 'C(L+r,r) of the even-parity sum spos.
-    Kind: helper.
-    Used by: spos_pascal, clique_step_abelian (used via the abelian pipeline).
-*)
+(** The k = 0 term of spos, namely 'C(L+r,r), split off from the rest.
+    That term is the one the clique recurrence isolates as m_L itself, c_0
+    being 1. *)
 Lemma spos_split n r L :
   spos n r L =
   'C(L + r, r) +
@@ -788,11 +648,7 @@ Proof.
 by rewrite spos_unfold /sumn /= -/(sumn _) bin0 mul1n subn0.
 Qed.
 
-(** sneg_eq_tail — drops the (vanishing) k=0 term from sneg, giving the
-    tail iota 1 L form used by Pascal-style recurrences.
-    Kind: helper.
-    Used by: sneg_pascal, clique_step_abelian.
-*)
+(** sneg has no k = 0 term, so it is already a sum over iota 1 L. *)
 Lemma sneg_eq_tail n r L :
   sneg n r L =
   sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
@@ -803,21 +659,13 @@ Qed.
 
 Arguments sumn : simpl never.
 
-(** sumn_map_add — linearity of sumn over pointwise addition of mapped
-    functions on a finite sequence.
-    Kind: helper.
-    Used by: sumn_map_split (additive decomposition on iota sums).
-*)
+(** sumn is additive in its summand. *)
 Lemma sumn_map_add {A : Type} (f g : A -> nat) (s : seq A) :
   sumn [seq f x + g x | x <- s] =
   sumn [seq f x | x <- s] + sumn [seq g x | x <- s].
 Proof. by elim: s => [|a s IH] //; rewrite /sumn /= -/(sumn _) IH addnACA. Qed.
 
-(** sumn_map_split — if f = g + h pointwise on the iota range, then the
-    sumn splits into sumn of g plus sumn of h.
-    Kind: helper.
-    Used by: Pascal-decomposition core lemmas for spos / sneg.
-*)
+(** A summand that splits pointwise on the range splits the sum. *)
 Lemma sumn_map_split (f g h : nat -> nat) m M :
   (forall k, m <= k -> f k = g k + h k) ->
   sumn [seq f k | k <- iota m M] =
@@ -828,11 +676,7 @@ rewrite /sumn /= -/(sumn _) -/(sumn _) -/(sumn _).
 by rewrite H // (IH _ (fun k Hk => H k (ltnW Hk))) addnACA.
 Qed.
 
-(** sumn_map_eq — pointwise equality of f and g on the iota range carries
-    through sumn; used to swap summand shapes without altering totals.
-    Kind: helper.
-    Used by: spos_pascal_core, sneg_pascal_core (index-shift normalisation).
-*)
+(** Summands equal on the range give equal sums. *)
 Lemma sumn_map_eq (f g : nat -> nat) m M :
   (forall k, m <= k -> f k = g k) ->
   sumn [seq f k | k <- iota m M] = sumn [seq g k | k <- iota m M].
@@ -842,17 +686,9 @@ rewrite /sumn /= -/(sumn _) -/(sumn _).
 by rewrite H // IH // => k /ltnW /H.
 Qed.
 
-(** sumn_shift_even_to_odd_gen — reindexes an even-gated sum over iota m.+1 M
-    to an odd-gated sum over iota m M by shifting k down to j = k.-1.
-    Kind: helper.
-    Why: parity alternates under the shift k |-> k.-1, so an even-indexed
-    term at k becomes an odd-indexed term at k-1; this is the general form
-    fed to sneg_pascal_core.
-    Used by: sneg_pascal_core (Pascal recurrence on sneg).
-    Naming: shift_even_to_odd is a precise parity-direction descriptor;
-    the _gen suffix marks the abstract-g form used to instantiate the
-    specialised even-to-odd rewrite.
-*)
+(** Shifting the index down by one turns an even-gated sum into an odd-gated
+    one.  Parity alternates under k |-> k-1, which is how the second summand
+    produced by Pascal's rule lands in the opposite half. *)
 Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :
   sumn [seq (if ~~ odd k then g k.-1 else 0) | k <- iota m.+1 M] =
   sumn [seq (if odd j then g j else 0) | j <- iota m M].
@@ -861,16 +697,7 @@ by elim: M m => [|M IH] m //;
   rewrite /sumn /= -/(sumn _) -/(sumn _) (IH m.+1) negbK.
 Qed.
 
-(** sumn_shift_odd_to_even_gen — reindexes an odd-gated sum over iota m.+1 M
-    to an even-gated sum over iota m M by shifting k down to j = k.-1.
-    Kind: helper.
-    Why: parity alternates under the shift k |-> k.-1, so an odd-indexed
-    term at k becomes an even-indexed term at k-1; the companion of
-    sumn_shift_even_to_odd_gen used in the spos recurrence.
-    Used by: spos_pascal_core (Pascal recurrence on spos).
-    Naming: shift_odd_to_even is a precise parity-direction descriptor;
-    the _gen suffix marks the abstract-g form.
-*)
+(** The same index shift in the other direction, odd-gated to even-gated. *)
 Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :
   sumn [seq (if odd k then g k.-1 else 0) | k <- iota m.+1 M] =
   sumn [seq (if ~~ odd j then g j else 0) | j <- iota m M].
@@ -879,10 +706,7 @@ by elim: M m => [|M IH] m //;
   rewrite /sumn /= -/(sumn _) -/(sumn _) (IH m.+1).
 Qed.
 
-(** sumn_iota_map0 — if f vanishes on [m, m+M), the mapped sum is zero.
-    Kind: helper.
-    Used by: spos0, sneg0 (annihilation of spos / sneg when n = 0).
-*)
+(** A summand vanishing on the range gives a zero sum. *)
 Lemma sumn_iota_map0 (f : nat -> nat) m M :
   (forall k, m <= k -> f k = 0) -> sumn [seq f k | k <- iota m M] = 0.
 Proof.
@@ -892,25 +716,16 @@ rewrite Hf // IH // => k Hk.
 by apply: Hf; exact: ltnW.
 Qed.
 
-(** spos_L0 — boundary value spos n r 0 = 'C(r, r).
-    Kind: helper.
-    Used by: spos_inv base case.
-*)
+(** At L = 0 only the k = 0 term remains, so spos n r 0 = 'C(r,r) = 1. *)
 Lemma spos_L0 n r : spos n r 0 = 'C(r, r).
 Proof. by rewrite /spos /sumn /= bin0 mul1n subn0 add0n addn0. Qed.
 
-(** sneg_L0 — boundary value sneg n r 0 = 0 (empty tail sum).
-    Kind: helper.
-    Used by: spos_inv base case.
-*)
+(** At L = 0 the odd half is empty. *)
 Lemma sneg_L0 n r : sneg n r 0 = 0.
 Proof. by rewrite /sneg /sumn. Qed.
 
-(** spos0 — evaluation spos 0 r L = 'C(L+r, r); only the k=0 term survives
-    when n = 0 since 'C(0, k) = 0 for k > 0.
-    Kind: helper.
-    Used by: spos_inv base case (n = 0).
-*)
+(** At n = 0 every term with k > 0 has a vanishing binomial factor, leaving
+    spos 0 r L = 'C(L+r,r). *)
 Lemma spos0 r L : spos 0 r L = 'C(L + r, r).
 Proof.
 rewrite spos_unfold /sumn /= -/(sumn _) mul1n subn0.
@@ -920,11 +735,7 @@ apply: sumn_iota_map0 => k Hk.
 by case: (~~ odd k) => //=; rewrite (bin_small Hk) mul0n.
 Qed.
 
-(** sneg0 — evaluation sneg 0 r L = 0; every tail term has a 'C(0, k)
-    factor that vanishes for k >= 1.
-    Kind: helper.
-    Used by: spos_inv base case (n = 0).
-*)
+(** At n = 0 the odd half vanishes entirely. *)
 Lemma sneg0 r L : sneg 0 r L = 0.
 Proof.
 rewrite sneg_unfold /=.
@@ -932,17 +743,14 @@ apply: sumn_iota_map0 => k Hk.
 by case: (odd k) => //=; rewrite (bin_small Hk) mul0n.
 Qed.
 
-(** binSn — Pascal identity rearranged so the decrement lives on k on the
-    right-hand side; complements binS for the sneg recurrence.
-    Kind: helper.
-    Used by: spos_pascal_core, sneg_pascal_core.
-*)
+(** Pascal's rule with the decrement on k: 'C(n+1,k) = 'C(n,k) + 'C(n,k-1)
+    for k > 0. *)
 Lemma binSn n k : 0 < k ->
   'C(n.+1, k) = 'C(n, k) + 'C(n, k.-1).
 Proof. by case: k => // k _; rewrite binS addnC. Qed.
 
-(* Core identity for spos_pascal: decomposes even-parity sum using
-   Pascal's rule C(n+1,k) = C(n,k) + C(n,k-1) and reindexing. *)
+(* Pascal's rule splits each even-index term in two; the second piece
+   reindexes into the odd half at one lower L. *)
 Lemma spos_pascal_core n r L :
   sumn [seq (if ~~ odd k then 'C(n.+1, k) * 'C(L.+1 - k + r, r) else 0)
        | k <- iota 1 L.+1] =
@@ -973,8 +781,8 @@ congr (_ * _).
 by case: k Hk => // k _; rewrite subSS.
 Qed.
 
-(* Core identity for sneg_pascal: decomposes odd-parity sum using
-   Pascal's rule and reindexing. *)
+(* The same split for the odd half, its second piece landing in the even half
+   at one lower L. *)
 Lemma sneg_pascal_core n r L :
   sumn [seq (if odd k then 'C(n.+1, k) * 'C(L.+1 - k + r, r) else 0)
        | k <- iota 1 L.+1] =
@@ -1005,11 +813,8 @@ congr (_ * _).
 by case: k Hk => // k _; rewrite subSS.
 Qed.
 
-(** spos_pascal — Pascal-style recurrence for spos: incrementing n expresses
-    spos n.+1 r L.+1 as spos n r L.+1 plus sneg n r L.
-    Kind: helper.
-    Used by: spos_inv inductive step, spos_eq_sneg.
-*)
+(** Raising n by one adds the opposite half at one lower L:
+    spos n+1 r (L+1) = spos n r (L+1) + sneg n r L. *)
 Lemma spos_pascal n r L :
   spos n.+1 r L.+1 = spos n r L.+1 + sneg n r L.
 Proof.
@@ -1017,11 +822,7 @@ rewrite (spos_split n.+1) (spos_split n r L.+1) (sneg_unfold n r L).
 by rewrite spos_pascal_core addnA.
 Qed.
 
-(** sneg_pascal — companion Pascal-style recurrence for sneg: incrementing n
-    expresses sneg n.+1 r L.+1 as sneg n r L.+1 plus spos n r L.
-    Kind: helper.
-    Used by: spos_inv inductive step, spos_eq_sneg.
-*)
+(** The companion recurrence, with the halves exchanged. *)
 Lemma sneg_pascal n r L :
   sneg n.+1 r L.+1 = sneg n r L.+1 + spos n r L.
 Proof.
@@ -1029,11 +830,10 @@ rewrite (sneg_eq_tail n.+1 r L.+1) (sneg_eq_tail n r L.+1) (spos_unfold n r L).
 by rewrite sneg_pascal_core addnA.
 Qed.
 
-(** spos_inv — invariant relating spos and sneg: when n <= r,
+(** For n <= r the two halves differ by a single binomial:
     spos n r L = 'C(L+r-n, r-n) + sneg n r L.
-    Kind: helper.
-    Used by: spos_eq_sneg; abelian clique-count collapse in clique_step_abelian.
-*)
+    The nat-safe form of the binomial inversion identity, the gap shrinking as
+    n climbs towards r. *)
 Lemma spos_inv n r L : n <= r ->
   spos n r L = 'C(L + r - n, r - n) + sneg n r L.
 Proof.
@@ -1063,11 +863,10 @@ have Heq3 : L.+1 + r - n = (L + r - n).+1 by rewrite addSn (subSn Hrn').
 by rewrite Heq1 Heq2 Heq3 binS addnC.
 Qed.
 
-(** spos_eq_sneg — critical case n = r where spos equals sneg; the extra
-    'C(L+r-n, r-n) term collapses to 'C(0,0) = 1 and is absorbed.
-    Kind: helper.
-    Used by: clique_step_abelian (abelian growth-rate collapse).
-*)
+(** At n = r+1 the two halves are equal.
+    The alternating sum sum_k (-1)^k 'C(r+1,k) 'C(L+1-k+r, r) is therefore
+    zero, which is exactly the clique recurrence for the complete graph and is
+    what makes the abelian trace count come out as a single binomial. *)
 Lemma spos_eq_sneg n L :
   spos n.+1 n L.+1 = sneg n.+1 n L.+1.
 Proof.
@@ -1076,34 +875,25 @@ rewrite (@spos_inv n n L.+1 (leqnn n)) (@spos_inv n n L (leqnn n)).
 by rewrite (subnn n) addnK addnK bin0 bin0 addnCA.
 Qed.
 
-(** pos_eq_sneg_range — bridges the filtered-sum form (odd k over iota 1 L)
-    to the sneg notation, collapsing the filter-of-mapped presentation.
-    Kind: helper.
-    Used by: clique_step_abelian.
-*)
+(** The odd part of a recurrence step, written in the sneg notation. *)
 Lemma pos_eq_sneg_range Tg r L :
   sumn [seq 'C(Tg, k) * 'C(L - k + r, r)
        | k <- [seq k <- iota 1 L | odd k]] =
   sneg Tg r L.
 Proof. by rewrite sneg_eq_tail sumn_filter_map. Qed.
 
-(** neg_eq_spos_sub — bridges the filtered-sum form (even k over iota 1 L)
-    to spos minus its k=0 term 'C(L+r, r).
-    Kind: helper.
-    Used by: clique_step_abelian.
-*)
+(** The even part of a recurrence step, written as spos with its k = 0 term
+    removed. *)
 Lemma neg_eq_spos_sub Tg r L :
   sumn [seq 'C(Tg, k) * 'C(L - k + r, r)
        | k <- [seq k <- iota 1 L | ~~ odd k]] =
   spos Tg r L - 'C(L + r, r).
 Proof. by rewrite spos_split sumn_filter_map addKn. Qed.
 
-(** clique_step_abelian — one step of the abelian clique recurrence yields
-    the closed-form binomial 'C(size memo + Tg.-1, Tg.-1) under the
-    complete-commutation graph, given the binomial invariant on memo.
-    Kind: helper.
-    Used by: clique_traces_aux_inv_abelian, clique_traces_abelian.
-*)
+(** On the complete graph, a recurrence step run on a memo table of binomials
+    produces the next binomial.
+    The alternating sum collapses by spos_eq_sneg, leaving only the k = 0
+    term. *)
 Lemma clique_step_abelian Tg memo :
   0 < Tg -> 0 < size memo ->
   (forall i, i < size memo -> nth 0 memo i = 'C(i + Tg.-1, Tg.-1)) ->
@@ -1133,17 +923,8 @@ rewrite /L; case: (size memo) Hpos => [|L'] // _.
 by rewrite spos_eq_sneg subKn // -spos_eq_sneg spos_split leq_addr.
 Qed.
 
-(** clique_traces_aux_inv_abelian — inductive invariant: under
-    complete_comm_nat and the binomial invariant on memo, running
-    clique_traces_aux for n more steps appends the closed-form binomials
-    'C(size memo + i + Tg.-1, Tg.-1) for i in iota 0 n.
-    Kind: helper.
-    Used by: clique_traces_abelian.
-    Naming: _aux_inv_abelian mirrors the naming of clique_traces_aux
-    (base recursor, aux) and its invariant (inv) specialised to the
-    abelian commutation graph; the five components each carry distinct
-    semantic roles.
-*)
+(** Run on the complete graph from a memo table of binomials, the recursion
+    appends the next binomials. *)
 Lemma clique_traces_aux_inv_abelian Tg n memo :
   0 < Tg -> 0 < size memo ->
   (forall i, i < size memo -> nth 0 memo i = 'C(i + Tg.-1, Tg.-1)) ->
@@ -1167,10 +948,11 @@ rewrite IH.
   by rewrite eqxx clique_step_abelian // addn0.
 Qed.
 
-(** clique_traces_abelian — closed form for the abelian clique trace count:
-    under complete_comm_nat, clique_traces Tg L equals 'C(L + Tg.-1, Tg.-1).
-    Kind: main.
-*)
+(** On the complete graph the clique recurrence gives 'C(L+Tg-1, Tg-1).
+    The abelian extreme: a trace class is a multiset of L letters, so the
+    count is polynomial in L of degree Tg-1.  Against Tg^L in the free case,
+    this is the whole range a commutation graph can move the search space
+    across. *)
 Lemma clique_traces_abelian Tg L :
   0 < Tg ->
   clique_traces Tg L complete_comm_nat = 'C(L + Tg.-1, Tg.-1).
@@ -1188,37 +970,26 @@ have -> : nth 0 ([:: 1] ++ [seq 'C(1 + i + Tg.-1, Tg.-1)
 by rewrite (nth_map 0) ?size_iota // nth_iota // add0n addnC addnA.
 Qed.
 
-(* --- vm_compute verification of growth rate formulas --- *)
+(* --- The four growth rates side by side, on three or four generators --- *)
 
-(** free_growth_check — vm_compute sanity check that for the free group
-    (empty commutation oracle), clique_traces follows Tg^L for Tg=3 up to
-    L=4.
-    Kind: example.
-    Why: pins the free-group growth rate so regressions in
-    clique_traces_aux show up immediately.
-*)
+(* The free case: 3^L. *)
 Lemma free_growth_check : [seq clique_traces 3 L (fun _ _ => false) | L <- iota 0 5]
   = [:: 1; 3; 9; 27; 81].
 Proof. by vm_compute. Qed.
 
-(* Abelian: C(L+Tg-1, Tg-1) for Tg=3 gives C(L+2,2) *)
+(* The abelian case: 'C(L+2,2), quadratic in L. *)
 Lemma abelian_growth_check : [seq clique_traces 3 L complete_comm_nat | L <- iota 0 5]
   = [:: 1; 3; 6; 10; 15].
 Proof. by vm_compute. Qed.
 
-(** star3_growth_check — vm_compute sanity check that for the star graph
-    K_{1,3} (one centre, three leaves), clique_traces follows the closed
-    form (3^{L+1}-1)/2 for L=0..5.
-    Kind: example.
-    Why: guards the star-graph recurrence against regressions; paired with
-    free_growth_check / abelian_growth_check / path3_growth_check.
-*)
+(* The star K_{1,3} on four generators: (3^{L+1}-1)/2, exponential with base
+   3 against the free case's 4. *)
 Lemma star3_growth_check :
   [seq clique_traces 4 L (star_comm_nat 3) | L <- iota 0 6]
   = [:: 1; 4; 13; 40; 121; 364].
 Proof. by vm_compute. Qed.
 
-(* Path on 3: m_L satisfies m_L = 3*m_{L-1} - m_{L-2} *)
+(* The path P_3: m_L = 3 m_{L-1} - m_{L-2}, growth rate (3+sqrt 5)/2. *)
 Lemma path3_growth_check :
   [seq clique_traces 3 L path_comm_nat | L <- iota 0 6]
   = [:: 1; 3; 8; 21; 55; 144].
@@ -1246,50 +1017,33 @@ Proof. by vm_compute. Qed.
    level, n_traces_of_natB carries the identity to the abstract n_traces of
    a RAAGType. *)
 
+(* The predicted and the enumerated counts, compared pointwise at each graph
+   this development uses.  Each list is nseq true, so the two agree
+   everywhere in range. *)
 Lemma cartier_foata_check_free3 :
   [seq (clique_traces 3 L (fun _ _ => false) ==
         n_traces_natB 3 L (fun _ _ => false)) | L <- iota 0 5]
   = nseq 5 true.
 Proof. by vm_compute. Qed.
 
-(** cartier_foata_check_abelian3 — vm_compute sanity check that the
-    clique polynomial trace count agrees with n_traces_natB on the
-    abelian (complete) commutation graph with Tg = 3, L in 0..4.
-    Kind: example.
-*)
 Lemma cartier_foata_check_abelian3 :
   [seq (clique_traces 3 L complete_comm_nat ==
         n_traces_natB 3 L complete_comm_nat) | L <- iota 0 5]
   = nseq 5 true.
 Proof. by vm_compute. Qed.
 
-(** cartier_foata_check_path3 — vm_compute sanity check that the
-    clique polynomial trace count agrees with n_traces_natB on the
-    path graph P_3 with Tg = 3, L in 0..4.
-    Kind: example.
-*)
 Lemma cartier_foata_check_path3 :
   [seq (clique_traces 3 L path_comm_nat ==
         n_traces_natB 3 L path_comm_nat) | L <- iota 0 5]
   = nseq 5 true.
 Proof. by vm_compute. Qed.
 
-(** cartier_foata_check_star3 — vm_compute sanity check that the
-    clique polynomial trace count agrees with n_traces_natB on the
-    star graph K_{1,3} with Tg = 4, L in 0..3.
-    Kind: example.
-*)
 Lemma cartier_foata_check_star3 :
   [seq (clique_traces 4 L (star_comm_nat 3) ==
         n_traces_natB 4 L (star_comm_nat 3)) | L <- iota 0 4]
   = nseq 4 true.
 Proof. by vm_compute. Qed.
 
-(** cartier_foata_check_abelian4 — vm_compute sanity check that the
-    clique polynomial trace count agrees with n_traces_natB on the
-    abelian (complete) commutation graph with Tg = 4, L in 0..3.
-    Kind: example.
-*)
 Lemma cartier_foata_check_abelian4 :
   [seq (clique_traces 4 L complete_comm_nat ==
         n_traces_natB 4 L complete_comm_nat) | L <- iota 0 4]
@@ -1333,59 +1087,52 @@ Proof. by vm_compute. Qed.
    Path P_3 has P(z) = 1 - 3z + z^2.  Growth rate = (3+sqrt(5))/2.
 *)
 
-(* Verify the T=4 comparison table *)
+(* The rows of the table above, each checked by computation. *)
 Lemma table_T4_free :
   [seq clique_traces 4 L (fun _ _ => false) | L <- iota 0 6]
   = [:: 1; 4; 16; 64; 256; 1024].
 Proof. by vm_compute. Qed.
 
-(** path4_comm_nat — commutation relation on 'I_4 encoding the path P_4:
-    two generators commute when their indices differ by at least 2.
-    Kind: instance.
-*)
+(** The path P_4 on four generators: indices commute when they differ by at
+    least 2.  Its cliques are the empty set, four vertices and three edges
+    ({0,2}, {0,3}, {1,3}), the same profile as the star K_{1,3}, which is why
+    the two rows of the table coincide. *)
 Definition path4_comm_nat (i j : nat) : bool :=
   (2 <= (maxn i j - minn i j)) && (i != j).
 
-(** table_T4_path — vm_compute verification of the path-P_4 row of the
-    T = 4 growth-rate comparison table.
-    Kind: example.
-*)
 Lemma table_T4_path :
   [seq clique_traces 4 L path4_comm_nat | L <- iota 0 6]
   = [:: 1; 4; 13; 40; 121; 364].
 Proof. by vm_compute. Qed.
 
-(* Note: path P_4 and star K_{1,3} have the same clique polynomial
-   P(z) = 1 - 4z + 3z^2 = (1-z)(1-3z), hence the same trace counts.
-   By the Cartier-Foata theorem, the trace-counting generating function
-   depends only on the clique polynomial of the commutation graph.
-   This is confirmed by the n_traces_natB cross-checks below. *)
+(* Non-isomorphic graphs with equal clique polynomials give equal trace
+   counts: by Cartier-Foata the generating function depends on the graph only
+   through P(z).  Path P_4 and star K_{1,3} both have
+   P(z) = 1 - 4z + 3z^2 = (1-z)(1-3z), and the two rows agree.
+   For the search-space reading this means the deck designer buys nothing by
+   choosing between two graphs with the same clique polynomial. *)
 
 Lemma table_T4_star3 :
   [seq clique_traces 4 L (star_comm_nat 3) | L <- iota 0 6]
   = [:: 1; 4; 13; 40; 121; 364].
 Proof. by vm_compute. Qed.
 
-(** table_T4_abelian — vm_compute verification of the abelian row of the
-    T = 4 growth-rate comparison table.
-    Kind: example.
-*)
 Lemma table_T4_abelian :
   [seq clique_traces 4 L complete_comm_nat | L <- iota 0 6]
   = [:: 1; 4; 10; 20; 35; 56].
 Proof. by vm_compute. Qed.
 
-(* Cross-check: n_traces_natB for path P_4 matches the clique prediction *)
+(* The enumerated counts for both graphs, matching the predicted rows. *)
 Lemma path4_ntB_check :
   [seq n_traces_natB 4 L path4_comm_nat | L <- iota 0 4]
   = [:: 1; 4; 13; 40].
 Proof. by vm_compute. Qed.
 
-(* Cross-check: n_traces_natB for star K_{1,3} matches *)
 Lemma star3_ntB_check :
   [seq n_traces_natB 4 L (star_comm_nat 3) | L <- iota 0 4]
   = [:: 1; 4; 13; 40].
 Proof. by vm_compute. Qed.
 
-(* The Cartier-Foata theorem is confirmed: path P_4 and star K_{1,3}
-   have the same clique polynomial and the same trace counts. *)
+(* Path P_4 and star K_{1,3} share a clique polynomial and share trace counts
+   at every length checked.  The general statement is cartier_foata in
+   pgg_raag_cartier_foata.v; what stands here is agreement at these lengths. *)

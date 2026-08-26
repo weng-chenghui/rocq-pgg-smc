@@ -45,37 +45,45 @@ Section path_instance.
 
 Variable m : nat.
 
+(* T = m+1 generators acting on N = m+2 card positions: generator i
+   transposes positions i and i+1, so T adjacent transpositions need one more
+   position than there are of them. *)
 Let T := m.+1.
 Let N := m.+2.
 Let gT : finGroupType := {perm 'I_N}.
 
-(* Ordinal constructors *)
+(* Lower endpoint i of the i-th path-graph transposition, read as a card
+   position.  The generator indices 'I_T sit inside the card positions 'I_N
+   by i |-> i, and path_hi carries the same index to i+1. *)
 Definition path_lo (i : 'I_T) : 'I_N :=
   Ordinal (ltn_trans (ltn_ord i) (ltnSn _)).
 
-(** path_hi — upper endpoint (i+1) of the i-th path-graph transposition,
-    as an ordinal in 'I_N.
-    Kind: canonical.
-*)
+(** Upper endpoint i+1 of the i-th path-graph transposition, as a card
+    position.  With path_lo this embeds a vertex of the path into the pair
+    of positions that generator moves. *)
 Definition path_hi (i : 'I_T) : 'I_N :=
   Ordinal (ltn_ord i : (val i).+1 < N).
 
-(* Generator: tperm i (i+1) *)
+(* Generator i is the transposition of the adjacent card positions i and
+   i+1.  These are the Coxeter generators of Sym('I_N), so the group they
+   span is the whole symmetric group; what the path graph describes is which
+   pairs of them commute, not a presentation of that group. *)
 Definition path_gen (i : 'I_T) : gT := tperm (path_lo i) (path_hi i).
 
-(* Generator tuple *)
+(* The T = m+1 generators as a tuple: the alphabet a dealer's word is
+   written over. *)
 Definition path_gen_tuple : T.-tuple gT := gen_tuple_of path_gen.
 
-(** path_gen_tupleE — the generator tuple reads back through tnth to the
-    raw path_gen constructor.
-    Kind: helper.
-    Used by: path_gen_inj_sigmas, path_Hcomm, path_adj_noncommute.
-*)
+(** Reading the generator tuple at index i returns path_gen i. *)
 Lemma path_gen_tupleE (i : 'I_T) : tnth path_gen_tuple i = path_gen i.
 Proof. exact: gen_tuple_ofE. Qed.
 
 (* --- Generator injectivity --- *)
 
+(* Distinct indices give distinct transpositions, since a tperm is determined
+   by the pair of positions it moves.  The injectivity half of the RAAG
+   mixin: were two generators equal, the alphabet would be smaller than T and
+   every trace count below would over-count it. *)
 Lemma path_gen_inj : injective path_gen.
 Proof.
 move=> i j; rewrite /path_gen => /permP Heq.
@@ -118,47 +126,45 @@ Let M_path : MonodromyReprWithGeneratorType := Path_PGGTypes.
 
 (* --- Commutativity relation --- *)
 
+(* The path commutation graph on the generator indices: i and j are declared
+   to commute exactly when |i - j| >= 2, written with truncated subtraction
+   in both directions so no ordering hypothesis is needed.
+   This edge relation is the sole input to the trace count: its cliques give
+   the clique polynomial and its independent sets give lower bounds.  It is
+   a statement about the graph and not about the group.  The generators do
+   satisfy it, by path_Hcomm below, but Sym('I_N) satisfies further relations
+   as well, so trace classes counted from this graph bound the number of
+   words up to commutation rather than the number of deck permutations
+   reached. *)
 Definition path_comm : rel 'I_T :=
   fun i j => (1 < (val i - val j) + (val j - val i))%N.
 
-(** path_comm_sym — the path-graph commutativity relation is symmetric.
-    Kind: helper.
-    Used by: isRAAG0.Build instance registration for Path_PGGTypes.
-*)
+(** The path relation is symmetric.
+    One of the two conditions the RAAG mixin puts on a commutation graph:
+    it must be undirected, since commutation of two permutations is. *)
 Lemma path_comm_sym : symmetric path_comm.
 Proof. by move=> i j; rewrite /path_comm addnC. Qed.
 
-(** path_comm_irrefl — path_comm is irreflexive: no generator commutes with
-    itself under this relation.
-    Kind: helper.
-    Used by: isRAAG0.Build instance registration for Path_PGGTypes.
-*)
+(** No index is path-related to itself.
+    The mixin's second condition on the graph.  A self-loop would license a
+    trace-equivalence swap inside a repeated letter, merging words the count
+    has to keep apart. *)
 Lemma path_comm_irrefl : irreflexive path_comm.
 Proof. by move=> i; rewrite /path_comm subnn. Qed.
 
-(** path_comm_dist2 — unpack the commutativity relation to its numeric form:
-    i and j commute iff |val i - val j| >= 2.
-    Kind: helper.
-    Used by: path_Hcomm to build a disjoint-support tperm argument.
-*)
+(** The path relation unpacked to its numeric content, |i - j| >= 2. *)
 Lemma path_comm_dist2 (i j : 'I_T) :
   path_comm i j ->
   (val i - val j) + (val j - val i) >= 2.
 Proof. by []. Qed.
 
-(** path_dist_neq — nat-level: symmetric distance >= 2 implies a != b.
-    Kind: helper.
-    Used by: path_Hcomm, where we need to discharge the disjointness side
-             conditions of tperm_disjoint_comm.
-*)
+(** Symmetric distance at least 2 forces a != b. *)
 Lemma path_dist_neq (a b : nat) : (a - b) + (b - a) >= 2 -> a != b.
 Proof. by case: (a =P b) => [-> | //]; rewrite subnn. Qed.
 
-(** path_dist_neqS — distance >= 2 implies a and b.+1 still differ, a
-    companion to path_dist_neq used to rule out "i+1 = j" collisions.
-    Kind: helper.
-    Used by: path_Hcomm for the four disjointness side conditions.
-*)
+(** Symmetric distance at least 2 also forces a != b+1.
+    With path_dist_neq this rules out every way the position pairs {i,i+1}
+    and {j,j+1} could meet. *)
 Lemma path_dist_neqS (a b : nat) : (a - b) + (b - a) >= 2 -> a != b.+1.
 Proof.
 move=> Hge; apply/eqP => Hab; rewrite Hab in Hge.
@@ -167,11 +173,12 @@ have H2 : b - b.+1 = 0 by apply/eqP; rewrite subn_eq0.
 by rewrite H1 H2 addn0 in Hge.
 Qed.
 
-(** path_Hcomm — generators at path-graph distance >= 2 commute in the
-    ambient symmetric group, via disjoint supports of the underlying tperms.
-    Kind: helper.
-    Used by: path_Hcomm_sigmas which feeds isRAAG0.Build.
-*)
+(** Generators at path distance at least 2 commute in Sym('I_N).
+    Distance 2 separates the position pairs {i,i+1} and {j,j+1}, and
+    transpositions with disjoint supports commute.  This discharges the
+    commutation field of the RAAG mixin, so every relation the path graph
+    declares does hold of the permutations, which is what licenses reading
+    the trace count of the graph as a count of distinct dealer words. *)
 Lemma path_Hcomm : forall i j : 'I_T,
   path_comm i j ->
   (tnth path_gen_tuple i * tnth path_gen_tuple j =
@@ -189,15 +196,13 @@ Qed.
 
 (* --- RAAG instance wrapper lemmas --- *)
 
+(* path_gen_inj restated through the abstract pgg_sigmas accessor, the shape
+   the mixin field is stated in. *)
 Lemma path_gen_inj_sigmas :
   injective (fun i : 'I_T => tnth (@pgg_sigmas M_path) i).
 Proof. by move=> i j; rewrite !path_gen_tupleE; exact: path_gen_inj. Qed.
 
-(** path_Hcomm_sigmas — restatement of path_Hcomm in the abstract pgg_sigmas
-    API, as required by the RAAG mixin.
-    Kind: helper.
-    Used by: Path_isRAAG instance registration.
-*)
+(** path_Hcomm restated through the abstract pgg_sigmas accessor. *)
 Lemma path_Hcomm_sigmas : forall i j : 'I_T,
   path_comm i j ->
   (tnth (@pgg_sigmas M_path) i * tnth (@pgg_sigmas M_path) j =
@@ -206,6 +211,11 @@ Proof. by move=> i j; exact: path_Hcomm. Qed.
 
 (* --- Non-abelianity (via generic) --- *)
 
+(* Generators 0 and 1 fail to commute once m >= 1: their position pairs {0,1}
+   and {1,2} share position 1, and the two products disagree there.  This is
+   the converse direction of the commutation graph, and the file proves it
+   for this pair only: commutation exactly at distance 2 or more is
+   established here in one direction generally and in the other at (0,1). *)
 Lemma path_adj_noncommute (Hm : 0 < m) :
   let i0 : 'I_T := Ordinal (isT : 0 < T) in
   let i1 : 'I_T := Ordinal (Hm : 1 < T) in
@@ -227,12 +237,12 @@ rewrite H_hi0_lo1 tpermL.
 by move/(congr1 val).
 Qed.
 
-(** path_G_nonabelian — the path-graph PGG is non-abelian whenever there are
-    at least two adjacent generators (m >= 1).
-    Kind: main.
-    Why: justifies that the path-graph instance is genuinely non-trivial and
-         so a meaningful setting for the Cartier-Foata analysis.
-*)
+(** The group spanned by the path generators is non-abelian as soon as
+    m >= 1.
+    A graph declaring every pair to commute yields the abelian trace count
+    'C(L+T-1, T-1), which is polynomial in L.  The failure of commutation at
+    one adjacent pair is what leaves room for the exponential lower bound
+    below. *)
 Lemma path_G_nonabelian : 0 < m ->
   ~~ abelian (pgg_G Path_PGGTypes).
 Proof.
@@ -246,8 +256,12 @@ have Hnc : (tnth (@pgg_sigmas M_path) i0 * tnth (@pgg_sigmas M_path) i1 !=
 exact: (gen_nonabelian Hij Hnc).
 Qed.
 
-(* --- Independent set: any adjacent pair {i, i+1} --- *)
+(* --- Independent set: the adjacent pair {0, 1} --- *)
 
+(* {0, 1} is an independent set of the path graph, its two members being at
+   distance 1 and so not declared to commute.  Over an independent set no
+   two letters may be swapped past each other, so distinct words over it stay
+   in distinct trace classes. *)
 Lemma path_indep_pair (Hm : 0 < m) :
   let I : {set 'I_T} := [set Ordinal (isT : 0 < T); Ordinal (Hm : 1 < T)] in
   forall i j : 'I_T, i \in I -> j \in I -> i != j -> ~~ path_comm i j.
@@ -259,20 +273,27 @@ Qed.
 
 (* --- RAAG instance registration --- *)
 
+(* The path instance as a RAAG: the generator tuple, the path graph, its
+   symmetry and irreflexivity, and the proofs that the declared commutations
+   hold and that distinct indices give distinct generators.  From here the
+   generic trace theory of pgg_raag.v applies to this instance. *)
 HB.instance Definition Path_isRAAG :=
   @isRAAG0.Build Path_PGGTypes
     path_comm path_comm_sym path_comm_irrefl
     path_Hcomm_sigmas path_gen_inj_sigmas.
 
+(* The same instance seen as a RAAG, the form the trace theory consumes. *)
 Let R_path : RAAGType := Path_PGGTypes.
 
-(** path_traces_lb — any adjacent pair {i, i+1} forms an independent set in
-    the path graph, so the number of Cartier-Foata traces of length L is at
-    least 2^L.
-    Kind: main.
-    Why: gives the exponential lower bound on the search space used in the
-         PGG security analysis.
-*)
+(** For m >= 1 there are at least 2^L trace classes among words of length L.
+    The adjacent pair {0,1} is an independent set of the path graph, so no
+    reordering relates two distinct words over those two letters and all 2^L
+    of them lie in different classes.  The bound is unconditional and
+    combinatorial: it counts classes of words modulo the declared
+    commutations, so the collapse of the generated group onto Sym('I_N)
+    noted in the file header leaves it intact as a statement about traces,
+    and equally forbids reading it as a count of distinct deck
+    permutations. *)
 Lemma path_traces_lb (L : nat) : 0 < m ->
   2 ^ L <= @n_traces R_path L.
 Proof.

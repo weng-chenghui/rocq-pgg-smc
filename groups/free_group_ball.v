@@ -58,25 +58,24 @@ Section reduced_words.
 Variable r : nat.
 Hypothesis Hr : 0 < r.
 
+(* alpha = 2r is the size of the alphabet: the r generators and their r
+   formal inverses. *)
 Let alpha := (r.*2).
-(* Letters: 0,...,2r-1. Letter i has inverse (i + r) mod 2r. *)
+(* The alphabet is {0,...,2r-1}, the r generators followed by their r formal
+   inverses, so the inverse of letter i is i + r taken mod 2r. *)
 
 Definition letter_inv (i : nat) : nat := (i + r) %% alpha.
 
-(** letter_inv_lt — the inverse letter stays in the alphabet {0,...,2r-1}.
-    Kind: helper.
-    Why: range lemma used when building reduced words to guarantee the
-         inverse-of-last-letter constraint is well-typed.
-    Used by: letter_invK, letter_inv_neq.
-*)
+(** The inverse of a letter is again a letter of the 2r-symbol alphabet.
+    Well-definedness of the involution against which the reduction predicate
+    is stated. *)
 Lemma letter_inv_lt (i : nat) : i < alpha -> letter_inv i < alpha.
 Proof. by move=> _; rewrite /letter_inv ltn_mod double_gt0. Qed.
 
-(** letter_invK — letter inversion is involutive on the alphabet.
-    Kind: helper.
-    Used by: reduced-word reasoning that relies on letter_inv being an
-             involution; underlies later sphere/ball bijection arguments.
-*)
+(** Letter inversion is an involution on the alphabet.
+    This is the free-group relation a a^-1 = 1 written at the level of
+    symbols, and it is what makes forbidding an adjacent inverse pair the
+    right notion of an irredundant word. *)
 Lemma letter_invK (i : nat) : i < alpha -> letter_inv (letter_inv i) = i.
 Proof.
 move=> Hi; rewrite /letter_inv.
@@ -87,12 +86,10 @@ rewrite addnC modnMDl.
 exact: modn_small.
 Qed.
 
-(** letter_inv_neq — no letter is its own inverse in the free group alphabet.
-    Kind: helper.
-    Why: used to derive the (2r-1) extensions recurrence for sphere_size and
-         to ensure the reduced-word predicate is non-trivial.
-    Used by: sphere_size_S consumers; ball_size growth arguments.
-*)
+(** No letter is its own inverse.
+    The alphabet carries no involutive generator, so a reduced word of
+    positive length forbids exactly one of its 2r continuations.  That is
+    the branching factor 2r-1 the sphere count is built on. *)
 Lemma letter_inv_neq (i : nat) : i < alpha -> letter_inv i != i.
 Proof.
 move=> Hi; rewrite /letter_inv.
@@ -108,16 +105,21 @@ move/dvdn_leq: Hdvd => /(_ Hr).
 by rewrite /alpha; lia.
 Qed.
 
-(* A word is reduced if no adjacent letters are inverses *)
+(* A word is reduced when no letter is immediately followed by its inverse.
+   This names the objects sphere_size and ball_size are read as counting.
+   No lemma below relates reduced to either count: that reduced words biject
+   with free-group elements is the reading of the numbers, not a theorem of
+   this file. *)
 Fixpoint reduced (w : seq nat) : bool :=
   match w with
   | [::] | [:: _] => true
   | a :: ((b :: _) as w') => (letter_inv a != b) && reduced w'
   end.
 
-(* Sphere: set of reduced words of length exactly k *)
-(* sphere_size r 0 = 1 *)
-(* sphere_size r k.+1 = 2r * (2r-1)^k *)
+(* Number of reduced words of length exactly k over the 2r letters: one
+   empty word, and 2r*(2r-1)^(k-1) otherwise, the first letter free and every
+   later letter avoiding only the inverse of its predecessor.  Given as a
+   closed form; nothing below derives it from reduced. *)
 
 Definition sphere_size (k : nat) : nat :=
   match k with
@@ -125,27 +127,22 @@ Definition sphere_size (k : nat) : nat :=
   | k'.+1 => alpha * (alpha - 1) ^ k'
   end.
 
-(* Key recurrence: each reduced word of length k extends to exactly
-   (2r - 1) reduced words of length k+1 (all letters except the inverse
-   of the last letter). The first letter has 2r choices. *)
 
+(** The radius-0 sphere holds the empty word alone. *)
 Lemma sphere_size_0 : sphere_size 0 = 1.
 Proof. by []. Qed.
 
-(** sphere_size_1 — there are exactly alpha = 2r reduced words of length 1.
-    Kind: helper.
-    Used by: ball_size_formula, ball_size_div, search_space_exp_growth.
-*)
+(** The radius-1 sphere has alpha = 2r elements.
+    A single letter is unconstrained, so the branching factor 2r-1 first
+    applies at the second letter, not the first. *)
 Lemma sphere_size_1 : sphere_size 1 = alpha.
 Proof. by rewrite /= muln1. Qed.
 
-(** sphere_size_S — recurrence: extending a positive-length reduced word by
-    one letter multiplies the count by (alpha - 1), since exactly one letter
-    (the inverse of the last) is forbidden.
-    Kind: helper.
-    Used by: ball_size_formula, ball_size_lower; this is the combinatorial
-             core of the free-group ball growth formula.
-*)
+(** Beyond length 1 each further letter multiplies the sphere count by
+    alpha - 1.
+    The geometric growth that both the closed form and the exponential lower
+    bound rest on: exactly one continuation, the inverse of the last letter,
+    is excluded. *)
 Lemma sphere_size_S (k : nat) :
   0 < k -> sphere_size k.+1 = sphere_size k * (alpha - 1).
 Proof.
@@ -164,33 +161,25 @@ Section ball_size_def.
 Variable r : nat.
 Hypothesis Hr : 0 < r.
 
-(** ball_size — number of reduced words of length at most L in the free
-    group on r generators.
-    Kind: canonical.
-*)
+(** Number of reduced words of length at most L in the free group on r
+    generators, the sum of the spheres of radius 0 through L.
+    This is the ceiling the search-space reading uses: any group on r
+    generators is a quotient of the free one, so words of length at most L
+    reach at most this many elements. *)
 Definition ball_size (L : nat) : nat :=
   \sum_(k < L.+1) sphere_size r k.
 
-(** ball_size_0 — only the empty word sits inside the radius-0 ball.
-    Kind: helper.
-    Used by: ball_size_ge1 and base case of inductive ball growth proofs.
-*)
+(** The radius-0 ball holds the empty word alone. *)
 Lemma ball_size_0 : ball_size 0 = 1.
 Proof. by rewrite /ball_size big_ord_recl big_ord0. Qed.
 
-(** ball_size_S — step form: the (L+1)-ball is the L-ball plus the outer
-    sphere of radius L+1.
-    Kind: helper.
-    Used by: inductive reasoning on ball growth and the closed-form proofs.
-*)
+(** The radius-(L+1) ball is the radius-L ball together with the outermost
+    sphere. *)
 Lemma ball_size_S (L : nat) :
   ball_size L.+1 = ball_size L + sphere_size r L.+1.
 Proof. by rewrite /ball_size big_ord_recr. Qed.
 
-(** ball_size_ge1 — every free-group ball is non-empty (contains the identity).
-    Kind: helper.
-    Used by: ball_size_lower base case and downstream search-space bounds.
-*)
+(** Every ball is non-empty, the empty word lying in all of them. *)
 Lemma ball_size_ge1 (L : nat) : 0 < ball_size L.
 Proof. by rewrite /ball_size big_ord_recl /=; lia. Qed.
 
@@ -202,7 +191,10 @@ End ball_size_def.
 
 Section geometric_series.
 
-(* (q - 1) * sum_{k=0}^{L} q^k = q^{L+1} - 1, for q >= 1 *)
+(* Geometric series over nat, stated multiplicatively so that neither nat
+   subtraction nor nat division appears on the left:
+   (q-1) * sum_{k=0}^{L} q^k = q^{L+1} - 1 for q >= 1.
+   This is what converts the sum of spheres into a closed form. *)
 Lemma geom_series_nat (q L : nat) :
   1 <= q ->
   q.-1 * (\sum_(k < L.+1) q ^ k) = q ^ L.+1 - 1.
@@ -219,7 +211,8 @@ have HqL : q.-1 * q ^ L.+1 + q ^ L.+1 = q ^ L.+2.
 lia.
 Qed.
 
-(* Variant: sum_{k=0}^{L} q^k = (q^{L+1} - 1) / (q - 1), for q >= 2 *)
+(* Division form of the same series: sum_{k=0}^{L} q^k = (q^{L+1}-1)/(q-1)
+   for q >= 2, the hypothesis under which the nat division is exact. *)
 Lemma geom_series_div (q L : nat) :
   2 <= q ->
   \sum_(k < L.+1) q ^ k = (q ^ L.+1 - 1) %/ q.-1.
@@ -238,28 +231,27 @@ End geometric_series.
 
 Section ball_size_formula.
 
+(* From here r >= 2, so the branching factor q = 2r-1 exceeds 1 and the ball
+   grows exponentially.  At r = 1 the free group is infinite cyclic, q = 1,
+   and every statement of this section degenerates. *)
 Variable r : nat.
 Hypothesis Hr : 1 < r.
 
 Let alpha := (r.*2).
 Let q := alpha - 1.
 
-(** alpha_gt1 — alphabet has at least two letters when r >= 2.
-    Kind: helper.
-    Used by: q_gt0, ball_size_formula, ball_size_div.
-*)
+(** With at least two generators the alphabet has more than two letters. *)
 Lemma alpha_gt1 : 1 < alpha.
 Proof. by rewrite /alpha; lia. Qed.
 
-(** q_gt0 — branching factor q = alpha - 1 is strictly positive when r >= 2.
-    Kind: helper.
-    Used by: ball_size_formula, ball_size_div, ball_size_lower; justifies
-             using q as a multiplicand for geometric-series arguments.
-*)
+(** The branching factor q = alpha - 1 is positive when r >= 2.
+    A free group on one generator has q = 1 and a ball that grows linearly;
+    the statements of this section assume that case away. *)
 Lemma q_gt0 : 0 < q.
 Proof. by rewrite /q /alpha; lia. Qed.
 
-(* ball_size r L = 1 + alpha * sum_{k=0}^{L-1} q^k *)
+(* The ball split at its first letter: the empty word, plus alpha choices of
+   first letter times the geometric sum of the branching that follows. *)
 Lemma ball_size_sum (L : nat) :
   ball_size r L = 1 + alpha * \sum_(k < L) q ^ k.
 Proof.
@@ -267,8 +259,9 @@ rewrite /ball_size big_ord_recl /=; congr (_ + _).
 by rewrite -big_distrr.
 Qed.
 
-(* Main formula, stated multiplicatively to avoid division:
-   (q - 1) * (ball_size r L - 1) = alpha * (q^L - 1) *)
+(* Closed form for the ball, stated multiplicatively to avoid nat division:
+   (q-1) * (ball_size r L - 1) = alpha * (q^L - 1), i.e.
+   (2r-2)*(ball_size r L - 1) = 2r*((2r-1)^L - 1). *)
 Lemma ball_size_formula (L : nat) :
   0 < L ->
   q.-1 * (ball_size r L - 1) = alpha * (q ^ L - 1).
@@ -280,9 +273,8 @@ have Hq1 : 1 <= q by rewrite /q /alpha; lia.
 by rewrite geom_series_nat.
 Qed.
 
-(* Division form for display:
-   ball_size r L = 1 + alpha * (q^L - 1) / (q - 1)
-   i.e., 1 + 2r * ((2r-1)^L - 1) / (2r - 2) *)
+(* The same closed form solved for ball_size:
+   ball_size r L = 1 + 2r * ((2r-1)^L - 1) / (2r - 2). *)
 Lemma ball_size_div (L : nat) :
   0 < L ->
   ball_size r L = 1 + alpha * ((q ^ L - 1) %/ q.-1).
@@ -293,7 +285,10 @@ rewrite geom_series_div //.
 by rewrite /q /alpha; lia.
 Qed.
 
-(* Exponential lower bound: ball_size r L >= q^L = (2r-1)^L *)
+(* The ball of radius L has at least (2r-1)^L elements.
+   The ball already contains the radius-L sphere, of size 2r*(2r-1)^(L-1),
+   and 2r >= 2r-1.  This exponent is the growth rate the search-space reading
+   of the count quotes. *)
 Lemma ball_size_lower (L : nat) : q ^ L <= ball_size r L.
 Proof.
 case: L => [|L].
@@ -315,20 +310,26 @@ End ball_size_formula.
 
 Section weval_inj_ball_connection.
 
-(* For word-eval injective generators with branching factor Tg = 2r,
-   the search space is Tg^L by weval_inj_search_space.
-   The ball_size gives the size when restricted to reduced words.
+(* The two counts are indexed differently and are not comparable term by
+   term.  For generators word-eval injective at length L, search_space L is
+   Tg^L with Tg = 2r, counting words of length exactly L; ball_size r L
+   counts reduced words of length at most L and can be the larger of the
+   two, as at r = 2, L = 1, where Tg^L = 4 and ball_size r L = 5.  Compared
+   at a fixed length the inequality runs the other way, sphere_size r L <=
+   Tg^L, with equality only for L <= 1, because after the first letter one
+   of the Tg continuations is forbidden.
 
-   Key insight: word evaluation injectivity at length L gives
-   search_space = Tg^L (all words distinct), which is always >= ball_size
-   (reduced words only).
+   In the free group every reduced word names a distinct element and every
+   non-reduced word collapses onto a shorter one, so ball_size r L is the
+   number of distinct group elements that words of length at most L reach.
+   That identification is the reading of the count, not a theorem here. *)
 
-   For free groups specifically, ALL reduced words give distinct elements,
-   and non-reduced words collapse. So the ball size counts the distinct
-   group elements reachable.
-
-   Exponential growth: ball_size r L >= (2r-1)^L for r >= 2. *)
-
+(** (2r-1)^L is at most 1 + 2r * sum_{k<L} (2r-1)^k, which is ball_size r L
+    with its definition unfolded to the geometric form.
+    The exponential floor on how many free-group elements words of length at
+    most L reach.  No search space occurs in the statement: the step from
+    this count to a search space is the free-quotient reading of the file
+    header. *)
 Lemma search_space_exp_growth (r L : nat) :
   1 < r -> (r.*2 - 1) ^ L <= 1 + r.*2 * (\sum_(k < L) (r.*2 - 1) ^ k).
 Proof.

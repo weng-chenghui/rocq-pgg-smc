@@ -36,7 +36,10 @@ From pgg_smc Require Import pgg_interface.
 (*   search_space = Tg^L.                                                     *)
 (*                                                                            *)
 (* Section 3 -- Concrete instance: overlapping 3-cycles in S_4:              *)
-(*   < s0, s1 | s0^3 = s1^3 = (s0*s1)^2 = 1 >  (A_4, order 12)            *)
+(*   Intended presentation < s0, s1 | s0^3 = s1^3 = (s0*s1)^2 = 1 >, the     *)
+(*   alternating group A_4 of order 12.  Only s0^3 = s1^3 = 1 is discharged  *)
+(*   in the kernel below; neither the braid relation nor the order of the    *)
+(*   group is.                                                               *)
 (*   sigma_0 = (0 1 2), sigma_1 = (1 2 3) -- two 3-cycles sharing (1,2).    *)
 (*   Tg=2, N=4, L=2: search_space = 4.  L >= 3 fails (s0^3 = s1^3 = 1      *)
 (*   so words [0,0,0] and [1,1,1] both map to the identity).                *)
@@ -54,15 +57,13 @@ Import Prenex Implicits.
 (* Section 1: Nat-level computable word-eval injectivity check                 *)
 (* ========================================================================== *)
 
-(** all_words — enumerate every length-L word over the alphabet {0,...,Tg-1}
-    as a seq of seqs of nat.  Produced by recursion on the length so that
-    every recursive call prepends one alphabet symbol.
-    Kind: helper.
-    Why: the nat-level counterpart of enumerating the finType of pgg_words;
-    kept structural so vm_compute reduces it eagerly.
-    Used by: eval_word_nat / word_fp enumeration, n_traces_natB,
-             all_words_perm_tuples, and downstream injectivity checks.
-*)
+(** Every word of length L over the alphabet {0,...,Tg-1}, enumerated by
+    recursion on the length.
+    The nat-level stand-in for the enumeration of the pgg_word finType, kept
+    structural so vm_compute reduces it.  It is the carrier both of the
+    injectivity check below and of the Foata trace count in pgg_raag.v, so
+    its completeness is what makes a computation on it a statement about all
+    words. *)
 Fixpoint all_words (Tg L : nat) : seq (seq nat) :=
   match L with
   | 0 => [:: [::]]
@@ -70,34 +71,35 @@ Fixpoint all_words (Tg L : nat) : seq (seq nat) :=
     flatten [seq map (cons i) (all_words Tg L') | i <- iota 0 Tg]
   end.
 
-(* foldl matches MathComp's \prod convention for permutations:
+(* Nat-level evaluation of a word at a point: apply the generators in reading
+   order.  The left fold is chosen to match MathComp's \prod convention for
+   permutations,
    foldl f x [a;b;c] = f(f(f(x,a),b),c) = sigma_c(sigma_b(sigma_a(x)))
-   = (\prod_(i <- [a;b;c]) sigma_i)%g x *)
+   = (\prod_(i <- [a;b;c]) sigma_i)%g x,
+   which is what lets word_eval_foldl identify the two evaluators. *)
 Definition eval_word_nat (gens : nat -> nat -> nat) (w : seq nat) (x : nat) : nat :=
   foldl (fun acc i => gens i acc) x w.
 
-(** word_fp — nat-level fingerprint of a word: the list of images of 0..N-1
-    under the word evaluation.  Two words collide iff their fingerprints
-    coincide on the canonical domain.
-    Kind: canonical.
-*)
+(** The fingerprint of a word: the images of the N card positions under the
+    permutation the word evaluates to.
+    A permutation of a finite set is determined by its table of values, so two
+    words name the same deck permutation exactly when their fingerprints
+    agree.  This turns a question about group elements into an equality of
+    concrete lists. *)
 Definition word_fp (N : nat) (gens : nat -> nat -> nat) (w : seq nat) : seq nat :=
   map (eval_word_nat gens w) (iota 0 N).
 
-(** weval_inj_natB — boolean: fingerprints of all length-L words on Tg
-    generators over N points are pairwise distinct.  Evaluated with
-    vm_compute to discharge weval_inj for concrete instances.
-    Kind: canonical.
-*)
+(** Boolean test that the length-L words over Tg generators have pairwise
+    distinct fingerprints.
+    A closed nat-level term, so vm_compute decides it for a concrete
+    instance.  weval_inj_of_natB turns a positive verdict into the abstract
+    weval_inj, hence into search_space L = Tg^L. *)
 Definition weval_inj_natB (N Tg L : nat) (gens : nat -> nat -> nat) : bool :=
   uniq (map (word_fp N gens) (all_words Tg L)).
 
-(** map_uniq_injective — if map f xs is duplicate-free, then f is injective
-    on the elements of xs.
-    Kind: helper.
-    Used by: weval_inj_of_natB to convert a uniq fingerprint list into
-             injectivity of word_eval on pgg_words.
-*)
+(** A duplicate-free image list makes f injective on the source list.
+    The generic step that converts the uniq verdict into an injectivity
+    statement. *)
 Lemma map_uniq_injective (T1 T2 : eqType) (f : T1 -> T2) (xs : seq T1) (a b : T1) :
   uniq (map f xs) -> a \in xs -> b \in xs -> f a = f b -> a = b.
 Proof.
@@ -114,11 +116,9 @@ have /eqP Hiab : ia == ib.
 by rewrite -(nth_index a Ha) -(nth_index a Hb) -/ia -/ib Hiab.
 Qed.
 
-(** mem_all_words — every length-L nat-word drawn from {0,...,Tg-1} lies in
-    the enumeration all_words Tg L.
-    Kind: helper.
-    Used by: weval_inj_of_natB via map_val_in_all_words.
-*)
+(** A word of length L whose letters are all below Tg occurs in all_words.
+    Completeness of the enumeration: without it a duplicate-free verdict over
+    all_words could still miss a colliding pair of words. *)
 Lemma mem_all_words Tg L (w : seq nat) :
   size w = L -> all (fun i => i < Tg) w -> w \in all_words Tg L.
 Proof.
@@ -136,6 +136,9 @@ Qed.
 
 Section weval_inj_gen_reflect.
 
+(* Tg = m+1 generators on N = n+2 card positions, with gens_nat a nat-level
+   mirror of the permutations and Hgens the statement that the mirror is
+   faithful. *)
 Variable m n : nat.
 Let Tg := m.+1.
 Let N := n.+2.
@@ -148,7 +151,8 @@ Variable gens_nat : nat -> nat -> nat.
 Hypothesis Hgens : forall (i : 'I_Tg) (x : 'I_N),
   gens_nat (val i) (val x) = val (tnth sigmas i x).
 
-(* Key lemma 1: foldl on nat matches foldl on ordinals *)
+(* The nat-level fold and the ordinal-level fold agree under val: the nat
+   generators mirror the permutations one step at a time. *)
 Lemma eval_foldl_agree (ws : seq 'I_Tg) (x : 'I_N) :
   foldl (fun acc i => gens_nat i acc) (val x) (map val ws) =
   val (foldl (fun (acc : 'I_N) (i : 'I_Tg) => tnth sigmas i acc) x ws).
@@ -156,7 +160,9 @@ Proof.
 by elim: ws x => [|j js IH] x //=; rewrite Hgens IH.
 Qed.
 
-(* Key lemma 2: word_eval equals foldl over the tuple *)
+(* word_eval, defined as a product of generators indexed along the word,
+   computes as the left fold that applies them in reading order.  The bridge
+   from MathComp's \prod to the shape of the nat-level evaluator. *)
 Lemma word_eval_foldl (L : nat) (w : @pgg_word M L) (x : 'I_N) :
   @word_eval M L w x =
   foldl (fun (acc : 'I_N) (j : 'I_Tg) => tnth sigmas j acc) x (tval w).
@@ -179,7 +185,8 @@ have -> : s = tval wt by [].
 exact: IH.
 Qed.
 
-(* Combine: eval_word_nat agrees with word_eval *)
+(* The nat-level evaluator and word_eval send every card position to the same
+   image: the computable mirror is faithful. *)
 Lemma eval_word_agree (L : nat) (w : @pgg_word M L) (x : 'I_N) :
   eval_word_nat gens_nat (map val (tval w)) (val x) =
   val (@word_eval M L w x).
@@ -187,20 +194,14 @@ Proof.
 by rewrite /eval_word_nat eval_foldl_agree word_eval_foldl.
 Qed.
 
-(* map val is injective on pgg_word *)
+(* Two words with the same sequence of letter values are equal, so nothing is
+   lost by reasoning about the nat projection of a word. *)
 Lemma map_val_tuple_inj (L : nat) (w1 w2 : @pgg_word M L) :
   map val (tval w1) = map val (tval w2) -> w1 = w2.
 Proof. by move/(inj_map val_inj) => /val_inj. Qed.
 
-(** map_val_in_all_words — the nat-projection of any pgg_word is one of the
-    enumerated words in all_words Tg L.
-    Kind: helper.
-    Used by: weval_inj_of_natB to apply map_uniq_injective on the enumerated
-             fingerprint list.
-    Naming: the five underscore components spell out the operation
-            ("map val") and the target set ("all_words"); shortening either
-            loses the precise API name this lemma wraps.
-*)
+(** The nat projection of a length-L word is one of the words all_words
+    enumerates. *)
 Lemma map_val_in_all_words (L : nat) (w : @pgg_word M L) :
   map val (tval w) \in all_words Tg L.
 Proof.
@@ -209,7 +210,12 @@ apply: mem_all_words.
 by apply/allP => k /mapP [i _ ->]; case: i.
 Qed.
 
-(* Main reflection lemma *)
+(* A positive verdict on the fingerprint check gives word-eval injectivity at
+   length L: distinct length-L words then name distinct deck permutations, so
+   no two dealer words of that length are confusable.  This is the
+   computational route to weval_inj for a concrete instance, and weval_inj is
+   the hypothesis under which the search space is as large as the alphabet
+   allows. *)
 Lemma weval_inj_of_natB (L : nat) :
   weval_inj_natB N Tg L gens_nat -> @weval_inj M L.
 Proof.
@@ -232,22 +238,19 @@ End weval_inj_gen_reflect.
 
 Section weval_inj_instance.
 
+(* A deck on m+1 generators and n+2 card positions, assumed word-eval
+   injective at the fixed length L. *)
 Variable L m n : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n.+2}.
 Let M := Gen_PGGTypes sigmas.
 Hypothesis Hlfree : @weval_inj M L.
 
-(** weval_inj_inst_search_space — instantiation of weval_inj_search_space
-    for a Gen_PGGTypes built from a concrete sigmas tuple with branching Tg
-    = m.+1, giving search_space = Tg^L.
-    Kind: main.
-    Why: this is the bridge lemma consumers call after discharging weval_inj
-         by vm_compute on weval_inj_natB.
-    Naming: the five underscore-separated components describe the namespace
-            (weval_inj) and the concrete object (inst = instance of
-            search_space); the exported user-facing name must mention both
-            the hypothesis kind and the conclusion quantity.
-*)
+(** For a Gen_PGGTypes on Tg = m+1 generators that is word-eval injective at
+    length L, the search space is exactly Tg^L.
+    That is the largest a search space over Tg letters can be, matching the
+    free group up to depth L.  Injectivity is not merely sufficient but
+    exact: every collision at length L would take one element out of the
+    count. *)
 Lemma weval_inj_inst_search_space : @search_space M L = m.+1 ^ L.
 Proof. exact: weval_inj_search_space Hlfree. Qed.
 
@@ -260,6 +263,7 @@ End weval_inj_instance.
 
 Section overlapping_3cycles.
 
+(* Four card positions. *)
 Definition oc_N := 4.
 
 (* sigma_0 = (0 1 2): the 3-cycle mapping 0->1->2->0 *)
@@ -267,30 +271,19 @@ Definition oc_s0_fun (i : 'I_oc_N) : 'I_oc_N :=
   match val i with
   | 0 => @Ordinal oc_N 1 isT | 1 => @Ordinal oc_N 2 isT
   | 2 => @Ordinal oc_N 0 isT | _ => i end.
-(** oc_s0_inv — inverse function of the 3-cycle (0 1 2) on 'I_4, used only
-    to produce the cancel witness that elevates oc_s0_fun to a perm.
-    Kind: canonical.
-*)
+(** The inverse 3-cycle (0 2 1), present only to supply the cancel witness
+    that raises oc_s0_fun to a permutation. *)
 Definition oc_s0_inv (i : 'I_oc_N) : 'I_oc_N :=
   match val i with
   | 0 => @Ordinal oc_N 2 isT | 1 => @Ordinal oc_N 0 isT
   | 2 => @Ordinal oc_N 1 isT | _ => i end.
-(** oc_s0K — cancel law oc_s0_inv \o oc_s0_fun = id, witnessing that
-    oc_s0_fun is injective.
-    Kind: helper.
-    Used by: oc_s0 (the perm structure wrapping oc_s0_fun).
-*)
+(** oc_s0_inv cancels oc_s0_fun, so the latter is injective. *)
 Lemma oc_s0K : cancel oc_s0_fun oc_s0_inv.
 Proof. by move=> x; apply: val_inj; case: x => [[|[|[|[|?]]]] ?]. Qed.
-(** oc_s0 — the permutation on 'I_oc_N obtained from oc_s0_fun via the cancel
-    witness oc_s0K; realises the 3-cycle sigma_0 = (0 1 2) in S_4.
-    Kind: canonical.
-*)
+(** The generator sigma_0 = (0 1 2) as a permutation of the four card
+    positions. *)
 Definition oc_s0 : {perm 'I_oc_N} := perm (can_inj oc_s0K).
-(** oc_s0E — pointwise unfolding of the oc_s0 permutation to oc_s0_fun.
-    Kind: helper.
-    Used by: oc_s0_order3, oc_noncommute, oc_gens_agree.
-*)
+(** oc_s0 sends a position to oc_s0_fun of it. *)
 Lemma oc_s0E x : oc_s0 x = oc_s0_fun x. Proof. by rewrite permE. Qed.
 
 (* sigma_1 = (1 2 3): the 3-cycle mapping 1->2->3->1 *)
@@ -298,70 +291,51 @@ Definition oc_s1_fun (i : 'I_oc_N) : 'I_oc_N :=
   match val i with
   | 1 => @Ordinal oc_N 2 isT | 2 => @Ordinal oc_N 3 isT
   | 3 => @Ordinal oc_N 1 isT | _ => i end.
-(** oc_s1_inv — inverse function of the 3-cycle (1 2 3) on 'I_4, companion
-    of oc_s0_inv for the second generator.
-    Kind: canonical.
-*)
+(** The inverse of the second 3-cycle, companion of oc_s0_inv. *)
 Definition oc_s1_inv (i : 'I_oc_N) : 'I_oc_N :=
   match val i with
   | 1 => @Ordinal oc_N 3 isT | 2 => @Ordinal oc_N 1 isT
   | 3 => @Ordinal oc_N 2 isT | _ => i end.
-(** oc_s1K — cancel witness for oc_s1_fun against oc_s1_inv.
-    Kind: helper.
-    Used by: oc_s1 (the perm structure wrapping oc_s1_fun).
-*)
+(** oc_s1_inv cancels oc_s1_fun. *)
 Lemma oc_s1K : cancel oc_s1_fun oc_s1_inv.
 Proof. by move=> x; apply: val_inj; case: x => [[|[|[|[|?]]]] ?]. Qed.
-(** oc_s1 — the permutation on 'I_oc_N obtained from oc_s1_fun via the cancel
-    witness oc_s1K; realises the 3-cycle sigma_1 = (1 2 3) in S_4.
-    Kind: canonical.
-*)
+(** The generator sigma_1 = (1 2 3) as a permutation of the four card
+    positions.  Its support {1,2,3} overlaps sigma_0's in the two positions
+    1 and 2, which is the whole reason the instance is non-abelian. *)
 Definition oc_s1 : {perm 'I_oc_N} := perm (can_inj oc_s1K).
-(** oc_s1E — pointwise unfolding of the oc_s1 permutation to oc_s1_fun.
-    Kind: helper.
-    Used by: oc_s1_order3, oc_noncommute, oc_gens_agree.
-*)
+(** oc_s1 sends a position to oc_s1_fun of it. *)
 Lemma oc_s1E x : oc_s1 x = oc_s1_fun x. Proof. by rewrite permE. Qed.
 
-(* Generator tuple *)
+(* The generator list has the length the tuple type asks for. *)
 Lemma oc_sigmas_size : size [:: oc_s0; oc_s1] == 2.
 Proof. by []. Qed.
 
-(** oc_sigmas — the two-generator tuple [:: oc_s0; oc_s1] packaged as a
-    2-tuple of permutations, feeding the OC_PGGTypes instance.
-    Kind: canonical.
-*)
+(** The two-letter alphabet of the overlapping-3-cycles instance. *)
 Definition oc_sigmas : 2.-tuple {perm 'I_oc_N} := Tuple oc_sigmas_size.
 
-(** oc_sigmasE — pointwise unfolding of the two-generator tuple oc_sigmas.
-    Kind: helper.
-    Used by: oc_gens_agree; downstream Cartier-Foata trace counting on the
-             overlapping-3-cycles instance.
-*)
+(** Index 0 of the alphabet is oc_s0 and index 1 is oc_s1. *)
 Lemma oc_sigmasE (i : 'I_2) : tnth oc_sigmas i =
   match val i with 0 => oc_s0 | _ => oc_s1 end.
 Proof.
 by rewrite (tnth_nth oc_s0) /=; case: i => [[|[|?]] ?].
 Qed.
 
-(** OC_PGGTypes — the concrete PGGTypes instance built from the overlapping
-    3-cycles generator tuple in S_4.
-    Kind: instance.
-*)
+(** The overlapping-3-cycles deck: two 3-cycles of four card positions as a
+    PGG instance, the smallest concrete setting in which the search-space
+    theory below is exercised. *)
 Definition OC_PGGTypes := Gen_PGGTypes oc_sigmas.
 
-(* Nat-level generator function for vm_compute *)
+(* The two generators as nat functions on {0,1,2,3}, the form vm_compute can
+   reduce. *)
 Definition oc_gens_nat (i x : nat) : nat :=
   match i with
   | 0 => match x with 0 => 1 | 1 => 2 | 2 => 0 | _ => x end
   | _ => match x with 1 => 2 | 2 => 3 | 3 => 1 | _ => x end
   end.
 
-(** oc_gens_agree — nat-level generators agree with the perm generators
-    pointwise on the four elements of 'I_4.
-    Kind: helper.
-    Used by: oc_weval_inj2 via weval_inj_of_natB.
-*)
+(** The nat generators agree with the permutations at every card position.
+    This is the faithfulness hypothesis weval_inj_of_natB needs: without it a
+    computation on the nat mirror would say nothing about the group. *)
 Lemma oc_gens_agree (i : 'I_2) (x : 'I_oc_N) :
   oc_gens_nat (val i) (val x) = val (tnth oc_sigmas i x).
 Proof.
@@ -369,46 +343,45 @@ by case: i => [[|[|?]] ?]; case: x => [[|[|[|[|?]]]] ?];
   rewrite oc_sigmasE /= permE.
 Qed.
 
-(** oc_s0_order3 — the first generator (0 1 2) of the overlapping-3-cycles
-    instance has order dividing 3.
-    Kind: helper.
-    Why waived: algebraic-order suffix marks this as a cyclic-order fact.
-    Used by: sanity checks on the overlapping-3-cycles instance; paired with
-             oc_s1_order3 in file-header discussion of why L >= 3 collapses.
-*)
+(** sigma_0 cubed is the identity.
+    Together with oc_s1_order3 this is the collision that bounds the
+    instance: the length-3 words 000 and 111 both evaluate to the identity,
+    so word-eval injectivity can hold at length 2 and must fail from length 3
+    on. *)
 Lemma oc_s0_order3 : (oc_s0 ^+ 3 = 1 :> {perm 'I_oc_N})%g.
 Proof.
 apply/permP => x; rewrite perm1 expgS permM expgS permM expg1 !oc_s0E.
 by apply: val_inj; case: x => [[|[|[|[|?]]]] ?].
 Qed.
 
-(** oc_s1_order3 — the second generator (1 2 3) has order dividing 3.
-    Kind: helper.
-    Why waived: algebraic-order suffix marks this as a cyclic-order fact.
-    Used by: sanity checks on the overlapping-3-cycles instance; cited in
-             the file header explaining why L >= 3 collapses.
-*)
+(** sigma_1 cubed is the identity, the second half of the length-3
+    collision. *)
 Lemma oc_s1_order3 : (oc_s1 ^+ 3 = 1 :> {perm 'I_oc_N})%g.
 Proof.
 apply/permP => x; rewrite perm1 expgS permM expgS permM expg1 !oc_s1E.
 by apply: val_inj; case: x => [[|[|[|[|?]]]] ?].
 Qed.
 
-(* Non-commutativity *)
+(* The two generators do not commute, their supports sharing positions 1 and
+   2.  The deck group is therefore non-abelian, so its search space is not
+   the polynomial count an abelian instance would give. *)
 Lemma oc_noncommute : (oc_s0 * oc_s1 != oc_s1 * oc_s0)%g.
 Proof.
 apply/negP => /eqP/permP /(_ (Ordinal (isT : 0 < oc_N))).
 by rewrite !permM !oc_s0E !oc_s1E.
 Qed.
 
-(* Word-eval injectivity via nat-level boolean decision + vm_compute *)
+(* Word-eval injectivity at length 2, decided by vm_compute on the
+   fingerprint check. *)
 Lemma oc_weval_inj2 : @weval_inj OC_PGGTypes 2.
 Proof.
 apply: (weval_inj_of_natB oc_gens_agree).
 by vm_compute.
 Qed.
 
-(* Search space instantiation *)
+(* Length-2 words reach exactly 4 = 2^2 distinct deck permutations, the
+   maximum for two generators at that length.  By the order-3 relations above
+   the same cannot hold at length 3. *)
 Lemma oc_search_space_2 : @search_space OC_PGGTypes 2 = 4.
 Proof. exact: weval_inj_inst_search_space oc_weval_inj2. Qed.
 
