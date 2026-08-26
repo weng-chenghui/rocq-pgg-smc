@@ -55,7 +55,11 @@ Definition is_involution (g : {perm 'I_N}) : Prop :=
 Definition is_fpf (g : {perm 'I_N}) : Prop :=
   forall x : 'I_N, g x != x.
 
-(** An fpf involution pairs each element with a distinct partner. *)
+(** A pairing is its own inverse, so it carries the partner of a card back
+    to that card.  This is what makes "the partner of x" well defined: the
+    orbits of an involution have length at most two, so the pair encode_bit
+    lays down at a position and the pair decode_bit reads back are the same
+    unordered pair, whichever end of it the coalition sees first. *)
 Lemma involution_partner (g : {perm 'I_N}) (x : 'I_N) :
   is_involution g -> g (g x) = x.
 Proof.
@@ -64,14 +68,13 @@ have := congr1 (fun f : {perm 'I_N} => f x) Hinv.
 by rewrite permM perm1.
 Qed.
 
-(** fpf_involution_partner_neq — fixed-point-free involutions map x to a distinct partner.
-    Kind: helper.
-    Why: combines the fixed-point-free predicate with the involution structure
-         to give the neq witness used by deck pairing arguments.
-    Used by: deck-pairing constructions where x and g x form paired slots.
-    Naming: intentional; five-component name parallels the deck-pairing
-            terminology "fpf + involution + partner + neq" and renaming
-            would touch downstream call sites. *)
+(** Under a fixed-point-free pairing every card has a partner other than
+    itself.  Distinctness is what keeps the two encodings apart: encode_bit
+    lays down (s, g s) for bit 1 and (s, s) for bit 0, so at a fixed point
+    of g the two exposures would coincide and the bit would be unreadable.
+    The involution hypothesis is inert -- fixed-point-freeness alone gives
+    the conclusion -- and stands in the statement only so it reads at the
+    pair of conditions a deck pairing is assumed to satisfy. *)
 Lemma fpf_involution_partner_neq (g : {perm 'I_N}) (x : 'I_N) :
   is_involution g -> is_fpf g -> g x != x.
 Proof. by move=> _ Hfpf; exact: Hfpf. Qed.
