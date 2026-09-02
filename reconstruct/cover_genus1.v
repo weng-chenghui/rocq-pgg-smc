@@ -44,252 +44,7 @@ Import GRing.Theory.
 Local Open Scope ring_scope.
 
 (******************************************************************************)
-(*     Section 1: Genus-1 Covering Data                                       *)
-(******************************************************************************)
-
-Section genus1.
-
-Variable M : MonodromyReprType.
-Let G := pgg_G M.
-Let N := (pgg_N' M).+1.
-Let rho := @pgg_rho M.
-
-(* For an elliptic covering E -> P^1:
-   - Base genus = 0
-   - Ramification must satisfy: 2*1 + 2|G| = R + 2, so R = 2|G|
-   - This means 2|G| total ramification index *)
-
-Hypothesis HG : 1 < #|G|.
-
-Let ramif1 := (2 * #|G|)%N.
-
-(** The Riemann-Hurwitz equality for the elliptic cover E -> P^1 of degree
-    #|G|, base genus 0, ramification ramif1 = 2|G|: 2*1 + 2|G| equals
-    #|G|*(2*0) + ramif1 + 2. This discharges the cd_hurwitz side-condition of
-    the genus-1 CoveringData, the algebraic check that the ramification
-    total is exactly what a genus-1 curve covering a genus-0 base of this
-    degree forces. *)
-Lemma genus1_hurwitz :
-  (2 * 1 + 2 * #|G| = #|G| * (2 * 0) + ramif1 + 2)%N.
-Proof.
-by rewrite muln1 muln0 muln0 add0n /ramif1 addnC.
-Qed.
-
-(** The total ramification ramif1 = 2|G| of the genus-1 cover is at least 3,
-    matching cd_n_branch = 3: the elliptic cover has room for at least as
-    many branch points as the CoveringData record for it claims. *)
-Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.
-Proof.
-rewrite /ramif1.
-have : (2 <= #|G|)%N by exact: HG.
-by case: #|G| => [|[|n]] //= _; rewrite mulnS.
-Qed.
-
-(** The CoveringData for the elliptic (genus-1) covering: base genus 0,
-    genus 1, total ramification ramif1 = 2|G|, discharged against
-    genus1_hurwitz and genus1_ramif_ge_nbr. This is the Riemann-Hurwitz
-    skeleton the elliptic AG code below is built on top of. *)
-Definition genus1_data : CoveringData M := {|
-  cd_base_genus := 0 ;
-  cd_n_branch   := 3 ;   (* elliptic covers typically have 3+ branch points *)
-  cd_total_ramif := ramif1 ;
-  cd_genus      := 1 ;
-  cd_ramif_ge_n_branch := genus1_ramif_ge_nbr ;
-  cd_hurwitz    := genus1_hurwitz ;
-|}.
-
-(******************************************************************************)
-(*     Section 2: AG Code on Elliptic Curve (hyperelliptic axiomatization)   *)
-(******************************************************************************)
-
-(* The Goppa weight bound is PROVED via the hyperelliptic resultant argument
-   (hyperelliptic_code.v). The privacy surjection is derived from the dual
-   minimum distance axiom. This reduces the axiomatization boundary:
-
-   Axiomatized (curve-level facts):
-   1. ev_ec_rank: generator matrix has full row rank (Riemann-Roch)
-   2. ev_ec_encode: evaluation structure (A(x)+y*B(x) representation)
-   3. ec_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
-   4. sigma_code_ec/sigma_fix0_ec/code_auto_ec: code automorphisms
-      (ts1_perm_compatible is now DERIVED via massey_perm_compatible)
-
-   Proved (via hyperelliptic_code.v):
-   - goppa_ec_wt: Goppa weight bound (from resultant parity argument)
-   - ag_ec_priv_surj: privacy (from dual minimum distance)
-   - ThresholdScheme construction (via Massey)
-   - Gap bound ts_T <= ts_k + 2 (from code parameters with g = 1)            *)
-
-(* Field over which the elliptic curve is defined *)
-Variable F_ec : finFieldType.
-Hypothesis HN_ec : N = #|F_ec|.
-
-(* n'' such that n = n''.+2 = N = code length *)
-Variable n''_ec : nat.
-Hypothesis Hn_ec : n''_ec.+2 = N.
-
-Let n_ec := n''_ec.+2.
-
-(* Code parameters: dimension k, genus g = 1 *)
-Variable k_ec : nat.
-Let g_ec : nat := 1.
-
-(* Generator matrix (evaluation of Riemann-Roch basis at rational points) *)
-Variable ev_ec : 'M[F_ec]_(k_ec, n_ec).
-
-(* Elliptic curve y^2 = f(x) with deg(f) = 3 (genus 1) *)
-Variable curve_poly_ec : {poly F_ec}.
-Hypothesis curve_deg_ec : size curve_poly_ec = (2 * g_ec + 1).+1.
-Hypothesis curve_sep_ec : separable_poly curve_poly_ec.
-
-(* Evaluation points on the curve *)
-Variable pts_x_ec : n_ec.-tuple F_ec.
-Variable pts_y_ec : n_ec.-tuple F_ec.
-Hypothesis pts_on_curve_ec :
-  forall i : 'I_n_ec, (tnth pts_y_ec i) ^+ 2 = curve_poly_ec.[tnth pts_x_ec i].
-Hypothesis pts_distinct_ec :
-  forall i j : 'I_n_ec, i != j ->
-  (tnth pts_x_ec i != tnth pts_x_ec j) || (tnth pts_y_ec i != tnth pts_y_ec j).
-Hypothesis pts_x_uniq_ec : uniq pts_x_ec.
-
-(* Code-level axioms (structural, not opaque) *)
-Hypothesis ev_ec_rank : \rank ev_ec = k_ec.
-Hypothesis Hk_ec : 0 < k_ec.
-Hypothesis Hkn_ec : k_ec <= n_ec.
-Hypothesis Hkg_ec : g_ec < k_ec.        (* 1 < k, i.e., k >= 2 *)
-Hypothesis Hkgn_ec : k_ec + g_ec < n_ec. (* k + 1 < n *)
-
-(* Design distance m = k + g - 1 *)
-Let m_deg_ec := (k_ec + g_ec - 1)%N.
-Let deg_f_ec := (2 * g_ec + 1)%N.
-
-Hypothesis Hdeg_f_le_ec : deg_f_ec <= m_deg_ec.
-
-(* Evaluation encoding: ev represents functions A(x) + y*B(x) *)
-Hypothesis ev_ec_encode :
-  forall v : 'rV[F_ec]_k_ec, v != 0 ->
-  exists A B : {poly F_ec},
-    ((A != 0) || (B != 0)) /\
-    size A <= (m_deg_ec./2).+1 /\
-    size B <= ((m_deg_ec - deg_f_ec)./2).+1 /\
-    forall i : 'I_n_ec,
-      (v *m ev_ec) ord0 i = A.[tnth pts_x_ec i] + tnth pts_y_ec i * B.[tnth pts_x_ec i].
-
-(* Dual evaluation encoding (replaces dual_min_dist axiom) *)
-Let m_deg_dual_ec := (n_ec + g_ec - k_ec - 1)%N.
-
-Hypothesis ec_dual_ev_encode :
-  forall w : 'rV[F_ec]_n_ec, w != 0 ->
-  (forall c : 'rV[F_ec]_n_ec, c \in ag_code ev_ec -> w *m c^T = 0) ->
-  exists A B : {poly F_ec},
-    ((A != 0) || (B != 0)) /\
-    size (hyp_resultant curve_poly_ec A B) <= m_deg_dual_ec.+1 /\
-    forall i : 'I_n_ec,
-      w ord0 i = A.[tnth pts_x_ec i] + tnth pts_y_ec i * B.[tnth pts_x_ec i].
-
-Hypothesis Hparam_ec : n_ec <= k_ec + g_ec + 1. (* n <= k + 2 *)
-
-(* Goppa weight bound: PROVED from hyperelliptic resultant argument *)
-Let goppa_ec_wt : forall m : 'rV[F_ec]_k_ec, m != 0 ->
-  n_ec - (k_ec + g_ec - 1) <= wH (m *m ev_ec).
-Proof.
-move=> v Hv.
-exact: (@hyp_goppa_wt_mdeg F_ec g_ec curve_poly_ec curve_deg_ec
-  m_deg_ec n''_ec pts_x_ec pts_y_ec pts_on_curve_ec
-  pts_x_uniq_ec Hdeg_f_le_ec k_ec ev_ec ev_ec_encode v Hv).
-Qed.
-
-(* Privacy: derived from dual minimum distance *)
-Let ag_ec_priv_surj :
-  forall (S : {set 'I_n_ec}) (target : 'rV[F_ec]_n_ec),
-    #|S| < (k_ec - g_ec).-1.+2 ->
-    exists c : 'rV[F_ec]_n_ec,
-      c \in ag_code ev_ec /\ vproj c S = vproj target S.
-Proof.
-move=> S target HS.
-exact: (hyp_priv_surj curve_deg_ec pts_on_curve_ec pts_x_uniq_ec Hkgn_ec Hkg_ec erefl ec_dual_ev_encode target HS).
-Qed.
-
-(* Concrete ThresholdScheme from AG code via Massey *)
-Let ts1 : ThresholdScheme 'I_N 'I_N :=
-  @ag_genus_scheme F_ec n''_ec k_ec g_ec ev_ec
-    ev_ec_rank Hk_ec Hkn_ec Hkgn_ec goppa_ec_wt ag_ec_priv_surj
-    N HN_ec.
-
-(* Gap: PROVED from code parameters (not axiomatized) *)
-Let ts1_gap : ts_T ts1 <= ts_k ts1 + 2 * g_ec :=
-  @ag_genus_gap F_ec n''_ec k_ec g_ec ev_ec
-    ev_ec_rank Hk_ec Hkn_ec Hkg_ec Hkgn_ec goppa_ec_wt ag_ec_priv_surj
-    Hparam_ec N HN_ec.
-
-(* 2 * g_ec = 2 * 1 = 2, so ts1_gap gives ts_T ts1 <= ts_k ts1 + 2 *)
-Let ts1_gap2 : ts_T ts1 <= ts_k ts1 + 2.
-Proof. exact: ts1_gap. Qed.
-
-(* Coordinate-permutation compatibility: derived from code automorphisms.
-   sigma_code_ec maps monodromy elements to column permutations of the AG code
-   that fix position 0 (the secret). massey_perm_compatible +
-   transport_perm_compatible derive ts_recon_perm_invariant from these. *)
-Variable sigma_code_ec : pgg_gT M -> {perm 'I_n_ec}.
-
-Hypothesis sigma_fix0_ec :
-  forall g, g \in G -> sigma_code_ec g ord0 = ord0.
-
-Hypothesis code_auto_ec :
-  forall g, g \in G ->
-  coord_perm_compatible (ag_code ev_ec) (sigma_code_ec g).
-
-Let ts1_perm : pgg_gT M -> {perm 'I_(ts_T' ts1).+1} :=
-  massey_share_perm (G:=G) sigma_fix0_ec.
-
-(** The elliptic threshold scheme ts1's reconstruction is invariant under the
-    monodromy action ts1_perm: the AG code's automorphism-derived column
-    permutations transport, via massey_perm_compatible, to a permutation
-    compatible with Massey reconstruction. This is the reconstruction leg of
-    genus1_covering's CoveringScheme, the fact that lets players who
-    permute their view still recover the same secret. *)
-Lemma ts1_perm_compatible :
-  @ts_recon_perm_invariant _ G _ _ ts1 ts1_perm.
-Proof.
-rewrite /ts1 /= /ag_genus_scheme /ag_massey.
-apply: transport_perm_compatible.
-exact: massey_perm_compatible.
-Qed.
-
-(** The CoveringScheme for the elliptic (genus-1) cover: genus1_data paired
-    with the AG-Massey threshold scheme ts1 and its monodromy-compatibility
-    witness ts1_perm_compatible. This is the complete, checked instance a
-    PGG protocol at genus 1 runs against, distance bound, threshold gap,
-    and perm-invariance all traced back to the elliptic curve's code
-    parameters. *)
-Definition genus1_covering : CoveringScheme M := {|
-  cs_plug := {|
-    rp_scheme    := ts1 ;
-    rp_content   := id ;
-    rp_monodromy := ts1_perm ;
-    rp_recon_invariant := ts1_perm_compatible |} ;
-  cs_data := genus1_data ;
-  cs_gap  := ts1_gap2 ;
-|}.
-
-(** The elliptic covering's reconstruction threshold exceeds its privacy
-    threshold by at most 2: a (k, k+2)-quasi-threshold scheme. This is
-    ar_gap_bound's genus formula, ts_T <= ts_k + 2*genus, made concrete at
-    genus 1. *)
-Lemma elliptic_gap :
-  ts_T (cs_scheme genus1_covering) <= ts_k (cs_scheme genus1_covering) + 2.
-Proof. exact: ts1_gap2. Qed.
-
-(** The genus recorded in genus1_covering's CoveringData is 1, not 0: this
-    instance sits on the positive-genus side of the algebraic-rigidity
-    dichotomy, where the gap is only bounded rather than forced to zero. *)
-Lemma genus1_vs_genus0 :
-  cd_genus (cs_data genus1_covering) = 1.
-Proof. by []. Qed.
-
-End genus1.
-
-(******************************************************************************)
-(*     Section 3: Generic Higher-Genus Covering                               *)
+(*     Section 1: Generic Higher-Genus Covering                               *)
 (******************************************************************************)
 
 Section higher_genus.
@@ -492,3 +247,229 @@ Lemma higher_genus_gap_bound :
 Proof. exact: ts_g_gap. Qed.
 
 End higher_genus.
+
+(******************************************************************************)
+(*     Section 2: Genus-1 Covering Data                                       *)
+(******************************************************************************)
+
+Section genus1.
+
+Variable M : MonodromyReprType.
+Let G := pgg_G M.
+Let N := (pgg_N' M).+1.
+Let rho := @pgg_rho M.
+
+(* For an elliptic covering E -> P^1:
+   - Base genus = 0
+   - Ramification must satisfy: 2*1 + 2|G| = R + 2, so R = 2|G|
+   - This means 2|G| total ramification index *)
+
+Hypothesis HG : 1 < #|G|.
+
+Let ramif1 := (2 * #|G|)%N.
+
+(** The Riemann-Hurwitz equality for the elliptic cover E -> P^1 of degree
+    #|G|, base genus 0, ramification ramif1 = 2|G|: 2*1 + 2|G| equals
+    #|G|*(2*0) + ramif1 + 2. This discharges the cd_hurwitz side-condition of
+    the genus-1 CoveringData, the algebraic check that the ramification
+    total is exactly what a genus-1 curve covering a genus-0 base of this
+    degree forces. *)
+Lemma genus1_hurwitz :
+  (2 * 1 + 2 * #|G| = #|G| * (2 * 0) + ramif1 + 2)%N.
+Proof.
+by rewrite muln1 muln0 muln0 add0n /ramif1 addnC.
+Qed.
+
+(** The total ramification ramif1 = 2|G| of the genus-1 cover is at least 3,
+    matching cd_n_branch = 3: the elliptic cover has room for at least as
+    many branch points as the CoveringData record for it claims. *)
+Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.
+Proof.
+rewrite /ramif1.
+have : (2 <= #|G|)%N by exact: HG.
+by case: #|G| => [|[|n]] //= _; rewrite mulnS.
+Qed.
+
+(** The CoveringData for the elliptic (genus-1) covering: higher_genus_data
+    at g := 1, hence base genus 0, three branch points and total
+    ramification ramif1 = 2|G|, discharged against genus1_hurwitz and
+    genus1_ramif_ge_nbr. This is the Riemann-Hurwitz skeleton the elliptic
+    AG code below is built on top of. *)
+Definition genus1_data : CoveringData M :=
+  higher_genus_data genus1_hurwitz genus1_ramif_ge_nbr.
+
+(******************************************************************************)
+(*     Section 3: AG Code on Elliptic Curve (hyperelliptic axiomatization)   *)
+(******************************************************************************)
+
+(* The Goppa weight bound is PROVED via the hyperelliptic resultant argument
+   (hyperelliptic_code.v). The privacy surjection is derived from the dual
+   minimum distance axiom. This reduces the axiomatization boundary:
+
+   Axiomatized (curve-level facts):
+   1. ev_ec_rank: generator matrix has full row rank (Riemann-Roch)
+   2. ev_ec_encode: evaluation structure (A(x)+y*B(x) representation)
+   3. ec_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
+   4. sigma_code_ec/sigma_fix0_ec/code_auto_ec: code automorphisms
+      (ts1_perm_compatible is now DERIVED via massey_perm_compatible)
+
+   Proved (via hyperelliptic_code.v):
+   - goppa_ec_wt: Goppa weight bound (from resultant parity argument)
+   - ag_ec_priv_surj: privacy (from dual minimum distance)
+   - ThresholdScheme construction (via Massey)
+   - Gap bound ts_T <= ts_k + 2 (from code parameters with g = 1)            *)
+
+(* Field over which the elliptic curve is defined *)
+Variable F_ec : finFieldType.
+Hypothesis HN_ec : N = #|F_ec|.
+
+(* n'' such that n = n''.+2 = N = code length *)
+Variable n''_ec : nat.
+Hypothesis Hn_ec : n''_ec.+2 = N.
+
+Let n_ec := n''_ec.+2.
+
+(* Code parameters: dimension k, genus g = 1 *)
+Variable k_ec : nat.
+Let g_ec : nat := 1.
+
+(* Generator matrix (evaluation of Riemann-Roch basis at rational points) *)
+Variable ev_ec : 'M[F_ec]_(k_ec, n_ec).
+
+(* Elliptic curve y^2 = f(x) with deg(f) = 3 (genus 1) *)
+Variable curve_poly_ec : {poly F_ec}.
+Hypothesis curve_deg_ec : size curve_poly_ec = (2 * g_ec + 1).+1.
+Hypothesis curve_sep_ec : separable_poly curve_poly_ec.
+
+(* Evaluation points on the curve *)
+Variable pts_x_ec : n_ec.-tuple F_ec.
+Variable pts_y_ec : n_ec.-tuple F_ec.
+Hypothesis pts_on_curve_ec :
+  forall i : 'I_n_ec, (tnth pts_y_ec i) ^+ 2 = curve_poly_ec.[tnth pts_x_ec i].
+Hypothesis pts_distinct_ec :
+  forall i j : 'I_n_ec, i != j ->
+  (tnth pts_x_ec i != tnth pts_x_ec j) || (tnth pts_y_ec i != tnth pts_y_ec j).
+Hypothesis pts_x_uniq_ec : uniq pts_x_ec.
+
+(* Code-level axioms (structural, not opaque) *)
+Hypothesis ev_ec_rank : \rank ev_ec = k_ec.
+Hypothesis Hk_ec : 0 < k_ec.
+Hypothesis Hkn_ec : k_ec <= n_ec.
+Hypothesis Hkg_ec : g_ec < k_ec.        (* 1 < k, i.e., k >= 2 *)
+Hypothesis Hkgn_ec : k_ec + g_ec < n_ec. (* k + 1 < n *)
+
+(* Design distance m = k + g - 1 *)
+Let m_deg_ec := (k_ec + g_ec - 1)%N.
+Let deg_f_ec := (2 * g_ec + 1)%N.
+
+Hypothesis Hdeg_f_le_ec : deg_f_ec <= m_deg_ec.
+
+(* Evaluation encoding: ev represents functions A(x) + y*B(x) *)
+Hypothesis ev_ec_encode :
+  forall v : 'rV[F_ec]_k_ec, v != 0 ->
+  exists A B : {poly F_ec},
+    ((A != 0) || (B != 0)) /\
+    size A <= (m_deg_ec./2).+1 /\
+    size B <= ((m_deg_ec - deg_f_ec)./2).+1 /\
+    forall i : 'I_n_ec,
+      (v *m ev_ec) ord0 i = A.[tnth pts_x_ec i] + tnth pts_y_ec i * B.[tnth pts_x_ec i].
+
+(* Dual evaluation encoding (replaces dual_min_dist axiom) *)
+Let m_deg_dual_ec := (n_ec + g_ec - k_ec - 1)%N.
+
+Hypothesis ec_dual_ev_encode :
+  forall w : 'rV[F_ec]_n_ec, w != 0 ->
+  (forall c : 'rV[F_ec]_n_ec, c \in ag_code ev_ec -> w *m c^T = 0) ->
+  exists A B : {poly F_ec},
+    ((A != 0) || (B != 0)) /\
+    size (hyp_resultant curve_poly_ec A B) <= m_deg_dual_ec.+1 /\
+    forall i : 'I_n_ec,
+      w ord0 i = A.[tnth pts_x_ec i] + tnth pts_y_ec i * B.[tnth pts_x_ec i].
+
+Hypothesis Hparam_ec : n_ec <= k_ec + g_ec + 1. (* n <= k + 2 *)
+
+(* Goppa weight bound: PROVED from hyperelliptic resultant argument *)
+Let goppa_ec_wt : forall m : 'rV[F_ec]_k_ec, m != 0 ->
+  n_ec - (k_ec + g_ec - 1) <= wH (m *m ev_ec).
+Proof.
+move=> v Hv.
+exact: (@hyp_goppa_wt_mdeg F_ec g_ec curve_poly_ec curve_deg_ec
+  m_deg_ec n''_ec pts_x_ec pts_y_ec pts_on_curve_ec
+  pts_x_uniq_ec Hdeg_f_le_ec k_ec ev_ec ev_ec_encode v Hv).
+Qed.
+
+(* Privacy: derived from dual minimum distance *)
+Let ag_ec_priv_surj :
+  forall (S : {set 'I_n_ec}) (target : 'rV[F_ec]_n_ec),
+    #|S| < (k_ec - g_ec).-1.+2 ->
+    exists c : 'rV[F_ec]_n_ec,
+      c \in ag_code ev_ec /\ vproj c S = vproj target S.
+Proof.
+move=> S target HS.
+exact: (hyp_priv_surj curve_deg_ec pts_on_curve_ec pts_x_uniq_ec Hkgn_ec Hkg_ec erefl ec_dual_ev_encode target HS).
+Qed.
+
+(* Concrete ThresholdScheme from AG code via Massey *)
+Let ts1 : ThresholdScheme 'I_N 'I_N :=
+  @ag_genus_scheme F_ec n''_ec k_ec g_ec ev_ec
+    ev_ec_rank Hk_ec Hkn_ec Hkgn_ec goppa_ec_wt ag_ec_priv_surj
+    N HN_ec.
+
+(* Coordinate-permutation compatibility: derived from code automorphisms.
+   sigma_code_ec maps monodromy elements to column permutations of the AG code
+   that fix position 0 (the secret). massey_perm_compatible +
+   transport_perm_compatible derive ts_recon_perm_invariant from these. *)
+Variable sigma_code_ec : pgg_gT M -> {perm 'I_n_ec}.
+
+Hypothesis sigma_fix0_ec :
+  forall g, g \in G -> sigma_code_ec g ord0 = ord0.
+
+Hypothesis code_auto_ec :
+  forall g, g \in G ->
+  coord_perm_compatible (ag_code ev_ec) (sigma_code_ec g).
+
+Let ts1_perm : pgg_gT M -> {perm 'I_(ts_T' ts1).+1} :=
+  massey_share_perm (G:=G) sigma_fix0_ec.
+
+(** The elliptic threshold scheme ts1's reconstruction is invariant under the
+    monodromy action ts1_perm: the AG code's automorphism-derived column
+    permutations transport, via massey_perm_compatible, to a permutation
+    compatible with Massey reconstruction. This is the reconstruction
+    invariance premise a genus-1 covering plug carries, the fact that lets
+    players who permute their view still recover the same secret. *)
+Lemma ts1_perm_compatible :
+  @ts_recon_perm_invariant _ G _ _ ts1 ts1_perm.
+Proof.
+rewrite /ts1 /= /ag_genus_scheme /ag_massey.
+apply: transport_perm_compatible.
+exact: massey_perm_compatible.
+Qed.
+
+(** The CoveringScheme for the elliptic (genus-1) cover: higher_genus_covering
+    at g := 1 over the elliptic curve's field F_ec, generator matrix ev_ec
+    and code automorphisms sigma_code_ec. This is the complete, checked
+    instance a PGG protocol at genus 1 runs against, distance bound,
+    threshold gap, and perm-invariance all traced back to the elliptic
+    curve's code parameters. *)
+Definition genus1_covering : CoveringScheme M :=
+  higher_genus_covering genus1_hurwitz genus1_ramif_ge_nbr HN_ec curve_deg_ec
+    pts_on_curve_ec pts_x_uniq_ec ev_ec_rank Hk_ec Hkn_ec Hkg_ec Hkgn_ec
+    Hdeg_f_le_ec ev_ec_encode ec_dual_ev_encode Hparam_ec sigma_fix0_ec
+    code_auto_ec.
+
+(** The elliptic covering's reconstruction threshold exceeds its privacy
+    threshold by at most 2: a (k, k+2)-quasi-threshold scheme. This is
+    ar_gap_bound's genus formula, ts_T <= ts_k + 2*genus, made concrete at
+    genus 1. *)
+Lemma elliptic_gap :
+  ts_T (cs_scheme genus1_covering) <= ts_k (cs_scheme genus1_covering) + 2.
+Proof. exact: higher_genus_gap_bound. Qed.
+
+(** The genus recorded in genus1_covering's CoveringData is 1, not 0: this
+    instance sits on the positive-genus side of the algebraic-rigidity
+    dichotomy, where the gap is only bounded rather than forced to zero. *)
+Lemma genus1_vs_genus0 :
+  cd_genus (cs_data genus1_covering) = 1.
+Proof. by []. Qed.
+
+End genus1.
