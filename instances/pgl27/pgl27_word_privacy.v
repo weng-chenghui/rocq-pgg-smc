@@ -162,7 +162,7 @@ Qed.
 (* Two halves of 2^-40 make 2^-39.  The mulr_natl and mulr_natr routes fail
    here because the ring numeral 2 is itself a natmul and the rewrite fires
    inside it, yielding (2 * 1) ^- 40. *)
-Let pow2_split : (2%:R : R)^-40 + 2%:R^-40 = 2%:R^-39.
+Fact pow2_split : (2%:R : R)^-40 + 2%:R^-40 = 2%:R^-39.
 Proof. by rewrite [RHS]splitr exprSr invfM. Qed.
 
 (** pgl27_word_view_indist — under the two-hundred-letter word shuffle the

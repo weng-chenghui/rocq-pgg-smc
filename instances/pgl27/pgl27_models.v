@@ -377,12 +377,6 @@ Qed.
 (*     The coalition bound as an instance of the generic transfer bound       *)
 (******************************************************************************)
 
-(* Two halves of 2^-40 make 2^-39: the mulr_natl and mulr_natr routes fail here
-   because the ring numeral 2 is itself a natmul and the rewrite fires inside
-   it. *)
-Let pow2_split : (2%:R : R)^-40 + 2%:R^-40 = 2%:R^-39.
-Proof. by rewrite [RHS]splitr exprSr invfM. Qed.
-
 (** pgl27_word_view_indist_via_transfer — under the two-hundred-letter word
     shuffle the coalition-view distributions of two secrets are within 2^-39
     in variation distance, for every coalition of at most three positions.
