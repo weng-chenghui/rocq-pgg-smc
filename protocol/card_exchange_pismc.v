@@ -96,8 +96,8 @@ From pgg_reconstruct Require Import algebraic_rigidity.
 (* Session-typed protocol programs using \pi{...} notation:                   *)
 (*   exchange_dealer players W P_idx == dealer deals hands and announces selection   *)
 (*   exchange_player i               == player i computes and reveals card position  *)
-(*   exchange_verifier players       == verifier observes card positions             *)
 (*   mk_player_aprocs js             == the erased players seated at js              *)
+(*   exchange_verifier players       == verifier observes card positions             *)
 (*                                                                            *)
 (* Action notation markers (inside custom pismc):                             *)
 (*   Deal<p> #x      deals hand x as DT_Hand                                *)
@@ -247,8 +247,7 @@ Definition exchange_player (i : 'I_T)
 (* The seat-indexed family of player processes, erased to aproc so the seats
    can sit in the interpreter's process list. Seat js_k occupies process id
    js_k + 2, so the caller supplies the seats in process-id order. On a
-   literal seat list this reduces to the literal list of erased players, which
-   is what the vm_compute run lemmas need. *)
+   literal seat list this computes to the literal list of erased players. *)
 Definition mk_player_aprocs (js : seq 'I_T) : seq (aproc pgg_dtype data) :=
   [seq mk_aproc (exchange_player i) | i <- js].
 
