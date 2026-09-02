@@ -496,12 +496,8 @@ Definition s5_aprocs_cut (g : 'I_5 -> 'I_5) (w0 : pgg_gT s5_M) :=
   erase_aprocs
   [:: mk_aproc (dealer_with_input_encoding s5_PI
                   (fun _ => g) [:: w0] [::] s5_run.s5_players 0)
-    ; mk_aproc (exchange_verifier s5_PI s5_run.s5_players)
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 0 isT))
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 1 isT))
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 2 isT))
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 3 isT))
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 4 isT))].
+    , mk_aproc (exchange_verifier s5_PI s5_run.s5_players)
+    & mk_player_aprocs s5_PI s5_run.s5_players].
 
 (** s5_aprocs_cut1 — at the identity cut, s5_aprocs_cut collapses to
     s5_aprocs_abs g, confirming the generalization above is conservative. *)

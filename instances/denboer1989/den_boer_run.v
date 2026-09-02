@@ -133,14 +133,10 @@ Definition den_boer_dealer_run (w0 : pgg_gT FiveCardKim_M) (P_idx : nat) :=
     ordered by process id (0..8). *)
 Definition den_boer_saprocs (a b : bool) (w0 : pgg_gT FiveCardKim_M) (P_idx : nat) :=
   [:: mk_aproc (den_boer_dealer_run w0 P_idx)
-    ; mk_aproc (exchange_verifier FiveCardKim_PI den_boer_players)
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 0 isT))
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 1 isT))
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 2 isT))
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 3 isT))
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 4 isT))
-    ; mk_aproc (@pgg_commit FiveCardKim_M 7 (encode_bool a))
-    ; mk_aproc (@pgg_commit FiveCardKim_M 8 (encode_bool b))].
+    , mk_aproc (exchange_verifier FiveCardKim_PI den_boer_players)
+    & mk_player_aprocs FiveCardKim_PI den_boer_players
+      ++ [:: mk_aproc (@pgg_commit FiveCardKim_M 7 (encode_bool a))
+           ; mk_aproc (@pgg_commit FiveCardKim_M 8 (encode_bool b))]].
 
 (** den_boer_procs — the erased process list fed to the interpreter. *)
 Definition den_boer_procs (a b : bool) (w0 : pgg_gT FiveCardKim_M) (P_idx : nat) :=

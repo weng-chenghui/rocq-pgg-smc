@@ -731,17 +731,8 @@ Definition s5x5_aprocs_cut (g : 'I_10 -> 'I_10) (w0 : pgg_gT s5x5_M) :=
   erase_aprocs
   [:: mk_aproc (dealer_with_input_encoding s5x5_PI
                   (fun _ => g) [:: w0] [::] s5x5_run.s5x5_players 0)
-    ; mk_aproc (exchange_verifier s5x5_PI s5x5_run.s5x5_players)
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 0 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 1 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 2 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 3 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 4 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 5 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 6 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 7 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 8 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 9 isT))].
+    , mk_aproc (exchange_verifier s5x5_PI s5x5_run.s5x5_players)
+    & mk_player_aprocs s5x5_PI s5x5_run.s5x5_players].
 
 (** s5x5_aprocs_cut1 — the identity cut w0 = 1 specializes s5x5_aprocs_cut
     back to the landed abstract skeleton s5x5_aprocs_abs. *)

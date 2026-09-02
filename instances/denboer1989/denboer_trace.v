@@ -55,14 +55,10 @@ Definition denboer_aprocs_abs :=
   erase_aprocs
   [:: mk_aproc (pgg_commit_prologue (fun committed =>
          exchange_dealer FiveCardKim_PI (g committed) den_boer_players [:: w0] 0) [::] [:: 7; 8])
-    ; mk_aproc (exchange_verifier FiveCardKim_PI den_boer_players)
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 0 isT))
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 1 isT))
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 2 isT))
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 3 isT))
-    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 4 isT))
-    ; mk_aproc (@pgg_commit FiveCardKim_M 7 va)
-    ; mk_aproc (@pgg_commit FiveCardKim_M 8 vb)].
+    , mk_aproc (exchange_verifier FiveCardKim_PI den_boer_players)
+    & mk_player_aprocs FiveCardKim_PI den_boer_players
+      ++ [:: mk_aproc (@pgg_commit FiveCardKim_M 7 va)
+           ; mk_aproc (@pgg_commit FiveCardKim_M 8 vb)]].
 
 (* The five player traces are stated per concrete player index so that both the
    process-list ordinal and the readout index share the canonical isT proof,

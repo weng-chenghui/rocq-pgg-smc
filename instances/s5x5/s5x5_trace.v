@@ -103,17 +103,8 @@ Definition s5x5_aprocs_abs :=
   erase_aprocs
   [:: mk_aproc (dealer_with_input_encoding s5x5_PI
                   (fun _ => g) [:: (1%g : pgg_gT s5x5_M)] [::] s5x5_players 0)
-    ; mk_aproc (exchange_verifier s5x5_PI s5x5_players)
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 0 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 1 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 2 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 3 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 4 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 5 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 6 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 7 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 8 isT))
-    ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 9 isT))].
+    , mk_aproc (exchange_verifier s5x5_PI s5x5_players)
+    & mk_player_aprocs s5x5_PI s5x5_players].
 
 (* The ten player traces are stated per concrete player index so that both the
    process-list ordinal and the readout index share the canonical isT proof,

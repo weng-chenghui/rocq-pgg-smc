@@ -72,15 +72,8 @@ Definition pgl27_dealer_run (s : bool) (w0 : pgg_gT pgl27_M) :=
     (0..9). The ten session-typed processes of one PGL(2,7) run. *)
 Definition pgl27_saprocs (s : bool) (w0 : pgg_gT pgl27_M) :=
   [:: mk_aproc (pgl27_dealer_run s w0)
-    ; mk_aproc (exchange_verifier pgl27_PI pgl27_players)
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 0 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 1 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 2 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 3 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 4 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 5 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 6 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 7 isT))].
+    , mk_aproc (exchange_verifier pgl27_PI pgl27_players)
+    & mk_player_aprocs pgl27_PI pgl27_players].
 
 (** pgl27_procs — the erased ten-process list fed to the interpreter. The
     plain-proc image of pgl27_saprocs driving run_interp. *)
@@ -99,15 +92,8 @@ Definition pgl27_dealer_deck (sh : 8.-tuple 'I_8) (w0 : pgg_gT pgl27_M) :=
     processes of one all-decks PGL(2,7) run. *)
 Definition pgl27_saprocs_deck (sh : 8.-tuple 'I_8) (w0 : pgg_gT pgl27_M) :=
   [:: mk_aproc (pgl27_dealer_deck sh w0)
-    ; mk_aproc (exchange_verifier pgl27_PI pgl27_players)
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 0 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 1 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 2 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 3 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 4 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 5 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 6 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 7 isT))].
+    , mk_aproc (exchange_verifier pgl27_PI pgl27_players)
+    & mk_player_aprocs pgl27_PI pgl27_players].
 
 (** pgl27_procs_deck — the erased ten-process list of the all-decks run. The
     plain-proc image of pgl27_saprocs_deck driving run_interp. *)

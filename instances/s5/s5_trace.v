@@ -65,12 +65,8 @@ Definition s5_aprocs_abs :=
   erase_aprocs
   [:: mk_aproc (dealer_with_input_encoding s5_PI
                   (fun _ => g) [:: (1%g : pgg_gT s5_M)] [::] s5_players 0)
-    ; mk_aproc (exchange_verifier s5_PI s5_players)
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 0 isT))
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 1 isT))
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 2 isT))
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 3 isT))
-    ; mk_aproc (exchange_player s5_PI (@Ordinal 5 4 isT))].
+    , mk_aproc (exchange_verifier s5_PI s5_players)
+    & mk_player_aprocs s5_PI s5_players].
 
 (** s5_rho1_index — at the identity cut and the [ord_tuple] starts, the
     readout index of player [i] is [i] itself: the identity cut leaves the

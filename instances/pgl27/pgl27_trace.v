@@ -92,15 +92,8 @@ Definition pgl27_aprocs_abs :=
   erase_aprocs
   [:: mk_aproc (dealer_with_input_encoding pgl27_PI
                   (fun _ => g) [:: w0] [::] pgl27_players 0)
-    ; mk_aproc (exchange_verifier pgl27_PI pgl27_players)
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 0 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 1 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 2 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 3 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 4 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 5 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 6 isT))
-    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 7 isT))].
+    , mk_aproc (exchange_verifier pgl27_PI pgl27_players)
+    & mk_player_aprocs pgl27_PI pgl27_players].
 
 (* The eight player traces are stated per concrete player index so that both
    the process-list ordinal and the readout index share the canonical isT
