@@ -97,3 +97,9 @@ Measured law of the campaign (three independent confirmations, W2/W5/
 W6): parametric factoring pays only when the duplicated PROOF BODIES
 are >= 10 lines per member; section/hypothesis restatement overhead is
 15-29 lines and qualified-name call sites eat one-liner savings.
+
+Open naming question from the W7.6 audit: `mk_player_aprocs` composes
+with the vendored `mk_aproc`, but repo precedent for lifting a helper
+over a seq pluralizes without the prefix (`erase_aproc` ->
+`erase_aprocs`), suggesting `player_aprocs`. Rename is one line plus 12
+call sites; candidate for the P3 naming wave.
