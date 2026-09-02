@@ -364,10 +364,7 @@ Proof. exact: genus0_exact. Qed.
 Lemma ar_genus1_gap2 :
   cd_genus (cs_data cs) = 1 ->
   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2)%N.
-Proof.
-move=> Hg1; have := cs_gap cs.
-by rewrite Hg1 muln1.
-Qed.
+Proof. exact: genus1_universal_option. Qed.
 
 (** higher_genus_landscape specialized to ar's own covering: the Hurwitz-
     regime row of the landscape table once AlgebraicRigidity is in hand,
