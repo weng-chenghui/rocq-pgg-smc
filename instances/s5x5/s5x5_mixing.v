@@ -529,6 +529,68 @@ Qed.
 
 End s5_lazy_TV.
 
+(* Shared pile-mirror infrastructure: the pile-1/pile-2 lemmas below vary
+   only in the seat embedding and five-seat generator tuple they supply, or
+   in the pile-uniform pointwise law; proved once here, generic in that
+   data. *)
+Section pile_generic.
+
+Variable embed : 'I_5 -> 'I_10.
+Variable lazy_gen : 8.-tuple {perm 'I_5}.
+Hypothesis gen_action : forall (k : 'I_8) (s : 'I_5),
+  tnth s5x5_gen_tuple k (embed s) = embed (tnth lazy_gen k s).
+
+Local Lemma word_eval_pile_generic (L : nat) (w : L.-tuple 'I_8) (s : 'I_5) :
+  word_eval (M:=Gen_PGGTypes s5x5_gen_tuple) w (embed s)
+  = embed (word_eval (M:=Gen_PGGTypes lazy_gen) w s).
+Proof.
+elim: L w s => [|L IH] w s.
+  by rewrite tuple0 /word_eval !big_ord0 !perm1.
+rewrite /word_eval !big_ord_recl.
+rewrite !permM.
+have ->: tnth (pgg_sigmas (s:=Gen_PGGTypes s5x5_gen_tuple)) (tnth w ord0) (embed s)
+       = embed (tnth (pgg_sigmas (s:=Gen_PGGTypes lazy_gen)) (tnth w ord0) s).
+  exact: gen_action.
+pose w' := [tuple tnth w (lift ord0 i) | i < L].
+have Hw' : forall i : 'I_L, tnth w (lift ord0 i) = tnth w' i.
+  by move=> i; rewrite tnth_mktuple.
+have IH' := IH w'.
+rewrite /word_eval in IH'.
+rewrite (eq_bigr (fun i => tnth pgg_sigmas (tnth w' i))); last by move=> i _; rewrite Hw'.
+rewrite [in RHS](eq_bigr (fun i => tnth pgg_sigmas (tnth w' i))); last by move=> i _; rewrite Hw'.
+by rewrite IH'.
+Qed.
+
+Variable R : realType.
+Variable fdU : R.-fdist 'I_10.
+Hypothesis HfdU : forall i : 'I_10, fdU i = 5%:R^-1 \/ fdU i = 0.
+
+Local Lemma var_dist_uniform_pile_generic :
+  var_dist fdU (fdist_uniform (card_ord 10)) = 1.
+Proof.
+rewrite /var_dist.
+rewrite (eq_bigr (fun _ : 'I_10 => 10%:R^-1 : R)); last first.
+- move=> i _.
+  rewrite fdist_uniformE card_ord.
+  case: (HfdU i) => ->.
+  + have step1 : (5%:R^-1 - 10%:R^-1 : R) = 10%:R^-1.
+      apply: (mulIf (x := 10%:R)); first by rewrite pnatr_eq0.
+      rewrite mulrBl mulVf ?pnatr_eq0 //.
+      have ->: (10%:R = 5%:R * 2%:R :> R) by rewrite -natrM.
+      rewrite mulrA mulVf ?pnatr_eq0 // mul1r.
+      have ->: (2%:R = 1 + 1 :> R) by rewrite -natr1.
+      by rewrite addrK.
+    by rewrite step1 ger0_norm.
+  + by rewrite sub0r normrN ger0_norm.
+- rewrite sumr_const card_ord.
+  rewrite -[X in (X *+ _)](mul1r).
+  rewrite -mulrnAr.
+  rewrite -mulr_natl.
+  by rewrite divff ?pnatr_eq0 // mulr1.
+Qed.
+
+End pile_generic.
+
 (******************************************************************************)
 (*  Section 6. Pile-1 equivalence between s5x5 and s5_lazy walks.             *)
 (*  On a pile-1 card position (val < 5), s5x5_gen_tuple acts identically     *)
@@ -576,23 +638,7 @@ Qed.
 Lemma word_eval_pile1 (L : nat) (w : L.-tuple 'I_8) (s : 'I_5) :
   word_eval (M:=Gen_PGGTypes s5x5_gen_tuple) w (widen5to10 s)
   = widen5to10 (word_eval (M:=Gen_PGGTypes s5_lazy_gen_tuple) w s).
-Proof.
-elim: L w s => [|L IH] w s.
-  by rewrite tuple0 /word_eval !big_ord0 !perm1.
-rewrite /word_eval !big_ord_recl.
-rewrite !permM.
-have ->: tnth (pgg_sigmas (s:=Gen_PGGTypes s5x5_gen_tuple)) (tnth w ord0) (widen5to10 s)
-       = widen5to10 (tnth (pgg_sigmas (s:=Gen_PGGTypes s5_lazy_gen_tuple)) (tnth w ord0) s).
-  exact: s5x5_gen_pile1_action.
-pose w' := [tuple tnth w (lift ord0 i) | i < L].
-have Hw' : forall i : 'I_L, tnth w (lift ord0 i) = tnth w' i.
-  by move=> i; rewrite tnth_mktuple.
-have IH' := IH w'.
-rewrite /word_eval in IH'.
-rewrite (eq_bigr (fun i => tnth pgg_sigmas (tnth w' i))); last by move=> i _; rewrite Hw'.
-rewrite [in RHS](eq_bigr (fun i => tnth pgg_sigmas (tnth w' i))); last by move=> i _; rewrite Hw'.
-by rewrite IH'.
-Qed.
+Proof. exact: (word_eval_pile_generic s5x5_gen_pile1_action). Qed.
 
 Section s5x5_rho_pile1.
 
@@ -688,23 +734,7 @@ Qed.
 Lemma word_eval_pile2 (L : nat) (w : L.-tuple 'I_8) (s : 'I_5) :
   word_eval (M:=Gen_PGGTypes s5x5_gen_tuple) w (rshift5to10 s)
   = rshift5to10 (word_eval (M:=Gen_PGGTypes s5_lazy_gen_tuple') w s).
-Proof.
-elim: L w s => [|L IH] w s.
-  by rewrite tuple0 /word_eval !big_ord0 !perm1.
-rewrite /word_eval !big_ord_recl.
-rewrite !permM.
-have ->: tnth (pgg_sigmas (s:=Gen_PGGTypes s5x5_gen_tuple)) (tnth w ord0) (rshift5to10 s)
-       = rshift5to10 (tnth (pgg_sigmas (s:=Gen_PGGTypes s5_lazy_gen_tuple')) (tnth w ord0) s).
-  exact: s5x5_gen_pile2_action.
-pose w' := [tuple tnth w (lift ord0 i) | i < L].
-have Hw' : forall i : 'I_L, tnth w (lift ord0 i) = tnth w' i.
-  by move=> i; rewrite tnth_mktuple.
-have IH' := IH w'.
-rewrite /word_eval in IH'.
-rewrite (eq_bigr (fun i => tnth pgg_sigmas (tnth w' i))); last by move=> i _; rewrite Hw'.
-rewrite [in RHS](eq_bigr (fun i => tnth pgg_sigmas (tnth w' i))); last by move=> i _; rewrite Hw'.
-by rewrite IH'.
-Qed.
+Proof. exact: (word_eval_pile_generic s5x5_gen_pile2_action). Qed.
 
 Section s5x5_rho_pile2.
 
@@ -815,25 +845,8 @@ Qed.
 Lemma var_dist_uniform_pile1_uniform10 :
   var_dist fdist_uniform_pile1 (fdist_uniform (card_ord 10)) = 1.
 Proof.
-rewrite /var_dist.
-rewrite (eq_bigr (fun _ : 'I_10 => 10%:R^-1 : R)); last first.
-- move=> i _.
-  rewrite fdist_uniform_pile1E fdist_uniformE card_ord.
-  case: (ltnP (val i) 5) => _.
-  + have step1 : (5%:R^-1 - 10%:R^-1 : R) = 10%:R^-1.
-      apply: (mulIf (x := 10%:R)); first by rewrite pnatr_eq0.
-      rewrite mulrBl mulVf ?pnatr_eq0 //.
-      have ->: (10%:R = 5%:R * 2%:R :> R) by rewrite -natrM.
-      rewrite mulrA mulVf ?pnatr_eq0 // mul1r.
-      have ->: (2%:R = 1 + 1 :> R) by rewrite -natr1.
-      by rewrite addrK.
-    by rewrite step1 ger0_norm.
-  + by rewrite sub0r normrN ger0_norm.
-- rewrite sumr_const card_ord.
-  rewrite -[X in (X *+ _)](mul1r).
-  rewrite -mulrnAr.
-  rewrite -mulr_natl.
-  by rewrite divff ?pnatr_eq0 // mulr1.
+apply: var_dist_uniform_pile_generic => i.
+by rewrite fdist_uniform_pile1E; case: ifP => _; [left | right].
 Qed.
 
 (** var_dist_uniform_pile2_uniform10 — the pile-2 mirror of
@@ -842,25 +855,8 @@ Qed.
 Lemma var_dist_uniform_pile2_uniform10 :
   var_dist fdist_uniform_pile2 (fdist_uniform (card_ord 10)) = 1.
 Proof.
-rewrite /var_dist.
-rewrite (eq_bigr (fun _ : 'I_10 => 10%:R^-1 : R)); last first.
-- move=> i _.
-  rewrite fdist_uniform_pile2E fdist_uniformE card_ord.
-  case: (ltnP (val i) 5) => _.
-  + by rewrite sub0r normrN ger0_norm.
-  + have step1 : (5%:R^-1 - 10%:R^-1 : R) = 10%:R^-1.
-      apply: (mulIf (x := 10%:R)); first by rewrite pnatr_eq0.
-      rewrite mulrBl mulVf ?pnatr_eq0 //.
-      have ->: (10%:R = 5%:R * 2%:R :> R) by rewrite -natrM.
-      rewrite mulrA mulVf ?pnatr_eq0 // mul1r.
-      have ->: (2%:R = 1 + 1 :> R) by rewrite -natr1.
-      by rewrite addrK.
-    by rewrite step1 ger0_norm.
-- rewrite sumr_const card_ord.
-  rewrite -[X in (X *+ _)](mul1r).
-  rewrite -mulrnAr.
-  rewrite -mulr_natl.
-  by rewrite divff ?pnatr_eq0 // mulr1.
+apply: var_dist_uniform_pile_generic => i.
+by rewrite fdist_uniform_pile2E; case: ifP => _; [right | left].
 Qed.
 
 End s5x5_pile_uniform.
