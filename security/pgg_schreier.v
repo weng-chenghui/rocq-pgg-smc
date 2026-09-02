@@ -232,6 +232,35 @@ Definition spectral_gap (lam : R) : R := 1 - lam.
 
 End spectral_gap_def.
 
+(* The decay envelope c * (1 - lam) ^+ L of a spectral gap lam in (0, 1]:
+   the rate 1 - lam sits in [0, 1), and the envelope is non-negative and
+   non-increasing in L.  Arithmetic in the gap and the prefactor alone, the
+   envelope is independent of which endpoint law a certificate bounds, so the
+   rate and epsilon lemmas of the Schreier certificate below and of the
+   weighted certificate in pgg_schreier_weighted.v are both instances of it. *)
+Section geometric_rate.
+
+Variables (R : realType) (lam c : R).
+Hypotheses (lam_pos : 0 < lam) (lam_le1 : lam <= 1) (c_ge0 : 0 <= c).
+
+Local Lemma rate_ge0 : 0 <= 1 - lam.
+Proof. by rewrite subr_ge0. Qed.
+
+Local Lemma rate_lt1 : 1 - lam < 1.
+Proof. by rewrite ltrBlDr addrC -ltrBlDr subrr. Qed.
+
+Local Lemma envelope_ge0 (L : nat) : 0 <= c * (1 - lam) ^+ L.
+Proof. by apply: mulr_ge0 => //; apply: exprn_ge0; exact: rate_ge0. Qed.
+
+Local Lemma envelope_decreasing (L1 L2 : nat) :
+  (L1 <= L2)%N -> c * (1 - lam) ^+ L2 <= c * (1 - lam) ^+ L1.
+Proof.
+move=> HL; apply: ler_wpM2l => //; apply: ler_wiXn2l => //;
+  by [exact: rate_ge0 | rewrite gerBl; exact: Order.POrderTheory.ltW lam_pos].
+Qed.
+
+End geometric_rate.
+
 (******************************************************************************)
 (*     Section 3: Schreier Certificate                                        *)
 (*                                                                            *)
@@ -308,20 +337,14 @@ Definition convergence_rate (sc : SchreierCertificate) : R :=
    the geometric bound schreier_epsilon = sqrt(N) * rate^L. *)
 Lemma convergence_rate_ge0 (sc : SchreierCertificate) :
   0 <= convergence_rate sc.
-Proof.
-rewrite /convergence_rate subr_ge0.
-exact: (sc_lambda_le1 sc).
-Qed.
+Proof. exact: rate_ge0 (sc_lambda_le1 sc). Qed.
 
 (* The convergence rate is strictly below 1, since the spectral gap is
    strictly positive.  Strictness is what makes schreier_epsilon decay
    geometrically to 0 as L grows, rather than merely stay bounded. *)
 Lemma convergence_rate_lt1 (sc : SchreierCertificate) :
   convergence_rate sc < 1.
-Proof.
-rewrite /convergence_rate ltrBlDr addrC -ltrBlDr subrr.
-exact: (sc_lambda_pos sc).
-Qed.
+Proof. exact: rate_lt1 (sc_lambda_pos sc). Qed.
 
 (* The certificate's L-free bound repackaged as a SecurityAsymptotic with
    eps_inf = 0: sa_convergence is exactly sc_convergence sc, since the
@@ -365,11 +388,7 @@ Definition schreier_epsilon (sc : SchreierCertificate) (L : nat) : R :=
 (* Epsilon is non-negative *)
 Lemma schreier_epsilon_ge0 (sc : SchreierCertificate) (L : nat) :
   0 <= schreier_epsilon sc L.
-Proof.
-apply: mulr_ge0; first exact: sqrtr_ge0.
-apply: exprn_ge0.
-exact: convergence_rate_ge0.
-Qed.
+Proof. exact: envelope_ge0 (sc_lambda_le1 sc) (sqrtr_ge0 _) L. Qed.
 
 (* The UPPER BOUND schreier_epsilon is monotonically decreasing in L.
    sqrt(N) * r^L2 <= sqrt(N) * r^L1 when 0 <= r < 1, L1 <= L2.
@@ -386,14 +405,8 @@ Qed.
 Lemma schreier_epsilon_decreasing (sc : SchreierCertificate) (L1 L2 : nat) :
   (L1 <= L2)%N -> schreier_epsilon sc L2 <= schreier_epsilon sc L1.
 Proof.
-move=> HL; rewrite /schreier_epsilon.
-apply: ler_wpM2l; first exact: sqrtr_ge0.
-rewrite -(subnK HL) exprD.
-apply: ler_piMl.
-- by apply: exprn_ge0; exact: convergence_rate_ge0.
-- apply: exprn_ile1; first exact: convergence_rate_ge0.
-  rewrite /convergence_rate lerBlDr lerDl.
-  exact: Order.POrderTheory.ltW (sc_lambda_pos sc).
+exact: (envelope_decreasing (sc_lambda_pos sc) (sc_lambda_le1 sc)
+                            (sqrtr_ge0 _)).
 Qed.
 
 (* Monotone security: if secure at L1, at least as secure at L2 >= L1 *)

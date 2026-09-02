@@ -166,10 +166,7 @@ Definition weighted_convergence_rate (wsc : WeightedSchreierCertificate) : R :=
    legitimate decay factor. *)
 Lemma weighted_convergence_rate_ge0 (wsc : WeightedSchreierCertificate) :
   0 <= weighted_convergence_rate wsc.
-Proof.
-rewrite /weighted_convergence_rate subr_ge0.
-exact: (wsc_lambda_le1 wsc).
-Qed.
+Proof. exact: pgg_schreier.rate_ge0 (wsc_lambda_le1 wsc). Qed.
 
 (* The weighted convergence rate is strictly below 1, since the spectral
    gap is strictly positive: the weighted analogue of
@@ -177,10 +174,7 @@ Qed.
    geometrically rather than merely stay bounded. *)
 Lemma weighted_convergence_rate_lt1 (wsc : WeightedSchreierCertificate) :
   weighted_convergence_rate wsc < 1.
-Proof.
-rewrite /weighted_convergence_rate ltrBlDr addrC -ltrBlDr subrr.
-exact: (wsc_lambda_pos wsc).
-Qed.
+Proof. exact: pgg_schreier.rate_lt1 (wsc_lambda_pos wsc). Qed.
 
 (* Epsilon from weighted Schreier certificate *)
 Definition weighted_schreier_epsilon
@@ -192,9 +186,7 @@ Lemma weighted_schreier_epsilon_ge0
     (wsc : WeightedSchreierCertificate) (L : nat) :
   0 <= weighted_schreier_epsilon wsc L.
 Proof.
-apply: mulr_ge0; first exact: sqrtr_ge0.
-apply: exprn_ge0.
-exact: weighted_convergence_rate_ge0.
+exact: pgg_schreier.envelope_ge0 (wsc_lambda_le1 wsc) (sqrtr_ge0 _) L.
 Qed.
 
 (* Epsilon is monotonically decreasing in L *)
@@ -203,14 +195,8 @@ Lemma weighted_schreier_epsilon_decreasing
   (L1 <= L2)%N ->
   weighted_schreier_epsilon wsc L2 <= weighted_schreier_epsilon wsc L1.
 Proof.
-move=> HL; rewrite /weighted_schreier_epsilon.
-apply: ler_wpM2l; first exact: sqrtr_ge0.
-rewrite -(subnK HL) exprD.
-apply: ler_piMl.
-- by apply: exprn_ge0; exact: weighted_convergence_rate_ge0.
-- apply: exprn_ile1; first exact: weighted_convergence_rate_ge0.
-  rewrite /weighted_convergence_rate lerBlDr lerDl.
-  exact: Order.POrderTheory.ltW (wsc_lambda_pos wsc).
+exact: (pgg_schreier.envelope_decreasing (wsc_lambda_pos wsc)
+                                         (wsc_lambda_le1 wsc) (sqrtr_ge0 _)).
 Qed.
 
 (* Monotone security: if secure at L1, at least as secure at L2 >= L1 *)
