@@ -31,7 +31,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from strip_comments import strip
 
 KINDS = {"Definition", "Lemma", "Theorem", "Corollary", "Record",
-         "Fixpoint", "Instance", "Axiom", "Notation"}
+         "Fixpoint", "Instance", "Axiom", "Notation",
+         "Fact", "Remark", "Proposition", "Property"}
 BODY_CUT = {"Definition", "Fixpoint", "Instance"}
 CTX = {"Variable", "Variables", "Hypothesis", "Hypotheses", "Context"}
 NAME_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_']*")
