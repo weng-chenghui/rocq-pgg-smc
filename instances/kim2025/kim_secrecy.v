@@ -14,6 +14,7 @@ From mathcomp Require Import fintype finfun finset tuple bigop ssralg ssrnum rea
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 From pgg_smc Require Import pgg_leakage_witness pgg_cyclic_cut_leakage.
 From pgg_smc Require Import pgg_sharing_mechanism five_card_leakage.
+From pgg_smc Require Import denboer_secrecy.
 
 Import GRing.Theory Num.Theory.
 Set Implicit Arguments.
@@ -35,11 +36,10 @@ Let kimP := P R.
 Lemma kim_indep : kimP |= ViewA R [:: 0%N] _|_ Secret R.
 Proof. by apply/inde_RV_sym; apply: mutual_info_RV0_indep; exact: leak_k1. Qed.
 
-Definition kim_ccd : CyclicCutData kimP :=
-  @MkCyclicCutData _ _ kimP _ _ (Secret R) (ViewA R [:: 0%N]) kim_indep.
-
+(* Kim's dealing mechanism is den Boer's, definitionally: both cut the same
+   uniform C_5 orbit, so one CyclicCut value serves both instances. *)
 Definition kim_mechanism : SharingMechanism kimP 0 0 :=
-  @CyclicCut _ _ kimP 0 0 kim_ccd.
+  denboer_mechanism R.
 
 (** kim_view_secrecy — one revealed card of Kim's five-card family carries
     zero information about the secret a && b: mutual information between
