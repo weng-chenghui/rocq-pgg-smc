@@ -37,7 +37,6 @@ protocol/pgg_monodromy_profile.v
 protocol/pgg_execution_plug.v
 protocol/pgg_observed_execution.v
 manifest/pgg_analysis_status.v
-protocol/pgg_correctness.v
 instances/abelian/pgg_abelian.v
 instances/abelian/abelian_word_collapse.v
 instances/star/pgg_raag_star.v

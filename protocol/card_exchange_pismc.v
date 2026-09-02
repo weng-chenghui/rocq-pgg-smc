@@ -105,9 +105,6 @@ From pgg_reconstruct Require Import algebraic_rigidity.
 (*   Receive<p> #x   receives DT_Hand, binds x : seq ('I_N)                 *)
 (*   Observe<p> &x   receives DT_Sheet, binds x : 'I_N                      *)
 (*   Receive<p> $x   receives DT_Idx, binds x : nat                         *)
-(*                                                                            *)
-(* Cross-equality with pgg_program.v and interpreter integration are          *)
-(* verified in pgg_correctness.v (not in this file).                          *)
 (******************************************************************************)
 
 Set Implicit Arguments.
