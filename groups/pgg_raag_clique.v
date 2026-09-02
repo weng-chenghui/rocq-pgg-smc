@@ -749,6 +749,47 @@ Lemma binSn n k : 0 < k ->
   'C(n.+1, k) = 'C(n, k) + 'C(n, k.-1).
 Proof. by case: k => // k _; rewrite binS addnC. Qed.
 
+(* Pascal's rule splits each b-guarded term in two, the second piece landing
+   in the opposite-parity half at one lower L; spos_pascal_core and
+   sneg_pascal_core instantiate b at true and false respectively. *)
+Local Notation pguard b k := (if b then ~~ odd k else odd k).
+
+Local Lemma pascal_core_gen (b : bool) n r L :
+  sumn [seq (if pguard b k then 'C(n.+1, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] =
+  sumn [seq (if pguard b k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] +
+  sumn [seq (if pguard (~~ b) k then 'C(n, k) * 'C(L - k + r, r) else 0)
+       | k <- iota 0 L.+1].
+Proof.
+transitivity (
+  sumn [seq (if pguard b k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] +
+  sumn [seq (if pguard b k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1]).
+  apply: sumn_map_split => k Hk /=.
+  case: (pguard b k) => //=.
+  by rewrite binSn // -mulnDl.
+suff -> :
+  sumn [seq (if pguard b k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] =
+  sumn [seq (if pguard (~~ b) k then 'C(n, k) * 'C(L - k + r, r) else 0)
+       | k <- iota 0 L.+1] by [].
+case: b.
+  rewrite -(sumn_shift_even_to_odd_gen
+              (fun j => 'C(n, j) * 'C(L - j + r, r)) 0 L.+1).
+  apply: sumn_map_eq => k Hk /=.
+  case: (~~ odd k) => //=.
+  congr (_ * _).
+  by case: k Hk => // k _; rewrite subSS.
+rewrite -(sumn_shift_odd_to_even_gen
+            (fun j => 'C(n, j) * 'C(L - j + r, r)) 0 L.+1).
+apply: sumn_map_eq => k Hk /=.
+case: (odd k) => //=.
+congr (_ * _).
+by case: k Hk => // k _; rewrite subSS.
+Qed.
+
 (* Pascal's rule splits each even-index term in two; the second piece
    reindexes into the odd half at one lower L. *)
 Lemma spos_pascal_core n r L :
@@ -758,28 +799,7 @@ Lemma spos_pascal_core n r L :
        | k <- iota 1 L.+1] +
   sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
        | k <- iota 0 L.+1].
-Proof.
-transitivity (
-  sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
-       | k <- iota 1 L.+1] +
-  sumn [seq (if ~~ odd k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
-       | k <- iota 1 L.+1]).
-  apply: sumn_map_split => k Hk /=.
-  case: (~~ odd k) => //=.
-  by rewrite binSn // -mulnDl.
-set X := sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
-              | k <- iota 1 L.+1].
-suff -> : sumn [seq (if ~~ odd k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
-               | k <- iota 1 L.+1] =
-          sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
-               | k <- iota 0 L.+1] by [].
-rewrite -(sumn_shift_even_to_odd_gen
-            (fun j => 'C(n, j) * 'C(L - j + r, r)) 0 L.+1).
-apply: sumn_map_eq => k Hk /=.
-case: (~~ odd k) => //=.
-congr (_ * _).
-by case: k Hk => // k _; rewrite subSS.
-Qed.
+Proof. exact: pascal_core_gen true n r L. Qed.
 
 (* The same split for the odd half, its second piece landing in the even half
    at one lower L. *)
@@ -790,28 +810,7 @@ Lemma sneg_pascal_core n r L :
        | k <- iota 1 L.+1] +
   sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
        | k <- iota 0 L.+1].
-Proof.
-transitivity (
-  sumn [seq (if odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
-       | k <- iota 1 L.+1] +
-  sumn [seq (if odd k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
-       | k <- iota 1 L.+1]).
-  apply: sumn_map_split => k Hk /=.
-  case: (odd k) => //=.
-  by rewrite binSn // -mulnDl.
-set X := sumn [seq (if odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
-              | k <- iota 1 L.+1].
-suff -> : sumn [seq (if odd k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
-               | k <- iota 1 L.+1] =
-          sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
-               | k <- iota 0 L.+1] by [].
-rewrite -(sumn_shift_odd_to_even_gen
-            (fun j => 'C(n, j) * 'C(L - j + r, r)) 0 L.+1).
-apply: sumn_map_eq => k Hk /=.
-case: (odd k) => //=.
-congr (_ * _).
-by case: k Hk => // k _; rewrite subSS.
-Qed.
+Proof. exact: pascal_core_gen false n r L. Qed.
 
 (** Raising n by one adds the opposite half at one lower L:
     spos n+1 r (L+1) = spos n r (L+1) + sneg n r L. *)
