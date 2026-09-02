@@ -28,6 +28,10 @@ From pgg_smc Require Import pgg_interface pgg_weval_inj.
 (*   foata_nf comm w == Foata normal form (canonical trace representative)    *)
 (*   n_traces_natB Tg L comm == number of distinct Foata normal forms         *)
 (*                                                                            *)
+(* Foata infrastructure (Section foata_infrastructure)                        *)
+(*   properties of the four above, with no bound on the letters and no group  *)
+(*   present; shared with pgg_raag_cartier_foata.v                            *)
+(*                                                                            *)
 (* Part 2: Abstract trace equivalence (MathComp level)                        *)
 (*   swap_word k w == swap positions k and k+1 in word w                      *)
 (*   adj_swap comm w1 w2 == w2 is obtained from w1 by one adjacent swap      *)
@@ -163,6 +167,707 @@ apply: leq_sum => i _.
 case HP : (P i) => //=.
 by rewrite (HPQ i HP).
 Qed.
+
+(* ========================================================================== *)
+(* Foata infrastructure                                                       *)
+(* ========================================================================== *)
+
+(* Properties of foata_pairs, dv_leq and foata_nf for an arbitrary commutation
+   relation on nat, with no bound on the letters and no group present: the
+   depth of a letter depends on the prefix only through its multiset of pairs,
+   dv_leq is a total order, and a word reaches its normal form by a chain of
+   adjacent commuting swaps.  Part 5 draws only on that last fact, to match
+   the nat-level trace count against the abstract one; the Cartier-Foata
+   theorem of pgg_raag_cartier_foata.v draws on the whole block. *)
+
+Section foata_infrastructure.
+
+(* ------------------------------------------------------------------ *)
+(* foata_depth_at as bigop — permutation-invariant                     *)
+(* ------------------------------------------------------------------ *)
+
+(* Rewriting the fold as a maximum over the prefix exposes what the depth
+   really depends on: the multiset of non-commuting predecessors, not the
+   order in which they were read. *)
+
+Lemma foata_depth_at_bigop (crel : nat -> nat -> bool) prev x :
+  foata_depth_at crel prev x =
+  \max_(dv <- prev | ~~ crel dv.2 x) dv.1.+1.
+Proof.
+rewrite /foata_depth_at.
+suff Hgen : forall acc,
+  foldl (fun a dv => if crel dv.2 x then a else maxn a dv.1.+1) acc prev =
+  maxn acc (\max_(dv <- prev | ~~ crel dv.2 x) dv.1.+1).
+  by rewrite Hgen max0n.
+elim: prev => [|dv prev IH] acc /=; first by rewrite big_nil maxn0.
+by rewrite big_cons; case: (crel dv.2 x) => /=; rewrite IH -?maxnA.
+Qed.
+
+(* Depth depends on the prefix only through its multiset of pairs, so
+   permuting the prefix leaves it fixed.  This is what lets two orders of
+   processing a commuting pair be compared. *)
+Lemma foata_depth_at_perm (crel : nat -> nat -> bool) prev1 prev2 x :
+  perm_eq prev1 prev2 ->
+  foata_depth_at crel prev1 x = foata_depth_at crel prev2 x.
+Proof. by move=> Hp; rewrite !foata_depth_at_bigop; apply: perm_big. Qed.
+
+(* ------------------------------------------------------------------ *)
+(* foata_pairs structural lemmas                                       *)
+(* ------------------------------------------------------------------ *)
+
+(* Assigning pairs to a concatenation is assigning them to the first part and
+   continuing with the result as prefix: the computation is a left fold and
+   never revisits a letter. *)
+Lemma foata_pairs_split' (crel : nat -> nat -> bool) prev w1 w2 :
+  foata_pairs crel prev (w1 ++ w2) =
+  foata_pairs crel (foata_pairs crel prev w1) w2.
+Proof. by elim: w1 prev => [|x w1 IH] prev //=. Qed.
+
+(* Reading the value component back gives the original word: the pairs record
+   depths without disturbing the letters. *)
+Lemma foata_pairs_vals (crel : nat -> nat -> bool) prev w :
+  map snd (foata_pairs crel prev w) = map snd prev ++ w.
+Proof.
+elim: w prev => [|x w IH] prev /=; first by rewrite cats0.
+by rewrite IH map_rcons -cats1 -catA.
+Qed.
+
+(* One pair per letter. *)
+Lemma size_foata_pairs (crel : nat -> nat -> bool) prev w :
+  size (foata_pairs crel prev w) = size prev + size w.
+Proof.
+elim: w prev => [|x w IH] prev /=; first by rewrite addn0.
+by rewrite IH size_rcons addSnnS.
+Qed.
+
+(* Appending a letter that commutes with b leaves the depth of b unchanged:
+   the depth counts only non-commuting predecessors. *)
+Lemma foata_depth_comm_rcons (crel : nat -> nat -> bool) prev d a b :
+  crel a b ->
+  foata_depth_at crel (rcons prev (d, a)) b =
+  foata_depth_at crel prev b.
+Proof.
+move=> Hab; rewrite !foata_depth_at_bigop -cats1 big_cat /=.
+by rewrite big_cons big_nil Hab /= maxn0.
+Qed.
+
+(* Pairs already assigned are never revised: the prefix survives verbatim. *)
+Lemma foata_pairs_prefix (crel : nat -> nat -> bool) prev w :
+  take (size prev) (foata_pairs crel prev w) = prev.
+Proof.
+elim: w prev => [|x w IH] prev //=.
+  by rewrite take_size.
+have := IH (rcons prev (foata_depth_at crel prev x, x)).
+rewrite size_rcons => HIH.
+rewrite -(take_takel _ (leqnSn (size prev))) HIH.
+by rewrite -cats1 take_size_cat.
+Qed.
+
+(* The value at a position of the pair list is the letter at that position of
+   the word. *)
+Lemma nth_foata_pairs_val (crel : nat -> nat -> bool) prev w k :
+  k < size w ->
+  (nth (0, 0) (foata_pairs crel prev w) (size prev + k)).2 = nth 0 w k.
+Proof.
+elim: w prev k => [|x w IH] prev k //=.
+case: k => [|k] Hk /=.
+  rewrite addn0; set prev' := rcons prev _.
+  have Hlt : size prev < size prev' by rewrite /prev' size_rcons.
+  rewrite -(nth_take (0,0) Hlt) (foata_pairs_prefix crel prev' w).
+  by rewrite /prev' nth_rcons ltnn eqxx.
+by rewrite -(IH (rcons prev (foata_depth_at crel prev x, x)) k Hk)
+           size_rcons addSnnS.
+Qed.
+
+(* The depth at a position is computed from the pairs of the strict prefix
+   alone. *)
+Lemma nth_foata_pairs_depth (crel : nat -> nat -> bool) prev w k :
+  k < size w ->
+  (nth (0, 0) (foata_pairs crel prev w) (size prev + k)).1 =
+  foata_depth_at crel (foata_pairs crel prev (take k w)) (nth 0 w k).
+Proof.
+elim: w prev k => [|x w IH] prev k //=.
+case: k => [|k] Hk /=.
+  rewrite addn0 /=; set prev' := rcons prev _.
+  have Hlt : size prev < size prev' by rewrite /prev' size_rcons.
+  rewrite -(nth_take (0,0) Hlt) (foata_pairs_prefix crel prev' w).
+  by rewrite /prev' nth_rcons ltnn eqxx.
+by rewrite -(IH (rcons prev (foata_depth_at crel prev x, x)) k Hk)
+           size_rcons addSnnS.
+Qed.
+
+(* foata_pairs with permuted prefix gives permuted output *)
+Lemma foata_pairs_perm_prefix (crel : nat -> nat -> bool) p1 p2 w :
+  perm_eq p1 p2 ->
+  perm_eq (foata_pairs crel p1 w) (foata_pairs crel p2 w).
+Proof.
+elim: w p1 p2 => [|x w IH] p1 p2 Hp //=.
+apply: IH; rewrite (foata_depth_at_perm _ _ Hp) -!cats1; exact: perm_cat Hp (perm_refl _).
+Qed.
+
+(* Swapping adjacent commuting elements preserves foata_pairs multiset *)
+Lemma foata_pairs_swap_adj (crel : nat -> nat -> bool) prev a b w :
+  crel a b -> crel b a ->
+  perm_eq (foata_pairs crel prev (a :: b :: w))
+          (foata_pairs crel prev (b :: a :: w)).
+Proof.
+move=> Hab Hba /=.
+rewrite (foata_depth_comm_rcons _ _ Hab) (foata_depth_comm_rcons _ _ Hba).
+apply: foata_pairs_perm_prefix.
+by rewrite -!cats1 -!catA perm_cat2l perm_catC.
+Qed.
+
+(* ------------------------------------------------------------------ *)
+(* dv_leq properties                                                   *)
+(* ------------------------------------------------------------------ *)
+
+(* dv_leq is a total order on (depth, value).  Totality and antisymmetry
+   together are what make sorting by it produce one canonical list per
+   multiset of pairs, hence one normal form per trace class. *)
+Lemma dv_leq_trans : transitive dv_leq.
+Proof.
+move=> [d2 v2] [d1 v1] [d3 v3]; rewrite /dv_leq /=.
+move/orP => [H1|/andP [/eqP H1 H2]]; move/orP => [H3|/andP [/eqP H3 H4]].
+- by apply/orP; left; exact: ltn_trans H1 H3.
+- by apply/orP; left; rewrite -H3.
+- by apply/orP; left; rewrite H1.
+- by apply/orP; right; apply/andP; split;
+    [rewrite H1 H3|exact: leq_trans H2 H4].
+Qed.
+
+Lemma dv_leq_anti : antisymmetric dv_leq.
+Proof.
+move=> [d1 v1] [d2 v2]; rewrite /dv_leq /=.
+move/andP => [/orP [H1|/andP [/eqP H1 H2]] /orP [H3|/andP [/eqP H3 H4]]].
+- by have := ltn_trans H1 H3; rewrite ltnn.
+- by exfalso; rewrite H3 ltnn in H1.
+- by exfalso; rewrite H1 ltnn in H3.
+- by congr pair; [rewrite H1 | apply/anti_leq/andP].
+Qed.
+
+Lemma dv_leq_total : total dv_leq.
+Proof.
+move=> [d1 v1] [d2 v2]; rewrite /dv_leq /=.
+by case: ltngtP => //= E; rewrite ?E ?eqxx /= ?leq_total ?orbT.
+Qed.
+
+(* Permuted pair lists sort to the same list, dv_leq being a total order. *)
+Lemma sort_perm_eq_dv (s1 s2 : seq (nat * nat)) :
+  perm_eq s1 s2 -> sort dv_leq s1 = sort dv_leq s2.
+Proof.
+move=> Hp.
+have Hs1 := sort_sorted dv_leq_total s1.
+have Hs2 := sort_sorted dv_leq_total s2.
+have Hp' : perm_eq (sort dv_leq s1) (sort dv_leq s2).
+  by rewrite (perm_sort _ s1) perm_sym (perm_sort _ s2) perm_sym.
+exact: (sorted_eq dv_leq_trans dv_leq_anti Hs1 Hs2 Hp').
+Qed.
+
+(* foata_nf invariant under adjacent commuting swap *)
+Lemma foata_nf_swap_adj (crel : nat -> nat -> bool) a b (w1 w2 : seq nat) :
+  crel a b -> crel b a ->
+  foata_nf crel (w1 ++ a :: b :: w2) = foata_nf crel (w1 ++ b :: a :: w2).
+Proof.
+move=> Hab Hba; rewrite /foata_nf !foata_pairs_split'.
+congr (map snd); apply: sort_perm_eq_dv.
+exact: foata_pairs_swap_adj.
+Qed.
+
+(* ------------------------------------------------------------------ *)
+(* Key depth property: non-commuting predecessor forces higher depth   *)
+(* ------------------------------------------------------------------ *)
+
+Lemma foata_depth_noncomm_lb (crel : nat -> nat -> bool) prev d v x :
+  ~~ crel v x -> (d, v) \in prev ->
+  d.+1 <= foata_depth_at crel prev x.
+Proof.
+move=> Hnc Hin; rewrite foata_depth_at_bigop.
+exact: (leq_bigmax_seq (d, v) Hin Hnc).
+Qed.
+
+(* Adjacent out-of-order pair in foata_pairs implies commutativity *)
+Lemma foata_descent_comm (crel : nat -> nat -> bool) prev w k :
+  k.+1 < size w ->
+  ~~ dv_leq (nth (0, 0) (foata_pairs crel prev w) (size prev + k))
+             (nth (0, 0) (foata_pairs crel prev w) (size prev + k.+1)) ->
+  crel (nth 0 w k) (nth 0 w k.+1).
+Proof.
+move=> Hk; rewrite /dv_leq negb_or -!ltnNge => /andP [Hlt _].
+apply/negPn/negP => Hnc.
+have Hk' := ltn_trans (ltnSn k) Hk.
+have Hdep : (nth (0, 0) (foata_pairs crel prev w) (size prev + k.+1)).1 >=
+  ((nth (0, 0) (foata_pairs crel prev w) (size prev + k)).1).+1.
+  rewrite (nth_foata_pairs_depth crel prev Hk).
+  rewrite (nth_foata_pairs_depth crel prev Hk').
+  rewrite (take_nth 0 Hk') -cats1 (foata_pairs_split' crel) /=.
+  apply: foata_depth_noncomm_lb; first exact: Hnc.
+  by rewrite mem_rcons inE eqxx.
+by have := leq_ltn_trans Hdep Hlt; rewrite ltnn.
+Qed.
+
+(* When foata_pairs is sorted, foata_nf = identity *)
+Lemma foata_nf_sorted (crel : nat -> nat -> bool) w :
+  sorted dv_leq (foata_pairs crel [::] w) -> foata_nf crel w = w.
+Proof.
+move=> Hs; rewrite /foata_nf.
+set ps := foata_pairs crel [::] w.
+have Hpe : perm_eq ps (sort dv_leq ps) by rewrite perm_sym perm_sort.
+have Heq := sorted_eq dv_leq_trans dv_leq_anti Hs (sort_sorted dv_leq_total ps) Hpe.
+rewrite -Heq; exact: foata_pairs_vals.
+Qed.
+
+(* Unsorted seq has adjacent descent *)
+Lemma not_sorted_descent' (s : seq (nat * nat)) :
+  1 < size s -> ~~ sorted dv_leq s ->
+  exists k : nat, k.+1 < size s /\
+    ~~ dv_leq (nth (0, 0) s k) (nth (0, 0) s k.+1).
+Proof.
+elim: s => [|a [|b s'] IH] //= _.
+rewrite negb_and => /orP [H|H].
+  by exists 0; rewrite H.
+have Hs : 1 < size (b :: s').
+  by case: (s') H => //= c s'' _; rewrite ltnS.
+have [k [Hk Hd]] := IH Hs H.
+by exists k.+1.
+Qed.
+
+(* ------------------------------------------------------------------ *)
+(* Word split and swap at nat level                                    *)
+(* ------------------------------------------------------------------ *)
+
+Lemma w_split_nat (k : nat) (w : seq nat) :
+  k.+1 < size w ->
+  w = take k w ++ nth 0 w k :: nth 0 w k.+1 :: drop k.+2 w.
+Proof.
+move=> Hk.
+have Hk' : k < size w := ltn_trans (ltnSn k) Hk.
+rewrite -{1}[w](cat_take_drop k).
+rewrite (drop_nth 0 Hk').
+by rewrite (drop_nth 0 Hk).
+Qed.
+
+(* ------------------------------------------------------------------ *)
+(* Foata inversion count and decrease under swap                       *)
+(* ------------------------------------------------------------------ *)
+
+(* The number of position pairs of w whose Foata pairs stand out of dv_leq
+   order.  It reaches 0 exactly on a word already in normal form, and drops
+   at every licensed swap, so it is the measure that makes normalisation
+   terminate. *)
+Definition foata_inv (crel : nat -> nat -> bool) (w : seq nat) : nat :=
+  let ps := foata_pairs crel [::] w in
+  \sum_(i < size w) \sum_(j < size w | i < j)
+    (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
+
+(* A word with no Foata inversion has sorted Foata pairs, hence is its own
+   normal form. *)
+Lemma foata_inv_zero (crel : nat -> nat -> bool) w :
+  foata_inv crel w = 0 ->
+  sorted dv_leq (foata_pairs crel [::] w).
+Proof.
+rewrite /foata_inv => Hzero.
+apply/(sortedP (0,0)) => i; rewrite size_foata_pairs /= add0n => Hi.
+apply/negPn/negP => Hneg.
+suff : 0 < \sum_(i0 < size w) \sum_(j0 < size w | i0 < j0)
+  (~~ dv_leq (nth (0, 0) (foata_pairs crel [::] w) i0)
+             (nth (0, 0) (foata_pairs crel [::] w) j0)) by rewrite Hzero.
+have Hi' : i < size w := ltn_trans (ltnSn i) Hi.
+rewrite (bigD1 (Ordinal Hi')) //=.
+apply: leq_trans; last exact: leq_addr.
+rewrite (bigD1 (Ordinal Hi)) //=.
+apply: leq_trans; last exact: leq_addr.
+by rewrite Hneg.
+Qed.
+
+(* foata_pairs structure after swap:
+   nth of foata_pairs for swap_nat k w equals nth of foata_pairs for w
+   with positions k and k+1 exchanged *)
+Lemma foata_pairs_swap_nth (crel : nat -> nat -> bool) w k :
+  (forall a b, crel a b -> crel b a) ->
+  k.+1 < size w ->
+  crel (nth 0 w k) (nth 0 w k.+1) ->
+  let sw := take k w ++ nth 0 w k.+1 :: nth 0 w k :: drop k.+2 w in
+  let ps := foata_pairs crel [::] w in
+  let ps' := foata_pairs crel [::] sw in
+  (forall i, i < size w ->
+    nth (0, 0) ps' i =
+    if i == k then nth (0, 0) ps k.+1
+    else if i == k.+1 then nth (0, 0) ps k
+    else nth (0, 0) ps i) /\
+  size sw = size w.
+Proof.
+move=> Hcsym Hk Hc /=.
+set sw := take k w ++ _ :: _ :: _.
+set ps := foata_pairs crel [::] w.
+set ps' := foata_pairs crel [::] sw.
+have Hsz : size sw = size w.
+  rewrite /sw size_cat /= size_drop (size_takel (ltnW (ltn_trans (ltnSn k) Hk))).
+  by rewrite -addn2 addnCA addn2 subnK.
+split => // i Hi.
+(* Decompose w and sw through foata_pairs_split' *)
+have Hw : w = take k w ++ nth 0 w k :: nth 0 w k.+1 :: drop k.+2 w.
+  exact: w_split_nat.
+(* ps = foata_pairs [::] w = foata_pairs P (a :: b :: suffix)
+   ps' = foata_pairs [::] sw = foata_pairs P (b :: a :: suffix)
+   where P = foata_pairs [::] (take k w), a = nth 0 w k, b = nth 0 w k.+1 *)
+set P := foata_pairs crel [::] (take k w).
+set a := nth 0 w k.
+set b := nth 0 w k.+1.
+set suffix := drop k.+2 w.
+have Hps : ps = foata_pairs crel P (a :: b :: suffix).
+  by rewrite /ps Hw foata_pairs_split'.
+have Hps' : ps' = foata_pairs crel P (b :: a :: suffix).
+  by rewrite /ps' /sw foata_pairs_split'.
+(* The depth of a from prefix P *)
+set da := foata_depth_at crel P a.
+set db := foata_depth_at crel P b.
+(* By commutativity, depth is the same whether we process a or b first *)
+have Hdb' : foata_depth_at crel (rcons P (da, a)) b = db.
+  by rewrite foata_depth_comm_rcons.
+have Hda' : foata_depth_at crel (rcons P (db, b)) a = da.
+  by rewrite foata_depth_comm_rcons // Hcsym.
+(* After processing [a; b] vs [b; a], the prefixes are permutations *)
+set P_ab := rcons (rcons P (da, a)) (db, b).
+set P_ba := rcons (rcons P (db, b)) (da, a).
+have Hpab : perm_eq P_ab P_ba.
+  rewrite /P_ab /P_ba; apply/seq.permP => p.
+  rewrite -cats1 -[rcons P (da, a)]cats1 -cats1 -[rcons P (db, b)]cats1.
+  by rewrite count_cat count_cat count_cat count_cat /= addn0 addn0 addnAC.
+(* For i < k: nth ps i and nth ps' i are the same (both in P) *)
+have HszP : size P = k.
+  by rewrite size_foata_pairs /= add0n size_take (ltn_trans (ltnSn k) Hk).
+(* The prefixes P_ab and P_ba are permutations of one another and
+   foata_depth_at is invariant under permutation of the prefix.  Processing
+   the suffix left to right after either one therefore gives the same pair at
+   every position, not merely a permuted list of pairs. *)
+have Hsuffix_eq : forall j, j < size suffix ->
+  nth (0, 0) (foata_pairs crel P_ab suffix) (size P_ab + j) =
+  nth (0, 0) (foata_pairs crel P_ba suffix) (size P_ba + j).
+  (* By induction on suffix, using foata_depth_at_perm *)
+  elim: suffix P_ab P_ba Hpab {Hps Hps'} => [|x suf IH] Pab Pba Hpab j Hj //.
+  case: j Hj => [|j] Hj /=.
+    rewrite addn0 addn0.
+    set dab := foata_depth_at crel Pab x.
+    set dba := foata_depth_at crel Pba x.
+    set Pab' := rcons Pab (dab, x).
+    set Pba' := rcons Pba (dba, x).
+    have Hlt_ab : size Pab < size Pab' by rewrite /Pab' size_rcons.
+    have Hlt_ba : size Pba < size Pba' by rewrite /Pba' size_rcons.
+    rewrite -(nth_take (0,0) Hlt_ab) (foata_pairs_prefix crel Pab' suf).
+    rewrite -(nth_take (0,0) Hlt_ba) (foata_pairs_prefix crel Pba' suf).
+    rewrite /Pab' /Pba' nth_rcons nth_rcons ltnn ltnn eqxx eqxx.
+    by rewrite /dab /dba (foata_depth_at_perm _ _ Hpab).
+  have Hpab' : perm_eq (rcons Pab (foata_depth_at crel Pab x, x))
+                       (rcons Pba (foata_depth_at crel Pba x, x)).
+    rewrite (foata_depth_at_perm _ _ Hpab) -cats1 -(cats1 Pba).
+    exact: perm_cat Hpab _.
+  have -> : size Pab + j.+1 =
+    size (rcons Pab (foata_depth_at crel Pab x, x)) + j
+    by rewrite size_rcons addSnnS.
+  have -> : size Pba + j.+1 =
+    size (rcons Pba (foata_depth_at crel Pba x, x)) + j
+    by rewrite size_rcons addSnnS.
+  exact: IH.
+(* Now assemble: for i < k, i = k, i = k+1, i > k+1 *)
+case: (ltnP i k) => Hik.
+  (* i < k: both in prefix P *)
+  have -> : (i == k) = false by apply/negbTE; rewrite ltn_eqF.
+  have -> : (i == k.+1) = false by apply/negbTE; rewrite ltn_eqF // ltnS ltnW.
+  have Hi_lt_P : i < size P by rewrite HszP.
+  transitivity (nth (0, 0) P i); last first.
+    have -> : nth (0,0) ps i = nth (0,0) (take (size P) ps) i by rewrite nth_take.
+    by rewrite Hps (foata_pairs_prefix crel P (a :: b :: suffix)).
+  have -> : nth (0,0) ps' i = nth (0,0) (take (size P) ps') i by rewrite nth_take.
+  by rewrite Hps' (foata_pairs_prefix crel P (b :: a :: suffix)).
+(* i >= k *)
+case Heqk : (i == k).
+  (* i = k *)
+  rewrite (eqP Heqk).
+  (* ps' at k = (db, b) = ps at k.+1 *)
+  have HszPba : k < size P_ba by rewrite /P_ba !size_rcons HszP.
+  have HszPab : k.+1 < size P_ab by rewrite /P_ab !size_rcons HszP.
+  rewrite Hps' /= Hda'.
+  rewrite -(nth_take (0,0) HszPba) (foata_pairs_prefix crel P_ba suffix).
+  rewrite /P_ba !nth_rcons !size_rcons HszP ltnSn ltnn eqxx /=.
+  rewrite Hps /= Hdb'.
+  rewrite -(nth_take (0,0) HszPab) (foata_pairs_prefix crel P_ab suffix).
+  by rewrite /P_ab !nth_rcons !size_rcons HszP ltnn eqxx.
+have Hik' : k < i by rewrite ltn_neqAle eq_sym Heqk Hik.
+case Heqk1 : (i == k.+1).
+  (* i = k+1: ps' at k+1 = (da, a) = ps at k *)
+  rewrite (eqP Heqk1).
+  have HszPba1 : k.+1 < size P_ba by rewrite /P_ba !size_rcons HszP.
+  have HszPabk : k < size P_ab by rewrite /P_ab !size_rcons HszP.
+  rewrite Hps' /= Hda'.
+  rewrite -(nth_take (0,0) HszPba1) (foata_pairs_prefix crel P_ba suffix).
+  rewrite /P_ba !nth_rcons !size_rcons HszP ltnn eqxx /=.
+  rewrite Hps /= Hdb'.
+  rewrite -(nth_take (0,0) HszPabk) (foata_pairs_prefix crel P_ab suffix).
+  by rewrite /P_ab !nth_rcons !size_rcons HszP ltnSn ltnn eqxx.
+(* i > k+1: in the suffix *)
+have Hik1 : k.+1 < i by rewrite ltn_neqAle eq_sym Heqk1 Hik'.
+have Hsuf_i : i - k.+2 < size suffix.
+  by rewrite size_drop ltn_sub2rE.
+(* i > k+1: positions in the suffix are unchanged *)
+have HszPab2 : size P_ab = k.+2 by rewrite /P_ab !size_rcons HszP.
+have HszPba2 : size P_ba = k.+2 by rewrite /P_ba !size_rcons HszP.
+have Hi_eq : i = size P_ab + (i - k.+2).
+  by rewrite HszPab2 addnC subnK.
+have Hi_ba : i = size P_ba + (i - k.+2).
+  by rewrite HszPba2 addnC subnK.
+have Hps_ab : ps = foata_pairs crel P_ab suffix.
+  by rewrite Hps /= Hdb'.
+have Hps'_ba : ps' = foata_pairs crel P_ba suffix.
+  by rewrite Hps' /= Hda'.
+have Hsuf_eq_i := Hsuffix_eq _ Hsuf_i.
+have Hki : k.+2 <= i by [].
+have Hki2 : k.+2 + (i - k.+2) = i by rewrite addnC subnK.
+rewrite HszPab2 HszPba2 Hki2 in Hsuf_eq_i.
+by rewrite Hps'_ba Hps_ab.
+Qed.
+
+(* Swapping two commuting adjacent letters whose Foata pairs are out of order
+   strictly lowers the inversion count.  The descent step of the rewrite
+   system that carries a word to its normal form. *)
+Lemma foata_inv_swap_lt (crel : nat -> nat -> bool) w k :
+  (forall a b, crel a b -> crel b a) ->
+  k.+1 < size w ->
+  crel (nth 0 w k) (nth 0 w k.+1) ->
+  ~~ dv_leq (nth (0, 0) (foata_pairs crel [::] w) k)
+             (nth (0, 0) (foata_pairs crel [::] w) k.+1) ->
+  foata_inv crel (take k w ++ nth 0 w k.+1 :: nth 0 w k :: drop k.+2 w) <
+  foata_inv crel w.
+Proof.
+move=> Hcsym Hk Hc Hdesc.
+set sw := take k w ++ _ :: _ :: _.
+have [Hnth Hsz] := foata_pairs_swap_nth Hcsym Hk Hc.
+set ps := foata_pairs crel [::] w.
+set ps' := foata_pairs crel [::] sw.
+rewrite /foata_inv Hsz.
+(* ps' is ps precomposed with the transposition tp of k and k+1, so the
+   inversion indicator at (i,j) for the swapped word is the one at
+   (tp i, tp j) for the original.  tp reverses the order of exactly one pair,
+   (k+1, k), and that pair is not an inversion: dv_leq is total and Hdesc
+   says the pair at (k, k+1) is the one out of order.  Every other term is
+   matched, so the double sum loses exactly that one inversion. *)
+have Hk' : k < size w := ltn_trans (ltnSn k) Hk.
+have Hk1 : k.+1 < size w := Hk.
+suff Hlt_sum : \sum_(i < size w) \sum_(j < size w | i < j)
+  (~~ dv_leq (nth (0, 0) ps' i) (nth (0, 0) ps' j)) <
+  \sum_(i < size w) \sum_(j < size w | i < j)
+    (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
+  exact: Hlt_sum.
+(* Rewrite ps' using Hnth *)
+have Hnth_eq : forall i : 'I_(size w),
+  nth (0, 0) ps' i =
+  nth (0, 0) ps (if val i == k then k.+1 else if val i == k.+1 then k else val i).
+  move=> [i Hi] /=; rewrite Hnth //.
+  case: (i == k) => //; case: (i == k.+1) => //.
+(* Reindexing by tp turns the sum for ps' into a sum for ps whose filter is
+   tp i < tp j; comparing that filter pointwise with i < j leaves the strict
+   drop at (k, k+1). *)
+set tp := fun i : nat => if i == k then k.+1 else if i == k.+1 then k else i.
+have Htp_inv : forall i, tp (tp i) = i.
+  move=> i; rewrite /tp.
+  case Hi : (i == k).
+    by rewrite (eqP Hi) gtn_eqF // eqxx.
+  case Hi1 : (i == k.+1).
+    by rewrite (eqP Hi1) eqxx.
+  by rewrite Hi Hi1.
+have Htp_inj : injective tp.
+  by move=> i j Hij; rewrite -(Htp_inv i) -(Htp_inv j) Hij.
+(* Step A: LHS = sum with f(tp i, tp j) *)
+have Heq_tp : \sum_(i < size w) \sum_(j < size w | i < j)
+  (~~ dv_leq (nth (0, 0) ps' i) (nth (0, 0) ps' j)) =
+  \sum_(i < size w) \sum_(j < size w | i < j)
+  (~~ dv_leq (nth (0, 0) ps (tp i)) (nth (0, 0) ps (tp j))).
+  apply: eq_bigr => i _; apply: eq_bigr => j _.
+  by rewrite !Hnth_eq.
+rewrite Heq_tp.
+have Hfix : dv_leq (nth (0, 0) ps k.+1) (nth (0, 0) ps k).
+  by move: (dv_leq_total (nth (0, 0) ps k) (nth (0, 0) ps k.+1));
+     rewrite (negbTE Hdesc).
+(* Build ordinal-level transposition *)
+set ik : 'I_(size w) := Ordinal Hk'.
+set ik1 : 'I_(size w) := Ordinal Hk.
+have Hik_ne : ik != ik1.
+  by apply/eqP => /(congr1 val) /= /n_Sn.
+have Htp_bnd : forall i, i < size w -> tp i < size w.
+  move=> i Hi; rewrite /tp.
+  case: (i == k) => //; case: (i == k.+1) => //.
+set tp_ord := fun i : 'I_(size w) => Ordinal (Htp_bnd _ (ltn_ord i)) : 'I_(size w).
+have Htp_ord_val : forall i : 'I_(size w), val (tp_ord i) = tp (val i).
+  by move=> [i Hi].
+have Htp_ord_inv : forall i, tp_ord (tp_ord i) = i.
+  move=> i; apply: ord_inj; rewrite !Htp_ord_val; exact: Htp_inv.
+have Htp_ord_inj : injective tp_ord.
+  by move=> i j Hij; rewrite -(Htp_ord_inv i) -(Htp_ord_inv j) Hij.
+(* Rewrite LHS using reindex *)
+(* First, show tp_ord ik = ik1 and tp_ord ik1 = ik *)
+have Htp_ik : tp_ord ik = ik1.
+  by apply: ord_inj; rewrite Htp_ord_val /tp /= eqxx.
+have Htp_ik1 : tp_ord ik1 = ik.
+  by apply: ord_inj; rewrite Htp_ord_val /tp /= gtn_eqF // eqxx.
+have Hval_ik : forall j : 'I_(size w), val j = k -> j = ik.
+  by move=> j' /= Hj'; apply: ord_inj.
+have Hval_ik1 : forall j : 'I_(size w), val j = k.+1 -> j = ik1.
+  by move=> j' /= Hj'; apply: ord_inj.
+(* Step B: Reindex to get reindexed_sum *)
+have Hreindex : \sum_(i < size w) \sum_(j < size w | i < j)
+  (~~ dv_leq (nth (0, 0) ps (tp i)) (nth (0, 0) ps (tp j))) =
+  \sum_(i < size w) \sum_(j < size w | tp (val i) < tp (val j))
+    (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
+  have Htp_tp_ord : forall i : 'I_(size w),
+    tp (val (tp_ord i)) = val i.
+    by move=> i0; rewrite Htp_ord_val Htp_inv.
+  rewrite (reindex_inj Htp_ord_inj).
+  apply: eq_bigr => i _.
+  rewrite (reindex_inj Htp_ord_inj).
+  apply: eq_bigr => j _.
+  congr (~~ dv_leq (nth _ ps _) (nth _ ps _)); exact: Htp_tp_ord.
+rewrite Hreindex.
+(* Step C: Show reindexed_sum < orig_sum *)
+(* Strategy: big_mkcond + ltn_sum (pointwise <= with strict < at (ik,ik1)).
+   The only pair where tp reverses ordering is (ik1, ik),
+   but f(ik1, ik) = ~~ dv_leq ps[k+1] ps[k] = 0 (by Hfix), so the term is 0. *)
+(* Helper: ltn_sum - strict inequality from pointwise *)
+have ltn_sum_aux : forall (I : finType) (f0 g0 : I -> nat) (i0 : I),
+    (forall i, f0 i <= g0 i) -> f0 i0 < g0 i0 ->
+    \sum_i f0 i < \sum_i g0 i.
+  move=> I f0 g0 i0 Hle Hlt.
+  rewrite (bigD1 i0) // [X in _ < X](bigD1 i0) //.
+  have Hle_rest : \sum_(i | i != i0) f0 i <= \sum_(i | i != i0) g0 i.
+    by apply: leq_sum => i _; exact: Hle.
+  apply: (@leq_ltn_trans (f0 i0 + \sum_(i | i != i0) g0 i)).
+    by rewrite leq_add2l.
+  by rewrite ltn_add2r.
+(* Helper: tp computation lemmas *)
+have tpk : tp k = k.+1 by rewrite /tp eqxx.
+have tpk1 : tp k.+1 = k by rewrite /tp (gtn_eqF (ltnSn k)) eqxx.
+have tp_oth : forall m, m != k -> m != k.+1 -> tp m = m.
+  by move=> m /negbTE Hm /negbTE Hm1; rewrite /tp Hm Hm1.
+(* Helper: the only pair where tp reverses ordering is (k+1, k) *)
+have tp_swap_only : forall i j : nat,
+    tp i < tp j -> ~~ (i < j) -> i = k.+1 /\ j = k.
+  move=> i0 j0 Htp0 Horig0.
+  have [Hik0|Hik0] := boolP (i0 == k); have [Hjk0|Hjk0] := boolP (j0 == k).
+  - by move: Htp0; rewrite (eqP Hik0) (eqP Hjk0) tpk ltnn.
+  - have [Hjk1|Hjk1] := boolP (j0 == k.+1).
+    + by move: Htp0; rewrite (eqP Hik0) (eqP Hjk1) tpk tpk1 ltnNge leqnSn.
+    + exfalso; move/negP: Horig0; apply.
+      rewrite (eqP Hik0).
+      move: Htp0; rewrite (eqP Hik0) tpk (@tp_oth j0 Hjk0 Hjk1) => Hlt0.
+      exact: ltn_trans (ltnSn k) Hlt0.
+  - have [Hik10|Hik10] := boolP (i0 == k.+1).
+    + by rewrite (eqP Hik10) (eqP Hjk0).
+    + exfalso; move/negP: Horig0; apply.
+      rewrite (eqP Hjk0).
+      move: Htp0; rewrite (eqP Hjk0) tpk (@tp_oth i0 Hik0 Hik10) => Hlt0.
+      by rewrite ltn_neqAle Hik0 -ltnS.
+  - have [Hik10|Hik10] := boolP (i0 == k.+1); have [Hjk1|Hjk1] := boolP (j0 == k.+1).
+    + by move: Htp0; rewrite (eqP Hik10) (eqP Hjk1) tpk1 ltnn.
+    + exfalso; move/negP: Horig0; apply.
+      rewrite (eqP Hik10).
+      move: Htp0; rewrite (eqP Hik10) tpk1 (@tp_oth j0 Hjk0 Hjk1) => Hlt0.
+      rewrite ltn_neqAle eq_sym Hjk1 /=.
+      exact: Hlt0.
+    + exfalso; move/negP: Horig0; apply.
+      rewrite (eqP Hjk1).
+      move: Htp0; rewrite (eqP Hjk1) tpk1 (@tp_oth i0 Hik0 Hik10) => Hlt0.
+      exact: ltn_trans Hlt0 (ltnSn k).
+    + exfalso; move/negP: Horig0; apply.
+      by move: Htp0; rewrite (@tp_oth i0 Hik0 Hik10) (@tp_oth j0 Hjk0 Hjk1).
+(* Pointwise: [tp i < tp j] * f(i,j) <= [i < j] * f(i,j) *)
+have Hpw : forall i j : 'I_(size w),
+  (if tp (val i) < tp (val j)
+   then ~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j) : nat else 0) <=
+  (if val i < val j
+   then ~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j) : nat else 0).
+  move=> i0 j0.
+  case Horig0 : (val i0 < val j0) => /=.
+    by case : (tp (val i0) < tp (val j0)).
+  have [Htp0|Htp0] := boolP (tp (val i0) < tp (val j0)) => //.
+  have [Hi0 Hj0] := @tp_swap_only (val i0) (val j0) Htp0 (negbT Horig0).
+  have -> : i0 = ik1 by apply: ord_inj.
+  have -> : j0 = ik by apply: ord_inj.
+  by rewrite /= Hfix.
+(* Strict at (ik, ik1) *)
+have Hstrict : (if tp (val ik) < tp (val ik1)
+    then ~~ dv_leq (nth (0, 0) ps ik) (nth (0, 0) ps ik1) : nat else 0) <
+  (if val ik < val ik1
+    then ~~ dv_leq (nth (0, 0) ps ik) (nth (0, 0) ps ik1) : nat else 0).
+  rewrite /= tpk tpk1 ltnSn (negbTE Hdesc) /=.
+  by have -> : k.+1 < k = false by rewrite ltnNge leqnSn.
+(* Final: big_mkcond + ltn_sum twice *)
+rewrite [X in X < _]big_mkcond [X in _ < X]big_mkcond.
+apply: (@ltn_sum_aux _ _ _ ik).
+  move=> i0.
+  rewrite [X in X <= _]big_mkcond [X in _ <= X]big_mkcond.
+  exact: leq_sum (fun j0 _ => Hpw i0 j0).
+rewrite [X in X < _]big_mkcond [X in _ < X]big_mkcond.
+apply: (@ltn_sum_aux _ _ _ ik1).
+  move=> j0.
+  exact: Hpw ik j0.
+exact: Hstrict.
+Qed.
+
+(* ------------------------------------------------------------------ *)
+(* Soundness: foata_nf(w) reachable via adjacent commuting swaps      *)
+(* ------------------------------------------------------------------ *)
+
+(* We prove: for any word w (with entries < some bound),
+   w is trace-equivalent to foata_nf(w).
+   Here trace-equiv at nat level means obtainable by adjacent commuting swaps. *)
+
+Lemma foata_nf_sound (crel : nat -> nat -> bool) w :
+  (forall a b, crel a b -> crel b a) ->
+  exists ws : seq (seq nat),
+    last w ws = foata_nf crel w /\
+    forall i, i < size ws ->
+      let w0 := nth [::] (w :: ws) i in
+      let w1 := nth [::] (w :: ws) i.+1 in
+      exists k, k.+1 < size w0 /\
+        crel (nth 0 w0 k) (nth 0 w0 k.+1) /\
+        crel (nth 0 w0 k.+1) (nth 0 w0 k) /\
+        w1 = take k w0 ++ nth 0 w0 k.+1 :: nth 0 w0 k :: drop k.+2 w0.
+Proof.
+move=> Hcsym.
+move: w.
+apply: (well_founded_induction_type
+  (Wf_nat.well_founded_ltof _ (foata_inv crel))).
+move=> w IH.
+case Hs : (sorted dv_leq (foata_pairs crel [::] w)).
+  exists [::]; split; first by rewrite /= foata_nf_sorted.
+  by move=> i.
+(* Not sorted: find adjacent descent *)
+have Hsz : 1 < size w.
+  case Hw : (size w) => [|[|n]] //.
+  1,2: exfalso; move/negP: Hs; apply;
+       by case: w Hw IH => [|a [|b w']] //=.
+have Hszfp : 1 < size (foata_pairs crel [::] w)
+  by rewrite size_foata_pairs /= add0n.
+have [k0 [Hk0 Hk0d]] := not_sorted_descent' Hszfp (negbT Hs).
+rewrite size_foata_pairs /= add0n in Hk0.
+have Hcomm : crel (nth 0 w k0) (nth 0 w k0.+1).
+  exact: foata_descent_comm Hk0 Hk0d.
+set sw := take k0 w ++ nth 0 w k0.+1 :: nth 0 w k0 :: drop k0.+2 w.
+have Hnf : foata_nf crel sw = foata_nf crel w.
+  rewrite /sw.
+  transitivity (foata_nf crel (take k0 w ++ nth 0 w k0 :: nth 0 w k0.+1 :: drop k0.+2 w)).
+    apply foata_nf_swap_adj; [exact: Hcsym | exact: Hcomm].
+  congr (foata_nf crel). symmetry; exact: w_split_nat.
+have Hlt : @Wf_nat.ltof _ (foata_inv crel) sw w.
+  rewrite /Wf_nat.ltof /sw; apply/ltP.
+  exact: foata_inv_swap_lt Hcsym Hk0 Hcomm Hk0d.
+have [ws [Hlast Hsteps]] := IH sw Hlt.
+exists (sw :: ws); split.
+  by rewrite /= Hlast Hnf.
+case => [|i] Hi /=.
+  exists k0; repeat split => //; exact: Hcsym.
+exact: Hsteps.
+Qed.
+
+End foata_infrastructure.
 
 (* ========================================================================== *)
 (* RAAG mixin + structure                                                     *)
@@ -1203,692 +1908,6 @@ Hypothesis Hcomm_nat : forall i j : 'I_Tg,
 Definition comm_ord : rel 'I_Tg := fun i j => comm_nat (val i) (val j).
 
 Let M : MonodromyReprWithGeneratorType := R.
-
-(* ------------------------------------------------------------------ *)
-(* Helper: foldl maxn shift lemma                                      *)
-(* ------------------------------------------------------------------ *)
-
-Let foldl_maxn_shift (s : seq nat) (a : nat) :
-  foldl maxn a s = maxn a (foldl maxn 0 s).
-Proof.
-elim: s a => [|b s IH] a /=; first by rewrite maxn0.
-by rewrite (IH (maxn a b)) (IH (maxn 0 b)) max0n maxnA.
-Qed.
-
-(* ------------------------------------------------------------------ *)
-(* foata_depth_at as bigop — permutation-invariant                     *)
-(* ------------------------------------------------------------------ *)
-
-Let foata_depth_at_bigop (crel : nat -> nat -> bool) prev x :
-  foata_depth_at crel prev x =
-  \max_(dv <- prev | ~~ crel dv.2 x) dv.1.+1.
-Proof.
-rewrite /foata_depth_at.
-suff Hgen : forall acc,
-  foldl (fun a dv => if crel dv.2 x then a else maxn a dv.1.+1) acc prev =
-  maxn acc (\max_(dv <- prev | ~~ crel dv.2 x) dv.1.+1).
-  by rewrite Hgen max0n.
-elim: prev => [|dv prev IH] acc /=; first by rewrite big_nil maxn0.
-by rewrite big_cons; case: (crel dv.2 x) => /=; rewrite IH -?maxnA.
-Qed.
-
-(* Depth depends on the prefix only through its multiset of pairs, so
-   permuting the prefix leaves it fixed.  This is what lets two orders of
-   processing a commuting pair be compared. *)
-Let foata_depth_at_perm (crel : nat -> nat -> bool) prev1 prev2 x :
-  perm_eq prev1 prev2 ->
-  foata_depth_at crel prev1 x = foata_depth_at crel prev2 x.
-Proof. by move=> Hp; rewrite !foata_depth_at_bigop; apply: perm_big. Qed.
-
-(* ------------------------------------------------------------------ *)
-(* foata_pairs structural lemmas                                       *)
-(* ------------------------------------------------------------------ *)
-
-Let foata_pairs_split' (crel : nat -> nat -> bool) prev w1 w2 :
-  foata_pairs crel prev (w1 ++ w2) =
-  foata_pairs crel (foata_pairs crel prev w1) w2.
-Proof. by elim: w1 prev => [|x w1 IH] prev //=. Qed.
-
-(* Reading the value component back gives the original word: the pairs record
-   depths without disturbing the letters. *)
-Let foata_pairs_vals (crel : nat -> nat -> bool) prev w :
-  map snd (foata_pairs crel prev w) = map snd prev ++ w.
-Proof.
-elim: w prev => [|x w IH] prev /=; first by rewrite cats0.
-by rewrite IH map_rcons -cats1 -catA.
-Qed.
-
-(* One pair per letter. *)
-Let size_foata_pairs' (crel : nat -> nat -> bool) prev w :
-  size (foata_pairs crel prev w) = size prev + size w.
-Proof.
-elim: w prev => [|x w IH] prev /=; first by rewrite addn0.
-by rewrite IH size_rcons addSnnS.
-Qed.
-
-(* Appending a letter that commutes with b leaves the depth of b unchanged:
-   the depth counts only non-commuting predecessors. *)
-Let foata_depth_comm_rcons (crel : nat -> nat -> bool) prev d a b :
-  crel a b ->
-  foata_depth_at crel (rcons prev (d, a)) b =
-  foata_depth_at crel prev b.
-Proof.
-move=> Hab; rewrite !foata_depth_at_bigop -cats1 big_cat /=.
-by rewrite big_cons big_nil Hab /= maxn0.
-Qed.
-
-(* Pairs already assigned are never revised: the prefix survives verbatim. *)
-Let foata_pairs_prefix (crel : nat -> nat -> bool) prev w :
-  take (size prev) (foata_pairs crel prev w) = prev.
-Proof.
-elim: w prev => [|x w IH] prev //=.
-  by rewrite take_size.
-have := IH (rcons prev (foata_depth_at crel prev x, x)).
-rewrite size_rcons => HIH.
-rewrite -(take_takel _ (leqnSn (size prev))) HIH.
-by rewrite -cats1 take_size_cat.
-Qed.
-
-(* The value at a position of the pair list is the letter at that position of
-   the word. *)
-Let nth_foata_pairs_val (crel : nat -> nat -> bool) prev w k :
-  k < size w ->
-  (nth (0, 0) (foata_pairs crel prev w) (size prev + k)).2 = nth 0 w k.
-Proof.
-elim: w prev k => [|x w IH] prev k //=.
-case: k => [|k] Hk /=.
-  rewrite addn0; set prev' := rcons prev _.
-  have Hlt : size prev < size prev' by rewrite /prev' size_rcons.
-  rewrite -(nth_take (0,0) Hlt) (foata_pairs_prefix crel prev' w).
-  by rewrite /prev' nth_rcons ltnn eqxx.
-by rewrite -(IH (rcons prev (foata_depth_at crel prev x, x)) k Hk)
-           size_rcons addSnnS.
-Qed.
-
-(* The depth at a position is computed from the pairs of the strict prefix
-   alone. *)
-Let nth_foata_pairs_depth (crel : nat -> nat -> bool) prev w k :
-  k < size w ->
-  (nth (0, 0) (foata_pairs crel prev w) (size prev + k)).1 =
-  foata_depth_at crel (foata_pairs crel prev (take k w)) (nth 0 w k).
-Proof.
-elim: w prev k => [|x w IH] prev k //=.
-case: k => [|k] Hk /=.
-  rewrite addn0 /=; set prev' := rcons prev _.
-  have Hlt : size prev < size prev' by rewrite /prev' size_rcons.
-  rewrite -(nth_take (0,0) Hlt) (foata_pairs_prefix crel prev' w).
-  by rewrite /prev' nth_rcons ltnn eqxx.
-by rewrite -(IH (rcons prev (foata_depth_at crel prev x, x)) k Hk)
-           size_rcons addSnnS.
-Qed.
-
-(* foata_pairs with permuted prefix gives permuted output *)
-Let foata_pairs_perm_prefix (crel : nat -> nat -> bool) p1 p2 w :
-  perm_eq p1 p2 ->
-  perm_eq (foata_pairs crel p1 w) (foata_pairs crel p2 w).
-Proof.
-elim: w p1 p2 => [|x w IH] p1 p2 Hp //=.
-apply: IH; rewrite (foata_depth_at_perm _ _ Hp) -!cats1; exact: perm_cat Hp (perm_refl _).
-Qed.
-
-(* Swapping adjacent commuting elements preserves foata_pairs multiset *)
-Let foata_pairs_swap_adj (crel : nat -> nat -> bool) prev a b w :
-  crel a b -> crel b a ->
-  perm_eq (foata_pairs crel prev (a :: b :: w))
-          (foata_pairs crel prev (b :: a :: w)).
-Proof.
-move=> Hab Hba /=.
-rewrite (foata_depth_comm_rcons _ _ Hab) (foata_depth_comm_rcons _ _ Hba).
-apply: foata_pairs_perm_prefix.
-by rewrite -!cats1 -!catA perm_cat2l perm_catC.
-Qed.
-
-(* ------------------------------------------------------------------ *)
-(* dv_leq properties                                                   *)
-(* ------------------------------------------------------------------ *)
-
-Let dv_leq_trans : transitive dv_leq.
-Proof.
-move=> [d2 v2] [d1 v1] [d3 v3]; rewrite /dv_leq /=.
-move/orP => [H1|/andP [/eqP H1 H2]]; move/orP => [H3|/andP [/eqP H3 H4]].
-- by apply/orP; left; exact: ltn_trans H1 H3.
-- by apply/orP; left; rewrite -H3.
-- by apply/orP; left; rewrite H1.
-- by apply/orP; right; apply/andP; split;
-    [rewrite H1 H3|exact: leq_trans H2 H4].
-Qed.
-
-Let dv_leq_anti : antisymmetric dv_leq.
-Proof.
-move=> [d1 v1] [d2 v2]; rewrite /dv_leq /=.
-move/andP => [/orP [H1|/andP [/eqP H1 H2]] /orP [H3|/andP [/eqP H3 H4]]].
-- by have := ltn_trans H1 H3; rewrite ltnn.
-- by exfalso; rewrite H3 ltnn in H1.
-- by exfalso; rewrite H1 ltnn in H3.
-- by congr pair; [rewrite H1 | apply/anti_leq/andP].
-Qed.
-
-Let dv_leq_total : total dv_leq.
-Proof.
-move=> [d1 v1] [d2 v2]; rewrite /dv_leq /=.
-by case: ltngtP => //= E; rewrite ?E ?eqxx /= ?leq_total ?orbT.
-Qed.
-
-(* Permuted pair lists sort to the same list, dv_leq being a total order. *)
-Let sort_perm_eq_dv (s1 s2 : seq (nat * nat)) :
-  perm_eq s1 s2 -> sort dv_leq s1 = sort dv_leq s2.
-Proof.
-move=> Hp.
-have Hs1 := sort_sorted dv_leq_total s1.
-have Hs2 := sort_sorted dv_leq_total s2.
-have Hp' : perm_eq (sort dv_leq s1) (sort dv_leq s2).
-  by rewrite (perm_sort _ s1) perm_sym (perm_sort _ s2) perm_sym.
-exact: (sorted_eq dv_leq_trans dv_leq_anti Hs1 Hs2 Hp').
-Qed.
-
-(* foata_nf invariant under adjacent commuting swap *)
-Let foata_nf_swap_adj (crel : nat -> nat -> bool) a b (w1 w2 : seq nat) :
-  crel a b -> crel b a ->
-  foata_nf crel (w1 ++ a :: b :: w2) = foata_nf crel (w1 ++ b :: a :: w2).
-Proof.
-move=> Hab Hba; rewrite /foata_nf !foata_pairs_split'.
-congr (map snd); apply: sort_perm_eq_dv.
-exact: foata_pairs_swap_adj.
-Qed.
-
-(* ------------------------------------------------------------------ *)
-(* Key depth property: non-commuting predecessor forces higher depth   *)
-(* ------------------------------------------------------------------ *)
-
-Let foata_depth_noncomm_lb (crel : nat -> nat -> bool) prev d v x :
-  ~~ crel v x -> (d, v) \in prev ->
-  d.+1 <= foata_depth_at crel prev x.
-Proof.
-move=> Hnc Hin; rewrite foata_depth_at_bigop.
-exact: (leq_bigmax_seq (d, v) Hin Hnc).
-Qed.
-
-(* Adjacent out-of-order pair in foata_pairs implies commutativity *)
-Let foata_descent_comm' (crel : nat -> nat -> bool) prev w k :
-  k.+1 < size w ->
-  ~~ dv_leq (nth (0, 0) (foata_pairs crel prev w) (size prev + k))
-             (nth (0, 0) (foata_pairs crel prev w) (size prev + k.+1)) ->
-  crel (nth 0 w k) (nth 0 w k.+1).
-Proof.
-move=> Hk; rewrite /dv_leq negb_or -!ltnNge => /andP [Hlt _].
-apply/negPn/negP => Hnc.
-have Hk' := ltn_trans (ltnSn k) Hk.
-have Hdep : (nth (0, 0) (foata_pairs crel prev w) (size prev + k.+1)).1 >=
-  ((nth (0, 0) (foata_pairs crel prev w) (size prev + k)).1).+1.
-  rewrite (nth_foata_pairs_depth crel prev Hk).
-  rewrite (nth_foata_pairs_depth crel prev Hk').
-  rewrite (take_nth 0 Hk') -cats1 (foata_pairs_split' crel) /=.
-  apply: foata_depth_noncomm_lb; first exact: Hnc.
-  by rewrite mem_rcons inE eqxx.
-by have := leq_ltn_trans Hdep Hlt; rewrite ltnn.
-Qed.
-
-(* When foata_pairs is sorted, foata_nf = identity *)
-Let foata_nf_sorted (crel : nat -> nat -> bool) w :
-  sorted dv_leq (foata_pairs crel [::] w) -> foata_nf crel w = w.
-Proof.
-move=> Hs; rewrite /foata_nf.
-set ps := foata_pairs crel [::] w.
-have Hpe : perm_eq ps (sort dv_leq ps) by rewrite perm_sym perm_sort.
-have Heq := sorted_eq dv_leq_trans dv_leq_anti Hs (sort_sorted dv_leq_total ps) Hpe.
-rewrite -Heq; exact: foata_pairs_vals.
-Qed.
-
-(* Unsorted seq has adjacent descent *)
-Let not_sorted_descent' (s : seq (nat * nat)) :
-  1 < size s -> ~~ sorted dv_leq s ->
-  exists k : nat, k.+1 < size s /\
-    ~~ dv_leq (nth (0, 0) s k) (nth (0, 0) s k.+1).
-Proof.
-elim: s => [|a [|b s'] IH] //= _.
-rewrite negb_and => /orP [H|H].
-  by exists 0; rewrite H.
-have Hs : 1 < size (b :: s').
-  by case: (s') H => //= c s'' _; rewrite ltnS.
-have [k [Hk Hd]] := IH Hs H.
-by exists k.+1.
-Qed.
-
-(* ------------------------------------------------------------------ *)
-(* Word split and swap at nat level                                    *)
-(* ------------------------------------------------------------------ *)
-
-Let w_split_nat (k : nat) (w : seq nat) :
-  k.+1 < size w ->
-  w = take k w ++ nth 0 w k :: nth 0 w k.+1 :: drop k.+2 w.
-Proof.
-move=> Hk.
-have Hk' : k < size w := ltn_trans (ltnSn k) Hk.
-rewrite -{1}[w](cat_take_drop k).
-rewrite (drop_nth 0 Hk').
-by rewrite (drop_nth 0 Hk).
-Qed.
-
-(* ------------------------------------------------------------------ *)
-(* Foata inversion count and decrease under swap                       *)
-(* ------------------------------------------------------------------ *)
-
-(* The number of position pairs of w whose Foata pairs stand out of dv_leq
-   order.  It reaches 0 exactly on a word already in normal form, and drops
-   at every licensed swap, so it is the measure that makes normalisation
-   terminate. *)
-Let foata_inv (crel : nat -> nat -> bool) (w : seq nat) : nat :=
-  let ps := foata_pairs crel [::] w in
-  \sum_(i < size w) \sum_(j < size w | i < j)
-    (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
-
-(* A word with no Foata inversion has sorted Foata pairs, hence is its own
-   normal form. *)
-Let foata_inv_zero (crel : nat -> nat -> bool) w :
-  foata_inv crel w = 0 ->
-  sorted dv_leq (foata_pairs crel [::] w).
-Proof.
-rewrite /foata_inv => Hzero.
-apply/(sortedP (0,0)) => i; rewrite size_foata_pairs' /= add0n => Hi.
-apply/negPn/negP => Hneg.
-suff : 0 < \sum_(i0 < size w) \sum_(j0 < size w | i0 < j0)
-  (~~ dv_leq (nth (0, 0) (foata_pairs crel [::] w) i0)
-             (nth (0, 0) (foata_pairs crel [::] w) j0)) by rewrite Hzero.
-have Hi' : i < size w := ltn_trans (ltnSn i) Hi.
-rewrite (bigD1 (Ordinal Hi')) //=.
-apply: leq_trans; last exact: leq_addr.
-rewrite (bigD1 (Ordinal Hi)) //=.
-apply: leq_trans; last exact: leq_addr.
-by rewrite Hneg.
-Qed.
-
-(* foata_pairs structure after swap:
-   nth of foata_pairs for swap_nat k w equals nth of foata_pairs for w
-   with positions k and k+1 exchanged *)
-Let foata_pairs_swap_nth (crel : nat -> nat -> bool) w k :
-  (forall a b, crel a b -> crel b a) ->
-  k.+1 < size w ->
-  crel (nth 0 w k) (nth 0 w k.+1) ->
-  let sw := take k w ++ nth 0 w k.+1 :: nth 0 w k :: drop k.+2 w in
-  let ps := foata_pairs crel [::] w in
-  let ps' := foata_pairs crel [::] sw in
-  (forall i, i < size w ->
-    nth (0, 0) ps' i =
-    if i == k then nth (0, 0) ps k.+1
-    else if i == k.+1 then nth (0, 0) ps k
-    else nth (0, 0) ps i) /\
-  size sw = size w.
-Proof.
-move=> Hcsym Hk Hc /=.
-set sw := take k w ++ _ :: _ :: _.
-set ps := foata_pairs crel [::] w.
-set ps' := foata_pairs crel [::] sw.
-have Hsz : size sw = size w.
-  rewrite /sw size_cat /= size_drop (size_takel (ltnW (ltn_trans (ltnSn k) Hk))).
-  by rewrite -addn2 addnCA addn2 subnK.
-split => // i Hi.
-(* Decompose w and sw through foata_pairs_split' *)
-have Hw : w = take k w ++ nth 0 w k :: nth 0 w k.+1 :: drop k.+2 w.
-  exact: w_split_nat.
-(* ps = foata_pairs [::] w = foata_pairs P (a :: b :: suffix)
-   ps' = foata_pairs [::] sw = foata_pairs P (b :: a :: suffix)
-   where P = foata_pairs [::] (take k w), a = nth 0 w k, b = nth 0 w k.+1 *)
-set P := foata_pairs crel [::] (take k w).
-set a := nth 0 w k.
-set b := nth 0 w k.+1.
-set suffix := drop k.+2 w.
-have Hps : ps = foata_pairs crel P (a :: b :: suffix).
-  by rewrite /ps Hw foata_pairs_split'.
-have Hps' : ps' = foata_pairs crel P (b :: a :: suffix).
-  by rewrite /ps' /sw foata_pairs_split'.
-(* The depth of a from prefix P *)
-set da := foata_depth_at crel P a.
-set db := foata_depth_at crel P b.
-(* By commutativity, depth is the same whether we process a or b first *)
-have Hdb' : foata_depth_at crel (rcons P (da, a)) b = db.
-  by rewrite foata_depth_comm_rcons.
-have Hda' : foata_depth_at crel (rcons P (db, b)) a = da.
-  by rewrite foata_depth_comm_rcons // Hcsym.
-(* After processing [a; b] vs [b; a], the prefixes are permutations *)
-set P_ab := rcons (rcons P (da, a)) (db, b).
-set P_ba := rcons (rcons P (db, b)) (da, a).
-have Hpab : perm_eq P_ab P_ba.
-  rewrite /P_ab /P_ba; apply/seq.permP => p.
-  rewrite -cats1 -[rcons P (da, a)]cats1 -cats1 -[rcons P (db, b)]cats1.
-  by rewrite count_cat count_cat count_cat count_cat /= addn0 addn0 addnAC.
-(* For i < k: nth ps i and nth ps' i are the same (both in P) *)
-have HszP : size P = k.
-  by rewrite size_foata_pairs' /= add0n size_take (ltn_trans (ltnSn k) Hk).
-(* The prefixes P_ab and P_ba are permutations of one another and
-   foata_depth_at is invariant under permutation of the prefix.  Processing
-   the suffix left to right after either one therefore gives the same pair at
-   every position, not merely a permuted list of pairs. *)
-have Hsuffix_eq : forall j, j < size suffix ->
-  nth (0, 0) (foata_pairs crel P_ab suffix) (size P_ab + j) =
-  nth (0, 0) (foata_pairs crel P_ba suffix) (size P_ba + j).
-  (* By induction on suffix, using foata_depth_at_perm *)
-  elim: suffix P_ab P_ba Hpab {Hps Hps'} => [|x suf IH] Pab Pba Hpab j Hj //.
-  case: j Hj => [|j] Hj /=.
-    rewrite addn0 addn0.
-    set dab := foata_depth_at crel Pab x.
-    set dba := foata_depth_at crel Pba x.
-    set Pab' := rcons Pab (dab, x).
-    set Pba' := rcons Pba (dba, x).
-    have Hlt_ab : size Pab < size Pab' by rewrite /Pab' size_rcons.
-    have Hlt_ba : size Pba < size Pba' by rewrite /Pba' size_rcons.
-    rewrite -(nth_take (0,0) Hlt_ab) (foata_pairs_prefix crel Pab' suf).
-    rewrite -(nth_take (0,0) Hlt_ba) (foata_pairs_prefix crel Pba' suf).
-    rewrite /Pab' /Pba' nth_rcons nth_rcons ltnn ltnn eqxx eqxx.
-    by rewrite /dab /dba (foata_depth_at_perm _ _ Hpab).
-  have Hpab' : perm_eq (rcons Pab (foata_depth_at crel Pab x, x))
-                       (rcons Pba (foata_depth_at crel Pba x, x)).
-    rewrite (foata_depth_at_perm _ _ Hpab) -cats1 -(cats1 Pba).
-    exact: perm_cat Hpab _.
-  have -> : size Pab + j.+1 =
-    size (rcons Pab (foata_depth_at crel Pab x, x)) + j
-    by rewrite size_rcons addSnnS.
-  have -> : size Pba + j.+1 =
-    size (rcons Pba (foata_depth_at crel Pba x, x)) + j
-    by rewrite size_rcons addSnnS.
-  exact: IH.
-(* Now assemble: for i < k, i = k, i = k+1, i > k+1 *)
-case: (ltnP i k) => Hik.
-  (* i < k: both in prefix P *)
-  have -> : (i == k) = false by apply/negbTE; rewrite ltn_eqF.
-  have -> : (i == k.+1) = false by apply/negbTE; rewrite ltn_eqF // ltnS ltnW.
-  have Hi_lt_P : i < size P by rewrite HszP.
-  transitivity (nth (0, 0) P i); last first.
-    have -> : nth (0,0) ps i = nth (0,0) (take (size P) ps) i by rewrite nth_take.
-    by rewrite Hps (foata_pairs_prefix crel P (a :: b :: suffix)).
-  have -> : nth (0,0) ps' i = nth (0,0) (take (size P) ps') i by rewrite nth_take.
-  by rewrite Hps' (foata_pairs_prefix crel P (b :: a :: suffix)).
-(* i >= k *)
-case Heqk : (i == k).
-  (* i = k *)
-  rewrite (eqP Heqk).
-  (* ps' at k = (db, b) = ps at k.+1 *)
-  have HszPba : k < size P_ba by rewrite /P_ba !size_rcons HszP.
-  have HszPab : k.+1 < size P_ab by rewrite /P_ab !size_rcons HszP.
-  rewrite Hps' /= Hda'.
-  rewrite -(nth_take (0,0) HszPba) (foata_pairs_prefix crel P_ba suffix).
-  rewrite /P_ba !nth_rcons !size_rcons HszP ltnSn ltnn eqxx /=.
-  rewrite Hps /= Hdb'.
-  rewrite -(nth_take (0,0) HszPab) (foata_pairs_prefix crel P_ab suffix).
-  by rewrite /P_ab !nth_rcons !size_rcons HszP ltnn eqxx.
-have Hik' : k < i by rewrite ltn_neqAle eq_sym Heqk Hik.
-case Heqk1 : (i == k.+1).
-  (* i = k+1: ps' at k+1 = (da, a) = ps at k *)
-  rewrite (eqP Heqk1).
-  have HszPba1 : k.+1 < size P_ba by rewrite /P_ba !size_rcons HszP.
-  have HszPabk : k < size P_ab by rewrite /P_ab !size_rcons HszP.
-  rewrite Hps' /= Hda'.
-  rewrite -(nth_take (0,0) HszPba1) (foata_pairs_prefix crel P_ba suffix).
-  rewrite /P_ba !nth_rcons !size_rcons HszP ltnn eqxx /=.
-  rewrite Hps /= Hdb'.
-  rewrite -(nth_take (0,0) HszPabk) (foata_pairs_prefix crel P_ab suffix).
-  by rewrite /P_ab !nth_rcons !size_rcons HszP ltnSn ltnn eqxx.
-(* i > k+1: in the suffix *)
-have Hik1 : k.+1 < i by rewrite ltn_neqAle eq_sym Heqk1 Hik'.
-have Hsuf_i : i - k.+2 < size suffix.
-  by rewrite size_drop ltn_sub2rE.
-(* i > k+1: positions in the suffix are unchanged *)
-have HszPab2 : size P_ab = k.+2 by rewrite /P_ab !size_rcons HszP.
-have HszPba2 : size P_ba = k.+2 by rewrite /P_ba !size_rcons HszP.
-have Hi_eq : i = size P_ab + (i - k.+2).
-  by rewrite HszPab2 addnC subnK.
-have Hi_ba : i = size P_ba + (i - k.+2).
-  by rewrite HszPba2 addnC subnK.
-have Hps_ab : ps = foata_pairs crel P_ab suffix.
-  by rewrite Hps /= Hdb'.
-have Hps'_ba : ps' = foata_pairs crel P_ba suffix.
-  by rewrite Hps' /= Hda'.
-have Hsuf_eq_i := Hsuffix_eq _ Hsuf_i.
-have Hki : k.+2 <= i by [].
-have Hki2 : k.+2 + (i - k.+2) = i by rewrite addnC subnK.
-rewrite HszPab2 HszPba2 Hki2 in Hsuf_eq_i.
-by rewrite Hps'_ba Hps_ab.
-Qed.
-
-(* Swapping two commuting adjacent letters whose Foata pairs are out of order
-   strictly lowers the inversion count.  The descent step of the rewrite
-   system that carries a word to its normal form. *)
-Let foata_inv_swap_lt (crel : nat -> nat -> bool) w k :
-  (forall a b, crel a b -> crel b a) ->
-  k.+1 < size w ->
-  crel (nth 0 w k) (nth 0 w k.+1) ->
-  ~~ dv_leq (nth (0, 0) (foata_pairs crel [::] w) k)
-             (nth (0, 0) (foata_pairs crel [::] w) k.+1) ->
-  foata_inv crel (take k w ++ nth 0 w k.+1 :: nth 0 w k :: drop k.+2 w) <
-  foata_inv crel w.
-Proof.
-move=> Hcsym Hk Hc Hdesc.
-set sw := take k w ++ _ :: _ :: _.
-have [Hnth Hsz] := foata_pairs_swap_nth Hcsym Hk Hc.
-set ps := foata_pairs crel [::] w.
-set ps' := foata_pairs crel [::] sw.
-rewrite /foata_inv Hsz.
-(* ps' is ps precomposed with the transposition tp of k and k+1, so the
-   inversion indicator at (i,j) for the swapped word is the one at
-   (tp i, tp j) for the original.  tp reverses the order of exactly one pair,
-   (k+1, k), and that pair is not an inversion: dv_leq is total and Hdesc
-   says the pair at (k, k+1) is the one out of order.  Every other term is
-   matched, so the double sum loses exactly that one inversion. *)
-have Hk' : k < size w := ltn_trans (ltnSn k) Hk.
-have Hk1 : k.+1 < size w := Hk.
-suff Hlt_sum : \sum_(i < size w) \sum_(j < size w | i < j)
-  (~~ dv_leq (nth (0, 0) ps' i) (nth (0, 0) ps' j)) <
-  \sum_(i < size w) \sum_(j < size w | i < j)
-    (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
-  exact: Hlt_sum.
-(* Rewrite ps' using Hnth *)
-have Hnth_eq : forall i : 'I_(size w),
-  nth (0, 0) ps' i =
-  nth (0, 0) ps (if val i == k then k.+1 else if val i == k.+1 then k else val i).
-  move=> [i Hi] /=; rewrite Hnth //.
-  case: (i == k) => //; case: (i == k.+1) => //.
-(* Reindexing by tp turns the sum for ps' into a sum for ps whose filter is
-   tp i < tp j; comparing that filter pointwise with i < j leaves the strict
-   drop at (k, k+1). *)
-set tp := fun i : nat => if i == k then k.+1 else if i == k.+1 then k else i.
-have Htp_inv : forall i, tp (tp i) = i.
-  move=> i; rewrite /tp.
-  case Hi : (i == k).
-    by rewrite (eqP Hi) gtn_eqF // eqxx.
-  case Hi1 : (i == k.+1).
-    by rewrite (eqP Hi1) eqxx.
-  by rewrite Hi Hi1.
-have Htp_inj : injective tp.
-  by move=> i j Hij; rewrite -(Htp_inv i) -(Htp_inv j) Hij.
-(* Step A: LHS = sum with f(tp i, tp j) *)
-have Heq_tp : \sum_(i < size w) \sum_(j < size w | i < j)
-  (~~ dv_leq (nth (0, 0) ps' i) (nth (0, 0) ps' j)) =
-  \sum_(i < size w) \sum_(j < size w | i < j)
-  (~~ dv_leq (nth (0, 0) ps (tp i)) (nth (0, 0) ps (tp j))).
-  apply: eq_bigr => i _; apply: eq_bigr => j _.
-  by rewrite !Hnth_eq.
-rewrite Heq_tp.
-have Hfix : dv_leq (nth (0, 0) ps k.+1) (nth (0, 0) ps k).
-  by move: (dv_leq_total (nth (0, 0) ps k) (nth (0, 0) ps k.+1));
-     rewrite (negbTE Hdesc).
-(* Build ordinal-level transposition *)
-set ik : 'I_(size w) := Ordinal Hk'.
-set ik1 : 'I_(size w) := Ordinal Hk.
-have Hik_ne : ik != ik1.
-  by apply/eqP => /(congr1 val) /= /n_Sn.
-have Htp_bnd : forall i, i < size w -> tp i < size w.
-  move=> i Hi; rewrite /tp.
-  case: (i == k) => //; case: (i == k.+1) => //.
-set tp_ord := fun i : 'I_(size w) => Ordinal (Htp_bnd _ (ltn_ord i)) : 'I_(size w).
-have Htp_ord_val : forall i : 'I_(size w), val (tp_ord i) = tp (val i).
-  by move=> [i Hi].
-have Htp_ord_inv : forall i, tp_ord (tp_ord i) = i.
-  move=> i; apply: ord_inj; rewrite !Htp_ord_val; exact: Htp_inv.
-have Htp_ord_inj : injective tp_ord.
-  by move=> i j Hij; rewrite -(Htp_ord_inv i) -(Htp_ord_inv j) Hij.
-(* Rewrite LHS using reindex *)
-(* First, show tp_ord ik = ik1 and tp_ord ik1 = ik *)
-have Htp_ik : tp_ord ik = ik1.
-  by apply: ord_inj; rewrite Htp_ord_val /tp /= eqxx.
-have Htp_ik1 : tp_ord ik1 = ik.
-  by apply: ord_inj; rewrite Htp_ord_val /tp /= gtn_eqF // eqxx.
-have Hval_ik : forall j : 'I_(size w), val j = k -> j = ik.
-  by move=> j' /= Hj'; apply: ord_inj.
-have Hval_ik1 : forall j : 'I_(size w), val j = k.+1 -> j = ik1.
-  by move=> j' /= Hj'; apply: ord_inj.
-(* Step B: Reindex to get reindexed_sum *)
-have Hreindex : \sum_(i < size w) \sum_(j < size w | i < j)
-  (~~ dv_leq (nth (0, 0) ps (tp i)) (nth (0, 0) ps (tp j))) =
-  \sum_(i < size w) \sum_(j < size w | tp (val i) < tp (val j))
-    (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
-  have Htp_tp_ord : forall i : 'I_(size w),
-    tp (val (tp_ord i)) = val i.
-    by move=> i0; rewrite Htp_ord_val Htp_inv.
-  rewrite (reindex_inj Htp_ord_inj).
-  apply: eq_bigr => i _.
-  rewrite (reindex_inj Htp_ord_inj).
-  apply: eq_bigr => j _.
-  congr (~~ dv_leq (nth _ ps _) (nth _ ps _)); exact: Htp_tp_ord.
-rewrite Hreindex.
-(* Step C: Show reindexed_sum < orig_sum *)
-(* Strategy: big_mkcond + ltn_sum (pointwise <= with strict < at (ik,ik1)).
-   The only pair where tp reverses ordering is (ik1, ik),
-   but f(ik1, ik) = ~~ dv_leq ps[k+1] ps[k] = 0 (by Hfix), so the term is 0. *)
-(* Helper: ltn_sum - strict inequality from pointwise *)
-have ltn_sum_aux : forall (I : finType) (f0 g0 : I -> nat) (i0 : I),
-    (forall i, f0 i <= g0 i) -> f0 i0 < g0 i0 ->
-    \sum_i f0 i < \sum_i g0 i.
-  move=> I f0 g0 i0 Hle Hlt.
-  rewrite (bigD1 i0) // [X in _ < X](bigD1 i0) //.
-  have Hle_rest : \sum_(i | i != i0) f0 i <= \sum_(i | i != i0) g0 i.
-    by apply: leq_sum => i _; exact: Hle.
-  apply: (@leq_ltn_trans (f0 i0 + \sum_(i | i != i0) g0 i)).
-    by rewrite leq_add2l.
-  by rewrite ltn_add2r.
-(* Helper: tp computation lemmas *)
-have tpk : tp k = k.+1 by rewrite /tp eqxx.
-have tpk1 : tp k.+1 = k by rewrite /tp (gtn_eqF (ltnSn k)) eqxx.
-have tp_oth : forall m, m != k -> m != k.+1 -> tp m = m.
-  by move=> m /negbTE Hm /negbTE Hm1; rewrite /tp Hm Hm1.
-(* Helper: the only pair where tp reverses ordering is (k+1, k) *)
-have tp_swap_only : forall i j : nat,
-    tp i < tp j -> ~~ (i < j) -> i = k.+1 /\ j = k.
-  move=> i0 j0 Htp0 Horig0.
-  have [Hik0|Hik0] := boolP (i0 == k); have [Hjk0|Hjk0] := boolP (j0 == k).
-  - by move: Htp0; rewrite (eqP Hik0) (eqP Hjk0) tpk ltnn.
-  - have [Hjk1|Hjk1] := boolP (j0 == k.+1).
-    + by move: Htp0; rewrite (eqP Hik0) (eqP Hjk1) tpk tpk1 ltnNge leqnSn.
-    + exfalso; move/negP: Horig0; apply.
-      rewrite (eqP Hik0).
-      move: Htp0; rewrite (eqP Hik0) tpk (@tp_oth j0 Hjk0 Hjk1) => Hlt0.
-      exact: ltn_trans (ltnSn k) Hlt0.
-  - have [Hik10|Hik10] := boolP (i0 == k.+1).
-    + by rewrite (eqP Hik10) (eqP Hjk0).
-    + exfalso; move/negP: Horig0; apply.
-      rewrite (eqP Hjk0).
-      move: Htp0; rewrite (eqP Hjk0) tpk (@tp_oth i0 Hik0 Hik10) => Hlt0.
-      by rewrite ltn_neqAle Hik0 -ltnS.
-  - have [Hik10|Hik10] := boolP (i0 == k.+1); have [Hjk1|Hjk1] := boolP (j0 == k.+1).
-    + by move: Htp0; rewrite (eqP Hik10) (eqP Hjk1) tpk1 ltnn.
-    + exfalso; move/negP: Horig0; apply.
-      rewrite (eqP Hik10).
-      move: Htp0; rewrite (eqP Hik10) tpk1 (@tp_oth j0 Hjk0 Hjk1) => Hlt0.
-      rewrite ltn_neqAle eq_sym Hjk1 /=.
-      exact: Hlt0.
-    + exfalso; move/negP: Horig0; apply.
-      rewrite (eqP Hjk1).
-      move: Htp0; rewrite (eqP Hjk1) tpk1 (@tp_oth i0 Hik0 Hik10) => Hlt0.
-      exact: ltn_trans Hlt0 (ltnSn k).
-    + exfalso; move/negP: Horig0; apply.
-      by move: Htp0; rewrite (@tp_oth i0 Hik0 Hik10) (@tp_oth j0 Hjk0 Hjk1).
-(* Pointwise: [tp i < tp j] * f(i,j) <= [i < j] * f(i,j) *)
-have Hpw : forall i j : 'I_(size w),
-  (if tp (val i) < tp (val j)
-   then ~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j) : nat else 0) <=
-  (if val i < val j
-   then ~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j) : nat else 0).
-  move=> i0 j0.
-  case Horig0 : (val i0 < val j0) => /=.
-    by case : (tp (val i0) < tp (val j0)).
-  have [Htp0|Htp0] := boolP (tp (val i0) < tp (val j0)) => //.
-  have [Hi0 Hj0] := @tp_swap_only (val i0) (val j0) Htp0 (negbT Horig0).
-  have -> : i0 = ik1 by apply: ord_inj.
-  have -> : j0 = ik by apply: ord_inj.
-  by rewrite /= Hfix.
-(* Strict at (ik, ik1) *)
-have Hstrict : (if tp (val ik) < tp (val ik1)
-    then ~~ dv_leq (nth (0, 0) ps ik) (nth (0, 0) ps ik1) : nat else 0) <
-  (if val ik < val ik1
-    then ~~ dv_leq (nth (0, 0) ps ik) (nth (0, 0) ps ik1) : nat else 0).
-  rewrite /= tpk tpk1 ltnSn (negbTE Hdesc) /=.
-  by have -> : k.+1 < k = false by rewrite ltnNge leqnSn.
-(* Final: big_mkcond + ltn_sum twice *)
-rewrite [X in X < _]big_mkcond [X in _ < X]big_mkcond.
-apply: (@ltn_sum_aux _ _ _ ik).
-  move=> i0.
-  rewrite [X in X <= _]big_mkcond [X in _ <= X]big_mkcond.
-  exact: leq_sum (fun j0 _ => Hpw i0 j0).
-rewrite [X in X < _]big_mkcond [X in _ < X]big_mkcond.
-apply: (@ltn_sum_aux _ _ _ ik1).
-  move=> j0.
-  exact: Hpw ik j0.
-exact: Hstrict.
-Qed.
-
-(* ------------------------------------------------------------------ *)
-(* Soundness: foata_nf(w) reachable via adjacent commuting swaps      *)
-(* ------------------------------------------------------------------ *)
-
-(* We prove: for any word w (with entries < some bound),
-   w is trace-equivalent to foata_nf(w).
-   Here trace-equiv at nat level means obtainable by adjacent commuting swaps. *)
-
-Let foata_nf_sound (crel : nat -> nat -> bool) w :
-  (forall a b, crel a b -> crel b a) ->
-  exists ws : seq (seq nat),
-    last w ws = foata_nf crel w /\
-    forall i, i < size ws ->
-      let w0 := nth [::] (w :: ws) i in
-      let w1 := nth [::] (w :: ws) i.+1 in
-      exists k, k.+1 < size w0 /\
-        crel (nth 0 w0 k) (nth 0 w0 k.+1) /\
-        crel (nth 0 w0 k.+1) (nth 0 w0 k) /\
-        w1 = take k w0 ++ nth 0 w0 k.+1 :: nth 0 w0 k :: drop k.+2 w0.
-Proof.
-move=> Hcsym.
-move: w.
-apply: (well_founded_induction_type
-  (Wf_nat.well_founded_ltof _ (foata_inv crel))).
-move=> w IH.
-case Hs : (sorted dv_leq (foata_pairs crel [::] w)).
-  exists [::]; split; first by rewrite /= foata_nf_sorted.
-  by move=> i.
-(* Not sorted: find adjacent descent *)
-have Hsz : 1 < size w.
-  case Hw : (size w) => [|[|n]] //.
-  1,2: exfalso; move/negP: Hs; apply;
-       by case: w Hw IH => [|a [|b w']] //=.
-have Hszfp : 1 < size (foata_pairs crel [::] w)
-  by rewrite size_foata_pairs' /= add0n.
-have [k0 [Hk0 Hk0d]] := not_sorted_descent' Hszfp (negbT Hs).
-rewrite size_foata_pairs' /= add0n in Hk0.
-have Hcomm : crel (nth 0 w k0) (nth 0 w k0.+1).
-  exact: foata_descent_comm' Hk0 Hk0d.
-set sw := take k0 w ++ nth 0 w k0.+1 :: nth 0 w k0 :: drop k0.+2 w.
-have Hnf : foata_nf crel sw = foata_nf crel w.
-  rewrite /sw.
-  transitivity (foata_nf crel (take k0 w ++ nth 0 w k0 :: nth 0 w k0.+1 :: drop k0.+2 w)).
-    apply foata_nf_swap_adj; [exact: Hcsym | exact: Hcomm].
-  congr (foata_nf crel). symmetry; exact: w_split_nat.
-have Hlt : @Wf_nat.ltof _ (foata_inv crel) sw w.
-  rewrite /Wf_nat.ltof /sw; apply/ltP.
-  exact: foata_inv_swap_lt Hcsym Hk0 Hcomm Hk0d.
-have [ws [Hlast Hsteps]] := IH sw Hlt.
-exists (sw :: ws); split.
-  by rewrite /= Hlast Hnf.
-case => [|i] Hi /=.
-  exists k0; repeat split => //; exact: Hcsym.
-exact: Hsteps.
-Qed.
 
 (* ------------------------------------------------------------------ *)
 (* Lift nat-level trace equivalence to ordinal level                   *)
