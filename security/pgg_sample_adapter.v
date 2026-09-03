@@ -224,7 +224,7 @@ Variable content_obs :
 
 (* Endpoint equation at every sample point: the executed endpoints are the
    static observation. *)
-Hypothesis Hep : forall u : sa_sampleT sa,
+Hypothesis endpoint_eq : forall u : sa_sampleT sa,
   @exec_endpoints mp e (sa.(sa_arg) u) (sa.(sa_cut) u) P_idx
   = @exec_static_endpoints mp e content_obs (sa.(sa_arg) u) (sa.(sa_cut) u).
 
@@ -251,7 +251,7 @@ Definition sa_static_coalition_view (C : {set 'I_(pi_T' (mp_PI mp)).+1})
 (** sa_seat_viewE — the executed seat reader is the static observation. *)
 Lemma sa_seat_viewE (i : 'I_(pi_T' (mp_PI mp)).+1) :
   sa_seat_view i = sa_static_seat_view i.
-Proof. by apply: funext => u; exact: (exec_seat_endpointE (Hep u) i). Qed.
+Proof. by apply: funext => u; exact: (exec_seat_endpointE (endpoint_eq u) i). Qed.
 
 (** sa_seat_distE — the executed seat distribution is the static
     observation's distribution: sa_seat_dist i = fdistmap
@@ -264,7 +264,7 @@ Proof. by rewrite /sa_seat_dist sa_seat_viewE. Qed.
     observation over the coalition. *)
 Lemma sa_coalition_viewE (C : {set 'I_(pi_T' (mp_PI mp)).+1}) :
   sa_coalition_view C = sa_static_coalition_view C.
-Proof. by apply: funext => u; exact: (exec_coalition_endpointsE (Hep u) C). Qed.
+Proof. by apply: funext => u; exact: (exec_coalition_endpointsE (endpoint_eq u) C). Qed.
 
 (** sa_coalition_distE — the executed coalition distribution is the static
     observation's distribution: sa_coalition_dist C = fdistmap

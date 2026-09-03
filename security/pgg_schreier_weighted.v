@@ -372,18 +372,18 @@ Let N := n'.+2.
 Variable Q : 'M[R]_(N, N).
 Variables a b : R.
 
-Hypothesis Hdiag : forall x : 'I_N, Q x x = a.
-Hypothesis Hoffdiag : forall x y : 'I_N, x != y -> Q x y = b.
-Hypothesis Hcol : forall y : 'I_N, \sum_x Q x y = 1.
+Hypothesis Q_diag : forall x : 'I_N, Q x x = a.
+Hypothesis Q_offdiag : forall x y : 'I_N, x != y -> Q x y = b.
+Hypothesis Q_col_sum : forall y : 'I_N, \sum_x Q x y = 1.
 
 (** Row stochastic follows from column stochastic + uniform-off-diagonal:
     a + (N-1)*b = 1. We derive this rather than assuming it. *)
 Lemma unif_offdiag_row_sum : a + (N.-1)%:R * b = 1.
 Proof.
 rewrite mulr_natl.
-have := Hcol ord0.
-rewrite (bigD1 ord0) //= Hdiag.
-rewrite (eq_bigr (fun=> b)); last by move=> i Hi; rewrite Hoffdiag // eq_sym.
+have := Q_col_sum ord0.
+rewrite (bigD1 ord0) //= Q_diag.
+rewrite (eq_bigr (fun=> b)); last by move=> i Hi; rewrite Q_offdiag // eq_sym.
 by rewrite sumr_const cardC1 card_ord.
 Qed.
 
@@ -418,7 +418,7 @@ rewrite exprSr.
 under eq_bigr do rewrite mxE.
 rewrite exchange_big /=.
 under eq_bigr => j _ do rewrite -mulr_suml IH mul1r.
-exact: Hcol.
+exact: Q_col_sum.
 Qed.
 
 (** Q^L entries for uniform-off-diagonal matrices *)
@@ -428,11 +428,11 @@ Proof.
 elim: L => [|L IH].
   by rewrite !expr0 mxE mul1r subrK.
 rewrite exprS mxE.
-rewrite (bigD1 s) //= Hdiag.
+rewrite (bigD1 s) //= Q_diag.
 have -> : \sum_(i < N | i != s) Q s i * (Q ^+ L) i x =
           b * \sum_(i < N | i != s) (Q ^+ L) i x.
   rewrite mulr_sumr; apply: eq_bigr => i Hi.
-  by rewrite Hoffdiag // eq_sym.
+  by rewrite Q_offdiag // eq_sym.
 have -> : \sum_(i < N | i != s) (Q ^+ L) i x = 1 - (Q ^+ L) s x.
   have := doubly_stochastic_power L x.
   rewrite (bigD1 s) //=.

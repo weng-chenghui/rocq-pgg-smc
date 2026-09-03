@@ -134,7 +134,7 @@ Definition grover_search_cost (M : nat) : nat := isqrt M.
 Section security_tradeoff.
 
 Variable r : nat.
-Hypothesis Hr : 1 < r.
+Hypothesis r_gt1 : 1 < r.
 
 Let kappa := r.*2 - 1.
 
@@ -164,7 +164,7 @@ Theorem grover_mitigation (L : nat) :
   kappa ^ L <= grover_search_cost (ball_size r (2 * L)).
 Proof.
 rewrite /grover_search_cost.
-apply: (leq_trans _ (isqrt_monotone (ball_size_lower Hr (2 * L)))).
+apply: (leq_trans _ (isqrt_monotone (ball_size_lower r_gt1 (2 * L)))).
 rewrite kappa_sq_L.
 exact: isqrt_expn.
 Qed.

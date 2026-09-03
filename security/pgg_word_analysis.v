@@ -391,7 +391,7 @@ Section fiber_count.
 Variable T : finType.
 Variable m : nat.
 Variables (fi fj : 'I_m.+2).
-Hypothesis Hfij : fi != fj.
+Hypothesis neq_fij : fi != fj.
 
 Let fib (a b : T) :=
   [set w : m.+2.-tuple T | (tnth w fi == a) && (tnth w fj == b)].

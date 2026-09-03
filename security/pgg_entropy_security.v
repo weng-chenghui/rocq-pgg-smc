@@ -157,7 +157,7 @@ Section entropy_uniform_supp.
 Context {R : realType}.
 Variable A : finType.
 Variable C : {set A}.
-Hypothesis HC : (0 < #|C|)%N.
+Hypothesis card_C_gt0 : (0 < #|C|)%N.
 
 (** entropy_uniform_supp — the Shannon entropy of the law uniform on a
     support C of size |C| is exactly log |C|, the maximum entropy
@@ -165,10 +165,10 @@ Hypothesis HC : (0 < #|C|)%N.
     fiber-decomposition formula specializes to when every fiber has size
     one. *)
 Lemma entropy_uniform_supp :
-  `H (@fdist_uniform_supp R A C HC) = log #|C|%:R :> R.
+  `H (@fdist_uniform_supp R A C card_C_gt0) = log #|C|%:R :> R.
 Proof.
 rewrite /entropy fdist_uniform_supp_restrict.
-have -> : \sum_(t in C) (`U HC) t * log ((`U HC) t) =
+have -> : \sum_(t in C) (`U card_C_gt0) t * log ((`U card_C_gt0) t) =
           \sum_(t in C) #|C|%:R^-1 * log (#|C|%:R^-1 : R).
   apply: eq_bigr => i Hi. by rewrite fdist_uniform_supp_in.
 rewrite big_const iter_addr addr0 logV; last by rewrite ltr0n.
@@ -191,7 +191,7 @@ Section entropy_fdistmap_uniform_supp.
 Context {R : realType}.
 Variables (A B : finType).
 Variable C : {set A}.
-Hypothesis HC : (0 < #|C|)%N.
+Hypothesis card_C_gt0 : (0 < #|C|)%N.
 Variable f : A -> B.
 
 Let img := f @: C.
@@ -205,20 +205,20 @@ Let fiber_at (b : B) := [set a in C | f a == b].
     c_y = 1) and specializes, in Section 3, to the endpoint map to give
     fiber_entropy_general's word-fiber entropy formula. *)
 Lemma entropy_fdistmap_uniform_supp :
-  `H (fdistmap f (@fdist_uniform_supp R A C HC)) =
+  `H (fdistmap f (@fdist_uniform_supp R A C card_C_gt0)) =
   log #|C|%:R -
   #|C|%:R^-1 *
   \sum_(b in img) #|fiber_at b|%:R * log #|fiber_at b|%:R.
 Proof.
 rewrite /entropy.
-set P := fdistmap f (`U HC).
+set P := fdistmap f (`U card_C_gt0).
 have P0 : forall y, y \notin img -> P y = 0.
   move=> y Hy; rewrite /P fdistmapE big1 // => a.
   rewrite inE => /eqP Hfa; apply: fdist_uniform_supp_notin.
   apply/negP => aC; move/negP: Hy; apply; apply/imsetP; by exists a.
 have Pval : forall y : B, P y = #|fiber_at y|%:R * #|C|%:R^-1.
   move=> y; rewrite /P fdistmapE.
-  transitivity (\sum_(a in fiber_at y) (`U HC) a : R).
+  transitivity (\sum_(a in fiber_at y) (`U card_C_gt0) a : R).
     rewrite (bigID (fun a => a \in C)) /=.
     rewrite [X in _ + X]big1 ?addr0; last first.
       by move=> a /andP [Ha HaC]; rewrite fdist_uniform_supp_notin.
@@ -306,7 +306,7 @@ Definition fiber_entropy (s : 'I_N) : R :=
    Balanced case: all c_x = k -> sum = |img|*k*log k -> H = log|img|.
    Unbalanced: H < log|img| (additional loss from fiber unevenness). *)
 Lemma fiber_entropy_general (s : 'I_N)
-    (Hlfree : @weval_inj M L) :
+    (lfree : @weval_inj M L) :
   let img_s := (fun sigma : {perm 'I_N} => sigma s) @: @achievable M L in
   let fiber_s x := [set sigma in @achievable M L | sigma s == x] in
   fiber_entropy s =
@@ -315,11 +315,11 @@ Lemma fiber_entropy_general (s : 'I_N)
   \sum_(x in img_s) #|fiber_s x|%:R * log #|fiber_s x|%:R.
 Proof.
 move=> img_s fiber_s.
-rewrite /fiber_entropy (rho_from_words_uniform_supp Hlfree).
+rewrite /fiber_entropy (rho_from_words_uniform_supp lfree).
 rewrite entropy_fdistmap_uniform_supp.
 have -> : #|@achievable M L| = (Tg ^ L)%N.
   by have -> : #|@achievable M L| = @search_space M L by [];
-     exact: (weval_inj_search_space Hlfree).
+     exact: (weval_inj_search_space lfree).
 by rewrite /img_s /fiber_s.
 Qed.
 
@@ -328,7 +328,7 @@ Qed.
    of that size. Applies to: Cyclic (trivially), Abelian/Disjoint, Monster
    (axiom). *)
 Lemma fiber_entropy_injective (s : 'I_N)
-    (Hlfree : @weval_inj M L)
+    (lfree : @weval_inj M L)
     (Hinj_s : {in @achievable M L &,
                injective (fun sigma : {perm 'I_N} => sigma s)}) :
   fiber_entropy s = log (Tg ^ L)%:R.
@@ -337,7 +337,7 @@ Proof.
    the pushforward into uniform_supp(image); the entropy of a
    uniform-on-image law is log of the image size, which
    weval_inj_search_space computes as Tg^L. *)
-rewrite /fiber_entropy (rho_from_words_uniform_supp Hlfree).
+rewrite /fiber_entropy (rho_from_words_uniform_supp lfree).
 rewrite (fdistmap_uniform_supp_inj _ Hinj_s) entropy_uniform_supp.
 congr (log _%:R).
 rewrite card_in_imset //.
@@ -350,7 +350,7 @@ Qed.
    When Tg^L = N, the achievable permutations cover all N card positions
    injectively, so the endpoint distribution is uniform on 'I_N. *)
 Lemma fiber_entropy_perfect (s : 'I_N)
-    (Hlfree : @weval_inj M L)
+    (lfree : @weval_inj M L)
     (Hinj_s : {in @achievable M L &,
                injective (fun sigma : {perm 'I_N} => sigma s)})
     (Hbal : (Tg ^ L = N)%N) :
@@ -491,7 +491,7 @@ Variable L : nat.
 Variable sigmas : Tg.-tuple {perm 'I_N}.
 Let M := Gen_PGGTypes sigmas.
 
-Hypothesis Hlfree : @weval_inj M L.
+Hypothesis lfree : @weval_inj M L.
 
 Let card_word_L' : #|{: L.-tuple 'I_Tg}| = (Tg ^ L).-1.+1.
 Proof. by rewrite card_tuple card_ord prednK // expn_gt0. Qed.
@@ -633,7 +633,7 @@ Let M := Gen_PGGTypes sigmas.
    Given weval_inj and perm_endpoint injectivity on achievable(L) for all s,
    sets ew_min_entropy = log(Tg^L) and ew_rho_dist = rho_from_words. *)
 Definition entropy_witness_inj (L : nat)
-    (Hlfree : @weval_inj M L)
+    (lfree : @weval_inj M L)
     (Hinj_s : forall s : 'I_n'.+2,
       {in @achievable M L &,
        injective (fun sigma : {perm 'I_n'.+2} => sigma s)})
@@ -642,7 +642,7 @@ Proof.
 refine (@MkEntropyWitness R M L (log (m.+1 ^ L)%:R)
          (rho_from_words (R:=R) L sigmas) _).
 move=> s.
-rewrite -(fiber_entropy_injective (R:=R) (N'':=n') (sigmas:=sigmas) Hlfree
+rewrite -(fiber_entropy_injective (R:=R) (N'':=n') (sigmas:=sigmas) lfree
           (Hinj_s s)).
 exact: Order.POrderTheory.lexx.
 Defined.
@@ -719,8 +719,8 @@ Lemma joint_entropy_le_log_words :
 Proof.
 rewrite /joint_fiber_entropy /joint_endpoint_dist /rho_from_words fdistmap_comp.
 rewrite /word_uniform.
-have HC : (0 < #|[set: L.-tuple 'I_Tg]|)%N by rewrite cardsT card_word_L.
-have Hbridge : fdist_uniform (card_word_L m L) = @fdist_uniform_supp R _ _ HC.
+have card_C_gt0 : (0 < #|[set: L.-tuple 'I_Tg]|)%N by rewrite cardsT card_word_L.
+have Hbridge : fdist_uniform (card_word_L m L) = @fdist_uniform_supp R _ _ card_C_gt0.
   by apply: fdist_ext => x;
      rewrite fdist_uniformE fdist_uniform_supp_in ?inE // cardsT.
 rewrite Hbridge entropy_fdistmap_uniform_supp.
@@ -792,13 +792,13 @@ Qed.
    Both are required. Without T-fold injectivity, multiple achievable
    permutations can produce the same T-tuple of endpoints. *)
 Lemma joint_entropy_full
-    (Hlfree : @weval_inj M L)
+    (lfree : @weval_inj M L)
     (Hjoint_inj : {in @achievable M L &,
                    injective joint_endpoint}) :
   joint_fiber_entropy = log (Tg ^ L)%:R.
 Proof.
 rewrite /joint_fiber_entropy /joint_endpoint_dist.
-rewrite (rho_from_words_uniform_supp Hlfree).
+rewrite (rho_from_words_uniform_supp lfree).
 rewrite (fdistmap_uniform_supp_inj _ Hjoint_inj).
 rewrite entropy_uniform_supp.
 congr (log _%:R).

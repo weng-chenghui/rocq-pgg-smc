@@ -44,7 +44,7 @@ Section monster_perfect.
 Variable R : realType.
 
 (* Saturation: 2^Lstar = N *)
-Hypothesis Hsat : (2 ^ monster_Lstar = monster_n.+2)%N.
+Hypothesis Lstar_sat : (2 ^ monster_Lstar = monster_n.+2)%N.
 
 (* EntropyWitness via pe_inj *)
 Definition monster_entropy_witness_Lstar : EntropyWitness R R_monster :=
@@ -55,7 +55,7 @@ Definition monster_entropy_witness_Lstar : EntropyWitness R R_monster :=
 Lemma monster_entropy_perfect (s : 'I_monster_n.+2) :
   fiber_entropy (R:=R) monster_Lstar monster_sigmas s = log monster_n.+2%:R.
 Proof.
-rewrite fiber_entropy_injective ?Hsat //;
+rewrite fiber_entropy_injective ?Lstar_sat //;
   first exact: monster_weval_inj_Lstar.
 exact: monster_perm_endpoint_inj_Lstar.
 Qed.
@@ -72,7 +72,7 @@ Lemma monster_entropy_eps_perfect :
 Proof.
 rewrite /monster_security_from_entropy /security_witness_from_entropy /=.
 rewrite /monster_entropy_witness_Lstar /entropy_witness_inj /=.
-by rewrite Hsat subrr mulr0 sqrtr0.
+by rewrite Lstar_sat subrr mulr0 sqrtr0.
 Qed.
 
 End monster_perfect.
@@ -86,8 +86,8 @@ Section monster_short_L.
 Variable R : realType.
 Variable L : nat.
 
-Hypothesis Hweval : @weval_inj M_monster L.
-Hypothesis Hpe : forall s : 'I_monster_n.+2,
+Hypothesis lfree : @weval_inj M_monster L.
+Hypothesis pe_inj : forall s : 'I_monster_n.+2,
   {in @achievable M_monster L &,
    injective (fun sigma : {perm 'I_monster_n.+2} => sigma s)}.
 
@@ -109,7 +109,7 @@ Proof. exact: fiber_entropy_gap. Qed.
 
 (* EntropyWitness: H_min = log(2^L) *)
 Definition monster_entropy_witness_short_L : EntropyWitness R R_monster :=
-  @entropy_witness_inj R _ _ monster_sigmas _ Hweval Hpe.
+  @entropy_witness_inj R _ _ monster_sigmas _ lfree pe_inj.
 
 (** monster_security_short_L — the short-word monster marginal bound:
     security_witness_from_entropy at the short-L entropy witness, with
@@ -256,7 +256,7 @@ Let R_oc : MonodromyReprWithGeneratorType := M_oc.
 
 Variable H_min : R.
 Variable rho_dist : R.-fdist {perm 'I_4}.
-Hypothesis Hbound : forall s : 'I_4,
+Hypothesis H_min_floor : forall s : 'I_4,
   (H_min <= `H (fdistmap (fun sigma : {perm 'I_4} => sigma s) rho_dist))%O.
 
 (** oc_entropy_witness_L — the OC(2,3) instance's EntropyWitness at an
@@ -264,7 +264,7 @@ Hypothesis Hbound : forall s : 'I_4,
     and its witnessing rho_dist, used to study how epsilon shrinks as L (and
     with it H_min) grows toward log N. *)
 Definition oc_entropy_witness_L : EntropyWitness R R_oc :=
-  @entropy_witness_from_rho R R_oc L rho_dist H_min Hbound.
+  @entropy_witness_from_rho R R_oc L rho_dist H_min H_min_floor.
 
 (** oc_security_from_entropy_L — the L-indexed marginal bound for OC: the
     L-indexed entropy witness pushed through Pinsker via

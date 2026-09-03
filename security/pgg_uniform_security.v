@@ -14,8 +14,8 @@
 (* Hypotheses:                                                                *)
 (*   - pgg_rho is injective on pgg_G M (faithfulness)                         *)
 (*   - The image rhoG acts regularly on 'I_N:                                 *)
-(*     * Hregular: eval_at s is injective on rhoG for all s                   *)
-(*     * Htrans: the image of rhoG under eval_at s is [set: 'I_N] for all s  *)
+(*     * pe_inj: eval_at s is injective on rhoG for all s                   *)
+(*     * rhoG_trans: the image of rhoG under eval_at s is [set: 'I_N] for all s  *)
 (*                                                                            *)
 (* Mathematical argument:                                                     *)
 (*   uniform(rhoG) --[eval_at s]--> uniform(eval_at s @: rhoG)               *)
@@ -50,19 +50,19 @@ Section uniform_supp_setT.
 Context {R : realType}.
 Variable A : finType.
 Variable n : nat.
-Hypothesis Hn : #|A| = n.+1.
+Hypothesis card_A : #|A| = n.+1.
 
 Let HsetT : (0 < #|[set: A]|)%N.
-Proof. by rewrite cardsT Hn. Qed.
+Proof. by rewrite cardsT card_A. Qed.
 
 (* fdist_uniform_supp over the universal set [set: A] equals the
-   cardinal-indexed fdist_uniform Hn.  Bridges the support-restricted
+   cardinal-indexed fdist_uniform card_A.  Bridges the support-restricted
    uniform construction, needed while rhoG's support is a proper subset,
    and the plain cardinal-indexed uniform that is the endpoint bound's
    target, once transitivity (img_setT) shows the support has become
    everything. *)
 Lemma fdist_uniform_supp_setT :
-  @fdist_uniform_supp R A [set: A] HsetT = fdist_uniform Hn.
+  @fdist_uniform_supp R A [set: A] HsetT = fdist_uniform card_A.
 Proof.
 apply/fdist_ext => a.
 rewrite fdist_uniform_supp_in ?inE // fdist_uniformE.
@@ -107,22 +107,22 @@ Let G := pgg_G M.
 Let rho := morphism.mfun (@pgg_rho M).
 Let rhoG : {set {perm 'I_N}} := [set rho x | x in G].
 
-Hypothesis HrhoG_pos : (0 < #|rhoG|)%N.
+Hypothesis card_rhoG_gt0 : (0 < #|rhoG|)%N.
 
 (* Regularity: eval_at s is injective on rhoG *)
-Hypothesis Hregular :
+Hypothesis pe_inj :
   forall s : 'I_N,
   {in rhoG &, injective (fun sigma : {perm 'I_N} => sigma s)}.
 
 (* Transitivity: the orbit of every card position s under rhoG is all of
    'I_N *)
-Hypothesis Htrans :
+Hypothesis rhoG_trans :
   forall s : 'I_N,
   [set (sigma : {perm 'I_N}) s | sigma in rhoG] = [set: 'I_N].
 
 (* The distribution: uniform over rhoG *)
 Let rho_uniform : R.-fdist {perm 'I_N} :=
-  @fdist_uniform_supp R _ rhoG HrhoG_pos.
+  @fdist_uniform_supp R _ rhoG card_rhoG_gt0.
 
 (* eval_at s *)
 Let eval_at (s : 'I_N) : {perm 'I_N} -> 'I_N :=
@@ -132,26 +132,26 @@ Let eval_at (s : 'I_N) : {perm 'I_N} -> 'I_N :=
 Let img (s : 'I_N) := (eval_at s) @: rhoG.
 
 (* img s, the endpoint image of rhoG at card position s, is non-empty, since
-   rhoG itself is non-empty (HrhoG_pos).  Housekeeping needed only to
+   rhoG itself is non-empty (card_rhoG_gt0).  Housekeeping needed only to
    construct fdist_uniform_supp on img s in eval_pushforward; img_setT
    below is the fact that actually pins down img s. *)
 Lemma img_pos (s : 'I_N) : (0 < #|img s|)%N.
 Proof.
 rewrite card_gt0; apply/set0Pn.
-have /card_gt0P [g Hg] := HrhoG_pos.
+have /card_gt0P [g Hg] := card_rhoG_gt0.
 by exists (g s); apply/imsetP; exists g.
 Qed.
 
 (* Key: the image is all of 'I_N *)
 Lemma img_setT (s : 'I_N) : img s = [set: 'I_N].
-Proof. exact: Htrans s. Qed.
+Proof. exact: rhoG_trans s. Qed.
 
 (* The pushforward of uniform(rhoG) through eval_at s is uniform(img s) *)
 Lemma eval_pushforward (s : 'I_N) :
   fdistmap (eval_at s) rho_uniform =
   @fdist_uniform_supp R _ (img s) (img_pos s).
 Proof.
-rewrite (@fdistmap_uniform_supp_inj R _ _ rhoG HrhoG_pos (eval_at s) (@Hregular s)).
+rewrite (@fdistmap_uniform_supp_inj R _ _ rhoG card_rhoG_gt0 (eval_at s) (@pe_inj s)).
 congr fdist_uniform_supp; exact: eq_irrelevance.
 Qed.
 
@@ -196,4 +196,4 @@ Definition uniform_security_witness (L : nat) : ShuffleCertificateBundle R M :=
 
 End uniform_security.
 
-Arguments uniform_security_witness {R M} HrhoG_pos Hregular Htrans L.
+Arguments uniform_security_witness {R M} card_rhoG_gt0 pe_inj rhoG_trans L.

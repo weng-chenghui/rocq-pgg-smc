@@ -42,7 +42,7 @@ Let G := pgg_G M.
    single card position, they must be equal. This is stronger than
    faithfulness (which requires agreement on ALL points). Regularity =
    free + transitive. *)
-Hypothesis Hreg : forall (g1 g2 : gT) (s : 'I_N),
+Hypothesis endpoint_free : forall (g1 g2 : gT) (s : 'I_N),
   g1 \in G -> g2 \in G ->
   endpoint g1 s = endpoint g2 s -> g1 = g2.
 
@@ -53,7 +53,7 @@ Hypothesis Hreg : forall (g1 g2 : gT) (s : 'I_N),
 Lemma one_eval_determines_perm (g1 g2 : gT) (s : 'I_N) :
   g1 \in G -> g2 \in G ->
   endpoint g1 s = endpoint g2 s -> g1 = g2.
-Proof. exact: Hreg. Qed.
+Proof. exact: endpoint_free. Qed.
 
 End regular_action.
 
@@ -72,10 +72,10 @@ Let Tg := (@pgg_ngens' M).+1.
 
 Variable L : nat.
 
-Hypothesis Habel : abelian G.
+Hypothesis abelG : abelian G.
 
 (* Regularity hypothesis for the monodromy representation *)
-Hypothesis Hreg : forall (g1 g2 : gT) (s : 'I_N),
+Hypothesis endpoint_free : forall (g1 g2 : gT) (s : 'I_N),
   g1 \in G -> g2 \in G ->
   endpoint g1 s = endpoint g2 s -> g1 = g2.
 
@@ -93,7 +93,7 @@ Lemma abelian_adversary_full_recovery (w1 w2 : pgg_word M L) (s : 'I_N) :
   endpoint (word_eval w1) s = endpoint (word_eval w2) s ->
   word_eval w1 = word_eval w2.
 Proof.
-by move=> Heq; apply: (Hreg (word_eval_in_G w1) (word_eval_in_G w2) Heq).
+by move=> Heq; apply: (endpoint_free (word_eval_in_G w1) (word_eval_in_G w2) Heq).
 Qed.
 
 (* Security collapse: search space bounded by frequency vector count *)
