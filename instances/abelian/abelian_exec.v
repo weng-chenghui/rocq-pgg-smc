@@ -154,12 +154,12 @@ Qed.
     interchangeable.  It connects what the program does to what the sharing
     scheme promises. *)
 Lemma abel_decodeE (e : ExecutionPlug abel_profile) (ep : seq 'I_4)
-    (Hsz : size ep = (pi_T' (mp_PI abel_profile)).+1)
-    (Hsz' : size ep = (ts_T' abel_ts).+1) :
-  @exec_decode abel_profile e ep Hsz
-  = ts_recon abel_ts (tcast Hsz' (in_tuple ep)).
+    (sz_ep : size ep = (pi_T' (mp_PI abel_profile)).+1)
+    (sz_ep' : size ep = (ts_T' abel_ts).+1) :
+  @exec_decode abel_profile e ep sz_ep
+  = ts_recon abel_ts (tcast sz_ep' (in_tuple ep)).
 Proof.
-by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
+by rewrite /exec_decode /run_recover (eq_irrelevance (etrans sz_ep _) sz_ep').
 Qed.
 
 (******************************************************************************)
@@ -237,14 +237,14 @@ Proof. by rewrite (exec_endpoints_size (abel_exec_endpoints s w0)). Qed.
     its shares. *)
 Lemma abel_exec_recon (s : 'I_4) (w0 : pgg_gT abel_M) :
   w0 \in pgg_G abel_M ->
-  forall Hsz : size (@exec_static_endpoints abel_profile abel_exec_plug
+  forall sz_ep : size (@exec_static_endpoints abel_profile abel_exec_plug
                        abel_content_obs s w0) = (pi_T' (mp_PI abel_profile)).+1,
   @exec_decode abel_profile abel_exec_plug
     (@exec_static_endpoints abel_profile abel_exec_plug abel_content_obs s w0)
-    Hsz = s.
+    sz_ep = s.
 Proof.
-move=> Gw0 Hsz.
-rewrite (abel_decodeE abel_exec_plug Hsz Hsz).
+move=> Gw0 sz_ep.
+rewrite (abel_decodeE abel_exec_plug sz_ep sz_ep).
 rewrite -[RHS](abel_sum_mod_perm_compatible Gw0 (ts_encode_valid abel_ts s)).
 congr (ts_recon _ _); apply: eq_from_tnth => i.
 by rewrite abel_static_tnth tnth_mktuple /abel_content_obs /= tnth_ord_tuple.
@@ -383,13 +383,13 @@ Proof. by rewrite (exec_endpoints_size (abel_shuffle_endpoints x w0)). Qed.
     sum leaves it alone. *)
 Lemma abel_shuffle_recon (x : unit) (w0 : pgg_gT abel_M) :
   w0 \in pgg_G abel_M ->
-  forall Hsz : size (@exec_static_endpoints abel_profile abel_shuffle_plug
+  forall sz_ep : size (@exec_static_endpoints abel_profile abel_shuffle_plug
                        abel_id_obs x w0) = (pi_T' (mp_PI abel_profile)).+1,
   @exec_decode abel_profile abel_shuffle_plug
     (@exec_static_endpoints abel_profile abel_shuffle_plug abel_id_obs x w0)
-    Hsz = abel_identity_recon_value.
+    sz_ep = abel_identity_recon_value.
 Proof.
-move=> Gw0 Hsz; rewrite (abel_decodeE abel_shuffle_plug Hsz Hsz).
+move=> Gw0 sz_ep; rewrite (abel_decodeE abel_shuffle_plug sz_ep sz_ep).
 apply: val_inj => /=.
 under eq_bigr do rewrite (abel_static_tnth (e:=abel_shuffle_plug)).
 under eq_bigr do rewrite /abel_id_obs /= tnth_ord_tuple abel_rhoE.

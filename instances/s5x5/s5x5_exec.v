@@ -233,12 +233,12 @@ Proof. by rewrite (exec_endpoints_size (s5x5_exec_endpoints s w0)). Qed.
     the endpoint tuple, so the plug's abstract exec_decode field can be read
     concretely as the instance's product reconstruction. *)
 Lemma s5x5_exec_decodeE (ep : seq 'I_(pgg_N' (mp_M mpX)).+1)
-    (Hsz : size ep = (pi_T' (mp_PI mpX)).+1)
-    (Hsz' : size ep = (ts_T' s5x5_scheme).+1) :
-  @exec_decode mpX s5x5_exec_plug ep Hsz
-  = ts_recon s5x5_scheme (tcast Hsz' (in_tuple ep)).
+    (sz_ep : size ep = (pi_T' (mp_PI mpX)).+1)
+    (sz_ep' : size ep = (ts_T' s5x5_scheme).+1) :
+  @exec_decode mpX s5x5_exec_plug ep sz_ep
+  = ts_recon s5x5_scheme (tcast sz_ep' (in_tuple ep)).
 Proof.
-by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
+by rewrite /exec_decode /run_recover (eq_irrelevance (etrans sz_ep _) sz_ep').
 Qed.
 
 (** s5x5_exec_recon — decoding the static observation returns the dealt
@@ -248,16 +248,16 @@ Qed.
     actual endpoints. *)
 Lemma s5x5_exec_recon (s : 'I_10) (w0 : pgg_gT s5x5_M) :
   w0 \in pgg_G s5x5_M ->
-  forall Hsz : size (@exec_static_endpoints mpX s5x5_exec_plug
+  forall sz_ep : size (@exec_static_endpoints mpX s5x5_exec_plug
                        s5x5_content_obs s w0)
                = (pi_T' (mp_PI mpX)).+1,
   @exec_decode mpX s5x5_exec_plug
-    (@exec_static_endpoints mpX s5x5_exec_plug s5x5_content_obs s w0) Hsz = s.
+    (@exec_static_endpoints mpX s5x5_exec_plug s5x5_content_obs s w0) sz_ep = s.
 Proof.
 move=> Gw0.
 rewrite -s5x5_exec_endpoints /exec_endpoints /exec_run s5x5_exec_fuelE
-        s5x5_exec_procsE /exec_verifier_id => Hsz.
-rewrite (s5x5_exec_decodeE Hsz (s5x5_endpoints_size s w0)).
+        s5x5_exec_procsE /exec_verifier_id => sz_ep.
+rewrite (s5x5_exec_decodeE sz_ep (s5x5_endpoints_size s w0)).
 exact: (s5x5_run_recovers s Gw0).
 Qed.
 
@@ -810,13 +810,13 @@ Lemma s5x5_rand_run_recovers (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
 Proof.
 move=> Gw0.
 have Hgoal : forall (ep : seq 'I_(pgg_N' s5x5_M).+1)
-    (Hsz : size ep = (ts_T' s5x5_scheme).+1),
+    (sz_ep : size ep = (ts_T' s5x5_scheme).+1),
     ep = [seq tnth (s5x5_rfree_layout uv)
                 (pgg_rho w0 (tnth (pi_starts s5x5_PI) i))
           | i <- enum 'I_(pi_T' s5x5_PI).+1] ->
-    ts_recon s5x5_scheme (tcast Hsz (in_tuple ep))
+    ts_recon s5x5_scheme (tcast sz_ep (in_tuple ep))
     = @combine_secret 3 3 (uv.1 ord0 ord0) (uv.2 ord0 ord0).
-  move=> ep Hsz Hep.
+  move=> ep sz_ep Hep.
   rewrite -(@s5x5_rfree_recon uv w0 Gw0).
   congr (ts_recon _ _).
   apply: eq_from_tnth => i.
@@ -912,12 +912,12 @@ Proof. by rewrite (exec_endpoints_size (s5x5_rand_endpoints uv w0)). Qed.
     s5x5_scheme applied to the endpoint tuple, the randomized counterpart of
     s5x5_exec_decodeE. *)
 Lemma s5x5_rand_decodeE (ep : seq 'I_(pgg_N' (mp_M mpX)).+1)
-    (Hsz : size ep = (pi_T' (mp_PI mpX)).+1)
-    (Hsz' : size ep = (ts_T' s5x5_scheme).+1) :
-  @exec_decode mpX s5x5_rand_exec_plug ep Hsz
-  = ts_recon s5x5_scheme (tcast Hsz' (in_tuple ep)).
+    (sz_ep : size ep = (pi_T' (mp_PI mpX)).+1)
+    (sz_ep' : size ep = (ts_T' s5x5_scheme).+1) :
+  @exec_decode mpX s5x5_rand_exec_plug ep sz_ep
+  = ts_recon s5x5_scheme (tcast sz_ep' (in_tuple ep)).
 Proof.
-by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
+by rewrite /exec_decode /run_recover (eq_irrelevance (etrans sz_ep _) sz_ep').
 Qed.
 
 (******************************************************************************)
@@ -995,18 +995,18 @@ Proof. by apply: ord_inj. Qed.
 Lemma s5x5_rand_recon (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
     (w0 : pgg_gT s5x5_M) :
   w0 \in pgg_G s5x5_M ->
-  forall Hsz : size (@exec_static_endpoints mpX s5x5_rand_exec_plug
+  forall sz_ep : size (@exec_static_endpoints mpX s5x5_rand_exec_plug
                        s5x5_rcontent_obs uv w0)
                = (pi_T' (mp_PI mpX)).+1,
   @exec_decode mpX s5x5_rand_exec_plug
     (@exec_static_endpoints mpX s5x5_rand_exec_plug s5x5_rcontent_obs uv w0)
-    Hsz
+    sz_ep
   = s5x5_codec (s5x5_joint_tape_secret uv).
 Proof.
 move=> Gw0.
 rewrite -s5x5_rand_endpoints /exec_endpoints /exec_run s5x5_rand_fuelE
-        s5x5_rand_procsE /exec_verifier_id => Hsz.
-rewrite (s5x5_rand_decodeE Hsz (s5x5_rand_endpoints_size uv w0)).
+        s5x5_rand_procsE /exec_verifier_id => sz_ep.
+rewrite (s5x5_rand_decodeE sz_ep (s5x5_rand_endpoints_size uv w0)).
 exact: (@s5x5_rand_run_recovers uv w0 Gw0).
 Qed.
 

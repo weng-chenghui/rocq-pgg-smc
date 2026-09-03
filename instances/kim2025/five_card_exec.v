@@ -218,22 +218,22 @@ Qed.
 (** five_card_exec_decodeE — the plug's decoder is the instance's
     reconstruction. *)
 Lemma five_card_exec_decodeE (ep : seq 'I_(pgg_N' (mp_M mpF)).+1)
-    (Hsz : size ep = (pi_T' (mp_PI mpF)).+1)
-    (Hsz' : size ep = (ts_T' fcI_scheme).+1) :
-  @exec_decode mpF five_card_exec_plug ep Hsz
-  = ts_recon fcI_scheme (tcast Hsz' (in_tuple ep)).
+    (sz_ep : size ep = (pi_T' (mp_PI mpF)).+1)
+    (sz_ep' : size ep = (ts_T' fcI_scheme).+1) :
+  @exec_decode mpF five_card_exec_plug ep sz_ep
+  = ts_recon fcI_scheme (tcast sz_ep' (in_tuple ep)).
 Proof.
-by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
+by rewrite /exec_decode /run_recover (eq_irrelevance (etrans sz_ep _) sz_ep').
 Qed.
 
 (** five_card_exec_decode_seqE — the plug's decoder reads the endpoint list as
     the three-consecutive-cards predicate of the decoded endpoints. *)
 Lemma five_card_exec_decode_seqE (ep : seq 'I_(pgg_N' (mp_M mpF)).+1)
-    (Hsz : size ep = (pi_T' (mp_PI mpF)).+1) :
-  @exec_decode mpF five_card_exec_plug ep Hsz
+    (sz_ep : size ep = (pi_T' (mp_PI mpF)).+1) :
+  @exec_decode mpF five_card_exec_plug ep sz_ep
   = fc_three_consec [seq decode_bool x | x <- ep].
 Proof.
-rewrite (five_card_exec_decodeE Hsz Hsz).
+rewrite (five_card_exec_decodeE sz_ep sz_ep).
 by rewrite /ts_recon /fcI_scheme /fcI_recon val_tcast.
 Qed.
 
@@ -242,15 +242,15 @@ Qed.
     proof of the endpoint count. *)
 Lemma five_card_exec_recon (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
   w0 \in pgg_G FiveCardKim_M ->
-  forall Hsz : size (@exec_static_endpoints mpF five_card_exec_plug
+  forall sz_ep : size (@exec_static_endpoints mpF five_card_exec_plug
                        five_card_content_obs (a, b) w0)
                = (pi_T' (mp_PI mpF)).+1,
   @exec_decode mpF five_card_exec_plug
     (@exec_static_endpoints mpF five_card_exec_plug five_card_content_obs
-       (a, b) w0) Hsz
+       (a, b) w0) sz_ep
   = (a, b).1 && (a, b).2.
 Proof.
-move=> Gw0 Hsz; rewrite five_card_exec_decode_seqE -five_card_exec_endpoints.
+move=> Gw0 sz_ep; rewrite five_card_exec_decode_seqE -five_card_exec_endpoints.
 rewrite /exec_endpoints /exec_run five_card_exec_fuelE five_card_exec_procsE.
 exact: (den_boer_run_recovers a b w0 Gw0).
 Qed.
@@ -400,12 +400,12 @@ Proof. by case: x => a b; exact: five_card_exec_endpoints. Qed.
 Lemma five_card_oe_static_recon (x : bool * bool)
     (w0 : pgg_gT FiveCardKim_M) :
   w0 \in pgg_G FiveCardKim_M ->
-  forall Hsz : size (@exec_static_endpoints mpF five_card_exec_plug
+  forall sz_ep : size (@exec_static_endpoints mpF five_card_exec_plug
                        five_card_content_obs x w0)
                = (pi_T' (mp_PI mpF)).+1,
   @exec_decode mpF five_card_exec_plug
     (@exec_static_endpoints mpF five_card_exec_plug five_card_content_obs x w0)
-    Hsz
+    sz_ep
   = x.1 && x.2.
 Proof. by case: x => a b; exact: five_card_exec_recon. Qed.
 

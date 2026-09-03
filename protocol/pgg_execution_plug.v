@@ -267,8 +267,8 @@ Proof. by rewrite e.(ep_players_bridge). Qed.
    run_recover and reconstructed there. This is the single point where a
    raw endpoint list is turned back into the profile's secret carrier. *)
 Definition exec_decode (ep : seq 'I_(pgg_N' (mp_M mp)).+1)
-    (Hsz : size ep = (pi_T' (mp_PI mp)).+1) : mp_secretT mp :=
-  run_recover (tcast (etrans Hsz exec_seat_share_count) (in_tuple ep)).
+    (sz_ep : size ep = (pi_T' (mp_PI mp)).+1) : mp_secretT mp :=
+  run_recover (tcast (etrans sz_ep exec_seat_share_count) (in_tuple ep)).
 
 (* The static group-action observation over the seats: content_obs x read at
    the cut w0 and each participant's starting position, computed with no
@@ -309,9 +309,9 @@ Hypothesis Hep : exec_endpoints x w0 P_idx
 
 (* Static recovery: decoding the static observation returns the expected
    value. *)
-Hypothesis Hrecon : forall Hsz : size (exec_static_endpoints content_obs x w0)
+Hypothesis Hrecon : forall sz_ep : size (exec_static_endpoints content_obs x w0)
     = (pi_T' (mp_PI mp)).+1,
-  @exec_decode (exec_static_endpoints content_obs x w0) Hsz = expected x.
+  @exec_decode (exec_static_endpoints content_obs x w0) sz_ep = expected x.
 
 (* Under the endpoint equation Hep, the run collects exactly one endpoint
    per seat: the count fact exec_run_recovers below needs to type-check its

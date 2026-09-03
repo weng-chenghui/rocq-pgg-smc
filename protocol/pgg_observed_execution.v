@@ -126,12 +126,12 @@ Record ObservedExecution := MkObservedExecution {
   oe_static_recon : forall (x : ep_inputT oe_execution)
                            (w0 : pgg_gT (mp_M oe_profile)),
     w0 \in pgg_G (mp_M oe_profile) ->
-    forall Hsz : size (@exec_static_endpoints oe_profile oe_execution
+    forall sz_ep : size (@exec_static_endpoints oe_profile oe_execution
                          oe_content_obs x w0)
                  = (pi_T' (mp_PI oe_profile)).+1,
     @exec_decode oe_profile oe_execution
       (@exec_static_endpoints oe_profile oe_execution oe_content_obs x w0)
-      Hsz
+      sz_ep
     = oe_expected x ;
 }.
 

@@ -160,28 +160,28 @@ Qed.
 (** pgl27_exec_decodeE — the plug's decoder is the instance's
     reconstruction. *)
 Lemma pgl27_exec_decodeE (ep : seq 'I_(pgg_N' (mp_M mpP)).+1)
-    (Hsz : size ep = (pi_T' (mp_PI mpP)).+1)
-    (Hsz' : size ep = (ts_T' orbit_scheme).+1) :
-  @exec_decode mpP pgl27_exec_plug ep Hsz
-  = ts_recon orbit_scheme (tcast Hsz' (in_tuple ep)).
+    (sz_ep : size ep = (pi_T' (mp_PI mpP)).+1)
+    (sz_ep' : size ep = (ts_T' orbit_scheme).+1) :
+  @exec_decode mpP pgl27_exec_plug ep sz_ep
+  = ts_recon orbit_scheme (tcast sz_ep' (in_tuple ep)).
 Proof.
-by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
+by rewrite /exec_decode /run_recover (eq_irrelevance (etrans sz_ep _) sz_ep').
 Qed.
 
 (** pgl27_exec_recon — decoding the static observation returns the dealt
     secret, for any cut in the group and any proof of the endpoint count. *)
 Lemma pgl27_exec_recon (s : bool) (w0 : pgg_gT pgl27_M) :
   w0 \in pgg_G pgl27_M ->
-  forall Hsz : size (@exec_static_endpoints mpP pgl27_exec_plug
+  forall sz_ep : size (@exec_static_endpoints mpP pgl27_exec_plug
                        pgl27_content_obs s w0) = (pi_T' (mp_PI mpP)).+1,
   @exec_decode mpP pgl27_exec_plug
     (@exec_static_endpoints mpP pgl27_exec_plug pgl27_content_obs s w0)
-    Hsz = s.
+    sz_ep = s.
 Proof.
 move=> Gw0.
 rewrite -pgl27_exec_endpoints /exec_endpoints /exec_run pgl27_exec_fuelE
-        pgl27_exec_procsE /exec_verifier_id => Hsz.
-rewrite (pgl27_exec_decodeE Hsz (pgl27_endpoints_size s w0)).
+        pgl27_exec_procsE /exec_verifier_id => sz_ep.
+rewrite (pgl27_exec_decodeE sz_ep (pgl27_endpoints_size s w0)).
 exact: (pgl27_run_recovers s Gw0).
 Qed.
 
