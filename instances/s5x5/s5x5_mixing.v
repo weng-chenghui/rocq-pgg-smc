@@ -563,7 +563,7 @@ Qed.
 
 Variable R : realType.
 Variable fdU : R.-fdist 'I_10.
-Hypothesis HfdU : forall i : 'I_10, fdU i = 5%:R^-1 \/ fdU i = 0.
+Hypothesis fdU_two_valued : forall i : 'I_10, fdU i = 5%:R^-1 \/ fdU i = 0.
 
 Local Lemma var_dist_uniform_pile_generic :
   var_dist fdU (fdist_uniform (card_ord 10)) = 1.
@@ -572,7 +572,7 @@ rewrite /var_dist.
 rewrite (eq_bigr (fun _ : 'I_10 => 10%:R^-1 : R)); last first.
 - move=> i _.
   rewrite fdist_uniformE card_ord.
-  case: (HfdU i) => ->.
+  case: (fdU_two_valued i) => ->.
   + have step1 : (5%:R^-1 - 10%:R^-1 : R) = 10%:R^-1.
       apply: (mulIf (x := 10%:R)); first by rewrite pnatr_eq0.
       rewrite mulrBl mulVf ?pnatr_eq0 //.

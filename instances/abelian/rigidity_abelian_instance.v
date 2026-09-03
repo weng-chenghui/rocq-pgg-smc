@@ -163,7 +163,7 @@ Let R_abel : MonodromyReprWithGeneratorType :=
 
 (* The monodromy group is nontrivial: the covering construction below needs
    more than one group element to act with. *)
-Hypothesis HG_abel : (1 < #|pgg_G R_abel|)%N.
+Hypothesis card_G_abel_gt1 : (1 < #|pgg_G R_abel|)%N.
 
 (* The Reed-Solomon alphabet: a finite field GF(q^m') with as many elements as
    there are card positions, so that a card position can carry a field
@@ -174,7 +174,7 @@ Variable n'' : nat.
 Variable a : GF m' primeq.
 Hypothesis qn : ~~ (q %| n''.+3)%nat.
 Hypothesis an : (n''.+3).-primitive_root a.
-Hypothesis HN : (pgg_N' R_abel).+1 = #|GF m' primeq|.
+Hypothesis defN : (pgg_N' R_abel).+1 = #|GF m' primeq|.
 
 (* Every shuffle in the group acts on the code's coordinates by a permutation
    that fixes the evaluation point 0 and carries codewords to codewords.  This
@@ -191,7 +191,7 @@ Hypothesis code_auto :
    parameters above, presented as a genus-0 covering, where reconstruction
    needs no more shares than privacy already forbids. *)
 Definition abel_covering : CoveringScheme R_abel :=
-  genus0_covering HG_abel qn an HN sigma_fix0 code_auto.
+  genus0_covering card_G_abel_gt1 qn an defN sigma_fix0 code_auto.
 
 (* The group is no larger than Klein's genus-0 automorphism bound.  This is
    the one algebraic-geometry input the threshold half takes on trust.  A

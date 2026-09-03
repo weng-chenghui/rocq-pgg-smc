@@ -372,7 +372,7 @@ Let s5_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 
 (* Group nontriviality. Could be discharged by computation since |S_5| = 120. *)
-Hypothesis HG_s5_crypto : (1 < #|pgg_G s5_M|)%N.
+Hypothesis card_G_s5_gt1 : (1 < #|pgg_G s5_M|)%N.
 
 (* Card-position count: 5 card positions (pgg_N' = 4) —
    definitionally true. *)
@@ -424,7 +424,7 @@ Let s5_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 
 (* Group nontriviality *)
-Hypothesis HG_s5 : (1 < #|pgg_G s5_M|)%N.
+Hypothesis card_G_s5_gt1 : (1 < #|pgg_G s5_M|)%N.
 
 (* Card-position count for s5_M: 5 card positions (pgg_N' = 4). Verified
    definitionally
