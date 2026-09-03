@@ -300,45 +300,45 @@ Variable expected : ep_inputT e -> mp_secretT mp.
 Variables (x : ep_inputT e) (w0 : pgg_gT (mp_M mp)) (P_idx : nat).
 
 (* Termination: every process of the run reaches Finish. *)
-Hypothesis Hterm : (exec_run x w0 P_idx).1
+Hypothesis exec_term : (exec_run x w0 P_idx).1
   = nseq (size (exec_procs x w0 P_idx)) Finish.
 
 (* Endpoint equation: the executed endpoints are the static observation. *)
-Hypothesis Hep : exec_endpoints x w0 P_idx
+Hypothesis endpoint_eq : exec_endpoints x w0 P_idx
   = exec_static_endpoints content_obs x w0.
 
 (* Static recovery: decoding the static observation returns the expected
    value. *)
-Hypothesis Hrecon : forall sz_ep : size (exec_static_endpoints content_obs x w0)
+Hypothesis static_recovery : forall sz_ep : size (exec_static_endpoints content_obs x w0)
     = (pi_T' (mp_PI mp)).+1,
   @exec_decode (exec_static_endpoints content_obs x w0) sz_ep = expected x.
 
-(* Under the endpoint equation Hep, the run collects exactly one endpoint
+(* Under the endpoint equation endpoint_eq, the run collects exactly one endpoint
    per seat: the count fact exec_run_recovers below needs to type-check its
    decode call against run_recover's expected tuple length. *)
 Lemma exec_endpoints_size : size (exec_endpoints x w0 P_idx)
   = (pi_T' (mp_PI mp)).+1.
-Proof. by rewrite Hep exec_static_endpoints_size. Qed.
+Proof. by rewrite endpoint_eq exec_static_endpoints_size. Qed.
 
 (* Decoding the run's actually-executed endpoints returns the expected value
-   expected x: the termination equation Hterm gets the run to a state where
-   endpoints exist to decode, the endpoint equation Hep identifies them with
-   the static observation, and the static-recovery hypothesis Hrecon decodes
+   expected x: the termination equation exec_term gets the run to a state where
+   endpoints exist to decode, the endpoint equation endpoint_eq identifies them with
+   the static observation, and the static-recovery hypothesis static_recovery decodes
    that observation to expected x, so the composite decode of the real run
    trace matches. *)
 Theorem exec_run_recovers :
   @exec_decode (exec_endpoints x w0 P_idx) exec_endpoints_size = expected x.
-Proof. by move: exec_endpoints_size; rewrite Hep; exact: Hrecon. Qed.
+Proof. by move: exec_endpoints_size; rewrite endpoint_eq; exact: static_recovery. Qed.
 
 (* Seat i's actually-executed endpoint is the static observation
    content_obs x (w0, tnth (pi_starts (mp_PI mp)) i): the pointwise form of
-   the endpoint equation Hep, giving one seat's value without needing the
+   the endpoint equation endpoint_eq, giving one seat's value without needing the
    whole endpoint list. *)
 Lemma exec_seat_endpointE (i : 'I_(pi_T' (mp_PI mp)).+1) :
   exec_seat_endpoint x w0 P_idx i
   = content_obs x (w0, tnth (pi_starts (mp_PI mp)) i).
 Proof.
-rewrite /exec_seat_endpoint Hep /exec_static_endpoints e.(ep_playersE).
+rewrite /exec_seat_endpoint endpoint_eq /exec_static_endpoints e.(ep_playersE).
 by rewrite (nth_map i) ?size_enum_ord // nth_ord_enum.
 Qed.
 
@@ -369,7 +369,7 @@ Lemma exec_coalition_endpoints_seqE (C : {set 'I_(pi_T' (mp_PI mp)).+1}) :
 Proof. by apply: eq_map => i; exact: exec_seat_endpointE. Qed.
 
 (* One run satisfies all three correctness facts at once: it reaches Finish
-   at every process (Hterm), it collects exactly one endpoint per seat
+   at every process (exec_term), it collects exactly one endpoint per seat
    (exec_endpoints_size), and decoding those endpoints returns expected x
    (exec_run_recovers). This packages the three separately-provable
    hypotheses of the section into the single conjunction downstream
@@ -381,7 +381,7 @@ Theorem exec_run_correct :
       = expected x].
 Proof.
 by split;
-  [exact: Hterm | exact: exec_endpoints_size | exact: exec_run_recovers].
+  [exact: exec_term | exact: exec_endpoints_size | exact: exec_run_recovers].
 Qed.
 
 End run_of_static_observation.

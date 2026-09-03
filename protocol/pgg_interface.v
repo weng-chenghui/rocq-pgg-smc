@@ -565,12 +565,12 @@ Variable M : MonodromyReprType.
 Variable T' : nat.
 Let T := T'.+1.
 Let N := (pgg_N' M).+1.
-Hypothesis HT : T <= N.
+Hypothesis TN : T <= N.
 
-(* Widening 'I_T along HT : T <= N and enumerating gives exactly T card
+(* Widening 'I_T along TN : T <= N and enumerating gives exactly T card
    positions, the size obligation the dependent Tuple constructor needs to
    package gen_starts_T below. *)
-Lemma gen_starts_T_size : size (map (widen_ord HT) (enum 'I_T)) == T.
+Lemma gen_starts_T_size : size (map (widen_ord TN) (enum 'I_T)) == T.
 Proof. by rewrite size_map size_enum_ord. Qed.
 
 (* The starting tuple assigning the first T card positions of the N-card
