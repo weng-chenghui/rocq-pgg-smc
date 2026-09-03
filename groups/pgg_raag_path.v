@@ -31,7 +31,7 @@ From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 (*   path_gen i == tperm (ordinal i) (ordinal (i+1))                          *)
 (*   path_comm i j == |i-j| >= 2                                              *)
 (*   path_gen_inj == generators are injective                                 *)
-(*   path_Hcomm == generators at path distance >= 2 commute                   *)
+(*   path_gen_comm == generators at path distance >= 2 commute                *)
 (*   path_adj_noncommute == generators 0 and 1 do not commute (m >= 1)        *)
 (*   path_G_nonabelian == non-abelian for m >= 1 (via gen_nonabelian)         *)
 (*   path_traces_lb == 2^L <= n_traces (adjacent pair forms indep set)        *)
@@ -132,7 +132,7 @@ Let M_path : MonodromyReprWithGeneratorType := Path_PGGTypes.
    This edge relation is the sole input to the trace count: its cliques give
    the clique polynomial and its independent sets give lower bounds.  It is
    a statement about the graph and not about the group.  The generators do
-   satisfy it, by path_Hcomm below, but Sym('I_N) satisfies further relations
+   satisfy it, by path_gen_comm below, but Sym('I_N) satisfies further relations
    as well, so trace classes counted from this graph bound the number of
    words up to commutation rather than the number of deck permutations
    reached. *)
@@ -179,7 +179,7 @@ Qed.
     commutation field of the RAAG mixin, so every relation the path graph
     declares does hold of the permutations, which is what licenses reading
     the trace count of the graph as a count of distinct dealer words. *)
-Lemma path_Hcomm : forall i j : 'I_T,
+Lemma path_gen_comm : forall i j : 'I_T,
   path_comm i j ->
   (tnth path_gen_tuple i * tnth path_gen_tuple j =
    tnth path_gen_tuple j * tnth path_gen_tuple i)%g.
@@ -202,12 +202,12 @@ Lemma path_gen_inj_sigmas :
   injective (fun i : 'I_T => tnth (@pgg_sigmas M_path) i).
 Proof. by move=> i j; rewrite !path_gen_tupleE; exact: path_gen_inj. Qed.
 
-(** path_Hcomm restated through the abstract pgg_sigmas accessor. *)
-Lemma path_Hcomm_sigmas : forall i j : 'I_T,
+(** path_gen_comm restated through the abstract pgg_sigmas accessor. *)
+Lemma path_gen_comm_sigmas : forall i j : 'I_T,
   path_comm i j ->
   (tnth (@pgg_sigmas M_path) i * tnth (@pgg_sigmas M_path) j =
    tnth (@pgg_sigmas M_path) j * tnth (@pgg_sigmas M_path) i)%g.
-Proof. by move=> i j; exact: path_Hcomm. Qed.
+Proof. by move=> i j; exact: path_gen_comm. Qed.
 
 (* --- Non-abelianity (via generic) --- *)
 
@@ -280,7 +280,7 @@ Qed.
 HB.instance Definition Path_isRAAG :=
   @isRAAG0.Build Path_PGGTypes
     path_comm path_comm_sym path_comm_irrefl
-    path_Hcomm_sigmas path_gen_inj_sigmas.
+    path_gen_comm_sigmas path_gen_inj_sigmas.
 
 (* The same instance seen as a RAAG, the form the trace theory consumes. *)
 Let R_path : RAAGType := Path_PGGTypes.

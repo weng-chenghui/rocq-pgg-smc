@@ -880,8 +880,9 @@ End foata_infrastructure.
    of the generator map.
    These five fields are the entire input to the trace theory below.  The
    graph fixes which adjacent letters of a word may be exchanged, hence the
-   trace classes and their number; raag_Hcomm makes each exchange invisible
-   to word_eval, so trace-equivalent words reach the same deck permutation;
+   trace classes and their number; raag_sigmas_comm makes each exchange
+   invisible to word_eval, so trace-equivalent words reach the same deck
+   permutation;
    and raag_gen_inj keeps an alphabet of nominal size Tg from silently
    collapsing to a smaller one.
    Nothing here forbids the group from satisfying further relations.  The
@@ -892,7 +893,7 @@ HB.mixin Record isRAAG0 (T : PGGTypes) of MonodromyReprWithGenerator T := {
   raag_comm : rel 'I_(@pgg_ngens' T).+1 ;
   raag_comm_sym : symmetric raag_comm ;
   raag_comm_irrefl : irreflexive raag_comm ;
-  raag_Hcomm : forall i j : 'I_(@pgg_ngens' T).+1,
+  raag_sigmas_comm : forall i j : 'I_(@pgg_ngens' T).+1,
     raag_comm i j ->
     (tnth (@pgg_sigmas T) i * tnth (@pgg_sigmas T) j =
      tnth (@pgg_sigmas T) j * tnth (@pgg_sigmas T) i)%g ;
@@ -912,7 +913,7 @@ HB.factory Record isRAAG (T : PGGTypes) of MonodromyReprWithGenerator T := {
   raag_comm : rel 'I_(@pgg_ngens' T).+1 ;
   raag_comm_sym : symmetric raag_comm ;
   raag_comm_irrefl : irreflexive raag_comm ;
-  raag_Hcomm : forall i j : 'I_(@pgg_ngens' T).+1,
+  raag_sigmas_comm : forall i j : 'I_(@pgg_ngens' T).+1,
     raag_comm i j ->
     (tnth (@pgg_sigmas T) i * tnth (@pgg_sigmas T) j =
      tnth (@pgg_sigmas T) j * tnth (@pgg_sigmas T) i)%g ;
@@ -922,7 +923,7 @@ HB.factory Record isRAAG (T : PGGTypes) of MonodromyReprWithGenerator T := {
 
 HB.builders Context T of isRAAG T.
   HB.instance Definition _ := @isRAAG0.Build T
-    raag_comm raag_comm_sym raag_comm_irrefl raag_Hcomm raag_gen_inj.
+    raag_comm raag_comm_sym raag_comm_irrefl raag_sigmas_comm raag_gen_inj.
 HB.end.
 
 (* ========================================================================== *)
@@ -945,7 +946,7 @@ Let comm_sym : symmetric comm := @raag_comm_sym R.
 Let comm_irrefl : irreflexive comm := @raag_comm_irrefl R.
 Let Hcomm : forall i j : 'I_Tg,
   comm i j -> (tnth sigmas i * tnth sigmas j = tnth sigmas j * tnth sigmas i)%g
-  := @raag_Hcomm R.
+  := @raag_sigmas_comm R.
 
 (* --- swap_word: swap positions k and k+1 in a word --- *)
 
@@ -1024,7 +1025,7 @@ Definition n_traces (L : nat) : nat :=
 
 (* Exchanging two adjacent letters that commute leaves the deck permutation
    the word evaluates to unchanged.
-   This is where the raag_Hcomm field of the mixin is spent, and it is why
+   This is where the raag_sigmas_comm field of the mixin is spent, and it is why
    trace classes are coarser than words while still finer than deck
    permutations. *)
 Lemma word_eval_adj_swap L (w1 w2 : pgg_word M L) :

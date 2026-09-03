@@ -379,7 +379,7 @@ Definition remaining_values : {set 'I_N} := ~: (v @: setT).
     the k already-revealed values are excluded. remaining_values is the
     support the colluders' posterior spreads over once those k values are
     known, which is what collusion_uniform below states is uniform. *)
-Lemma card_remaining : #|remaining_values| = (N - k)%N.
+Lemma card_remaining_values : #|remaining_values| = (N - k)%N.
 Proof.
 rewrite /remaining_values.
 have Hvi : #|v @: setT| = k by rewrite card_imset // cardsT card_ord.

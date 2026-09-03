@@ -454,10 +454,10 @@ Hypothesis epsilon_ge0 : 0 <= epsilon.
 Hypothesis dpi_bound :
   var_dist adversary_posterior ideal_posterior <= epsilon.
 
-(** Hcard_remaining — the set of card positions the coalition has not
+(** card_remaining — the set of card positions the coalition has not
     observed has exactly N - T' elements. *)
-Lemma Hcard_remaining : #|remaining| = (N - T')%N.
-Proof. exact: card_remaining. Qed.
+Lemma card_remaining : #|remaining| = (N - T')%N.
+Proof. exact: card_remaining_values. Qed.
 
 (** collusion_bound_conditional — the coalition's conditional posterior over
     the unobserved card position's value is within epsilon + 2T'/N of
@@ -474,7 +474,7 @@ apply: lerD => //.
 (* var_dist(ideal_posterior, full_uniform) = 2*T'/N *)
 rewrite /ideal_posterior /full_uniform.
 rewrite var_dist_uniform_supp /=.
-rewrite Hcard_remaining card_ord subnBA; last by exact: ltnW.
+rewrite card_remaining card_ord subnBA; last by exact: ltnW.
 by rewrite addnC addnK.
 Qed.
 
