@@ -104,7 +104,7 @@ Definition s5x5_aprocs_abs :=
   [:: mk_aproc (dealer_with_input_encoding s5x5_PI
                   (fun _ => g) [:: (1%g : pgg_gT s5x5_M)] [::] s5x5_players 0)
     , mk_aproc (exchange_verifier s5x5_PI s5x5_players)
-    & mk_player_aprocs s5x5_PI s5x5_players].
+    & player_aprocs s5x5_PI s5x5_players].
 
 (* The ten player traces are stated per concrete player index so that both the
    process-list ordinal and the readout index share the canonical isT proof,

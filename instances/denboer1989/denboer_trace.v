@@ -56,7 +56,7 @@ Definition denboer_aprocs_abs :=
   [:: mk_aproc (pgg_commit_prologue (fun committed =>
          exchange_dealer FiveCardKim_PI (g committed) den_boer_players [:: w0] 0) [::] [:: 7; 8])
     , mk_aproc (exchange_verifier FiveCardKim_PI den_boer_players)
-    & mk_player_aprocs FiveCardKim_PI den_boer_players
+    & player_aprocs FiveCardKim_PI den_boer_players
       ++ [:: mk_aproc (@pgg_commit FiveCardKim_M 7 va)
            ; mk_aproc (@pgg_commit FiveCardKim_M 8 vb)]].
 

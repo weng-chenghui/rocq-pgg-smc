@@ -165,7 +165,7 @@ Definition exec_saprocs (x : ep_inputT e) (w0 : pgg_gT (mp_M mp)) (P_idx : nat)
     : seq (aproc pgg_dtype (pgg_data (pgg_N' (mp_M mp)).+1)) :=
   mk_aproc (exec_dealer x w0 P_idx)
     :: mk_aproc (exchange_verifier (mp_PI mp) e.(ep_players))
-    :: mk_player_aprocs (mp_PI mp) e.(ep_players)
+    :: player_aprocs (mp_PI mp) e.(ep_players)
        ++ e.(ep_input_procs) x.
 
 (* The erased process list exec_saprocs is built as: the plain-proc image

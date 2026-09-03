@@ -62,7 +62,7 @@ Definition s5x5_dealer_run (s : 'I_10) (w0 : pgg_gT s5x5_M) :=
 Definition s5x5_saprocs (s : 'I_10) (w0 : pgg_gT s5x5_M) :=
   [:: mk_aproc (s5x5_dealer_run s w0)
     , mk_aproc (exchange_verifier s5x5_PI s5x5_players)
-    & mk_player_aprocs s5x5_PI s5x5_players].
+    & player_aprocs s5x5_PI s5x5_players].
 
 (** s5x5_procs — the erased process list fed to the interpreter. *)
 Definition s5x5_procs (s : 'I_10) (w0 : pgg_gT s5x5_M) :=

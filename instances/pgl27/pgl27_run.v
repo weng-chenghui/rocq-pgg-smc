@@ -73,7 +73,7 @@ Definition pgl27_dealer_run (s : bool) (w0 : pgg_gT pgl27_M) :=
 Definition pgl27_saprocs (s : bool) (w0 : pgg_gT pgl27_M) :=
   [:: mk_aproc (pgl27_dealer_run s w0)
     , mk_aproc (exchange_verifier pgl27_PI pgl27_players)
-    & mk_player_aprocs pgl27_PI pgl27_players].
+    & player_aprocs pgl27_PI pgl27_players].
 
 (** pgl27_procs — the erased ten-process list fed to the interpreter. The
     plain-proc image of pgl27_saprocs driving run_interp. *)
@@ -93,7 +93,7 @@ Definition pgl27_dealer_deck (sh : 8.-tuple 'I_8) (w0 : pgg_gT pgl27_M) :=
 Definition pgl27_saprocs_deck (sh : 8.-tuple 'I_8) (w0 : pgg_gT pgl27_M) :=
   [:: mk_aproc (pgl27_dealer_deck sh w0)
     , mk_aproc (exchange_verifier pgl27_PI pgl27_players)
-    & mk_player_aprocs pgl27_PI pgl27_players].
+    & player_aprocs pgl27_PI pgl27_players].
 
 (** pgl27_procs_deck — the erased ten-process list of the all-decks run. The
     plain-proc image of pgl27_saprocs_deck driving run_interp. *)

@@ -93,7 +93,7 @@ Definition pgl27_aprocs_abs :=
   [:: mk_aproc (dealer_with_input_encoding pgl27_PI
                   (fun _ => g) [:: w0] [::] pgl27_players 0)
     , mk_aproc (exchange_verifier pgl27_PI pgl27_players)
-    & mk_player_aprocs pgl27_PI pgl27_players].
+    & player_aprocs pgl27_PI pgl27_players].
 
 (* The eight player traces are stated per concrete player index so that both
    the process-list ordinal and the readout index share the canonical isT

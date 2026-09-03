@@ -98,8 +98,14 @@ W6): parametric factoring pays only when the duplicated PROOF BODIES
 are >= 10 lines per member; section/hypothesis restatement overhead is
 15-29 lines and qualified-name call sites eat one-liner savings.
 
-Open naming question from the W7.6 audit: `mk_player_aprocs` composes
-with the vendored `mk_aproc`, but repo precedent for lifting a helper
-over a seq pluralizes without the prefix (`erase_aproc` ->
-`erase_aprocs`), suggesting `player_aprocs`. Rename is one line plus 12
-call sites; candidate for the P3 naming wave.
+Naming question from the W7.6 audit, RESOLVED 2026-09-03: the user
+ruled that MathComp style is the criterion, and under it
+`mk_player_aprocs` loses to `player_aprocs`. Upstream `mk*` names
+(`mkseq`, `mktuple`, `mkset`, `mkfun`) are constructors that turn a
+function into the canonical enumeration over its whole domain; a fixed
+family mapped over a selected index list is an image, which MathComp
+names as a noun (`codom`, `perm_on`). The underscore spelling is also
+off-pattern upstream (only `mk_monic`, `mk_path`, `mk_sequence` in the
+whole tree). Renamed across the definition and 12 files; the
+statement-surface diff is exactly the one definition entry (all call
+sites sit in Definition bodies), context hash unchanged.

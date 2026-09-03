@@ -732,7 +732,7 @@ Definition s5x5_aprocs_cut (g : 'I_10 -> 'I_10) (w0 : pgg_gT s5x5_M) :=
   [:: mk_aproc (dealer_with_input_encoding s5x5_PI
                   (fun _ => g) [:: w0] [::] s5x5_run.s5x5_players 0)
     , mk_aproc (exchange_verifier s5x5_PI s5x5_run.s5x5_players)
-    & mk_player_aprocs s5x5_PI s5x5_run.s5x5_players].
+    & player_aprocs s5x5_PI s5x5_run.s5x5_players].
 
 (** s5x5_aprocs_cut1 — the identity cut w0 = 1 specializes s5x5_aprocs_cut
     back to the landed abstract skeleton s5x5_aprocs_abs. *)
