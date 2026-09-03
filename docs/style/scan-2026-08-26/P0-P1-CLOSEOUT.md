@@ -109,3 +109,14 @@ off-pattern upstream (only `mk_monic`, `mk_path`, `mk_sequence` in the
 whole tree). Renamed across the definition and 12 files; the
 statement-surface diff is exactly the one definition entry (all call
 sites sit in Definition bodies), context hash unchanged.
+
+P5 partial, executed early by user order 2026-09-03: deleted the two
+orphan files security/debug_morph.v and security/pgg_schreier_test.v
+(never in _CoqProject, both contained Admitted) and the dead
+RSCodeWitness apparatus at the tail of reconstruct/cover_genus0.v
+(Record RSCodeWitness, Arguments rsw_auto, genus0_covering_witness;
+zero consumers tree-wide, and the record-witness pattern measured
+net-negative in P2 W5). Statement-surface diff is exactly the two
+cover_genus0.v removals; the orphans were never in the surface. The
+vendored smc/ quartet and lib/proba_entropy_ext.v stay verbatim by
+the same order.
