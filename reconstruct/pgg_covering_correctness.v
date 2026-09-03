@@ -44,7 +44,7 @@ Let G := pgg_G M.
 Let rho := @pgg_rho M.
 Let ts := cs_scheme cs.
 
-Hypothesis HT : ts_T' ts = pi_T' PI.
+Hypothesis eq_T' : ts_T' ts = pi_T' PI.
 
 (* Given monodromy-stable starting shares (G_stable) and a ts_valid share
    vector, endpoint reconstruction along any group element P recovers the
@@ -56,15 +56,15 @@ Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
     (G_stable : forall g, g \in pgg_G M ->
        forall i : 'I_(ts_T' ts).+1,
          rp_content (cs_plug cs)
-           (rho g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+           (rho g (tnth (cast_tuple (esym (congr1 S eq_T')) (pi_starts PI)) i)) =
          tnth [tuple rp_content (cs_plug cs)
-                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+                 (tnth (cast_tuple (esym (congr1 S eq_T')) (pi_starts PI)) j)
               | j < (ts_T' ts).+1] (rp_monodromy (cs_plug cs) g i)) :
   P \in pgg_G M ->
   ts_valid ts s [tuple rp_content (cs_plug cs)
-                   (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+                   (tnth (cast_tuple (esym (congr1 S eq_T')) (pi_starts PI)) j)
                 | j < (ts_T' ts).+1] ->
-  pgg_recon_endpoints HT (rp_content (cs_plug cs)) P = s.
+  pgg_recon_endpoints eq_T' (rp_content (cs_plug cs)) P = s.
 Proof.
 (* Applies pgg_recon_monodromy_correct over the full group pgg_G, using the
    plug's rp_recon_invariant and rp_content. *)

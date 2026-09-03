@@ -93,8 +93,8 @@ Section ag_code_props.
 Variables (F : finFieldType) (n k : nat).
 Variable ev : 'M[F]_(k, n).
 Hypothesis ev_rank : \rank ev = k.
-Hypothesis Hk : 0 < k.
-Hypothesis Hkn : k <= n.
+Hypothesis k_gt0 : 0 < k.
+Hypothesis le_kn : k <= n.
 
 Variable g : nat.
 Hypothesis goppa_wt :
@@ -128,15 +128,15 @@ Qed.
     can be stated at all. *)
 Lemma ag_not_trivial : not_trivial (ag_code ev).
 Proof.
-have _ := (Hkn, goppa_wt).
+have _ := (le_kn, goppa_wt).
 apply/not_trivialP; apply/negP => /eqP H0.
-have Hmem : delta_mx 0 (Ordinal Hk) *m ev \in ag_code ev by apply: ag_code_eval.
+have Hmem : delta_mx 0 (Ordinal k_gt0) *m ev \in ag_code ev by apply: ag_code_eval.
 rewrite H0 memv0 in Hmem.
-have Hm : (delta_mx 0 (Ordinal Hk) : 'rV[F]_k) != 0.
+have Hm : (delta_mx 0 (Ordinal k_gt0) : 'rV[F]_k) != 0.
   (* Fallback (A002): extracting one entry from a row-vector equality
      is not a congruence over a matched head symbol; goal-level `congr`
      cannot operate on the opaque `delta_mx` / zero-vector heads. *)
-  apply/negP => /eqP/(congr1 (fun m : 'rV_k => m 0 (Ordinal Hk))).
+  apply/negP => /eqP/(congr1 (fun m : 'rV_k => m 0 (Ordinal k_gt0))).
   by rewrite mxE !eqxx /= mxE => /eqP; rewrite oner_eq0.
 by move: (ag_mulmx_neq0 Hm); rewrite (eqP Hmem) eqxx.
 Qed.
@@ -167,11 +167,11 @@ Proof.
 move=> Hlt.
 apply: leq_trans ag_min_dist_lb.
 rewrite ltn_subRL.
-by rewrite subnK // (leq_trans Hk) // leq_addr.
+by rewrite subnK // (leq_trans k_gt0) // leq_addr.
 Qed.
 
 End ag_code_props.
 
-Arguments ag_not_trivial {F n k} ev ev_rank Hk Hkn {g} goppa_wt.
-Arguments ag_min_dist_lb {F n k} ev ev_rank Hk Hkn {g} goppa_wt.
-Arguments ag_min_dist_ge2 {F n k} ev ev_rank Hk Hkn {g} goppa_wt.
+Arguments ag_not_trivial {F n k} ev ev_rank k_gt0 le_kn {g} goppa_wt.
+Arguments ag_min_dist_lb {F n k} ev ev_rank k_gt0 le_kn {g} goppa_wt.
+Arguments ag_min_dist_ge2 {F n k} ev ev_rank k_gt0 le_kn {g} goppa_wt.

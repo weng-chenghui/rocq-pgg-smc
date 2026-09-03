@@ -174,10 +174,10 @@ Variables (k g : nat).
 Variable ev : 'M[F]_(k, n).
 
 Hypothesis ev_rank : \rank ev = k.
-Hypothesis Hk : 0 < k.
-Hypothesis Hkn : k <= n.
-Hypothesis Hkg : g < k.
-Hypothesis Hkgn : k + g < n.
+Hypothesis k_gt0 : 0 < k.
+Hypothesis le_kn : k <= n.
+Hypothesis lt_gk : g < k.
+Hypothesis lt_kgn : k + g < n.
 Hypothesis goppa_wt :
   forall m : 'rV[F]_k, m != 0 -> n - (k + g - 1) <= wH (m *m ev).
 (* For any coordinate set S smaller than (k - g).-1.+2 and any target
@@ -193,11 +193,11 @@ Variable k2 : nat.
 Variable ev_2k : 'M[F]_(k2, n).
 
 Hypothesis ev_2k_rank : \rank ev_2k = k2.
-Hypothesis Hk2 : 0 < k2.
-Hypothesis Hk2n : k2 <= n.
+Hypothesis k2_gt0 : 0 < k2.
+Hypothesis le_k2n : k2 <= n.
 Variable g2 : nat.
-Hypothesis Hk2g : g2 < k2.
-Hypothesis Hk2gn : k2 + g2 < n.
+Hypothesis lt_g2k2 : g2 < k2.
+Hypothesis lt_k2g2n : k2 + g2 < n.
 Hypothesis goppa_2k_wt :
   forall m : 'rV[F]_k2, m != 0 -> n - (k2 + g2 - 1) <= wH (m *m ev_2k).
 (* The same local-surjectivity property for the doubled code ev_2k: a
@@ -215,11 +215,11 @@ Hypothesis ag_mult :
     hadamard c1 c2 \in ag_code ev_2k.
 
 (* Equal code lengths means equal ts_T' values *)
-Hypothesis HT_eq : ts_T' (ag_massey ev_rank Hk Hkn Hkgn goppa_wt ag_priv_surj) =
-  ts_T' (ag_massey ev_2k_rank Hk2 Hk2n Hk2gn goppa_2k_wt ag_2k_priv_surj).
+Hypothesis eq_T' : ts_T' (ag_massey ev_rank k_gt0 le_kn lt_kgn goppa_wt ag_priv_surj) =
+  ts_T' (ag_massey ev_2k_rank k2_gt0 le_k2n lt_k2g2n goppa_2k_wt ag_2k_priv_surj).
 
-Let base := ag_massey ev_rank Hk Hkn Hkgn goppa_wt ag_priv_surj.
-Let doubled := ag_massey ev_2k_rank Hk2 Hk2n Hk2gn goppa_2k_wt ag_2k_priv_surj.
+Let base := ag_massey ev_rank k_gt0 le_kn lt_kgn goppa_wt ag_priv_surj.
+Let doubled := ag_massey ev_2k_rank k2_gt0 le_k2n lt_k2g2n goppa_2k_wt ag_2k_priv_surj.
 
 (** Multiplying two valid base-scheme share tuples coordinatewise, and
     casting across the ts_T' base = ts_T' doubled equality, gives a valid
@@ -235,12 +235,12 @@ Lemma ag_massey_mult (s1 s2 : F)
   ts_valid base s1 shares1 ->
   ts_valid base s2 shares2 ->
   ts_valid doubled (s1 * s2)
-    (cast_tuple (congr1 S HT_eq)
+    (cast_tuple (congr1 S eq_T')
       [tuple tnth shares1 i * tnth shares2 i | i < (ts_T' base).+1]).
 Proof.
 move=> Hv1 Hv2.
 rewrite /ts_valid /= /massey_valid_tuple.
-have -> : congr1 S HT_eq = erefl _ by exact: eq_irrelevance.
+have -> : congr1 S eq_T' = erefl _ by exact: eq_irrelevance.
 rewrite /cast_tuple /=.
 have -> : tuple_to_rV [tuple tnth shares1 i * tnth shares2 i | i < n''.+1]
           = hadamard (tuple_to_rV shares1) (tuple_to_rV shares2).
@@ -258,7 +258,7 @@ Qed.
 Definition ag_mult_scheme : MultiplicativeScheme :=
   {| ms_base := base ;
      ms_doubled := doubled ;
-     ms_T_eq := HT_eq ;
+     ms_T_eq := eq_T' ;
      ms_mult := ag_massey_mult |}.
 
 End ag_mult_scheme_sect.

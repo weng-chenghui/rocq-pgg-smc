@@ -191,8 +191,8 @@ Hypothesis qn : ~~ (q %| n''.+3)%nat.
 Hypothesis an : (n''.+3).-primitive_root a.
 
 Let R_oc : MonodromyReprWithGeneratorType := @Gen_PGGTypes 1 2 oc_sigmas.
-Hypothesis HN : (pgg_N' R_oc).+1 = #|GF m' primeq|.
-Hypothesis HG_oc : (1 < #|pgg_G R_oc|)%N.
+Hypothesis defN : (pgg_N' R_oc).+1 = #|GF m' primeq|.
+Hypothesis card_G_oc_gt1 : (1 < #|pgg_G R_oc|)%N.
 
 Variable sigma_code : pgg_gT R_oc -> {perm 'I_n''.+3}.
 Hypothesis sigma_fix0 :
@@ -202,7 +202,7 @@ Hypothesis code_auto :
   coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
 Hypothesis oc_genus0_klein : (#|pgg_G R_oc| <= klein_genus0_bound R_oc)%N.
 
-Let ar := oc_rigidity R HG_oc qn an HN sigma_fix0 code_auto oc_genus0_klein.
+Let ar := oc_rigidity R card_G_oc_gt1 qn an defN sigma_fix0 code_auto oc_genus0_klein.
 
 (* --- Phase 2: Certification — security side --- *)
 

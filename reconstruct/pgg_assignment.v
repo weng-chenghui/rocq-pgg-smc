@@ -54,7 +54,7 @@ Lemma succ_mod_cycle2_ord (T : nat) (i j : 'I_T.+1) :
   i = inZp (j + 1) ->
   False.
 Proof.
-move=> HT Hj Hi.
+move=> T'_gt0 Hj Hi.
 have Hvi := congr1 val Hi.
 have Hvj := congr1 val Hj.
 simpl in Hvi, Hvj.
@@ -78,14 +78,14 @@ case: (ltnP (iv + 1)%N T.+1) => Hcase1.
     by rewrite jv_eq iv11_T modnn.
   have : (T.+1 = 2)%N by rewrite -iv11_T iv_eq.
   move=> /eqP; rewrite eqSS => /eqP HT1.
-  by rewrite HT1 ltnn in HT.
+  by rewrite HT1 ltnn in T'_gt0.
 have iv_T : (iv = T)%N.
   apply/eqP; rewrite eqn_leq -ltnS HiT /=.
   by rewrite -(leq_add2r 1) !addn1 ltnS in Hcase1.
 have jv_eq : (jv = 0)%N by rewrite Hvj iv_T addn1 modnn.
 have iv_eq : (iv = 1)%N.
   rewrite Hvi jv_eq add0n modn_small //; exact: ltnW.
-by rewrite iv_eq in iv_T; rewrite -iv_T ltnn in HT.
+by rewrite iv_eq in iv_T; rewrite -iv_T ltnn in T'_gt0.
 Qed.
 
 Import GRing.Theory.
@@ -214,7 +214,7 @@ End Monotonicity.
 Section CycleGraph.
 
 Variable T' : nat.
-Hypothesis HT : (0 < T')%N.
+Hypothesis T'_gt0 : (0 < T')%N.
 Let T := T'.+1.
 
 (** Cycle graph: party i is connected to party (i+1) mod T
@@ -236,7 +236,7 @@ Proof. by rewrite !inE /= orbC. Qed.
 Lemma cycle_irrefl (i : 'I_T) : (i, i) \notin cycle_edge_set.
 Proof.
 rewrite inE /= orbb; apply/negP => /eqP /(congr1 val) /= Hmod.
-exact: (succ_mod_neq HT (ltn_ord i) (esym Hmod)).
+exact: (succ_mod_neq T'_gt0 (ltn_ord i) (esym Hmod)).
 Qed.
 
 (** The AssignmentGraph on T vertices where party i shares a component with

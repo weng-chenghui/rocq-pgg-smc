@@ -145,9 +145,9 @@ End ramp_threshold.
 Section cycle_ramp.
 
 Variable T' : nat.
-Hypothesis HT : (1 < T')%N.
+Hypothesis T'_gt1 : (1 < T')%N.
 
-Let ag := cycle_graph (ltnW HT).
+Let ag := cycle_graph (ltnW T'_gt1).
 
 (** In the cycle graph, losing any party from the full coalition
     leaves at least some edges uncovered (secure). *)

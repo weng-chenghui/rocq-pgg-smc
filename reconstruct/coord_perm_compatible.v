@@ -58,7 +58,7 @@ Variable n' : nat.
 Let n := n'.+2.
 
 Variable sigma : {perm 'I_n}.
-Hypothesis Hfix0 : sigma ord0 = ord0.
+Hypothesis sigma_fix0 : sigma ord0 = ord0.
 
 (** sigma never sends a lifted (nonzero) index back to the fixed point 0,
     since sigma is injective and already fixes 0. This is the
@@ -67,7 +67,7 @@ Hypothesis Hfix0 : sigma ord0 = ord0.
 Lemma sigma_lift_neq0 (j : 'I_n'.+1) : sigma (lift ord0 j) != ord0.
 Proof.
 apply/eqP => Habs.
-have Hlj0 : lift ord0 j = ord0 by exact: (perm_inj (etrans Habs (esym Hfix0))).
+have Hlj0 : lift ord0 j = ord0 by exact: (perm_inj (etrans Habs (esym sigma_fix0))).
 have := congr1 val Hlj0.
 by rewrite /= /bump leq0n add1n.
 Qed.
@@ -124,7 +124,7 @@ Proof. by rewrite permE restrict_perm0_funE. Qed.
 
 End restrict_perm0.
 
-Arguments restrict_perm0_val {n'} sigma Hfix0.
+Arguments restrict_perm0_val {n'} sigma sigma_fix0.
 
 (******************************************************************************)
 (*     Section 3: Massey Codeword + Column Permutation                        *)
@@ -139,12 +139,12 @@ Let n := n'.+2.
 Variable C : Lcode0.t F n.
 Hypothesis C_nt : not_trivial C.
 Let d := min_dist C_nt.
-Hypothesis Hd2 : 1 < d.
+Hypothesis d_gt1 : 1 < d.
 
 Variable sigma : {perm 'I_n}.
-Hypothesis Hfix0 : sigma ord0 = ord0.
+Hypothesis sigma_fix0 : sigma ord0 = ord0.
 
-Let sigma_sh := restrict_perm0_val sigma Hfix0.
+Let sigma_sh := restrict_perm0_val sigma sigma_fix0.
 
 (** Applying the code-side permutation sigma (fixing 0) to a Massey codeword
     equals building the codeword from the same secret with the share-side
@@ -159,11 +159,11 @@ Lemma massey_codeword_col_perm (s : F) (shares : 'rV[F]_n'.+1) :
 Proof.
 apply/rowP => i.
 rewrite /col_perm mxE /massey_codeword mxE mxE.
-case: (unliftP ord0 i) => [j -> | ->]; last by rewrite Hfix0 eqxx.
+case: (unliftP ord0 i) => [j -> | ->]; last by rewrite sigma_fix0 eqxx.
 have Hneq0 : (lift ord0 j : nat) != 0%N by rewrite /=.
 rewrite (negbTE Hneq0).
 have Hneq0s : (sigma (lift ord0 j) : nat) != 0%N.
-  by have := sigma_lift_neq0 Hfix0 j; rewrite -val_eqE /=.
+  by have := sigma_lift_neq0 sigma_fix0 j; rewrite -val_eqE /=.
 rewrite (negbTE Hneq0s) mxE.
 have lift_inord : forall (k : 'I_n), (k : nat) != 0%N ->
     lift ord0 (@inord n' k.-1) = k.
@@ -188,7 +188,7 @@ Lemma massey_recon_col_perm (s : F) (shares : 'rV[F]_n'.+1) :
   massey_reconstruct C (col_perm sigma_sh shares) = s.
 Proof.
 move=> Hauto HmemC.
-apply: (massey_reconstruct_correct Hd2).
+apply: (massey_reconstruct_correct d_gt1).
 rewrite -massey_codeword_col_perm.
 exact: Hauto.
 Qed.
@@ -208,7 +208,7 @@ Let n := n'.+2.
 Variable C : Lcode0.t F n.
 Hypothesis C_nt : not_trivial C.
 Let d := min_dist C_nt.
-Hypothesis Hd2 : 1 < d.
+Hypothesis d_gt1 : 1 < d.
 
 Variable d_perp' : nat.
 Hypothesis priv_surj :
@@ -250,7 +250,7 @@ case: (Sumbool.sumbool_of_bool _) => [hg | /negP]; last by rewrite gG.
 by congr (restrict_perm0_val _ _); exact: eq_irrelevance.
 Qed.
 
-(** The Massey ThresholdScheme built from C, Hd2 and priv_surj is
+(** The Massey ThresholdScheme built from C, d_gt1 and priv_surj is
     ts_recon_perm_invariant under G via massey_share_perm: reconstructing
     after permuting a valid share tuple by any g's induced share
     permutation returns the same secret. This discharges, for any Massey
@@ -259,7 +259,7 @@ Qed.
     elsewhere in the batch needs from a covering scheme's plug. *)
 Lemma massey_perm_compatible :
   @ts_recon_perm_invariant gT G _ _
-    (massey_scheme C_nt Hd2 priv_surj)
+    (massey_scheme C_nt d_gt1 priv_surj)
     massey_share_perm.
 Proof.
 move=> g s shares gG Hvalid /=.
@@ -283,8 +283,8 @@ Section transport_perm_compat.
 
 Variables (A B : Type).
 Variable (f : A -> B) (g_inv : B -> A).
-Hypothesis Hgi : cancel g_inv f.
-Hypothesis Hfg : cancel f g_inv.
+Hypothesis g_invK : cancel g_inv f.
+Hypothesis fK : cancel f g_inv.
 
 Variable ts : ThresholdScheme A A.
 
@@ -303,7 +303,7 @@ Variable perm_A : gT -> {perm 'I_T}.
     expose downstream. *)
 Lemma transport_perm_compatible :
   @ts_recon_perm_invariant gT G _ _ ts perm_A ->
-  @ts_recon_perm_invariant gT G _ _ (transport_scheme Hgi Hfg ts) perm_A.
+  @ts_recon_perm_invariant gT G _ _ (transport_scheme g_invK fK ts) perm_A.
 Proof.
 move=> Hperm g s shares gG.
 change (ts_valid ts (g_inv s) [tuple g_inv (tnth shares i) | i < T] ->
@@ -319,9 +319,9 @@ have Heq : [tuple g_inv (tnth [tuple tnth shares (perm_A g i0) | i0 < T] i)
 rewrite Heq.
 have Hc := Hperm g (g_inv s)
   [tuple g_inv (tnth shares i0) | i0 < T] gG Hvalid.
-by rewrite Hc Hgi.
+by rewrite Hc g_invK.
 Qed.
 
 End transport_perm_compat.
 
-Arguments transport_perm_compatible {A B f g_inv} Hgi Hfg {ts gT G} perm_A.
+Arguments transport_perm_compatible {A B f g_inv} g_invK fK {ts gT G} perm_A.

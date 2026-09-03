@@ -251,7 +251,7 @@ Let starts := pi_starts PI.
    secretT = bool. *)
 Variable secretT : Type.
 Variable ts : ThresholdScheme secretT 'I_N.
-Hypothesis HT : ts_T' ts = pi_T' PI.
+Hypothesis eq_T' : ts_T' ts = pi_T' PI.
 
 (* A fixed content readout applied to each shuffled start before reconstruction.
    With [content = id] every statement below collapses definitionally to the
@@ -262,7 +262,7 @@ Let sT := (ts_T' ts).+1.
 
 (* Cast endpoints to the scheme's tuple type *)
 Definition pgg_recon (eps : T.-tuple 'I_N) : secretT :=
-  ts_recon ts (cast_tuple (esym (congr1 S HT)) eps).
+  ts_recon ts (cast_tuple (esym (congr1 S eq_T')) eps).
 
 (* The secret reconstructed from endpoints, read through the content map *)
 Definition pgg_recon_endpoints (P : gT) : secretT :=
@@ -279,21 +279,21 @@ Lemma pgg_recon_monodromy_correct (H : {group gT}) (s : secretT) (P : gT)
     (HsubG : H \subset pgg_G M)
     (G_stable : forall g, g \in H ->
        forall i : 'I_sT,
-         content (rho g (tnth (cast_tuple (esym (congr1 S HT)) starts) i)) =
-         tnth [tuple content (tnth (cast_tuple (esym (congr1 S HT)) starts) j)
+         content (rho g (tnth (cast_tuple (esym (congr1 S eq_T')) starts) i)) =
+         tnth [tuple content (tnth (cast_tuple (esym (congr1 S eq_T')) starts) j)
               | j < sT] (perm g i)) :
   P \in H ->
-  ts_valid ts s [tuple content (tnth (cast_tuple (esym (congr1 S HT)) starts) j)
+  ts_valid ts s [tuple content (tnth (cast_tuple (esym (congr1 S eq_T')) starts) j)
                 | j < sT] ->
   @ts_recon_perm_invariant gT H _ _ ts perm ->
   pgg_recon_endpoints P = s.
 Proof.
 move=> PG Hvalid Hperm.
 rewrite /pgg_recon_endpoints /pgg_recon.
-have -> : cast_tuple (esym (congr1 S HT))
+have -> : cast_tuple (esym (congr1 S eq_T'))
             [tuple content (rho P (tnth starts i)) | i < T] =
           [tuple tnth [tuple content
-              (tnth (cast_tuple (esym (congr1 S HT)) starts) j) | j < sT]
+              (tnth (cast_tuple (esym (congr1 S eq_T')) starts) j) | j < sT]
               (perm P i) | i < sT].
   apply: eq_from_tnth => i.
   rewrite tnth_cast_tuple tnth_mktuple tnth_mktuple -tnth_cast_tuple.

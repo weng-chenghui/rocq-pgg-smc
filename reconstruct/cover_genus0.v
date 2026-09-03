@@ -62,7 +62,7 @@ Let rho := @pgg_rho M.
    - Ramification = 2|G| - 2 (total from 2 fully ramified points)
    - Genus = 0 (Riemann-Hurwitz: 0 + 2|G| = (2|G|-2) + 2) *)
 
-Hypothesis HG : 1 < #|G|.  (* nontrivial group *)
+Hypothesis card_G_gt1 : 1 < #|G|.  (* nontrivial group *)
 
 (* Ramification for 2 fully-ramified branch points *)
 Let ramif0 := (2 * #|G| - 2)%N.
@@ -78,7 +78,7 @@ Proof.
 rewrite mulr0 mulr0 add0r add0r /ramif0.
 suff : (2 * #|G| = (2 * #|G| - 2) + 2)%N by [].
 rewrite subnK //.
-by rewrite -[X in X <= _]muln1 leq_mul2l (ltnW HG).
+by rewrite -[X in X <= _]muln1 leq_mul2l (ltnW card_G_gt1).
 Qed.
 
 (** The genus-0 total ramification ramif0 is at least 2, the minimum
@@ -87,7 +87,7 @@ Qed.
 Lemma genus0_ramif_ge_nbr : (2 <= ramif0)%N.
 Proof.
 rewrite /ramif0.
-have HG2 : (2 <= #|G|)%N by exact: HG.
+have HG2 : (2 <= #|G|)%N by exact: card_G_gt1.
 case: #|G| HG2 => [|[|n]] // _.
 by rewrite mulnS addKn mulnS leq_addr.
 Qed.
@@ -120,13 +120,13 @@ Variable a : F.
 
 Hypothesis qn : ~~ (q %| n''.+3)%nat.
 Hypothesis an : (n''.+3).-primitive_root a.
-Hypothesis HN : N = #|F|.
+Hypothesis defN : N = #|F|.
 
 (* Concrete threshold scheme from RS codes via Massey (rs_massey_bridge.v) *)
-Let ts0 : ThresholdScheme 'I_N 'I_N := rs_genus0_scheme primeq a qn an HN.
+Let ts0 : ThresholdScheme 'I_N 'I_N := rs_genus0_scheme primeq a qn an defN.
 
 (* Exactness: proved from RS min_dist + Massey construction *)
-Let ts0_exact : ts_T ts0 = ts_k ts0 := rs_genus0_exact primeq a qn an HN.
+Let ts0_exact : ts_T ts0 = ts_k ts0 := rs_genus0_exact primeq a qn an defN.
 
 (* Coordinate-permutation compatibility: derived from code automorphisms.
    sigma_code maps monodromy elements to column permutations of the RS code

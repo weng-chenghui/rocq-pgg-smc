@@ -37,8 +37,8 @@ Section transport.
 
 Variables (A B : Type).
 Variable (f : A -> B) (g : B -> A).
-Hypothesis Hgf : cancel g f.
-Hypothesis Hfg : cancel f g.
+Hypothesis gK : cancel g f.
+Hypothesis fK : cancel f g.
 
 Variable ts : ThresholdScheme A A.
 
@@ -62,12 +62,12 @@ Definition transport_recon (shares : T'.+1.-tuple B) : B :=
 
 (** transport_valid s shares implies transport_recon shares = s: the
     ts_correct field of transport_scheme below, obtained by applying ts's
-    correctness in A and closing the round trip with Hgf : cancel g f. *)
+    correctness in A and closing the round trip with gK : cancel g f. *)
 Lemma transport_correct (s : B) (shares : T'.+1.-tuple B) :
   transport_valid s shares -> transport_recon shares = s.
 Proof.
 rewrite /transport_valid /transport_recon => Hv.
-by rewrite (@ts_correct _ _ ts _ _ Hv) Hgf.
+by rewrite (@ts_correct _ _ ts _ _ Hv) gK.
 Qed.
 
 (** For any coalition C smaller than the threshold and any two secrets s1
@@ -93,12 +93,12 @@ exists [tuple f (tnth shares_a i) | i < T'.+1]; split.
   have -> : [tuple g (tnth [tuple f (tnth shares_a i0) | i0 < T'.+1] i)
             | i < T'.+1] = shares_a.
     apply: eq_from_tnth => i.
-    by rewrite !tnth_mktuple Hfg.
+    by rewrite !tnth_mktuple fK.
   exact: HvA.
 - move=> i Hi.
   rewrite tnth_mktuple.
   have := Hagree _ Hi; rewrite /shares_g tnth_mktuple => ->.
-  by rewrite Hgf.
+  by rewrite gK.
 Qed.
 
 (** transport_encode s = f-image of (ts_encode ts (g s)): encode g s in
@@ -109,7 +109,7 @@ Definition transport_encode (s : B) : T'.+1.-tuple B :=
 
 (** transport_valid s (transport_encode s): the transported encoding is
     valid by construction, the ts_encode_valid field of transport_scheme
-    below, since Hfg : cancel f g restores ts_encode ts (g s) inside the
+    below, since fK : cancel f g restores ts_encode ts (g s) inside the
     transported validity predicate. *)
 Lemma transport_encode_valid (s : B) :
   transport_valid s (transport_encode s).
@@ -118,7 +118,7 @@ rewrite /transport_valid /transport_encode.
 have -> : [tuple g (tnth [tuple f (tnth (ts_encode ts (g s)) i0)
           | i0 < T'.+1] i) | i < T'.+1] = ts_encode ts (g s).
   apply: eq_from_tnth => i.
-  by rewrite !tnth_mktuple Hfg.
+  by rewrite !tnth_mktuple fK.
 exact: ts_encode_valid.
 Qed.
 
@@ -200,16 +200,16 @@ Hypothesis qn : ~~ (q %| n''.+3)%nat.
 Hypothesis an : (n''.+3).-primitive_root a.
 
 Variable N : nat.
-Hypothesis HN : N = #|F|.
+Hypothesis defN : N = #|F|.
 
-(** toF x = enum_val (cast_ord HN x), reading a value of F off the index
+(** toF x = enum_val (cast_ord defN x), reading a value of F off the index
     x : 'I_N after recasting along N = #|F|: one half of the 'I_N <-> F
     bijection the transport construction of rs_genus0_scheme runs along. *)
-Definition toF (x : 'I_N) : F := enum_val (cast_ord HN x).
-(** ofF x = cast_ord (esym HN) (enum_rank x), the inverse reading of a
+Definition toF (x : 'I_N) : F := enum_val (cast_ord defN x).
+(** ofF x = cast_ord (esym defN) (enum_rank x), the inverse reading of a
     value of F back to an index of 'I_N: the other half of the 'I_N <-> F
     bijection the transport construction of rs_genus0_scheme runs along. *)
-Definition ofF (x : F) : 'I_N := cast_ord (esym HN) (enum_rank x).
+Definition ofF (x : F) : 'I_N := cast_ord (esym defN) (enum_rank x).
 
 (** cancel ofF toF: toF undoes ofF, half of the 'I_N <-> F bijection
     rs_genus0_scheme transports the RS-Massey scheme along. *)
@@ -236,5 +236,5 @@ Proof. exact: transport_exact (rs_massey_exact qn an). Qed.
 
 End rs_genus0.
 
-Arguments rs_genus0_scheme {q m'} primeq {n''} a qn an {N} HN.
-Arguments rs_genus0_exact {q m'} primeq {n''} a qn an {N} HN.
+Arguments rs_genus0_scheme {q m'} primeq {n''} a qn an {N} defN.
+Arguments rs_genus0_exact {q m'} primeq {n''} a qn an {N} defN.

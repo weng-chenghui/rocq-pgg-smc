@@ -169,7 +169,7 @@ Hypothesis pts_distinct :
 
 Hypothesis pts_x_uniq : uniq pts_x.
 
-Hypothesis Hdeg_f_le : deg_f <= m_deg.
+Hypothesis deg_f_le : deg_f <= m_deg.
 
 (** The resultant polynomial R(x) = A(x)^2 - B(x)^2 * curve_poly(x),
     obtained by setting A(x) + y*B(x) = 0 and eliminating y via
@@ -359,7 +359,7 @@ move=> v Hv.
 have [A [B [HAB [HsA [HsB Hev]]]]] := ev_encode Hv.
 set R := hyp_resultant A B.
 have HR : R != 0 := hyp_resultant_neq0 HAB.
-have HsR : size R <= m_deg.+1 := hyp_resultant_deg Hdeg_f_le HsA HsB.
+have HsR : size R <= m_deg.+1 := hyp_resultant_deg deg_f_le HsA HsB.
 (* Map zero positions to roots of R via pts_x, then bound via max_poly_roots *)
 set w := v *m ev.
 set zeros := [seq tnth pts_x i | i <- enum 'I_n & (w 0 i == 0)].
@@ -391,7 +391,7 @@ Qed.
 (* Identifies the internal degree parameter m_deg with the classical Goppa
    design distance k + g - 1, translating the bookkeeping used above into
    the standard AG-code parameterization. *)
-Hypothesis Hm_eq : m_deg = (k + g - 1)%N.
+Hypothesis def_m_deg : m_deg = (k + g - 1)%N.
 
 (** Every nonzero codeword v *m ev has Hamming weight at least
     n - (k + g - 1): the hyperelliptic Goppa weight bound stated at the
@@ -400,24 +400,24 @@ Hypothesis Hm_eq : m_deg = (k + g - 1)%N.
 Theorem hyp_goppa_wt :
   forall v : 'rV[F]_k, v != 0 ->
   (n - (k + g - 1) <= wH (v *m ev))%N.
-Proof. by move=> v Hv; rewrite -Hm_eq; exact: hyp_goppa_wt_mdeg. Qed.
+Proof. by move=> v Hv; rewrite -def_m_deg; exact: hyp_goppa_wt_mdeg. Qed.
 
 (******************************************************************************)
 (*     Section 4: Privacy from Dual Minimum Distance                          *)
 (******************************************************************************)
 
 Hypothesis ev_rank : \rank ev = k.
-Hypothesis Hk : 0 < k.
-Hypothesis Hkn : k <= n.
-Hypothesis Hkgn : k + g < n.
-Hypothesis Hkg : g < k.
+Hypothesis k_gt0 : 0 < k.
+Hypothesis le_kn : k <= n.
+Hypothesis lt_kgn : k + g < n.
+Hypothesis lt_gk : g < k.
 
 (* Dual minimum distance: proved from a polynomial root bound.
    For any nonzero word w orthogonal to the AG code, there exists a nonzero
    polynomial R of degree <= m_deg_dual whose roots include all zero positions
    of w (mapped via pts_x). Root counting then gives wH w >= (k-g)+1. *)
 Variable m_deg_dual : nat.
-Hypothesis Hm_dual_eq : m_deg_dual = (n + g - k - 1)%N.
+Hypothesis def_m_deg_dual : m_deg_dual = (n + g - k - 1)%N.
 
 (* Dual evaluation encoding: orthogonal words admit A(x)+y*B(x) representation.
    Dual analog of ev_encode. The resultant degree bound is given directly
@@ -492,10 +492,10 @@ have HwH_bound : n - m_deg_dual <= wH w.
   set wt := wH w in Hcompl *.
   rewrite leq_subLR addnC -Hcompl leq_add2l //.
 apply: leq_trans _ HwH_bound.
-rewrite Hm_dual_eq.
+rewrite def_m_deg_dual.
 suff -> : (n - (n + g - k - 1))%N = (k - g).+1 by [].
-have Hgk := ltnW Hkg.
-have Hk1n := leq_ltn_trans (leq_addr g k) Hkgn.
+have Hgk := ltnW lt_gk.
+have Hk1n := leq_ltn_trans (leq_addr g k) lt_kgn.
 have Hngk1 : k.+1 <= n + g := leq_trans Hk1n (leq_addr g n).
 by rewrite -subnDA addn1 (subnBA _ Hngk1) subnDl (subSn Hgk).
 Qed.

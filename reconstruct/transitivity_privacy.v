@@ -264,7 +264,7 @@ End kernel_independence.
 Section uniform_supp_bij.
 Local Open Scope ring_scope.
 Variables (R : realType) (A : finType) (C : {set A}).
-Hypothesis HC : (0 < #|C|)%N.
+Hypothesis card_C_gt0 : (0 < #|C|)%N.
 
 (** An injective endomap of A that stabilizes a support set C, mapping C to C
     and its complement to its complement, pushes the uniform law on C to
@@ -274,7 +274,7 @@ Hypothesis HC : (0 < #|C|)%N.
     (alldecks_shuffle_absorb). *)
 Lemma fdist_uniform_supp_bij (f : A -> A) :
   injective f -> (forall a, (f a \in C) = (a \in C)) ->
-  fdistmap f (fdist_uniform_supp R HC) = fdist_uniform_supp R HC.
+  fdistmap f (fdist_uniform_supp R card_C_gt0) = fdist_uniform_supp R card_C_gt0.
 Proof.
 move=> finj Hstab.
 have [f' f'K f'K'] := injF_bij finj.
@@ -286,11 +286,11 @@ rewrite big_pred1_eq.
 have HfC : (f' a \in C) = (a \in C) by rewrite -{2}(f'K' a) Hstab.
 case: (boolP (a \in C)) => Ha.
   have HfaC : f' a \in C by rewrite HfC.
-  by rewrite (fdist_uniform_supp_in R HC HfaC)
-             (fdist_uniform_supp_in R HC Ha).
+  by rewrite (fdist_uniform_supp_in R card_C_gt0 HfaC)
+             (fdist_uniform_supp_in R card_C_gt0 Ha).
 have HfaC : f' a \notin C by rewrite HfC.
-by rewrite (fdist_uniform_supp_notin R HC HfaC)
-           (fdist_uniform_supp_notin R HC Ha).
+by rewrite (fdist_uniform_supp_notin R card_C_gt0 HfaC)
+           (fdist_uniform_supp_notin R card_C_gt0 Ha).
 Qed.
 
 End uniform_supp_bij.
@@ -299,7 +299,7 @@ Section transitivity_privacy.
 Variables (N' : nat) (gT : finGroupType) (G : {group gT}).
 Variable rho : {morphism G >-> {perm 'I_N'.+1}}.
 Variable t : nat.
-Hypothesis Htrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
+Hypothesis rhoG_ntrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
 
 (** For k <= t and a fixed injective source k-tuple p, the map g |-> the
     k-tuple image of p under rho g has every fiber of the same size
@@ -316,7 +316,7 @@ Lemma rho_tuple_fiber_card (k : nat) (p q : k.-tuple 'I_N'.+1) :
 Proof.
 move=> Hkt Hp Hq.
 have ktrans : [transitive^k rho @* G, on [set: 'I_N'.+1] | 'P].
-  exact: (ntransitive_weak Hkt Htrans).
+  exact: (ntransitive_weak Hkt rhoG_ntrans).
 have phiE : forall g, [tuple (rho g) (tnth p i) | i < k] = n_act 'P p (rho g).
   by move=> g; apply: eq_from_tnth => i; rewrite tnth_mktuple tnth_map.
 pose Fb := fun r : k.-tuple 'I_N'.+1 => [set g in G | n_act 'P p (rho g) == r].
@@ -359,12 +359,12 @@ Qed.
 Section redeal.
 Variable orbit_class : N'.+1.-tuple 'I_N'.+1 -> bool.
 Variable deck_ok : N'.+1.-tuple 'I_N'.+1 -> bool.
-Hypothesis Hdeck_uniq : forall sh, deck_ok sh -> uniq sh.
-Hypothesis Hinv : forall g sh, g \in G ->
+Hypothesis deck_ok_uniq : forall sh, deck_ok sh -> uniq sh.
+Hypothesis orbit_class_inv : forall g sh, g \in G ->
   orbit_class [tuple tnth sh (rho g i) | i < N'.+1] = orbit_class sh.
-Hypothesis Hdeck_stable : forall g sh, g \in G ->
+Hypothesis deck_ok_stable : forall g sh, g \in G ->
   deck_ok [tuple tnth sh (rho g i) | i < N'.+1] = deck_ok sh.
-Hypothesis Hpopulated : forall b : bool,
+Hypothesis orbit_class_onto : forall b : bool,
   exists sh, deck_ok sh /\ orbit_class sh = b.
 
 (** For a t-transitive shuffle over a distinct-card deck, every coalition of
@@ -380,10 +380,10 @@ Theorem ttrans_private (s2 : bool) (sh : N'.+1.-tuple 'I_N'.+1)
   exists sh', [/\ deck_ok sh', orbit_class sh' = s2 &
     forall i, i \in C -> tnth sh' i = tnth sh i].
 Proof.
-move=> HC Hsh.
-have [sh2 [Hsh2 Hsh2c]] := Hpopulated s2.
-have sh_inj : injective (tnth sh) by apply/tuple_uniqP; exact: Hdeck_uniq.
-have sh2_inj : injective (tnth sh2) by apply/tuple_uniqP; exact: Hdeck_uniq.
+move=> card_C_gt0 Hsh.
+have [sh2 [Hsh2 Hsh2c]] := orbit_class_onto s2.
+have sh_inj : injective (tnth sh) by apply/tuple_uniqP; exact: deck_ok_uniq.
+have sh2_inj : injective (tnth sh2) by apply/tuple_uniqP; exact: deck_ok_uniq.
 have [ps psE] : {ps : {perm 'I_N'.+1} | ps =1 tnth sh}.
   by exists (perm sh_inj); exact: permE.
 have [ps2 ps2E] : {ps2 : {perm 'I_N'.+1} | ps2 =1 tnth sh2}.
@@ -400,7 +400,7 @@ have Htt : tt \in dtuple_on k [set: 'I_N'.+1].
   rewrite inE; apply/andP; split; last by apply/subsetP.
   by apply/tuple_uniqP => l1 l2; rewrite !tnth_mktuple => /perm_inj/stinj->.
 have ktrans : [transitive^k rho @* G, on [set: 'I_N'.+1] | 'P].
-  exact: (ntransitive_weak Hk Htrans).
+  exact: (ntransitive_weak Hk rhoG_ntrans).
 have [h hin htt] := atransP2 ktrans Hst Htt.
 have [g gG _ hg] := morphimP hin.
 have httE : forall l, h (tnth st l) = pih (tnth st l).
@@ -411,8 +411,8 @@ have hpi : forall i, i \in C -> rho g i = pih i.
   have iC2 : i \in st by rewrite mem_enum.
   by case/tnthP: iC2 => l ->; rewrite -hg httE.
 exists [tuple tnth sh2 (rho g i) | i < N'.+1]; split.
-- by rewrite (Hdeck_stable sh2 gG).
-- by rewrite (Hinv sh2 gG).
+- by rewrite (deck_ok_stable sh2 gG).
+- by rewrite (orbit_class_inv sh2 gG).
 - move=> i iC.
   by rewrite tnth_mktuple (hpi i iC) -ps2E /pih permM permKV psE.
 Qed.
@@ -481,9 +481,9 @@ Section view_indep.
 Local Open Scope proba_scope.
 Variable R : realType.
 Variable secretP : R.-fdist bool.
-Hypothesis HG : (0 < #|G|)%N.
+Hypothesis card_G_gt0 : (0 < #|G|)%N.
 Variable encode : bool -> N'.+1.-tuple 'I_N'.+1.
-Let P : R.-fdist (bool * gT)%type := secretP `x (`U HG).
+Let P : R.-fdist (bool * gT)%type := secretP `x (`U card_G_gt0).
 
 (** The random variable of what coalition C observes at a sample (secret,
     shuffle): the dealt card at each position rho g i for i in C, padded with
@@ -512,7 +512,7 @@ pose pf := fun v : 'I_N'.+1 =>
   [ffun i : 'I_N'.+1 => if i \in [set i0] then v else ord0].
 pose mu : R.-fdist {ffun 'I_N'.+1 -> 'I_N'.+1} :=
   fdistmap pf (fdist_uniform (card_ord N'.+1)).
-apply: (@inde_prod_fst R bool gT secretP (`U HG) _
+apply: (@inde_prod_fst R bool gT secretP (`U card_G_gt0) _
   (coalition_view [set i0]) mu) => b.
 have inj_b : injective (tnth (encode b)) by apply/tuple_uniqP; exact: Huniq.
 have -> : (fun b0 : gT => coalition_view [set i0] (b, b0))
@@ -575,10 +575,10 @@ Local Open Scope proba_scope.
 Variables (N' : nat) (gT : finGroupType) (G : {group gT}).
 Variable rho : {morphism G >-> {perm 'I_N'.+1}}.
 Variable t : nat.
-Hypothesis Htrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
+Hypothesis rhoG_ntrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
 Variable R : realType.
 Variable secretP : R.-fdist bool.
-Hypothesis HG : (0 < #|G|)%N.
+Hypothesis card_G_gt0 : (0 < #|G|)%N.
 Variable encode : bool -> N'.+1.-tuple 'I_N'.+1.
 
 (** The uniform shuffle, pushed forward through the coalition's encoded
@@ -593,7 +593,7 @@ Lemma ktuple_encode_uniform (k : nat) (p : k.-tuple 'I_N'.+1) (b : bool)
   (k <= t)%N -> uniq (encode b) ->
   p \in dtuple_on k [set: 'I_N'.+1] ->
   fdistmap (fun g : gT => [tuple tnth (encode b) (rho g (tnth p l)) | l < k])
-    (`U HG : R.-fdist gT) = `U Hdt.
+    (`U card_G_gt0 : R.-fdist gT) = `U Hdt.
 Proof.
 move=> Hk Hub Hp.
 have b_inj : injective (tnth (encode b)) by apply/tuple_uniqP; exact: Hub.
@@ -615,7 +615,7 @@ have fibeqgen : forall r : k.-tuple 'I_N'.+1,
       apply/tuple_uniqP => l1 l2; rewrite !tnth_mktuple => /(can_inj ebK').
       by move: Hr; rewrite inE => /andP[/tuple_uniqP rinj _]; apply: rinj.
     by apply/subsetP => x _; rewrite inE.
-  rewrite -(rho_tuple_fiber_card Htrans Hk Hp Hr').
+  rewrite -(rho_tuple_fiber_card rhoG_ntrans Hk Hp Hr').
   apply: eq_card => g; rewrite !inE; congr (_ && _).
   apply/idP/idP => /eqP Htup; apply/eqP.
     apply: eq_from_tnth => l.
@@ -673,10 +673,10 @@ Qed.
     the file's distributional privacy claim. *)
 Lemma ttrans_view_indep_gen (C : {set 'I_N'.+1}) :
   (#|C| <= t)%N -> (forall b, uniq (encode b)) ->
-  secretP `x (`U HG) |= coalition_view rho secretP HG encode C _|_
-    @dealt_secret gT G R secretP HG.
+  secretP `x (`U card_G_gt0) |= coalition_view rho secretP card_G_gt0 encode C _|_
+    @dealt_secret gT G R secretP card_G_gt0.
 Proof.
-move=> HC Huniq.
+move=> card_C_gt0 Huniq.
 pose k := size (enum C).
 pose p : k.-tuple 'I_N'.+1 := in_tuple (enum C).
 have Hk : (k <= t)%N by rewrite /k -cardE.
@@ -686,9 +686,9 @@ have Hp : p \in dtuple_on k [set: 'I_N'.+1].
 have Hdt : (0 < #|dtuple_on k [set: 'I_N'.+1]|)%N by apply/card_gt0P; exists p.
 pose maskf := fun r : k.-tuple 'I_N'.+1 =>
   [ffun i : 'I_N'.+1 => nth ord0 (val r) (index i (enum C))].
-apply: (@inde_prod_fst R bool gT secretP (`U HG) _
-  (coalition_view rho secretP HG encode C) (fdistmap maskf (`U Hdt))) => b.
-have Hcomp : (fun b0 : gT => coalition_view rho secretP HG encode C (b, b0))
+apply: (@inde_prod_fst R bool gT secretP (`U card_G_gt0) _
+  (coalition_view rho secretP card_G_gt0 encode C) (fdistmap maskf (`U Hdt))) => b.
+have Hcomp : (fun b0 : gT => coalition_view rho secretP card_G_gt0 encode C (b, b0))
     = maskf \o
       (fun g : gT => [tuple tnth (encode b) (rho g (tnth p l)) | l < k]).
   apply: boolp.funext => g; apply/ffunP => i.
@@ -718,15 +718,15 @@ Local Open Scope entropy_scope.
     colluders learn no less" a theorem rather than an assumption. *)
 Lemma coalition_view_mutual_info_le (C C' : {set 'I_N'.+1}) :
   C' \subset C ->
-  `I(dealt_secret secretP HG ;
-       coalition_view rho secretP HG encode C')
-    <= `I(dealt_secret secretP HG ; coalition_view rho secretP HG encode C).
+  `I(dealt_secret secretP card_G_gt0 ;
+       coalition_view rho secretP card_G_gt0 encode C')
+    <= `I(dealt_secret secretP card_G_gt0 ; coalition_view rho secretP card_G_gt0 encode C).
 Proof.
 move=> HCC'.
 pose restrict := fun v : {ffun 'I_N'.+1 -> 'I_N'.+1} =>
   [ffun i => if i \in C' then v i else ord0].
-have Hview : coalition_view rho secretP HG encode C'
-    = restrict `o coalition_view rho secretP HG encode C.
+have Hview : coalition_view rho secretP card_G_gt0 encode C'
+    = restrict `o coalition_view rho secretP card_G_gt0 encode C.
   apply: boolp.funext => u; apply/ffunP => i.
   rewrite /comp_RV /restrict /coalition_view !ffunE.
   case: (boolP (i \in C')) => iC' //=.
@@ -743,16 +743,16 @@ Local Open Scope proba_scope.
 Variables (N' : nat) (gT : finGroupType) (G : {group gT}).
 Variable rho : {morphism G >-> {perm 'I_N'.+1}}.
 Variable t : nat.
-Hypothesis Htrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
+Hypothesis rhoG_ntrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
 Variable R : realType.
 Variable secretP : R.-fdist bool.
-Hypothesis HG : (0 < #|G|)%N.
+Hypothesis card_G_gt0 : (0 < #|G|)%N.
 Variable orbit_class : N'.+1.-tuple 'I_N'.+1 -> bool.
 Variable deck_ok : N'.+1.-tuple 'I_N'.+1 -> bool.
-Hypothesis Hdeck_uniq : forall sh, deck_ok sh -> uniq sh.
-Hypothesis Hinv : forall g sh, g \in G ->
+Hypothesis deck_ok_uniq : forall sh, deck_ok sh -> uniq sh.
+Hypothesis orbit_class_inv : forall g sh, g \in G ->
   orbit_class [tuple tnth sh (rho g i) | i < N'.+1] = orbit_class sh.
-Hypothesis Hdeck_stable : forall g sh, g \in G ->
+Hypothesis deck_ok_stable : forall g sh, g \in G ->
   deck_ok [tuple tnth sh (rho g i) | i < N'.+1] = deck_ok sh.
 
 (** The set of valid decks belonging to orbit class s: deck_ok sh with
@@ -762,14 +762,14 @@ Hypothesis Hdeck_stable : forall g sh, g \in G ->
 Definition class_decks (s : bool) : {set N'.+1.-tuple 'I_N'.+1} :=
   [set sh | deck_ok sh && (orbit_class sh == s)].
 
-Hypothesis Hpop : forall s : bool, (0 < #|class_decks s|)%N.
+Hypothesis card_class_decks_gt0 : forall s : bool, (0 < #|class_decks s|)%N.
 
 (** The joint law of a secret, an independently and uniformly drawn valid
     deck of that secret's class, and an independent uniform shuffle. This is
     the sample space of the all-decks dealer, which redraws the deck itself
     per secret rather than fixing one deck and shuffling it. *)
 Definition alldecksP : R.-fdist (bool * (N'.+1.-tuple 'I_N'.+1 * gT)) :=
-  secretP `X (fun s => ((`U (Hpop s)) `x (`U HG))).
+  secretP `X (fun s => ((`U (card_class_decks_gt0 s)) `x (`U card_G_gt0))).
 
 (** The secret-component projection of an alldecksP sample: the random
     variable the all-decks dealer's coalition view must be shown independent
@@ -789,24 +789,24 @@ Local Lemma alldecks_view_law (C : {set 'I_N'.+1}) (s : bool)
     (Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_N'.+1]|)%N) :
   (#|C| <= t)%N ->
   fdistmap (fun dg => alldecks_view C (s, dg))
-    ((`U (Hpop s)) `x ((`U HG) : R.-fdist gT))
+    ((`U (card_class_decks_gt0 s)) `x ((`U card_G_gt0) : R.-fdist gT))
   = fdistmap (fun r : (size (enum C)).-tuple 'I_N'.+1 =>
        [ffun i : 'I_N'.+1 => nth ord0 (val r) (index i (enum C))])
       (`U Hdt).
 Proof.
-move=> HC.
+move=> card_C_gt0.
 pose k := size (enum C).
 pose p : k.-tuple 'I_N'.+1 := in_tuple (enum C).
 have Hk : (k <= t)%N by rewrite /k -cardE.
 have Hp : p \in dtuple_on k [set: 'I_N'.+1].
   by rewrite inE; apply/andP;
      split; [exact: enum_uniq | apply/subsetP => x _; rewrite inE].
-apply: (fdistmap_prod_const (P := `U (Hpop s)) (W := fun _ => `U HG)) => sh Hsh.
+apply: (fdistmap_prod_const (P := `U (card_class_decks_gt0 s)) (W := fun _ => `U card_G_gt0)) => sh Hsh.
 have Hmem : sh \in class_decks s.
   apply: contraNT Hsh => Hsh'.
-  by rewrite (fdist_uniform_supp_notin R (Hpop s) Hsh') eqxx.
+  by rewrite (fdist_uniform_supp_notin R (card_class_decks_gt0 s) Hsh') eqxx.
 move: Hmem; rewrite inE => /andP[Hok _].
-have Huniqsh : uniq sh := Hdeck_uniq Hok.
+have Huniqsh : uniq sh := deck_ok_uniq Hok.
 have Hcomp : (fun g : gT => alldecks_view C (s, (sh, g)))
     = (fun r : k.-tuple 'I_N'.+1 =>
          [ffun i : 'I_N'.+1 => nth ord0 (val r) (index i (enum C))])
@@ -826,7 +826,7 @@ have Hcomp : (fun g : gT => alldecks_view C (s, (sh, g)))
     by split; [rewrite /k; exact: index_size | rewrite /k leqNgt index_mem].
   by rewrite Hidx nth_default // size_tuple.
 rewrite Hcomp -fdistmap_comp.
-rewrite (@ktuple_encode_uniform N' gT G rho t Htrans R HG
+rewrite (@ktuple_encode_uniform N' gT G rho t rhoG_ntrans R card_G_gt0
           (fun _ => sh) k p true Hdt Hk Huniqsh Hp).
 by [].
 Qed.
@@ -840,7 +840,7 @@ Qed.
 Lemma ttrans_view_indep_alldecks (C : {set 'I_N'.+1}) :
   (#|C| <= t)%N -> alldecksP |= alldecks_view C _|_ alldecks_secret.
 Proof.
-move=> HC.
+move=> card_C_gt0.
 have Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_N'.+1]|)%N.
   apply/card_gt0P; exists (in_tuple (enum C)).
   by rewrite inE; apply/andP;
@@ -848,7 +848,7 @@ have Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_N'.+1]|)%N.
 apply: (inde_prod_kernel_fst
    (mu := fdistmap (fun r : (size (enum C)).-tuple 'I_N'.+1 =>
             [ffun i => nth ord0 (val r) (index i (enum C))]) (`U Hdt))) => s _.
-exact: (alldecks_view_law s Hdt HC).
+exact: (alldecks_view_law s Hdt card_C_gt0).
 Qed.
 
 (** Shuffling a uniformly drawn valid deck of orbit class s by an independent
@@ -860,19 +860,19 @@ Qed.
 Lemma alldecks_shuffle_absorb (s : bool) :
   fdistmap (fun shg : N'.+1.-tuple 'I_N'.+1 * gT =>
               [tuple tnth shg.1 (rho shg.2 i) | i < N'.+1])
-           ((`U (Hpop s)) `x ((`U HG) : R.-fdist gT))
-  = `U (Hpop s).
+           ((`U (card_class_decks_gt0 s)) `x ((`U card_G_gt0) : R.-fdist gT))
+  = `U (card_class_decks_gt0 s).
 Proof.
 apply: fdistmap_prod_snd_const => g Hg.
 have gG : g \in G.
   apply: contraNT Hg => gN.
-  by rewrite (fdist_uniform_supp_notin R HG gN) eqxx.
-apply: (fdist_uniform_supp_bij R (Hpop s)).
+  by rewrite (fdist_uniform_supp_notin R card_G_gt0 gN) eqxx.
+apply: (fdist_uniform_supp_bij R (card_class_decks_gt0 s)).
   move=> sh1 sh2 Heq; apply: eq_from_tnth => j.
   move: (congr1 (fun T : N'.+1.-tuple 'I_N'.+1 =>
                    tnth T (((rho g)^-1)%g j)) Heq).
   by rewrite !tnth_mktuple permKV.
-move=> sh; rewrite /class_decks !inE (@Hdeck_stable g sh gG) (@Hinv g sh gG).
+move=> sh; rewrite /class_decks !inE (@deck_ok_stable g sh gG) (@orbit_class_inv g sh gG).
 by [].
 Qed.
 
@@ -881,7 +881,7 @@ Qed.
     with the shuffle coordinate dropped: the sample space of a dealer that
     hands out a fresh valid deck per secret without shuffling it. *)
 Definition uniform_deckP : R.-fdist (bool * N'.+1.-tuple 'I_N'.+1) :=
-  secretP `X (fun s => `U (Hpop s)).
+  secretP `X (fun s => `U (card_class_decks_gt0 s)).
 
 (** The card values coalition C reads directly off the dealt deck, padded
     with ord0 outside C. This is uniform_deckP's analogue of coalition_view,
@@ -902,7 +902,7 @@ Lemma ttrans_view_indep_deck (C : {set 'I_N'.+1}) :
   uniform_deckP |= uniform_deck_view C
     _|_ ((fun u => u.1) : {RV uniform_deckP -> bool}).
 Proof.
-move=> HC.
+move=> card_C_gt0.
 have Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_N'.+1]|)%N.
   apply/card_gt0P; exists (in_tuple (enum C)).
   by rewrite inE; apply/andP;
@@ -919,7 +919,7 @@ rewrite (_ : (fun b => uniform_deck_view C (s, b))
   rewrite /comp /uniform_deck_view /alldecks_view !ffunE.
   case: (i \in C) => //=.
   by rewrite tnth_mktuple.
-exact: (alldecks_view_law s Hdt HC).
+exact: (alldecks_view_law s Hdt card_C_gt0).
 Qed.
 
 End alldecks_view_indep.
@@ -959,20 +959,20 @@ Definition profile_deck (p : MonodromyProfile) (sel : bool -> mp_secretT p)
 Lemma profile_view_indep (p : MonodromyProfile) (t : nat)
     (sel : bool -> mp_secretT p)
     (Hlen : (ts_T' (rp_scheme (mp_plug p))).+1 = (pgg_N' (mp_M p)).+1)
-    (Htrans : ntransitive t (@pgg_rho (mp_M p) @* pgg_G (mp_M p))
+    (rhoG_ntrans : ntransitive t (@pgg_rho (mp_M p) @* pgg_G (mp_M p))
                             [set: 'I_(pgg_N' (mp_M p)).+1] 'P)
     (R : realType) (secretP : R.-fdist bool)
-    (HG : (0 < #|pgg_G (mp_M p)|)%N)
+    (card_G_gt0 : (0 < #|pgg_G (mp_M p)|)%N)
     (Hdistinct : forall b : bool,
        uniq (ts_encode (rp_scheme (mp_plug p)) (sel b)))
     (C : {set 'I_(pgg_N' (mp_M p)).+1}) :
   (#|C| <= t)%N ->
-  secretP `x (`U HG)
-    |= coalition_view (@pgg_rho (mp_M p)) secretP HG (profile_deck sel Hlen) C
-    _|_ dealt_secret secretP HG.
+  secretP `x (`U card_G_gt0)
+    |= coalition_view (@pgg_rho (mp_M p)) secretP card_G_gt0 (profile_deck sel Hlen) C
+    _|_ dealt_secret secretP card_G_gt0.
 Proof.
-move=> HC.
-apply: (ttrans_view_indep_gen Htrans secretP HG HC).
+move=> card_C_gt0.
+apply: (ttrans_view_indep_gen rhoG_ntrans secretP card_G_gt0 card_C_gt0).
 by move=> b; rewrite /profile_deck val_tcast; exact: Hdistinct.
 Qed.
 

@@ -90,7 +90,7 @@ Variable C : Lcode0.t F n.
 Hypothesis C_not_trivial : not_trivial C.
 
 Let d := min_dist C_not_trivial.
-Hypothesis Hd2 : 1 < d.
+Hypothesis d_gt1 : 1 < d.
 
 (* Build the full codeword from secret (position 0) and shares (positions 1..n-1).
    Defined pointwise to avoid row_mx type inference issues. *)
@@ -155,7 +155,7 @@ have /eqP Hdiff0 : diff == 0.
   apply/negPn/negP => Hne0.
   have : d <= 1 :=
     leq_trans (min_dist_is_min C_not_trivial HdiffC Hne0) HwH1.
-  by rewrite leqNgt Hd2.
+  by rewrite leqNgt d_gt1.
 have := congr1 (fun v : 'rV[F]_n => v ord0 ord0) Hdiff0.
 rewrite /diff !mxE /=.
 by move/eqP; rewrite subr_eq0 => /eqP.
@@ -398,20 +398,20 @@ End massey_privacy.
 
 Section massey_mds.
 
-Hypothesis HMDS : maximum_distance_separable C_not_trivial.
+Hypothesis mdsC : maximum_distance_separable C_not_trivial.
 
 Let k := \dim C.
 
 (* For MDS codes: d = n - k + 1 (Singleton bound with equality).
    The dual of an MDS code is MDS with d_perp = k + 1.
-   Proving d_perp = k + 1 from HMDS requires the dual code theory
+   Proving d_perp = k + 1 from mdsC requires the dual code theory
    (currently WIP in linearcode.v). *)
 
 Lemma mds_min_dist_eq : d = (n - k + 1)%N.
-Proof. by move/eqP: HMDS. Qed.
+Proof. by move/eqP: mdsC. Qed.
 
 End massey_mds.
 
 End massey.
 
-Arguments massey_scheme {F n' C} C_not_trivial Hd2 {d_perp'} privacy_surj.
+Arguments massey_scheme {F n' C} C_not_trivial d_gt1 {d_perp'} privacy_surj.

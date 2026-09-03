@@ -40,10 +40,10 @@ Variables (k g : nat).
 Variable ev : 'M[F]_(k, n).
 
 Hypothesis ev_rank : \rank ev = k.
-Hypothesis Hk : 0 < k.
-Hypothesis Hkn : k <= n.
-Hypothesis Hkg : g < k.
-Hypothesis Hkgn : k + g < n.
+Hypothesis k_gt0 : 0 < k.
+Hypothesis le_kn : k <= n.
+Hypothesis lt_gk : g < k.
+Hypothesis lt_kgn : k + g < n.
 Hypothesis goppa_wt :
   forall m : 'rV[F]_k, m != 0 -> n - (k + g - 1) <= wH (m *m ev).
 
@@ -61,8 +61,8 @@ Hypothesis ag_priv_surj :
     #|S| < d_perp'.+2 ->
     exists c : 'rV[F]_n, c \in ag_code ev /\ vproj c S = vproj target S.
 
-Let C_nt := ag_not_trivial ev ev_rank Hk Hkn goppa_wt.
-Let Hd2 := ag_min_dist_ge2 ev ev_rank Hk Hkn goppa_wt Hkgn.
+Let C_nt := ag_not_trivial ev ev_rank k_gt0 le_kn goppa_wt.
+Let Hd2 := ag_min_dist_ge2 ev ev_rank k_gt0 le_kn goppa_wt lt_kgn.
 
 (** The ThresholdScheme built from ag_code via Massey's construction,
     instantiated from the code's nontriviality, its distance-at-least-2
@@ -79,8 +79,8 @@ Lemma d_perp_eq : d_perp'.+2 = (k - g).+1.
 Proof. by rewrite prednK // subn_gt0. Qed.
 
 (* ts_T = n'' + 1 = n - 1, ts_k = d_perp' + 1 = k - g.
-   Need: n - 1 <= k - g + 2g = k + g. From Hparam: n <= k + g + 1. *)
-Hypothesis Hparam : n <= k + g + 1.
+   Need: n - 1 <= k - g + 2g = k + g. From low_redundancy: n <= k + g + 1. *)
+Hypothesis low_redundancy : n <= k + g + 1.
 
 (** The reconstruction threshold ts_T exceeds the privacy threshold ts_k by
     at most 2 * g. This is the AG-Massey scheme's privacy/recovery gap
@@ -90,16 +90,16 @@ Lemma ag_massey_gap : ts_T ag_massey <= ts_k ag_massey + 2 * g.
 Proof.
 rewrite /ts_T /ts_k /= prednK ?subn_gt0 //.
 rewrite mulSn mul1n addnA subnK; last exact: ltnW.
-by have H := Hparam; rewrite addn1 in H.
+by have H := low_redundancy; rewrite addn1 in H.
 Qed.
 
 (* Transport to 'I_N *)
 Variable N : nat.
-Hypothesis HN : N = #|F|.
+Hypothesis defN : N = #|F|.
 
 (* Bijection between 'I_N and F *)
-Let ag_toF (x : 'I_N) : F := enum_val (cast_ord HN x).
-Let ag_ofF (x : F) : 'I_N := cast_ord (esym HN) (enum_rank x).
+Let ag_toF (x : 'I_N) : F := enum_val (cast_ord defN x).
+Let ag_ofF (x : F) : 'I_N := cast_ord (esym defN) (enum_rank x).
 
 Let ag_ofFK : cancel ag_ofF ag_toF.
 Proof. by move=> x; rewrite /ag_ofF /ag_toF cast_ordKV enum_rankK. Qed.
