@@ -137,8 +137,8 @@ Variables (R : realType) (A : finType) (n : nat).
     the uniform shuffle output with the per-secret encoding's injective card
     map (ttrans_view_indep) leaves the coalition's single observed value
     uniform regardless of which secret was dealt. *)
-Lemma bij_uniform (H : #|A| = n.+1) (f : A -> A) : bijective f ->
-  fdistmap f (fdist_uniform (R:=R) H) = fdist_uniform H.
+Lemma bij_uniform (card_A : #|A| = n.+1) (f : A -> A) : bijective f ->
+  fdistmap f (fdist_uniform (R:=R) card_A) = fdist_uniform card_A.
 Proof.
 move=> bijf; have [g fg gf] := bijf.
 apply: fdist_ext => a.

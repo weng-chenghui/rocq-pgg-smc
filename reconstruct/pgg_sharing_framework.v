@@ -217,18 +217,19 @@ Arguments sum_mod_scheme {N' T'}.
 (******************************************************************************)
 
 (* Helper: cast a tuple when the size index changes *)
-Definition cast_tuple {A : Type} {n m : nat} (H : n = m)
+Definition cast_tuple {A : Type} {n m : nat} (eq_nm : n = m)
     (t : n.-tuple A) : m.-tuple A :=
-  eq_rect n (fun k => k.-tuple A) t m H.
+  eq_rect n (fun k => k.-tuple A) t m eq_nm.
 
-(** tnth (cast_tuple H t) i = tnth t (cast_ord (esym H) i): a tuple cast
-    along a length equality H composes with the matching index cast on
-    'I_m. Section 4 below reindexes protocol endpoints through casts of
-    this kind whenever the scheme's declared length and the protocol's
-    coordinate count are only propositionally, not definitionally, equal. *)
-Lemma tnth_cast_tuple {A : Type} {n m : nat} (H : n = m)
+(** tnth (cast_tuple eq_nm t) i = tnth t (cast_ord (esym eq_nm) i): a
+    tuple cast along a length equality composes with the matching index
+    cast on 'I_m. Section 4 below reindexes protocol endpoints through
+    casts of this kind whenever the scheme's declared length and the
+    protocol's coordinate count are only propositionally, not
+    definitionally, equal. *)
+Lemma tnth_cast_tuple {A : Type} {n m : nat} (eq_nm : n = m)
     (t : n.-tuple A) (i : 'I_m) :
-  tnth (cast_tuple H t) i = tnth t (cast_ord (esym H) i).
+  tnth (cast_tuple eq_nm t) i = tnth t (cast_ord (esym eq_nm) i).
 Proof.
 subst m.
 by rewrite /cast_tuple /= cast_ord_id.

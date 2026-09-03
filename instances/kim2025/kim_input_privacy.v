@@ -747,9 +747,14 @@ End kim_input_privacy.
     ceiling, confirming kim_input_private recovers den Boer's exact
     zero-leakage result as the bias-0 special case. *)
 Corollary kim_input_private0 (R : realType)
-    (H1 : (0 : R) < 5%:R^-1) (H2 : - (4%:R * 5%:R^-1) < (0 : R))
-    (H3 : 0 < 5%:R^-1 - `|0 : R|) (A : seq nat) :
+    (inv5_gt0 : (0 : R) < 5%:R^-1)
+    (neg4inv5_lt0 : - (4%:R * 5%:R^-1) < (0 : R))
+    (gap_gt0 : 0 < 5%:R^-1 - `|0 : R|) (A : seq nat) :
   cond_mutual_info
-    (`p_ [% @kim_inputs R 0 H1 H2, @kim_view R 0 H1 H2 A, @kim_secret R 0 H1 H2])
+    (`p_ [% @kim_inputs R 0 inv5_gt0 neg4inv5_lt0,
+            @kim_view R 0 inv5_gt0 neg4inv5_lt0 A,
+            @kim_secret R 0 inv5_gt0 neg4inv5_lt0])
     <= @kim_leak_bound R 0.
-Proof. exact: (@kim_input_private R 0 H1 H2 H3 A). Qed.
+Proof.
+exact: (@kim_input_private R 0 inv5_gt0 neg4inv5_lt0 gap_gt0 A).
+Qed.

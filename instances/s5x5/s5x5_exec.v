@@ -539,17 +539,17 @@ Qed.
     underlying value as the cut image of seat i, once that image is known
     to be below five. *)
 Lemma s5x5_p1_map_val (w0 : pgg_gT s5x5_M) (i : 'I_5)
-    (H : (@pgg_rho s5x5_M w0 (s5x5_p1_idx i) < 5)%N) :
+    (rho_lt5 : (@pgg_rho s5x5_M w0 (s5x5_p1_idx i) < 5)%N) :
   s5x5_p1_map w0 i = @pgg_rho s5x5_M w0 (s5x5_p1_idx i) :> nat.
-Proof. exact: (inordK H). Qed.
+Proof. exact: (inordK rho_lt5). Qed.
 
 (** s5x5_p2_map_val — the pile-2 reindexing s5x5_p2_map w0 i has the offset
     value of the cut image of seat i, once that offset is known to be below
     five. *)
 Lemma s5x5_p2_map_val (w0 : pgg_gT s5x5_M) (i : 'I_5)
-    (H : (@pgg_rho s5x5_M w0 (s5x5_p2_idx i) - 5 < 5)%N) :
+    (rho_sub_lt5 : (@pgg_rho s5x5_M w0 (s5x5_p2_idx i) - 5 < 5)%N) :
   s5x5_p2_map w0 i = (@pgg_rho s5x5_M w0 (s5x5_p2_idx i) - 5)%N :> nat.
-Proof. exact: (inordK H). Qed.
+Proof. exact: (inordK rho_sub_lt5). Qed.
 
 (** s5x5_p1_map_inj — the pile-1 restriction s5x5_p1_map w0 of a group cut
     is injective: distinct pile-1 parties stay distinct after the cut,
