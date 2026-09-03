@@ -192,6 +192,20 @@ RAAG relation, vs `path_genC` whose C suffix belongs on commuted
 operations and doubles as set complement); `Gw0` (membership is the
 whole concept; mathcomp's attested `Ax : x \in A` juxtaposition).
 
+## Execution record (2026-09-03)
+
+Executed in nine commits: A1 (1d933a1, plus the card_remaining_values
+widening), A2a (67c8b84, 32 Gw0 binders), A2b (193e0a6), A2c
+(89d9efe, the sz_ep sweep — widened from the single-site plan item to
+the whole exec-layer pattern), A3 per directory: security 4ba980a,
+groups 4b8ccf5, reconstruct f1f0d59, protocol e65bd67, instances
+ee0cf9f. Every commit passed the protocol: full build EXIT=0 from a
+captured log, fixpoint 0 files, statement-surface diff confined to
+the authorized renames (name/statement pairs plus ctxhash-only lines
+under renamed section hypotheses). Residual `Hypothesis H` grep hits:
+one, H_min_floor, whose subject is the variable H_min — not a case.
+Proof-script-internal names remain for R5 as planned.
+
 The remaining judgment calls were confirmed by the user 2026-09-03:
 `low_redundancy` for `Hparam*`, and `endpoint_free` for `Hreg`
 (`endpoint` verified as the covering-theory term — the endpoint of the
