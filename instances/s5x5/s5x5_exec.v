@@ -254,11 +254,11 @@ Lemma s5x5_exec_recon (s : 'I_10) (w0 : pgg_gT s5x5_M) :
   @exec_decode mpX s5x5_exec_plug
     (@exec_static_endpoints mpX s5x5_exec_plug s5x5_content_obs s w0) Hsz = s.
 Proof.
-move=> Hw0.
+move=> Gw0.
 rewrite -s5x5_exec_endpoints /exec_endpoints /exec_run s5x5_exec_fuelE
         s5x5_exec_procsE /exec_verifier_id => Hsz.
 rewrite (s5x5_exec_decodeE Hsz (s5x5_endpoints_size s w0)).
-exact: (s5x5_run_recovers s Hw0).
+exact: (s5x5_run_recovers s Gw0).
 Qed.
 
 (* Recovery is exported in three forms per plug, as at the other instances:
@@ -271,14 +271,14 @@ Qed.
     s, for any cut w0 in the group: the interpreter's actual endpoints, not
     just their closed form, recover the dealt position. *)
 Theorem s5x5_exec_recovers (s : 'I_10) (w0 : pgg_gT s5x5_M)
-    (Hw0 : w0 \in pgg_G s5x5_M) :
+    (Gw0 : w0 \in pgg_G s5x5_M) :
   @exec_decode mpX s5x5_exec_plug
     (@exec_endpoints mpX s5x5_exec_plug s w0 0)
     (exec_endpoints_size (s5x5_exec_endpoints s w0)) = s.
 Proof.
 exact: (@exec_run_recovers mpX s5x5_exec_plug s5x5_content_obs
           (fun s : 'I_10 => s) s w0 0 (s5x5_exec_endpoints s w0)
-          (s5x5_exec_recon Hw0)).
+          (s5x5_exec_recon Gw0)).
 Qed.
 
 (** s5x5_exec_correct — the deterministic run reaches Finish at each of its
@@ -287,7 +287,7 @@ Qed.
     count and recovery bundled into the single correctness statement for
     the deterministic plug. *)
 Theorem s5x5_exec_correct (s : 'I_10) (w0 : pgg_gT s5x5_M)
-    (Hw0 : w0 \in pgg_G s5x5_M) :
+    (Gw0 : w0 \in pgg_G s5x5_M) :
   [/\ (@exec_run mpX s5x5_exec_plug s w0 0).1
         = nseq (size (@exec_procs mpX s5x5_exec_plug s w0 0)) Finish,
       size (@exec_endpoints mpX s5x5_exec_plug s w0 0)
@@ -298,7 +298,7 @@ Theorem s5x5_exec_correct (s : 'I_10) (w0 : pgg_gT s5x5_M)
 Proof.
 exact: (@exec_run_correct mpX s5x5_exec_plug s5x5_content_obs
           (fun s : 'I_10 => s) s w0 0 (s5x5_exec_terminates s w0)
-          (s5x5_exec_endpoints s w0) (s5x5_exec_recon Hw0)).
+          (s5x5_exec_endpoints s w0) (s5x5_exec_recon Gw0)).
 Qed.
 
 (** s5x5_observed — the S_5 x S_5 deterministic observed execution:
@@ -317,11 +317,11 @@ Definition s5x5_observed : OE.ObservedExecution :=
     s5x5_exec_recovers, read through the packaged ObservedExecution record
     rather than the bare plug. *)
 Theorem s5x5_observed_recovers (s : 'I_10) (w0 : pgg_gT s5x5_M)
-    (Hw0 : w0 \in pgg_G s5x5_M) :
+    (Gw0 : w0 \in pgg_G s5x5_M) :
   @exec_decode mpX s5x5_exec_plug
     (@exec_endpoints mpX s5x5_exec_plug s w0 0)
     (OE.oe_endpoints_size s5x5_observed s w0) = s.
-Proof. exact: (OE.oe_run_recovers s5x5_observed s w0 Hw0). Qed.
+Proof. exact: (OE.oe_run_recovers s5x5_observed s w0 Gw0). Qed.
 
 (******************************************************************************)
 (*     The observer types read off the deterministic plug                     *)
@@ -509,29 +509,29 @@ Definition s5x5_p2_map (w0 : pgg_gT s5x5_M) (i : 'I_5) : 'I_5 :=
 (** s5x5_p1_stab — a group cut w0 sends a pile-1 seat to a pile-1 seat: the
     per-seat instance of s5x5_pile1_stab that makes s5x5_p1_map well-defined
     as a map into 'I_5. *)
-Lemma s5x5_p1_stab (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M)
+Lemma s5x5_p1_stab (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M)
     (i : 'I_5) : (@pgg_rho s5x5_M w0 (s5x5_p1_idx i) < 5)%N.
-Proof. exact: (@s5x5_pile1_stab w0 Hw0 (s5x5_p1_idx i) (ltn_ord i)). Qed.
+Proof. exact: (@s5x5_pile1_stab w0 Gw0 (s5x5_p1_idx i) (ltn_ord i)). Qed.
 
 (** s5x5_p2_stab — a group cut w0 sends a pile-2 seat to a pile-2 seat: the
     per-seat instance of s5x5_preserves_pile2_proved that makes s5x5_p2_map
     well-defined as a map into 'I_5. *)
-Lemma s5x5_p2_stab (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M)
+Lemma s5x5_p2_stab (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M)
     (i : 'I_5) : (5 <= @pgg_rho s5x5_M w0 (s5x5_p2_idx i))%N.
 Proof.
 have H1 : ~~ (s5x5_p2_idx i < 5)%N by rewrite -leqNgt; exact: s5x5_p2_idx_ge.
 have H2 : ~~ (@pgg_rho s5x5_M w0 (s5x5_p2_idx i) < 5)%N
-  := @s5x5_preserves_pile2_proved w0 Hw0 (s5x5_p2_idx i) H1.
+  := @s5x5_preserves_pile2_proved w0 Gw0 (s5x5_p2_idx i) H1.
 by rewrite leqNgt.
 Qed.
 
 (** s5x5_p2_stab_sub — the offset image of a pile-2 seat under a cut, minus
     five, is below five: the arithmetic form of s5x5_p2_stab needed to land
     s5x5_p2_map's inord construction inside 'I_5. *)
-Lemma s5x5_p2_stab_sub (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M)
+Lemma s5x5_p2_stab_sub (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M)
     (i : 'I_5) : (@pgg_rho s5x5_M w0 (s5x5_p2_idx i) - 5 < 5)%N.
 Proof.
-rewrite -(ltn_add2r 5) (subnK (s5x5_p2_stab Hw0 i)).
+rewrite -(ltn_add2r 5) (subnK (s5x5_p2_stab Gw0 i)).
 exact: (ltn_ord (@pgg_rho s5x5_M w0 (s5x5_p2_idx i))).
 Qed.
 
@@ -555,15 +555,15 @@ Proof. exact: (inordK H). Qed.
     is injective: distinct pile-1 parties stay distinct after the cut,
     which is what lets the pile-1 factor reconstruction below reindex
     without collision. *)
-Lemma s5x5_p1_map_inj (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M) :
+Lemma s5x5_p1_map_inj (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M) :
   injective (s5x5_p1_map w0).
 Proof.
 move=> a b Hab.
 have Hrho : @pgg_rho s5x5_M w0 (s5x5_p1_idx a)
           = @pgg_rho s5x5_M w0 (s5x5_p1_idx b).
   apply: ord_inj.
-  by rewrite -(s5x5_p1_map_val (s5x5_p1_stab Hw0 a))
-             -(s5x5_p1_map_val (s5x5_p1_stab Hw0 b)) Hab.
+  by rewrite -(s5x5_p1_map_val (s5x5_p1_stab Gw0 a))
+             -(s5x5_p1_map_val (s5x5_p1_stab Gw0 b)) Hab.
 have Hidx := @perm_inj _ (@pgg_rho s5x5_M w0) _ _ Hrho.
 by apply: ord_inj; rewrite -(s5x5_p1_idx_val a) -(s5x5_p1_idx_val b) Hidx.
 Qed.
@@ -572,16 +572,16 @@ Qed.
     is injective: distinct pile-2 parties stay distinct after the cut,
     which is what lets the pile-2 factor reconstruction below reindex
     without collision. *)
-Lemma s5x5_p2_map_inj (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M) :
+Lemma s5x5_p2_map_inj (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M) :
   injective (s5x5_p2_map w0).
 Proof.
 move=> a b Hab.
 have Hrho : @pgg_rho s5x5_M w0 (s5x5_p2_idx a)
           = @pgg_rho s5x5_M w0 (s5x5_p2_idx b).
   apply: ord_inj.
-  rewrite -(subnK (s5x5_p2_stab Hw0 a)) -(subnK (s5x5_p2_stab Hw0 b)).
-  by rewrite -(s5x5_p2_map_val (s5x5_p2_stab_sub Hw0 a))
-             -(s5x5_p2_map_val (s5x5_p2_stab_sub Hw0 b)) Hab.
+  rewrite -(subnK (s5x5_p2_stab Gw0 a)) -(subnK (s5x5_p2_stab Gw0 b)).
+  by rewrite -(s5x5_p2_map_val (s5x5_p2_stab_sub Gw0 a))
+             -(s5x5_p2_map_val (s5x5_p2_stab_sub Gw0 b)) Hab.
 have Hidx := @perm_inj _ (@pgg_rho s5x5_M w0) _ _ Hrho.
 apply: ord_inj; apply: (@addnI 5).
 by rewrite -(s5x5_p2_idx_val a) -(s5x5_p2_idx_val b) Hidx.
@@ -659,14 +659,14 @@ Qed.
     pile-1 factor's own share tuple, using s5x5_p1_stab to know the cut
     image stays inside pile-1. *)
 Lemma s5x5_pile1_layoutE (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
-    (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M) :
+    (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M) :
   [tuple @project_pile1 3 3
       (tnth [tuple tnth (s5x5_rfree_layout uv) (@pgg_rho s5x5_M w0 j) | j < 10]
             (s5x5_p1_idx i)) | i < 5]
   = [tuple tnth (s5_rfree_layout uv.1) (s5x5_p1_map w0 i) | i < 5].
 Proof.
 apply: eq_from_tnth => i; rewrite !tnth_mktuple.
-have Hlt := s5x5_p1_stab Hw0 i.
+have Hlt := s5x5_p1_stab Gw0 i.
 case: (ltnP (@pgg_rho s5x5_M w0 (s5x5_p1_idx i)) 5) => Hc;
   last by rewrite (leq_gtF Hc) in Hlt.
 rewrite /s5x5_p1_map.
@@ -678,14 +678,14 @@ Qed.
     pile-2 mirror of s5x5_pile1_layoutE, using s5x5_p2_stab to know the cut
     image stays inside pile-2. *)
 Lemma s5x5_pile2_layoutE (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
-    (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M) :
+    (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M) :
   [tuple @project_pile2 3 3
       (tnth [tuple tnth (s5x5_rfree_layout uv) (@pgg_rho s5x5_M w0 j) | j < 10]
             (s5x5_p2_idx i)) | i < 5]
   = [tuple tnth (s5_rfree_layout uv.2) (s5x5_p2_map w0 i) | i < 5].
 Proof.
 apply: eq_from_tnth => i; rewrite !tnth_mktuple.
-have Hge := s5x5_p2_stab Hw0 i.
+have Hge := s5x5_p2_stab Gw0 i.
 case: (ltnP (@pgg_rho s5x5_M w0 (s5x5_p2_idx i)) 5) => Hc;
   first by rewrite (leq_gtF Hge) in Hc.
 rewrite /s5x5_p2_map.
@@ -702,18 +702,18 @@ Qed.
     is earned from the two five-seat ones instead of from the product
     scheme's own correctness lemma. *)
 Lemma s5x5_rfree_recon (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
-    (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M) :
+    (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M) :
   ts_recon s5x5_scheme
     [tuple tnth (s5x5_rfree_layout uv) (@pgg_rho s5x5_M w0 i) | i < 10]
   = @combine_secret 3 3 (uv.1 ord0 ord0) (uv.2 ord0 ord0).
 Proof.
 rewrite s5x5_reconE s5x5_pile1_sharesE s5x5_pile2_sharesE.
 congr (@combine_secret 3 3).
-- rewrite (s5x5_pile1_layoutE uv Hw0).
-  exact: (@sum_mod5_recon_reindex (s5x5_p1_map w0) (@s5x5_p1_map_inj w0 Hw0)
+- rewrite (s5x5_pile1_layoutE uv Gw0).
+  exact: (@sum_mod5_recon_reindex (s5x5_p1_map w0) (@s5x5_p1_map_inj w0 Gw0)
             (uv.1 ord0 ord0) (s5_rfree_layout uv.1) (s5x5_pile_valid uv.1)).
-- rewrite (s5x5_pile2_layoutE uv Hw0).
-  exact: (@sum_mod5_recon_reindex (s5x5_p2_map w0) (@s5x5_p2_map_inj w0 Hw0)
+- rewrite (s5x5_pile2_layoutE uv Gw0).
+  exact: (@sum_mod5_recon_reindex (s5x5_p2_map w0) (@s5x5_p2_map_inj w0 Gw0)
             (uv.2 ord0 ord0) (s5_rfree_layout uv.2) (s5x5_pile_valid uv.2)).
 Qed.
 
@@ -808,7 +808,7 @@ Lemma s5x5_rand_run_recovers (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
           (nth [::] (run_interp 300 (s5x5_rprocs_cut uv w0)).2 1))))
   = @combine_secret 3 3 (uv.1 ord0 ord0) (uv.2 ord0 ord0).
 Proof.
-move=> Hw0.
+move=> Gw0.
 have Hgoal : forall (ep : seq 'I_(pgg_N' s5x5_M).+1)
     (Hsz : size ep = (ts_T' s5x5_scheme).+1),
     ep = [seq tnth (s5x5_rfree_layout uv)
@@ -817,7 +817,7 @@ have Hgoal : forall (ep : seq 'I_(pgg_N' s5x5_M).+1)
     ts_recon s5x5_scheme (tcast Hsz (in_tuple ep))
     = @combine_secret 3 3 (uv.1 ord0 ord0) (uv.2 ord0 ord0).
   move=> ep Hsz Hep.
-  rewrite -(@s5x5_rfree_recon uv w0 Hw0).
+  rewrite -(@s5x5_rfree_recon uv w0 Gw0).
   congr (ts_recon _ _).
   apply: eq_from_tnth => i.
   rewrite tcastE tnth_mktuple.
@@ -1003,11 +1003,11 @@ Lemma s5x5_rand_recon (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
     Hsz
   = s5x5_codec (s5x5_joint_tape_secret uv).
 Proof.
-move=> Hw0.
+move=> Gw0.
 rewrite -s5x5_rand_endpoints /exec_endpoints /exec_run s5x5_rand_fuelE
         s5x5_rand_procsE /exec_verifier_id => Hsz.
 rewrite (s5x5_rand_decodeE Hsz (s5x5_rand_endpoints_size uv w0)).
-exact: (@s5x5_rand_run_recovers uv w0 Hw0).
+exact: (@s5x5_rand_run_recovers uv w0 Gw0).
 Qed.
 
 (** s5x5_rand_exec_recovers — the randomized run decodes to s5x5_codec
@@ -1015,7 +1015,7 @@ Qed.
     interpreter-level counterpart of s5x5_rand_recon, the randomized
     analogue of s5x5_exec_recovers. *)
 Theorem s5x5_rand_exec_recovers (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
-    (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M) :
+    (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M) :
   @exec_decode mpX s5x5_rand_exec_plug
     (@exec_endpoints mpX s5x5_rand_exec_plug uv w0 0)
     (exec_endpoints_size (s5x5_rand_endpoints uv w0))
@@ -1023,7 +1023,7 @@ Theorem s5x5_rand_exec_recovers (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
 Proof.
 exact: (@exec_run_recovers mpX s5x5_rand_exec_plug s5x5_rcontent_obs
           (fun uv => s5x5_codec (s5x5_joint_tape_secret uv)) uv w0 0
-          (s5x5_rand_endpoints uv w0) (s5x5_rand_recon Hw0)).
+          (s5x5_rand_endpoints uv w0) (s5x5_rand_recon Gw0)).
 Qed.
 
 (** s5x5_rand_correct — the randomized run reaches Finish at each of its
@@ -1032,7 +1032,7 @@ Qed.
     termination, endpoint count and recovery bundled together, the
     randomized analogue of s5x5_exec_correct. *)
 Theorem s5x5_rand_correct (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
-    (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M) :
+    (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M) :
   [/\ (@exec_run mpX s5x5_rand_exec_plug uv w0 0).1
         = nseq (size (@exec_procs mpX s5x5_rand_exec_plug uv w0 0)) Finish,
       size (@exec_endpoints mpX s5x5_rand_exec_plug uv w0 0)
@@ -1045,7 +1045,7 @@ Proof.
 exact: (@exec_run_correct mpX s5x5_rand_exec_plug s5x5_rcontent_obs
           (fun uv => s5x5_codec (s5x5_joint_tape_secret uv)) uv w0 0
           (s5x5_rand_terminates uv w0) (s5x5_rand_endpoints uv w0)
-          (s5x5_rand_recon Hw0)).
+          (s5x5_rand_recon Gw0)).
 Qed.
 
 (* The expected value of the randomized observed execution is the 'I_10 image
@@ -1072,11 +1072,11 @@ Definition s5x5_rand_observed : OE.ObservedExecution :=
     ObservedExecution record. *)
 Theorem s5x5_rand_observed_recovers
     (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
-    (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M) :
+    (w0 : pgg_gT s5x5_M) (Gw0 : w0 \in pgg_G s5x5_M) :
   @exec_decode mpX s5x5_rand_exec_plug
     (@exec_endpoints mpX s5x5_rand_exec_plug uv w0 0)
     (OE.oe_endpoints_size s5x5_rand_observed uv w0)
   = s5x5_codec (s5x5_joint_tape_secret uv).
-Proof. exact: (OE.oe_run_recovers s5x5_rand_observed uv w0 Hw0). Qed.
+Proof. exact: (OE.oe_run_recovers s5x5_rand_observed uv w0 Gw0). Qed.
 
 End s5x5_execution.

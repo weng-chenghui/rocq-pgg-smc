@@ -243,9 +243,9 @@ Lemma abel_exec_recon (s : 'I_4) (w0 : pgg_gT abel_M) :
     (@exec_static_endpoints abel_profile abel_exec_plug abel_content_obs s w0)
     Hsz = s.
 Proof.
-move=> Hw0 Hsz.
+move=> Gw0 Hsz.
 rewrite (abel_decodeE abel_exec_plug Hsz Hsz).
-rewrite -[RHS](abel_sum_mod_perm_compatible Hw0 (ts_encode_valid abel_ts s)).
+rewrite -[RHS](abel_sum_mod_perm_compatible Gw0 (ts_encode_valid abel_ts s)).
 congr (ts_recon _ _); apply: eq_from_tnth => i.
 by rewrite abel_static_tnth tnth_mktuple /abel_content_obs /= tnth_ord_tuple.
 Qed.
@@ -256,14 +256,14 @@ Qed.
     distinguishes it from the constant recovery of the identity-content run
     below. *)
 Theorem abel_exec_recovers (s : 'I_4) (w0 : pgg_gT abel_M)
-    (Hw0 : w0 \in pgg_G abel_M) :
+    (Gw0 : w0 \in pgg_G abel_M) :
   @exec_decode abel_profile abel_exec_plug
     (@exec_endpoints abel_profile abel_exec_plug s w0 0)
     (exec_endpoints_size (abel_exec_endpoints s w0)) = s.
 Proof.
 exact: (@exec_run_recovers abel_profile abel_exec_plug abel_content_obs
           (fun s : 'I_4 => s) s w0 0 (abel_exec_endpoints s w0)
-          (abel_exec_recon Hw0)).
+          (abel_exec_recon Gw0)).
 Qed.
 
 (** abel_exec_correct — the run terminates at each of its six processes,
@@ -272,7 +272,7 @@ Qed.
     means for this instance to run correctly; none of them is a privacy
     claim. *)
 Theorem abel_exec_correct (s : 'I_4) (w0 : pgg_gT abel_M)
-    (Hw0 : w0 \in pgg_G abel_M) :
+    (Gw0 : w0 \in pgg_G abel_M) :
   [/\ (@exec_run abel_profile abel_exec_plug s w0 0).1
         = nseq (size (@exec_procs abel_profile abel_exec_plug s w0 0)) Finish,
       size (@exec_endpoints abel_profile abel_exec_plug s w0 0)
@@ -283,7 +283,7 @@ Theorem abel_exec_correct (s : 'I_4) (w0 : pgg_gT abel_M)
 Proof.
 exact: (@exec_run_correct abel_profile abel_exec_plug abel_content_obs
           (fun s : 'I_4 => s) s w0 0 (abel_exec_terminates s w0)
-          (abel_exec_endpoints s w0) (abel_exec_recon Hw0)).
+          (abel_exec_endpoints s w0) (abel_exec_recon Gw0)).
 Qed.
 
 (** abel_det_observed — the secret-recovery run packaged with what it
@@ -301,11 +301,11 @@ Definition abel_det_observed : OE.ObservedExecution :=
     the same statement as abel_exec_recovers read through the packaging rather
     than through the plug directly. *)
 Theorem abel_observed_recovers (s : 'I_4) (w0 : pgg_gT abel_M)
-    (Hw0 : w0 \in pgg_G abel_M) :
+    (Gw0 : w0 \in pgg_G abel_M) :
   @exec_decode abel_profile abel_exec_plug
     (@exec_endpoints abel_profile abel_exec_plug s w0 0)
     (OE.oe_endpoints_size abel_det_observed s w0) = s.
-Proof. exact: (OE.oe_run_recovers abel_det_observed s w0 Hw0). Qed.
+Proof. exact: (OE.oe_run_recovers abel_det_observed s w0 Gw0). Qed.
 
 (******************************************************************************)
 (*     The shuffle-analysis plug                                              *)
@@ -389,7 +389,7 @@ Lemma abel_shuffle_recon (x : unit) (w0 : pgg_gT abel_M) :
     (@exec_static_endpoints abel_profile abel_shuffle_plug abel_id_obs x w0)
     Hsz = abel_identity_recon_value.
 Proof.
-move=> Hw0 Hsz; rewrite (abel_decodeE abel_shuffle_plug Hsz Hsz).
+move=> Gw0 Hsz; rewrite (abel_decodeE abel_shuffle_plug Hsz Hsz).
 apply: val_inj => /=.
 under eq_bigr do rewrite (abel_static_tnth (e:=abel_shuffle_plug)).
 under eq_bigr do rewrite /abel_id_obs /= tnth_ord_tuple abel_rhoE.
@@ -404,7 +404,7 @@ Qed.
     correctness of abel_exec_recovers; reading it as the latter would
     overstate what the identity-content path establishes. *)
 Theorem abel_shuffle_recovers (x : unit) (w0 : pgg_gT abel_M)
-    (Hw0 : w0 \in pgg_G abel_M) :
+    (Gw0 : w0 \in pgg_G abel_M) :
   @exec_decode abel_profile abel_shuffle_plug
     (@exec_endpoints abel_profile abel_shuffle_plug x w0 0)
     (exec_endpoints_size (abel_shuffle_endpoints x w0))
@@ -412,14 +412,14 @@ Theorem abel_shuffle_recovers (x : unit) (w0 : pgg_gT abel_M)
 Proof.
 exact: (@exec_run_recovers abel_profile abel_shuffle_plug abel_id_obs
           (fun _ : unit => abel_identity_recon_value) x w0 0
-          (abel_shuffle_endpoints x w0) (abel_shuffle_recon Hw0)).
+          (abel_shuffle_endpoints x w0) (abel_shuffle_recon Gw0)).
 Qed.
 
 (** abel_shuffle_correct — the identity-content run terminates at each of its
     six processes, collects one endpoint per seat, and decodes to the
     constant, for every shuffle in the group. *)
 Theorem abel_shuffle_correct (x : unit) (w0 : pgg_gT abel_M)
-    (Hw0 : w0 \in pgg_G abel_M) :
+    (Gw0 : w0 \in pgg_G abel_M) :
   [/\ (@exec_run abel_profile abel_shuffle_plug x w0 0).1
         = nseq (size (@exec_procs abel_profile abel_shuffle_plug x w0 0))
                 Finish,
@@ -433,7 +433,7 @@ Proof.
 exact: (@exec_run_correct abel_profile abel_shuffle_plug abel_id_obs
           (fun _ : unit => abel_identity_recon_value) x w0 0
           (abel_shuffle_terminates x w0) (abel_shuffle_endpoints x w0)
-          (abel_shuffle_recon Hw0)).
+          (abel_shuffle_recon Gw0)).
 Qed.
 
 (** abel_shuffle_observed — the identity-content run packaged with its
@@ -448,12 +448,12 @@ Definition abel_shuffle_observed : OE.ObservedExecution :=
 (** abel_shuffle_observed_recovers — the packaged identity-content run decodes
     to the constant, for every shuffle in the group. *)
 Theorem abel_shuffle_observed_recovers (x : unit) (w0 : pgg_gT abel_M)
-    (Hw0 : w0 \in pgg_G abel_M) :
+    (Gw0 : w0 \in pgg_G abel_M) :
   @exec_decode abel_profile abel_shuffle_plug
     (@exec_endpoints abel_profile abel_shuffle_plug x w0 0)
     (OE.oe_endpoints_size abel_shuffle_observed x w0)
   = abel_identity_recon_value.
-Proof. exact: (OE.oe_run_recovers abel_shuffle_observed x w0 Hw0). Qed.
+Proof. exact: (OE.oe_run_recovers abel_shuffle_observed x w0 Gw0). Qed.
 
 (******************************************************************************)
 (*     The complete four-endpoint observer                                    *)

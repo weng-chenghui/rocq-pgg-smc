@@ -232,11 +232,11 @@ Lemma s5_exec_recon (s : 'I_5) (w0 : pgg_gT s5_M) :
   @exec_decode mpS s5_exec_plug
     (@exec_static_endpoints mpS s5_exec_plug s5_content_obs s w0) Hsz = s.
 Proof.
-move=> Hw0.
+move=> Gw0.
 rewrite -s5_exec_endpoints /exec_endpoints /exec_run s5_exec_fuelE
         s5_exec_procsE /exec_verifier_id => Hsz.
 rewrite (s5_exec_decodeE Hsz (s5_endpoints_size s w0)).
-exact: (s5_run_recovers s Hw0).
+exact: (s5_run_recovers s Gw0).
 Qed.
 
 (* Recovery is exported in three forms per plug, as at the other instances:
@@ -250,13 +250,13 @@ Qed.
     position s and cut w0 returns s, for any cut w0 in the group. The first
     of the three recovery forms noted above. *)
 Theorem s5_exec_recovers (s : 'I_5) (w0 : pgg_gT s5_M)
-    (Hw0 : w0 \in pgg_G s5_M) :
+    (Gw0 : w0 \in pgg_G s5_M) :
   @exec_decode mpS s5_exec_plug
     (@exec_endpoints mpS s5_exec_plug s w0 0)
     (exec_endpoints_size (s5_exec_endpoints s w0)) = s.
 Proof.
 exact: (@exec_run_recovers mpS s5_exec_plug s5_content_obs (fun s : 'I_5 => s)
-          s w0 0 (s5_exec_endpoints s w0) (s5_exec_recon Hw0)).
+          s w0 0 (s5_exec_endpoints s w0) (s5_exec_recon Gw0)).
 Qed.
 
 (** s5_exec_correct — the deterministic run of s5_exec_plug reaches Finish
@@ -265,7 +265,7 @@ Qed.
     correctness facts above (termination, endpoint count, recovery)
     packaged into one statement. *)
 Theorem s5_exec_correct (s : 'I_5) (w0 : pgg_gT s5_M)
-    (Hw0 : w0 \in pgg_G s5_M) :
+    (Gw0 : w0 \in pgg_G s5_M) :
   [/\ (@exec_run mpS s5_exec_plug s w0 0).1
         = nseq (size (@exec_procs mpS s5_exec_plug s w0 0)) Finish,
       size (@exec_endpoints mpS s5_exec_plug s w0 0)
@@ -276,7 +276,7 @@ Theorem s5_exec_correct (s : 'I_5) (w0 : pgg_gT s5_M)
 Proof.
 exact: (@exec_run_correct mpS s5_exec_plug s5_content_obs (fun s : 'I_5 => s)
           s w0 0 (s5_exec_terminates s w0) (s5_exec_endpoints s w0)
-          (s5_exec_recon Hw0)).
+          (s5_exec_recon Gw0)).
 Qed.
 
 (** s5_observed — the ObservedExecution record packaging s5_profile with
@@ -297,11 +297,11 @@ Definition s5_observed : OE.ObservedExecution :=
     group. The second of the three recovery forms, restated through the
     ObservedExecution record. *)
 Theorem s5_observed_recovers (s : 'I_5) (w0 : pgg_gT s5_M)
-    (Hw0 : w0 \in pgg_G s5_M) :
+    (Gw0 : w0 \in pgg_G s5_M) :
   @exec_decode mpS s5_exec_plug
     (@exec_endpoints mpS s5_exec_plug s w0 0)
     (OE.oe_endpoints_size s5_observed s w0) = s.
-Proof. exact: (OE.oe_run_recovers s5_observed s w0 Hw0). Qed.
+Proof. exact: (OE.oe_run_recovers s5_observed s w0 Gw0). Qed.
 
 (******************************************************************************)
 (*     The observer types read off the deterministic plug                     *)
@@ -587,7 +587,7 @@ Lemma s5_rand_run_recovers (u : 'rV['Z_5]_5) (w0 : pgg_gT s5_M) :
           (nth [::] (run_interp 150 (s5_rprocs_cut u w0)).2 1))))
   = u ord0 ord0.
 Proof.
-move=> Hw0.
+move=> Gw0.
 have Hgoal : forall (ep : seq 'I_(pgg_N' s5_M).+1)
     (Hsz : size ep = (ts_T' s5_scheme).+1),
     ep = [seq tnth (s5_rfree_layout u)
@@ -595,7 +595,7 @@ have Hgoal : forall (ep : seq 'I_(pgg_N' s5_M).+1)
           | i <- enum 'I_(pi_T' s5_PI).+1] ->
     ts_recon s5_scheme (tcast Hsz (in_tuple ep)) = u ord0 ord0.
   move=> ep Hsz Hep.
-  rewrite -[u ord0 ord0](s5_recon_perm_invariant Hw0 (s5_rfree_valid u)).
+  rewrite -[u ord0 ord0](s5_recon_perm_invariant Gw0 (s5_rfree_valid u)).
   congr (ts_recon _ _).
   apply: eq_from_tnth => i.
   rewrite tcastE tnth_mktuple.
@@ -706,11 +706,11 @@ Lemma s5_rand_recon (u : 'rV['Z_5]_5) (w0 : pgg_gT s5_M) :
     (@exec_static_endpoints mpS s5_rand_exec_plug s5_rcontent_obs u w0) Hsz
   = s5_codec (s5_tape_secret u).
 Proof.
-move=> Hw0.
+move=> Gw0.
 rewrite -s5_rand_endpoints /exec_endpoints /exec_run s5_rand_fuelE
         s5_rand_procsE /exec_verifier_id => Hsz.
 rewrite (s5_rand_decodeE Hsz (s5_rand_endpoints_size u w0)).
-exact: (@s5_rand_run_recovers u w0 Hw0).
+exact: (@s5_rand_run_recovers u w0 Gw0).
 Qed.
 
 (** s5_rand_exec_recovers — the randomized run decodes to the encoded tape
@@ -719,7 +719,7 @@ Qed.
     (s5_tape_secret u), for any cut w0 in the group. The randomized
     counterpart of s5_exec_recovers. *)
 Theorem s5_rand_exec_recovers (u : 'rV['Z_5]_5) (w0 : pgg_gT s5_M)
-    (Hw0 : w0 \in pgg_G s5_M) :
+    (Gw0 : w0 \in pgg_G s5_M) :
   @exec_decode mpS s5_rand_exec_plug
     (@exec_endpoints mpS s5_rand_exec_plug u w0 0)
     (exec_endpoints_size (s5_rand_endpoints u w0))
@@ -727,7 +727,7 @@ Theorem s5_rand_exec_recovers (u : 'rV['Z_5]_5) (w0 : pgg_gT s5_M)
 Proof.
 exact: (@exec_run_recovers mpS s5_rand_exec_plug s5_rcontent_obs
           (fun u => s5_codec (s5_tape_secret u)) u w0 0
-          (s5_rand_endpoints u w0) (s5_rand_recon Hw0)).
+          (s5_rand_endpoints u w0) (s5_rand_recon Gw0)).
 Qed.
 
 (** s5_rand_correct — the randomized run of s5_rand_exec_plug reaches Finish
@@ -735,7 +735,7 @@ Qed.
     decodes to the encoded tape secret, for any cut w0 in the group: the
     randomized counterpart of s5_exec_correct. *)
 Theorem s5_rand_correct (u : 'rV['Z_5]_5) (w0 : pgg_gT s5_M)
-    (Hw0 : w0 \in pgg_G s5_M) :
+    (Gw0 : w0 \in pgg_G s5_M) :
   [/\ (@exec_run mpS s5_rand_exec_plug u w0 0).1
         = nseq (size (@exec_procs mpS s5_rand_exec_plug u w0 0)) Finish,
       size (@exec_endpoints mpS s5_rand_exec_plug u w0 0)
@@ -748,7 +748,7 @@ Proof.
 exact: (@exec_run_correct mpS s5_rand_exec_plug s5_rcontent_obs
           (fun u => s5_codec (s5_tape_secret u)) u w0 0
           (s5_rand_terminates u w0) (s5_rand_endpoints u w0)
-          (s5_rand_recon Hw0)).
+          (s5_rand_recon Gw0)).
 Qed.
 
 (** s5_rand_observed — the ObservedExecution record packaging s5_profile with
@@ -766,11 +766,11 @@ Definition s5_rand_observed : OE.ObservedExecution :=
     (s5_tape_secret u), for any cut w0 in the group. The randomized
     counterpart of s5_observed_recovers. *)
 Theorem s5_rand_observed_recovers (u : 'rV['Z_5]_5) (w0 : pgg_gT s5_M)
-    (Hw0 : w0 \in pgg_G s5_M) :
+    (Gw0 : w0 \in pgg_G s5_M) :
   @exec_decode mpS s5_rand_exec_plug
     (@exec_endpoints mpS s5_rand_exec_plug u w0 0)
     (OE.oe_endpoints_size s5_rand_observed u w0)
   = s5_codec (s5_tape_secret u).
-Proof. exact: (OE.oe_run_recovers s5_rand_observed u w0 Hw0). Qed.
+Proof. exact: (OE.oe_run_recovers s5_rand_observed u w0 Gw0). Qed.
 
 End s5_execution.

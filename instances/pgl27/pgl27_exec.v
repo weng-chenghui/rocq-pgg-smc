@@ -178,11 +178,11 @@ Lemma pgl27_exec_recon (s : bool) (w0 : pgg_gT pgl27_M) :
     (@exec_static_endpoints mpP pgl27_exec_plug pgl27_content_obs s w0)
     Hsz = s.
 Proof.
-move=> Hw0.
+move=> Gw0.
 rewrite -pgl27_exec_endpoints /exec_endpoints /exec_run pgl27_exec_fuelE
         pgl27_exec_procsE /exec_verifier_id => Hsz.
 rewrite (pgl27_exec_decodeE Hsz (pgl27_endpoints_size s w0)).
-exact: (pgl27_run_recovers s Hw0).
+exact: (pgl27_run_recovers s Gw0).
 Qed.
 
 (** pgl27_exec_recovers — the derived PGL(2,7) run decodes to the dealt
@@ -190,13 +190,13 @@ Qed.
     collects at secret s and cut w0, returns s for every cut w0 in the
     group. *)
 Theorem pgl27_exec_recovers (s : bool) (w0 : pgg_gT pgl27_M)
-    (Hw0 : w0 \in pgg_G pgl27_M) :
+    (Gw0 : w0 \in pgg_G pgl27_M) :
   @exec_decode mpP pgl27_exec_plug
     (@exec_endpoints mpP pgl27_exec_plug s w0 0)
     (exec_endpoints_size (pgl27_exec_endpoints s w0)) = s.
 Proof.
 exact: (@exec_run_recovers mpP pgl27_exec_plug pgl27_content_obs (fun b => b)
-          s w0 0 (pgl27_exec_endpoints s w0) (pgl27_exec_recon Hw0)).
+          s w0 0 (pgl27_exec_endpoints s w0) (pgl27_exec_recon Gw0)).
 Qed.
 
 (** pgl27_exec_correct — termination, endpoint count and recovery of the
@@ -204,7 +204,7 @@ Qed.
     its ten processes, collects one endpoint per seat, and decodes to the
     dealt secret s, for any cut w0 in the group. *)
 Theorem pgl27_exec_correct (s : bool) (w0 : pgg_gT pgl27_M)
-    (Hw0 : w0 \in pgg_G pgl27_M) :
+    (Gw0 : w0 \in pgg_G pgl27_M) :
   [/\ (@exec_run mpP pgl27_exec_plug s w0 0).1
         = nseq (size (@exec_procs mpP pgl27_exec_plug s w0 0)) Finish,
       size (@exec_endpoints mpP pgl27_exec_plug s w0 0)
@@ -215,7 +215,7 @@ Theorem pgl27_exec_correct (s : bool) (w0 : pgg_gT pgl27_M)
 Proof.
 exact: (@exec_run_correct mpP pgl27_exec_plug pgl27_content_obs (fun b => b)
           s w0 0 (pgl27_exec_terminates s w0) (pgl27_exec_endpoints s w0)
-          (pgl27_exec_recon Hw0)).
+          (pgl27_exec_recon Gw0)).
 Qed.
 
 (******************************************************************************)
@@ -311,11 +311,11 @@ Definition pgl27_observed : OE.ObservedExecution :=
     collects at secret s and cut w0 returns s, for every cut w0 in the
     group. *)
 Theorem pgl27_observed_recovers (s : bool) (w0 : pgg_gT pgl27_M)
-    (Hw0 : w0 \in pgg_G pgl27_M) :
+    (Gw0 : w0 \in pgg_G pgl27_M) :
   @exec_decode mpP pgl27_exec_plug
     (@exec_endpoints mpP pgl27_exec_plug s w0 0)
     (OE.oe_endpoints_size pgl27_observed s w0) = s.
-Proof. exact: (OE.oe_run_recovers pgl27_observed s w0 Hw0). Qed.
+Proof. exact: (OE.oe_run_recovers pgl27_observed s w0 Gw0). Qed.
 
 (******************************************************************************)
 (*     The exact sample space of the eight-card orbit instance                *)

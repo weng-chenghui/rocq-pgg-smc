@@ -250,28 +250,28 @@ Lemma five_card_exec_recon (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
        (a, b) w0) Hsz
   = (a, b).1 && (a, b).2.
 Proof.
-move=> Hw0 Hsz; rewrite five_card_exec_decode_seqE -five_card_exec_endpoints.
+move=> Gw0 Hsz; rewrite five_card_exec_decode_seqE -five_card_exec_endpoints.
 rewrite /exec_endpoints /exec_run five_card_exec_fuelE five_card_exec_procsE.
-exact: (den_boer_run_recovers a b w0 Hw0).
+exact: (den_boer_run_recovers a b w0 Gw0).
 Qed.
 
 (** five_card_exec_recovers — the derived five-card run decodes to the
     conjunction of the two committed bits. *)
 Theorem five_card_exec_recovers (a b : bool) (w0 : pgg_gT FiveCardKim_M)
-    (Hw0 : w0 \in pgg_G FiveCardKim_M) :
+    (Gw0 : w0 \in pgg_G FiveCardKim_M) :
   @exec_decode mpF five_card_exec_plug
     (@exec_endpoints mpF five_card_exec_plug (a, b) w0 0)
     (exec_endpoints_size (five_card_exec_endpoints a b w0)) = a && b.
 Proof.
 exact: (@exec_run_recovers mpF five_card_exec_plug five_card_content_obs
           (fun ab => ab.1 && ab.2) (a, b) w0 0
-          (five_card_exec_endpoints a b w0) (five_card_exec_recon Hw0)).
+          (five_card_exec_endpoints a b w0) (five_card_exec_recon Gw0)).
 Qed.
 
 (** five_card_exec_correct — termination, endpoint count and recovery of the
     derived five-card run. *)
 Theorem five_card_exec_correct (a b : bool) (w0 : pgg_gT FiveCardKim_M)
-    (Hw0 : w0 \in pgg_G FiveCardKim_M) :
+    (Gw0 : w0 \in pgg_G FiveCardKim_M) :
   [/\ (@exec_run mpF five_card_exec_plug (a, b) w0 0).1
         = nseq (size (@exec_procs mpF five_card_exec_plug (a, b) w0 0))
             Finish,
@@ -284,7 +284,7 @@ Proof.
 exact: (@exec_run_correct mpF five_card_exec_plug five_card_content_obs
           (fun ab => ab.1 && ab.2) (a, b) w0 0
           (five_card_exec_terminates a b w0 0)
-          (five_card_exec_endpoints a b w0) (five_card_exec_recon Hw0)).
+          (five_card_exec_endpoints a b w0) (five_card_exec_recon Gw0)).
 Qed.
 
 (******************************************************************************)
@@ -437,11 +437,11 @@ Proof. by []. Qed.
 (** five_card_observed_recovers — the packaged five-card run decodes to the
     conjunction of the committed pair. *)
 Theorem five_card_observed_recovers (x : bool * bool)
-    (w0 : pgg_gT FiveCardKim_M) (Hw0 : w0 \in pgg_G FiveCardKim_M) :
+    (w0 : pgg_gT FiveCardKim_M) (Gw0 : w0 \in pgg_G FiveCardKim_M) :
   @exec_decode mpF five_card_exec_plug
     (@exec_endpoints mpF five_card_exec_plug x w0 0)
     (OE.oe_endpoints_size five_card_observed x w0) = x.1 && x.2.
-Proof. exact: (OE.oe_run_recovers five_card_observed x w0 Hw0). Qed.
+Proof. exact: (OE.oe_run_recovers five_card_observed x w0 Gw0). Qed.
 
 (******************************************************************************)
 (*     The den Boer sample space of the five-card instance                    *)
