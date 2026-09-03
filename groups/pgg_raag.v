@@ -1902,7 +1902,7 @@ Let Tg := (@pgg_ngens' R).+1.
    and n_traces_of_natB at the end carries the result back to R. *)
 Variable comm_nat : nat -> nat -> bool.
 
-Hypothesis Hcomm_nat : forall i j : 'I_Tg,
+Hypothesis comm_natE : forall i j : 'I_Tg,
   @raag_comm R i j = comm_nat (val i) (val j).
 
 (* The oracle read back as a relation on generator indices. *)
@@ -1919,8 +1919,8 @@ Let comm_nat_sym : forall a b : nat,
   a < Tg -> b < Tg -> comm_nat a b -> comm_nat b a.
 Proof.
 move=> a b Ha Hb Hab.
-rewrite -(@Hcomm_nat (Ordinal Hb) (Ordinal Ha)).
-by rewrite (@raag_comm_sym R) Hcomm_nat.
+rewrite -(@comm_natE (Ordinal Hb) (Ordinal Ha)).
+by rewrite (@raag_comm_sym R) comm_natE.
 Qed.
 
 (* Bridge: nat-level swap chain -> ordinal-level trace_equiv *)
@@ -2006,7 +2006,7 @@ apply/existsP; exists (Ordinal Hk_bound).
 apply/andP; split.
   (* Commutativity: raag_comm (tnth w0 k) (tnth w0 k.+1) *)
   (* Goal: raag_comm (tnth w0 k_ord) (tnth w0 k1_ord) *)
-  rewrite Hcomm_nat !(tnth_nth ord0).
+  rewrite comm_natE !(tnth_nth ord0).
   (* Now goal: comm_nat (val (nth ord0 w0 k')) (val (nth ord0 w0 k1')) *)
   simpl.
   have -> : val (nth ord0 (tval w0) k) = nth 0 (map val (tval w0)) k.
@@ -2098,9 +2098,9 @@ rewrite /fnf /=.
 set ik := Ordinal (ltn_trans (ltn_ord k) (ltnSn L')).
 set ik1 := @Ordinal L'.+1 (val k).+1 (ltn_ord k).
 have Hcomm1 : comm_nat (val (tnth w1 ik)) (val (tnth w1 ik1)).
-  by rewrite -Hcomm_nat.
+  by rewrite -comm_natE.
 have Hcomm2 : comm_nat (val (tnth w1 ik1)) (val (tnth w1 ik)).
-  by rewrite -Hcomm_nat raag_comm_sym.
+  by rewrite -comm_natE raag_comm_sym.
 set mw := map val (tval w1).
 set a := val (tnth w1 ik).
 set b := val (tnth w1 ik1).

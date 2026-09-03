@@ -137,7 +137,7 @@ Qed.
 Section weval_inj_gen_reflect.
 
 (* Tg = m+1 generators on N = n+2 card positions, with gens_nat a nat-level
-   mirror of the permutations and Hgens the statement that the mirror is
+   mirror of the permutations and gens_natE the statement that the mirror is
    faithful. *)
 Variable m n : nat.
 Let Tg := m.+1.
@@ -148,7 +148,7 @@ Let M := Gen_PGGTypes sigmas.
 
 Variable gens_nat : nat -> nat -> nat.
 
-Hypothesis Hgens : forall (i : 'I_Tg) (x : 'I_N),
+Hypothesis gens_natE : forall (i : 'I_Tg) (x : 'I_N),
   gens_nat (val i) (val x) = val (tnth sigmas i x).
 
 (* The nat-level fold and the ordinal-level fold agree under val: the nat
@@ -157,7 +157,7 @@ Lemma eval_foldl_agree (ws : seq 'I_Tg) (x : 'I_N) :
   foldl (fun acc i => gens_nat i acc) (val x) (map val ws) =
   val (foldl (fun (acc : 'I_N) (i : 'I_Tg) => tnth sigmas i acc) x ws).
 Proof.
-by elim: ws x => [|j js IH] x //=; rewrite Hgens IH.
+by elim: ws x => [|j js IH] x //=; rewrite gens_natE IH.
 Qed.
 
 (* word_eval, defined as a product of generators indexed along the word,
@@ -243,7 +243,7 @@ Section weval_inj_instance.
 Variable L m n : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n.+2}.
 Let M := Gen_PGGTypes sigmas.
-Hypothesis Hlfree : @weval_inj M L.
+Hypothesis lfree : @weval_inj M L.
 
 (** For a Gen_PGGTypes on Tg = m+1 generators that is word-eval injective at
     length L, the search space is exactly Tg^L.
@@ -252,7 +252,7 @@ Hypothesis Hlfree : @weval_inj M L.
     exact: every collision at length L would take one element out of the
     count. *)
 Lemma weval_inj_inst_search_space : @search_space M L = m.+1 ^ L.
-Proof. exact: weval_inj_search_space Hlfree. Qed.
+Proof. exact: weval_inj_search_space lfree. Qed.
 
 End weval_inj_instance.
 

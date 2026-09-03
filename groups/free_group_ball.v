@@ -56,7 +56,7 @@ Import Prenex Implicits.
 Section reduced_words.
 
 Variable r : nat.
-Hypothesis Hr : 0 < r.
+Hypothesis r_gt0 : 0 < r.
 
 (* alpha = 2r is the size of the alphabet: the r generators and their r
    formal inverses. *)
@@ -101,7 +101,7 @@ have Hdvd : alpha %| r.
   have := divn_eq (i + r) alpha.
   rewrite Heq => Heq2.
   by lia.
-move/dvdn_leq: Hdvd => /(_ Hr).
+move/dvdn_leq: Hdvd => /(_ r_gt0).
 by rewrite /alpha; lia.
 Qed.
 
@@ -159,7 +159,7 @@ End reduced_words.
 Section ball_size_def.
 
 Variable r : nat.
-Hypothesis Hr : 0 < r.
+Hypothesis r_gt0 : 0 < r.
 
 (** Number of reduced words of length at most L in the free group on r
     generators, the sum of the spheres of radius 0 through L.
@@ -235,7 +235,7 @@ Section ball_size_formula.
    grows exponentially.  At r = 1 the free group is infinite cyclic, q = 1,
    and every statement of this section degenerates. *)
 Variable r : nat.
-Hypothesis Hr : 1 < r.
+Hypothesis r_gt1 : 1 < r.
 
 Let alpha := (r.*2).
 Let q := alpha - 1.
@@ -292,7 +292,7 @@ Qed.
 Lemma ball_size_lower (L : nat) : q ^ L <= ball_size r L.
 Proof.
 case: L => [|L].
-  by rewrite expn0; exact: (ball_size_ge1 (ltnW Hr)).
+  by rewrite expn0; exact: (ball_size_ge1 (ltnW r_gt1)).
 rewrite ball_size_sum.
 apply: (leq_trans _ (leq_addl 1 _)).
 rewrite expnS.
@@ -333,8 +333,8 @@ Section weval_inj_ball_connection.
 Lemma search_space_exp_growth (r L : nat) :
   1 < r -> (r.*2 - 1) ^ L <= 1 + r.*2 * (\sum_(k < L) (r.*2 - 1) ^ k).
 Proof.
-move=> Hr.
-have := @ball_size_lower r Hr L.
+move=> r_gt1.
+have := @ball_size_lower r r_gt1 L.
 by rewrite ball_size_sum.
 Qed.
 
