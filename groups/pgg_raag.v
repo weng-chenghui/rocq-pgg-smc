@@ -5,7 +5,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop fingraph path binomial.
 From Stdlib Require Import Wf_nat.
-From pgg_smc Require Import pgg_interface pgg_weval_inj.
+From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
 (* PGG: RAAG (Right-Angled Artin Group) Search Space Theory                  *)
@@ -101,6 +101,20 @@ Definition dv_leq (p1 p2 : nat * nat) : bool :=
    forms. *)
 Definition foata_nf (comm : nat -> nat -> bool) (w : seq nat) : seq nat :=
   [seq p.2 | p <- sort dv_leq (foata_pairs comm [::] w)].
+
+(** Every word of length L over the alphabet {0,...,Tg-1}, enumerated by
+    recursion on the length.
+    The nat-level stand-in for the enumeration of the pgg_word finType, kept
+    structural so vm_compute reduces it.  It is the carrier both of the Foata
+    trace count below and of the word-eval injectivity check in
+    legacy/groups/pgg_weval_inj.v, so its completeness is what makes a
+    computation on it a statement about all words. *)
+Fixpoint all_words (Tg L : nat) : seq (seq nat) :=
+  match L with
+  | 0 => [:: [::]]
+  | L'.+1 =>
+    flatten [seq map (cons i) (all_words Tg L') | i <- iota 0 Tg]
+  end.
 
 (** The number of distinct Foata normal forms among the length-L words over
     Tg letters.

@@ -4,7 +4,7 @@ From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop.
-From pgg_smc Require Import pgg_interface.
+From pgg_smc Require Import pgg_interface pgg_raag.
 
 (******************************************************************************)
 (* PGG: Word-Eval Injective Generators and Optimal Search Space               *)
@@ -56,20 +56,6 @@ Import Prenex Implicits.
 (* ========================================================================== *)
 (* Section 1: Nat-level computable word-eval injectivity check                 *)
 (* ========================================================================== *)
-
-(** Every word of length L over the alphabet {0,...,Tg-1}, enumerated by
-    recursion on the length.
-    The nat-level stand-in for the enumeration of the pgg_word finType, kept
-    structural so vm_compute reduces it.  It is the carrier both of the
-    injectivity check below and of the Foata trace count in pgg_raag.v, so
-    its completeness is what makes a computation on it a statement about all
-    words. *)
-Fixpoint all_words (Tg L : nat) : seq (seq nat) :=
-  match L with
-  | 0 => [:: [::]]
-  | L'.+1 =>
-    flatten [seq map (cons i) (all_words Tg L') | i <- iota 0 Tg]
-  end.
 
 (* Nat-level evaluation of a word at a point: apply the generators in reading
    order.  The left fold is chosen to match MathComp's \prod convention for
