@@ -9,10 +9,9 @@
 (* This demonstrates all algebraic rigidity parameters computed from          *)
 (* a single (G, I) choice with concrete vm_compute-checkable results:         *)
 (*   1. Complexity: search_space L <= |G|                                     *)
-(*   2. Security (fiber): var_dist <= 6/5 at L=1 (fiber-counted, proved)     *)
-(*   3. Security (spectral): L=286, eps = sqrt(5)*(1-gap)^286               *)
+(*   2. Security (spectral): L=286, eps = sqrt(5)*(1-gap)^286               *)
 (*      40-bit security from the in-kernel spectral certificate              *)
-(*   4. Threshold: genus-4 Bring's-curve cover (no-go: |S_5|=120 > Klein 60)   *)
+(*   3. Threshold: genus-4 Bring's-curve cover (no-go: |S_5|=120 > Klein 60)   *)
 (*                                                                            *)
 (* Spectral gap of the Schreier walk on 'I_5:                                *)
 (*   The 5x5 Schreier matrix with 4 adjacent transpositions is               *)
@@ -34,7 +33,8 @@
 (*   s5_nt_L3 : n_traces_natB 4 3 path_comm_nat = 40                         *)
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
-(*   s5_security_witness_1 : ShuffleMarginalBound (fiber-counted eps=6/5)    *)
+(*   s5_security_witness_schreier : ShuffleCertificateBundle at any word     *)
+(*     length L, eps = sqrt(5)*(1-gap)^L                                     *)
 (*   s5_rigidity : AlgebraicRigidity (security + threshold)                  *)
 (*   s5_rayleigh_Q2_R (s5_mixing.v) : the Rayleigh premise of the            *)
 (*     spectral bound, from an in-kernel rounded LDL^T certificate           *)
@@ -63,102 +63,6 @@ Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 
 Import GRing.Theory Num.Theory.
-
-(******************************************************************************)
-(*     ShuffleMarginalBound Construction                                      *)
-(******************************************************************************)
-
-Section s5_security.
-
-Variable R : realType.
-
-Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
-Let s5_M : MonodromyReprWithGeneratorType := M_s5.
-
-Local Open Scope ring_scope.
-
-(* Fiber-counted endpoint bound: for each card position s in 'I_5,
-   var_dist(fdistmap perm_endpoint (rho_from_words 1 path_gen_tuple_3), uniform) <= 6/5.
-   Achievable(1) = {(01),(12),(23),(34)} (4 adjacent transpositions).
-   Worst-case card positions s=0,4: P=(3/4,1/4,0,0,0), var_dist=6/5. *)
-Lemma s5_endpoint_bound_fiber :
-  forall s : 'I_5,
-  (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
-                     (@rho_from_words R _ _ 1 (path_gen_tuple 3)))
-           (fdist_uniform (card_ord 5)) <= 6%:R / 5%:R)%O.
-Proof.
-move=> s.
-apply: (Order.POrderTheory.le_trans
-  (@var_dist_endpoint_image_bound_unbalanced R 3 3 1 (path_gen_tuple 3)
-    s5_weval_inj1 (erefl true) 2 s _)); last first.
-  by rewrite /= -GRing.Theory.natrM.
-have Hmem : forall (w : pgg_word (Gen_PGGTypes (path_gen_tuple 3)) 1),
-    word_eval w s \in
-      (fun sigma : {perm 'I_5} => sigma s) @:
-        achievable (Gen_PGGTypes (path_gen_tuple 3)) 1.
-  by move=> w; apply: imset_f; apply: imset_f.
-pose w0 : pgg_word (Gen_PGGTypes (path_gen_tuple 3)) 1 := [tuple ord0].
-pose w3 : pgg_word (Gen_PGGTypes (path_gen_tuple 3)) 1 := [tuple ord_max].
-pose w1 : pgg_word (Gen_PGGTypes (path_gen_tuple 3)) 1 :=
-  [tuple (Ordinal (n:=4) (m:=1) (erefl true))].
-have Hw0 : @word_eval (Gen_PGGTypes (path_gen_tuple 3)) 1 w0 =
-           @path_gen 3 ord0.
-  rewrite /word_eval /w0 big_ord_recr /= big_ord0 mul1g.
-  by rewrite (@path_gen_tupleE 3).
-have Hw3 : @word_eval (Gen_PGGTypes (path_gen_tuple 3)) 1 w3 =
-           @path_gen 3 ord_max.
-  rewrite /word_eval /w3 big_ord_recr /= big_ord0 mul1g.
-  by rewrite (@path_gen_tupleE 3).
-have Hw1 : @word_eval (Gen_PGGTypes (path_gen_tuple 3)) 1 w1 =
-           @path_gen 3 (Ordinal (n:=4) (m:=1) (erefl true)).
-  rewrite /word_eval /w1 big_ord_recr /= big_ord0 mul1g.
-  by rewrite (@path_gen_tupleE 3).
-apply/card_gt1P.
-case: s Hmem => [[|[|[|[|[|s]]]]] Hs] //= Hmem.
-(* s=0: tperm(0,1)(0)=1 vs tperm(3,4)(0)=0 *)
-- exists (word_eval w0 (Ordinal Hs)), (word_eval w3 (Ordinal Hs)).
-  split; [exact: Hmem | exact: Hmem |].
-  rewrite Hw0 Hw3 /path_gen.
-  have -> : Ordinal Hs = @path_lo 3 ord0 by apply: val_inj.
-  rewrite tpermL tpermD; rewrite -?val_eqE //.
-(* s=1: tperm(0,1)(1)=0 vs tperm(3,4)(1)=1 *)
-- exists (word_eval w0 (Ordinal Hs)), (word_eval w3 (Ordinal Hs)).
-  split; [exact: Hmem | exact: Hmem |].
-  rewrite Hw0 Hw3 /path_gen.
-  have -> : Ordinal Hs = @path_hi 3 ord0 by apply: val_inj.
-  rewrite tpermR tpermD; rewrite -?val_eqE //.
-(* s=2: tperm(0,1)(2)=2 vs tperm(1,2)(2)=1 *)
-- exists (word_eval w0 (Ordinal Hs)), (word_eval w1 (Ordinal Hs)).
-  split; [exact: Hmem | exact: Hmem |].
-  rewrite Hw0 Hw1 /path_gen.
-  have -> : Ordinal Hs = @path_hi 3 (Ordinal (n:=4) (m:=1) (erefl true))
-    by apply: val_inj.
-  rewrite tpermD; [| rewrite -?val_eqE //..].
-  rewrite tpermR; rewrite -?val_eqE //.
-(* s=3: tperm(0,1)(3)=3 vs tperm(3,4)(3)=4 *)
-- exists (word_eval w0 (Ordinal Hs)), (word_eval w3 (Ordinal Hs)).
-  split; [exact: Hmem | exact: Hmem |].
-  rewrite Hw0 Hw3 /path_gen.
-  have -> : Ordinal Hs = @path_lo 3 ord_max by apply: val_inj.
-  rewrite tpermD; [| rewrite -?val_eqE //..].
-  rewrite tpermL; rewrite -?val_eqE //.
-(* s=4: tperm(0,1)(4)=4 vs tperm(3,4)(4)=3 *)
-- exists (word_eval w0 (Ordinal Hs)), (word_eval w3 (Ordinal Hs)).
-  split; [exact: Hmem | exact: Hmem |].
-  rewrite Hw0 Hw3 /path_gen.
-  have -> : Ordinal Hs = @path_hi 3 ord_max by apply: val_inj.
-  rewrite tpermD; [| rewrite -?val_eqE //..].
-  rewrite tpermR; rewrite -?val_eqE //.
-Qed.
-
-(* ShuffleMarginalBound at L=1 via fiber counting: epsilon = 6/5, tighter
-   than the generic DPI bound of 2*(5!-4)/5! ~ 1.93. This is the S_5
-   instance's certificate-free security witness, built from the fiber
-   count in s5_endpoint_bound_fiber. *)
-Definition s5_security_witness_1 : ShuffleMarginalBound R s5_M :=
-  security_witness_fiber s5_weval_inj1 s5_endpoint_bound_fiber.
-
-End s5_security.
 
 (******************************************************************************)
 (*     Spectral Gap Convergence                                               *)
@@ -205,8 +109,8 @@ Defined.
 (** s5_security_witness_schreier — the S_5 certificate bundle at word
     length [L]: the spectral marginal bound sqrt(5)*(1-gap)^L on the
     word-endpoint distribution, paired with the asymptotic rate
-    [s5_asymptotic] and no exact certificate. This is the security input
-    [s5_rigidity_cryptographically_secure] reads at L = 286. *)
+    [s5_asymptotic] and no exact certificate. This is the security half
+    [s5_rigidity] reads at L = 286. *)
 Definition s5_security_witness_schreier (L : nat) :
     ShuffleCertificateBundle R s5_M :=
   @MkShuffleCertificateBundle R s5_M
@@ -218,13 +122,6 @@ Definition s5_security_witness_schreier (L : nat) :
     (Some s5_asymptotic).
 
 End s5_spectral.
-
-(******************************************************************************)
-(*     Spectral AlgebraicRigidity at L=286 (40-bit security)                  *)
-(*                                                                            *)
-(* sqrt(5) * (1 - gap)^286 < 2^{-40} when gap ~ 0.0955.                     *)
-(* For 128-bit security, use L=897 instead.                                   *)
-(******************************************************************************)
 
 (******************************************************************************)
 (*     Bring's-curve axiomatisation for the S_5 covering                      *)
@@ -360,65 +257,20 @@ Definition s5_brings_covering : CoveringScheme s5_brings_M := {|
 
 (** s5_brings_covering_genus — [s5_brings_covering] has genus 4, a
     definitional consequence of [s5_brings_covering_data]. Feeds the
-    genus-0 vacuity arguments in [s5_genus0_klein] and
-    [s5_genus0_automorphism]: since the true genus is 4, any premise
-    asking for genus 0 is false, so those obligations hold vacuously. *)
+    genus-0 vacuity argument in [s5_genus0_automorphism]: since the true
+    genus is 4, any premise asking for genus 0 is false, so that
+    obligation holds vacuously. *)
 Lemma s5_brings_covering_genus :
   cd_genus (cs_data s5_brings_covering) = 4.
 Proof. by []. Qed.
 
 End s5_brings_axiomatisation.
 
-Section s5_rigidity_cryptographically_secure.
-
-Variable R : realType.
-
-Let s5_M : MonodromyReprWithGeneratorType :=
-  @Gen_PGGTypes 3 3 (path_gen_tuple 3).
-
-(* Group nontriviality. Could be discharged by computation since |S_5| = 120. *)
-Hypothesis card_G_s5_gt1 : (1 < #|pgg_G s5_M|)%N.
-
-(* Card-position count: 5 card positions (pgg_N' = 4) —
-   definitionally true. *)
-Lemma s5_HN5_crypto : (pgg_N' s5_M).+1 = 5.
-Proof. by []. Qed.
-
-(** s5_genus0_klein — the genus-0 PGL automorphism obligation for the
-    Bring's-curve-based S_5 covering holds vacuously: the covering has
-    [cd_genus = 4] (per [s5_brings_covering_genus]), so the premise
-    [4 = 0] is false and the conclusion is unconstrained. Discharges the
-    automorphism-bound field that [s5_threshold_witness_concrete]
-    packages below. *)
-Lemma s5_genus0_klein :
-  cd_genus (cs_data s5_brings_covering) = 0 ->
-  (#|pgg_G s5_M| <= klein_genus0_bound s5_M)%N.
-Proof. by rewrite s5_brings_covering_genus. Qed.
-
-(** s5_threshold_witness_concrete — the threshold witness for the
-    cryptographically-secure S_5 rigidity instance, packaging the
-    Bring's-curve covering [s5_brings_covering] with its vacuous
-    genus-0 PGL bound [s5_genus0_klein]. *)
-Definition s5_threshold_witness_concrete : ThresholdWitness s5_M :=
-  @MkThresholdWitness s5_M s5_brings_covering s5_genus0_klein.
-
-(* The spectral content is discharged by s5_mixing.v. *)
-
-(** s5_rigidity_cryptographically_secure — the AlgebraicRigidity value
-    for the S_5 instance at word length 286: the Schreier spectral
-    security bundle [s5_security_witness_schreier] read at L = 286,
-    paired with the concrete Bring's-curve threshold witness. At gap ~
-    0.0955 this delivers the instance's 40-bit security bound,
-    var_dist < 2^{-40}. *)
-Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R s5_M :=
-  @MkAlgebraicRigidity R s5_M
-    (@s5_security_witness_schreier R 286)
-    s5_threshold_witness_concrete.
-
-End s5_rigidity_cryptographically_secure.
-
 (******************************************************************************)
-(*     AlgebraicRigidity Instance                                             *)
+(*     AlgebraicRigidity Instance at L = 286 (40-bit security)                *)
+(*                                                                            *)
+(* sqrt(5) * (1 - gap)^286 < 2^{-40} when gap ~ 0.0955.                     *)
+(* For 128-bit security, read the same bundle at L = 897 instead.             *)
 (******************************************************************************)
 
 Section s5_rigidity.
@@ -427,9 +279,6 @@ Variable R : realType.
 
 Let s5_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 3 3 (path_gen_tuple 3).
-
-(* Group nontriviality *)
-Hypothesis card_G_s5_gt1 : (1 < #|pgg_G s5_M|)%N.
 
 (* Card-position count for s5_M: 5 card positions (pgg_N' = 4). Verified
    definitionally
@@ -457,15 +306,16 @@ Proof. by rewrite /genus0_automorphism_bound /s5_covering s5_brings_covering_gen
 Definition s5_threshold_witness : ThresholdWitness s5_M :=
   @MkThresholdWitness s5_M s5_covering s5_genus0_automorphism.
 
-(** s5_rigidity — the AlgebraicRigidity value for the S_5 instance,
-    pairing the certificate-free fiber-counted security witness
-    [s5_security_witness_1] (epsilon = 6/5 at word length 1) with the
-    threshold witness [s5_threshold_witness]. The Hypothesis-gated
-    counterpart of [s5_rigidity_cryptographically_secure], which instead
-    uses the spectral certificate at L = 286. *)
+(** s5_rigidity — the AlgebraicRigidity value of the S_5 instance: the
+    Schreier spectral security bundle [s5_security_witness_schreier] read
+    at word length 286, where sqrt(5) * (181/200)^286 < 2^{-40}, paired
+    with the Bring's-curve threshold witness [s5_threshold_witness]. The
+    security half is an unconditional information-theoretic bound on the
+    per-seat endpoint marginal; the threshold half rests on the two
+    geometry axioms of this file. *)
 Definition s5_rigidity : AlgebraicRigidity R s5_M :=
   @MkAlgebraicRigidity R s5_M
-    (shuffle_bundle_of_bound (s5_security_witness_1 R))
+    (@s5_security_witness_schreier R 286)
     s5_threshold_witness.
 
 (* Derived properties *)

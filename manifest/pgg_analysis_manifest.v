@@ -48,7 +48,7 @@
 (* BaselineClassicalOnly when Print Assumptions reports the trio and        *)
 (* nothing else, and                                                          *)
 (* AcceptsAxioms when it reports named repository assumptions beyond it. The  *)
-(* three constructors of PggAxiom are the only such assumptions, and a status *)
+(* two constructors of PggAxiom are the only such assumptions, and a status   *)
 (* covers the public results of the path, not only the values the row stores. *)
 (*                                                                            *)
 (* (2) Completion levels are cumulative and are stated at the level the       *)
@@ -61,9 +61,7 @@
 (* (3) A capability line uses the narrowest label the theorem statement       *)
 (* supports, from the closed vocabulary correctness, exact privacy,           *)
 (* approximate privacy, trace secrecy, conditional entropy, mutual            *)
-(* information or endpoint marginal mixing. A theorem conditional on the      *)
-(* trusted analytical certificate s5_rayleigh_Q2_R is described as            *)
-(* conditional in every capability line that depends on it.                   *)
+(* information or endpoint marginal mixing.                                   *)
 (*                                                                            *)
 (* Every identifier in the tables below is checked at the end of this file by *)
 (* one Timeout-guarded Check against its spelled type, and every row by one   *)
@@ -537,17 +535,17 @@ Local Open Scope ring_scope.
 (*                          uniform on any carrier is stated or implied |     *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
-(* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R] |*)
+(* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
 (* | typed row            | s5_row_word |                                     *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
 (* | word_endpoint_bound | the cut distribution of word_sample, named by      *)
 (*   word_cut_distE | one position's endpoint distribution                    *)
-(*   | cut-level endpoint marginal mixing, conditional on s5_rayleigh_Q2_R |  *)
+(*   | cut-level endpoint marginal mixing |                                   *)
 (* | exec_endpoint_bound | sa_seat_dist of word_sample                        *)
 (*   | one seat's executed reading against the encoder-image ideal           *)
-(*   | executed endpoint marginal mixing, conditional on s5_rayleigh_Q2_R |   *)
+(*   | executed endpoint marginal mixing |                                    *)
 (*                                                                            *)
 (* Level justification. word_sample is a SampleAdapter over exec_plug and     *)
 (* word_cut_distE names its cut distribution, giving Sampled;                 *)
@@ -557,10 +555,9 @@ Local Open Scope ring_scope.
 (* secret-independent; it quantifies over no coalition, mentions no second    *)
 (* secret and has neither the shape of an indistinguishability statement nor  *)
 (* that of a leakage statement. No finite-word coalition claim is made        *)
-(* anywhere on this path. Both bounds are conditional on the trusted          *)
-(* analytical certificate s5_rayleigh_Q2_R, which is why the assumption       *)
-(* status of this row lists AxRayleighQ2R next to the instance's group-order  *)
-(* assumption.                                                                *)
+(* anywhere on this path. Both bounds descend from the in-kernel Rayleigh     *)
+(* certificate of s5_mixing.v, so the only named assumption of this row is    *)
+(* the instance's group-order one.                                            *)
 (*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
@@ -729,14 +726,14 @@ Definition s5_row_rand : AnalysisPathRow :=
 (** The AnalysisPathRow for the same instance under a finite generator
     word: S5Analysis.observed paired with the word model family indexed by
     a secret prior and a word length, AnalysisBridged, IdealFinite,
-    AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]. exec_endpoint_bound
-    is a mixing theorem at the row's own executed observer against the
-    encoder-image ideal, conditional on the trusted analytical certificate
-    s5_rayleigh_Q2_R, which is why that axiom joins the group-order one. *)
+    AcceptsAxioms [:: AxS5GroupOrder]. exec_endpoint_bound is a mixing
+    theorem at the row's own executed observer against the encoder-image
+    ideal, resting on the in-kernel Rayleigh certificate of s5_mixing.v
+    and on no named assumption beyond the group-order one. *)
 Definition s5_row_word : AnalysisPathRow :=
   @MkAnalysisPathRow S5Analysis.observed AnalysisBridged
     S5Analysis.word_family IdealFinite
-    (AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
+    (AcceptsAxioms [:: AxS5GroupOrder]).
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -1602,7 +1599,7 @@ Timeout 60 Check (apr_model s5_row_word
 Timeout 60 Check (erefl : apr_completion s5_row_word = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer s5_row_word = IdealFinite).
 Timeout 60 Check (erefl : apr_assumptions s5_row_word
-  = AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
+  = AcceptsAxioms [:: AxS5GroupOrder]).
 
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)

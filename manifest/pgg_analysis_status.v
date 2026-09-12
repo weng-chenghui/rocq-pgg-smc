@@ -15,7 +15,7 @@
 (* mixing or limitation theorem to the same distribution and the same         *)
 (* observer as its sample, which a negative mixing result also does.          *)
 (*                                                                            *)
-(* The three constructors of PggAxiom name the only accepted assumptions of   *)
+(* The two constructors of PggAxiom name the only accepted assumptions of     *)
 (* the repository, so an assumption status is checkable against the output of *)
 (* Print Assumptions without carrying strings.                                *)
 (*                                                                            *)
@@ -74,7 +74,6 @@ Inductive TransferStatus : Set :=
 
 (* The closed set of named assumptions accepted anywhere in the repository. *)
 Inductive PggAxiom : Set :=
-  | AxRayleighQ2R      (* s5_rayleigh_Q2_R: trusted analytical certificate *)
   | AxS5GroupOrder     (* s5_group_order_eq *)
   | AxS5x5GroupOrder.  (* s5x5_group_order_eq *)
 
