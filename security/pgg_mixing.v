@@ -42,13 +42,18 @@
 (*   schreier_transition_col_inv_closed                                       *)
 (*   schreier_endpoint_eq_Q_power_inv_closed                                  *)
 (*   symm_ds_TV_bound_inv_closed                                              *)
+(*                                                                            *)
+(* Discharging a Rayleigh premise from a rounded LDL^T certificate:           *)
+(*   cV_quad_formE, big_offdiag_exchange, abs_prod_le_sqr, pointwise_dom      *)
+(*   psd_of_dominant, psd_of_diag, psd_of_ldl                                 *)
+(*   sumzero_const_form, rayleigh_of_shift                                    *)
 (******************************************************************************)
 
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import bigop order ssrnum ssralg matrix mxalgebra.
-From mathcomp Require Import boolp reals.
+From mathcomp Require Import boolp reals lra.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import pgg_collusion_bound pgg_schreier.
 
@@ -846,4 +851,216 @@ exact: (@symm_ds_TV_bound_cV R n'.+1 Q Q_row_sum Q_col_sum Q_symm
 Qed.
 
 End schreier_inv_closed.
+
+(******************************************************************************)
+(*     Section 9: positive semidefiniteness from a rounded LDL^T certificate  *)
+(*                                                                            *)
+(* The Rayleigh premise of Sections 7 and 8 asks for a matrix inequality on   *)
+(* the sum-zero subspace.  An exact LDL^T factorisation of the witness matrix *)
+(* has coefficients too large for rational normalisation, so the certificate  *)
+(* is rounded: the factors carry a small denominator and the exact residual   *)
+(* is absorbed by a diagonal-dominance argument.  Section 10 removes the      *)
+(* all-ones direction, on which no such matrix can be positive definite.      *)
+(******************************************************************************)
+
+Section psd_certificate.
+
+Variable R : realType.
+Variable n : nat.
+
+(** cV_quad_formE — the quadratic form v^T M v of a column vector, read as a
+    double sum over coordinates.  The form in which an entrywise certificate
+    is checked: a matrix inequality becomes a statement about n^2 scalars. *)
+Lemma cV_quad_formE (E : 'M[R]_n) (v : 'cV[R]_n) :
+  (v^T *m E *m v) ord0 ord0 = \sum_i \sum_j E i j * (v i ord0 * v j ord0).
+Proof.
+rewrite mxE.
+under eq_bigr do rewrite mxE mulr_suml.
+rewrite exchange_big /=.
+apply: eq_bigr => i _; apply: eq_bigr => j _.
+rewrite mxE.
+by rewrite mulrA [v i ord0 * _]mulrC.
+Qed.
+
+(** big_offdiag_exchange — an off-diagonal double sum is unchanged when the
+    two indices are exchanged.  It turns a row-indexed dominance budget into
+    a column-indexed one, which is why a dominance certificate has to supply
+    both the row sums and the column sums. *)
+Lemma big_offdiag_exchange (F : 'I_n -> 'I_n -> R) :
+  \sum_i \sum_(j | j != i) F i j = \sum_j \sum_(i | i != j) F i j.
+Proof.
+rewrite (eq_bigr (fun i => \sum_j (if j != i then F i j else 0))); last first.
+  by move=> i _; rewrite -big_mkcond.
+rewrite exchange_big /=.
+apply: eq_bigr => j _.
+rewrite -big_mkcond /=.
+by apply: eq_bigl => i; rewrite eq_sym.
+Qed.
+
+(** abs_prod_le_sqr — twice the absolute value of a product is at most the
+    sum of the two squares.  The elementary inequality that lets an
+    off-diagonal entry pay for itself out of the two diagonal entries it
+    sits between. *)
+Lemma abs_prod_le_sqr (a b : R) : 2%:R * `|a * b| <= a ^+ 2 + b ^+ 2.
+Proof.
+rewrite normrM -[a ^+ 2]real_normK ?num_real// -[b ^+ 2]real_normK ?num_real//.
+set x := `|a|; set y := `|b|.
+have H : 0 <= (x - y) ^+ 2 by exact: sqr_ge0.
+move: H; rewrite sqrrB => H.
+lra.
+Qed.
+
+(** pointwise_dom — an off-diagonal entry e bounded in absolute value by al
+    contributes at least -al (a^2 + b^2) / 2 to the quadratic form.  The
+    per-entry step of the diagonal-dominance argument: the budget al is
+    spent half on each of the two coordinates the entry couples. *)
+Lemma pointwise_dom (e al a b : R) : e <= al -> - e <= al ->
+  - (al * (a ^+ 2 + b ^+ 2) / 2%:R) <= e * (a * b).
+Proof.
+move=> H1 H2.
+have Hal0 : 0 <= al by lra.
+have Habs : `|e| <= al by rewrite ler_norml; apply/andP; split; lra.
+have Hab := abs_prod_le_sqr a b.
+have Hnn : 0 <= `|a * b| by exact: normr_ge0.
+have Hne : 0 <= `|e| by exact: normr_ge0.
+have Hprod : 2%:R * (`|e| * `|a * b|) <= al * (a ^+ 2 + b ^+ 2) by nra.
+have Hlb : - `|e * (a * b)| <= e * (a * b).
+  by rewrite lerNl -normrN; exact: ler_norm.
+move: Hlb; rewrite normrM => Hlb.
+lra.
+Qed.
+
+(** psd_of_dominant — a matrix whose off-diagonal entries are dominated, row-
+    and column-wise, by a nonnegative matrix whose sums stay below the
+    diagonal has a nonnegative quadratic form.  Stated with the dominating
+    matrix A as data so that a concrete certificate discharges every premise
+    by linear arithmetic on literals; this is the residual half of a rounded
+    LDL^T certificate. *)
+Lemma psd_of_dominant (E A : 'M[R]_n) :
+  (forall i j, i != j -> E i j <= A i j) ->
+  (forall i j, i != j -> - E i j <= A i j) ->
+  (forall i, \sum_(j | j != i) A i j <= E i i) ->
+  (forall j, \sum_(i | i != j) A i j <= E j j) ->
+  forall v : 'cV[R]_n, 0 <= (v^T *m E *m v) ord0 ord0.
+Proof.
+move=> HEA HEA' Hrow Hcol v.
+rewrite cV_quad_formE.
+rewrite (eq_bigr (fun i => E i i * (v i ord0 * v i ord0)
+                          + \sum_(j | j != i) E i j * (v i ord0 * v j ord0)));
+  last by move=> i _; rewrite (bigD1 i)//=.
+rewrite big_split /=.
+have Hdiag : \sum_(i < n) E i i * (v i ord0 * v i ord0)
+           = \sum_(i < n) E i i * (v i ord0) ^+ 2.
+  by apply: eq_bigr => i _; rewrite expr2.
+rewrite Hdiag.
+set X := \sum_(i < n) E i i * (v i ord0) ^+ 2.
+set Y := \sum_(i < n) \sum_(j < n | j != i) E i j * (v i ord0 * v j ord0).
+suff key : - X <= Y by lra.
+have HA : \sum_(i < n) \sum_(j < n | j != i)
+            (- (A i j * ((v i ord0) ^+ 2 + (v j ord0) ^+ 2) / 2%:R)) <= Y.
+  rewrite /Y; apply: ler_sum => i _; apply: ler_sum => j Hij.
+  by apply: pointwise_dom; [apply: HEA | apply: HEA']; rewrite eq_sym.
+have HB : - X <= \sum_(i < n) \sum_(j < n | j != i)
+            (- (A i j * ((v i ord0) ^+ 2 + (v j ord0) ^+ 2) / 2%:R)).
+  under eq_bigr do rewrite sumrN.
+  rewrite sumrN lerN2.
+  have -> : \sum_(i < n) \sum_(j < n | j != i)
+              (A i j * ((v i ord0) ^+ 2 + (v j ord0) ^+ 2) / 2%:R)
+     = \sum_(i < n) \sum_(j < n | j != i) (A i j * (v i ord0) ^+ 2 / 2%:R)
+     + \sum_(i < n) \sum_(j < n | j != i) (A i j * (v j ord0) ^+ 2 / 2%:R).
+    rewrite -big_split /=; apply: eq_bigr => i _.
+    rewrite -big_split /=; apply: eq_bigr => j _.
+    by rewrite mulrDr mulrDl.
+  have -> : X = X / 2%:R + X / 2%:R by lra.
+  apply: lerD.
+    rewrite /X mulr_suml.
+    apply: ler_sum => i _.
+    under eq_bigr do rewrite -mulrA.
+    rewrite -mulr_suml -mulrA.
+    apply: ler_wpM2r; last exact: Hrow.
+    by rewrite mulr_ge0 ?sqr_ge0// invr_ge0 ler0n.
+  rewrite (big_offdiag_exchange (fun i j => A i j * (v j ord0) ^+ 2 / 2%:R)).
+  rewrite /X mulr_suml.
+  apply: ler_sum => j _.
+  under eq_bigr do rewrite -mulrA.
+  rewrite -mulr_suml -mulrA.
+  apply: ler_wpM2r; last exact: Hcol.
+  by rewrite mulr_ge0 ?sqr_ge0// invr_ge0 ler0n.
+lra.
+Qed.
+
+(** psd_of_diag — a diagonal matrix with nonnegative entries has a
+    nonnegative quadratic form.  The positive half of an LDL^T certificate:
+    all of the certificate's positivity is carried by the pivots D. *)
+Lemma psd_of_diag (D : 'rV[R]_n) (w : 'cV[R]_n) :
+  (forall k, 0 <= D ord0 k) -> 0 <= (w^T *m diag_mx D *m w) ord0 ord0.
+Proof.
+move=> HD; rewrite cV_quad_formE.
+apply: sumr_ge0 => i _.
+rewrite (bigD1 i)//= big1; last first.
+  by move=> j Hij; rewrite mxE eq_sym (negbTE Hij) mulr0n mul0r.
+by rewrite addr0 mxE eqxx mulr1n -expr2 mulr_ge0 ?sqr_ge0.
+Qed.
+
+(** psd_of_ldl — a matrix that splits as A D A^T plus a residual of
+    nonnegative quadratic form, with D nonnegative entrywise, has a
+    nonnegative quadratic form, because v^T A D A^T v is the D-weighted sum
+    of the squares of A^T v.  The shape a rounded certificate takes: A and D
+    carry a small denominator and the exact residual E absorbs the rounding
+    error, so no hypothesis mentions the true factorisation. *)
+Lemma psd_of_ldl (S A E : 'M[R]_n) (D : 'rV[R]_n) :
+  S = A *m diag_mx D *m A^T + E ->
+  (forall k, 0 <= D ord0 k) ->
+  (forall v : 'cV[R]_n, 0 <= (v^T *m E *m v) ord0 ord0) ->
+  forall v : 'cV[R]_n, 0 <= (v^T *m S *m v) ord0 ord0.
+Proof.
+move=> HS HD HE v.
+rewrite HS mulmxDr mulmxDl mxE.
+apply: addr_ge0; last exact: HE.
+have -> : v^T *m (A *m diag_mx D *m A^T) *m v
+        = (A^T *m v)^T *m diag_mx D *m (A^T *m v).
+  by rewrite trmx_mul trmxK !mulmxA.
+exact: psd_of_diag.
+Qed.
+
+End psd_certificate.
+
+(******************************************************************************)
+(*     Section 10: the all-ones shift is invisible on sum-zero vectors        *)
+(******************************************************************************)
+
+Section sumzero_shift.
+
+Variable R : realType.
+Variable n : nat.
+
+(** sumzero_const_form — a constant matrix has zero quadratic form on a
+    vector whose coordinates sum to zero.  The all-ones direction is the
+    only one a doubly stochastic walk does not contract, and this is the
+    statement that it is invisible from inside its orthogonal complement. *)
+Lemma sumzero_const_form (c : R) (v : 'cV[R]_n) :
+  \sum_i v i ord0 = 0 ->
+  (v^T *m const_mx c *m v) ord0 ord0 = 0.
+Proof.
+move=> Hv; rewrite cV_quad_formE.
+rewrite big1// => i _.
+under eq_bigr do rewrite mxE mulrA.
+by rewrite -mulr_sumr Hv mulr0.
+Qed.
+
+(** rayleigh_of_shift — adding a constant matrix leaves the quadratic form
+    unchanged on sum-zero vectors.  A Rayleigh bound restricted to the
+    sum-zero subspace may therefore be certified on a shifted matrix that is
+    positive semidefinite everywhere; choosing the shift large enough to lift
+    the all-ones eigenvalue is what makes a global LDL^T certificate exist
+    for a statement that only holds on a hyperplane. *)
+Lemma rayleigh_of_shift (M : 'M[R]_n) (c : R) (v : 'cV[R]_n) :
+  \sum_i v i ord0 = 0 ->
+  (v^T *m (M + const_mx c) *m v) ord0 ord0 = (v^T *m M *m v) ord0 ord0.
+Proof.
+move=> Hv.
+by rewrite mulmxDr mulmxDl mxE sumzero_const_form// addr0.
+Qed.
+
+End sumzero_shift.
 
