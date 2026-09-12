@@ -222,3 +222,48 @@ instances/pgl27/pgl27_spectral_certificate.py, which is an untrusted
 search: the kernel checks the factorisation identity and the diagonal
 dominance, and no property of how the tables were found enters any
 proof.
+
+## Spectral witnesses and the free-words relocation (2026-09-13)
+
+Plan: docs/superpowers/plans/2026-09-12-spectral-witnesses-and-free-words-relocation.md,
+steps 2-4 (step 1 is the PGL(2,7) section above). Every step gated by
+statement_surface.py, a captured full build EXIT=0, a fixpoint build of 0
+files, and Print Assumptions on the headline.
+
+- Step 2 (8d584a7): `Axiom s5_rayleigh_Q2_R` is a Lemma with the identical
+  statement, proved from a rounded LDL^T certificate at the same alpha =
+  181/200 (c = 11/50, eps = 1/2000, den = 1000; generator
+  instances/s5/s5_spectral_certificate.py, 25 identities checked by lra).
+  Surface: kind Axiom -> Lemma on one line, three s5_sos_* removals, 25
+  additions. s5_mixing.v compiles in 19 s. Kept-tree axioms drop to
+  s5_group_order_eq and s5_brings_covering_realised (plus the Parameter
+  realised_by_curve).
+- Step 3 (dd1ac60): `s5_rigidity` reads `s5_security_witness_schreier R 286`
+  (sqrt 5 * (181/200)^286 < 2^-40); the vacuous L = 1 fiber witness
+  (epsilon 6/5) and the duplicate `s5_rigidity_cryptographically_secure`
+  section are deleted; `Hypothesis card_G_s5_gt1`, never discharged into
+  any statement, is gone (ctxhash-only change on nine declarations). The
+  manifest's `AxRayleighQ2R` tag and its prose are removed. Print
+  Assumptions s5_rigidity = s5_group_order_eq + the classical three.
+- Step 4 (19c5092, 10dab7c): the free-words layer moved verbatim to
+  legacy/groups/pgg_weval_inj.v (the weval_inj vocabulary from
+  pgg_interface.v plus the reflection procedure and the OC data) and
+  legacy/security/pgg_free_words.v (the lfree sections of
+  pgg_collusion_bound.v, the fiber and direct-endpoint witnesses of
+  algebraic_rigidity.v, security_witness_schreier's Hlfree variant,
+  raag_weval_inj*, s5_weval_inj1). `all_words` lives in pgg_raag.v now.
+  Cumulative surface over the two commits: 73 removals, 73 additions,
+  every removed name re-added with identical statement text; the only
+  same-file changes are ctxhash-only on card_word_L, word_uniform,
+  rho_from_words after deleting the unused `Hypothesis lfree`. 13 kept
+  files dropped the pgg_weval_inj import. Residue of `weval_inj` in the
+  kept tree: comment lines only (pgl27_spectral.v, pgg_schreier.v) and the
+  nat-level `check_weval_inj` of pgg_security_solver.v.
+
+After step 4 the kept tree (93 .v files) states security in two forms
+only: exact independence (view / trace secrecy) and Schreier spectral
+decay (S_5, Kim, and now PGL(2,7)). Deferred: renaming
+`s5_spectral_convergence_proved` (status suffix; five sites in
+s5_models.v); the blueprint node for s5_rayleigh_Q2_R still says Assumed;
+`SecurityProfile`/`ar_security_profile` moved with the layer although they
+carry no free-words dependency.

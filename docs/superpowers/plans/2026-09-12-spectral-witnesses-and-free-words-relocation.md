@@ -1,7 +1,9 @@
 # Spectral witnesses for PGL(2,7) and S_5, then retire the free-words layer
 
 Date: 2026-09-12. Approved by the user (steps 1-4, including the change to
-the S_5 rigidity instance in step 3).
+the S_5 rigidity instance in step 3). EXECUTED 2026-09-13: step 1 in
+5a1c862..75e8053, step 2 in 8d584a7, step 3 in dd1ac60, step 4 in
+19c5092 and 10dab7c; close-out in docs/style/scan-2026-08-26/P0-P1-CLOSEOUT.md.
 
 ## Why
 
