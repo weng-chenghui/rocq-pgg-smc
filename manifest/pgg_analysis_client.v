@@ -3,8 +3,8 @@
 (******************************************************************************)
 (* pgg_analysis_client: the clean client of the analysis manifest             *)
 (*                                                                            *)
-(* One import reaches all five facades, the typed status vocabulary and the   *)
-(* seventeen typed rows. The file has EXACTLY ONE Require of any kind, and    *)
+(* One import reaches all three facades, the typed status vocabulary and the  *)
+(* eight typed rows. The file has EXACTLY ONE Require of any kind, and        *)
 (* every Check below is a bare Check on an alias, so no scope needs to be     *)
 (* open and no notation needs to be in scope: what is established here is     *)
 (* reachability of the aliases, not their spelling.                           *)
@@ -63,43 +63,6 @@ Check S5Analysis.exec_coalition_secrecy.        (* 6 Security *)
 Check S5Analysis.word_endpoint_bound.           (* bound, not security *)
 Check S5Analysis.rand_transfer_status.          (* 7 Transfer, typed status *)
 
-(* Ten-seat S_5 x S_5 instance, sections 1 to 6, the bound sub-block and
-   section 7. *)
-Check S5x5Analysis.profile.                     (* 1 Program *)
-Check S5x5Analysis.rand_exec_plug.              (* 2 Execution *)
-Check S5x5Analysis.joint_view.                  (* 3 Observers *)
-Check S5x5Analysis.rand_sample.                 (* 4 Models *)
-Check S5x5Analysis.rand_family.                 (* 4 Models, typed family *)
-Check S5x5Analysis.word_family.                 (* 4 Models, typed family *)
-Check S5x5Analysis.ideal_pile1_reading.         (* 4 Models, executed ideal *)
-Check S5x5Analysis.ideal_pile2_reading.         (* 4 Models, executed ideal *)
-Check S5x5Analysis.ideal_seat_reading.          (* 4 Models, executed ideal *)
-Check S5x5Analysis.exec_pile1_bound.            (* bound, executed observer *)
-Check S5x5Analysis.exec_pile2_bound.            (* bound, executed observer *)
-Check S5x5Analysis.exec_seat_bound.             (* bound, executed observer *)
-Check S5x5Analysis.exec_seat_uniform_ub.        (* bound, executed observer *)
-Check S5x5Analysis.exec_pile1_floor.            (* 7 Transfer, executed *)
-Check S5x5Analysis.exec_pile2_floor.            (* 7 Transfer, executed *)
-Check S5x5Analysis.exec_pile1_floor_gt0.        (* 7 Transfer, executed *)
-Check S5x5Analysis.exec_pile2_floor_gt0.        (* 7 Transfer, executed *)
-Check S5x5Analysis.exec_pile1_uniform_ge.       (* 7 Transfer, executed *)
-Check S5x5Analysis.exec_pile2_uniform_ge.       (* 7 Transfer, executed *)
-Check S5x5Analysis.rand_observed_recovers.      (* 5 Correctness *)
-Check S5x5Analysis.exec_joint_secrecy.          (* 6 Security *)
-Check S5x5Analysis.word_pile1_bound.            (* bound, not security *)
-Check S5x5Analysis.rand_transfer_status.        (* 7 Transfer, typed status *)
-
-(* Four-seat abelian instance, sections 1 to 7. Its section 6 result is a
-   negative one, and the transfer status records that. *)
-Check AbelianAnalysis.profile.                  (* 1 Program *)
-Check AbelianAnalysis.shuffle_plug.             (* 2 Execution *)
-Check AbelianAnalysis.endpoint_vector.          (* 3 Observers *)
-Check AbelianAnalysis.word_sample.              (* 4 Models *)
-Check AbelianAnalysis.word_family.              (* 4 Models, typed family *)
-Check AbelianAnalysis.shuffle_recovers.         (* 5 Correctness *)
-Check AbelianAnalysis.word_mixing_limitation.   (* 6 mixing limitation *)
-Check AbelianAnalysis.limitation_transfer_status. (* 7 Transfer *)
-
 (******************************************************************************)
 (*     The observed-execution values and the remaining distinct observers     *)
 (******************************************************************************)
@@ -109,10 +72,6 @@ Check FiveCardAnalysis.observed.
 Check FiveCardAnalysis.den_boer_observed.
 Check S5Analysis.observed.
 Check S5Analysis.rand_observed.
-Check S5x5Analysis.observed.
-Check S5x5Analysis.rand_observed.
-Check AbelianAnalysis.observed.
-Check AbelianAnalysis.shuffle_observed.
 
 Check PGL27Analysis.verifier_trace.
 Check PGL27Analysis.player_raw_trace.
@@ -145,36 +104,8 @@ Check S5Analysis.rand_verifier_trace.
 Check S5Analysis.rand_verifier_endpoints.
 Check S5Analysis.rand_player_raw_trace.
 
-(* The two piles of the ten-seat instance keep distinct readers at every
-   level: seat, coalition and the joint pair. *)
-Check S5x5Analysis.seat_endpoint.
-Check S5x5Analysis.coalition_endpoints.
-Check S5x5Analysis.verifier_trace.
-Check S5x5Analysis.verifier_endpoints.
-Check S5x5Analysis.player_raw_trace.
-Check S5x5Analysis.rand_seat_endpoint.
-Check S5x5Analysis.rand_coalition_endpoints.
-Check S5x5Analysis.rand_content_trace.
-Check S5x5Analysis.rand_verifier_trace.
-Check S5x5Analysis.rand_verifier_endpoints.
-Check S5x5Analysis.rand_player_raw_trace.
-Check S5x5Analysis.pile1_seats.
-Check S5x5Analysis.pile2_seats.
-Check S5x5Analysis.pile1_seat_view.
-Check S5x5Analysis.pile2_seat_view.
-Check S5x5Analysis.pile1_coalition_view.
-Check S5x5Analysis.pile2_coalition_view.
-
-(* The abelian complete four-endpoint observer and its injectivity. *)
-Check AbelianAnalysis.seat_endpoint.
-Check AbelianAnalysis.verifier_trace.
-Check AbelianAnalysis.verifier_endpoints.
-Check AbelianAnalysis.player_raw_trace.
-Check AbelianAnalysis.endpoint_vector_inj.
-Check AbelianAnalysis.ideal_sample.
-
 (******************************************************************************)
-(*     The typed status vocabulary and the seventeen rows                     *)
+(*     The typed status vocabulary and the eight rows                         *)
 (******************************************************************************)
 
 Check CompletionLevel.
@@ -202,27 +133,18 @@ Check five_card_row_repeated.
 Check s5_row_det.
 Check s5_row_rand.
 Check s5_row_word.
-Check s5x5_row_det.
-Check s5x5_row_rand.
-Check s5x5_row_pile1_word.
-Check s5x5_row_pile2_word.
-Check s5x5_row_pile1_limitation.
-Check s5x5_row_pile2_limitation.
-Check abel_row_recovery.
-Check abel_row_identity.
-Check abel_row_limitation.
 
 (******************************************************************************)
 (*     What one import actually reaches                                       *)
 (*                                                                            *)
-(* Require is transitive in LOADING but not in IMPORTING. The five facades    *)
+(* Require is transitive in LOADING but not in IMPORTING. The three facades   *)
 (* Require Export their type vocabulary and Require Import the instance       *)
 (* files, so through the single import above this client gets:                *)
 (*                                                                            *)
-(*   - every facade alias, under its module name (the lines above); the five  *)
+(*   - every facade alias, under its module name (the lines above); the three *)
 (*     modules keep the short names apart, so PGL27Analysis.profile,          *)
-(*     FiveCardAnalysis.profile, S5Analysis.profile, S5x5Analysis.profile and *)
-(*     AbelianAnalysis.profile coexist and none shadows another;              *)
+(*     FiveCardAnalysis.profile and S5Analysis.profile coexist and none       *)
+(*     shadows another;                                                       *)
 (*   - the exported type vocabulary, by short name (the lines below);         *)
 (*   - the manifest's own rows and record, by short name;                     *)
 (*   - every instance-file constant by QUALIFIED name only, because those     *)
@@ -243,13 +165,11 @@ Check sw_rho_dist.
 Check scb_bound.
 
 (* Facade aliases are not visible unqualified either: the module name is the
-   namespace, which is what keeps the five facades' short names distinct. *)
+   namespace, which is what keeps the three facades' short names distinct. *)
 Fail Check profile.
 Fail Check exec_plug.
 Fail Check content_trace.
 Fail Check rand_sample.
-Fail Check joint_view.
-Fail Check endpoint_vector.
 
 (* Instance-file constants: not visible by short name. *)
 Locate pgl27_exec_endpoints.
@@ -260,10 +180,6 @@ Locate five_card_exec_colour_view.
 Fail Check five_card_exec_colour_view.
 Locate s5_rfree_share.
 Fail Check s5_rfree_share.
-Locate s5x5_rfree_recon.
-Fail Check s5x5_rfree_recon.
-Locate abel_reader.
-Fail Check abel_reader.
 
 (* The same constants ARE reachable by qualified name, because Require loaded
    their modules transitively. Encapsulation here is a naming discipline, not
@@ -273,5 +189,3 @@ Check pgl27_exec.pgl27_exec_endpoints.
 Check five_card_exec.five_card_exec_endpoints.
 Check five_card_models.five_card_exec_colour_view.
 Check s5_exec.s5_rfree_share.
-Check s5x5_exec.s5x5_rfree_recon.
-Check abelian_exec.abel_reader.
