@@ -7,17 +7,18 @@
 (*   where epsilon = var_dist(rho_dist, uniform(S_N)) is the gap between the   *)
 (*   real protocol distribution and the idealized uniform permutation.         *)
 (*                                                                             *)
-(* Section 6: Word-eval injective instantiation — rho_from_words is           *)
-(*   uniform over achievable(L) when word_eval is injective.                   *)
-(*   Provides rho_from_words, rho_from_words_uniform_supp, fiber counting.     *)
-(*   Concrete epsilon is computed per-instance (not here).                     *)
+(* Section 6: The law rho_from_words that a uniformly random length-L word    *)
+(*   induces on deck permutations, and the uniform law on L-words it is        *)
+(*   the pushforward of. What this law is worth as an Assumption-1 input       *)
+(*   depends on word-eval injectivity, which lives in                          *)
+(*   legacy/security/pgg_free_words.v.                                         *)
 (******************************************************************************)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup perm.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj.
+From pgg_smc Require Import perm_uniform pgg_interface.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -542,8 +543,7 @@ Qed.
 End fdistmap_eval_uniform_section.
 
 (******************************************************************************)
-(*  Section 6: Word-eval injective instantiation — concrete epsilon for     *)
-(*  Assumption 1                                                             *)
+(*  Section 6: The word law rho_from_words                                   *)
 (******************************************************************************)
 
 (* General lemma: fdistmap of uniform through an injective function
@@ -622,9 +622,6 @@ Variable L : nat.
 Variable sigmas : Tg.-tuple {perm 'I_N}.
 Let M := Gen_PGGTypes sigmas.
 
-(* Word-eval injectivity *)
-Hypothesis lfree : @weval_inj M L.
-
 (* Cardinality of word space *)
 Lemma card_word_L :
   #|{: L.-tuple 'I_Tg}| = (Tg ^ L).-1.+1.
@@ -640,124 +637,10 @@ Definition word_uniform : R.-fdist (L.-tuple 'I_Tg) :=
 Definition rho_from_words : R.-fdist {perm 'I_N} :=
   fdistmap (@word_eval M L) word_uniform.
 
-(* achievable(L) has positive cardinality *)
-Lemma achievable_pos : (0 < #|@achievable M L|)%N.
-Proof.
-rewrite /achievable -/M.
-have -> : #|[set word_eval w | w : pgg_word M L]| = @search_space M L by [].
-rewrite weval_inj_search_space //.
-by rewrite expn_gt0.
-Qed.
-
-(** rho_from_words_uniform_supp — conditional on word-eval injectivity
-    (lfree), the group-element law induced by a uniformly random length-L
-    word is exactly uniform on achievable(L), the set of permutations some
-    length-L word reaches. This turns generator-word sampling into an
-    idealized Assumption-1 input with epsilon = 0 exactly, not merely
-    bounded, for the collusion bound above. *)
-Lemma rho_from_words_uniform_supp :
-  rho_from_words = @fdist_uniform_supp R _ (@achievable M L) achievable_pos.
-Proof.
-apply/fdist_ext => g.
-rewrite /rho_from_words /word_uniform fdistmapE.
-case/boolP: (g \in @achievable M L) => Hg.
-  (* g in achievable: exactly one preimage *)
-  rewrite fdist_uniform_supp_in //.
-  move/imsetP: Hg => [w _ Hgw].
-  rewrite (bigD1 w) /=; last by rewrite !inE Hgw eqxx.
-  rewrite fdist_uniformE big1 ?addr0; last first.
-    move=> w' /andP [Hw' Hneq].
-    rewrite inE in Hw'; move/eqP in Hw'.
-    rewrite Hgw in Hw'; move/lfree in Hw'.
-    by rewrite Hw' eqxx in Hneq.
-  congr (_ ^-1).
-  have -> : #|@achievable M L| = @search_space M L by [].
-  rewrite weval_inj_search_space //.
-  by rewrite card_tuple card_ord.
-(* g not in achievable: no preimage *)
-rewrite fdist_uniform_supp_notin //.
-apply: big1 => w; rewrite inE => /eqP Hfw.
-exfalso; move/negP: Hg; apply.
-by apply/imsetP; exists w.
-Qed.
-
-
 End weval_inj_collusion.
 
 (******************************************************************************)
-(*   Section 7: Fiber equidistribution                                       *)
-(*                                                                            *)
-(*   Defines fibers (preimages of word_eval) and proves that under uniform   *)
-(*   word distribution, the probability of each achievable group element is  *)
-(*   proportional to its fiber size. Under word-eval injectivity, fibers    *)
-(*   are singletons                                                         *)
-(*   and the induced distribution is uniform over achievable(L).             *)
-(******************************************************************************)
-
-Section fiber_equidistribution.
-
-Context {R : realType}.
-Variable N'' : nat.
-Let N' := N''.+1.
-Let N := N'.+1.
-
-Variable m : nat.
-Let Tg := m.+1.
-Variable L : nat.
-Variable sigmas : Tg.-tuple {perm 'I_N}.
-Let M := Gen_PGGTypes sigmas.
-
-(** card_word_L' — the number of length-L words over Tg generators is
-    Tg ^ L, the cardinality witness this section's uniform word law is
-    built on. *)
-Lemma card_word_L' :
-  #|{: L.-tuple 'I_Tg}| = (Tg ^ L).-1.+1.
-Proof.
-by rewrite card_tuple card_ord prednK // expn_gt0.
-Qed.
-
-Let word_unif : R.-fdist (L.-tuple 'I_Tg) := fdist_uniform card_word_L'.
-
-(* Fiber: set of words evaluating to a given group element *)
-Definition fiber (g : {perm 'I_N}) : {set L.-tuple 'I_Tg} :=
-  [set w | @word_eval M L w == g].
-
-(* The probability of g under rho_from_words equals |fiber g| / Tg^L *)
-Lemma fiber_prob (g : {perm 'I_N}) :
-  fdistmap (@word_eval M L) word_unif g =
-  #|fiber g|%:R / (Tg ^ L)%:R.
-Proof.
-rewrite fdistmapE.
-rewrite (eq_bigl (fun a => a \in fiber g)); last first.
-  by move=> w; rewrite !inE.
-rewrite (eq_bigr (fun _ => (Tg ^ L)%:R^-1)); last first.
-  by move=> w _; rewrite fdist_uniformE card_tuple card_ord.
-by rewrite big_const iter_addr addr0 -mulr_natr mulrC mulr1 mulrC mulr_natr.
-Qed.
-
-(* Under word-eval injectivity, each fiber has at most one element *)
-Lemma weval_inj_fiber_le1 (lfree : @weval_inj M L) (g : {perm 'I_N}) :
-  (#|fiber g| <= 1)%N.
-Proof.
-apply/card_le1_eqP => w1 w2.
-rewrite !inE => /eqP Hw1 /eqP Hw2.
-by apply: lfree; rewrite Hw1 Hw2.
-Qed.
-
-(* Under word-eval injectivity, fibers of achievable elements are singletons *)
-Lemma weval_inj_fiber_card1 (lfree : @weval_inj M L) (g : {perm 'I_N}) :
-  g \in @achievable M L -> #|fiber g| = 1%N.
-Proof.
-move=> /imsetP [w _ Hw].
-apply/eqP; rewrite eqn_leq weval_inj_fiber_le1 //=.
-apply/card_gt0P; exists w.
-by rewrite inE Hw.
-Qed.
-
-End fiber_equidistribution.
-
-(******************************************************************************)
-(*   Section 8: Generalized collusion bound for arbitrary coalition size k  *)
+(*   Section 7: Generalized collusion bound for arbitrary coalition size k  *)
 (******************************************************************************)
 
 (* Generalization of the collusion bound to arbitrary coalition size k.
@@ -813,11 +696,12 @@ Qed.
 End collusion_bound_k.
 
 (******************************************************************************)
-(*   Section 9: Pushforward of uniform_supp through support-injective f     *)
+(*   Section 8: Pushforward of uniform_supp through support-injective f     *)
 (*                                                                            *)
 (*   When f is injective on C, fdistmap f (uniform_supp C) = uniform_supp   *)
 (*   (f @: C). Combined with var_dist_uniform_supp, this gives a direct     *)
-(*   endpoint epsilon = 2*(N - |f @: C|)/N without going through the DPI.   *)
+(*   endpoint epsilon = 2*(N - |f @: C|)/N without going through the DPI,   *)
+(*   the route legacy/security/pgg_free_words.v takes.                      *)
 (******************************************************************************)
 
 Section fdistmap_uniform_supp_inj.
@@ -835,8 +719,9 @@ Proof. by rewrite card_in_imset. Qed.
 
 (* When f is injective on C, the pushforward of uniform_supp(C) through f
    is uniform_supp(f(C)); combined with var_dist_uniform_supp this gives
-   Section 10's direct endpoint epsilon = 2*(N - |f @: C|)/N, avoiding the
-   DPI's looser bound through the group order. *)
+   the direct endpoint epsilon 2*(N - |f @: C|)/N of
+   legacy/security/pgg_free_words.v, avoiding the DPI's looser bound
+   through the group order. *)
 Lemma fdistmap_uniform_supp_inj :
   fdistmap f (@fdist_uniform_supp R A C card_C_gt0) =
   @fdist_uniform_supp R B img Himg_pos.
@@ -867,113 +752,7 @@ Qed.
 End fdistmap_uniform_supp_inj.
 
 (******************************************************************************)
-(*  Section 10: Direct endpoint epsilon for groups with injective perm_endpoint     *)
-(*                                                                            *)
-(*  When word_eval is injective (weval_inj L) AND perm_endpoint is injective on    *)
-(*  achievable(L), the endpoint distribution is uniform_supp over            *)
-(*  perm_endpoint(achievable(L)), giving epsilon = 2*(N - Tg^L)/N.                 *)
-(*  This is tighter than the DPI bound 2*(N! - Tg^L)/N!.                    *)
-(******************************************************************************)
-
-Section direct_endpoint_epsilon.
-
-Context {R : realType}.
-Variable N'' : nat.
-Let N' := N''.+1.
-Let N := N'.+1.
-
-Variable m : nat.
-Let Tg := m.+1.
-Variable L : nat.
-Variable sigmas : Tg.-tuple {perm 'I_N}.
-Let M := Gen_PGGTypes sigmas.
-
-Hypothesis lfree : @weval_inj M L.
-
-(* The endpoint evaluation function *)
-Let eval_at (s : 'I_N) : {perm 'I_N} -> 'I_N :=
-  fun sigma => sigma s.
-
-(* eval_at s is injective on achievable(L) for each starting card position s *)
-Hypothesis pe_inj :
-  forall s : 'I_N,
-  {in @achievable M L &, injective (eval_at s)}.
-
-(* The key bound: epsilon = 2*(N - Tg^L)/N with denominator N, not N! *)
-Let direct_eps : R := 2%:R * (N - Tg ^ L)%:R / N%:R.
-
-(** direct_eps_ge0 — the direct endpoint epsilon 2(N - Tg^L)/N is
-    non-negative, as an upper bound on a TV distance must be. *)
-Lemma direct_eps_ge0 : 0 <= direct_eps.
-Proof.
-rewrite /direct_eps.
-apply: divr_ge0; last by rewrite ler0n.
-by rewrite mulr_ge0 // ler0n.
-Qed.
-
-(** achievable_card_TgL — conditional on word-eval injectivity (lfree),
-    the set of permutations reachable by some length-L word has exactly
-    Tg ^ L elements: every word gives a distinct permutation, so counting
-    achievable permutations reduces to counting words. *)
-Lemma achievable_card_TgL : #|@achievable M L| = (Tg ^ L)%N.
-Proof.
-have -> : #|@achievable M L| = @search_space M L by [].
-by rewrite weval_inj_search_space.
-Qed.
-
-(** achievable_pos' — the achievable-permutation set is non-empty, the
-    positivity witness fdist_uniform_supp requires to put a law on it. *)
-Lemma achievable_pos' : (0 < #|@achievable M L|)%N.
-Proof. by rewrite achievable_card_TgL expn_gt0. Qed.
-
-(* The image of achievable through eval_at s has cardinality Tg^L *)
-Lemma perm_endpoint_image_card (s : 'I_N) :
-  #|(eval_at s) @: @achievable M L| = (Tg ^ L)%N.
-Proof.
-rewrite card_in_imset; last first.
-  have Hs : {in @achievable M L &, injective (eval_at s)}.
-    exact: pe_inj.
-  exact: Hs.
-exact: achievable_card_TgL.
-Qed.
-
-(** perm_endpoint_image_pos — the endpoint image of achievable permutations
-    at card position s is non-empty, the positivity witness needed to put
-    a uniform-on-image law on it. *)
-Lemma perm_endpoint_image_pos (s : 'I_N) :
-  (0 < #|(eval_at s) @: @achievable M L|)%N.
-Proof. by rewrite perm_endpoint_image_card expn_gt0. Qed.
-
-(** TgL_leq_N — the number of achievable endpoint values never exceeds N:
-    an image of a subset of 'I_N cannot outgrow the carrier, the bound the
-    epsilon formulas below simplify against. *)
-Lemma TgL_leq_N : (Tg ^ L <= N)%N.
-Proof.
-rewrite -(perm_endpoint_image_card ord0).
-apply: (leq_trans (max_card _)).
-by rewrite card_ord.
-Qed.
-
-(* Direct endpoint bound: for each card position s, the marginal endpoint
-   distribution is at distance 2*(N-Tg^L)/N from uniform.
-   This is TIGHTER than the DPI bound 2*(N!-Tg^L)/N!. *)
-Theorem var_dist_endpoint_direct (s : 'I_N) :
-  var_dist (fdistmap (eval_at s) (rho_from_words L sigmas))
-           (fdist_uniform (card_ord N)) <= direct_eps.
-Proof.
-rewrite (rho_from_words_uniform_supp lfree).
-have Hs : {in @achievable M L &, injective (eval_at s)}.
-  exact: pe_inj.
-rewrite (fdistmap_uniform_supp_inj _ Hs).
-rewrite var_dist_uniform_supp.
-rewrite perm_endpoint_image_card card_ord /direct_eps.
-exact: Order.POrderTheory.lexx.
-Qed.
-
-End direct_endpoint_epsilon.
-
-(******************************************************************************)
-(*  Section 11: Balanced-case var_dist for non-injective perm_endpoint              *)
+(*  Section 9: Balanced-case var_dist for non-injective perm_endpoint               *)
 (*                                                                            *)
 (*  When |achievable(L)| = N (balanced case, i.e., Tg^L = N), the var_dist  *)
 (*  of fdistmap perm_endpoint (uniform_supp achievable) against uniform depends     *)
@@ -1180,122 +959,8 @@ Qed.
 
 End unbalanced_var_dist.
 
-(* Unbalanced endpoint image bound: when |C| <= N (e.g., Tg^L < N),
-   the bound 2*(N - img_min)/N still holds. *)
-Section endpoint_image_bound_unbalanced.
-
-Context {R : realType}.
-Variable N'' : nat.
-Let N' := N''.+1.
-Let N := N'.+1.
-
-Variable m : nat.
-Let Tg := m.+1.
-Variable L : nat.
-Variable sigmas : Tg.-tuple {perm 'I_N}.
-Let M := Gen_PGGTypes sigmas.
-
-Hypothesis lfree : @weval_inj M L.
-
-(** var_dist_endpoint_unbalanced — in the unbalanced regime Tg^L <= N, the
-    coalition's endpoint marginal at card position s is at TV distance
-    exactly
-    2(N - |image_s|)/N from uniform, where image_s is the endpoint's image
-    of the achievable-permutation set. *)
-Lemma var_dist_endpoint_unbalanced
-    (HCleN : (Tg ^ L <= N)%N) (s : 'I_N) :
-  var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
-                     (@rho_from_words R N'' m L sigmas))
-           (fdist_uniform (card_ord N)) =
-  2%:R * (N - #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%:R / N%:R.
-Proof.
-rewrite (rho_from_words_uniform_supp lfree).
-rewrite (@var_dist_fdistmap_unbalanced R _ _ _ _ _ N' (card_ord N)) //.
-  by rewrite !card_ord.
-rewrite card_ord.
-have -> : #|@achievable M L| = @search_space M L by [].
-by rewrite weval_inj_search_space.
-Qed.
-
-(** var_dist_endpoint_image_bound_unbalanced — a lower bound img_min on
-    |image_s| yields the upper bound 2(N - img_min)/N on the coalition's
-    endpoint TV distance from uniform in the unbalanced regime, letting a
-    concrete instance certify security from a single nat-level cardinality
-    computation instead of the exact image size. *)
-Lemma var_dist_endpoint_image_bound_unbalanced
-    (HCleN : (Tg ^ L <= N)%N) (img_min : nat) (s : 'I_N)
-    (Himg : (img_min <= #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%N) :
-  (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
-                     (@rho_from_words R N'' m L sigmas))
-           (fdist_uniform (card_ord N)) <= 2%:R * (N - img_min)%:R / N%:R)%O.
-Proof.
-rewrite var_dist_endpoint_unbalanced //.
-apply: ler_wpM2r; first by rewrite invr_ge0 ler0n.
-apply: ler_wpM2l; first by rewrite ler0n.
-by rewrite ler_nat leq_sub2l.
-Qed.
-
-End endpoint_image_bound_unbalanced.
-
 (******************************************************************************)
-(*  Section 12: Image size bound via nat-level computation                   *)
-(*                                                                            *)
-(*  For concrete instances, |perm_endpoint @: achievable| can be computed at the    *)
-(*  nat level using eval_word_nat, then reflected to the type level.          *)
-(******************************************************************************)
-
-Section endpoint_image_bound.
-
-Context {R : realType}.
-Variable N'' : nat.
-Let N' := N''.+1.
-Let N := N'.+1.
-
-Variable m : nat.
-Let Tg := m.+1.
-Variable L : nat.
-Variable sigmas : Tg.-tuple {perm 'I_N}.
-Let M := Gen_PGGTypes sigmas.
-
-Hypothesis lfree : @weval_inj M L.
-
-(* When Tg^L = N (balanced), the fiber-counted var_dist reduces to
-   the image-size formula 2*(N - |image_s|)/N. *)
-Lemma var_dist_endpoint_balanced
-    (card_C : (Tg ^ L = N)%N) (s : 'I_N) :
-  var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
-                     (@rho_from_words R N'' m L sigmas))
-           (fdist_uniform (card_ord N)) =
-  2%:R * (N - #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%:R / N%:R.
-Proof.
-rewrite (rho_from_words_uniform_supp lfree).
-rewrite (@var_dist_fdistmap_balanced R _ _ _ _ _ N' (card_ord N)).
-  by rewrite card_ord /M.
-have -> : #|@achievable M L| = @search_space M L by [].
-by rewrite weval_inj_search_space // card_C.
-Qed.
-
-(** var_dist_endpoint_image_bound — the balanced-regime (Tg^L = N) analogue
-    of var_dist_endpoint_image_bound_unbalanced: a lower bound img_min on
-    |image_s| yields the endpoint TV bound 2(N - img_min)/N from a
-    nat-level cardinality computation rather than the exact image size. *)
-Lemma var_dist_endpoint_image_bound
-    (card_C : (Tg ^ L = N)%N) (img_min : nat) (s : 'I_N)
-    (Himg : (img_min <= #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%N) :
-  (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
-                     (@rho_from_words R N'' m L sigmas))
-           (fdist_uniform (card_ord N)) <= 2%:R * (N - img_min)%:R / N%:R)%O.
-Proof.
-rewrite var_dist_endpoint_balanced //.
-apply: ler_wpM2r; first by rewrite invr_ge0 ler0n.
-apply: ler_wpM2l; first by rewrite ler0n.
-by rewrite ler_nat leq_sub2l.
-Qed.
-
-End endpoint_image_bound.
-
-(******************************************************************************)
-(*     Section 8: Transfer of a pushforward equality along a close prior      *)
+(*     Section 10: Transfer of a pushforward equality along a close prior     *)
 (*                                                                            *)
 (* Two readers of a distribution P that agree on a nearby ideal               *)
 (* distribution Q stay close on P itself. The bound is a triangle             *)
@@ -1338,4 +1003,3 @@ Check collusion_bound_unconditional.
 Check collusion_bound_conditional.
 Check collusion_bound_k.
 Check fdistmap_uniform_supp_inj.
-Check var_dist_endpoint_direct.

@@ -14,7 +14,7 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop div order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_raag.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 
 Set Implicit Arguments.

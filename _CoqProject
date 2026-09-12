@@ -121,6 +121,7 @@ legacy/reconstruct/cover_genus1.v
 legacy/reconstruct/cover_genus2.v
 reconstruct/cover_tradeoff.v
 reconstruct/algebraic_rigidity.v
+legacy/security/pgg_free_words.v
 legacy/reconstruct/dropout_witness.v
 legacy/reconstruct/pgg_dealer_bridge.v
 legacy/reconstruct/pgg_protocol_landscape.v

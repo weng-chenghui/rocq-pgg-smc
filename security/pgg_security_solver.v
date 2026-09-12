@@ -12,7 +12,6 @@
 (*   - Constraint/solve: given partial parameters, solve for the rest         *)
 (*   - solve_L_aux: search for smallest L achieving target epsilon            *)
 (*   - StarParams/star_solve: star-graph specific solver (m -> Tg=m+1, N=m+3)*)
-(*   - SecurityProfile: wraps a ShuffleMarginalBound with L* + nontriviality  *)
 (*   - vm_compute demonstrations for all group families                       *)
 (*                                                                            *)
 (* Key design: two epsilon formulas:                                          *)
@@ -294,29 +293,14 @@ Eval vm_compute in eps_lt2 (epsilon_endpoint_rat 1 4 1).   (* Cyclic N=4: true (
 Eval vm_compute in eps_lt1 (epsilon_endpoint_rat 1 4 1).   (* Cyclic N=4: false *)
 
 (******************************************************************************)
-(*     SecurityProfile record                                                 *)
-(*                                                                            *)
-(*     Wraps a ShuffleMarginalBound with:                                     *)
-(*       - L* (the specific length used)                                      *)
-(*       - Nontriviality: epsilon < 2 (strictly better than trivial bound)    *)
-(*                                                                            *)
-(*     Note: epsilon < 2 means the security bound is nontrivial.              *)
-(*     epsilon < 1 means d_TV < 1/2 (better than random guessing for the     *)
-(*     adversary). Both are checkable via vm_compute on the rational form.    *)
-(******************************************************************************)
-
-(* SecurityProfile is parameterized; we define it in a Section.
-   The actual record definition is in algebraic_rigidity.v alongside
-   ShuffleMarginalBound, since it depends on realType and fdist. *)
-
-(******************************************************************************)
 (*     Nat-level word enumeration and fingerprinting                         *)
-(*     (duplicated from pgg_weval_inj.v to keep solver dependency-free)      *)
+(*     (duplicated from legacy/groups/pgg_weval_inj.v, solver-independent)   *)
 (******************************************************************************)
 
 (* Enumerates every length-L word over the alphabet {0, ..., Tg-1} as a
    seq of seqs of nat.  The nat-level counterpart of the pgg_word finType
-   enumeration in pgg_weval_inj.v, duplicated here to keep this file's
+   enumeration in legacy/groups/pgg_weval_inj.v, duplicated here to keep
+   this file's
    vm_compute demos free of the finType/tuple dependency. *)
 Fixpoint enum_words (Tg L : nat) : seq (seq nat) :=
   match L with

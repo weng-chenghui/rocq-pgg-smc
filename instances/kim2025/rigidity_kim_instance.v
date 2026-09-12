@@ -23,7 +23,7 @@ From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj
+From pgg_smc Require Import perm_uniform pgg_interface
                             pgg_collusion_bound five_card_kim.
 From pgg_smc Require Import five_card_family pgg_monodromy_profile.
 

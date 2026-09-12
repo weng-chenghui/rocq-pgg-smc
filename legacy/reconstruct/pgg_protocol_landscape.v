@@ -87,6 +87,7 @@ From mathcomp Require Import boolp reals exp.
 From infotheo Require Import realType_ext realType_ln fdist proba
                              variation_dist.
 From infotheo Require Import divergence entropy pinsker.
+From pgg_smc Require Import pgg_free_words.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj.
 From pgg_smc Require Import pgg_collusion_bound pgg_entropy_security
                             pgg_schreier.

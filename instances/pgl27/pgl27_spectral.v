@@ -25,7 +25,8 @@
 (*                                                                            *)
 (* WHAT IS PACKAGED.  weval_inj fails for the symmetrized alphabet at every   *)
 (* L >= 2, since letter 1 is the inverse of letter 0 and the words (0,1) and  *)
-(* (1,0) both evaluate to the identity.  security_witness_schreier, which     *)
+(* (1,0) both evaluate to the identity.  security_witness_schreier of         *)
+(* legacy/security/pgg_free_words.v, which                                    *)
 (* takes a weval_inj premise, is therefore unavailable here, and only         *)
 (* security_witness_schreier_asymptotic is packaged.                          *)
 (*                                                                            *)
@@ -620,7 +621,8 @@ Definition pgl27_schreier_cert (R : realType) :
 
 (** pgl27_security_asymptotic — the asymptotic security witness of the
     PGL(2,7) shuffle: the geometric endpoint bound with a zero additive
-    floor.  Its non-asymptotic sibling security_witness_schreier takes a
+    floor.  Its non-asymptotic sibling security_witness_schreier, in
+    legacy/security/pgg_free_words.v, takes a
     weval_inj premise, which the symmetrized alphabet fails at every L >= 2
     because the two-letter words (0,1) and (1,0) both evaluate to the
     identity, so this is the only witness this alphabet supports. *)

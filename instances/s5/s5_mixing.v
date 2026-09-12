@@ -56,7 +56,7 @@ From mathcomp Require Import bigop order ssrnum ssralg matrix.
 From mathcomp Require Import ssrint.
 From mathcomp Require Import boolp reals lra.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
+From pgg_smc Require Import pgg_interface pgg_raag.
 From pgg_smc Require Import pgg_collusion_bound pgg_schreier pgg_mixing.
 From pgg_smc Require Import pgg_raag_path.
 

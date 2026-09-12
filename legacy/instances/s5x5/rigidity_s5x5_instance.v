@@ -47,6 +47,7 @@ From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
+From pgg_smc Require Import pgg_free_words.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_s5x5 pgg_collusion_bound s5x5_pile.
 From pgg_smc Require Import s5x5_mixing s5_mixing.

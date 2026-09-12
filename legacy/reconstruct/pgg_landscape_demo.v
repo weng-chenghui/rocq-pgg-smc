@@ -25,6 +25,7 @@ From infotheo Require Import realType_ext realType_ln fdist proba
                              variation_dist divergence entropy pinsker.
 From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
 From infotheo Require Import ssralg_ext reed_solomon.
+From pgg_smc Require Import pgg_free_words.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj
                             pgg_collusion_bound pgg_entropy_security
                             pgg_schreier.

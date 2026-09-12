@@ -6,7 +6,6 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
 From mathcomp Require Import boolp reals.
 From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 Require Import pgg_interface pgg_session_types.
-Require Import pgg_weval_inj.
 From pgg_smc Require Import pgg_security_solver.
 From pgg_reconstruct Require Import algebraic_rigidity.
 

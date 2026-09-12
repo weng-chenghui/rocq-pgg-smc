@@ -4,7 +4,7 @@ From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop.
-From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
+From pgg_smc Require Import pgg_interface pgg_raag.
 From pgg_smc Require Import pgg_raag_path pgg_raag_clique.
 
 (******************************************************************************)
@@ -21,7 +21,6 @@ From pgg_smc Require Import pgg_raag_path pgg_raag_clique.
 (* Contents:                                                                  *)
 (*   s5_gens_nat == nat-level generator function for vm_compute               *)
 (*   s5_gens_agree == agreement with path_gen at m=3                          *)
-(*   s5_weval_inj1 == word-eval injectivity at L=1 (via vm_compute)           *)
 (*   s5_nt_L* == vm_compute trace counts                                      *)
 (******************************************************************************)
 
@@ -42,9 +41,10 @@ Definition s5_gens_nat (i x : nat) : nat :=
 (** s5_gens_agree — the nat-level swap function [s5_gens_nat] agrees with
     the perm-level path-RAAG generator [tnth (path_gen_tuple 3)] at every
     generator index and seat. Equating the two is what lets word-evaluation
-    facts below ([s5_weval_inj1], the trace counts) be settled by
-    [vm_compute] on the decidable nat description instead of computing with
-    permutations directly. *)
+    facts below (the trace counts) and the length-1 word-eval injectivity
+    of legacy/security/pgg_free_words.v be settled by [vm_compute] on the
+    decidable nat description instead of computing with permutations
+    directly. *)
 Lemma s5_gens_agree (i : 'I_4) (x : 'I_5) :
   s5_gens_nat (val i) (val x) = val (tnth (path_gen_tuple 3) i x).
 Proof.
@@ -52,19 +52,6 @@ by case: i => [[|[|[|[|?]]]] Hi];
   case: x => [[|[|[|[|[|?]]]]] Hx];
   rewrite ?gen_tuple_ofE /path_gen /path_lo /path_hi ?permE.
 Qed.
-
-(** s5_weval_inj1 — word evaluation is injective at length 1 for the S_5
-    path-RAAG generators: two single-generator words that evaluate to the
-    same permutation are the same generator. This is the shortest length at
-    which injectivity can hold at all, since length 2 already collapses
-    words like [i,i] to the identity because every generator is an
-    involution (noted below). *)
-Lemma s5_weval_inj1 : @weval_inj (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 1.
-Proof. apply: (weval_inj_of_natB s5_gens_agree). by vm_compute. Qed.
-
-(* Note: word-eval injectivity at L=2 fails because adjacent transpositions
-   are involutions (s_i^2 = 1 for all i), so words [i,i] all evaluate to
-   the identity. *)
 
 (* vm_compute trace count demonstrations *)
 (* N=5, Tg=4, comm = path (|i-j| >= 2) *)

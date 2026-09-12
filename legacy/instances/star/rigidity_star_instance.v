@@ -27,6 +27,7 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
 From infotheo Require Import ssralg_ext reed_solomon.
+From pgg_smc Require Import pgg_free_words.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag
                              card_exchange_pismc.
 From pgg_smc Require Import pgg_raag_star pgg_raag_clique pgg_collusion_bound.

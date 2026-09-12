@@ -7,7 +7,8 @@
 (*                                                                            *)
 (*   pgg_interface.v -- word_eval, achievable, endpoint, perm_endpoint        *)
 (*   pgg_collusion_bound.v -- rho_from_words, var_dist bounds                 *)
-(*   algebraic_rigidity.v -- ShuffleMarginalBound (fiber + endpoint_inj)      *)
+(*   algebraic_rigidity.v -- ShuffleMarginalBound, ShuffleCertificateBundle   *)
+(*   legacy/security/pgg_free_words.v -- the weval_inj security layer         *)
 (*   legacy/security/pgg_entropy_security.v -- fiber_entropy, Pinsker         *)
 (*   THIS FILE -- Schreier transition matrix, spectral gap, convergence rate  *)
 (*   rigidity_*_instance.v -- per-family SchreierCertificate axioms           *)
@@ -31,8 +32,9 @@
 (*                                                                            *)
 (* The Schreier walk Q^L(s,x) = Pr[sigma_w(s) = x] holds directly --        *)
 (* no need to go through G. The weval_inj hypothesis is dropped from the     *)
-(* spectral bound (it was an artifact of going through the Cayley graph).    *)
-(* weval_inj is still needed downstream for marginal-bound construction.     *)
+(* spectral bound (it was an artifact of going through the Cayley graph),    *)
+(* so the bound here is unconditional in the word length and assumes         *)
+(* nothing about freeness of the alphabet.                                   *)
 (*                                                                            *)
 (* == Contents ==                                                             *)
 (*                                                                            *)
@@ -54,7 +56,6 @@
 (*       property of the Markov chain, independent of word-eval injectivity   *)
 (*   convergence_rate sc == 1 - sc_lambda_gap sc, decay factor per step       *)
 (*   schreier_epsilon sc L == sqrt(N) * (1-gap)^L, the epsilon bound         *)
-(*   security_witness_schreier sc L == certificate bundle from certificate    *)
 (*   schreier_epsilon_decreasing == eps(L2) <= eps(L1) when L1 <= L2         *)
 (*   security_monotone == var_dist at L2 bounded by eps(L1) when L1 <= L2    *)
 (*                                                                            *)
@@ -145,8 +146,7 @@ From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import matrix.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj
-                            pgg_collusion_bound.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_collusion_bound.
 From pgg_reconstruct Require Import algebraic_rigidity.
 
 Set Implicit Arguments.
@@ -362,24 +362,6 @@ move=> L' s.
 rewrite add0r.
 exact: sc_convergence.
 Defined.
-
-(* The PGG certificate bundle at word length L: the marginal bound
-   sw_bound_eps = sqrt(N) * (1 - sc_lambda_gap sc)^L against
-   rho_from_words L sigmas, with the certificate's L-free asymptotic bound
-   attached as the optional convergence witness.  Hlfree, weval_inj at L,
-   is required of the caller: the spectral bound sc_convergence itself does
-   not need it, but the bundle is valid PGG security evidence only once
-   rho_from_words L sigmas is known to range over achievable permutations
-   without collision. *)
-Definition security_witness_schreier (sc : SchreierCertificate)
-    (L : nat) (Hlfree : @weval_inj M L) : ShuffleCertificateBundle R M :=
-  @MkShuffleCertificateBundle R M
-    (@MkShuffleMarginalBound R M L
-      (Num.sqrt (N%:R) * (1 - sc_lambda_gap sc) ^+ L)
-      (rho_from_words L sigmas)
-      (sc_convergence sc L))
-    None
-    (Some (security_witness_schreier_asymptotic sc)).
 
 (* Epsilon from Schreier certificate *)
 Definition schreier_epsilon (sc : SchreierCertificate) (L : nat) : R :=

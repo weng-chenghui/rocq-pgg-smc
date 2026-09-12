@@ -130,7 +130,7 @@ From mathcomp Require Import reals exp.
 From infotheo Require Import realType_ext realType_ln fdist proba variation_dist.
 From infotheo Require Import divergence entropy pinsker entropy_convex.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj.
-From pgg_smc Require Import pgg_collusion_bound.
+From pgg_smc Require Import pgg_collusion_bound pgg_free_words.
 From pgg_reconstruct Require Import algebraic_rigidity.
 
 Set Implicit Arguments.

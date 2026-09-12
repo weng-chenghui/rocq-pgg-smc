@@ -25,6 +25,18 @@ From pgg_smc Require Import pgg_interface pgg_raag.
 (* so N >= 7 (since 7!=5040 >= 1024). Pick two sigma_i in S_7 generating a   *)
 (* subgroup of order >= 1024 with no word collisions at length 10.            *)
 (*                                                                            *)
+(* No alphabet of a retained instance is free beyond length 1, so this file   *)
+(* and everything built on it are legacy: what reads them is the Monster and  *)
+(* overlapping-3-cycles symbolic route and the retired L = 1 S_5 fiber        *)
+(* witness. The security layer over weval_inj is legacy/security/             *)
+(* pgg_free_words.v.                                                          *)
+(*                                                                            *)
+(* Section 0 -- The notion itself, relocated from protocol/pgg_interface.v:   *)
+(*   weval_inj M L == word_eval is injective on L-words                       *)
+(*   weval_injB, weval_injP == its boolean form and the reflection            *)
+(*   weval_inj_search_space == weval_inj L -> search_space L = Tg^L          *)
+(*   gen_inj_weval_inj1 == injective generators give weval_inj at L = 1       *)
+(*                                                                            *)
 (* Section 1 -- Nat-level computable word-eval injectivity check:             *)
 (*   weval_inj_natB N Tg L gens == boolean check via uniq of word fingerprints*)
 (*   weval_inj_of_natB == reflection: weval_inj_natB true -> weval_inj L     *)
@@ -52,6 +64,86 @@ From pgg_smc Require Import pgg_interface pgg_raag.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
+
+(* ========================================================================== *)
+(* Section 0: Word-eval injectivity                                           *)
+(* ========================================================================== *)
+
+Section search_space_ops.
+
+Variable M : MonodromyReprWithGeneratorType.
+
+Let gT := pgg_gT M.
+Let G := pgg_G M.
+Let Tg := (@pgg_ngens' M).+1.
+Let sigmas := @pgg_sigmas M.
+
+Local Notation search_space := (search_space M).
+
+(* Word-eval injectivity: word evaluation is injective on L-words *)
+Definition weval_inj (L : nat) : Prop :=
+  injective (@word_eval M L).
+
+(* Word-eval injective generators achieve the maximal search space T^L *)
+Lemma weval_inj_search_space (L : nat) :
+  weval_inj L -> search_space L = Tg ^ L.
+Proof.
+move=> Hinj; rewrite /search_space /achievable.
+rewrite card_imset; last exact: Hinj.
+by rewrite card_tuple card_ord.
+Qed.
+
+(* The boolean form of weval_inj L, via MathComp's decidable injectiveb on
+   the finite domain 'I_Tg^L. Boolean form is what lets weval_injP hand the
+   propositional injectivity to ssreflect's reflection machinery. *)
+Definition weval_injB (L : nat) : bool :=
+  injectiveb (@word_eval M L).
+
+(* weval_injB reflects weval_inj: the boolean and propositional statements
+   of length-L word-evaluation injectivity agree. *)
+Lemma weval_injP (L : nat) : reflect (weval_inj L) (weval_injB L).
+Proof. exact: injectiveP. Qed.
+
+End search_space_ops.
+
+(* ========================================================================== *)
+(* Generic results from generator injectivity                                 *)
+(* ========================================================================== *)
+
+Section gen_inj_theory.
+
+Variable M : MonodromyReprWithGeneratorType.
+
+Let gT := pgg_gT M.
+Let Tg := (@pgg_ngens' M).+1.
+Let sigmas := @pgg_sigmas M.
+
+(* Injective generators (as a bare index function) force word evaluation at
+   length 1 to be injective in the general weval_inj sense, since a
+   length-1 word is exactly its single generator. This is the bridge that
+   lets the concrete generator hypothesis feed the generic search-space
+   bound below. *)
+Lemma gen_inj_weval_inj1 :
+  injective (fun i : 'I_Tg => tnth sigmas i) ->
+  @weval_inj M 1.
+Proof.
+move=> Hinj w1 w2 Heval.
+apply: eq_from_tnth => i.
+have -> : i = ord0 by apply: val_inj; case: i => -[].
+apply: Hinj.
+by move: Heval; rewrite /word_eval !big_ord_recl !big_ord0 !mulg1.
+Qed.
+
+(* Injective generators make the length-1 search space attain its maximum
+   Tg: chaining gen_inj_weval_inj1 with weval_inj_search_space, every one of
+   the Tg generators reaches a distinct group element, so the search space
+   at word length 1 is as large as it can possibly be. *)
+Lemma gen_inj_weval_inj1_search_space :
+  injective (fun i : 'I_Tg => tnth sigmas i) ->
+  @search_space M 1 = Tg.
+Proof. by move/gen_inj_weval_inj1/weval_inj_search_space. Qed.
+
+End gen_inj_theory.
 
 (* ========================================================================== *)
 (* Section 1: Nat-level computable word-eval injectivity check                 *)

@@ -42,11 +42,6 @@
 (*                                                                            *)
 (* Constructors:                                                              *)
 (*   shuffle_bundle_of_bound == a bound with neither certificate attached     *)
-(*   security_witness_fiber == bound from fiber-counted epsilon               *)
-(*     Accepts any epsilon + proof; instances use vm_compute/case analysis.   *)
-(*     Applicable to: OC (eps=1), S5 (eps=6/5), Star (eps=2(m+1)/(m+3))   *)
-(*   security_witness_endpoint_inj == for perm_endpoint-injective groups             *)
-(*     Epsilon = 2*(N - Tg^L)/N. Applicable to: NCycle, Abelian, Monster     *)
 (*   security_witness_from_bound == bound from an arbitrary epsilon proof     *)
 (*   security_witness_with_exact == bundle with the exact certificate         *)
 (*                                                                            *)
@@ -68,7 +63,7 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop div order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_raag.
 From pgg_smc Require Import pgg_collusion_bound pgg_security_solver.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff.
@@ -255,82 +250,6 @@ Arguments AlgebraicRigidity R M : clear implicits.
     exact or asymptotic behavior. *)
 Definition shuffle_bundle_of_bound R M (b : ShuffleMarginalBound R M)
   : ShuffleCertificateBundle R M := MkShuffleCertificateBundle b None None.
-
-(******************************************************************************)
-(*     Fiber-Counted ShuffleMarginalBound Constructor                         *)
-(*                                                                            *)
-(* For groups where perm_endpoint is NOT injective on achievable(L), the direct      *)
-(* endpoint bound is invalid. Instead, each instance proves its own           *)
-(* var_dist bound by fiber counting (case analysis, vm_compute, or            *)
-(* parametric algebra). The constructor accepts epsilon + proof directly.      *)
-(*                                                                            *)
-(* Applicable to: OC (eps=1), S5 (eps=6/5), Star (eps=2(m+1)/(m+3))       *)
-(******************************************************************************)
-
-Section fiber_security.
-
-Variable R : realType.
-Variable m n' : nat.
-Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
-Let M := Gen_PGGTypes sigmas.
-
-(** The ShuffleMarginalBound assembled directly from a caller-supplied
-    epsilon and its per-position var_dist proof, independent of how that
-    proof was derived. Groups where perm_endpoint fails to be injective on
-    achievable(L) have no uniform closed-form epsilon and must fall back to
-    fiber counting (case analysis, vm_compute, parametric algebra); this
-    constructor is the common landing point for whatever proof that fiber
-    count produces. *)
-Definition security_witness_fiber (L : nat)
-    (Hlfree : @weval_inj M L)
-    (epsilon : R)
-    (Hbound : forall s : 'I_n'.+2,
-      (var_dist (fdistmap (fun sigma : {perm 'I_n'.+2} => sigma s)
-                         (rho_from_words L sigmas))
-               (fdist_uniform (card_ord n'.+2)) <= epsilon)%O)
-    : ShuffleMarginalBound R M :=
-  @MkShuffleMarginalBound R M L epsilon
-    (rho_from_words L sigmas) Hbound.
-
-End fiber_security.
-
-(******************************************************************************)
-(*     Direct Endpoint ShuffleMarginalBound Constructor                       *)
-(*                                                                            *)
-(* When perm_endpoint is injective on achievable(L) for each starting card   *)
-(* position s,                                                               *)
-(* the endpoint distribution is closer to uniform than the DPI bound gives.  *)
-(* Epsilon = 2*(N - Tg^L)/N (denominator N, not N!).                         *)
-(*                                                                            *)
-(* Applicable to: Cyclic (Tg=1, perm_endpoint trivially injective),                 *)
-(*                Abelian (Tg=2, N=4, perm_endpoint injective on achievable(1))     *)
-(* NOT applicable to: Star, S5, OC, Monster (perm_endpoint not injective on  *)
-(*                    achievable for all card positions)                     *)
-(******************************************************************************)
-
-Section direct_endpoint_security.
-
-Variable R : realType.
-Variable m n' : nat.
-Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
-Let M := Gen_PGGTypes sigmas.
-
-(** The ShuffleMarginalBound built when perm_endpoint is injective on
-    achievable(L): the epsilon improves from a generic fiber estimate to the
-    closed form 2*(N - Tg^L)/N (denominator N, not N!), since injectivity
-    lets the endpoint distribution be counted exactly rather than merely
-    bounded. *)
-Definition security_witness_endpoint_inj (L : nat)
-    (Hlfree : @weval_inj M L)
-    (Hinj_s : forall s : 'I_n'.+2,
-      {in @achievable M L &,
-       injective (fun sigma : {perm 'I_n'.+2} => sigma s)})
-    : ShuffleMarginalBound R M :=
-  @MkShuffleMarginalBound R M L _
-    (rho_from_words L sigmas)
-    (var_dist_endpoint_direct Hlfree Hinj_s).
-
-End direct_endpoint_security.
 
 (******************************************************************************)
 (*     Convenience Constructors                                               *)
@@ -537,63 +456,6 @@ Lemma ar_search_space_chain (L : nat) :
 Proof. exact: search_space_chain. Qed.
 
 End raag_derived_properties.
-
-(******************************************************************************)
-(*     SecurityProfile: ShuffleMarginalBound + L* + nontriviality             *)
-(*                                                                            *)
-(* A SecurityProfile bundles a ShuffleMarginalBound with a specific word      *)
-(* length sp_Lstar, the turning point at which the bound was established,    *)
-(* and a nontriviality witness sp_nontrivial that epsilon < 2, strictly       *)
-(* better than the trivial full-variation-distance bound.                    *)
-(*                                                                            *)
-(* The threshold is 2 rather than 1 because the DPI epsilon is always < 2    *)
-(* once Tg^L >= 1, which holds trivially, while epsilon < 1 needs the        *)
-(* direct endpoint bound that only some instances can supply; fixing the     *)
-(* threshold at 2 lets every existing instance build a SecurityProfile       *)
-(* immediately.                                                              *)
-(*                                                                            *)
-(* The bound is required only at L*, not at every length, because weval_inj  *)
-(* is not monotone in L: OC satisfies weval_inj(2) but not weval_inj(3),     *)
-(* since its generator cubes collide there.                                  *)
-(******************************************************************************)
-
-Section security_profile.
-
-Variable R : realType.
-Variable M : MonodromyReprWithGeneratorType.
-
-Local Open Scope ring_scope.
-
-Let eps_bound := (2%:R : R).
-
-(** A ShuffleMarginalBound at a distinguished word length sp_Lstar, together
-    with a proof that its epsilon is strictly below the trivial bound of 2.
-    Existence at one length is deliberate: weval_inj need not hold beyond
-    sp_Lstar, so the profile makes no monotonicity claim about longer
-    words. *)
-Record SecurityProfile := MkSecurityProfile {
-  sp_Lstar : nat ;
-  sp_witness : ShuffleMarginalBound R M ;
-  sp_at_Lstar : sw_L sp_witness = sp_Lstar ;
-  sp_nontrivial : is_true (Num.lt (sw_bound_eps sp_witness) eps_bound)
-}.
-
-(* Builds a SecurityProfile from an AlgebraicRigidity instance once its
-   security bound's epsilon is shown below 2: the profile's word length is
-   read off the bound's own sw_L, so no new length choice is introduced. *)
-Definition ar_security_profile (ar : AlgebraicRigidity R M)
-    (Hlt2 : is_true
-      (Num.lt (sw_bound_eps (scb_bound (ar_security ar))) eps_bound))
-    : SecurityProfile :=
-  @MkSecurityProfile
-    (sw_L (scb_bound (ar_security ar)))
-    (scb_bound (ar_security ar))
-    erefl
-    Hlt2.
-
-End security_profile.
-
-Arguments SecurityProfile R M : clear implicits.
 
 (******************************************************************************)
 (*     CertifiedSolution: Bridge from computable solver to proof witness     *)

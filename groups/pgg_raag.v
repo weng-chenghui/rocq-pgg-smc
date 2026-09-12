@@ -42,8 +42,6 @@ From pgg_smc Require Import pgg_interface.
 (*   word_eval_adj_swap : adjacent commuting swap preserves word_eval         *)
 (*   word_eval_trace : trace-equivalent words evaluate equally                *)
 (*   search_space_le_traces : search_space L <= n_traces L                    *)
-(*   raag_weval_inj : word_eval injective on trace classes                    *)
-(*   raag_weval_inj_search_space : raag_weval_inj -> search_space = n_traces  *)
 (*   search_space_chain : search_space L <= n_traces L <= Tg^L                *)
 (*                                                                            *)
 (* Part 4: Extreme cases                                                      *)
@@ -903,7 +901,8 @@ End foata_infrastructure.
    Nothing here forbids the group from satisfying further relations.  The
    mixin bounds the deck group above by the RAAG on this graph, so the trace
    count is an upper bound on the search space; a matching lower bound needs
-   either an independent set in the graph or the raag_weval_inj hypothesis. *)
+   either an independent set in the graph or the assumption that word_eval
+   separates trace classes, which lives in legacy/security/pgg_free_words.v. *)
 HB.mixin Record isRAAG0 (T : PGGTypes) of MonodromyReprWithGenerator T := {
   raag_comm : rel 'I_(@pgg_ngens' T).+1 ;
   raag_comm_sym : symmetric raag_comm ;
@@ -1185,44 +1184,6 @@ apply/subsetP => b /imsetP [x _ ->].
 apply/imsetP; exists (root e x).
   by rewrite !inE roots_root // andbT.
 exact: word_eval_trace (connect_root _ x).
-Qed.
-
-(* The hypothesis that word_eval separates trace classes: two length-L words
-   reaching the same deck permutation are already related by commuting swaps.
-   This is the RAAG analogue of word-eval injectivity for free generators.
-   It says the deck group satisfies no relation beyond those the commutation
-   graph declares, up to length L, and it is exactly what upgrades the
-   inequality search_space <= n_traces to an equality. *)
-Definition raag_weval_inj (L : nat) : Prop :=
-  forall w1 w2 : pgg_word M L, word_eval w1 = word_eval w2 -> trace_equiv w1 w2.
-
-(** Under raag_weval_inj at length L, the search space equals the trace count.
-    The commutation graph then accounts for every collision among length-L
-    words, so counting words modulo commutation counts deck permutations
-    exactly.  Drop the hypothesis and only the inequality of
-    search_space_le_traces survives. *)
-Lemma raag_weval_inj_search_space L :
-  raag_weval_inj L -> @search_space M L = n_traces L.
-Proof.
-move=> Hraag.
-apply/eqP; rewrite eqn_leq; apply/andP; split.
-  exact: search_space_le_traces.
-(* n_traces <= search_space: word_eval is injective on roots *)
-rewrite /search_space /achievable /n_traces.
-set e := adj_swap_sym (L:=L).
-have Hsym := sym_connect_sym (@adj_swap_sym_sym L).
-set D := predI (roots e) (mem {: pgg_word M L}).
-suff Hinj : {in D &, injective (@word_eval M L)}.
-  have <- : #|[set word_eval r | r in D]| = n_comp e {: pgg_word M L}.
-    by rewrite (card_in_imset Hinj).
-  apply: subset_leq_card.
-  apply/subsetP => b /imsetP [r Hr ->].
-  by apply/imsetP; exists r => //; move: Hr; rewrite !inE andbT.
-move=> r1 r2 Hr1 Hr2 Heq.
-move: Hr1 Hr2; rewrite /D !inE !andbT => /eqP Hr1 /eqP Hr2.
-have Hconn := Hraag _ _ Heq.
-rewrite /trace_equiv /e in Hconn.
-by move/(rootP Hsym) in Hconn; rewrite Hr1 Hr2 in Hconn.
 Qed.
 
 (* There are at most Tg^L trace classes at length L, the classes being a
@@ -1858,49 +1819,7 @@ have : e wa w' = false.
 by rewrite Hstep.
 Qed.
 
-(* Over an independent set, and assuming word_eval separates trace classes,
-   distinct words reach distinct deck permutations.
-   The |I|^L words of indep_set_traces_lb then reach |I|^L distinct deck
-   permutations, moving the lower bound from trace classes to the search
-   space itself.  raag_weval_inj is the price of that move; without it the
-   bound stays a statement about words modulo commutation. *)
-Lemma indep_set_word_eval_inj (I : {set 'I_Tg}) (L : nat) :
-  (forall i j : 'I_Tg, i \in I -> j \in I -> i != j -> ~~ comm i j) ->
-  raag_weval_inj L ->
-  forall (w1 w2 : pgg_word M L),
-    (forall k : 'I_L, tnth w1 k \in I) ->
-    (forall k : 'I_L, tnth w2 k \in I) ->
-    word_eval w1 = word_eval w2 -> w1 = w2.
-Proof.
-move=> Hindep Hrl w1 w2 H1 H2 Heval.
-apply: (indep_set_singleton_traces Hindep H1 H2).
-exact: Hrl.
-Qed.
-
 End raag_theory.
-
-(* ========================================================================== *)
-(* Derived results for any RAAGType                                           *)
-(* ========================================================================== *)
-
-Section raag_derived.
-Variable R : RAAGType.
-Let Tg := (@pgg_ngens' R).+1.
-
-(** Distinct generators give distinct deck permutations, so word_eval is
-    injective on words of length 1.
-    Directly the raag_gen_inj field of the mixin.  No commutation acts on a
-    one-letter word, so at length 1 words, trace classes and deck
-    permutations coincide. *)
-Lemma raag_weval_inj1 : @weval_inj R 1.
-Proof. exact: gen_inj_weval_inj1 (@raag_gen_inj R). Qed.
-
-(** At length 1 the search space is the number of generators.
-    The base case of every growth statement, and the one length at which the
-    three counts of search_space_chain agree. *)
-Lemma raag_search_space_1 : @search_space R 1 = Tg.
-Proof. exact: weval_inj_search_space raag_weval_inj1. Qed.
-End raag_derived.
 
 (* ========================================================================== *)
 (* Part 5: Nat-level reflection                                               *)
