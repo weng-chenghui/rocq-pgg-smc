@@ -17,3 +17,15 @@ build.log
 .*.~undo-tree~
 verify-build.log
 build-*.log
+# LaTeX intermediates (notes/); paper dirs keep their .bbl on purpose
+*.fls
+*.fdb_latexmk
+*.out
+*.blg
+*.synctex.gz
+*.toc
+*.nav
+*.snm
+*.vrb
+notes/**/*.log
+notes/**/*.bbl
