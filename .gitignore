@@ -29,3 +29,5 @@ build-*.log
 *.vrb
 notes/**/*.log
 notes/**/*.bbl
+.nra.cache
+rocq_mcp_cache_*.v
