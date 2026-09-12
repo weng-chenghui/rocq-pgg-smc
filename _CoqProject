@@ -172,6 +172,7 @@ instances/pgl27/pgl27_trace.v
 instances/pgl27/pgl27_recovery.v
 instances/pgl27/pgl27_leakage_census.v
 instances/pgl27/pgl27_mixing.v
+instances/pgl27/pgl27_spectral.v
 instances/pgl27/pgl27_word_privacy.v
 instances/pgl27/pgl27_exec.v
 instances/pgl27/pgl27_models.v
