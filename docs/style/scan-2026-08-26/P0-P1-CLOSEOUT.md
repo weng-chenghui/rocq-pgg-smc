@@ -161,3 +161,64 @@ and NOT fixed in code (both change what the instances claim):
    the s5 record's 4 branch points should be 3 for the (2,4,5) Bring's
    cover; the framework's CoveringData only constrains n_branch <=
    total_ramif, so neither record is rejected by the kernel.
+
+## PGL(2,7) spectral bound (2026-09-12)
+
+Executed notes/20260912-pgl27-rayleigh-design.md and
+docs/superpowers/plans/2026-09-12-pgl27-spectral-implementation.md, tasks
+1 to 5. PGL(2,7) gains the per-seat endpoint marginal bound
+sqrt(8) * (7/8)^L at every word length L, alongside the enumerated
+fixed-length bound pgl27_word_mixing (L = 200, 2^-40) it already had. The
+coalition-view statement pgl27_word_view_indist is unchanged and stays at
+L = 200.
+
+Commits, in order:
+
+  5a1c862  feat(mixing): inverse-closed Schreier bridge
+  b3a7ead  feat(mixing): PSD from a rounded LDL^T certificate
+  2161a4d  refactor(pgl27): export the alphabet pairing facts of
+           pgl27_mixing
+  86f39e2  feat(pgl27): all-L spectral bound with an in-kernel Rayleigh
+           certificate
+
+Statement-surface additions (scripts/statement_surface.py against the
+preceding commit each time): 4 + 9 + 5 + 41 = 59 added lines, 0 removed,
+0 modified across the four commits. No existing line changed, ctxhash
+included: the two pgg_mixing.v batches open new sections rather than
+extending an existing one, and the five pgl27_mixing.v changes are
+un-Localisations with unchanged statement text.
+
+Axiom count: unchanged. The campaign adds no Axiom, Parameter,
+Conjecture or Admitted. instances/s5/s5_mixing.v's Axiom
+s5_rayleigh_Q2_R is untouched; the soundness audit records that it is
+dischargeable by the same rounded-certificate route at its own
+alpha = 181/200, which is a follow-up and not part of this work.
+
+Print Assumptions pgl27_spectral_convergence:
+
+    Axioms:
+    propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+    functional_extensionality_dep :
+      forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+      (forall x : A, f x = g x) -> f = g
+    constructive_indefinite_description :
+      forall (A : Type) (P : A -> Prop),
+      (exists x : A, P x) -> {x : A | P x}
+
+Identical for pgl27_schreier_cert and for 17 further new declarations;
+five of the new lemmas (pgl27_inv_letter_ordE, pgl27_inv_letter_ordK,
+pgl27_sym_sigmas_inv_closed, pgl27_gen_val, pgl27_gen_countE) are Closed
+under the global context. This is the classical baseline the real-number
+layer already carries, recorded verbatim in the design note's soundness
+audit; nothing is added to it.
+
+Compile time of instances/pgl27/pgl27_spectral.v: 2m30s wall on a warm
+tree, dominated by pgl27_cert_identity, which checks 64 entrywise
+rational identities with lra. Full make -j8 EXIT=0 after each of the four
+commits, each followed by a fixpoint make compiling 0 files.
+
+The five certificate tables were produced by
+instances/pgl27/pgl27_spectral_certificate.py, which is an untrusted
+search: the kernel checks the factorisation identity and the diagonal
+dominance, and no property of how the tables were found enters any
+proof.
