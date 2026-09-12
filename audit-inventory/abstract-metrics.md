@@ -1,5 +1,11 @@
 # Abstract metrics: reproducible counts for wadt2026-abstract.tex
 
+> Snapshot of the pre-extraction tree (infotheo-pgg, 2026-03). Line numbers,
+> names (e.g. path_Hcomm, Hcard_remaining) and the file set predate the P2
+> de-duplication, the R3 renames and the 2026-09-12 legacy/ move; the
+> abstract-metrics pins are the WADT 2026 abstract's evidence and are kept
+> as recorded. Regenerate only for a new submission.
+
 The WADT 2026 extended abstract claims **75 files, 17K LOC, 47 main
 theorems**. The first two are exactly correct under the rule and
 recipe below; the third should be amended to **46** (the abstract's

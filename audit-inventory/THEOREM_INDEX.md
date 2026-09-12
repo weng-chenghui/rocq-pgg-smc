@@ -1,5 +1,11 @@
 # pgg-smc theorem index
 
+> Snapshot of the pre-extraction tree (infotheo-pgg, 2026-03). Line numbers,
+> names (e.g. path_Hcomm, Hcard_remaining) and the file set predate the P2
+> de-duplication, the R3 renames and the 2026-09-12 legacy/ move; the
+> abstract-metrics pins are the WADT 2026 abstract's evidence and are kept
+> as recorded. Regenerate only for a new submission.
+
 886 declarations across 67 in-scope files.
 
 ## `groups/` (188 decls)
