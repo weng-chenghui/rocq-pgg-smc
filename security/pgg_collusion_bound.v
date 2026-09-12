@@ -59,7 +59,8 @@ End var_dist_extra.
 Section var_dist_inj.
 
 (* R is bound by Variable, not by Context, so that the discharged constant
-   keeps the non-maximal implicit R of its former home in s5x5_mixing.v. *)
+   keeps the non-maximal implicit R of its former home, s5x5_mixing.v (now
+   in legacy/). *)
 Variable R : realType.
 
 (** var_dist_fdistmap_inj — an injective reader transports the total variation

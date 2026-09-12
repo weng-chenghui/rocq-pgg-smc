@@ -178,7 +178,7 @@ Definition fc_face (c : 'I_5) : bool := decode_bool c.
     [fun c => encode_bool (fc_face c)] that agrees with it only on the two
     used marks (positions 0 and 1) and disagrees on positions 2..4. With
     content = id and starts = ord_tuple 5, the protocol's G_stable condition
-    collapses to reflexivity exactly as in s5x5_G_stable, so the end-to-end
+    collapses to reflexivity as in s5x5_G_stable (legacy/), so the end-to-end
     correctness theorem is provable without assuming a layout-dependent face
     permutation; the boolean reading fc_content discards is recovered
     downstream by fcI_recon's per-position decode_bool. *)

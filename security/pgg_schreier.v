@@ -8,7 +8,7 @@
 (*   pgg_interface.v -- word_eval, achievable, endpoint, perm_endpoint        *)
 (*   pgg_collusion_bound.v -- rho_from_words, var_dist bounds                 *)
 (*   algebraic_rigidity.v -- ShuffleMarginalBound (fiber + endpoint_inj)      *)
-(*   pgg_entropy_security.v -- fiber_entropy, Pinsker bridge                  *)
+(*   legacy/security/pgg_entropy_security.v -- fiber_entropy, Pinsker         *)
 (*   THIS FILE -- Schreier transition matrix, spectral gap, convergence rate  *)
 (*   rigidity_*_instance.v -- per-family SchreierCertificate axioms           *)
 (*                                                                            *)

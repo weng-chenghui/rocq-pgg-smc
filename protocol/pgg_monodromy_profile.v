@@ -24,7 +24,7 @@
 (*   profile_recon_encode the dealt secret is recovered                       *)
 (*                                                                            *)
 (* The in-scope profiles filling this record are pgl27_profile,               *)
-(* five_card_profile, s5_profile and s5x5_profile.                            *)
+(* five_card_profile and s5_profile (s5x5_profile is in legacy/).             *)
 (******************************************************************************)
 
 From HB Require Import structures.

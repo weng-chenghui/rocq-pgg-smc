@@ -42,10 +42,10 @@ From pgg_smc Require Import pgg_weval_inj pgg_raag.
 (* Part 5: Cross-checks against the abstract trace count                      *)
 (*   clique_traces Tg L comm = n_traces_natB Tg L comm is the Cartier-Foata   *)
 (*   theorem for a symmetric irreflexive comm.  It is proved as               *)
-(*   cartier_foata in pgg_raag_cartier_foata.v, which imports this file, so   *)
-(*   it is not available here; what this part contains is vm_compute evidence *)
-(*   pinning the two sides against each other at the graphs and lengths this  *)
-(*   development uses.                                                        *)
+(*   cartier_foata in legacy/groups/pgg_raag_cartier_foata.v, which imports   *)
+(*   this file, so it is not available here; this part holds vm_compute       *)
+(*   evidence pinning the two sides against each other at the graphs and      *)
+(*   lengths this development uses.                                           *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -1007,9 +1007,10 @@ Proof. by vm_compute. Qed.
    Both hypotheses are load-bearing rather than customary: without symmetry
    the identity already fails at L = 3.
 
-   The proof is cartier_foata in pgg_raag_cartier_foata.v, which imports
-   this file, so the identity reaches consumers of the clique polynomial but
-   is not itself available here.  The checks below instead pin the two sides
+   The proof is cartier_foata in legacy/groups/pgg_raag_cartier_foata.v,
+   which imports this file, so the identity reaches consumers of the clique
+   polynomial but is not itself available here.  The checks below instead
+   pin the two sides
    against each other at the commutation graphs this development uses --
    free, abelian, star and path, Tg up to 4 and L up to 5 -- which is the
    range every concrete instance of the trace bound falls in.  From the nat
@@ -1134,4 +1135,5 @@ Proof. by vm_compute. Qed.
 
 (* Path P_4 and star K_{1,3} share a clique polynomial and share trace counts
    at every length checked.  The general statement is cartier_foata in
-   pgg_raag_cartier_foata.v; what stands here is agreement at these lengths. *)
+   legacy/groups/pgg_raag_cartier_foata.v; what stands here is agreement at
+   these lengths. *)

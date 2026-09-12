@@ -133,8 +133,8 @@ Proof. by rewrite val_ord_tuple enum_uniq. Qed.
     FiveCardKim_M, with the identity start tuple ord_tuple 5 over the five
     card positions.
     The identity starts reduce the G_stable condition to reflexivity of
-    pgg_rho (content = fc_content = id), exactly as for the s5x5 starting
-    interface. *)
+    pgg_rho (content = fc_content = id), exactly as for the legacy s5x5
+    starting interface. *)
 Definition FiveCardKim_PI : PGGInterface FiveCardKim_M :=
   @MkPGGI FiveCardKim_M 4 (ord_tuple 5) ord_tuple5_uniq.
 

@@ -71,7 +71,33 @@ term vanishes, so <v, Q^2 v> <= alpha^2 <v, v>.
 | 8 | Headline `pgl27_spectral_convergence` composes 1-7 through `symm_ds_TV_bound_invclosed` | decomposition probe: headline Qed from Admitted supports | pending |
 | 9 | Transfer to the weighted law: `rho_weighted_is_uniform` (pgg_weighted_words.v:146) rewrites `rho_from_words_weighted _ Wuni` to `rho_from_words` | probe: one rewrite at m = 4, N'' = 6, L arbitrary | pending |
 | 10 | Packaging: `SchreierCertificate` value `pgl27_schreier_cert` with sc_lambda_gap = 1/8, and `SecurityAsymptotic` via `security_witness_schreier_asymptotic` | probe: the two Definitions typecheck at pgl27_sym_sigmas (m = 4, n' = 6) | pending |
-| 11 | alpha = 7/8 exceeds the true lambda_2 | not a kernel claim; the kernel checks the certificate. Python reports lambda_2^2 ~ 0.7442 < 49/64 = 0.7656 | informational |
+| 11 | alpha = 7/8 exceeds the true lambda_2 | not a kernel claim; the kernel checks the certificate. Exact Sturm count (soundness audit): no eigenvalue other than 1 has modulus >= 7/8; lambda_2 = 0.8626490514 | informational |
+
+### Probe results (2026-09-12)
+
+All three probe files compile. probe_pgl27_generic.v and probe_pgl27_cert.v
+have zero Admitted; probe_pgl27_decomposition.v keeps exactly its four
+intended Admitted supports and derives the headline, the weighted transfer,
+the gap lemmas and `pgl27_schreier_cert` (Defined) from them.
+
+| Row | Verdict | Evidence |
+|---|---|---|
+| 1 | GO | `schreier_transition_symm_invclosed`, `..._col_invclosed`, `schreier_endpoint_eq_Q_power_invclosed` (replayed: the original does carry sigmas_invol) and `symm_ds_TV_bound_invclosed` Qed; Print Assumptions = the three classical axioms only |
+| 2 | GO | `pgl27_sym_sigmas_invclosed` Qed, closed under the global context; inv_perm reached as `tnth pgl27_gens (Ordinal 2)` (Local in pgl27_group.v) |
+| 3 | GO | `pgl27_Q_E` Qed via `pgl27_gen_countE` (cardinality as a 5-term sum over the letter table) + 64-way case split + vm_compute; mutation (row 7 last entry 4 -> 3) fails with "No applicable tactic" |
+| 4 | GO | `psd_of_dominant`, `psd_of_ldl` Qed at general n; classical axioms only |
+| 5 | GO | `pgl27_cert_identity` Qed (matrixP, mxE, 8-term expansion, lra); whole cert probe compiles in 148 s wall; mutation (last D entry 1 -> 2) fails with "Cannot find witness" |
+| 6 | GO | `pgl27_Dc_ge0`, `pgl27_Ec_le_Ac`, `pgl27_Ec_ge_negAc`, `pgl27_Ac_row_dominant`, `pgl27_Ac_col_dominant` Qed |
+| 7 | GO | `sumzero_const_form`, `rayleigh_of_shift` Qed |
+| 8 | GO | headline Qed from the Admitted supports; Print Assumptions lists exactly the four supports plus the classical axioms |
+| 9 | GO | `rho_weighted_is_uniform` rewrites directly at `fdist_uniform (card_ord 5)` (no eq_irrelevance needed) |
+| 10 | GO | `pgl27_schreier_cert` Defined; `pgl27_security_asymptotic` typechecks |
+
+Cost note: the 64-entry certificate identity dominates compile time (about
+two minutes). Acceptable for one permanent file; the implementation plan
+records the per-entry route so a faster variant (per-row lemmas, or
+`vm_compute` on an int-scaled form) can replace it later without changing
+the statement.
 
 ## Soundness invariants
 

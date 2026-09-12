@@ -14,7 +14,7 @@
 (* content readout fc_content, the C_5 monodromy pgg_rho, and the proven        *)
 (* full-group reconstruction invariance fcI_perm_compatible_kim. This routes    *)
 (* the foundational five-card trick through the same shared exchange_* program  *)
-(* as the s5, s5x5 and abelian instances, on the same group the Kim member uses.*)
+(* as the s5 instance (s5x5 and abelian now in legacy/), on the Kim group.      *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -114,7 +114,7 @@ Definition FiveCardKim_Teq : ts_T' fcI_scheme = pi_T' FiveCardKim_PI := erefl.
     condition of protocol correctness on the five-card family instance, proven
     rather than assumed: with starts = ord_tuple 5 and fc_content the
     identity, both sides collapse to pgg_rho g i, exactly as in
-    s5x5_G_stable. *)
+    s5x5_G_stable (legacy/). *)
 Lemma FiveCardKim_G_stable :
   forall g, g \in pgg_G FiveCardKim_M ->
   forall i : 'I_(ts_T' fcI_scheme).+1,

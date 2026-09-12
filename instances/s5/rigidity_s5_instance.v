@@ -258,7 +258,7 @@ Local Notation s5_brings_M :=
      - [s5_group_order_eq]: the path-A_4 generators span the full S_5
        of order 120. This is "bubble-sort generates S_n", true but the
        lifting through the [Gen_PGGTypes] HB stack is engineering deferred
-       to a future commit. Mirrors [s5x5_group_order_eq].
+       to a future commit. Mirrors [s5x5_group_order_eq] (legacy/).
 
      - [s5_brings_covering_realised]: Bring's curve is the (genus-4)
        algebraic curve realising this CoveringData. Edge (1978). *)
@@ -311,7 +311,7 @@ Axiom s5_brings_covering_realised :
 
 (* Threshold scheme: sum-mod on 'I_5 with 5 parties. ts_T = ts_k = 5, so
    T - k = 0. The covering-scheme machinery therefore lives in the exact
-   regime; only the [s5x5] instance exercises the strict-gap branch. *)
+   regime; only the legacy [s5x5] instance exercises the strict-gap branch. *)
 Let s5_ts : ThresholdScheme 'I_5 'I_5 := @sum_mod_scheme 3 4.
 
 (** s5_cs_gap — the [cs_gap] obligation ts_T <= ts_k + 2*cd_genus holds
@@ -325,8 +325,8 @@ Proof. by []. Qed.
 (** s5_sum_mod_perm_compatible — sum-mod reconstruction of the S_5 shares
     is invariant under the monodromy permutation of the share-index
     tuple. The single-pile analogue of [product_sum_mod_perm_compatible]
-    in reconstruct/product_threshold.v: with no pile partition to track,
-    the proof is a single reindex. Discharges the [cs_recon_invariant]
+    in legacy/reconstruct/product_threshold.v: with no pile partition to
+    track, the proof is a single reindex. Discharges the [cs_recon_invariant]
     obligation of [s5_brings_covering]. *)
 Lemma s5_sum_mod_perm_compatible :
   @ts_recon_perm_invariant _ (pgg_G s5_brings_M) _ _ s5_ts

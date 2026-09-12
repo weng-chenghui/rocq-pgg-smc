@@ -37,8 +37,8 @@
 (*   ThresholdWitness M  == packages the covering scheme + PGL hypothesis     *)
 (*   AlgebraicRigidity R M == combines a bundle and a threshold witness       *)
 (*                                                                            *)
-(*   See dropout_witness.v for [DropoutWitness], the capability-side          *)
-(*   record that complements the structural ThresholdWitness here.            *)
+(*   See legacy/reconstruct/dropout_witness.v for [DropoutWitness], the       *)
+(*   capability-side record complementing the structural ThresholdWitness.    *)
 (*                                                                            *)
 (* Constructors:                                                              *)
 (*   shuffle_bundle_of_bound == a bound with neither certificate attached     *)
@@ -153,7 +153,8 @@ Record SecurityAsymptotic := MkSecurityAsymptotic {
     asymptotic evidence on top of it without changing this bound. *)
 Record ShuffleMarginalBound := MkShuffleMarginalBound {
   (* sw_L is the finite-word length the distribution is read at. It is the
-     length consumed by the dealer bridge (pgg_dealer_bridge.v) and by the
+     length consumed by the dealer bridge
+     (legacy/reconstruct/pgg_dealer_bridge.v) and by the
      SecurityParams of a CertifiedSolution. *)
   sw_L : nat;
   (* sw_bound_eps is the stated full-L1 upper bound on one endpoint marginal.
@@ -197,16 +198,17 @@ Record ShuffleCertificateBundle := MkShuffleCertificateBundle {
    from cover_tradeoff.v:gap_bound) is a privacy-vs-reveal gap, not
    a dropout-tolerance budget. Reconstruction in every concrete
    threshold scheme used here consumes the FULL share tuple:
-   - rs_massey_exact (rs_massey_bridge.v:194): RS gives ts_T = ts_k
-     at genus 0, so the gap is zero;
-   - shamir_exact (cover_genus0.v:179): same statement at the
-     transported covering scheme;
-   - ag_massey_gap (ag_massey_bridge.v:85): AG-Massey gives
-     ts_T <= ts_k + 2g for genus g > 0 codes, but its ts_recon
-     (massey_recon_tuple, massey.v:369) still takes a full tuple.
+   - rs_massey_exact (legacy/reconstruct/rs_massey_bridge.v:194): RS gives
+     ts_T = ts_k at genus 0, so the gap is zero;
+   - shamir_exact (legacy/reconstruct/cover_genus0.v:179): same statement
+     at the transported covering scheme;
+   - ag_massey_gap (legacy/reconstruct/ag_massey_bridge.v:85): AG-Massey
+     gives ts_T <= ts_k + 2g for genus g > 0 codes, but its ts_recon
+     (massey_recon_tuple, legacy/reconstruct/massey.v:369) still takes a
+     full tuple.
    Operationalising T - k as "any T - k missing shares can be
    tolerated" requires a partial-erasure decoder, which is left
-   as future work; see [reconstruct/dropout_witness.v] for the
+   as future work; see [legacy/reconstruct/dropout_witness.v] for the
    [DropoutWitness] record that records such a decoder when one
    is constructed.
 

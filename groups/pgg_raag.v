@@ -30,7 +30,7 @@ From pgg_smc Require Import pgg_interface pgg_weval_inj.
 (*                                                                            *)
 (* Foata infrastructure (Section foata_infrastructure)                        *)
 (*   properties of the four above, with no bound on the letters and no group  *)
-(*   present; shared with pgg_raag_cartier_foata.v                            *)
+(*   present; shared with legacy/groups/pgg_raag_cartier_foata.v              *)
 (*                                                                            *)
 (* Part 2: Abstract trace equivalence (MathComp level)                        *)
 (*   swap_word k w == swap positions k and k+1 in word w                      *)
@@ -178,7 +178,8 @@ Qed.
    dv_leq is a total order, and a word reaches its normal form by a chain of
    adjacent commuting swaps.  Part 5 draws only on that last fact, to match
    the nat-level trace count against the abstract one; the Cartier-Foata
-   theorem of pgg_raag_cartier_foata.v draws on the whole block. *)
+   theorem of legacy/groups/pgg_raag_cartier_foata.v draws on the whole
+   block. *)
 
 Section foata_infrastructure.
 

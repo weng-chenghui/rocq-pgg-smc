@@ -430,7 +430,7 @@ Definition path_comm' (i j : nat) : bool :=
    adjacent transpositions generate the full symmetric group S_{n+2}, so
    this is the file's transitive test case, whose achievable set can
    reach every permutation as L grows (contrasted with Star's stuck
-   orbits in pgg_security_demo.v). *)
+   orbits in legacy/security/pgg_security_demo.v). *)
 Definition path_desc (n : nat) : GroupDesc :=
   MkGroupDesc n.+1 (n + 2) path_comm' path_gens.
 
@@ -467,7 +467,8 @@ Definition oc_comm' (p i j : nat) : bool :=
    oc_comm'. Each generator moves more card positions than one of Path's
    adjacent transpositions does, so OC converges to eps -> 0 faster; the
    eps-progression
-   demos in pgg_security_demo.v compare the two families on this basis. *)
+   demos in legacy/security/pgg_security_demo.v compare the two families on
+   this basis. *)
 Definition oc_desc (k p : nat) : GroupDesc :=
   MkGroupDesc k (k + p - 1) (oc_comm' p) (oc_gens p).
 
@@ -681,7 +682,7 @@ Eval vm_compute in fiber_eps_nat (star_desc 10) 1.  (* m=10: Tg=11, N=13 *)
 (*     fiber unevenness: 0 means all fibers are singletons (max entropy).    *)
 (*                                                                            *)
 (*     For true entropy, use the type-level fiber_entropy in                  *)
-(*     pgg_entropy_security.v with real-valued log.                           *)
+(*     legacy/security/pgg_entropy_security.v with real-valued log.           *)
 (******************************************************************************)
 
 (* Fiber unevenness indicator for card position s:
