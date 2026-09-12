@@ -292,7 +292,7 @@ Qed.
     sqrt 5 * alpha^L of uniform, in variation distance under the
     repository's full-L1 convention. This is the S_5 spectral mixing
     bound (s5_spectral_convergence_proved) transported to the sample
-    layer; it is conditional on the trusted certificate s5_rayleigh_Q2_R
+    layer; it rests on the in-kernel Rayleigh certificate s5_rayleigh_Q2_R
     and bounds one seat's endpoint marginal only, not a coalition view. *)
 Lemma s5_word_endpoint_bound (s : 'I_5) :
   (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
@@ -382,7 +382,7 @@ Definition s5_ideal_reading (secretP : R.-fdist 'I_5) : R.-fdist 'I_5 :=
     encoder-image ideal reading s5_ideal_reading, in variation distance
     under the repository's full-L1 convention. This is
     s5_spectral_convergence_proved transported through the executed
-    interpreter, so it is conditional on the trusted certificate
+    interpreter, so it rests on the in-kernel Rayleigh certificate
     s5_rayleigh_Q2_R. It bounds one seat's endpoint marginal only: the
     ideal reading is neither uniform nor secret-independent, and no
     coalition, privacy, secrecy, or leakage conclusion follows from it. *)

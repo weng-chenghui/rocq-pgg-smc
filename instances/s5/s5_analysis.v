@@ -273,7 +273,7 @@ Definition exec_coalition_secrecy := @s5_exec_coalition_secrecy.
 (* distance from uniform of ONE seat's endpoint distribution after a word of  *)
 (* L cuts, in the repository's full-L1 convention. It quantifies over one     *)
 (* position, mentions no coalition view and no second secret, and is          *)
-(* conditional on the trusted analytical certificate s5_rayleigh_Q2_R. It is  *)
+(* rests on the in-kernel Rayleigh certificate s5_rayleigh_Q2_R. It is        *)
 (* neither exact nor approximate privacy, and is recorded as an endpoint      *)
 (* marginal bound in the analysis manifest.                                   *)
 (******************************************************************************)

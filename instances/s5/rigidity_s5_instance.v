@@ -11,7 +11,7 @@
 (*   1. Complexity: search_space L <= |G|                                     *)
 (*   2. Security (fiber): var_dist <= 6/5 at L=1 (fiber-counted, proved)     *)
 (*   3. Security (spectral): L=286, eps = sqrt(5)*(1-gap)^286               *)
-(*      40-bit security from axiomatized spectral gap                        *)
+(*      40-bit security from the in-kernel spectral certificate              *)
 (*   4. Threshold: genus-4 Bring's-curve cover (no-go: |S_5|=120 > Klein 60)   *)
 (*                                                                            *)
 (* Spectral gap of the Schreier walk on 'I_5:                                *)
@@ -36,6 +36,8 @@
 (* Proved (not axiomatized):                                                  *)
 (*   s5_security_witness_1 : ShuffleMarginalBound (fiber-counted eps=6/5)    *)
 (*   s5_rigidity : AlgebraicRigidity (security + threshold)                  *)
+(*   s5_rayleigh_Q2_R (s5_mixing.v) : the Rayleigh premise of the            *)
+(*     spectral bound, from an in-kernel rounded LDL^T certificate           *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -159,7 +161,7 @@ Definition s5_security_witness_1 : ShuffleMarginalBound R s5_M :=
 End s5_security.
 
 (******************************************************************************)
-(*     Spectral Gap Convergence (Axiomatized)                                 *)
+(*     Spectral Gap Convergence                                               *)
 (*                                                                            *)
 (* The Schreier graph of S_5 on 'I_5 with 4 adjacent transpositions is       *)
 (* the path graph P_5. The transition matrix is:                              *)
@@ -182,8 +184,11 @@ Variable R : realType.
 Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 Let s5_M : MonodromyReprWithGeneratorType := M_s5.
 
-(* Spectral gap derived from the Python-attested Rayleigh certificate
-   (see s5_mixing.v + s5_spectral_certificate.py).  No free variables. *)
+(* Spectral gap of the Schreier walk on the five card positions, from the
+   rounded LDL^T certificate proved in s5_mixing.v: the tables come from an
+   untrusted search in s5_spectral_certificate.py, and the kernel checks the
+   factorisation identity, the nonnegativity of the pivots and the diagonal
+   dominance of the residual.  No free variables. *)
 
 Definition s5_asymptotic : @SecurityAsymptotic R s5_M.
 Proof.
