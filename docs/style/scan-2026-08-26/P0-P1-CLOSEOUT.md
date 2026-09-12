@@ -120,3 +120,44 @@ net-negative in P2 W5). Statement-surface diff is exactly the two
 cover_genus0.v removals; the orphans were never in the surface. The
 vendored smc/ quartet and lib/proba_entropy_ext.v stay verbatim by
 the same order.
+
+## A3 axiom citations (2026-09-12)
+
+Deferred item 4 executed, comment-only (strip_comments.py identical against
+HEAD for both files; full rebuild EXIT=0, 12 files; fixpoint 0).
+Sources verified through research-kb (slices atlas-v3-monster-group-page,
+wilson2001-monster-hurwitz, gkkl2007-presentations-finite-simple-groups,
+braden-disney-hogg-2022-brings-curve).
+
+rigidity_monster_instance.v: monster_n cites the ATLAS (index of 2.B =
+97,239,461,142,009,186,000); monster_sigmas cites Aschbacher-Guralnick 1984
+(2-generation of all finite simple groups) and Wilson 2001 (explicit
+(2B,3B,7B) pair for M); monster_covering cites Wilson 2001 (M is a Hurwitz
+group, so a Galois cover of P^1 with deck group M exists);
+monster_genus0_klein cites Klein 1884. The three L* axioms have no
+literature source and now say so.
+
+Two correctness findings surfaced by the audit, recorded in the comments
+and NOT fixed in code (both change what the instances claim):
+
+1. Monster: monster_weval_inj_Lstar and monster_perm_endpoint_inj_Lstar
+   jointly force 2^L* <= N (machine-checked in a scratch file: search
+   space = 2^L* by weval_inj_search_space, injects into N positions by
+   card_in_imset + max_card). The header's L* = 67 with 2^67 > N and
+   epsilon = 0 therefore contradicts the file's own axioms; the direct
+   epsilon 2(N - 2^L*)/N is at least 2(N - 2^66)/N ~ 0.48 and is never 0
+   since N is not a power of two (direct_eps truncates by nat subtraction
+   otherwise). pgg_entropy_security_demo.v's Section monster_perfect
+   assumes 2^L* = N (Lstar_sat), unsatisfiable at the ATLAS degree, so
+   its "perfect security" lemmas are vacuous there.
+2. s5x5: s5x5_covering_data (genus 173, 6 branch points, ramification
+   29144) is realised by no S_5 x S_5 Galois cover of P^1: each branch
+   point of a Galois cover contributes >= |G|/2 = 7200, so 6 need >= 43200;
+   and genus 173 admits no signature at all over the element orders of
+   S_5 x S_5 (checked by enumeration for r = 3, 4, 5 and genus 173..180).
+   s5x5_inverse_galois_realised therefore asserts a false statement under
+   its stated reading. The two-Bring's-curve axiom s5x5_multi_realised is
+   sound (Edge 1978; Wiman 1895) and now cites them. Related looseness:
+   the s5 record's 4 branch points should be 3 for the (2,4,5) Bring's
+   cover; the framework's CoveringData only constrains n_branch <=
+   total_ramif, so neither record is rejected by the kernel.

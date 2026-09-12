@@ -8,6 +8,8 @@
 (*   1. |G| = 14400 > klein_genus0_bound(10) = 60 → genus > 0                *)
 (*   2. Hurwitz's automorphism bound |Aut(C)| <= 84(g-1) at |G| = 14400      *)
 (*      forces g >= 173                                                      *)
+(* 173 is a lower bound and is not attained: no S_5 × S_5 Galois cover of    *)
+(* P^1 has genus 173 (see s5x5_inverse_galois_realised).                     *)
 (*                                                                            *)
 (* Parameters:                                                                *)
 (*   N = 10 card positions (two 5-card piles)                                *)
@@ -17,7 +19,8 @@
 (*     eps = 1 + sqrt(10)*lazy_alpha^591                                     *)
 (*     var_dist floors at 1 (orbit-vs-global gap), not 0                    *)
 (*   ThresholdScheme: product of two sum_mod on 'I_5                         *)
-(*   CoveringData: genus 173, base genus 0, ramif = 29144                    *)
+(*   CoveringData: genus 173, base genus 0, ramif = 29144 (Hurwitz-           *)
+(*     consistent arithmetic only; realised by no S_5 × S_5 Galois cover)    *)
 (*                                                                            *)
 (* Spectral gap of the Schreier walk on 'I_10:                               *)
 (*   The 10x10 Schreier matrix decomposes into two 5x5 blocks (one per      *)
@@ -334,20 +337,28 @@ Qed.
 Lemma s5x5_n_branch_le : (6 <= 29144)%N. Proof. by []. Qed.
 
 (** s5x5_covering_data — covering-data record for the S_5 x S_5 instance:
-    genus 173, 6 branches, total ramification 29144. The genus is forced by
-    the Hurwitz lower bound (s5x5_hurwitz) for any S_5 x S_5 Galois cover of
-    P^1; s5x5_inverse_galois_realised below is the realisation axiom for
-    this specific cover. *)
+    genus 173, 6 branch points, total ramification 29144. The numbers
+    satisfy the Riemann-Hurwitz identity (s5x5_hurwitz), and 173 is the
+    Hurwitz lower bound 1 + 14400/84 rounded up for any curve with an
+    S_5 x S_5 action; it is not the genus of any such curve (see
+    s5x5_inverse_galois_realised). *)
 Definition s5x5_covering_data : CoveringData s5x5_M :=
   @MkCoveringData s5x5_M 0 6 29144 173 s5x5_n_branch_le s5x5_hurwitz.
 
-(** s5x5_inverse_galois_realised — s5x5_covering_data corresponds to an
-    actual Galois cover of P^1 with deck group S_5 x S_5 and genus 173, not
-    merely a formally consistent record. The trust boundary: the inverse
-    Galois problem for S_5 x S_5 over Q is solved, so S_5 x S_5 is
-    realisable as a Galois group of a number-field extension, and a
-    Belyi-style construction lifts that to a Galois cover of P^1_Q with this
-    deck group at the Hurwitz-minimal genus 173. *)
+(** s5x5_inverse_galois_realised — asserts that s5x5_covering_data is the
+    data of an actual Galois cover of P^1 with deck group S_5 x S_5.  No
+    literature source supports it, and the record is not realisable as
+    stated: in a Galois cover with group G every branch point contributes
+    at least |G|/2 = 7200 to the total ramification, so 6 branch points
+    need at least 43200 > 29144; and genus 173 has no signature at all,
+    since Riemann-Hurwitz at |G| = 14400 and genus 173 demands orders
+    m_1, ..., m_r with sum (1 - 1/m_i) = 2 + 43/1800, which no choice of
+    r and of element orders of S_5 x S_5 (1, 2, 3, 4, 5, 6, 10, 12, 15,
+    20, 30) satisfies.  The Hurwitz bound 84(g - 1) is attained only by
+    quotients of the (2,3,7) triangle group, which are perfect, and
+    S_5 x S_5 is not.  The axiom therefore records a modelling claim
+    that is false under the Galois-closure reading it names; the realisable
+    per-pile geometry is s5x5_multi_realised below. *)
 Axiom s5x5_inverse_galois_realised :
   realised_by_curve s5x5_covering_data.
 
@@ -617,10 +628,11 @@ End s5x5_rigidity_cryptographically_secure.
 (******************************************************************************)
 (*     Multi-component realisation: two disjoint Bring's curves               *)
 (*                                                                            *)
-(* The single-component s5x5_covering above uses cd_genus = 173, the          *)
-(* mathematically-honest value under the framework's Galois-closure           *)
-(* interpretation (cd_hurwitz uses #|G|, forcing Hurwitz on the degree-      *)
-(* |G|=14400 cover; per Hurwitz Aut bound, g >= 173).                        *)
+(* The single-component s5x5_covering above uses cd_genus = 173, the Hurwitz *)
+(* lower bound under the framework's Galois-closure interpretation           *)
+(* (cd_hurwitz uses #|G|, forcing Hurwitz on the degree-|G|=14400 cover;     *)
+(* per Hurwitz Aut bound, g >= 173).  The bound is not attained by any       *)
+(* S_5 × S_5 cover (see s5x5_inverse_galois_realised).                       *)
 (*                                                                            *)
 (* But the actual s5x5 protocol is operationally a degree-10 cover with      *)
 (* TWO orbits (the two piles of 5 sheets). Each orbit is realised by a       *)
@@ -676,10 +688,20 @@ Proof. by rewrite /mcd_max_genus /= big_cons big_cons big_nil maxn0 maxnn. Qed.
 
 (** s5x5_multi_realised — s5x5_multi_data corresponds to an actual pair of
     disjoint genus-4 Bring's curves, each carrying an S_5 action on its five
-    sheets, not merely formally consistent record data. This is the
-    multi-component counterpart of s5x5_inverse_galois_realised: the same
-    trust boundary, stated for the two-piece operational cover rather than
-    the single Galois-closure curve. *)
+    sheets, not merely formally consistent record data.  Source: Bring's
+    curve is the genus-4 curve x_1 + ... + x_5 = 0, sum x_i^2 = 0,
+    sum x_i^3 = 0 in P^4, and its automorphism group is S_5 acting by
+    coordinate permutation (W. L. Edge, "Bring's curve", J. London Math.
+    Soc. (2) 18 (1978) 539-545; A. Wiman 1895 for Aut = S_5; surveyed in
+    Braden and Disney-Hogg, arXiv:2208.13692, Prop. 2.13).  The component
+    record (5 sheets, genus 4, total ramification 16) is the Riemann-Hurwitz
+    data of any degree-5 map from a genus-4 curve to P^1; the identification
+    of the pile's five card positions with the sheets of such a map is the
+    modelling reading, and the curve's S_5 automorphism action is what the
+    record's genus comes from.  This is the multi-component counterpart of
+    s5x5_inverse_galois_realised, stated for the two-piece operational cover
+    rather than the single Galois-closure curve, and unlike that axiom it
+    names a curve that exists. *)
 Axiom s5x5_multi_realised :
   realised_by_multi_curve s5x5_multi_data.
 
