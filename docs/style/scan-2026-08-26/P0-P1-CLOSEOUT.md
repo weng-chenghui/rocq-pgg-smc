@@ -35,9 +35,9 @@ raced). Undo granularity is per batch.
    generated-docs intent.
 3. Banner-box alignment: ~60 new lines off modal box width in 16
    files; one orphan half-line (manifest:855). Mechanical sed pass.
-4. Two axiom-citation gaps flagged in rigidity_s5x5_instance.v
-   (s5x5_inverse_galois_realised, s5x5_multi_realised) — need real
-   sources, not fabricated ones.
+4. DONE (commit 21072d0, see the A3 section below): axiom citations in
+   rigidity_s5x5_instance.v and rigidity_monster_instance.v; the
+   s5x5 Galois-closure axiom turned out to have no true source.
 5. Vendored files (smc/, lib/proba_entropy_ext.v) untouched pending
    the provenance-policy decision.
 
