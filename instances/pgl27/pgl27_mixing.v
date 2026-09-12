@@ -14,6 +14,8 @@
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_sym_sigmas == the inverse-closed five-letter generator tuple       *)
+(*   pgl27_inv_letter == the letter inverting letter j, an involution of the  *)
+(*                       five letter indices                                  *)
 (*   mtbl j           == the permutation table of the j-th letter             *)
 (*   elem_table       == the BFS closure, keys paired with carrying words     *)
 (*   walkN L          == the length-L walk distribution over the 336 states   *)
@@ -150,8 +152,19 @@ Local Definition elem_table : seq (seq nat * seq nat) :=
 Local Definition tbl_index (t : seq nat) : nat :=
   find (fun sw : seq nat * seq nat => sw.1 == t) elem_table.
 
-(* The letter carrying a state back along the reverse walk. *)
-Local Definition inv_letter (j : nat) : nat := nth 0 [:: 1; 0; 3; 2; 4] j.
+(** pgl27_inv_letter — the index pairing of the symmetrized alphabet: the
+    letter whose permutation inverts letter j, and the letter carrying a
+    state back along the reverse walk.  Translation and scaling are paired
+    with their inverses and inversion is paired with itself, so the alphabet
+    is closed under inversion and the reverse walk needs no letter the
+    forward walk does not already have.  Inversion-closure, weaker than
+    every letter being an involution, is what makes the transition matrix of
+    the walk symmetric. *)
+Definition pgl27_inv_letter (j : nat) : nat := nth 0 [:: 1; 0; 3; 2; 4] j.
+
+(* The file's own spelling of pgl27_inv_letter, kept for the Local
+   declarations below that were written against it. *)
+Local Notation inv_letter := pgl27_inv_letter.
 
 (* For each key, the indices of its five reverse-walk predecessors. *)
 Local Definition pred_table : seq (seq nat) :=
@@ -329,7 +342,11 @@ Local Lemma ptbl_gen1 : ptbl (tnth pgl27_gens (@Ordinal 3 1 isT)) = mtbl 2.
 Proof. by apply: ptbl_of_fwd => //; exact: gfwd1. Qed.
 Local Lemma ptbl_gen2 : ptbl (tnth pgl27_gens (@Ordinal 3 2 isT)) = mtbl 4.
 Proof. by apply: ptbl_of_fwd => //; exact: gfwd2. Qed.
-Local Lemma ptbl_sym (j : 'I_5) : ptbl (tnth pgl27_sym_sigmas j) = mtbl (val j).
+(** ptbl_sym — the permutation table of letter j is the j-th row of the
+    literal alphabet table.  The alphabet the walk runs on is the alphabet
+    written down, so a computation over the tables settles a question about
+    the permutations. *)
+Lemma ptbl_sym (j : 'I_5) : ptbl (tnth pgl27_sym_sigmas j) = mtbl (val j).
 Proof. by apply: ptbl_of_fwd; [exact: mtbl_val | rewrite size_mtbl // ltn_ord]. Qed.
 (* ptbl is a morphism: the table of a product is the composition of the two
    tables.  With ptbl_inj this makes ptbl a faithful representation of the
@@ -345,9 +362,11 @@ rewrite permM /mcomp (nth_map 0) ?ptbl_size //.
 have -> : nth 0 (ptbl g) i = val (g (Ordinal Hi)) by rewrite -ptbl_nth.
 by rewrite ptbl_nth.
 Qed.
-(* Distinct shuffles have distinct tables, so an identity of tables is an
-   identity of shuffles. *)
-Local Lemma ptbl_inj : injective ptbl.
+(** ptbl_inj — distinct shuffles have distinct permutation tables, so an
+    identity of tables is an identity of shuffles.  The direction that turns
+    a table computation back into a group fact, and with ptbl_morph it makes
+    the table representation faithful. *)
+Lemma ptbl_inj : injective ptbl.
 Proof.
 move=> g h Heq; apply/permP => x; apply: val_inj.
 by rewrite -(ptbl_nth g) -(ptbl_nth h) Heq.
@@ -652,9 +671,11 @@ Qed.
 (* The inverse of each letter reads off the reverse-walk letter's table.      *)
 (* -------------------------------------------------------------------------- *)
 
-(* The inversion generator is an involution, so its inverse has its own
-   table. *)
-Local Lemma ptbl_geninv2 :
+(** ptbl_geninv2 — the inverse of the inversion generator has the inversion
+    generator's own table.  Inversion is the one letter that is its own
+    inverse, which is why the symmetrized alphabet has five letters and not
+    six. *)
+Lemma ptbl_geninv2 :
   ptbl ((tnth pgl27_gens (@Ordinal 3 2 isT))^-1)%g = mtbl 4.
 Proof.
 apply: (@ptbl_of_fwd _ (mtbl 4)); last by [].
@@ -663,11 +684,13 @@ move=> x; apply: (perm_inv_val (F := mtbl 4)); first exact: gfwd2.
 - by case=> [|[|[|[|[|[|[|[|k]]]]]]]].
 Qed.
 
-(* The inverse of letter j has the table of letter inv_letter j.  The five
-   reverse steps of the walk are again letters of the alphabet, which is the
-   reason the alphabet was symmetrized: the reverse walk needs no table the
-   forward walk does not already have. *)
-Local Lemma ptbl_inv_letter (j : 'I_5) :
+(** ptbl_inv_letter — the inverse of letter j has the table of letter
+    pgl27_inv_letter j.  The five reverse steps of the walk are again letters
+    of the alphabet, which is the reason the alphabet was symmetrized: the
+    reverse walk needs no table the forward walk does not already have.  Read
+    through ptbl_inj this is the inverse-closure the symmetric mixing bound
+    requires of the generator multiset. *)
+Lemma ptbl_inv_letter (j : 'I_5) :
   ptbl ((tnth pgl27_sym_sigmas j)^-1)%g = mtbl (inv_letter (val j)).
 Proof.
 case: j => -[|[|[|[|[|//]]]]] Hj; rewrite (tnth_nth 1%g) /=.
