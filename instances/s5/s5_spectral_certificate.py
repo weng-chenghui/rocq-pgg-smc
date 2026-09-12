@@ -1,143 +1,142 @@
 #!/usr/bin/env python3
-# infotheo: information theory and error-correcting codes in Rocq
-# Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later
+"""Rayleigh certificate for the S_5 adjacent-transposition Schreier walk on 5 cards.
+
+Generators (pgg_raag_path.path_gen_tuple 3): the four adjacent transpositions
+(0 1), (1 2), (2 3), (3 4) on 'I_5.  Q is the 5x5 Schreier transition matrix
+Q(x,y) = #{k : sigma_k x = y} / 4, the lazy-free path-graph walk P_5.
+
+Certified statement (consumed by s5_mixing.v, discharging the former Axiom s5_rayleigh_Q2_R):
+  for every column 5-vector v with sum v_i = 0,
+      <v, Q^2 v> <= alpha^2 <v, v>,      alpha = 181/200.
+
+Certificate shape (kernel-checkable with small rationals):
+  M' := alpha^2 I - Q^2 + (c/5) J        (J = all-ones; J v = 0 on sum-zero v)
+  M'  = L D L^T + E   exactly over Q,
+  D >= 0 entrywise, E row- and column-diagonally dominant with E_ii >= 0.
+Then v^T M' v = v^T L D L^T v + v^T E v >= 0 for all v, and on sum-zero v
+the J term vanishes, giving the Rayleigh bound.
+
+L is the exact LDL^T of M' - eps I rounded to 1/den; D is the exact pivot
+list floored to 1/den; E is the exact residual.  Rounding keeps every
+number small enough for tactic-level rational arithmetic.
+
+Run:  python3 s5_spectral_certificate.py        (prints Rocq literals)
+Exit status 1 if any check fails.
 """
-s5_spectral_certificate.py
+from fractions import Fraction as F
+import math, sys
 
-External sum-of-squares certificate for the S_5 adjacent-transposition
-Schreier walk's spectral bound.
-
-This script is the numerical component of the hybrid verification used by
-pgg-smc/instances/s5/s5_mixing.v and pgg-smc/instances/s5/rigidity_s5_instance.v.
-
-It computes an exact-rational LDL^T decomposition of the 4x4 reduced Gram
-matrix S := B^T (alpha^2 I - Q^2) B, where
-  - Q is the 5x5 Schreier transition matrix for the path-graph P_5
-    (diagonal [3/4, 1/2, 1/2, 1/2, 3/4], adjacent off-diagonal 1/4),
-  - alpha = 181/200 (a rational upper bound on the second-largest
-    eigenvalue of Q, targeting 40-bit mixing at L=286),
-  - B : 'M[rat]_(5,4) is the "differences" basis for the mean-zero
-    hyperplane in Q^5, whose columns are (1,-1,0,0,0), (0,1,-1,0,0),
-    (0,0,1,-1,0), (0,0,0,1,-1).
-
-Output: the 4 diagonal pivots D_k and the 6 lower-triangular entries L_ij
-of the LDL^T factorization, all as exact rationals.
-
-Verification: the script also checks that L D L^T = S holds exactly over
-Q, and that every pivot D_k is strictly positive. Both facts together
-witness that S is positive semidefinite, which is equivalent to the
-Rayleigh bound <v, Q^2 v> <= alpha^2 <v,v> for v in the mean-zero
-hyperplane. This is the claim imported into s5_mixing.v as a Rocq
-Hypothesis, and the claim around which the rest of the spectral-to-
-variation-distance chain is proved in Rocq.
-
-Re-run this script whenever alpha or Q changes. Do NOT edit the rational
-constants in s5_mixing.v by hand; regenerate them from this script so the
-certificate remains auditable.
-"""
-
-from fractions import Fraction
+N, Tg = 5, 4
+ALPHA, C, EPS, DEN = F(181, 200), F(11, 50), F(1, 2000), 1000
 
 
-def F(n, d=1):
-    return Fraction(n, d)
+def transposition(i):
+    p = list(range(N))
+    p[i], p[i + 1] = p[i + 1], p[i]
+    return p
 
 
-def matmul(A, B):
-    n, m, k = len(A), len(B[0]), len(B)
-    return [
-        [sum((A[i][t] * B[t][j] for t in range(k)), F(0)) for j in range(m)]
-        for i in range(n)
-    ]
+gens = [transposition(i) for i in range(4)]
 
 
-def transpose(X):
-    return [[X[j][i] for j in range(len(X))] for i in range(len(X[0]))]
+def mm(A, B):
+    return [[sum(A[i][k] * B[k][j] for k in range(len(B))) for j in range(len(B[0]))]
+            for i in range(len(A))]
 
 
-def diag(dv):
-    n = len(dv)
-    return [[dv[i] if i == j else F(0) for j in range(n)] for i in range(n)]
+def T(A):
+    return [[A[j][i] for j in range(len(A))] for i in range(len(A[0]))]
 
 
-# --- Schreier transition matrix Q for P_5 with uniform 1/4 generator sampling
-Q = [
-    [F(3, 4), F(1, 4), F(0), F(0), F(0)],
-    [F(1, 4), F(1, 2), F(1, 4), F(0), F(0)],
-    [F(0), F(1, 4), F(1, 2), F(1, 4), F(0)],
-    [F(0), F(0), F(1, 4), F(1, 2), F(1, 4)],
-    [F(0), F(0), F(0), F(1, 4), F(3, 4)],
-]
-
-Qsq = matmul(Q, Q)
-
-# --- Spectral upper bound (rational)
-ALPHA = F(181, 200)                         # alpha
-ALPHA2 = ALPHA * ALPHA                      # alpha^2 = 32761 / 40000
-
-# --- M = alpha^2 * I - Q^2 (5x5 symmetric)
-M = [
-    [(ALPHA2 if i == j else F(0)) - Qsq[i][j] for j in range(5)]
-    for i in range(5)
-]
-
-# --- B : 5 x 4 "differences" basis for the mean-zero hyperplane.
-# Columns are (1,-1,0,0,0), (0,1,-1,0,0), (0,0,1,-1,0), (0,0,0,1,-1).
-B = [
-    [F(1), F(0), F(0), F(0)],
-    [F(-1), F(1), F(0), F(0)],
-    [F(0), F(-1), F(1), F(0)],
-    [F(0), F(0), F(-1), F(1)],
-    [F(0), F(0), F(0), F(-1)],
-]
-
-# --- S = B^T M B  (4 x 4 rational symmetric Gram matrix)
-S = matmul(matmul(transpose(B), M), B)
-
-# --- LDL^T decomposition of S over the rationals.
-n = 4
-D = [F(0)] * n
-L = [[F(0) if i != j else F(1) for j in range(n)] for i in range(n)]
-for k in range(n):
-    D[k] = S[k][k] - sum((L[k][j] ** 2 * D[j] for j in range(k)), F(0))
-    for i in range(k + 1, n):
-        L[i][k] = (
-            S[i][k] - sum((L[i][j] * L[k][j] * D[j] for j in range(k)), F(0))
-        ) / D[k]
-
-# --- Reconstruction check: L D L^T must equal S exactly.
-Lt = transpose(L)
-LD = matmul(L, diag(D))
-LDLt = matmul(LD, Lt)
-assert all(LDLt[i][j] == S[i][j] for i in range(n) for j in range(n)), \
-    "LDL^T reconstruction failed"
-
-# --- Positivity check: every pivot must be strictly positive.
-assert all(d > 0 for d in D), f"non-positive pivot in LDL^T: {D}"
+Q = [[F(sum(1 for g in gens if g[x] == y), Tg) for y in range(N)] for x in range(N)]
+Q2 = mm(Q, Q)
+Mp = [[(ALPHA * ALPHA if i == j else 0) - Q2[i][j] + C / N for j in range(N)] for i in range(N)]
 
 
-def fmt(x):
-    return f"{x.numerator}/{x.denominator}" if x.denominator != 1 else f"{x.numerator}"
+def ldl(S):
+    n = len(S)
+    L = [[F(0)] * n for _ in range(n)]
+    D = [F(0)] * n
+    for j in range(n):
+        D[j] = S[j][j] - sum(L[j][k] ** 2 * D[k] for k in range(j))
+        L[j][j] = F(1)
+        for i in range(j + 1, n):
+            L[i][j] = (S[i][j] - sum(L[i][k] * L[j][k] * D[k] for k in range(j))) / D[j]
+    return L, D
 
 
-if __name__ == "__main__":
-    print("# S_5 Schreier spectral certificate")
-    print(f"# alpha   = {fmt(ALPHA)}")
-    print(f"# alpha^2 = {fmt(ALPHA2)}")
-    print()
-    print("# LDL^T pivots (all strictly positive):")
-    for k in range(n):
-        print(f"#   D_{k} = {fmt(D[k])}")
-    print()
-    print("# Lower-triangular L (unit diagonal, only nonzero entries shown):")
-    for i in range(n):
-        for j in range(i):
-            print(f"#   L_{i}{j} = {fmt(L[i][j])}")
-    print()
-    print("# Checks:")
-    print("#   LDL^T reconstruction of S:    PASS")
-    print("#   All pivots strictly positive: PASS")
-    print()
-    print("# These values are the import basis for the Rocq `Hypothesis` block")
-    print("# in rigidity_s5_instance.v via the `Axiom`-like parametric import")
-    print("# in s5_mixing.v. See s5_spectral_certificate.md for context.")
+Me = [[Mp[i][j] - (EPS if i == j else 0) for j in range(N)] for i in range(N)]
+Lx, Dx = ldl(Me)
+L = [[F(round(x * DEN), DEN) for x in r] for r in Lx]
+D = [F(math.floor(d * DEN), DEN) for d in Dx]
+E = [[Mp[i][j] - sum(L[i][k] * D[k] * L[j][k] for k in range(N)) for j in range(N)]
+     for i in range(N)]
+
+ok = True
+ok &= all(Q[i][j] == Q[j][i] for i in range(N) for j in range(N))
+ok &= all(sum(Q[i]) == 1 for i in range(N)) and all(sum(Q[i][j] for i in range(N)) == 1 for j in range(N))
+ok &= all(d >= 0 for d in D)
+ok &= all(E[i][i] >= sum(abs(E[i][j]) for j in range(N) if j != i) for i in range(N))
+ok &= all(E[j][j] >= sum(abs(E[i][j]) for i in range(N) if i != j) for j in range(N))
+ok &= all(Mp[i][j] == sum(L[i][k] * D[k] * L[j][k] for k in range(N)) + E[i][j]
+          for i in range(N) for j in range(N))
+
+# numerically locate lambda_2 (power iteration on the sum-zero subspace), report only
+Qf = [[float(q) for q in r] for r in Q]
+import random
+random.seed(1)
+lam = 0.0
+for _ in range(3):
+    v = [random.random() for _ in range(N)]
+    m = sum(v) / N
+    v = [x - m for x in v]
+    for _ in range(4000):
+        w = [sum(Qf[i][j] * v[j] for j in range(N)) for i in range(N)]
+        w = [sum(Qf[i][j] * w[j] for j in range(N)) for i in range(N)]
+        m = sum(w) / N
+        w = [x - m for x in w]
+        n = math.sqrt(sum(x * x for x in w))
+        v = [x / n for x in w]
+    w = [sum(Qf[i][j] * v[j] for j in range(N)) for i in range(N)]
+    w = [sum(Qf[i][j] * w[j] for j in range(N)) for i in range(N)]
+    lam = max(lam, sum(a * b for a, b in zip(v, w)))
+
+
+def table(name, M, den):
+    print(f"(* {name}, entries scaled by {den} *)")
+    for r in M:
+        print("  [:: " + "; ".join(str(int(x * den)) for x in r) + " ]")
+
+
+print("(* generated by s5_spectral_certificate.py *)")
+print(f"(* alpha = {ALPHA}, c = {C}, eps = {EPS}, den = {DEN};"
+      f" numerically lambda_2^2 ~ {lam:.6f}, alpha^2 = {float(ALPHA*ALPHA):.6f} *)")
+print("(* generators (0 1) (1 2) (2 3) (3 4) on 'I_5: *)")
+for g in gens:
+    print("  " + str(g))
+table("Q", Q, 4)
+table("Q^2", Q2, 16)
+table("M' = (181/200)^2 I - Q^2 + (11/250) J", Mp, 40000*4)
+table("L", L, DEN)
+print("(* D, scaled by %d *)" % DEN)
+print("  [:: " + "; ".join(str(int(d * DEN)) for d in D) + " ]")
+ED = 160000 * DEN ** 3
+table("E", E, ED)
+print("(* E common denominator: %d *)" % ED)
+A = [[abs(E[i][j]) if i != j else F(0) for j in range(N)] for i in range(N)]
+table("A = |E| off the diagonal, 0 on it", A, ED)
+ok &= all(sum(A[i]) <= E[i][i] for i in range(N))
+ok &= all(sum(A[i][j] for i in range(N)) <= E[j][j] for j in range(N))
+# reduced-form integer tables: every table above is integral after scaling,
+# so pgl27_spectral.v can state the certificate over int literals.
+g = 0
+for r in E:
+    for x in r:
+        g = math.gcd(g, int(x * ED))
+print("(* gcd of the scaled E entries: %d; E and A can be stated over denominator %d *)" % (g, ED // g))
+table("E reduced", E, ED // g)
+table("A reduced", A, ED // g)
+print("(* slack per row (E_ii - sum_{j<>i} |E_ij|): *)")
+print("  " + str([str(E[i][i] - sum(abs(E[i][j]) for j in range(N) if j != i)) for i in range(N)]))
+print("(* all checks passed: %s *)" % ok)
+sys.exit(0 if ok else 1)
