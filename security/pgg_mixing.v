@@ -35,6 +35,13 @@
 (*                                                                            *)
 (* Total-variation bound (main theorem):                                      *)
 (*   symm_ds_TV_bound                                                         *)
+(*                                                                            *)
+(* Same bound for an alphabet only closed under inversion, each letter        *)
+(* paired with its inverse by an involution f of the letter index:            *)
+(*   schreier_transition_symm_inv_closed                                      *)
+(*   schreier_transition_col_inv_closed                                       *)
+(*   schreier_endpoint_eq_Q_power_inv_closed                                  *)
+(*   symm_ds_TV_bound_inv_closed                                              *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -700,4 +707,143 @@ exact: (@symm_ds_TV_bound_cV R n'.+1 Q Q_row_sum Q_col_sum Q_symm
 Qed.
 
 End schreier_TV_bound.
+
+(******************************************************************************)
+(*     Section 8: Schreier bridges under an inverse-closed alphabet           *)
+(*                                                                            *)
+(* Sections 6 and 7 assume every letter of the alphabet is its own inverse.   *)
+(* An alphabet that is only closed under inversion, each letter paired with   *)
+(* its inverse by an involution f of the letter index, yields the same        *)
+(* symmetric doubly stochastic transition matrix and hence the same           *)
+(* total-variation bound.  Involutive alphabets are the case f = id.          *)
+(******************************************************************************)
+
+Section schreier_inv_closed.
+
+Variable R : realType.
+Variable m n' : nat.
+Let Tg := m.+1.
+Let N := n'.+2.
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+Variable f : 'I_Tg -> 'I_Tg.
+Hypothesis fK : involutive f.
+Hypothesis sigmas_fV :
+  forall k : 'I_Tg, tnth sigmas (f k) = ((tnth sigmas k)^-1)%g.
+
+(** schreier_transition_symm_inv_closed — under an inverse-closed generator
+    multiset the Schreier transition matrix is symmetric: the walk treats a
+    step and its reverse alike.  This is the one structural input the
+    doubly-stochastic mixing bound needs beyond row stochasticity, and it is
+    weaker than the involution hypothesis the adjacent-transposition
+    instances satisfy (f = id). *)
+Lemma schreier_transition_symm_inv_closed :
+  (schreier_transition R sigmas)^T = schreier_transition R sigmas.
+Proof.
+apply/matrixP => i j; rewrite !mxE.
+congr (_%:R / _).
+rewrite /schreier_gen_count.
+rewrite -(card_imset [set k : 'I_Tg | tnth sigmas k i == j] (can_inj fK)).
+apply: eq_card => k; rewrite !inE.
+apply/idP/imsetP => [Hk|[y]].
+  exists (f k); last by rewrite fK.
+  by rewrite inE sigmas_fV -(eqP Hk) permK.
+rewrite inE => Hy ->.
+by rewrite sigmas_fV -(eqP Hy) permK.
+Qed.
+
+(** schreier_transition_col_inv_closed — every column of an inverse-closed
+    Schreier transition matrix sums to one.  Together with the row sums,
+    which hold for any generator multiset, this makes the walk doubly
+    stochastic, so the uniform law on card positions is stationary and the
+    spectral contraction of Section 5 applies to it. *)
+Lemma schreier_transition_col_inv_closed (j : 'I_N) :
+  \sum_i schreier_transition R sigmas i j = 1.
+Proof.
+have Hsym := schreier_transition_symm_inv_closed.
+transitivity (\sum_i schreier_transition R sigmas j i).
+  apply: eq_bigr => i _.
+  have /matrixP /(_ j i) := Hsym.
+  by rewrite mxE.
+exact: schreier_transition_stochastic.
+Qed.
+
+(** schreier_endpoint_eq_Q_power_inv_closed — the endpoint marginal at card
+    position a of the length-L uniform word law is the (a, ord0) entry of
+    Q^L applied to the point mass at s.  The bridge from the probabilistic
+    picture (fdistmap through rho_from_words) to the linear-algebra picture
+    the spectral bound operates in; symmetry of Q is what lets the walk be
+    read forwards from s rather than backwards from a. *)
+Lemma schreier_endpoint_eq_Q_power_inv_closed (L : nat) (s a : 'I_N) :
+  fdistmap (fun sigma : {perm 'I_N} => sigma s) (rho_from_words L sigmas) a
+  = ((schreier_transition R sigmas) ^+ L *m \col_i (i == s)%:R) a ord0.
+Proof.
+have Hsym := schreier_transition_symm_inv_closed.
+have HQLsymm :
+  ((schreier_transition R sigmas) ^+ L)^T = (schreier_transition R sigmas) ^+ L.
+  elim: L => [|K IH].
+    by rewrite expr0 trmx1.
+  by rewrite exprS trmx_mul IH -exprS exprSr Hsym.
+have entry_eq :
+  forall i j,
+    ((schreier_transition R sigmas) ^+ L) i j
+    = ((schreier_transition R sigmas) ^+ L) j i.
+  move=> i j.
+  have /matrixP /(_ j i) := HQLsymm.
+  by rewrite mxE.
+rewrite mxE.
+rewrite (bigD1 s)//= mxE eqxx mulr1 big1; last first.
+  by move=> j /negPf Hj; rewrite mxE Hj mulr0.
+rewrite addr0.
+rewrite entry_eq.
+by rewrite -schreier_walk_eq_endpoint.
+Qed.
+
+(** symm_ds_TV_bound_inv_closed — conditional on the Rayleigh bound
+    <v, Q^2 v> <= alpha^2 <v, v> on sum-zero vectors, the endpoint marginal
+    of the length-L walk started at card position s lies within
+    sqrt(N) * alpha^L of uniform.  The conclusion of symm_ds_TV_bound under
+    the weaker structural hypothesis: an alphabet that carries the inverse
+    of each of its letters, rather than one whose letters are all
+    involutions.  The bound is unconditional in the adversary and averages
+    over words; alpha is the only quantity an instance must supply. *)
+Lemma symm_ds_TV_bound_inv_closed (alpha : R) (L : nat) (s : 'I_N) :
+  0 <= alpha ->
+  (forall v : 'cV[R]_N,
+    \sum_i v i ord0 = 0 ->
+    (v^T *m (schreier_transition R sigmas *m schreier_transition R sigmas) *m v)
+      ord0 ord0
+    <= alpha ^+ 2 * cV_inner v v) ->
+  var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
+             (rho_from_words L sigmas))
+           (fdist_uniform (card_ord N))
+  <= Num.sqrt (N%:R) * alpha ^+ L.
+Proof.
+move=> alpha_ge0 rayleigh_Qsq.
+set Q := schreier_transition R sigmas.
+have Q_row_sum : forall i : 'I_N, \sum_j Q i j = 1
+  by exact: schreier_transition_stochastic.
+have Q_col_sum : forall j : 'I_N, \sum_i Q i j = 1
+  by exact: schreier_transition_col_inv_closed.
+have Q_symm : Q^T = Q by exact: schreier_transition_symm_inv_closed.
+rewrite /var_dist.
+have HtoCol :
+  \sum_a `|fdistmap (fun sigma : {perm 'I_N} => sigma s)
+            (rho_from_words L sigmas) a
+        - fdist_uniform (card_ord N) a|
+  = \sum_a `|(Q ^+ L *m \col_i (i == s)%:R) a ord0
+            - (\col_i (#|'I_N|%:R^-1 : R)) a ord0|.
+  apply: eq_bigr => a _.
+  congr `|_|.
+  congr (_ - _).
+    by rewrite /Q; exact: schreier_endpoint_eq_Q_power_inv_closed.
+  by rewrite mxE fdist_uniformE.
+rewrite HtoCol.
+have HsqrtN_eq : Num.sqrt (N%:R : R) = Num.sqrt (#|'I_N|%:R)
+  by rewrite card_ord.
+rewrite HsqrtN_eq.
+exact: (@symm_ds_TV_bound_cV R n'.+1 Q Q_row_sum Q_col_sum Q_symm
+          alpha alpha_ge0 rayleigh_Qsq L s).
+Qed.
+
+End schreier_inv_closed.
 
