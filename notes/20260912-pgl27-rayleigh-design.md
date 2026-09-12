@@ -105,8 +105,113 @@ PSD lemma. Existing statements are not changed.
 
 ## Probe files (kept, never imported)
 
-scratchpad/probe_pgl27_rayleigh.v, scratchpad/probe_pgl27_decomposition.v.
+scratchpad/probe_pgl27_generic.v (claims 1, 4, 7),
+scratchpad/probe_pgl27_cert.v (claims 2, 3, 5, 6),
+scratchpad/probe_pgl27_decomposition.v (claims 8, 9, 10).
 
 ## Audit findings
 
-(filled after the soundness and naming audits)
+### Naming / precedent audit (2026-09-12, Opus, NO-GO pending fixes; all folded in below)
+
+1. `tr_perm`, `sc_perm`, `inv_perm` are `Local Definition`s in
+   pgl27_group.v:84-86; only `pgl27_gens` is exported. Claim 2 is restated
+   through `tnth pgl27_gens (@Ordinal 3 k isT)`. ACCEPTED.
+2. pgl27_mixing.v already holds the alphabet pairing and its facts as
+   `Local`s: `inv_letter` (:154, the table [:: 1; 0; 3; 2; 4]),
+   `ptbl_inv_letter` (:670), `ptbl_sym` (:332), `ptbl_inj` (:350),
+   `ptbl_geninv2` (:657). The permanent file un-Localises and reuses them;
+   `pgl27_sym_swap` becomes `pgl27_inv_letter` (the file's own word) and
+   `inv_perm_invol` is folded into `pgl27_sym_sigmas_inv_closed`. ACCEPTED.
+3. Claim 9 is stated as `endpoint_dist_weighted R 6 4 L pgl27_sym_sigmas
+   Wuni s` (pgg_weighted_words.v:99), the form `pgl27_endpoint_mixing`
+   (pgl27_mixing.v:1037) already uses. ACCEPTED.
+4. Names: `pgl27_alpha_R`, `pgl27_gap_R` (mirror s5); headline
+   `pgl27_spectral_convergence` plus `pgl27_spectral_convergence_gap` (no
+   `_proved` status suffix); suffix `_inv_closed` (mathcomp `invr_closed`,
+   repo `elem_closed`); `pgl27_shift_mx` for M'; `pgl27_cert_lower`,
+   `pgl27_cert_diag`, `pgl27_cert_resid`, `pgl27_cert_bound` for L, D, E, A;
+   `pgl27_cert_mx` for the table-to-matrix helper (`tbl` is the group
+   file's word for permutation tables); `psd_of_dominant`, `psd_of_ldl`,
+   `rayleigh_of_shift`, `sumzero_const_form`, `_E` suffixes kept. In
+   `psd_of_ldl` the matrix argument is `A`, never `L` (word length
+   everywhere else). ACCEPTED.
+5. `symm_ds_TV_bound` carries a dead hypothesis `alpha <= 1` (its body
+   `symm_ds_TV_bound_cV` :501 never uses it). The inverse-closed variant
+   drops it; the old statement is untouched. ACCEPTED.
+6. Placement: `statement_surface.py`'s ctxhash covers every enclosing
+   Variable/Hypothesis, so adding `f` and its hypotheses to an existing
+   section of pgg_mixing.v would silently change the surface of four
+   exported lemmas. The inverse-closed bridge opens a NEW section; the PSD
+   lemmas take a new section too. Gate: `statement_surface.py --rev HEAD`
+   before/after shows only additions. ACCEPTED.
+7. Claim 10's only `MkSchreierCertificate` precedent is now
+   legacy/instances/monster/rigidity_monster_instance.v:328 (term-mode
+   construction). The kept tree builds no SchreierCertificate today;
+   pgl27's will be the first. The `@` on `SchreierCertificate` is
+   redundant. ACCEPTED (precedent cited as legacy).
+8. Style: docstrings `(** name — ... *)` on every permanent declaration;
+   no `0%R` inside ring_scope; line width <= 80. ACCEPTED.
+
+### Soundness audit (2026-09-12, Opus, GO; evidence in scratchpad/audit_sound_*)
+
+1. Ledger row 1 corrected: `sigmas_invol` is consumed by THREE lemmas,
+   `schreier_transition_symm` (:557), `..._doubly_stochastic_col` (:584)
+   and `schreier_endpoint_eq_Q_power` (:605, through its symmetry
+   argument). Inverse-closure suffices for each, since
+   #{k : sigma_k j = i} = #{k : sigma_k i = j} through the bijection
+   k -> f k. Involutions are the f = id case, so the permanent file derives
+   the old `symm_ds_TV_bound` from the new bridge instead of duplicating
+   the machinery (proof-body change only; statement untouched). ACCEPTED.
+2. "the only new generic fact" was wrong: `psd_of_dominant` and
+   `psd_of_ldl` are new generic facts too (no PSD, Gershgorin or
+   diagonal-dominance lemma exists in mathcomp, infotheo or the repo).
+   ACCEPTED.
+3. Claim 11 upgraded from numeric to exact: the auditor's independent
+   exact-rational recomputation reproduces every table (Q, M', L, D, E, A)
+   and the identity M' = L D L^T + E over the rationals; charpoly(Q) =
+   x^8 - (6/5)x^7 - (21/25)x^6 + (146/125)x^5 + (99/625)x^4 - (38/125)x^3
+   - (22/15625)x^2 + (1368/78125)x + 117/78125, and a Sturm count shows
+   no eigenvalue other than 1 has |lambda| >= 7/8; lambda_2 =
+   0.8626490514. lambda_min(E) = 0.0077 > 0 and lambda_min(M') = 1/64
+   exactly (set by the all-ones direction alpha^2 - 1 + c, so c = 1/4 is
+   the binding parameter with 1/64 of room). ACCEPTED.
+4. `weval_inj` FAILS for pgl27_sym_sigmas at every L >= 2 (the words
+   (0,1) and (1,0) both evaluate to the identity, since letter 1 is the
+   inverse of letter 0). Hence `security_witness_schreier` (which takes a
+   weval_inj premise) is unavailable at the symmetrized alphabet; only
+   `security_witness_schreier_asymptotic` is. The deliverable states this
+   in the file header. ACCEPTED.
+5. Classical baseline recorded verbatim: `Print Assumptions` on
+   `symm_ds_TV_bound`, `schreier_endpoint_eq_Q_power`,
+   `rho_weighted_is_uniform` and `pgl27_word_mixing` lists exactly
+   `propositional_extensionality`, `functional_extensionality_dep`,
+   `constructive_indefinite_description`. The headline must list nothing
+   beyond these three. ACCEPTED.
+6. Certificate numbers quoted at the reduced denominator: E and A over
+   10^6 with largest numerator 27934; L over 100; D over 100; M' over 1600.
+   ACCEPTED (section "Mathematics of A" corrected below).
+7. Claim 9 hazard: `rho_weighted_is_uniform` is stated at
+   `fdist_uniform card_Tg` where `card_Tg : #|'I_Tg| = Tg.-1.+1` is a
+   section-local proof term; the probe writes `fdist_uniform (card_ord 5)`.
+   Same type, different proof term; the rewrite may need `eq_irrelevance`
+   or the statement is made at `endpoint_dist_weighted ... Wuni` as the
+   naming audit already asked. ACCEPTED.
+8. `Axiom s5_rayleigh_Q2_R` (instances/s5/s5_mixing.v:186) is dischargeable
+   by the same route WITHOUT changing its alpha = 181/200: den = 1000,
+   c = 11/50, eps = 1/2000, D = [237/1000; 23/125; 103/500; 343/1000;
+   1/1000], E over 10^9 with largest numerator 1399700, smallest row slack
+   11/10^6. At den = 100 the smallest alpha of the form k/100 with a
+   certificate is 91/100 (90/100 is below lambda_2 = 0.9045). Recorded as
+   a follow-up task, not part of this deliverable.
+9. Non-vacuity confirmed: sqrt 8 * (7/8)^L < 1 exactly from L >= 8
+   (L = 7 gives 1.1107, L = 8 gives 0.9719); at L = 200 the bound is
+   2^-37.03. The hypothesis set of `psd_of_dominant` is satisfiable
+   (audit_sound_vac.v: n = 1 and n = 2 instances proved) and is a real
+   restriction (a negative E fails it).
+
+### Corrected numbers (supersede "Mathematics of A")
+
+L rounded to 1/100, D floored to 1/100, E the exact residual with common
+denominator 10^6 and numerators at most 27934; A = |E| off the diagonal.
+Row slacks E_ii - sum_{j<>i} A_ij: 9/1600, 173/40000, 7993/10^6,
+5529/10^6, 4311/10^6, 989/250000, 8481/10^6, 1081/200000.
