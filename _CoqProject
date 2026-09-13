@@ -40,6 +40,8 @@ protocol/pgg_run.v
 protocol/pgg_monodromy_profile.v
 protocol/pgg_execution_plug.v
 protocol/pgg_observed_execution.v
+protocol/pgg_instance.v
+protocol/pgg_functionality.v
 manifest/pgg_analysis_status.v
 legacy/instances/abelian/pgg_abelian.v
 legacy/instances/abelian/abelian_word_collapse.v
