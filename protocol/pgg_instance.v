@@ -38,17 +38,20 @@
 (* profile_endpoints_stmt at its own profile.                                 *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   PGGAlgebraic           == the algebraic data of one instance             *)
-(*   instance_M             == the monodromy representation, a Notation       *)
-(*   instance_PI            == the seat interface                             *)
-(*   instance_plug          == the reconstruction plug                        *)
-(*   instance_profile       == the MonodromyProfile                           *)
-(*   ExecutionParams        == the run-level data over an algebra             *)
-(*   instance_exec          == the ExecutionPlug of a parameter record        *)
-(*   instance_observed      == the ObservedExecution of a parameter record    *)
-(*   dealt_secret_params    == the parameters of a dealer-dealt secret        *)
-(*   static_coalition_obs   == a coalition's static endpoint reading          *)
-(*   profile_endpoints_stmt == the endpoint equation with abstract readout    *)
+(*   PGGAlgebraic             == the algebraic data of one instance           *)
+(*   instance_M               == the monodromy representation, a Notation     *)
+(*   instance_PI              == the seat interface                           *)
+(*   instance_plug            == the reconstruction plug                      *)
+(*   instance_profile         == the MonodromyProfile                         *)
+(*   ExecutionParams          == the run-level data over an algebra           *)
+(*   instance_exec            == the ExecutionPlug of a parameter record      *)
+(*   instance_terminates_stmt == every process of the run reaches Finish      *)
+(*   instance_endpoints_stmt  == the run's endpoints are the static reading   *)
+(*   instance_recon_stmt      == static decoding returns the expected value   *)
+(*   instance_observed        == the ObservedExecution of a parameter record  *)
+(*   dealt_secret_params      == the parameters of a dealer-dealt secret      *)
+(*   static_coalition_obs     == a coalition's static endpoint reading        *)
+(*   profile_endpoints_stmt   == the endpoint equation with abstract readout  *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   generic_static_recon       == static decoding returns the dealt value    *)
@@ -66,8 +69,7 @@ From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
 From pgg_smc Require Import pgg_execution_plug pgg_observed_execution.
-From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
-                                    algebraic_rigidity input_encoding.
+From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -162,10 +164,11 @@ Arguments pga_starts_uniq : clear implicits.
 Arguments pga_share_card : clear implicits.
 
 (* The monodromy representation an instance's generators define: the
-   permutation group they generate, acting on the deck by evaluation. This is
-   a notation rather than a definition because the hasGenerators and
-   ShuffleMarginalBound instances are registered against the head symbol
-   Gen_PGGTypes, and inference finds them only where that head is visible. *)
+   permutation group they generate, acting on the deck by evaluation. This is a
+   notation rather than a definition because the isMonodromyRepr and
+   hasGenerators structures are registered against the head symbol
+   Gen_PGGTypes, and instance resolution finds them only where that head is
+   visible. *)
 Notation instance_M A := (Gen_PGGTypes (pga_gens A)).
 
 (* The reconstruction plug of an instance: its scheme, its readout, its
@@ -272,12 +275,13 @@ Arguments ex_content_obs {A} E : rename.
 Arguments ex_expected {A} E : rename.
 
 (* The plug a parameter record builds: params_exec at the record's own mode,
-   readout and fuel. Three of the six fields reach the plug and three do not,
-   because ex_content_obs and ex_expected are not execution data; they enter
-   at instance_observed. Routing the plug through the record rather than
-   letting an instance call params_exec is what stops a run whose interpreter
-   readout disagrees with the static observation its security statements are
-   made about. *)
+   readout and fuel. Four of the six fields reach the plug, ex_inputT as its
+   run argument type and ex_content, ex_commits and ex_fuel as its readout,
+   process list and budget. ex_content_obs and ex_expected do not, because they
+   are not execution data, and they enter at instance_observed. Routing the
+   plug through the record rather than letting an instance call params_exec is
+   what stops a run whose interpreter readout disagrees with the static
+   observation its security statements are made about. *)
 Definition instance_exec (A : PGGAlgebraic) (E : ExecutionParams A)
     : ExecutionPlug (instance_profile A) :=
   params_exec (ex_commits E) (ex_content E) (ex_fuel E).
@@ -363,9 +367,9 @@ Definition dealt_secret_params (A : PGGAlgebraic) (fuel : nat)
 
 (* A coalition's static endpoint reading at one run argument and one shuffle:
    the coalition's seats read their own observation, every other seat reads
-   ord0. The sample point is an explicit argument and cut pair rather than a
-   point of a probability space, because a two-secret comparison cannot be
-   stated at a space whose sample already contains the secret. *)
+   ord0. The sample point is an explicit argument and shuffle pair rather
+   than a point of a probability space, because a two-secret comparison
+   cannot be stated at a space whose sample already contains the secret. *)
 Definition static_coalition_obs (A : PGGAlgebraic) (E : ExecutionParams A)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1})
     (x : ex_inputT E) (g : pgg_gT (mp_M (instance_profile A)))

@@ -111,12 +111,14 @@ Definition realises (oe : OE.ObservedExecution)
     = fn_f F x.
 Arguments realises : clear implicits.
 
-(* The value the execution is built to recover is the functionality's
-   function, as terms. Conversion decides this, so an instance that writes
-   its recovered value as the ideal function discharges it by reflexivity,
-   and one whose recovered value only agrees pointwise with the ideal
-   function does not: the specification is pinned up to conversion and no
-   further. *)
+(* The value the execution is built to recover is the functionality's function,
+   as terms. Conversion decides this, so an instance that writes its recovered
+   value as the ideal function discharges it by reflexivity, and one whose
+   recovered value only agrees pointwise with the ideal function does not
+   discharge it by reflexivity. That case still closes through funext, at the
+   price of functional_extensionality_dep and propositional_extensionality in
+   the row's assumption list, so the difference between the two specifications
+   is visible in Print Assumptions rather than in provability. *)
 Definition realises_expected (oe : OE.ObservedExecution)
     (F : Functionality (oe_inputT oe) (oe_outT oe)) : Prop :=
   OE.oe_expected oe = fn_f F.
