@@ -9,17 +9,36 @@
 (* at 8 seats, 8 shares and 8 cards, the participant list is pgl27_players    *)
 (* and the fuel is pgl27_fuel.                                                *)
 (*                                                                            *)
+(* The same instance is also written as a PGGAlgebraic, from which the        *)
+(* framework of pgg_instance.v derives the profile, the plug and the          *)
+(* observed execution. The two descriptions agree as terms, pgl27_profileE    *)
+(* and pgl27_execE, and pgl27_observed is the derived value. Of its three run *)
+(* facts the instance decides two by reduction, termination at its own plug   *)
+(* and the endpoint equation once at its profile with the content readout     *)
+(* left a variable, and owes no proof at all for the third: reconstruction    *)
+(* follows from the coordinate law pgl27_coordE.                              *)
+(*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_exec_plug                 == the execution plug over               *)
 (*                                      pgl27_profile                         *)
+(*   pgl27_walk_data                 == the five-letter walk alphabet with    *)
+(*                                      the proof that it generates the       *)
+(*                                      shuffle group                         *)
+(*   pgl27_share_card                == one share per card position           *)
+(*   pgl27_algebra                   == the algebraic data of the instance    *)
+(*   pgl27_dealt_params              == the run-level data of the dealt run   *)
+(*   pgl27_endpoints                 == the endpoint obligation, from the     *)
+(*                                      profile's abstract-readout equation   *)
+(*   pgl27_recon                     == the reconstruction obligation, from   *)
+(*                                      the coordinate law                    *)
 (*   pgl27_content_obs               == the static observation: the share of  *)
 (*                                      the secret at the cut image of a      *)
 (*                                      starting position                     *)
 (*   pgl27_exec_player_raw_trace     == seat i's raw executed trace           *)
 (*   pgl27_exec_coalition_raw_trace  == a coalition's raw executed traces     *)
-(*   pgl27_observed                  == the ObservedExecution packing the     *)
-(*                                      plug, the static observation and the  *)
-(*                                      three run facts at process offset 0   *)
+(*   pgl27_observed                  == the ObservedExecution the framework   *)
+(*                                      derives from pgl27_algebra and the    *)
+(*                                      three run facts                       *)
 (*   pgl27_sample                    == the exact sample adapter: the sample  *)
 (*                                      space bool * pgg_gT pgl27_M under     *)
 (*                                      pgl27P                                *)
@@ -29,6 +48,14 @@
 (*                                      evaluated word                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   pgl27_coordE   == seat i's share index under a shuffle is that           *)
+(*                     shuffle's image of seat i's start                      *)
+(*   pgl27_profileE == the derived profile is pgl27_profile                   *)
+(*   pgl27_execE    == the derived plug is pgl27_exec_plug                    *)
+(*   pgl27_terminates == every process of the dealt run reaches Finish        *)
+(*   pgl27_profile_endpoints == at every readout the executed endpoints of a  *)
+(*                              dealer-dealt run over this profile are its    *)
+(*                              static reading                                *)
 (*   pgl27_exec_recovers == the derived run decodes to the dealt secret       *)
 (*   pgl27_exec_correct  == termination, endpoint count and recovery of the   *)
 (*                          derived run                                       *)
@@ -76,6 +103,7 @@ From pgg_smc Require Import pgg_execution_plug pgg_weighted_words.
 From pgg_smc Require Import pgg_observed_execution pgg_sample_adapter.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     algebraic_rigidity input_encoding.
+From pgg_smc Require Import pgg_instance.
 From pgg_smc Require Import pgl27_group pgl27_scheme pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_word_privacy.
 
@@ -291,20 +319,122 @@ by rewrite /pgl27_exec_player_raw_trace /exec_participant_trace /exec_seat_id
 Qed.
 
 (******************************************************************************)
+(*     The algebraic plugin of the eight-card orbit instance                  *)
+(******************************************************************************)
+
+(** pgl27_walk_data — the symmetrized five-letter alphabet together with the
+    proof that it generates the group the three presentation generators
+    generate.  The mixing and spectral arguments of this instance walk on that
+    alphabet rather than on the presentation one, and carrying the equation
+    lets the instance name both alphabets without introducing a second
+    group. *)
+Definition pgl27_walk_data :
+  { k : nat & { w : k.+1.-tuple {perm 'I_8}
+    | (<<[set tnth w i | i : 'I_k.+1]>>
+       = <<[set tnth pgl27_gens i | i : 'I_3]>>)%G } }.
+Proof.
+exists 4; exists pgl27_mixing.pgl27_moves.
+exact: pgl27_mixing.pgl27_gen5_eq.
+Defined.
+
+(** pgl27_share_card — the orbit scheme deals one share per card position,
+    eight of each.  It is the equation along which a share index is read as a
+    deck position; here it is reflexivity, so every transport it induces is
+    the identity on indices. *)
+Definition pgl27_share_card : (ts_T' orbit_scheme).+1 = 8 := erefl.
+
+(** pgl27_coordE — seat i's share index under a shuffle is the deck position
+    that shuffle sends seat i's start to.  This is the record form of "seat i
+    observes the share sitting at the image of seat i's card", the single
+    coordinate hypothesis from which the framework derives static
+    reconstruction; the eight seats start at the eight positions in order, so
+    the image of seat i's start is the image of i. *)
+Lemma pgl27_coordE (w0 : {perm 'I_8}) (i : 'I_(ts_T' orbit_scheme).+1) :
+  (fun g => @pgg_rho pgl27_M g) w0 i
+  = cast_ord (esym pgl27_share_card)
+      (@pgg_rho pgl27_M w0 (tnth (ord_tuple 8) i)).
+Proof. by rewrite cast_ord_id tnth_ord_tuple. Qed.
+
+(** pgl27_algebra — the algebraic data of the eight-card orbit instance:
+    three generating permutations of eight card positions, the five-letter
+    walk alphabet, the Boolean secret the orbit scheme deals, eight seats
+    starting at the eight positions in order, and the shuffle action on share
+    indices with its reconstruction invariance and its coordinate law.  Its
+    dealer readout is the identity, so a card carries the share dealt to its
+    own position and no encoding stands between the two; its seat list is the
+    stored pgl27_players, which the run reads because enum 'I_8 does not
+    reduce.  The record holds no run, no fuel and no probability model, so the
+    seat interface, the reconstruction plug and the monodromy profile of this
+    instance are all functions of this one value. *)
+Definition pgl27_algebra : PGGAlgebraic :=
+  @MkPGGAlgebraic 2 6 pgl27_gens (Some pgl27_walk_data)
+    bool orbit_scheme pgl27_share_card (ord_tuple 8) pgl27_starts_uniq
+    id (fun g => @pgg_rho pgl27_M g) orbit_recon_invariant pgl27_coordE
+    pgl27_players pgl27_players_enumE.
+
+(** pgl27_dealt_params — the run-level data of a run that deals the orbit
+    secret and recovers it: the run argument is the secret itself, no party
+    commits an input, and the interpreter budget is pgl27_fuel.  The
+    dealer-dealt mode is what leaves the instance owing termination alone
+    among the three run facts. *)
+Definition pgl27_dealt_params : ExecutionParams pgl27_algebra :=
+  dealt_secret_params pgl27_algebra pgl27_fuel.
+
+(** pgl27_profileE — the profile derived from the algebra is the instance's
+    own monodromy profile.  The two are the same term, so every theorem about
+    pgl27_profile is a theorem about the derived profile. *)
+Lemma pgl27_profileE : instance_profile pgl27_algebra = pgl27_profile.
+Proof. by []. Qed.
+
+(** pgl27_execE — the plug derived from the run parameters is the instance's
+    own execution plug.  The dealer-dealt readout of the algebra and the
+    hand-written readout of pgl27_exec_plug are the same term, so the two
+    plugs drive the same interpreter run. *)
+Lemma pgl27_execE : instance_exec pgl27_dealt_params = pgl27_exec_plug.
+Proof. by []. Qed.
+
+(** pgl27_terminates — every process of the dealt run reaches Finish within
+    pgl27_fuel.  The one run fact that has no route through the algebra: it
+    depends on the interpreter and on the budget, and is decided by
+    reduction. *)
+Lemma pgl27_terminates : instance_terminates_stmt pgl27_dealt_params.
+Proof. by vm_compute. Qed.
+
+(** pgl27_profile_endpoints — at every content readout, the executed
+    endpoints of a dealer-dealt run over this profile are its static
+    group-action reading.  Keeping the readout a variable removes the dealt
+    card from the reduction, so one decision at the profile serves every run
+    driven over it. *)
+Lemma pgl27_profile_endpoints :
+  profile_endpoints_stmt pgl27_algebra pgl27_fuel.
+Proof. by vm_compute. Qed.
+
+(** pgl27_endpoints — the endpoint obligation of the dealt run, obtained by
+    instantiating the profile's abstract-readout equation at the dealt
+    readout.  The dealt instance pays no reduction of its own for it. *)
+Definition pgl27_endpoints : instance_endpoints_stmt pgl27_dealt_params :=
+  profile_endpointsE pgl27_profile_endpoints.
+
+(** pgl27_recon — decoding the static endpoint reading at a shuffle in the
+    group returns the dealt secret.  The framework derives it from
+    pgl27_coordE alone, so reconstruction correctness of this instance is a
+    consequence of its coordinate law and costs no further proof. *)
+Definition pgl27_recon : instance_recon_stmt pgl27_dealt_params :=
+  dealt_static_recon pgl27_algebra pgl27_fuel.
+
+(******************************************************************************)
 (*     The packaged observed execution at pgl27_profile                       *)
 (******************************************************************************)
 
-(** pgl27_observed — the eight-card orbit observed execution.  The record
-    packs pgl27_profile with plug pgl27_exec_plug at process offset 0, static
-    observation
-    pgl27_content_obs and expected value the dealt secret; the three run facts
-    are pgl27_exec_terminates, pgl27_exec_endpoints and pgl27_exec_recon,
-    whose cut index is already the record's own offset and whose quantifiers
-    are already the record's forall over secret and cut. *)
+(** pgl27_observed — the eight-card orbit observed execution, derived by the
+    framework from the algebraic record and the three run facts above.  Two of
+    those facts are framework lemmas, the endpoint equation instantiated from
+    the profile and the reconstruction derived from the coordinate law, and
+    the third is the instance's own termination computation; the profile, the
+    plug, the static observation and the recovered value are all read off
+    pgl27_algebra and pgl27_dealt_params. *)
 Definition pgl27_observed : OE.ObservedExecution :=
-  OE.MkObservedExecution mpP pgl27_exec_plug 0
-    pgl27_content_obs (fun b : bool => b)
-    pgl27_exec_terminates pgl27_exec_endpoints (@pgl27_exec_recon).
+  instance_observed pgl27_terminates pgl27_endpoints pgl27_recon.
 
 (** pgl27_observed_recovers — the packaged eight-card orbit run decodes to the
     dealt secret.  The decoder applied to the endpoints pgl27_observed

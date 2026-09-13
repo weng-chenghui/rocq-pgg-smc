@@ -7,6 +7,9 @@
 (* Definitions:                                                               *)
 (*   rho_word          == the law of the product of two hundred uniform       *)
 (*                        letters of the symmetrized alphabet                 *)
+(*   pgl27_word_marginal_bound                                                *)
+(*                     == the marginal bound of that law, at word length two  *)
+(*                        hundred and epsilon 2^-40                           *)
 (*   pgl27P_gen p      == the prior p times the uniform PGL(2,7) shuffle      *)
 (*   pgl27P_word_gen p == the prior p times the word shuffle                  *)
 (*   pgl27_equianharmonic_view == the coalition view at orbit_encode true     *)
@@ -37,7 +40,7 @@ From pgg_smc Require Import pgg_weighted_words.
 From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_profile pgl27_scheme.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
 From pgg_reconstruct Require Import covering_scheme pgg_sharing_framework.
-From pgg_reconstruct Require Import transitivity_privacy.
+From pgg_reconstruct Require Import transitivity_privacy algebraic_rigidity.
 From pgg_smc Require Import pgl27_run pgl27_secrecy pgl27_trace pgl27_mixing.
 From pgg_smc Require Import smc_interpreter pismc smc_session_types.
 
@@ -74,6 +77,18 @@ Variable R : realType.
     word shuffle law on PGL(2,7). *)
 Definition rho_word : R.-fdist (pgg_gT pgl27_M) :=
   @rho_from_words_weighted R 6 4 200 pgl27_moves (Wuni R).
+
+(** pgl27_word_marginal_bound — the word walk's inhabitant of the marginal
+    bound record: word length two hundred, epsilon 2^-40, the analyzed law
+    rho_word, and the per-position proof pgl27_endpoint_mixing that one card's
+    marginal of that law is within 2^-40 of uniform.  It is the word family's
+    counterpart of pgl27_marginal_bound, which the exact family carries at
+    length zero and epsilon zero because that model draws its cut from the
+    group itself; the 2^-40 here is what replacing that draw by a finite word
+    costs, and it is the number a word row's spectral arm spends. *)
+Definition pgl27_word_marginal_bound : ShuffleMarginalBound R pgl27_M :=
+  @MkShuffleMarginalBound R pgl27_M 200 (2%:R^-40) rho_word
+    (@pgl27_endpoint_mixing R).
 
 (** pgl27P_gen — the joint law of a secret drawn from secretP and an
     independent uniform PGL(2,7) shuffle. The exact-shuffle sample space at an
