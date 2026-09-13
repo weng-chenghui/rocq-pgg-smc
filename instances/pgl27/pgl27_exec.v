@@ -27,9 +27,9 @@
 (*   pgl27_share_card                == one share per card position           *)
 (*   pgl27_algebra                   == the algebraic data of the instance    *)
 (*   pgl27_dealt_params              == the run-level data of the dealt run   *)
-(*   pgl27_endpoints                 == the endpoint obligation, from the     *)
+(*   pgl27_dealt_endpoints           == the endpoint obligation, from the     *)
 (*                                      profile's abstract-readout equation   *)
-(*   pgl27_recon                     == the reconstruction obligation, from   *)
+(*   pgl27_dealt_recon               == the reconstruction obligation, from   *)
 (*                                      the coordinate law                    *)
 (*   pgl27_content_obs               == the static observation: the share of  *)
 (*                                      the secret at the cut image of a      *)
@@ -52,7 +52,7 @@
 (*                     shuffle's image of seat i's start                      *)
 (*   pgl27_profileE == the derived profile is pgl27_profile                   *)
 (*   pgl27_execE    == the derived plug is pgl27_exec_plug                    *)
-(*   pgl27_terminates == every process of the dealt run reaches Finish        *)
+(*   pgl27_dealt_terminates == every process of the dealt run reaches Finish  *)
 (*   pgl27_profile_endpoints == at every readout the executed endpoints of a  *)
 (*                              dealer-dealt run over this profile are its    *)
 (*                              static reading                                *)
@@ -393,11 +393,14 @@ Proof. by []. Qed.
 Lemma pgl27_execE : instance_exec pgl27_dealt_params = pgl27_exec_plug.
 Proof. by []. Qed.
 
-(** pgl27_terminates — every process of the dealt run reaches Finish within
-    pgl27_fuel.  The one run fact that has no route through the algebra: it
-    depends on the interpreter and on the budget, and is decided by
-    reduction. *)
-Lemma pgl27_terminates : instance_terminates_stmt pgl27_dealt_params.
+(** pgl27_dealt_terminates — every process of the dealt run reaches Finish
+    within pgl27_fuel.  The one run fact that has no route through the
+    algebra: it depends on the interpreter and on the budget, and is decided
+    by reduction.  The statement is convertible with pgl27_exec_terminates,
+    which states the same reduction at the hand-written plug; both spend the
+    instance's own vm_compute, and this one is stated on the plug the
+    framework derives from pgl27_algebra. *)
+Lemma pgl27_dealt_terminates : instance_terminates_stmt pgl27_dealt_params.
 Proof. by vm_compute. Qed.
 
 (** pgl27_profile_endpoints — at every content readout, the executed
@@ -409,17 +412,21 @@ Lemma pgl27_profile_endpoints :
   profile_endpoints_stmt pgl27_algebra pgl27_fuel.
 Proof. by vm_compute. Qed.
 
-(** pgl27_endpoints — the endpoint obligation of the dealt run, obtained by
-    instantiating the profile's abstract-readout equation at the dealt
-    readout.  The dealt instance pays no reduction of its own for it. *)
-Definition pgl27_endpoints : instance_endpoints_stmt pgl27_dealt_params :=
+(** pgl27_dealt_endpoints — the endpoint obligation of the dealt run.  The
+    statement is convertible with pgl27_exec_endpoints, which proves it
+    directly from the interpreter; this one instantiates the profile's
+    abstract-readout equation at the dealt readout, so the instance pays no
+    reduction of its own for it. *)
+Definition pgl27_dealt_endpoints : instance_endpoints_stmt pgl27_dealt_params :=
   profile_endpointsE pgl27_profile_endpoints.
 
-(** pgl27_recon — decoding the static endpoint reading at a shuffle in the
-    group returns the dealt secret.  The framework derives it from
-    pgl27_coordE alone, so reconstruction correctness of this instance is a
-    consequence of its coordinate law and costs no further proof. *)
-Definition pgl27_recon : instance_recon_stmt pgl27_dealt_params :=
+(** pgl27_dealt_recon — decoding the static endpoint reading at a shuffle in
+    the group returns the dealt secret.  The statement is convertible with
+    pgl27_exec_recon, which proves it through the interpreter; this one is
+    dealt_static_recon, which the framework derives from pgl27_coordE alone,
+    so reconstruction correctness of this instance is a consequence of its
+    coordinate law and costs no further proof. *)
+Definition pgl27_dealt_recon : instance_recon_stmt pgl27_dealt_params :=
   dealt_static_recon pgl27_algebra pgl27_fuel.
 
 (******************************************************************************)
@@ -434,7 +441,8 @@ Definition pgl27_recon : instance_recon_stmt pgl27_dealt_params :=
     plug, the static observation and the recovered value are all read off
     pgl27_algebra and pgl27_dealt_params. *)
 Definition pgl27_observed : OE.ObservedExecution :=
-  instance_observed pgl27_terminates pgl27_endpoints pgl27_recon.
+  instance_observed pgl27_dealt_terminates pgl27_dealt_endpoints
+    pgl27_dealt_recon.
 
 (** pgl27_observed_recovers — the packaged eight-card orbit run decodes to the
     dealt secret.  The decoder applied to the endpoints pgl27_observed
