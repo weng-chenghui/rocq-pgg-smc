@@ -6,12 +6,12 @@
 (* A row of the analysis manifest is written here as a program. Its lines     *)
 (* are statements; each one takes the data accumulated so far, the            *)
 (* proposition proved about it so far, and one payload of its own, and        *)
-(* returns the data lifted one completion level. The first two statements     *)
-(* establish that proposition, replacing the True the two bottom levels       *)
-(* carry; the three above them extend it by one conjunct on the right, so     *)
-(* from Sampled upwards it is a left-nested conjunction whose added conjuncts *)
-(* are about the coalition's view. A reader who stops at any line knows       *)
-(* exactly what has been proved there, and the named projections at the       *)
+(* returns the data lifted one completion level. dealt_step carries the True  *)
+(* of the two bottom levels forward, execute_step establishes the proposition *)
+(* in its place, and the three above them extend it by one conjunct on the    *)
+(* right, so from Sampled upwards it is a left-nested conjunction whose added *)
+(* conjuncts are about the coalition's view. A reader who stops at any line   *)
+(* knows exactly what has been proved there, and the named projections at the *)
 (* bottom read those conjuncts back off a finished row.                       *)
 (*                                                                            *)
 (* There are five statements. dealt_step fixes the run argument to be the     *)
@@ -45,27 +45,32 @@
 (* the spectral arm's proposition mentions.                                   *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   ExactWitness      == the exact arm's security witness                    *)
-(*   SpectralCert      == the spectral arm's security certificate             *)
-(*   SecurityPort      == the arm an instance certifies                       *)
-(*   StackAt           == the data a row holds at one completion level        *)
-(*   StackProp         == the proposition a row holds at one completion level *)
-(*   ViewLiftAt        == data at a level with a proof about it               *)
-(*   lift_bind         == sequencing, written s ;;; f 'of' p                  *)
-(*   dealt_step        == the statement dealing a secret at a fuel            *)
-(*   execute_step      == the statement adjoining the three run facts         *)
-(*   sample_step       == the statement adjoining an analysis model family    *)
-(*   certify_exact     == the statement adjoining an exact witness            *)
-(*   certify_spectral  == the statement adjoining a spectral certificate      *)
-(*   conclude          == the terminal republishing the bound                 *)
-(*   restate           == the terminal handing the row over as a proposition  *)
-(*   publish           == the terminal pairing the row with its manifest row  *)
+(*   ExactWitness           == the exact arm's security witness               *)
+(*   SpectralCert           == the spectral arm's security certificate        *)
+(*   SecurityPort           == the arm an instance certifies                  *)
+(*   StackAt                == the data a row holds at one completion level   *)
+(*   StackProp              == the proposition a row holds at one level       *)
+(*   ViewLiftAt             == data at a level with a proof about it          *)
+(*   lift_bind              == sequencing, written s ;;; f 'of' p             *)
+(*   dealt_step             == the statement dealing a secret at a fuel       *)
+(*   execute_step           == the statement adjoining the three run facts    *)
+(*   sample_step            == the statement adjoining an analysis family     *)
+(*   certify_exact          == the statement adjoining an exact witness       *)
+(*   certify_spectral       == the statement adjoining a spectral certificate *)
+(*   conclude               == the terminal republishing the bound            *)
+(*   restate                == the terminal handing over a chosen proposition *)
+(*   publish                == the terminal attaching the row's manifest row  *)
+(*   LiftedRowAt            == a row's data, its manifest row and its theorem *)
+(*   run_correct_of         == run correctness of a published row             *)
+(*   view_identification_of == its executed-to-static view equation           *)
+(*   view_secrecy_of        == its security statement, exact-arm name         *)
+(*   view_indist_of         == the same statement, spectral-arm name          *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   lift_left_unit    == sequencing onto a built lift is application         *)
-(*   exact_tail        == the exact arm's composition law                     *)
-(*   spectral_tail     == the spectral arm's composition law                  *)
-(*   port_reprice      == a port's proposition at a renamed bound             *)
+(*   lift_left_unit         == sequencing onto a built lift is application    *)
+(*   exact_tail             == the exact arm's composition law                *)
+(*   spectral_tail          == the spectral arm's composition law             *)
+(*   port_reprice           == a port's proposition at a renamed bound        *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -372,7 +377,7 @@ Definition BridgedProp (c : Reprice) (q : StackAt AnalysisBridged) : Prop :=
   (oe_correct_prop (ab_obs q) /\ sampled_viewE_prop (ab_f q))
   /\ forall (R : realType) (idx : amf_index (ab_f q) R),
        PortProp c (ab_port q R idx).
-Arguments BridgedProp c q.
+Arguments BridgedProp c q : assert.
 
 (* The proposition a row carries at each completion level: nothing about a
    coalition below Observed, run correctness at Observed, that with the view
@@ -481,7 +486,7 @@ Definition execute_step (x : StackAt Executable) (_ : StackProp Executable x)
           (existT _ (projT1 (projT2 p)) (projT2 (projT2 p))))))
     (observed_correct _).
 
-Arguments execute_step x _ p.
+Arguments execute_step x _ p : assert.
 
 (* The payload of sample_step: an analysis model family over the accumulated
    observed execution, the value that fixes the probability model a row's
@@ -504,7 +509,7 @@ Definition sample_step (x : StackAt Observed) (q : StackProp Observed x)
                  (ex_content_obs (projT1 (projT2 x)))
                  (fun u => ob_He x _ _) C)).
 
-Arguments sample_step x q f.
+Arguments sample_step x q f : assert.
 
 (* The payload of certify_exact: one exact witness per real field and index of
    the accumulated family. Uniformity in the field is what makes the arm's
@@ -577,7 +582,7 @@ Definition certify_exact (x : StackAt Sampled) (q : StackProp Sampled x)
              (fun R idx => ExactIndependence (p R idx))))))))
     (conj q (fun R idx => exact_tail (p R idx) (proj2 q R idx))).
 
-Arguments certify_exact x q p.
+Arguments certify_exact x q p : assert.
 
 (* Adjoins the spectral arm's certificate at every real field and index,
    reaching AnalysisBridged with the arm's proposition proved by
@@ -592,7 +597,7 @@ Definition certify_spectral (x : StackAt Sampled) (q : StackProp Sampled x)
              (fun R idx => SpectralDecay (p R idx))))))))
     (conj q (fun R idx => spectral_tail (p R idx))).
 
-Arguments certify_spectral x q p.
+Arguments certify_spectral x q p : assert.
 
 (******************************************************************************)
 (*     The terminals                                                          *)
@@ -607,7 +612,7 @@ Definition RepricePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
     | ExactIndependence _ => unit
     | SpectralDecay cert => cert_eps cert = odflt (cert_eps cert) (c R)
     end.
-Arguments RepricePayload c q.
+Arguments RepricePayload c q : assert.
 
 (* A port's proposition at the chain's own bound, with an identity naming
    another number, is that port's proposition at the other number. Renaming
@@ -645,7 +650,7 @@ Arguments conclude : clear implicits.
    trade except what that derivation uses. *)
 Definition RestatePayload (Q : Prop) (q : StackAt AnalysisBridged) : Type :=
   StackProp AnalysisBridged q -> Q.
-Arguments RestatePayload Q q.
+Arguments RestatePayload Q q : assert.
 
 (* A row's data together with an arbitrary proposition proved from what the
    row accumulated. The proposition is a parameter and not a field of the
