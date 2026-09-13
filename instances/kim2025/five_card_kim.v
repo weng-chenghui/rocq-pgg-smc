@@ -29,7 +29,7 @@
 (* After T shuffles: var_dist <= sqrt(5) * |a - b|^T.                         *)
 (*                                                                            *)
 (* Contents:                                                                  *)
-(*   fc_kim_gens       == 5 generators: [1, sigma, sigma^2, sigma^3, sigma^4] *)
+(*   fc_kim_gens       == powers [1, sigma, ..., sigma^4] of the 5-cycle      *)
 (*   FiveCardKim_M     == Gen_PGGTypes instance (m=4, n'=3)                   *)
 (*   kim_weight_fun    == weight function parameterized by eps                 *)
 (*   kim_weight_dist   == FDist from kim_weight_fun (needs positivity hyps)   *)
@@ -109,7 +109,7 @@ Let sigma := fc_sigma.
 Definition fc_sigma_pow (k : 'I_5) : {perm 'I_5} := (sigma ^+ val k)%g.
 
 (** fc_kim_gens — the five powers [1, sigma, sigma^2, sigma^3, sigma^4] of the
-    5-cycle on card positions, a generating set of the cyclic group of order 5.
+    5-cycle on card positions, enumerating the whole cyclic group of order 5.
     The alphabet whose weighted words give Kim's cyclic-shift shuffle, so a
     weight on the five letters is exactly a bias on the rotation amount. *)
 Definition fc_kim_gens : 5.-tuple {perm 'I_5} :=

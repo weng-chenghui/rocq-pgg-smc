@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rayleigh certificate for the PGL(2,7) Schreier walk on P^1(F_7).
 
-Generators (pgl27_mixing.pgl27_sym_sigmas): z+1, (z+1)^-1, 3z, (3z)^-1, -1/z,
+Generators (pgl27_mixing.pgl27_moves): z+1, (z+1)^-1, 3z, (3z)^-1, -1/z,
 acting on 'I_8 with 7 = the point at infinity.  Q is the 8x8 Schreier
 transition matrix Q(x,y) = #{k : sigma_k x = y} / 5.
 

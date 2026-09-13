@@ -56,8 +56,8 @@ Import Prenex Implicits.
 (** pgl27_moves — the five-letter alphabet the random word walks along:
     translation, scaling, inversion, and the inverses of translation and
     scaling.  Closed under inversion, so the L-letter word shuffle is a
-    symmetric random walk on the group the five letters generate, which by
-    pgl27_gen5_eq is the PGL(2,7) shuffle group. *)
+    symmetric random walk on the group the five letters generate, which is the
+    PGL(2,7) shuffle group. *)
 Definition pgl27_moves : 5.-tuple {perm 'I_8} :=
   [tuple tnth pgl27_gens (@Ordinal 3 0 isT);
          ((tnth pgl27_gens (@Ordinal 3 0 isT))^-1)%g;
