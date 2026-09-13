@@ -15,43 +15,46 @@
 (* execution are all derived, so an instance writes down data and the         *)
 (* framework writes down the stack.                                           *)
 (*                                                                            *)
-(* Two of the three run obligations are discharged here once for every        *)
-(* instance. generic_static_recon proves that decoding the static endpoint    *)
-(* reading returns the dealt value, from the reconstruction invariance of     *)
-(* the plug's scheme and a single coordinate hypothesis; dealt_static_recon   *)
-(* supplies that hypothesis from pga_coordE, so a dealer-dealt instance owes  *)
-(* no reconstruction proof at all. profile_endpointsE transports the          *)
-(* endpoint equation from a statement whose content readout is a variable to  *)
-(* the statement about the dealt readout. The endpoint equation is decided    *)
-(* by reduction, and it is reduction of a concrete dealt card that makes      *)
-(* that costly, or impossible where an encoding passes through an opaque      *)
-(* insub and never reduces at all. Keeping the readout a variable removes     *)
-(* the dealt card from the reduction, so one reduction per profile replaces   *)
-(* one reduction per plug: measured on 2026-09-14, the PGL(2,7) form closes   *)
-(* by vm_compute in 8.8 s with a 3.8 s Qed, and its dealt instance follows    *)
-(* by instantiation with no reduction of its own.                             *)
+(* One of the three run obligations is discharged here for every instance,    *)
+(* and a second is replaced by a cheaper equivalent. generic_static_recon     *)
+(* proves that decoding the static endpoint reading returns the dealt value,  *)
+(* from the reconstruction invariance of the plug's scheme and a single       *)
+(* coordinate hypothesis; dealt_static_recon supplies that hypothesis from    *)
+(* pga_coordE, so a dealer-dealt instance owes no reconstruction proof at     *)
+(* all. profile_endpointsE leaves the endpoint obligation with the instance   *)
+(* and only makes it cheaper: it carries the endpoint equation from a         *)
+(* statement whose content readout is a variable to the statement about the   *)
+(* dealt readout. The equation is decided by reduction, and it is reduction   *)
+(* of a concrete dealt card that makes that costly, or impossible where an    *)
+(* encoding passes through an opaque insub and never reduces at all. Keeping  *)
+(* the readout a variable removes the dealt card from the reduction, so one   *)
+(* reduction per profile replaces one reduction per plug: measured on         *)
+(* 2026-09-14, the PGL(2,7) form closes by vm_compute in 8.8 s with a 3.8 s   *)
+(* Qed, and its dealt instance follows by instantiation with no reduction of  *)
+(* its own.                                                                   *)
 (*                                                                            *)
-(* What an instance still owes is termination, instance_terminates_stmt,      *)
-(* which has no route through the algebra, and one reduction proof of         *)
+(* What an instance owes is termination, instance_terminates_stmt, which has  *)
+(* no route through the algebra, and one reduction proof of                   *)
 (* profile_endpoints_stmt at its own profile.                                 *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   PGGAlgebraic          == the algebraic data of one instance              *)
-(*   instance_M            == the monodromy representation it generates       *)
-(*   instance_PI           == the seat interface                              *)
-(*   instance_plug         == the reconstruction plug                         *)
-(*   instance_profile      == the MonodromyProfile                            *)
-(*   ExecutionParams       == the run-level data over an algebra              *)
-(*   instance_exec         == the ExecutionPlug of a parameter record         *)
-(*   instance_observed     == the ObservedExecution of a parameter record     *)
-(*   dealt_secret_params   == the parameters of a dealer-dealt secret         *)
-(*   static_coalition_obs  == a coalition's static endpoint reading           *)
+(*   PGGAlgebraic           == the algebraic data of one instance             *)
+(*   instance_M             == the monodromy representation, a Notation       *)
+(*   instance_PI            == the seat interface                             *)
+(*   instance_plug          == the reconstruction plug                        *)
+(*   instance_profile       == the MonodromyProfile                           *)
+(*   ExecutionParams        == the run-level data over an algebra             *)
+(*   instance_exec          == the ExecutionPlug of a parameter record        *)
+(*   instance_observed      == the ObservedExecution of a parameter record    *)
+(*   dealt_secret_params    == the parameters of a dealer-dealt secret        *)
+(*   static_coalition_obs   == a coalition's static endpoint reading          *)
 (*   profile_endpoints_stmt == the endpoint equation with abstract readout    *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   generic_static_recon       == static decoding returns the dealt value    *)
 (*   generic_static_recon_valid == the same for any valid sharing             *)
 (*   dealt_static_recon         == the dealer-dealt case, from pga_coordE     *)
+(*   static_coalition_obsE      == the coalition reading, seat by seat        *)
 (*   profile_endpointsE         == abstract readout to dealt readout          *)
 (******************************************************************************)
 
@@ -113,7 +116,11 @@ Record PGGAlgebraic := MkPGGAlgebraic {
   pga_starts  : (ts_T' pga_scheme).+1.-tuple 'I_pga_n.+2 ;
   pga_starts_uniq : uniq pga_starts ;
   (* pga_content is the readout the dealer applies to a card position before
-     dealing it. *)
+     dealing it, and it is the readout the reconstruction plug is built from,
+     fixed once by the algebra. The run-level ex_content below is a second
+     readout, chosen per run and free to depend on committed payloads; a
+     reader deciding which one a statement is about reads it off the
+     record. *)
   pga_content : 'I_pga_n.+2 -> 'I_pga_n.+2 ;
   (* pga_monodromy is the action of a shuffle on share indices, and
      pga_recon_invariant says reconstruction is unchanged by it: a shuffled
@@ -140,9 +147,12 @@ Record PGGAlgebraic := MkPGGAlgebraic {
   pga_playersE : pga_players = enum 'I_(ts_T' pga_scheme).+1 ;
 }.
 
-(* The record's own argument is kept explicit on the projections whose result
-   type does not mention it, which the file-level Set Implicit Arguments would
-   otherwise take for an inferable argument. *)
+(* Unset Strict Implicit infers the record argument of a projection whose
+   field type binds a later argument mentioning it, which is the case for
+   pga_content, pga_monodromy, pga_recon_invariant and pga_coordE; these lines
+   keep it explicit. The three arity-one equations that follow mention the
+   record only in their conclusion, where no inference is attempted, and are
+   listed so that the record is supplied the same way at every projection. *)
 Arguments pga_content : clear implicits.
 Arguments pga_monodromy : clear implicits.
 Arguments pga_recon_invariant : clear implicits.
@@ -169,7 +179,7 @@ Definition instance_plug (A : PGGAlgebraic)
 
 (* The seat interface of an instance: one seat per share, beginning at the
    recorded starting positions. Taking the seat count from the scheme is what
-   makes the seat/share bridge below reflexivity. *)
+   makes instance_bridge reflexivity. *)
 Definition instance_PI (A : PGGAlgebraic) : PGGInterface (instance_M A) :=
   @MkPGGI (instance_M A) (ts_T' (pga_scheme A)) (pga_starts A)
     (pga_starts_uniq A).
@@ -177,7 +187,7 @@ Definition instance_PI (A : PGGAlgebraic) : PGGInterface (instance_M A) :=
 (* The monodromy profile of an instance: its representation, its secret
    carrier, its seat interface and its reconstruction plug. This is the value
    an instance file otherwise writes by hand, and the two are the same term,
-   so every theorem already proved about a hand-written profile applies to
+   so every theorem about a hand-written profile applies to
    the derived one by conversion. *)
 Definition instance_profile (A : PGGAlgebraic) : MonodromyProfile :=
   @MkMonodromyProfile (instance_M A) (pga_secretT A) (instance_PI A)
@@ -204,7 +214,9 @@ Variant InputProcs (A : PGGAlgebraic) (inputT : Type) : Type :=
   | Commits of (inputT -> seq (aproc pgg_dtype (pgg_data (pga_n A).+2))).
 
 (* The process list a mode supplies at each run argument: empty in the
-   dealer-dealt mode, the stored list otherwise. *)
+   dealer-dealt mode, the stored list otherwise. Separating the eliminator
+   from params_exec is what lets the mode be consumed inside the
+   ep_input_procs field rather than at the head of the plug. *)
 Definition params_input_procs (A : PGGAlgebraic) (inputT : Type)
     (commits : InputProcs A inputT)
     : inputT -> seq (aproc pgg_dtype (pgg_data (pga_n A).+2)) :=
@@ -229,13 +241,29 @@ Definition params_exec (A : PGGAlgebraic) (inputT : Type)
    much interpreter fuel it is given. None of it constrains the algebra, so
    one algebra supports several parameter records. *)
 Record ExecutionParams (A : PGGAlgebraic) := MkExecutionParams {
+  (* ex_inputT is the carrier of one run argument. It need not be the secret
+     carrier: a run may take committed bits and reconstruct something else. *)
   ex_inputT   : Type ;
+  (* ex_commits selects the input mode, so a parameter record records who
+     supplies the input rather than leaving it to the plug that is built. *)
   ex_commits  : InputProcs A ex_inputT ;
+  (* ex_content is the readout the dealer runs inside the interpreter, taking
+     the run argument and the committed payloads to a card content. *)
   ex_content  : ex_inputT -> seq 'I_(pga_n A).+2
                   -> 'I_(pga_n A).+2 -> 'I_(pga_n A).+2 ;
+  (* ex_content_obs is what a seat observes after a shuffle, as a function of
+     the run argument and the shuffle alone. It names no interpreter state and
+     takes no payload list, which is why it can carry a security statement
+     that a trace cannot; instance_endpoints_stmt is the assertion that the
+     interpreter's messages compute it. *)
   ex_content_obs : ex_inputT -> pgg_gT (instance_M A) * 'I_(pga_n A).+2
                      -> 'I_(pga_n A).+2 ;
+  (* ex_expected is the value the run is meant to recover. It is the
+     specification side of correctness, so a run that decodes to something
+     else is a failed run rather than a different protocol. *)
   ex_expected : ex_inputT -> pga_secretT A ;
+  (* ex_fuel is the interpreter budget. Replacing a sufficient budget by
+     another sufficient one leaves every statement below unchanged. *)
   ex_fuel     : nat ;
 }.
 
@@ -243,7 +271,13 @@ Arguments ex_content {A} E : rename.
 Arguments ex_content_obs {A} E : rename.
 Arguments ex_expected {A} E : rename.
 
-(* The execution plug of a parameter record. *)
+(* The plug a parameter record builds: params_exec at the record's own mode,
+   readout and fuel. Three of the six fields reach the plug and three do not,
+   because ex_content_obs and ex_expected are not execution data; they enter
+   at instance_observed. Routing the plug through the record rather than
+   letting an instance call params_exec is what stops a run whose interpreter
+   readout disagrees with the static observation its security statements are
+   made about. *)
 Definition instance_exec (A : PGGAlgebraic) (E : ExecutionParams A)
     : ExecutionPlug (instance_profile A) :=
   params_exec (ex_commits E) (ex_content E) (ex_fuel E).
@@ -273,7 +307,7 @@ Definition instance_endpoints_stmt (A : PGGAlgebraic) (E : ExecutionParams A)
 
 (* Decoding the static endpoint reading at a shuffle in the group returns the
    value the run is meant to recover. The third run fact, and the one
-   discharged generically below from pga_coordE. *)
+   dealt_static_recon derives from pga_coordE. *)
 Definition instance_recon_stmt (A : PGGAlgebraic) (E : ExecutionParams A)
     : Prop :=
   forall (x : ex_inputT E) (w0 : pgg_gT (mp_M (instance_profile A))),
@@ -342,6 +376,21 @@ Definition static_coalition_obs (A : PGGAlgebraic) (E : ExecutionParams A)
                     (g, tnth (pi_starts (mp_PI (instance_profile A))) i)
              else ord0].
 
+(* Seat i's entry of that reading. The defining equation is proved here, at
+   abstract A, so that a downstream proof at a concrete profile reaches the
+   entry by rewriting with this lemma instead of unfolding the finite
+   function, whose unscoped expansion does not terminate on a concrete
+   deck. *)
+Lemma static_coalition_obsE (A : PGGAlgebraic) (E : ExecutionParams A)
+    (C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1})
+    (x : ex_inputT E) (g : pgg_gT (mp_M (instance_profile A)))
+    (i : 'I_(pi_T' (mp_PI (instance_profile A))).+1) :
+  static_coalition_obs C x g i
+  = if i \in C
+    then ex_content_obs E x (g, tnth (pi_starts (mp_PI (instance_profile A))) i)
+    else ord0.
+Proof. by rewrite /static_coalition_obs ffunE. Qed.
+
 (******************************************************************************)
 (*     Framework lemma 1: static reconstruction                               *)
 (******************************************************************************)
@@ -359,7 +408,8 @@ Variable content_obs :
   ep_inputT e -> pgg_gT M * 'I_(pgg_N' M).+1 -> 'I_(pgg_N' M).+1.
 Variable expected : ep_inputT e -> mp_secretT mp.
 
-(* The plug's own seat/share bridge in successor form. *)
+(* The plug's own seat/share bridge in successor form. Both counts are the
+   same natural number, so the cast it induces is the identity on indices. *)
 Let bridge : (pi_T' PI).+1 = (ts_T' ts).+1 := exec_seat_share_count e.
 
 Hypothesis Hobs :
@@ -417,8 +467,11 @@ Local Notation ts := (rp_scheme (mp_plug mp)).
 Variable content_obs :
   ep_inputT e -> pgg_gT M * 'I_(pgg_N' M).+1 -> 'I_(pgg_N' M).+1.
 Variable expected : ep_inputT e -> mp_secretT mp.
+(* shares is the layout actually dealt, which need not be ts_encode. *)
 Variable shares : ep_inputT e -> ((ts_T' ts).+1).-tuple 'I_(pgg_N' M).+1.
 
+(* The plug's own seat/share bridge in successor form. Both counts are the
+   same natural number, so the cast it induces is the identity on indices. *)
 Let bridge : (pi_T' PI).+1 = (ts_T' ts).+1 := exec_seat_share_count e.
 
 Hypothesis Hvalid : forall x, ts_valid ts (expected x) (shares x).
@@ -465,7 +518,7 @@ End generic_static_recon_valid.
    algebra alone. The coordinate hypothesis of generic_static_recon is
    pga_coordE read through the plug's seat/share bridge, which casts between
    two copies of the same share count and is therefore the identity on
-   indices. A dealer-dealt instance owes no reconstruction proof. *)
+   indices. *)
 Lemma dealt_static_recon (A : PGGAlgebraic) (fuel : nat) :
   instance_recon_stmt (dealt_secret_params A fuel).
 Proof.

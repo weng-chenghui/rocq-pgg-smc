@@ -79,7 +79,10 @@ Record Functionality (inputT outT : Type) := MkFunctionality {
    argument, the type of the reconstructed value, the shuffle group, and the
    privacy threshold read off the profile's scheme. Naming them lets a
    Functionality be typed against an execution without mentioning any of the
-   records the execution is assembled from. *)
+   records the execution is assembled from. oe_k is the threshold the
+   execution delivers and fn_threshold is the one the specification asks for;
+   nothing here relates them, because the privacy claim that would is stated
+   per instance, against that instance's own probability model. *)
 Definition oe_inputT (oe : OE.ObservedExecution) : Type :=
   ep_inputT (OE.oe_execution oe).
 Definition oe_outT (oe : OE.ObservedExecution) : Type :=
