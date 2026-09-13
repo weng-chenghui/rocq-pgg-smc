@@ -817,7 +817,7 @@ Lemma den_boer_witness_rotationE :
 Proof.
 rewrite /den_boer_marginal_bound /= rho_from_words_weighted1
         kim_weight_uniform_at0.
-by congr fdistmap; apply: funext => k; exact: fc_kim_sigmasE.
+by congr fdistmap; apply: funext => k; exact: fc_kim_gensE.
 Qed.
 
 End den_boer_witness_distribution.

@@ -77,9 +77,9 @@ have Gcyc : pgg_G FiveCardKim_M = <[five_card_group.fc_sigma]>.
   apply/val_inj => /=.
   apply/eqP; rewrite eqEsubset; apply/andP; split.
     rewrite gen_subG; apply/subsetP => x /imsetP[i _ ->].
-    by rewrite fc_kim_sigmasE; exact: mem_cycle.
+    by rewrite fc_kim_gensE; exact: mem_cycle.
   rewrite cycle_subG; apply: mem_gen; apply/imsetP.
-  by exists (@Ordinal 5 1 isT) => //; rewrite fc_kim_sigmasE expg1.
+  by exists (@Ordinal 5 1 isT) => //; rewrite fc_kim_gensE expg1.
 rewrite Gcyc in Hg.
 have /cycleP [k Hk] := Hg.
 rewrite Hk.

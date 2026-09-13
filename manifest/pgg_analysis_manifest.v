@@ -960,7 +960,7 @@ Timeout 60 Check (PGL27Analysis.view_mixing :
 Timeout 60 Check (PGL27Analysis.word_mixing :
   forall R : realType,
     var_dist
-      (rho_from_words_weighted 200 pgl27_mixing.pgl27_sym_sigmas
+      (rho_from_words_weighted 200 pgl27_mixing.pgl27_moves
          (pgl27_mixing.Wuni R))
       (`U pgl27_profile.pgl27_G_pos)
     <= 2%:R^-40).
@@ -1127,7 +1127,7 @@ Timeout 60 Check (FiveCardAnalysis.repeated_cut_distE :
   forall (R : realType) (eps : R) (Hlt : eps < 5%:R^-1)
     (Hgt : - (4%:R * 5%:R^-1) < eps) (L : nat),
     sa_cut_dist (@FiveCardAnalysis.repeated_sample R eps Hlt Hgt L)
-    = rho_from_words_weighted L five_card_kim.fc_kim_sigmas
+    = rho_from_words_weighted L five_card_kim.fc_kim_gens
         (five_card_kim.kim_weight_dist Hlt Hgt)).
 
 Timeout 60 Check (FiveCardAnalysis.repeated_seat_distE :
@@ -1150,7 +1150,7 @@ Timeout 60 Check (FiveCardAnalysis.centi_cut_distE :
 Timeout 60 Check (FiveCardAnalysis.centi_witness_rhoE :
   forall R : realType,
     sw_rho_dist (scb_bound (FiveCardAnalysis.centi_bundle R))
-    = rho_from_words_weighted 7 five_card_kim.fc_kim_sigmas
+    = rho_from_words_weighted 7 five_card_kim.fc_kim_gens
         (five_card_kim.kim_weight_dist (five_card_kim.kim_centi_lt R)
            (five_card_kim.kim_centi_gt R))).
 
@@ -1277,7 +1277,7 @@ Timeout 60 Check (FiveCardAnalysis.endpoint_bound :
     `|eps| < 4%:R / 5%:R ->
     forall (L : nat) (s : 'I_5),
       var_dist
-        (endpoint_dist_weighted L five_card_kim.fc_kim_sigmas
+        (endpoint_dist_weighted L five_card_kim.fc_kim_gens
            (five_card_kim.kim_weight_dist Hlt Hgt) s)
         (fdist_uniform (card_ord 5))
       <= Num.Def.sqrtr 5%:R * five_card_kim.kim_lambda2 eps ^+ L).

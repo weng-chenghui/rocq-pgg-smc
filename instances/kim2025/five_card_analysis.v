@@ -424,7 +424,7 @@ Timeout 60 Check (FiveCardAnalysis.endpoint_bound :
     `|eps| < 4%:R / 5%:R ->
     forall (L : nat) (s : 'I_5),
       var_dist
-        (endpoint_dist_weighted L fc_kim_sigmas (kim_weight_dist Hlt Hgt) s)
+        (endpoint_dist_weighted L fc_kim_gens (kim_weight_dist Hlt Hgt) s)
         (fdist_uniform (card_ord 5))
       <= Num.Def.sqrtr 5%:R * kim_lambda2 eps ^+ L).
 

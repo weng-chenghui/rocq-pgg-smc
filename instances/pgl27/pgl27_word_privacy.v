@@ -49,7 +49,7 @@ Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 Local Open Scope ring_scope.
 
-Notation pgl27_Msym := (Gen_PGGTypes pgl27_sym_sigmas).
+Notation pgl27_Msym := (Gen_PGGTypes pgl27_moves).
 
 (** pgl27_word_run_recovers — the executed endpoints of a run whose shuffle is
     the product of a two-hundred-letter generator word decode to the dealt
@@ -73,7 +73,7 @@ Variable R : realType.
     letters of the symmetrized five-letter generator alphabet. The realistic
     word shuffle law on PGL(2,7). *)
 Definition rho_word : R.-fdist (pgg_gT pgl27_M) :=
-  @rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas (Wuni R).
+  @rho_from_words_weighted R 6 4 200 pgl27_moves (Wuni R).
 
 (** pgl27P_gen — the joint law of a secret drawn from secretP and an
     independent uniform PGL(2,7) shuffle. The exact-shuffle sample space at an

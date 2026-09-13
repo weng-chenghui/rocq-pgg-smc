@@ -163,18 +163,21 @@ by case=> -[|[|[|[|[|//]]]]] Hk; apply/val_inj;
    rewrite /pgl27_inv_letter_ord !(tnth_nth (@Ordinal 5 0 isT)).
 Qed.
 
-(** pgl27_sym_sigmas_inv_closed — the letter paired with k by
+(** pgl27_moves_inv_closed — the letter paired with k by
     pgl27_inv_letter_ord is the inverse permutation of letter k, so the
     generator multiset of the shuffle is closed under inversion.  This is
     the structural hypothesis symm_ds_TV_bound_inv_closed needs, and the
     reason the Schreier transition matrix of the shuffle is symmetric even
     though only one of its five letters is an involution. *)
-Lemma pgl27_sym_sigmas_inv_closed (k : 'I_5) :
-  tnth pgl27_sym_sigmas (pgl27_inv_letter_ord k)
-  = ((tnth pgl27_sym_sigmas k)^-1)%g.
+Lemma pgl27_moves_inv_closed (k : 'I_5) :
+  tnth pgl27_moves (pgl27_inv_letter_ord k)
+  = ((tnth pgl27_moves k)^-1)%g.
 Proof.
 by apply: ptbl_inj; rewrite ptbl_sym ptbl_inv_letter pgl27_inv_letter_ordE.
 Qed.
+
+#[deprecated(since="2026-09-13", note="use pgl27_moves_inv_closed")]
+Notation pgl27_sym_sigmas_inv_closed := pgl27_moves_inv_closed (only parsing).
 
 (******************************************************************************)
 (*  Section 3. The Schreier transition matrix as a literal table.             *)
@@ -251,7 +254,7 @@ Proof. by case: x => -[|[|[|[|[|[|[|[|//]]]]]]]] Hx; rewrite permE. Qed.
     thereby described entirely by eight-element lists of naturals, which is
     what lets the Schreier counts be decided by computation. *)
 Lemma pgl27_gen_val (j : 'I_5) (x : 'I_8) :
-  val (tnth pgl27_sym_sigmas j x) = nth 0%N (pgl27_letter_tbl j) (val x).
+  val (tnth pgl27_moves j x) = nth 0%N (pgl27_letter_tbl j) (val x).
 Proof.
 case: j => -[|[|[|[|[|//]]]]] Hj; rewrite (tnth_nth 1%g) /=.
 - exact: pgl27_gen_val0.
@@ -273,7 +276,7 @@ Qed.
     once i and j are concrete, and hence the step that makes the 64 entries
     of the transition matrix decidable by computation. *)
 Lemma pgl27_gen_countE (i j : 'I_8) :
-  schreier_gen_count pgl27_sym_sigmas i j
+  schreier_gen_count pgl27_moves i j
   = \sum_(k < 5) (nth 0%N (pgl27_letter_tbl (val k)) (val i) == val j : nat).
 Proof.
 rewrite /schreier_gen_count cardsE -sum1_card big_mkcond /=.
@@ -287,7 +290,7 @@ Qed.
     rationals with denominator five, and no further reference to permutations
     is needed. *)
 Lemma pgl27_Q_E (R : realType) :
-  schreier_transition R pgl27_sym_sigmas = pgl27_Q R.
+  schreier_transition R pgl27_moves = pgl27_Q R.
 Proof.
 apply/matrixP => i j; rewrite !mxE.
 congr (_%:R / _).
@@ -534,8 +537,8 @@ Qed.
     certificate tables are used. *)
 Lemma pgl27_rayleigh_Q2 (R : realType) (v : 'cV[R]_8) :
   \sum_i v i ord0 = 0 ->
-  (v^T *m (schreier_transition R pgl27_sym_sigmas
-           *m schreier_transition R pgl27_sym_sigmas) *m v) ord0 ord0
+  (v^T *m (schreier_transition R pgl27_moves
+           *m schreier_transition R pgl27_moves) *m v) ord0 ord0
   <= (pgl27_alpha_R R) ^+ 2 * cV_inner v v.
 Proof.
 move=> Hv.
@@ -567,13 +570,13 @@ Qed.
     what several seats jointly see. *)
 Lemma pgl27_spectral_convergence (R : realType) (L : nat) (s : 'I_8) :
   var_dist (fdistmap (fun sigma : {perm 'I_8} => sigma s)
-             (rho_from_words L pgl27_sym_sigmas))
+             (rho_from_words L pgl27_moves))
            (fdist_uniform (card_ord 8))
   <= Num.sqrt 8%:R * (pgl27_alpha_R R) ^+ L.
 Proof.
 apply: (symm_ds_TV_bound_inv_closed (f := pgl27_inv_letter_ord)).
 - exact: pgl27_inv_letter_ordK.
-- exact: pgl27_sym_sigmas_inv_closed.
+- exact: pgl27_moves_inv_closed.
 - exact: pgl27_alpha_R_ge0.
 - exact: pgl27_rayleigh_Q2.
 Qed.
@@ -584,7 +587,7 @@ Qed.
     one letter of the word acquires a price. *)
 Lemma pgl27_spectral_convergence_gap (R : realType) (L : nat) (s : 'I_8) :
   var_dist (fdistmap (fun sigma : {perm 'I_8} => sigma s)
-             (rho_from_words L pgl27_sym_sigmas))
+             (rho_from_words L pgl27_moves))
            (fdist_uniform (card_ord 8))
   <= Num.sqrt 8%:R * (1 - pgl27_gap_R R) ^+ L.
 Proof.
@@ -598,7 +601,7 @@ Qed.
     fixed-length and all-length bounds of this shuffle are comparable
     without further transport. *)
 Lemma pgl27_spectral_convergence_weighted (R : realType) (L : nat) (s : 'I_8) :
-  var_dist (@endpoint_dist_weighted R 6 4 L pgl27_sym_sigmas (Wuni R) s)
+  var_dist (@endpoint_dist_weighted R 6 4 L pgl27_moves (Wuni R) s)
            (fdist_uniform (card_ord 8))
   <= Num.sqrt 8%:R * (pgl27_alpha_R R) ^+ L.
 Proof.
@@ -612,8 +615,8 @@ Qed.
     consumer of the Schreier interface use the shuffle without reading the
     certificate tables. *)
 Definition pgl27_schreier_cert (R : realType) :
-    SchreierCertificate R 4 6 pgl27_sym_sigmas :=
-  @MkSchreierCertificate R 4 6 pgl27_sym_sigmas
+    SchreierCertificate R 4 6 pgl27_moves :=
+  @MkSchreierCertificate R 4 6 pgl27_moves
     (pgl27_gap_R R)
     (pgl27_gap_R_pos R)
     (pgl27_gap_R_le1 R)

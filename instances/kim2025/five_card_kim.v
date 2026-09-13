@@ -29,7 +29,7 @@
 (* After T shuffles: var_dist <= sqrt(5) * |a - b|^T.                         *)
 (*                                                                            *)
 (* Contents:                                                                  *)
-(*   fc_kim_sigmas     == 5 generators: [1, sigma, sigma^2, sigma^3, sigma^4] *)
+(*   fc_kim_gens       == 5 generators: [1, sigma, sigma^2, sigma^3, sigma^4] *)
 (*   FiveCardKim_M     == Gen_PGGTypes instance (m=4, n'=3)                   *)
 (*   kim_weight_fun    == weight function parameterized by eps                 *)
 (*   kim_weight_dist   == FDist from kim_weight_fun (needs positivity hyps)   *)
@@ -108,22 +108,32 @@ Let sigma := fc_sigma.
 (** Powers of fc_sigma *)
 Definition fc_sigma_pow (k : 'I_5) : {perm 'I_5} := (sigma ^+ val k)%g.
 
-(** The 5 generators for Kim's model *)
-Definition fc_kim_sigmas : 5.-tuple {perm 'I_5} :=
+(** fc_kim_gens — the five powers [1, sigma, sigma^2, sigma^3, sigma^4] of the
+    5-cycle on card positions, a generating set of the cyclic group of order 5.
+    The alphabet whose weighted words give Kim's cyclic-shift shuffle, so a
+    weight on the five letters is exactly a bias on the rotation amount. *)
+Definition fc_kim_gens : 5.-tuple {perm 'I_5} :=
   [tuple (1 : {perm 'I_5})%g;
          (sigma ^+ 1)%g;
          (sigma ^+ 2)%g;
          (sigma ^+ 3)%g;
          (sigma ^+ 4)%g].
 
-(** Each generator sigma^k acts as expected *)
-Lemma fc_kim_sigmasE (k : 'I_5) : tnth fc_kim_sigmas k = (sigma ^+ val k)%g.
+(** fc_kim_gensE — the k-th letter is the k-th power of the 5-cycle.  Reads a
+    statement about letters of the shuffle as a statement about rotation
+    amounts. *)
+Lemma fc_kim_gensE (k : 'I_5) : tnth fc_kim_gens k = (sigma ^+ val k)%g.
 Proof.
 by case: k => [[|[|[|[|[|?]]]]] ?];
   rewrite (tnth_nth (1%g : {perm 'I_5})) /=.
 Qed.
 
 End kim_generators.
+
+#[deprecated(since="2026-09-13", note="use fc_kim_gens")]
+Notation fc_kim_sigmas := fc_kim_gens (only parsing).
+#[deprecated(since="2026-09-13", note="use fc_kim_gensE")]
+Notation fc_kim_sigmasE := fc_kim_gensE (only parsing).
 
 (******************************************************************************)
 (** * Section 2: PGG Instance                                                 *)
@@ -133,7 +143,7 @@ Section kim_pgg_instance.
 
 (** m = 4 (5 generators), n' = 3 (N = 5 card positions) *)
 Definition FiveCardKim_M : MonodromyReprWithGeneratorType :=
-  @Gen_PGGTypes 4 3 fc_kim_sigmas.
+  @Gen_PGGTypes 4 3 fc_kim_gens.
 
 End kim_pgg_instance.
 
@@ -259,7 +269,7 @@ Hypothesis eps_lt : eps < 5%:R^-1.
 Hypothesis eps_gt : - (4%:R * 5%:R^-1) < eps.
 
 Let W := kim_weight_dist eps_lt eps_gt.
-Let Q := schreier_transition_weighted fc_kim_sigmas W.
+Let Q := schreier_transition_weighted fc_kim_gens W.
 
 (** The Schreier matrix entry Q(x,y) depends only on (y - x) mod 5.
     For a cyclic group with generators sigma^k, sigma^k(x) = y iff k = y - x
@@ -270,7 +280,7 @@ Lemma fc_kim_schreier_diag (x : 'I_5) :
   Q x x = 5%:R^-1 - eps.
 Proof.
 rewrite /Q /schreier_transition_weighted mxE.
-rewrite /fc_kim_sigmas.
+rewrite /fc_kim_gens.
 case: x => [[|[|[|[|[|?]]]]] Hx] //=.
 all: rewrite big_mkcond /=.
 all: rewrite big_ord_recr /= big_ord_recr /= big_ord_recr /=
@@ -300,7 +310,7 @@ rewrite exchange_big /=.
 rewrite -[RHS](FDist.f1 W).
 apply: eq_bigr => k _.
 rewrite -big_mkcond /=.
-rewrite (big_pred1 ((tnth fc_kim_sigmas k)^-1%g y)) //.
+rewrite (big_pred1 ((tnth fc_kim_gens k)^-1%g y)) //.
 move=> x; rewrite /=.
 apply/eqP/eqP.
 - by move=> H; rewrite -H permK.
@@ -311,7 +321,7 @@ Qed.
 Lemma fc_kim_schreier_offdiag (x y : 'I_5) :
   x != y -> Q x y = 5%:R^-1 + eps / 4%:R.
 Proof.
-rewrite /Q /schreier_transition_weighted mxE /fc_kim_sigmas.
+rewrite /Q /schreier_transition_weighted mxE /fc_kim_gens.
 case: x => [[|[|[|[|[|?]]]]] Hx] //=;
 case: y => [[|[|[|[|[|?]]]]] Hy] //= _;
 rewrite big_mkcond /=;
@@ -401,7 +411,7 @@ Proof. by rewrite /kim_spectral_gap lerBlDr lerDl; exact: kim_lambda2_ge0. Qed.
     most sqrt 5 * kim_lambda2 ^ L, the geometric rate at which Kim's biased
     shuffle mixes to uniform. *)
 Lemma kim_spectral_convergence : forall (L : nat) (s : 'I_5),
-  var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas W s)
+  var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_gens W s)
            (fdist_uniform (card_ord 5))
   <= Num.sqrt 5%:R * kim_lambda2 ^+ L.
 Proof.
@@ -416,7 +426,7 @@ under eq_bigr => x _ do
   rewrite (@schreier_weighted_bridge R 4 3) fdist_uniformE card_ord.
 (* Apply the general convergence bound *)
 have := @unif_offdiag_convergence R 3
-  (schreier_transition_weighted fc_kim_sigmas W)
+  (schreier_transition_weighted fc_kim_gens W)
   (5%:R^-1 - eps) (5%:R^-1 + eps / 4%:R)
   (fc_kim_schreier_diag eps_lt eps_gt)
   (fc_kim_schreier_offdiag eps_lt eps_gt)
@@ -434,9 +444,9 @@ by rewrite normrN normrM ger0_norm // divr_ge0.
 Qed.
 
 (** Weighted Schreier Certificate *)
-Definition fc_kim_schreier_cert : WeightedSchreierCertificate R 4 3 fc_kim_sigmas W.
+Definition fc_kim_schreier_cert : WeightedSchreierCertificate R 4 3 fc_kim_gens W.
 Proof.
-apply: (@MkWeightedSchreierCertificate R 4 3 fc_kim_sigmas W).
+apply: (@MkWeightedSchreierCertificate R 4 3 fc_kim_gens W).
 - exact: fc_kim_doubly_stochastic.
 - exact: kim_spectral_gap_pos.
 - exact: kim_spectral_gap_le1.
@@ -451,7 +461,7 @@ Defined.
     (8/5) * kim_lambda2 ^ L exactly, sharpening kim_spectral_convergence's
     inequality to an equality. *)
 Lemma kim_var_dist_exact (L : nat) (s : 'I_5) :
-  var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas W s)
+  var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_gens W s)
            (fdist_uniform (card_ord 5))
   = 2%:R * 4%:R / 5%:R * kim_lambda2 ^+ L.
 Proof.
@@ -462,7 +472,7 @@ rewrite /var_dist.
 under eq_bigr => x _ do
   rewrite (@schreier_weighted_bridge R 4 3) fdist_uniformE card_ord.
 have := @unif_offdiag_var_dist R 3
-  (schreier_transition_weighted fc_kim_sigmas W)
+  (schreier_transition_weighted fc_kim_gens W)
   (5%:R^-1 - eps) (5%:R^-1 + eps / 4%:R)
   (fc_kim_schreier_diag eps_lt eps_gt)
   (fc_kim_schreier_offdiag eps_lt eps_gt)
@@ -485,7 +495,7 @@ apply: (@MkSecurityAsymptotic R FiveCardKim_M
   kim_spectral_gap 0
   kim_spectral_gap_pos kim_spectral_gap_le1
   (Order.POrderTheory.lexx 0)
-  (fun L' => @rho_from_words_weighted R 3 4 L' fc_kim_sigmas W)).
+  (fun L' => @rho_from_words_weighted R 3 4 L' fc_kim_gens W)).
 move=> L' s.
 rewrite add0r /kim_spectral_gap /kim_lambda2 opprB addrC subrK.
 exact: kim_spectral_convergence.
@@ -499,10 +509,10 @@ Definition fc_kim_security_bundle (L : nat) :
   @MkShuffleCertificateBundle R FiveCardKim_M
     (@MkShuffleMarginalBound R FiveCardKim_M L
       (Num.sqrt 5%:R * kim_lambda2 ^+ L)
-      (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
+      (@rho_from_words_weighted R 3 4 L fc_kim_gens W)
       (fun s => kim_spectral_convergence L s))
     (Some (@MkSecurityExact R FiveCardKim_M
-      (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
+      (@rho_from_words_weighted R 3 4 L fc_kim_gens W)
       (2%:R * 4%:R / 5%:R * kim_lambda2 ^+ L)
       (kim_var_dist_exact L)))
     (Some fc_kim_asymptotic).
@@ -547,7 +557,7 @@ Variable R : realType.
 (** For any concrete eps satisfying the constraints, we get a full
     security analysis pipeline:
     1. Weight distribution (kim_weight_dist)
-    2. Schreier matrix (schreier_transition_weighted fc_kim_sigmas W)
+    2. Schreier matrix (schreier_transition_weighted fc_kim_gens W)
     3. Doubly stochastic proof (fc_kim_doubly_stochastic)
     4. Spectral convergence bound (kim_spectral_convergence)
     5. Exact variation distance (kim_var_dist_exact)
@@ -562,7 +572,7 @@ Lemma fc_kim_security_bound (eps : R)
     (Hgt : - (4%:R * 5%:R^-1) < eps)
     (Hspec : `|eps| < 4%:R / 5%:R)
     (L : nat) (s : 'I_5) :
-  var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas
+  var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_gens
               (kim_weight_dist Hlt Hgt) s)
            (fdist_uniform (card_ord 5))
   <= Num.sqrt 5%:R * (kim_lambda2 eps) ^+ L.
@@ -650,7 +660,7 @@ Qed.
     report. *)
 Lemma kim_one_cut_centiE (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
-              (@rho_from_words_weighted R 3 4 1 fc_kim_sigmas
+              (@rho_from_words_weighted R 3 4 1 fc_kim_gens
                  (kim_weight_dist kim_centi_lt kim_centi_gt)))
            (fdist_uniform (card_ord 5))
   = 1 / 50.

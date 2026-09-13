@@ -13,7 +13,7 @@
 (* identity, and a scalar checker certifies its total-variation bound.        *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   pgl27_sym_sigmas == the inverse-closed five-letter generator tuple       *)
+(*   pgl27_moves      == the inverse-closed five-letter walk alphabet         *)
 (*   pgl27_inv_letter == the letter inverting letter j, an involution of the  *)
 (*                       five letter indices                                  *)
 (*   mtbl j           == the permutation table of the j-th letter             *)
@@ -53,16 +53,20 @@ Import Prenex Implicits.
 (* The five symmetrized generators and their permutation tables of 'I_8.      *)
 (* -------------------------------------------------------------------------- *)
 
-(** pgl27_sym_sigmas — the inverse-closed symmetrized generator tuple of the
-    realistic word shuffle: translation, scaling, inversion and the two
-    inverses of translation and scaling. The letter alphabet of the L-word
-    shuffle. *)
-Definition pgl27_sym_sigmas : 5.-tuple {perm 'I_8} :=
+(** pgl27_moves — the five-letter alphabet the random word walks along:
+    translation, scaling, inversion, and the inverses of translation and
+    scaling.  Closed under inversion, so the L-letter word shuffle is a
+    symmetric random walk on the group the five letters generate, which by
+    pgl27_gen5_eq is the PGL(2,7) shuffle group. *)
+Definition pgl27_moves : 5.-tuple {perm 'I_8} :=
   [tuple tnth pgl27_gens (@Ordinal 3 0 isT);
          ((tnth pgl27_gens (@Ordinal 3 0 isT))^-1)%g;
          tnth pgl27_gens (@Ordinal 3 1 isT);
          ((tnth pgl27_gens (@Ordinal 3 1 isT))^-1)%g;
          tnth pgl27_gens (@Ordinal 3 2 isT)].
+
+#[deprecated(since="2026-09-13", note="use pgl27_moves")]
+Notation pgl27_sym_sigmas := pgl27_moves (only parsing).
 
 (* The permutation table of the j-th letter, read off by position. *)
 Local Definition mtbl (j : nat) : seq nat :=
@@ -106,7 +110,7 @@ Proof. by case: x => -[|[|[|[|[|[|[|[|//]]]]]]]] Hx; rewrite permE. Qed.
    code.  The alphabet is therefore described entirely by mtbl, which is the
    form the BFS closure and the walk recursion compute in. *)
 Local Lemma mtbl_val (j : 'I_5) (x : 'I_8) :
-  val (tnth pgl27_sym_sigmas j x) = nth 0 (mtbl j) (val x).
+  val (tnth pgl27_moves j x) = nth 0 (mtbl j) (val x).
 Proof.
 case: j => -[|[|[|[|[|//]]]]] Hj; rewrite (tnth_nth 1%g) /=.
 - exact: gfwd0.
@@ -346,7 +350,7 @@ Proof. by apply: ptbl_of_fwd => //; exact: gfwd2. Qed.
     literal alphabet table.  The alphabet the walk runs on is the alphabet
     written down, so a computation over the tables settles a question about
     the permutations. *)
-Lemma ptbl_sym (j : 'I_5) : ptbl (tnth pgl27_sym_sigmas j) = mtbl (val j).
+Lemma ptbl_sym (j : 'I_5) : ptbl (tnth pgl27_moves j) = mtbl (val j).
 Proof. by apply: ptbl_of_fwd; [exact: mtbl_val | rewrite size_mtbl // ltn_ord]. Qed.
 (* ptbl is a morphism: the table of a product is the composition of the two
    tables.  With ptbl_inj this makes ptbl a faithful representation of the
@@ -420,7 +424,7 @@ Local Lemma gen_in_G (i : 'I_3) : tnth pgl27_gens i \in pgg_G pgl27_M.
 Proof. by apply: mem_gen; apply/imsetP; exists i. Qed.
 
 (* The perm-level letter selected by a nat index. *)
-Local Definition gen5_of (j : nat) : {perm 'I_8} := tnth pgl27_sym_sigmas (inord j).
+Local Definition gen5_of (j : nat) : {perm 'I_8} := tnth pgl27_moves (inord j).
 (* Every letter of the symmetrized alphabet lies in the shuffle group, the
    two inverse letters because a group is closed under inversion.  So
    symmetrizing the alphabet does not enlarge the state space. *)
@@ -522,7 +526,7 @@ Qed.
     nor a larger one, so uniformity on that group is the right mixing
     target. *)
 Lemma pgl27_gen5_eq :
-  <<[set tnth pgl27_sym_sigmas j | j : 'I_5]>>%G = pgg_G pgl27_M.
+  <<[set tnth pgl27_moves j | j : 'I_5]>>%G = pgg_G pgl27_M.
 Proof.
 apply: group_inj => /=; apply/eqP; rewrite eqEsubset; apply/andP; split.
 - rewrite gen_subG; apply/subsetP => x /imsetP[j _ ->].
@@ -578,12 +582,12 @@ Qed.
 (* The fibre of a length-L word over the five letters, counted by the walk.   *)
 (* -------------------------------------------------------------------------- *)
 
-Local Notation Msym := (Gen_PGGTypes pgl27_sym_sigmas).
+Local Notation Msym := (Gen_PGGTypes pgl27_moves).
 
 (* The shuffle a length-L letter word evaluates to: the ordered product of its
    letters. *)
 Local Definition weval (L : nat) (w : L.-tuple 'I_5) : {perm 'I_8} :=
-  (\prod_(i < L) tnth pgl27_sym_sigmas (tnth w i))%g.
+  (\prod_(i < L) tnth pgl27_moves (tnth w i))%g.
 
 (* The fibre count of g at length L: how many of the 5^L letter words have
    product g.  Under the uniform letter law every word carries probability
@@ -600,12 +604,12 @@ Local Definition rc (L : nat) (p : L.-tuple 'I_5 * 'I_5) : L.+1.-tuple 'I_5 :=
    The last letter of a word is the last factor of the product, which is why
    the fibre recursion below walks backwards through inverse letters. *)
 Local Lemma weval_last (L : nat) (w : L.-tuple 'I_5) (j : 'I_5) :
-  weval (rc (w, j)) = (weval w * tnth pgl27_sym_sigmas j)%g.
+  weval (rc (w, j)) = (weval w * tnth pgl27_moves j)%g.
 Proof.
 rewrite /weval big_ord_recr /=; congr (_ * _)%g.
-- apply: eq_bigr => i _; congr (tnth pgl27_sym_sigmas _).
+- apply: eq_bigr => i _; congr (tnth pgl27_moves _).
   by rewrite !(tnth_nth ord0) /= nth_rcons size_tuple ltn_ord.
-- congr (tnth pgl27_sym_sigmas _).
+- congr (tnth pgl27_moves _).
   by rewrite (tnth_nth ord0) /= nth_rcons size_tuple ltnn eqxx.
 Qed.
 
@@ -637,18 +641,18 @@ Qed.
    in L+1 steps are the words reaching each of g's five predecessors in L.  It
    is stated on the group; walk_step is its image on the 336 state indices. *)
 Local Lemma fibc_rec (L : nat) (g : {perm 'I_8}) :
-  fibc L.+1 g = \sum_(j < 5) fibc L (g * (tnth pgl27_sym_sigmas j)^-1)%g.
+  fibc L.+1 g = \sum_(j < 5) fibc L (g * (tnth pgl27_moves j)^-1)%g.
 Proof.
 rewrite /fibc -sum1dep_card.
 rewrite (reindex (@rc L)); last exact: (onW_bij _ (rc_bij L)).
 have Hpred : (fun p : L.-tuple 'I_5 * 'I_5 => weval (rc p) == g)
-          =1 (fun p => weval p.1 == g * (tnth pgl27_sym_sigmas p.2)^-1)%g.
+          =1 (fun p => weval p.1 == g * (tnth pgl27_moves p.2)^-1)%g.
   move=> p; case: p => w j /=.
   by rewrite weval_last; apply/idP/idP => /eqP H; apply/eqP;
      [rewrite -H mulgK | rewrite H mulgVK].
 rewrite (eq_bigl _ _ Hpred) big_mkcond /=.
 rewrite -(pair_bigA _ (fun (i : L.-tuple 'I_5) (j : 'I_5) =>
-  if weval i == (g * (tnth pgl27_sym_sigmas j)^-1)%g then 1 else 0)) /=.
+  if weval i == (g * (tnth pgl27_moves j)^-1)%g then 1 else 0)) /=.
 rewrite exchange_big /=.
 apply: eq_bigr => j _.
 by rewrite -big_mkcond /= sum1dep_card.
@@ -691,7 +695,7 @@ Qed.
     through ptbl_inj this is the inverse-closure the symmetric mixing bound
     requires of the generator multiset. *)
 Lemma ptbl_inv_letter (j : 'I_5) :
-  ptbl ((tnth pgl27_sym_sigmas j)^-1)%g = mtbl (inv_letter (val j)).
+  ptbl ((tnth pgl27_moves j)^-1)%g = mtbl (inv_letter (val j)).
 Proof.
 case: j => -[|[|[|[|[|//]]]]] Hj; rewrite (tnth_nth 1%g) /=.
 - exact: (ptbl_sym (@Ordinal 5 1 isT)).
@@ -758,7 +762,7 @@ Proof. by move=> Hk Hjn; apply: tbl_index_lt; exact: predk_mem. Qed.
    letter on the group, so the five predecessor slots the walk reads at k name
    the five group predecessors of the shuffle entry_perm k. *)
 Local Lemma entry_pred (k : nat) (j : 'I_5) : (k < 336)%N ->
-  (entry_perm k * (tnth pgl27_sym_sigmas j)^-1)%g = entry_perm (predk k (val j)).
+  (entry_perm k * (tnth pgl27_moves j)^-1)%g = entry_perm (predk k (val j)).
 Proof.
 move=> Hk.
 have Hpred : (predk k (val j) < 336)%N by apply: predk_lt => //; exact: ltn_ord.
@@ -854,7 +858,7 @@ Qed.
 (* Words evaluate inside the shuffle group; the certificate in nat.           *)
 (* -------------------------------------------------------------------------- *)
 
-Local Lemma sym_in_G (j : 'I_5) : tnth pgl27_sym_sigmas j \in pgg_G pgl27_M.
+Local Lemma sym_in_G (j : 'I_5) : tnth pgl27_moves j \in pgg_G pgl27_M.
 Proof. by move: (gen5_of_mem (val j)); rewrite /gen5_of inord_val. Qed.
 
 (* Every letter word evaluates inside the shuffle group, so the word shuffle
@@ -973,7 +977,7 @@ Qed.
    product is the fibre count divided by the number of words.  This is where
    the counting layer meets the probability layer. *)
 Local Lemma rho_valE (g : {perm 'I_8}) :
-  @rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas Wuni g
+  @rho_from_words_weighted R 6 4 200 pgl27_moves Wuni g
   = (fibc 200 g)%:R / (5 ^ 200)%:R.
 Proof.
 rewrite fiber_prob_weighted.
@@ -1004,7 +1008,7 @@ Local Lemma mixing_bound_gen
   (forall w : 200.-tuple 'I_5, weval w \in Gg) ->
   (2 ^ 40 * (\sum_(k < 336) N.to_nat (absdiffN (336 * vN k) (5 ^ 200)%num))
    <= 336 * 5 ^ 200)%N ->
-  var_dist (@rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas Wuni) (`U GposH)
+  var_dist (@rho_from_words_weighted R 6 4 200 pgl27_moves Wuni) (`U GposH)
   <= 2%:R^-40.
 Proof.
 move=> Hcard mem_Gg ep_inj ep_mem fibcnt word_in_G Hcert.
@@ -1042,7 +1046,7 @@ Qed.
     of the idealised uniform shuffle transfers to the shuffle a dealer can
     actually perform at a cost of 2^-40. *)
 Lemma pgl27_word_mixing :
-  var_dist (@rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas Wuni)
+  var_dist (@rho_from_words_weighted R 6 4 200 pgl27_moves Wuni)
            (`U pgl27_G_pos)
   <= 2%:R^-40.
 Proof.
@@ -1058,7 +1062,7 @@ Qed.
     shuffle makes that marginal exactly uniform, and this is the price of
     replacing it by a finite word. *)
 Lemma pgl27_endpoint_mixing (s : 'I_8) :
-  var_dist (@endpoint_dist_weighted R 6 4 200 pgl27_sym_sigmas Wuni s)
+  var_dist (@endpoint_dist_weighted R 6 4 200 pgl27_moves Wuni s)
            (fdist_uniform (card_ord 8))
   <= 2%:R^-40.
 Proof.
@@ -1089,7 +1093,7 @@ Qed.
     2^-40 in variation distance. *)
 Lemma pgl27_joint_mixing (secretP : R.-fdist bool) :
   var_dist
-    (secretP `x (@rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas Wuni))
+    (secretP `x (@rho_from_words_weighted R 6 4 200 pgl27_moves Wuni))
     (secretP `x (`U pgl27_G_pos))
   <= 2%:R^-40.
 Proof.

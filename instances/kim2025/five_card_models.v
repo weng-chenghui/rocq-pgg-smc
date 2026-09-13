@@ -212,7 +212,7 @@ Qed.
     the L-repeated-cut model. *)
 Lemma kim_repeated_cut_distE :
   sa_cut_dist kim_repeated_sample
-  = @rho_from_words_weighted R 3 4 L fc_kim_sigmas
+  = @rho_from_words_weighted R 3 4 L fc_kim_gens
       (kim_weight_dist eps_lt_inv5 eps_gt_neg4inv5).
 Proof.
 rewrite /sa_cut_dist /kim_repeated_sample /= /rho_from_words_weighted.
@@ -390,7 +390,7 @@ Definition kim_centi_repeated_sample :=
     bundle's own bound. *)
 Lemma kim_centi_witness_rhoE :
   sw_rho_dist (scb_bound (kim_security_bundle_centi R))
-  = @rho_from_words_weighted R 3 4 7 fc_kim_sigmas
+  = @rho_from_words_weighted R 3 4 7 fc_kim_gens
       (kim_weight_dist (kim_centi_lt R) (kim_centi_gt R)).
 Proof. by []. Qed.
 

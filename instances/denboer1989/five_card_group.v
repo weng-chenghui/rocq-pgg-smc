@@ -21,7 +21,7 @@
 (*   - Bit 0: (s, s) = same position                                         *)
 (*                                                                            *)
 (* Shuffle generator: sigma = (0 1 2 3 4), the 5-cycle cyclic shift of all    *)
-(*   five positions; sigma^5 = 1. This is the generator fc_kim_sigmas is      *)
+(*   five positions; sigma^5 = 1. This is the generator fc_kim_gens is        *)
 (*   built from in the Kim-family instance.                                   *)
 (*                                                                            *)
 (* References:                                                                *)
