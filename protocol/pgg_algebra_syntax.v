@@ -3,7 +3,7 @@
 (******************************************************************************)
 (* The algebra block: a named surface for PGGAlgebraic                        *)
 (*                                                                            *)
-(* A PGGAlgebraic has sixteen fields and an instance writing it as one        *)
+(* A PGGAlgebraic has fifteen fields and an instance writing it as one        *)
 (* constructor application supplies sixteen positional arguments. This file   *)
 (* gives the same record a block surface in which every component is written  *)
 (* under a name, and it fills five of the fields on the instance's behalf.    *)
@@ -33,30 +33,25 @@
 (* action, and the clause's only variable content is the obligation that      *)
 (* reconstruction is unchanged by it.                                         *)
 (*                                                                            *)
-(* Two clauses are optional. The walk clause names a second generating        *)
-(* alphabet with the proof that it generates the same group, which is the     *)
-(* alphabet a mixing argument runs on; without it a step takes the            *)
-(* presentation generators. The leaks clause names a coalition size at which  *)
-(* privacy fails, with the proof that it does; without it the instance claims *)
-(* no failure. Neither clause reaches any proposition proved about a run.     *)
+(* One clause is optional. The walk clause names a second generating          *)
+(* alphabet with the obligation that it generates the same group, which is    *)
+(* the alphabet a mixing argument runs on; without it a step takes the        *)
+(* presentation generators. It reaches no proposition proved about a run.     *)
 (*                                                                            *)
-(* The block spends five identifiers as global keywords in every file that    *)
-(* requires this one: encode, read, private, leaks and shuffled_by. Each of   *)
-(* them follows a slot in some rule, which is what makes a token a keyword;   *)
-(* the tokens mount, walk, along, seat, players, secret, deal, cache, seats   *)
-(* and pgg_rho follow a literal and stay identifiers. The leading token       *)
-(* algebra stays an identifier too: measured on 2026-09-14 it can be          *)
-(* declared and then used bare in a term, in an application, as a binder and  *)
-(* as a record field, because the literal that follows it in every rule is    *)
-(* not a slot.                                                                *)
+(* The block spends four identifiers as global keywords in every file that    *)
+(* requires this one: encode, read, private and shuffled_by. Each of them     *)
+(* follows a slot in some rule, which is what makes a token a keyword; the    *)
+(* tokens mount, walk, along, seat, players, secret, deal, cache, seats and   *)
+(* pgg_rho follow a literal and stay identifiers. The leading token algebra   *)
+(* stays an identifier too: measured on 2026-09-14 it can be declared and     *)
+(* then used bare in a term, in an application, as a binder and as a record   *)
+(* field, because the literal that follows it in every rule is not a slot.    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   ord_monodromy   == the deck action read as an action on share indices    *)
 (*   ord_starts      == the seats starting at the deck positions in order     *)
 (*   mk_walk         == what the walk clause stores                           *)
 (*   no_walk         == the absent walk clause                                *)
-(*   mk_leaks        == what the leaks clause stores                          *)
-(*   no_leaks        == the absent leaks clause                               *)
 (*   pinned_scheme   == a scheme with its encoding, reconstruction and        *)
 (*                      privacy obligation checked against the ones written   *)
 (*   mk_algebra      == the PGGAlgebraic a block builds                       *)
@@ -121,7 +116,7 @@ by rewrite esymK tnth_ord_tuple.
 Qed.
 
 (******************************************************************************)
-(*     The two optional clauses                                               *)
+(*     The optional walk clause                                               *)
 (******************************************************************************)
 
 (* What the walk clause stores: a second generating alphabet with the
@@ -144,19 +139,6 @@ Definition no_walk (m n : nat) (gens : m.+1.-tuple {perm 'I_n.+2})
       | (<<[set tnth w i | i : 'I_k.+1]>>
          = <<[set tnth gens i | i : 'I_m.+1]>>)%G } } := None.
 Arguments no_walk {m n} gens.
-
-(* What the leaks clause stores: a coalition size and an obligation that
-   privacy fails there. The proposition is whatever the instance proved,
-   because sharpness is stated in the instance's probability model and the
-   algebra has none. *)
-Definition mk_leaks (k : nat) (P : Prop) (H : P)
-  : option { k : nat & { P : Prop & P } } :=
-  Some (existT _ k (existT _ P H)).
-Arguments mk_leaks k [P] H.
-
-(* The absent leaks clause: the instance claims no coalition size at which
-   privacy fails. *)
-Definition no_leaks : option { k : nat & { P : Prop & P } } := None.
 
 (******************************************************************************)
 (*     The scheme with its three written parts pinned                         *)
@@ -188,9 +170,9 @@ Arguments pinned_scheme : clear implicits.
 (******************************************************************************)
 
 (* The PGGAlgebraic of an instance whose shares are its deck positions: the
-   generators, an optional walk alphabet, the scheme with its leak annotation,
-   and the seat list, with the seat starts, the dealer readout, the monodromy
-   and the coordinate law supplied by this file. The share-count equation is an
+   generators, an optional walk alphabet, the scheme and the seat list, with
+   the seat starts, the dealer readout, the monodromy and the coordinate law
+   supplied by this file. The share-count equation is an
    argument rather than a field of the scheme, so a block whose deck size and
    share count disagree is rejected at the equation.
 
@@ -204,14 +186,13 @@ Definition mk_algebra (m n : nat) (gens : m.+1.-tuple {perm 'I_n.+2})
             | (<<[set tnth w i | i : 'I_k.+1]>>
                = <<[set tnth gens i | i : 'I_m.+1]>>)%G } })
     (secretT : Type) (S : ThresholdScheme secretT 'I_n.+2)
-    (lk : option { k : nat & { P : Prop & P } })
     (Hc : (ts_T' S).+1 = n.+2)
     (Hst : uniq (ord_starts Hc))
     (Hinv : @ts_recon_perm_invariant _ (pgg_G (Gen_PGGTypes gens)) _ _ S
               (ord_monodromy gens Hc))
     (pl : seq 'I_(ts_T' S).+1)
     (Hpl : pl = enum 'I_(ts_T' S).+1) : PGGAlgebraic :=
-  @MkPGGAlgebraic m n gens mv secretT S lk Hc (ord_starts Hc) Hst id
+  @MkPGGAlgebraic m n gens mv secretT S Hc (ord_starts Hc) Hst id
     (ord_monodromy gens Hc) Hinv (@ord_coordE m n gens _ Hc) pl Hpl.
 Arguments mk_algebra : clear implicits.
 
@@ -219,48 +200,30 @@ Arguments mk_algebra : clear implicits.
 (*     The block surface                                                      *)
 (******************************************************************************)
 
-(* The four rules are the walk clause present or absent against the leaks
-   clause present or absent. All four are only parsing, because each repeats
-   the generator slot and the secret slot on its right-hand side.
+(* The two rules are the walk clause present and absent. Both are only
+   parsing, because each repeats the generator slot and the secret slot on its
+   right-hand side.
 
    In shuffled_by pgg_rho by Hinv the token pgg_rho is a literal of the rule
    and not a slot: the shuffle action of this surface is fixed to the deck
    action, and a block cannot substitute another one. What the clause takes is
-   Hinv alone, the proof that reconstruction is unchanged by that action. The
-   coordinate law relating share indices to cards is likewise not written,
+   Hinv alone, the obligation that reconstruction is unchanged by that action.
+   The coordinate law relating share indices to cards is likewise not written,
    because at a fixed action and seats in order it is ord_coordE. *)
-
-Notation "'algebra' '{' 'mount' '<<' gens '>>' ';' 'walk' 'along' w 'by' Hw ';' 'seat' 'players' st 'by' Hst ';' 'secret' T ';' 'deal' S 'encode' e 'read' r 'private' 'by' p 'leaks' 'at' k 'by' Hk 'shuffled_by' 'pgg_rho' 'by' Hinv ';' 'cache' 'seats' pl 'by' Hpl '}'" :=
-  (@mk_algebra _ _ gens (mk_walk gens w Hw) T
-     (@pinned_scheme T _ S e r p erefl erefl erefl)
-     (@mk_leaks k _ Hk) erefl (Hst : uniq st) Hinv pl Hpl)
-  (at level 0, gens at level 0, w at level 0, Hw at level 0,
-   st at level 0, Hst at level 0, T at level 0, S at level 0,
-   e at level 0, r at level 0, p at level 0, k at level 0, Hk at level 0,
-   Hinv at level 0, pl at level 0, Hpl at level 0, only parsing).
 
 Notation "'algebra' '{' 'mount' '<<' gens '>>' ';' 'walk' 'along' w 'by' Hw ';' 'seat' 'players' st 'by' Hst ';' 'secret' T ';' 'deal' S 'encode' e 'read' r 'private' 'by' p 'shuffled_by' 'pgg_rho' 'by' Hinv ';' 'cache' 'seats' pl 'by' Hpl '}'" :=
   (@mk_algebra _ _ gens (mk_walk gens w Hw) T
      (@pinned_scheme T _ S e r p erefl erefl erefl)
-     no_leaks erefl (Hst : uniq st) Hinv pl Hpl)
+     erefl (Hst : uniq st) Hinv pl Hpl)
   (at level 0, gens at level 0, w at level 0, Hw at level 0,
    st at level 0, Hst at level 0, T at level 0, S at level 0,
    e at level 0, r at level 0, p at level 0, Hinv at level 0,
    pl at level 0, Hpl at level 0, only parsing).
 
-Notation "'algebra' '{' 'mount' '<<' gens '>>' ';' 'seat' 'players' st 'by' Hst ';' 'secret' T ';' 'deal' S 'encode' e 'read' r 'private' 'by' p 'leaks' 'at' k 'by' Hk 'shuffled_by' 'pgg_rho' 'by' Hinv ';' 'cache' 'seats' pl 'by' Hpl '}'" :=
-  (@mk_algebra _ _ gens (no_walk gens) T
-     (@pinned_scheme T _ S e r p erefl erefl erefl)
-     (@mk_leaks k _ Hk) erefl (Hst : uniq st) Hinv pl Hpl)
-  (at level 0, gens at level 0, st at level 0, Hst at level 0,
-   T at level 0, S at level 0, e at level 0, r at level 0, p at level 0,
-   k at level 0, Hk at level 0, Hinv at level 0,
-   pl at level 0, Hpl at level 0, only parsing).
-
 Notation "'algebra' '{' 'mount' '<<' gens '>>' ';' 'seat' 'players' st 'by' Hst ';' 'secret' T ';' 'deal' S 'encode' e 'read' r 'private' 'by' p 'shuffled_by' 'pgg_rho' 'by' Hinv ';' 'cache' 'seats' pl 'by' Hpl '}'" :=
   (@mk_algebra _ _ gens (no_walk gens) T
      (@pinned_scheme T _ S e r p erefl erefl erefl)
-     no_leaks erefl (Hst : uniq st) Hinv pl Hpl)
+     erefl (Hst : uniq st) Hinv pl Hpl)
   (at level 0, gens at level 0, st at level 0, Hst at level 0,
    T at level 0, S at level 0, e at level 0, r at level 0, p at level 0,
    Hinv at level 0, pl at level 0, Hpl at level 0, only parsing).

@@ -109,22 +109,6 @@ Record PGGAlgebraic := MkPGGAlgebraic {
      scheme is where the privacy threshold of the instance lives. *)
   pga_secretT : Type ;
   pga_scheme  : ThresholdScheme pga_secretT 'I_pga_n.+2 ;
-  (* pga_leaks records a coalition size at which this instance's privacy
-     fails, together with an obligation that it does. The scheme guarantees
-     privacy below the threshold ts_k' pga_scheme and says nothing at or
-     above it; an annotation here says that silence is sharpness. It enters
-     no accumulated proposition, so a program over an annotated instance
-     proves what a program over an unannotated one proves.
-
-     Nothing here ties the number to the proposition. Sharpness is an
-     information-theoretic statement in the instance's probability model, and
-     the algebra holds no probability model, so the proposition is whatever
-     the instance proved and the field checks only that it is inhabited: a
-     number that does not match the proof, or a proof of something else
-     entirely, typechecks. The annotation is evidence a reader follows to the
-     named lemma, not a claim the kernel decides. None says the instance
-     claims no failure. *)
-  pga_leaks   : option { k : nat & { P : Prop & P } } ;
   (* pga_share_card states that the scheme deals one share per card position.
      It is what lets a share index be read as a deck position, and the
      execution stack transports tuples along it. *)

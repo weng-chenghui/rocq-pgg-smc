@@ -33,12 +33,13 @@
 (* mathcomp-analysis convex.v, with which it was checked to coexist in one    *)
 (* file.                                                                      *)
 (*                                                                            *)
-(* The surface spends eleven identifiers as global keywords in every file     *)
+(* The surface spends twelve identifiers as global keywords in every file     *)
 (* that requires this one: dealt, functionality, execute, endpoints, recon,   *)
-(* sample, certify, tied, ideal, mixing and invariant. Each follows a slot in *)
-(* some rule. The tokens fuel, terminates, publish, vm_compute,               *)
+(* sample, certify, leaks, tied, ideal, mixing and invariant. Each follows a  *)
+(* slot in some rule. The tokens fuel, terminates, publish, vm_compute,       *)
 (* ExactIndependence and SpectralDecay follow a literal and stay identifiers, *)
-(* which is what keeps the two port constructors usable by name.              *)
+(* which is what keeps the two port constructors usable by name; at follows a *)
+(* literal too and was a keyword of Rocq before this file.                    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   obs_payload  == the three run facts in the shape execute_step wants      *)
@@ -46,6 +47,9 @@
 (*                   components                                               *)
 (*   Targeted     == an algebra with the ideal function a run of it computes  *)
 (*   targeted_F   == the Functionality a Targeted names                       *)
+(*   ExactLeakAt  == some coalition of k seats has a view of positive mutual  *)
+(*                   information with the secret                              *)
+(*   exact_leaks  == the witness again, with such an annotation checked       *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -53,7 +57,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
-From infotheo Require Import realType_ext fdist proba variation_dist.
+From infotheo Require Import realType_ext fdist proba variation_dist entropy.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_smc Require Import pgg_interface pgg_monodromy_profile.
 From pgg_smc Require Import pgg_execution_plug pgg_weighted_words.
@@ -69,6 +73,7 @@ Import GRing.Theory Num.Theory.
 
 Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
+Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 
 (******************************************************************************)
@@ -149,6 +154,42 @@ Notation "A 'functionality' f" := (@MkTargeted A _ f)
   (at level 90, left associativity, f at level 0).
 
 (******************************************************************************)
+(*     The tightness annotation of the exact arm                              *)
+(******************************************************************************)
+
+(* At every real field and index, some coalition of exactly k seats reads a
+   view whose mutual information with the secret is strictly positive. It is
+   the affirmation, at size k, of what an ExactWitness denies below the
+   threshold, stated at the same reader ew_indep is stated at, so the two are
+   claims about one object rather than two.
+
+   A scheme guarantees nothing at or above its threshold, and this is what
+   separates a threshold that is sharp from one that is merely as far as a
+   proof reached. It is an annotation on the guarantee and not part of it: k
+   occurs in the type, so the kernel checks the number against the proof, and
+   the annotated program is convertible with the unannotated one. It attaches
+   to the exact arm alone, so a program certifying decay carries no such
+   claim. *)
+Definition ExactLeakAt (k : nat) (x : StackAt Sampled) (p : ExactPayload x)
+    : Prop :=
+  forall (R : realType) (idx : amf_index (sp_f x) R),
+    exists C : {set 'I_(pi_T' (mp_PI (instance_profile (projT1 x)))).+1},
+      #|C| = k
+      /\ 0 < `I( ew_secret (p R idx) ;
+                 (fun u => static_coalition_obs C
+                             ((amf_sample (sp_f x) R idx).(sa_arg) u)
+                             ((amf_sample (sp_f x) R idx).(sa_cut) u)) ).
+Arguments ExactLeakAt : clear implicits.
+
+(* The exact arm's witness, with a tightness annotation checked against it and
+   then dropped. The result is the witness itself, so the annotation costs
+   nothing in the term a row builds and everything proved about an annotated
+   program is proved about the unannotated one. *)
+Definition exact_leaks (x : StackAt Sampled) (p : ExactPayload x)
+    (k : nat) (H : ExactLeakAt k x p) : ExactPayload x := p.
+Arguments exact_leaks : clear implicits.
+
+(******************************************************************************)
 (*     The row statements                                                     *)
 (******************************************************************************)
 
@@ -170,6 +211,11 @@ Notation "s 'sample' f" := (s ;;; sample_step of f)
 
 Notation "s 'certify' 'ExactIndependence' w" := (s ;;; certify_exact of w)
   (at level 90, left associativity, w at level 0).
+
+Notation "s 'certify' 'ExactIndependence' w 'leaks' 'at' k 'by' H" :=
+  (s ;;; certify_exact of (exact_leaks (tableau_at s) w k H))
+  (at level 90, left associativity, w at level 0, k at level 0, H at level 0,
+   only parsing).
 
 Notation "s 'certify' 'SpectralDecay' c" := (s ;;; certify_spectral of c)
   (at level 90, left associativity, c at level 0).
