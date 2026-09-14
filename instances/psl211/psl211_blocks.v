@@ -338,8 +338,13 @@ Definition psl211_hexad_tbl : seq (seq nat) := [::
 Definition psl211_tbl_ok (tbl : seq (seq nat)) : bool :=
   (size tbl == 132) &&
   all (fun R => (size R == 6) && sorted ltn R && all (fun x => x < 12) R) tbl.
+
+(** psl211_tbl_ok_mirrorT — the mirror table is a well-formed block system:
+    every row-reading certificate below reads it as one. *)
 Lemma psl211_tbl_ok_mirrorT : psl211_tbl_ok psl211_mirror_tbl.
 Proof. by vm_compute. Qed.
+
+(** psl211_tbl_ok_hexadT — the hexad table is a well-formed block system. *)
 Lemma psl211_tbl_ok_hexadT : psl211_tbl_ok psl211_hexad_tbl.
 Proof. by vm_compute. Qed.
 
