@@ -189,4 +189,5 @@ manifest/pgg_tableau_syntax.v
 instances/pgl27/pgl27_rows.v
 instances/psl211/psl211_blocks.v
 instances/psl211/psl211_group.v
+instances/psl211/psl211_orbit.v
 manifest/pgg_analysis_client.v
