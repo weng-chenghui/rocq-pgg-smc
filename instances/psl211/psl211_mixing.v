@@ -22,8 +22,10 @@
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   mixing_bound_okT   == the length-584 walk meets the 2^-40 mixing bound   *)
-(*   psl211_word_mixing == the 584-letter word law is within 2^-40 of the     *)
-(*                         uniform shuffle in variation distance              *)
+(*   psl211_word_mixing     == the 584-letter word law is within 2^-40 of the *)
+(*                             uniform shuffle in variation distance          *)
+(*   psl211_endpoint_mixing == the same for each single-card marginal         *)
+(*   psl211_joint_mixing    == the same for the joint secret-and-shuffle law  *)
 (*                                                                            *)
 (* The certificate is an inequality between two binary naturals over the      *)
 (* common denominator 660 * 3^584, where 3^584 is the number of letter words  *)
@@ -39,8 +41,7 @@
 (* convention, which is the one pgl27_mixing.v uses.                          *)
 (*                                                                            *)
 (* Not here: the closure enumeration and its checker, which are in            *)
-(* psl211_closure.v, and the endpoint and joint mixing corollaries of         *)
-(* pgl27_mixing.v, which need the single-card marginal of psl211_profile.v.   *)
+(* psl211_closure.v.                                                          *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -53,8 +54,8 @@ From mathcomp Require Import primitive_action.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import pgg_interface.
-From pgg_smc Require Import psl211_group psl211_closure.
-From pgg_smc Require Import pgg_weighted_words.
+From pgg_smc Require Import psl211_group psl211_closure psl211_profile.
+From pgg_smc Require Import pgg_collusion_bound pgg_weighted_words.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -551,6 +552,53 @@ exact: (@mixing_bound_gen (pgg_G psl211_M)%G psl211_entry_perm
   psl211_mem_entry_perm psl211_entry_perm_inj psl211_entry_perm_mem
   (fun k : nat => @fiber_count 584 k)
   (@word_eval_in_G 584) mixing_cert_nat).
+Qed.
+
+(** psl211_endpoint_mixing — the marginal at one card position of the
+    584-letter word shuffle is within 2^-40 of uniform in variation distance.
+    Where the card starting at that position ends up after the realistic word
+    shuffle is uniform over the twelve positions to within 2^-40, and the
+    exact shuffle makes the same marginal exactly uniform, so the 2^-40 is
+    the whole price of replacing the exact shuffle by a finite word. *)
+Lemma psl211_endpoint_mixing (s : 'I_12) :
+  var_dist (@endpoint_dist_weighted R 10 2 584 psl211_moves psl211_Wuni s)
+           (fdist_uniform (card_ord 12))
+  <= 2%:R^-40.
+Proof.
+rewrite -(psl211_point_uniform R s).
+apply: Order.POrderTheory.le_trans psl211_word_mixing.
+exact: (var_dist_fdistmap (fun sigma : {perm 'I_12} => sigma s)).
+Qed.
+
+(* Two products with the same first marginal are as far apart as their second
+   marginals.  Tensoring the shuffle law with an independent secret prior
+   therefore neither creates nor destroys variation distance. *)
+Local Lemma var_dist_prodR (A B : finType) (P : R.-fdist A)
+    (Q1 Q2 : R.-fdist B) :
+  var_dist (P `x Q1) (P `x Q2) = var_dist Q1 Q2.
+Proof.
+rewrite /var_dist.
+under eq_bigr => ab _ do
+  rewrite !fdist_prodE -mulrBr normrM (ger0_norm (FDist.ge0 _ _)).
+rewrite -(pair_bigA _ (fun a b => P a * `|Q1 b - Q2 b|)) /=.
+rewrite exchange_big /=.
+apply: eq_bigr => b _.
+by rewrite -big_distrl /= FDist.f1 mul1r.
+Qed.
+
+(** psl211_joint_mixing — the joint secret-and-shuffle law of the 584-letter
+    word run is within 2^-40 of the exact-shuffle joint law.  Tensoring with
+    an independent binary secret prior costs nothing, so every observable of
+    the word run is within 2^-40 in variation distance of the same observable
+    of the exact-shuffle run. *)
+Lemma psl211_joint_mixing (secretP : R.-fdist bool) :
+  var_dist
+    (secretP `x (@rho_from_words_weighted R 10 2 584 psl211_moves psl211_Wuni))
+    (secretP `x (`U psl211_G_pos))
+  <= 2%:R^-40.
+Proof.
+rewrite var_dist_prodR.
+exact: psl211_word_mixing.
 Qed.
 
 End psl211_mixing_sec.
