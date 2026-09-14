@@ -28,6 +28,7 @@
 -R legacy/security pgg_smc
 
 lib/perm_uniform.v
+lib/perm_exchange.v
 lib/proba_entropy_ext.v
 smc/graded_resource.v
 smc/smc_interpreter.v

@@ -111,8 +111,8 @@ Proof. by rewrite /heart_block -psl211_heart_set_act inE tnth_mktuple. Qed.
    coset of the stabiliser of x, so the fiber of the action map over y has
    the order of that stabiliser.  Stated at a total action, so that it
    instantiates at the set action 'P^* the block count runs through. *)
-(* Candidate for a mathcomp-only lib file: no psl211 content, kept Local here
-   until one exists, as psl211_scheme.v does for perm_of_eq_card. *)
+(* No psl211 content: a mathcomp-only home for it would be a lib file in the
+   style of lib/perm_exchange.v. *)
 Local Lemma card_amove (gT : finGroupType) (rT : finType)
     (to : {action gT &-> rT}) (G : {group gT}) (x y : rT) :
   y \in orbit to G x ->
