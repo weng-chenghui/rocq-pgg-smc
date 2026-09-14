@@ -31,3 +31,8 @@ notes/**/*.log
 notes/**/*.bbl
 .nra.cache
 rocq_mcp_cache_*.v
+notes/probes/**/*.vo
+notes/probes/**/*.vos
+notes/probes/**/*.vok
+notes/probes/**/*.glob
+notes/probes/**/*.aux
