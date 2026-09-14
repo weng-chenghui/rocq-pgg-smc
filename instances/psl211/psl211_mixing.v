@@ -37,7 +37,7 @@ From mathcomp Require Import primitive_action.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import pgg_interface.
-From pgg_smc Require Import psl211_blocks psl211_group.
+From pgg_smc Require Import psl211_blocks psl211_group psl211_closure.
 From pgg_smc Require Import pgg_collusion_bound pgg_weighted_words.
 
 Set Implicit Arguments.
@@ -192,140 +192,12 @@ by case: (g == 1%g); rewrite ?cardsT ?cards0 ?card_tuple ?card_ord ?expn0.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
-(* The inverse of each letter reads off the reverse-walk letter's table.      *)
-(* -------------------------------------------------------------------------- *)
-
-(* A permutation whose forward images are read off the table F has (g^-1) x at
-   Finv, whenever Finv is a right inverse of F on the twelve positions.  The
-   inverse of the block-reversal letter is given by a table this way, so no
-   permutation is ever inverted inside a kernel computation. *)
-Local Lemma perm_inv_val (g : {perm 'I_12}) (F Finv : seq nat) (x : 'I_12) :
-  (forall y : 'I_12, val (g y) = nth 0 F (val y)) ->
-  (forall k, k < 12 -> nth 0 F (nth 0 Finv k) = k) ->
-  (forall k, k < 12 -> nth 0 Finv k < 12) ->
-  val ((g^-1)%g x) = nth 0 Finv (val x).
-Proof.
-move=> Hfwd Hcomp Hrange.
-have Hc12 : nth 0 Finv (val x) < 12 by apply: Hrange; exact: ltn_ord.
-pose z : 'I_12 := Ordinal Hc12.
-have Hgz : g z = x.
-  by apply/val_inj; rewrite Hfwd /= Hcomp //; exact: ltn_ord.
-have Hzx : (g^-1)%g x = z by rewrite -Hgz permK.
-by rewrite Hzx.
-Qed.
-
-(* Block reversal sends a position to the entry of row 0 of the alphabet
-   table at that position. *)
-Local Lemma gfwd_r4 (x : 'I_12) :
-  val (psl211_r4_perm x) = nth 0 (psl211_mtbl 0) (val x).
-Proof. exact: psl211_r4_permE. Qed.
-
-(* The inverse of the block-reversal letter has the block-reversal letter's
-   own table.  Reversal of each four-position segment is an involution, which
-   is why the symmetrized alphabet has three letters and not four. *)
-Local Lemma ptbl_r4_inv :
-  psl211_ptbl ((psl211_r4_perm)^-1)%g = psl211_mtbl 0.
-Proof.
-apply: (@psl211_ptbl_of_fwd _ (psl211_mtbl 0)); last by [].
-move=> x; apply: (perm_inv_val (F := psl211_mtbl 0)); first exact: gfwd_r4.
-- by case=> [|[|[|[|[|[|[|[|[|[|[|[|k]]]]]]]]]]]].
-- by case=> [|[|[|[|[|[|[|[|[|[|[|[|k]]]]]]]]]]]].
-Qed.
-
-(* The inverse of letter j has the table of letter psl211_inv_letter j.  The
-   three reverse steps of the walk are again letters of the alphabet, which is
-   the reason the alphabet was symmetrized: the reverse walk needs no table
-   the forward walk does not already have.  Read through psl211_ptbl_inj this
-   is the inverse-closure the symmetric mixing bound requires of the generator
-   multiset. *)
-Local Lemma ptbl_inv_letter (j : 'I_3) :
-  psl211_ptbl ((tnth psl211_moves j)^-1)%g
-  = psl211_mtbl (psl211_inv_letter (val j)).
-Proof.
-case: j => -[|[|[|//]]] Hj; rewrite (tnth_nth 1%g) /=.
-- exact: ptbl_r4_inv.
-- exact: (psl211_ptbl_sym (@Ordinal 3 2 isT)).
-- by rewrite invgK; exact: (psl211_ptbl_sym (@Ordinal 3 1 isT)).
-Qed.
-
-(* -------------------------------------------------------------------------- *)
 (* The predecessor index and the entry-permutation reverse step.              *)
 (* -------------------------------------------------------------------------- *)
 
 (* Every letter of the alphabet lies in the shuffle group. *)
 Local Lemma sym_in_G (j : 'I_3) : tnth psl211_moves j \in pgg_G psl211_M.
 Proof. by move: (psl211_gen3_of_mem (val j)); rewrite /psl211_gen3_of inord_val.
-Qed.
-
-(* A group element's table is one of the closure keys.  Read off the
-   enumeration psl211_mem_G_Ps and the section psl211_ptbl_entry rather than
-   the closure checker, which psl211_group.v keeps to itself. *)
-Local Lemma key_of_G (g : {perm 'I_12}) :
-  g \in pgg_G psl211_M -> psl211_ptbl g \in unzip1 psl211_elem_table.
-Proof.
-move=> /psl211_mem_G_Ps /mapP[k Hk ->].
-rewrite mem_iota /= in Hk.
-by rewrite (psl211_ptbl_entry Hk); apply: mem_nth; rewrite psl211_keys_size.
-Qed.
-
-(* Every one-letter successor of a key is itself a key: composing tables is
-   multiplying shuffles, and the group is closed under its own letters. *)
-Local Lemma keys_closed_mem (t : seq nat) (j : nat) :
-  t \in unzip1 psl211_elem_table -> j \in [:: 0; 1; 2] ->
-  psl211_mcomp t (psl211_mtbl j) \in unzip1 psl211_elem_table.
-Proof.
-(* Every membership side condition is discharged by an explicit term: a goal
-   about psl211_elem_table left to done is proved by evaluating the
-   breadth-first search of psl211_group.v in lazy kernel reduction, which the
-   vm_compute that certified the table does not help with. *)
-move=> Ht Hj.
-have [jo Hjo] :
-    exists jo : 'I_3, psl211_mtbl j = psl211_ptbl (tnth psl211_moves jo).
-  move: Hj; rewrite !inE => /or3P[] /eqP ->.
-  - by exists (@Ordinal 3 0 isT); rewrite psl211_ptbl_sym.
-  - by exists (@Ordinal 3 1 isT); rewrite psl211_ptbl_sym.
-  - by exists (@Ordinal 3 2 isT); rewrite psl211_ptbl_sym.
-set k := index t (unzip1 psl211_elem_table).
-have Hklt : k < 660.
-  rewrite /k -psl211_keys_size index_mem; exact: Ht.
-have Hkt : psl211_ptbl (psl211_entry_perm k) = t.
-  rewrite (psl211_ptbl_entry Hklt) /k.
-  exact: (@nth_index _ [::] t (unzip1 psl211_elem_table) Ht).
-rewrite Hjo -Hkt -psl211_ptbl_morph.
-apply: key_of_G; apply: groupM;
-  [exact: psl211_entry_perm_mem | exact: sym_in_G].
-Qed.
-
-Local Lemma mem_unzip1_has (t : seq nat) :
-  (t \in unzip1 psl211_elem_table)
-  = has (fun sw : seq nat * seq nat => sw.1 == t) psl211_elem_table.
-Proof. by rewrite /unzip1 -has_pred1 has_map. Qed.
-
-(* A key is found at an index below 660, so psl211_tbl_index lands in the
-   walk's state range. *)
-Local Lemma tbl_index_lt (t : seq nat) :
-  t \in unzip1 psl211_elem_table -> (psl211_tbl_index t < 660)%N.
-Proof.
-rewrite mem_unzip1_has /psl211_tbl_index -psl211_size_elem_table -has_find.
-move=> H; exact: H.
-Qed.
-
-(* Reading the key list at the index psl211_tbl_index assigns a key returns
-   that key, so the indexing is a section of the key list. *)
-Local Lemma tbl_index_key (t : seq nat) :
-  t \in unzip1 psl211_elem_table ->
-  nth [::] (unzip1 psl211_elem_table) (psl211_tbl_index t) = t.
-Proof.
-(* The side conditions carrying psl211_elem_table must be supplied as
-   premises: letting done touch them forces the breadth-first search through
-   lazy kernel reduction instead of vm_compute. *)
-move=> Ht.
-have Hh : has (fun sw : seq nat * seq nat => sw.1 == t) psl211_elem_table.
-  by rewrite -mem_unzip1_has; exact: Ht.
-have Hlt : (psl211_tbl_index t < size psl211_elem_table)%N.
-  by rewrite /psl211_tbl_index -has_find; exact: Hh.
-rewrite /unzip1 (nth_map ([::], [::]) _ _ Hlt).
-by apply/eqP; exact: (nth_find ([::], [::]) Hh).
 Qed.
 
 (* The index of the jn-th reverse-walk predecessor of state k: the key at k
@@ -344,13 +216,13 @@ Local Lemma predk_mem (k jn : nat) : (k < 660)%N -> (jn < 3)%N ->
                (psl211_mtbl (psl211_inv_letter jn))
     \in unzip1 psl211_elem_table.
 Proof.
-move=> Hk Hjn; apply: keys_closed_mem; last exact: inv_letter_mem.
-by apply: mem_nth; rewrite psl211_keys_size.
+move=> Hk Hjn; apply: psl211_keys_closed; last exact: inv_letter_mem.
+by apply: mem_nth; rewrite psl211_size_keys.
 Qed.
 
 Local Lemma predk_lt (k jn : nat) :
   (k < 660)%N -> (jn < 3)%N -> (predk k jn < 660)%N.
-Proof. by move=> Hk Hjn; apply: tbl_index_lt; exact: predk_mem. Qed.
+Proof. by move=> Hk Hjn; apply: psl211_tbl_index_lt; exact: predk_mem. Qed.
 
 (* entry_perm k * sigma_j^-1 is entry_perm (predk k j), for k below 660.  The
    index arithmetic of psl211_pred_table is right multiplication by the
@@ -364,8 +236,8 @@ move=> Hk.
 have Hpred : (predk k (val j) < 660)%N by apply: predk_lt => //; exact: ltn_ord.
 apply: psl211_ptbl_inj.
 rewrite (psl211_ptbl_entry Hpred) /predk.
-rewrite (tbl_index_key (predk_mem Hk (ltn_ord j))).
-by rewrite psl211_ptbl_morph (psl211_ptbl_entry Hk) (ptbl_inv_letter j).
+rewrite (psl211_tbl_index_key (predk_mem Hk (ltn_ord j))).
+by rewrite psl211_ptbl_morph (psl211_ptbl_entry Hk) (psl211_ptbl_inv_letter j).
 Qed.
 
 (* -------------------------------------------------------------------------- *)
@@ -437,11 +309,11 @@ elim: L k => [|L IH] k Hk.
         rewrite -(psl211_ptbl_entry Hk) H1k psl211_ptbl_id.
         by rewrite /unzip1 (nth_map ([::], [::]) _ _ H0) psl211_elem_table0.
       have Hks : (k < size (unzip1 psl211_elem_table))%N
-        by rewrite psl211_keys_size.
+        by rewrite psl211_size_keys.
       have H0s : (0 < size (unzip1 psl211_elem_table))%N
-        by rewrite psl211_keys_size.
+        by rewrite psl211_size_keys.
       move: Hp => /eqP.
-      rewrite (nth_uniq _ Hks H0s psl211_uniq_elem_keys).
+      rewrite (nth_uniq _ Hks H0s psl211_keys_uniq).
       by move/eqP => ->.
     - move/eqP => ->.
       by rewrite /psl211_entry_perm psl211_elem_table0 /psl211_word3_perm.
@@ -657,7 +529,7 @@ Lemma psl211_word_mixing :
   <= 2%:R^-40.
 Proof.
 apply: (@mixing_bound_gen (pgg_G psl211_M)%G psl211_entry_perm
-  (fun k => nth 0%num (walkN 584) k) psl211_G_pos psl211_card psl211_mem_G_Ps
+  (fun k => nth 0%num (walkN 584) k) psl211_G_pos psl211_card psl211_mem_entry_perm
   psl211_entry_perm_inj psl211_entry_perm_mem
   (fun k : nat => @fiber_count 584 k)
   (@word_eval_in_G 584) mixing_cert_nat).

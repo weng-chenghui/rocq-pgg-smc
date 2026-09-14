@@ -191,6 +191,7 @@ instances/kim2025/five_card_rows.v
 instances/s5/s5_rows.v
 instances/psl211/psl211_blocks.v
 instances/psl211/psl211_group.v
+instances/psl211/psl211_closure.v
 instances/psl211/psl211_orbit.v
 instances/psl211/psl211_scheme.v
 instances/psl211/psl211_profile.v

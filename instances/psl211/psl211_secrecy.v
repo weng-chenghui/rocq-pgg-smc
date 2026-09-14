@@ -60,7 +60,8 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import transitivity_privacy design_privacy.
-From pgg_smc Require Import psl211_blocks psl211_group psl211_orbit.
+From pgg_smc Require Import psl211_blocks psl211_group psl211_closure.
+From pgg_smc Require Import psl211_orbit.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
