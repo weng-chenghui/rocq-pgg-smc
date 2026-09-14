@@ -28,6 +28,8 @@
 (* Definitions:                                                               *)
 (*   Functionality         == the ideal function and the tolerated coalition  *)
 (*                            size                                            *)
+(*   algebra_functionality == the specification a dealer-dealt run of an      *)
+(*                            algebra meets                                   *)
 (*   oe_inputT, oe_outT, oe_gT, oe_k                                          *)
 (*                         == the carriers a realisation is stated in         *)
 (*   realises              == the run decodes to the ideal function           *)
@@ -49,8 +51,10 @@ From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
+From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_smc Require Import pgg_interface pgg_monodromy_profile.
 From pgg_smc Require Import pgg_execution_plug pgg_observed_execution.
+From pgg_smc Require Import pgg_instance.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -74,6 +78,19 @@ Local Open Scope ring_scope.
 Record Functionality (inputT outT : Type) := MkFunctionality {
   fn_f : inputT -> outT ;
   fn_threshold : nat }.
+
+(* The specification a dealer-dealt run of an algebra meets: the identity on
+   the dealt secret, tolerating one seat fewer than the scheme's privacy
+   threshold. Both components are forced rather than chosen. The function is
+   the identity because a run that deals a secret and reconstructs it computes
+   nothing from several parties' inputs, and the tolerated size is the
+   scheme's own ts_k', because the coalition sizes at which the shares reveal
+   nothing are the scheme's and no part of the execution narrows them. An
+   instance in this mode therefore names no functionality of its own, and
+   realises_expected against this one holds by conversion. *)
+Definition algebra_functionality (A : PGGAlgebraic)
+    : Functionality (pga_secretT A) (pga_secretT A) :=
+  MkFunctionality id (ts_k' (pga_scheme A)).
 
 (* The carriers a realisation statement is made in: the type of one run
    argument, the type of the reconstructed value, the shuffle group, and the

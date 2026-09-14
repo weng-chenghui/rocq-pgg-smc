@@ -41,6 +41,7 @@ protocol/pgg_monodromy_profile.v
 protocol/pgg_execution_plug.v
 protocol/pgg_observed_execution.v
 protocol/pgg_instance.v
+protocol/pgg_algebra_syntax.v
 protocol/pgg_functionality.v
 manifest/pgg_analysis_status.v
 legacy/instances/abelian/pgg_abelian.v
@@ -182,5 +183,6 @@ instances/pgl27/pgl27_models.v
 instances/pgl27/pgl27_analysis.v
 manifest/pgg_analysis_manifest.v
 manifest/pgg_tableau.v
+manifest/pgg_tableau_syntax.v
 instances/pgl27/pgl27_rows.v
 manifest/pgg_analysis_client.v
