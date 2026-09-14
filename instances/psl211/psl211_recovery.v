@@ -25,7 +25,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action bigop div prime.
+From mathcomp Require Import morphism action div.
 From mathcomp Require Import primitive_action.
 From pgg_smc Require Import pgg_interface.
 From pgg_smc Require Import psl211_blocks psl211_group psl211_orbit.
@@ -39,10 +39,9 @@ Import Prenex Implicits.
 (* Eleven colours determine the heart set.                                    *)
 (* -------------------------------------------------------------------------- *)
 
-(** psl211_eleven_reveal_set — two six-element sets of positions agreeing at
-    eleven of the twelve positions are equal: under a fixed count of hearts
-    the twelfth colour is forced. The colour pigeonhole of the six-six
-    split, which constrains only colours and not cards. *)
+(** psl211_eleven_reveal_set — under a fixed count of hearts the twelfth
+    colour is forced by the other eleven. The colour-layer pigeonhole,
+    constraining colours alone and never the cards beneath them. *)
 Lemma psl211_eleven_reveal_set (H H' : {set 'I_12}) (j : 'I_12) :
   #|H| = 6 -> #|H'| = 6 ->
   (forall i, i != j -> (i \in H') = (i \in H)) -> H' = H.
@@ -67,15 +66,14 @@ Proof.
 have key (tbl : seq (seq nat)) :
     psl211_tbl_ok tbl -> S \in psl211_sets_of tbl -> #|S| = 6.
   move=> Hok; rewrite inE => /hasP[R HR /eqP <-].
-  by apply: psl211_block_card6; exact: (allP (psl211_tbl_ok_asc6 Hok) _ HR).
-by case/orP; [exact: key psl211_tbl_ok_mirrorT
-            | exact: key psl211_tbl_ok_hexadT].
+  apply: psl211_block_card6; exact: (allP (psl211_tbl_ok_asc6 Hok) _ HR).
+case/orP; [exact: key psl211_tbl_ok_mirrorT
+         | exact: key psl211_tbl_ok_hexadT].
 Qed.
 
 (** psl211_eleven_reveal_class — two valid decks whose cards have the same
-    colour off one position carry the same chirality. Eleven revealed
-    colours determine the secret, so a coalition of eleven positions
-    reconstructs it. *)
+    colour off one position carry the same chirality, so a coalition holding
+    eleven of the twelve colours reconstructs the secret. *)
 Lemma psl211_eleven_reveal_class (s s' : bool) (sh sh' : 12.-tuple 'I_12)
     (j : 'I_12) :
   psl211_orbit_valid s sh -> psl211_orbit_valid s' sh' ->
@@ -88,7 +86,7 @@ have E : psl211_heart_set sh' = psl211_heart_set sh.
   apply: (@psl211_eleven_reveal_set _ _ j).
   - exact: block_card6 Hval.
   - exact: block_card6 Hval'.
-  - by move=> i ij; rewrite !inE; exact: Hoff.
+  - move=> i ij; rewrite !inE; exact: Hoff.
 by rewrite -Hcl -Hcl' /psl211_orbit_class E.
 Qed.
 
@@ -98,22 +96,25 @@ Qed.
 
 (* vm_compute cannot reduce enum 'I_12, so the ground distinctness check of
    the witness deck goes through the literal enumeration, as psl211_orbit.v
-   does for the encoders; both lines are Local there. *)
+   does for the encoders. *)
 Local Definition ord12_enum : seq 'I_12 :=
   [:: @Ordinal 12 0 isT; @Ordinal 12 1 isT; @Ordinal 12 2 isT;
       @Ordinal 12 3 isT; @Ordinal 12 4 isT; @Ordinal 12 5 isT;
       @Ordinal 12 6 isT; @Ordinal 12 7 isT; @Ordinal 12 8 isT;
       @Ordinal 12 9 isT; @Ordinal 12 10 isT; @Ordinal 12 11 isT].
 
+(* The twelve positions in order, as a literal reduction may consume. *)
 Local Lemma enum_ord12 : enum 'I_12 = ord12_enum.
 Proof. by apply: (inj_map val_inj); rewrite val_enum_ord. Qed.
 
+(* Position from a natural number, by reduction modulo twelve; restated
+   because psl211_orbit.v's copy is Local there. *)
 Local Definition Imod (k : nat) : 'I_12 := Ordinal (ltn_pmod k (ltn0Sn 11)).
 
 (* The mirror block through the five positions 1, 3, 7, 10, 11 of the hexad
-   row psl211_rep_list false = [0; 1; 3; 7; 10; 11].  It is the unique such
-   mirror block (psl211_design5_mirrorT) and holds position 2 where the hexad
-   row holds position 0, so the two blocks differ at 0 and at 2 only. *)
+   row psl211_rep_list false = [0; 1; 3; 7; 10; 11]; it is unique by
+   psl211_design5_mirrorT. It holds position 2 where the hexad row holds
+   position 0, so the two blocks differ at 0 and at 2 only. *)
 Local Definition mirror_swap_row : seq nat := [:: 1; 2; 3; 7; 10; 11].
 
 (* Position to card of a deck whose hearts sit on mirror_swap_row: the
@@ -122,14 +123,17 @@ Local Definition mirror_swap_row : seq nat := [:: 1; 2; 3; 7; 10; 11].
 Local Definition mirror_swap_tbl : seq nat :=
   [:: 6; 1; 0; 2; 7; 8; 9; 3; 10; 11; 4; 5].
 
+(* The chirality-true witness deck: its hearts sit on the mirror block. *)
 Local Definition mirror_swap_deck : 12.-tuple 'I_12 :=
   [tuple Imod (nth 0 mirror_swap_tbl i) | i < 12].
 
+(* The witness deck deals twelve distinct cards. *)
 Local Lemma mirror_swap_deck_ok : psl211_deck_ok mirror_swap_deck.
 Proof.
 by rewrite /psl211_deck_ok /mirror_swap_deck /= enum_ord12; vm_compute.
 Qed.
 
+(* The witness deck's heart positions are exactly the mirror block. *)
 Local Lemma mirror_swap_heart_set :
   psl211_heart_set mirror_swap_deck = psl211_list_to_set mirror_swap_row.
 Proof.
@@ -137,6 +141,7 @@ apply/setP => i; rewrite !inE tnth_mktuple.
 by case: i => -[|[|[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]]]] ?.
 Qed.
 
+(* The mirror block is a block of the mirror system, by its table row. *)
 Local Lemma mirror_swap_mem :
   psl211_list_to_set mirror_swap_row \in psl211_mirror_blocks.
 Proof.
@@ -144,6 +149,7 @@ rewrite inE; apply/hasP; exists mirror_swap_row; last by [].
 by vm_compute.
 Qed.
 
+(* The witness deck is a valid deal of chirality true. *)
 Local Lemma mirror_swap_valid : psl211_orbit_valid true mirror_swap_deck.
 Proof.
 split; first exact: mirror_swap_deck_ok.
@@ -165,7 +171,7 @@ by case: i => -[|[|[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]]]] ?.
 Qed.
 
 (* The card at position i of a re-dealt deck is the card the original deck
-   holds at position g i.  Stated at an abstract deck because tnth_mktuple
+   holds at position g i. Stated at an abstract deck because tnth_mktuple
    otherwise unfolds the witness decks, which are themselves tuple
    comprehensions. *)
 Local Lemma tnth_act (sh : 12.-tuple 'I_12) (g : pgg_gT psl211_M)
@@ -190,8 +196,8 @@ Qed.
 
 (** psl211_ten_reveal_ambiguous — for every two hidden positions there are
     valid decks of the two chiralities whose cards have the same colour at
-    the other ten positions. Ten revealed colours never determine the
-    secret, wherever the two hidden positions sit. *)
+    the other ten. Ten colours leave the secret undetermined, wherever the
+    two hidden positions sit. *)
 Lemma psl211_ten_reveal_ambiguous (p q : 'I_12) :
   p != q ->
   exists sh sh', psl211_orbit_valid true sh /\ psl211_orbit_valid false sh' /\
@@ -220,8 +226,8 @@ exists [tuple tnth (psl211_orbit_encode false) (@pgg_rho psl211_M g i)
 split; first exact: valid_act gG mirror_swap_valid.
 split; first exact: valid_act gG (psl211_orbit_encode_valid false).
 move=> i nip niq; rewrite !tnth_act; apply: decks_agree_off02.
-- apply: contra nip => /eqP Hgi; apply/eqP; apply: (@perm_inj _ g).
+  apply: contra nip => /eqP Hgi; apply/eqP; apply: (@perm_inj _ g).
   by rewrite Hgi Hgp.
-- apply: contra niq => /eqP Hgi; apply/eqP; apply: (@perm_inj _ g).
-  by rewrite Hgi Hgq.
+apply: contra niq => /eqP Hgi; apply/eqP; apply: (@perm_inj _ g).
+by rewrite Hgi Hgq.
 Qed.
