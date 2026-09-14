@@ -980,7 +980,7 @@ git add reconstruct/design_privacy.v && git commit -m "feat(reconstruct): design
 - Create: `instances/psl211/psl211_scheme.v`
 - Source: `probe_decomposition.v` lines 43-125, `pgl27_scheme.v` (all)
 
-- [ ] **Step 1: Validity, correctness, the re-deal privacy (ledger L12)**
+- [x] **Step 1: Validity, correctness, the re-deal privacy (ledger L12)**
 
 ```coq
 From HB Require Import structures.
@@ -1052,7 +1052,7 @@ Proof.
 Qed.
 ```
 
-- [ ] **Step 2: The records (probe_decomposition.v lines 100-125, content `id`)**
+- [x] **Step 2: The records (probe_decomposition.v lines 100-125, content `id`)**
 
 ```coq
 (** psl211_orbit_scheme — the twelve-card chirality ThresholdScheme: secret
@@ -1078,7 +1078,7 @@ Definition psl211_plug : ReconPlug psl211_M bool :=
     (fun g => @pgg_rho psl211_M g) psl211_orbit_recon_invariant.
 ```
 
-- [ ] **Step 3: Compile and check**
+- [x] **Step 3: Compile and check**
 
 ```bash
 make instances/psl211/psl211_scheme.vo 2>&1 | tail -3 && echo BUILD-OK
@@ -1086,7 +1086,7 @@ make instances/psl211/psl211_scheme.vo 2>&1 | tail -3 && echo BUILD-OK
 
 Expected: `BUILD-OK`; `Print Assumptions psl211_plug.`: `Closed under the global context`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add instances/psl211/psl211_scheme.v && git commit -m "feat(psl211): threshold scheme with re-deal privacy at five, reconstruction plug"
@@ -1573,3 +1573,5 @@ Blocking findings and their resolution in the text above: (2) Task 9 now uses th
 As built, Task 3 (commit 338cdff): the exported word layer is `psl211_wgenn`, `psl211_papply`, `psl211_word_perm`, `psl211_word_perm_mem`, `psl211_word_perm_val`; `wapply` is Local; `psl211_milk6_permE` is named `psl211_m6_permVE`; the three blocks of four cards are called four-card blocks, not quarters (12 / 4 = 3 cards would be a quarter). Every later task's text above has been updated to these names.
 
 As built, Task 4 (commit 89aa93f): `psl211_pattern_countE` carries `uniq tbl`; `psl211_asc6`, `psl211_mirror_tbl_uniq`, `psl211_hexad_tbl_uniq` exported; `class_count` takes the enumeration as a parameter (a 924-row literal inside `eq_card` does not terminate); `sorted6` is the literal with a `sorted6E` bridge to the nested-flatten shape whose completeness proof is pgl27's; `code_table_okA` restates the BFS certificate with `all` at the head because the `allP` view on the BFS-headed form does not terminate; `setact_imset` replaces `rewrite /=` in the orbit proofs.
+
+As built, Task 6 (commit a75d6a2): `psl211_private` is proved uniformly in the two secrets (no `case: (s1 == s2)`); the re-dealt deck is `[tuple sg (tnth sh i) | i < 12]` for a code permutation `sg` supported off the coalition's codes and carrying the old heart codes onto the new block, obtained from the new general Local lemma `perm_of_eq_card` (equinumerous subsets of a finType are exchanged by a permutation supported on their union; absent from mathcomp), so distinctness is `perm_inj` rather than a counting argument; the `#|C| = 0` case uses the encoder because `psl211_count_ok` certifies sizes 1..5 only; the pattern transfer is the Local `fam_pattern_transfer`; the file imports `path`; nineteen Local helpers in all (`perm_onS`, `perm_of_eq_card`, `mem_ascending`, `mem_subsets`, `mem_sublists`, `sorted_val_enum`, `all_lt12_enum`, `subseq_val_enum`, `count_ok_le5`, `fam_tbl`, `fam_blocks`, `fam_blocksT`, `fam_blocksF`, `asc6_fam`, `uniq_fam`, `fam_card6`, `fam_class`, `fam_valid`, `fam_pattern_transfer`); `mem_ascending` reaches the Local enumerator of psl211_blocks.v by qualified name, a fragility to remove by moving `mem_ascending`/`mem_subsets` into psl211_blocks.v (follow-up, not blocking).
