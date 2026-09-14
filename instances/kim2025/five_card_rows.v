@@ -18,7 +18,7 @@
 (*                                                                            *)
 (* The row is written in the statement surface of pgg_tableau_syntax.v over   *)
 (* the statements of pgg_tableau.v: the prefix names the ideal function,      *)
-(* drives the run in the committed-input mode and adjoins the three run       *)
+(* drives the run in the encoded-run mode and adjoins the three run           *)
 (* facts, one further statement adjoins the uniform rotation model, one       *)
 (* adjoins the exact witness, and the last publishes the manifest row. The    *)
 (* published row is the manifest's five_card_row_uniform, and the rowE lemma  *)
@@ -45,8 +45,8 @@
 (* two or more cards are proved positive nowhere.                             *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   five_card_committed     == the prefix: the committed-input run with its  *)
-(*                              three run facts                               *)
+(*   five_card_committed     == the prefix: the encoded run with its three    *)
+(*                              run facts                                     *)
 (*   five_card_colour_fill   == a coalition's colours read back as card       *)
 (*                              positions                                     *)
 (*   five_card_exact_witness == the exact arm's witness at every field and    *)
@@ -116,7 +116,7 @@ Local Open Scope ring_scope.
 
 (** The first three statements of the five-card row: the algebra with the
     ideal function a run of it computes, the run driven in the
-    committed-input mode at fuel 100, and the three run facts. What has been
+    encoded-run mode at fuel 100, and the three run facts. What has been
     proved at this point is run correctness, that the interpreter finishes,
     collects one endpoint per seat and decodes them to the conjunction of the
     two committed bits, and nothing about a coalition. *)

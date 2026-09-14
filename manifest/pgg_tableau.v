@@ -30,8 +30,8 @@
 (*                                                                            *)
 (* Each arm has one composition law, and the two laws are where the           *)
 (* mathematics of the row sits. exact_tail transports a witness's             *)
-(* independence from the static reader to the executed one along the previous *)
-(* line's identification, then derives the entropy forms by                   *)
+(* independence from the direct computation to the view along the previous    *)
+(* statement's link lemma, then derives the entropy forms by                  *)
 (* leakage_of_view_indep and the closure under deterministic post-processing  *)
 (* by inde_RV_comp. spectral_tail feeds the certificate's cut-carrier         *)
 (* distance and its ideal constancy to var_dist_fdistmap_transfer.            *)
@@ -62,7 +62,7 @@
 (*   publish                == the terminal attaching the row's manifest row  *)
 (*   PublishedRowAt         == a row's data, its manifest row and its theorem *)
 (*   run_correct_of         == run correctness of a published row             *)
-(*   view_identification_of == its link lemma, the executed view as the       *)
+(*   view_identification_of == its link lemma, the view as the                *)
 (*                             direct computation                             *)
 (*   view_secrecy_of        == its security statement, exact-arm name         *)
 (*   view_indist_of         == the same statement, spectral-arm name          *)
@@ -347,7 +347,7 @@ Definition cert_eps (R : realType) (A : PGGAlgebraic) (E : ExecutionParams A)
   sw_bound_eps (sc_b cert) + sw_bound_eps (sc_b cert).
 Arguments cert_eps {R A E sa} cert.
 
-(* A bound named once per real field, with None meaning the chain's own sum. A
+(* A bound named once per real field, with None meaning the program's own sum.
    single real will not serve, because the security port quantifies over the
    real field and the published number is therefore a function of it. *)
 Definition Reprice := forall R : realType, option R.
@@ -382,7 +382,7 @@ Arguments BridgedProp c q : assert.
 
 (* The proposition a row carries at each completion level: nothing about a
    coalition below Observed, run correctness at Observed, that with the view
-   identification at Sampled, and the bridged conjunction at the chain's own
+   identification at Sampled, and the bridged conjunction at the program's own
    bound above it. This is the default proposition family of the carrier
    below, and the family a terminal leaves when it republishes a row.
 
@@ -431,8 +431,8 @@ Definition tableau_bind (a : CompletionLevel) (Q : StackAt a -> Prop)
   f (tableau_at s) (tableau_thm s) p.
 Arguments tableau_bind {a Q P T} s f p.
 
-(* The surface of a row: a statement f applied to the chain so far and to its
-   payload p. Left associative, so a row reads as a sequence of statements
+(* The surface of a row: a statement f applied to the program so far and to
+   its payload p. Left associative, so a row reads as a sequence of statements
    applied to a growing coordinate; right associativity parses one line's
    payload as the next line's continuation. The infix >>= is taken by the
    fdist scope, so the separator is spelled of. *)
@@ -527,8 +527,8 @@ Definition SpectralPayload (x : StackAt Sampled) : Type :=
   forall (R : realType) (idx : amf_index (sp_f x) R),
     SpectralCert (amf_sample (sp_f x) R idx).
 
-(* The independence a witness states at the static reader, transported to the
-   executed reader along the view identification, with its entropy forms and
+(* The independence a witness states at the direct computation, transported
+   to the view along the link lemma, with its entropy forms and
    its closure under deterministic post-processing. The composition law of the
    exact arm, and what makes an ExactWitness the whole of what an instance
    owes on it. *)
@@ -615,7 +615,7 @@ Definition RepricePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
     end.
 Arguments RepricePayload c q : assert.
 
-(* A port's proposition at the chain's own bound, with an identity naming
+(* A port's proposition at the program's own bound, with an identity naming
    another number, is that port's proposition at the other number. Renaming
    proves nothing new about the coalition, and it is what lets a row publish
    the constant a paper cites. *)
@@ -681,7 +681,7 @@ Record PublishedRowAt (c : Reprice) := MkPublishedRow {
   published_thm : BridgedProp c published_at }.
 Arguments PublishedRowAt : clear implicits.
 
-(* A published row at the chain's own bound: what a row that never restates
+(* A published row at the program's own bound: what a row that never restates
    its number publishes. *)
 Notation PublishedRow := (PublishedRowAt no_reprice).
 
@@ -701,8 +701,8 @@ Definition run_correct_of (c : Reprice) (r : PublishedRowAt c) :=
   proj1 (proj1 (published_thm r)).
 Arguments run_correct_of {c} r.
 
-(* The link lemma of a published row, identifying its executed view with the
-   direct computation, the fact on which its security statement is stated
+(* The link lemma of a published row, identifying its view with the direct
+   computation, the fact on which its security statement is stated
    about a group action. *)
 Definition view_identification_of (c : Reprice) (r : PublishedRowAt c) :=
   proj2 (proj1 (published_thm r)).

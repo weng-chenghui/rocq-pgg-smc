@@ -4,7 +4,7 @@
 (* five_card_exec: the ExecutionPlug of the five-card instance                *)
 (*                                                                            *)
 (* The five-card instance carries an execution plug over its own              *)
-(* MonodromyProfile five_card_profile, built by the committed-input           *)
+(* MonodromyProfile five_card_profile, built by the encoded-run               *)
 (* constructor: the run argument is the committed pair of bits, both count    *)
 (* bridges are erefl at 5 seats, 5 shares and 5 cards, the participant list   *)
 (* is den_boer_players, the input processes are the two commit processes of   *)
@@ -12,7 +12,7 @@
 (*                                                                            *)
 (* The same run is written a second time as framework data. five_card_algebra *)
 (* is the instance's algebraic record and five_card_params drives it in the   *)
-(* committed-input mode, and the observed execution below is what the         *)
+(* encoded-run mode, and the observed execution below is what the             *)
 (* framework builds from those two and the three run facts, rather than a     *)
 (* record assembled here. The instance pays two reductions for them:          *)
 (* termination at the run, and the endpoint equation at the profile, where    *)
@@ -27,7 +27,7 @@
 (*   five_card_commits     == the commit processes of the two committing      *)
 (*                            parties                                         *)
 (*   five_card_payload     == the card positions those processes hand over    *)
-(*   five_card_params      == the run-level data of the committed-input run   *)
+(*   five_card_params      == the run-level data of the encoded run           *)
 (*   five_card_endpoints   == the endpoint obligation of that run             *)
 (*   five_card_recon       == the reconstruction obligation of that run       *)
 (*   five_card_exec_plug   == the execution plug over five_card_profile       *)
@@ -172,7 +172,7 @@ Proof. by apply: (inj_map val_inj); rewrite val_enum_ord. Qed.
     over five_card_profile with run argument the committed pair (a, b) of
     bits, the seat/share bridge erefl at 5 seats and 5 shares, participant
     list den_boer_players, content the den Boer layout of the decoded
-    committed cards and fuel 100. The committed-input constructor takes the
+    committed cards and fuel 100. The encoded-run constructor takes the
     two commit processes of the committing parties 7 and 8 as its
     input-process list. *)
 Definition five_card_exec_plug : ExecutionPlug mpF :=
@@ -458,7 +458,7 @@ Definition five_card_payload (ab : bool * bool)
     : seq 'I_(pga_n five_card_algebra).+2 :=
   [:: encode_bool ab.1; encode_bool ab.2].
 
-(** five_card_params — the run-level data of the committed-input run: the run
+(** five_card_params — the run-level data of the encoded run: the run
     argument is the pair of committed bits, the two parties above commit it,
     the dealer assembles the den Boer layout from what they sent, the value
     the run recovers is the conjunction, and the interpreter budget is 100.
@@ -471,14 +471,14 @@ Definition five_card_params : ExecutionParams five_card_algebra :=
     den_boer_decode five_card_commits 100.
 
 (** five_card_execE — the plug derived from the run parameters is the
-    instance's own execution plug. The committed-input readout of the
+    instance's own execution plug. The encoded-run readout of the
     parameters and the hand-written readout of five_card_exec_plug are the
     same term, so the two plugs drive the same interpreter run. *)
 Lemma five_card_execE : instance_exec five_card_params = five_card_exec_plug.
 Proof. by []. Qed.
 
-(** five_card_terminates — every process of the committed-input run reaches
-    Finish within the budget. The one run fact that has no route through the
+(** five_card_terminates — every process of the encoded run reaches Finish
+    within the budget. The one run fact that has no route through the
     algebra: it depends on the interpreter and on the budget, and is decided
     by reduction. The statement is convertible with five_card_oe_terminates,
     which states the same reduction at the hand-written plug. *)
@@ -503,7 +503,7 @@ Lemma five_card_decodeK (ab : bool * bool) :
   den_boer_decode (five_card_payload ab) = ab.
 Proof. by case: ab => a b; exact: den_boer_decodeK. Qed.
 
-(** five_card_endpoints — the endpoint obligation of the committed-input run.
+(** five_card_endpoints — the endpoint obligation of the encoded run.
     The statement is convertible with five_card_oe_endpoints, which proves it
     directly from the interpreter; this one turns the layout the dealer
     assembled from the payloads into the layout the direct computation reads,

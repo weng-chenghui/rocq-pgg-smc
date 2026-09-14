@@ -100,7 +100,6 @@
 (*                      == the same for a sharing-family run                  *)
 (******************************************************************************)
 
-From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
