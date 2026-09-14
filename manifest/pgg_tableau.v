@@ -1,7 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* Tableau: the row program of one protocol instance                        *)
+(* Tableau: the row program of one protocol instance                          *)
 (*                                                                            *)
 (* A row of the analysis manifest is written here as a program. Its lines     *)
 (* are statements; each one takes the data accumulated so far, the            *)
@@ -40,37 +40,37 @@
 (* instance never appears as a line: it enters only as the witness or the     *)
 (* certificate a certify statement takes, so an instance owes one record per  *)
 (* arm and no proof about the framework. And of the three terminals only      *)
-(* conclude returns a Tableau and so only it has a step's shape, but it is    *)
+(* conclude returns a tableau and only it has a step's shape, but it too is   *)
 (* outside: it leaves the data and the arms untouched and moves only the real *)
 (* the spectral arm's proposition mentions.                                   *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   ExactWitness            == the exact arm's security witness              *)
-(*   SpectralCert            == the spectral arm's security certificate       *)
-(*   SecurityPort            == the arm an instance certifies                 *)
-(*   StackAt                 == the data a row holds at one completion level  *)
-(*   StackProp               == the proposition a row holds at one level      *)
-(*   TableauAt               == data at a level with a proof about it         *)
-(*   tableau_bind            == sequencing, written s ;;; f 'of' p            *)
-(*   dealt_step              == the statement dealing a secret at a fuel      *)
-(*   execute_step            == the statement adjoining the three run facts   *)
-(*   sample_step             == the statement adjoining an analysis family    *)
-(*   certify_exact           == the statement adjoining an exact witness      *)
-(*   certify_spectral        == the statement adjoining a spectral cert       *)
-(*   conclude                == the terminal republishing the bound           *)
-(*   restate                 == the terminal handing over a proposition       *)
-(*   publish                 == the terminal attaching the row's manifest row *)
-(*   PublishedRowAt          == a row's data, its manifest row and theorem    *)
-(*   run_correct_of          == run correctness of a published row            *)
-(*   view_identification_of  == its executed-to-static view equation          *)
-(*   view_secrecy_of         == its security statement, exact-arm name        *)
-(*   view_indist_of          == the same statement, spectral-arm name         *)
+(*   ExactWitness           == the exact arm's security witness               *)
+(*   SpectralCert           == the spectral arm's security certificate        *)
+(*   SecurityPort           == the arm an instance certifies                  *)
+(*   StackAt                == the data a row holds at one completion level   *)
+(*   StackProp              == the proposition a row holds at one level       *)
+(*   TableauAt              == data at a level with a proof about it          *)
+(*   tableau_bind           == sequencing, written s ;;; f 'of' p             *)
+(*   dealt_step             == the statement dealing a secret at a fuel       *)
+(*   execute_step           == the statement adjoining the three run facts    *)
+(*   sample_step            == the statement adjoining an analysis family     *)
+(*   certify_exact          == the statement adjoining an exact witness       *)
+(*   certify_spectral       == the statement adjoining a spectral certificate *)
+(*   conclude               == the terminal republishing the bound            *)
+(*   restate                == the terminal handing over a chosen proposition *)
+(*   publish                == the terminal attaching the row's manifest row  *)
+(*   PublishedRowAt         == a row's data, its manifest row and its theorem *)
+(*   run_correct_of         == run correctness of a published row             *)
+(*   view_identification_of == its executed-to-static view equation           *)
+(*   view_secrecy_of        == its security statement, exact-arm name         *)
+(*   view_indist_of         == the same statement, spectral-arm name          *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   tableau_left_unit       == sequencing onto a tableau is application      *)
-(*   exact_tail              == the exact arm's composition law               *)
-(*   spectral_tail           == the spectral arm's composition law            *)
-(*   port_reprice            == a port's proposition at a renamed bound       *)
+(*   tableau_left_unit      == sequencing onto a built tableau is application *)
+(*   exact_tail             == the exact arm's composition law                *)
+(*   spectral_tail          == the spectral arm's composition law             *)
+(*   port_reprice           == a port's proposition at a renamed bound        *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -414,7 +414,7 @@ Record TableauAt (b : CompletionLevel) (Q : StackAt b -> Prop) :=
 
 Arguments TableauAt : clear implicits.
 
-(* A Tableau at the default proposition family of its level: what every line
+(* A tableau at the default proposition family of its level: what every line
    of a row returns until a terminal changes the family. *)
 Notation Tableau b := (TableauAt b (StackProp b)).
 
@@ -444,7 +444,7 @@ Notation "s ;;; f 'of' p" := (tableau_bind s f p)
 Definition tableau_start (A : PGGAlgebraic) : Tableau Algebraic :=
   @MkTableau Algebraic (StackProp Algebraic) A I.
 
-(* Sequencing a statement onto a Tableau built from given data and proof is
+(* Sequencing a statement onto a tableau built from given data and proof is
    that statement applied to them. The left unit law of the bind; it holds by
    conversion, so a row's proof term is the composition of its statements with
    no bookkeeping between the lines. *)
