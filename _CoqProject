@@ -181,6 +181,6 @@ instances/pgl27/pgl27_exec.v
 instances/pgl27/pgl27_models.v
 instances/pgl27/pgl27_analysis.v
 manifest/pgg_analysis_manifest.v
-manifest/pgg_view_lift.v
+manifest/pgg_tableau.v
 instances/pgl27/pgl27_rows.v
 manifest/pgg_analysis_client.v

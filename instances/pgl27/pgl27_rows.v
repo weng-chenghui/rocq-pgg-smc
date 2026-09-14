@@ -17,7 +17,7 @@
 (* that walk still has from uniform.                                          *)
 (*                                                                            *)
 (* Each family's row is one program. Its lines are the statements of          *)
-(* pgg_view_lift.v: the shared prefix deals the secret and adjoins the three  *)
+(* pgg_tableau.v: the shared prefix deals the secret and adjoins the three   *)
 (* run facts, one further line adjoins the family, one adjoins that family's  *)
 (* security witness, and the last publishes the manifest row. The published   *)
 (* rows are the manifest's pgl27_row_exact and pgl27_row_word, and the two    *)
@@ -41,25 +41,25 @@
 (* proposition to the statement a paper cites.                                *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   pgl27_dealt            == the prefix shared by both rows                 *)
-(*   pgl27_exact_witness    == the exact arm's witness at every field and     *)
-(*                            index                                           *)
-(*   pgl27_word_cert        == the spectral arm's certificate                 *)
-(*   pgl27_row_exact_lifted == the exact row as a program                     *)
-(*   pgl27_row_word_lifted  == the word row as a program                      *)
-(*   pgl27_reprice39        == the name 2^-39 for the word row's bound        *)
-(*   pgl27_row_word39       == the word row republished at that name          *)
-(*   pgl27_word_target      == the word row's published statement             *)
-(*   pgl27_exact_target     == the exact row's published statement            *)
-(*   pgl27_word_restated    == the word row through the restate terminal      *)
-(*   pgl27_exact_restated   == the exact row through the restate terminal     *)
+(*   pgl27_dealt             == the prefix shared by both rows                *)
+(*   pgl27_exact_witness     == the exact arm's witness at every field and    *)
+(*                              index                                         *)
+(*   pgl27_word_cert         == the spectral arm's certificate                *)
+(*   pgl27_row_exact_tableau == the exact row as a program                    *)
+(*   pgl27_row_word_tableau  == the word row as a program                     *)
+(*   pgl27_reprice39         == the name 2^-39 for the word row's bound       *)
+(*   pgl27_row_word39        == the word row republished at that name         *)
+(*   pgl27_word_target       == the word row's published statement            *)
+(*   pgl27_exact_target      == the exact row's published statement           *)
+(*   pgl27_word_restated     == the word row through the restate terminal     *)
+(*   pgl27_exact_restated    == the exact row through the restate terminal    *)
 (*   pgl27_word_same_statement                                                *)
 (*                         == the published word statement and the word row's *)
 (*                            restatement inhabit one type                    *)
 (*   pgl27_exact_same_statement                                               *)
 (*                         == the published exact statement and the exact     *)
 (*                            row's restatement inhabit one type              *)
-(*   pgl27_F                == the ideal functionality the run realises       *)
+(*   pgl27_F                 == the ideal functionality the run realises      *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_static_obsE     == the framework's seat reader is the instance's   *)
@@ -89,7 +89,7 @@ From pgg_smc Require Import pgg_instance pgg_functionality.
 From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
 From pgg_smc Require Import pgl27_exec pgl27_models.
-From pgg_smc Require Import pgg_analysis_manifest pgg_view_lift.
+From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -111,8 +111,8 @@ Local Open Scope ring_scope.
     probability model; everything up to this point is common to both, and what
     has been proved at this point is run correctness and nothing about a
     coalition. *)
-Definition pgl27_dealt : ViewLift Observed :=
-  lift_start pgl27_algebra
+Definition pgl27_dealt : Tableau Observed :=
+  tableau_start pgl27_algebra
     ;;; dealt_step of pgl27_fuel
     ;;; execute_step of (existT _ pgl27_dealt_terminates
                            (existT _ pgl27_dealt_endpoints pgl27_dealt_recon)).
@@ -232,7 +232,7 @@ Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
     one. What the finished row carries about a coalition of fewer than four
     seats is independence of the dealt secret, at every real field, with no
     numeric bound anywhere in it. *)
-Definition pgl27_row_exact_lifted : LiftedRow :=
+Definition pgl27_row_exact_tableau : PublishedRow :=
   pgl27_dealt
     ;;; sample_step of pgl27_exact_family
     ;;; certify_exact of pgl27_exact_witness
@@ -245,7 +245,7 @@ Definition pgl27_row_exact_lifted : LiftedRow :=
     readings of two dealt secrets, bounded by 2^-40 + 2^-40: the framework's
     transfer inequality crosses from the walk to the ideal cut and back again,
     and each crossing spends the same mixing bound once. *)
-Definition pgl27_row_word_lifted : LiftedRow :=
+Definition pgl27_row_word_tableau : PublishedRow :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_spectral of pgl27_word_cert
@@ -255,14 +255,14 @@ Definition pgl27_row_word_lifted : LiftedRow :=
     instance. Conversion decides it, so the descriptive row and the theorem
     proved about it cannot drift apart. *)
 Lemma pgl27_row_exact_rowE :
-  lifted_row pgl27_row_exact_lifted = pgl27_row_exact.
+  published_row pgl27_row_exact_tableau = pgl27_row_exact.
 Proof. by []. Qed.
 
 (** The same for the word program and the manifest's word row. The two rowE
     lemmas together are what makes the manifest a claim this file discharges
     rather than a table maintained beside it. *)
 Lemma pgl27_row_word_rowE :
-  lifted_row pgl27_row_word_lifted = pgl27_row_word.
+  published_row pgl27_row_word_tableau = pgl27_row_word.
 Proof. by []. Qed.
 
 (******************************************************************************)
@@ -278,7 +278,7 @@ Definition pgl27_reprice39 : Reprice := fun R => Some (2%:R^-39 : R).
     is pow2_split; the data, the model and the certificate are untouched, so the
     republished row asserts exactly what the row above asserts, at the number a
     reader expects to cite. *)
-Definition pgl27_row_word39 : LiftedRowAt pgl27_reprice39 :=
+Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_spectral of pgl27_word_cert
@@ -289,7 +289,7 @@ Definition pgl27_row_word39 : LiftedRowAt pgl27_reprice39 :=
     family, and pow2_split alone is an identity at one field. Supplying it bare
     is rejected, which is what keeps a row from republishing a bound that holds
     only at the field a reader happened to pick. *)
-Fail Definition pgl27_row_word39_bare : LiftedRowAt pgl27_reprice39 :=
+Fail Definition pgl27_row_word39_bare : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_spectral of pgl27_word_cert
@@ -319,7 +319,7 @@ Definition pgl27_word_target (R : realType) : Prop :=
     is repeated here; the bound itself comes from the row. *)
 Lemma pgl27_word_bridge (R : realType) (secretP : R.-fdist bool)
     (q : StackAt AnalysisBridged)
-    (Hq : q = lift_at (pgl27_dealt
+    (Hq : q = tableau_at (pgl27_dealt
                          ;;; sample_step of pgl27_word_family
                          ;;; certify_spectral of pgl27_word_cert)) :
   StackProp AnalysisBridged q -> pgl27_word_target R.
@@ -335,7 +335,7 @@ Qed.
     keeps the row's data and replaces its accumulated conjunction by the
     proposition the caller wrote out, proved by the bridge above. *)
 Definition pgl27_word_restated (R : realType) (secretP : R.-fdist bool)
-    : RestatedLift (pgl27_word_target R) :=
+    : RestatedTableau (pgl27_word_target R) :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_spectral of pgl27_word_cert
@@ -377,7 +377,7 @@ Definition pgl27_exact_target (R : realType) : Prop :=
     remains is to rewrite the executed reader as the instance's view, using the
     row's own view identification and then pgl27_static_obsE. *)
 Lemma pgl27_exact_bridge (R : realType) (q : StackAt AnalysisBridged)
-    (Hq : q = lift_at (pgl27_dealt
+    (Hq : q = tableau_at (pgl27_dealt
                          ;;; sample_step of pgl27_exact_family
                          ;;; certify_exact of pgl27_exact_witness)) :
   StackProp AnalysisBridged q -> pgl27_exact_target R.
@@ -396,7 +396,7 @@ Qed.
 (** The exact row handed over as its published statement, by the bridge above.
     The row's data is kept and only its accumulated conjunction is traded. *)
 Definition pgl27_exact_restated (R : realType)
-    : RestatedLift (pgl27_exact_target R) :=
+    : RestatedTableau (pgl27_exact_target R) :=
   pgl27_dealt
     ;;; sample_step of pgl27_exact_family
     ;;; certify_exact of pgl27_exact_witness
@@ -439,7 +439,7 @@ Theorem pgl27_exact_view_secrecy (R : realType) (C : {set 'I_8})
     & forall (W : finType) (h : {ffun 'I_8 -> 'I_8} -> W),
         pgl27P R |= (h `o (@sa_coalition_view R pgl27_profile pgl27_exec_plug
                              (pgl27_sample R) 0 C)) _|_ (pgl27_secret R)].
-Proof. exact: (view_secrecy_of pgl27_row_exact_lifted R tt C HC). Qed.
+Proof. exact: (view_secrecy_of pgl27_row_exact_tableau R tt C HC). Qed.
 
 (******************************************************************************)
 (*     Each published statement and its restatement are one statement         *)
@@ -482,7 +482,7 @@ Definition pgl27_exact_same_statement (R : realType) :
     the threshold proof. *)
 Fail Definition pgl27_word_arm_is_not_exact (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (HC : (#|C| < 4)%N) :=
-  view_secrecy_of pgl27_row_word_lifted R secretP C HC.
+  view_secrecy_of pgl27_row_word_tableau R secretP C HC.
 
 (******************************************************************************)
 (*     The ideal functionality                                                *)

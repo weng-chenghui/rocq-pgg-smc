@@ -1,12 +1,12 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* ViewLift: the row program of one protocol instance                         *)
+(* Tableau: the row program of one protocol instance                        *)
 (*                                                                            *)
 (* A row of the analysis manifest is written here as a program. Its lines     *)
 (* are statements; each one takes the data accumulated so far, the            *)
 (* proposition proved about it so far, and one payload of its own, and        *)
-(* returns the data lifted one completion level. dealt_step carries the True  *)
+(* returns the data raised one completion level. dealt_step carries the True  *)
 (* of the two bottom levels forward, execute_step establishes the proposition *)
 (* in its place, and the three above them extend it by one conjunct on the    *)
 (* right, so from Sampled upwards it is a left-nested conjunction whose added *)
@@ -40,37 +40,37 @@
 (* instance never appears as a line: it enters only as the witness or the     *)
 (* certificate a certify statement takes, so an instance owes one record per  *)
 (* arm and no proof about the framework. And of the three terminals only      *)
-(* conclude returns a lift and so only it has a step's shape, but it too is   *)
+(* conclude returns a Tableau and so only it has a step's shape, but it is    *)
 (* outside: it leaves the data and the arms untouched and moves only the real *)
 (* the spectral arm's proposition mentions.                                   *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   ExactWitness           == the exact arm's security witness               *)
-(*   SpectralCert           == the spectral arm's security certificate        *)
-(*   SecurityPort           == the arm an instance certifies                  *)
-(*   StackAt                == the data a row holds at one completion level   *)
-(*   StackProp              == the proposition a row holds at one level       *)
-(*   ViewLiftAt             == data at a level with a proof about it          *)
-(*   lift_bind              == sequencing, written s ;;; f 'of' p             *)
-(*   dealt_step             == the statement dealing a secret at a fuel       *)
-(*   execute_step           == the statement adjoining the three run facts    *)
-(*   sample_step            == the statement adjoining an analysis family     *)
-(*   certify_exact          == the statement adjoining an exact witness       *)
-(*   certify_spectral       == the statement adjoining a spectral certificate *)
-(*   conclude               == the terminal republishing the bound            *)
-(*   restate                == the terminal handing over a chosen proposition *)
-(*   publish                == the terminal attaching the row's manifest row  *)
-(*   LiftedRowAt            == a row's data, its manifest row and its theorem *)
-(*   run_correct_of         == run correctness of a published row             *)
-(*   view_identification_of == its executed-to-static view equation           *)
-(*   view_secrecy_of        == its security statement, exact-arm name         *)
-(*   view_indist_of         == the same statement, spectral-arm name          *)
+(*   ExactWitness            == the exact arm's security witness              *)
+(*   SpectralCert            == the spectral arm's security certificate       *)
+(*   SecurityPort            == the arm an instance certifies                 *)
+(*   StackAt                 == the data a row holds at one completion level  *)
+(*   StackProp               == the proposition a row holds at one level      *)
+(*   TableauAt               == data at a level with a proof about it         *)
+(*   tableau_bind            == sequencing, written s ;;; f 'of' p            *)
+(*   dealt_step              == the statement dealing a secret at a fuel      *)
+(*   execute_step            == the statement adjoining the three run facts   *)
+(*   sample_step             == the statement adjoining an analysis family    *)
+(*   certify_exact           == the statement adjoining an exact witness      *)
+(*   certify_spectral        == the statement adjoining a spectral cert       *)
+(*   conclude                == the terminal republishing the bound           *)
+(*   restate                 == the terminal handing over a proposition       *)
+(*   publish                 == the terminal attaching the row's manifest row *)
+(*   PublishedRowAt          == a row's data, its manifest row and theorem    *)
+(*   run_correct_of          == run correctness of a published row            *)
+(*   view_identification_of  == its executed-to-static view equation          *)
+(*   view_secrecy_of         == its security statement, exact-arm name        *)
+(*   view_indist_of          == the same statement, spectral-arm name         *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   lift_left_unit         == sequencing onto a built lift is application    *)
-(*   exact_tail             == the exact arm's composition law                *)
-(*   spectral_tail          == the spectral arm's composition law             *)
-(*   port_reprice           == a port's proposition at a renamed bound        *)
+(*   tableau_left_unit       == sequencing onto a tableau is application      *)
+(*   exact_tail              == the exact arm's composition law               *)
+(*   spectral_tail           == the spectral arm's composition law            *)
+(*   port_reprice            == a port's proposition at a renamed bound       *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -407,16 +407,16 @@ Arguments StackProp : clear implicits.
    because a terminal that republishes the bound hands back a record at the
    same level whose proposition is no longer StackProp. *)
 #[projections(primitive)]
-Record ViewLiftAt (b : CompletionLevel) (Q : StackAt b -> Prop) :=
-  MkViewLift {
-    lift_at  : StackAt b ;
-    lift_thm : Q lift_at }.
+Record TableauAt (b : CompletionLevel) (Q : StackAt b -> Prop) :=
+  MkTableau {
+    tableau_at  : StackAt b ;
+    tableau_thm : Q tableau_at }.
 
-Arguments ViewLiftAt : clear implicits.
+Arguments TableauAt : clear implicits.
 
-(* A lift at the default proposition family of its level: what every line of a
-   row returns until a terminal changes the family. *)
-Notation ViewLift b := (ViewLiftAt b (StackProp b)).
+(* A Tableau at the default proposition family of its level: what every line
+   of a row returns until a terminal changes the family. *)
+Notation Tableau b := (TableauAt b (StackProp b)).
 
 (* Sequencing: a statement receives the accumulated data, the accumulated
    proof and one payload of its own, and returns what it builds. The bind is
@@ -424,34 +424,34 @@ Notation ViewLift b := (ViewLiftAt b (StackProp b)).
    the incoming coordinate, and a non-dependent sequencing would have to fix
    that type before the coordinate is known and would silently drop the
    previous line's proposition. *)
-Definition lift_bind (a : CompletionLevel) (Q : StackAt a -> Prop)
-    (P : StackAt a -> Type) (T : Type) (s : ViewLiftAt a Q)
-    (f : forall x : StackAt a, Q x -> P x -> T) (p : P (lift_at s)) : T :=
-  f (lift_at s) (lift_thm s) p.
-Arguments lift_bind {a Q P T} s f p.
+Definition tableau_bind (a : CompletionLevel) (Q : StackAt a -> Prop)
+    (P : StackAt a -> Type) (T : Type) (s : TableauAt a Q)
+    (f : forall x : StackAt a, Q x -> P x -> T) (p : P (tableau_at s)) : T :=
+  f (tableau_at s) (tableau_thm s) p.
+Arguments tableau_bind {a Q P T} s f p.
 
 (* The surface of a row: a statement f applied to the chain so far and to its
    payload p. Left associative, so a row reads as a sequence of statements
    applied to a growing coordinate; right associativity parses one line's
    payload as the next line's continuation. The infix >>= is taken by the
    fdist scope, so the separator is spelled of. *)
-Notation "s ;;; f 'of' p" := (lift_bind s f p)
+Notation "s ;;; f 'of' p" := (tableau_bind s f p)
   (at level 90, left associativity).
 
 (* The first line of every row: an algebra, with the empty proposition its
    level carries. Nothing about a coalition has been proved at this point,
    which is what True records. *)
-Definition lift_start (A : PGGAlgebraic) : ViewLift Algebraic :=
-  @MkViewLift Algebraic (StackProp Algebraic) A I.
+Definition tableau_start (A : PGGAlgebraic) : Tableau Algebraic :=
+  @MkTableau Algebraic (StackProp Algebraic) A I.
 
-(* Sequencing a statement onto a lift built from given data and proof is that
-   statement applied to them. The left unit law of the bind; it holds by
+(* Sequencing a statement onto a Tableau built from given data and proof is
+   that statement applied to them. The left unit law of the bind; it holds by
    conversion, so a row's proof term is the composition of its statements with
    no bookkeeping between the lines. *)
-Lemma lift_left_unit (a : CompletionLevel) (Q : StackAt a -> Prop)
+Lemma tableau_left_unit (a : CompletionLevel) (Q : StackAt a -> Prop)
     (P : StackAt a -> Type) (T : Type) (x : StackAt a) (pf : Q x)
     (f : forall y : StackAt a, Q y -> P y -> T) (p : P x) :
-  lift_bind (@MkViewLift a Q x pf) f p = f x pf p.
+  tableau_bind (@MkTableau a Q x pf) f p = f x pf p.
 Proof. exact: erefl. Qed.
 
 (******************************************************************************)
@@ -462,8 +462,8 @@ Proof. exact: erefl. Qed.
    The first statement of a dealer-dealt row, and the point at which the run
    argument becomes the secret itself. *)
 Definition dealt_step (x : StackAt Algebraic) (_ : StackProp Algebraic x)
-    (fuel : nat) : ViewLift Executable :=
-  @MkViewLift Executable (StackProp Executable)
+    (fuel : nat) : Tableau Executable :=
+  @MkTableau Executable (StackProp Executable)
     (existT (fun A : PGGAlgebraic => ExecutionParams A) x
        (dealt_secret_params x fuel)) I.
 
@@ -479,8 +479,8 @@ Definition ObsPayload (x : StackAt Executable) : Type :=
    correctness proved from the observed execution they build. This is the one
    line at which an instance's own reduction work enters a row. *)
 Definition execute_step (x : StackAt Executable) (_ : StackProp Executable x)
-    (p : ObsPayload x) : ViewLift Observed :=
-  @MkViewLift Observed (StackProp Observed)
+    (p : ObsPayload x) : Tableau Observed :=
+  @MkTableau Observed (StackProp Observed)
     (existT _ (projT1 x) (existT _ (projT2 x)
        (existT _ (projT1 p)
           (existT _ (projT1 (projT2 p)) (projT2 (projT2 p))))))
@@ -499,8 +499,8 @@ Definition FamPayload (x : StackAt Observed) : Type :=
    static one. It is the line that turns a row's claims from claims about the
    interpreter's messages into claims about a group action. *)
 Definition sample_step (x : StackAt Observed) (q : StackProp Observed x)
-    (f : FamPayload x) : ViewLift Sampled :=
-  @MkViewLift Sampled (StackProp Sampled)
+    (f : FamPayload x) : Tableau Sampled :=
+  @MkTableau Sampled (StackProp Sampled)
     (existT _ (projT1 x) (existT _ (projT1 (projT2 x))
        (existT _ (ob_Ht x) (existT _ (ob_He x) (existT _ (ob_Hr x) f)))))
     (conj q (fun R idx C =>
@@ -574,8 +574,8 @@ Arguments spectral_tail {R A E sa} cert.
    AnalysisBridged with the arm's proposition proved by exact_tail from the
    previous line's identification. *)
 Definition certify_exact (x : StackAt Sampled) (q : StackProp Sampled x)
-    (p : ExactPayload x) : ViewLift AnalysisBridged :=
-  @MkViewLift AnalysisBridged (StackProp AnalysisBridged)
+    (p : ExactPayload x) : Tableau AnalysisBridged :=
+  @MkTableau AnalysisBridged (StackProp AnalysisBridged)
     (existT _ (projT1 x) (existT _ (projT1 (projT2 x))
        (existT _ (sp_Ht x) (existT _ (sp_He x) (existT _ (sp_Hr x)
           (existT _ (sp_f x)
@@ -589,8 +589,8 @@ Arguments certify_exact x q p : assert.
    spectral_tail. The two certify statements are the only lines through which
    an instance's own mathematics enters a row. *)
 Definition certify_spectral (x : StackAt Sampled) (q : StackProp Sampled x)
-    (p : SpectralPayload x) : ViewLift AnalysisBridged :=
-  @MkViewLift AnalysisBridged (StackProp AnalysisBridged)
+    (p : SpectralPayload x) : Tableau AnalysisBridged :=
+  @MkTableau AnalysisBridged (StackProp AnalysisBridged)
     (existT _ (projT1 x) (existT _ (projT1 (projT2 x))
        (existT _ (sp_Ht x) (existT _ (sp_He x) (existT _ (sp_Hr x)
           (existT _ (sp_f x)
@@ -636,8 +636,8 @@ Arguments port_reprice c {R A E sa} p.
    mentions moves. *)
 Definition conclude (c : Reprice) (q : StackAt AnalysisBridged)
     (pf : StackProp AnalysisBridged q) (p : RepricePayload c q)
-    : ViewLiftAt AnalysisBridged (BridgedProp c) :=
-  @MkViewLift AnalysisBridged (BridgedProp c) q
+    : TableauAt AnalysisBridged (BridgedProp c) :=
+  @MkTableau AnalysisBridged (BridgedProp c) q
     (conj (proj1 pf)
        (fun R idx => port_reprice c (ab_port q R idx)
                        (proj2 pf R idx) (p R idx))).
@@ -656,65 +656,65 @@ Arguments RestatePayload Q q : assert.
    row accumulated. The proposition is a parameter and not a field of the
    data, so two rows over the same instance may be handed over as different
    theorems. *)
-Record RestatedLift (Q : Prop) := MkRestatedLift {
+Record RestatedTableau (Q : Prop) := MkRestatedTableau {
   rq_at  : StackAt AnalysisBridged ;
   rq_thm : Q }.
-Arguments RestatedLift : clear implicits.
+Arguments RestatedTableau : clear implicits.
 
 (* The terminal handing a row over as a proposition its caller writes out.
    conclude is not an instance of it: conclude's target is computed by the
    framework from the reprice, this one's is supplied. *)
 Definition restate (Q : Prop) (q : StackAt AnalysisBridged)
     (pf : StackProp AnalysisBridged q) (p : RestatePayload Q q)
-    : RestatedLift Q :=
-  @MkRestatedLift Q q (p pf).
+    : RestatedTableau Q :=
+  @MkRestatedTableau Q q (p pf).
 Arguments restate : clear implicits.
 
 (* A row's data, the manifest row describing it, and the proposition the row
-   reached. The manifest already publishes the descriptive row; a lifted row
-   is that same value with its theorem attached, so the manifest's claim about
-   an instance and the proof of it are one term. *)
-Record LiftedRowAt (c : Reprice) := MkLiftedRow {
-  lifted_at  : StackAt AnalysisBridged ;
-  lifted_row : AnalysisPathRow ;
-  lifted_thm : BridgedProp c lifted_at }.
-Arguments LiftedRowAt : clear implicits.
+   reached. The manifest already publishes the descriptive row; a published
+   row is that same value with its theorem attached, so the manifest's claim
+   about an instance and the proof of it are one term. *)
+Record PublishedRowAt (c : Reprice) := MkPublishedRow {
+  published_at  : StackAt AnalysisBridged ;
+  published_row : AnalysisPathRow ;
+  published_thm : BridgedProp c published_at }.
+Arguments PublishedRowAt : clear implicits.
 
-(* A lifted row at the chain's own bound: what a row that never restates its
-   number publishes. *)
-Notation LiftedRow := (LiftedRowAt no_reprice).
+(* A published row at the chain's own bound: what a row that never restates
+   its number publishes. *)
+Notation PublishedRow := (PublishedRowAt no_reprice).
 
 (* The terminal pairing the accumulated proposition with the manifest row for
    it. The assumption status precedes the coordinate because the sequencing
    carries one payload per line and the transfer status is that payload. *)
 Definition publish (a : AssumptionStatus) (c : Reprice)
     (q : StackAt AnalysisBridged) (pf : BridgedProp c q)
-    (t : TransferStatus) : LiftedRowAt c :=
-  @MkLiftedRow c q
+    (t : TransferStatus) : PublishedRowAt c :=
+  @MkPublishedRow c q
     (@MkAnalysisPathRow (ab_obs q) AnalysisBridged (ab_f q) t a) pf.
 Arguments publish a {c} q pf t.
 
 (* Run correctness of a published row: every process finishes, the endpoints
    number one per seat, and decoding them returns the dealt value. *)
-Definition run_correct_of (c : Reprice) (r : LiftedRowAt c) :=
-  proj1 (proj1 (lifted_thm r)).
+Definition run_correct_of (c : Reprice) (r : PublishedRowAt c) :=
+  proj1 (proj1 (published_thm r)).
 Arguments run_correct_of {c} r.
 
 (* The executed-to-static view identification of a published row, the fact on
    which its security statement is stated about a group action. *)
-Definition view_identification_of (c : Reprice) (r : LiftedRowAt c) :=
-  proj2 (proj1 (lifted_thm r)).
+Definition view_identification_of (c : Reprice) (r : PublishedRowAt c) :=
+  proj2 (proj1 (published_thm r)).
 Arguments view_identification_of {c} r.
 
 (* The security statement of a published row, under the name a reader of the
    exact arm expects. *)
-Definition view_secrecy_of (c : Reprice) (r : LiftedRowAt c) :=
-  proj2 (lifted_thm r).
+Definition view_secrecy_of (c : Reprice) (r : PublishedRowAt c) :=
+  proj2 (published_thm r).
 Arguments view_secrecy_of {c} r.
 
 (* The same projection under the name a reader of the spectral arm expects.
    The arm is selected only when the result is applied, so naming the one that
    does not match a row fails at the next application rather than here. *)
-Definition view_indist_of (c : Reprice) (r : LiftedRowAt c) :=
-  proj2 (lifted_thm r).
+Definition view_indist_of (c : Reprice) (r : PublishedRowAt c) :=
+  proj2 (published_thm r).
 Arguments view_indist_of {c} r.
