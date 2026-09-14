@@ -51,27 +51,28 @@
 (*                                                                            *)
 (* The manifest carries a third five-seat row, s5_row_word, whose cut is a    *)
 (* finite word over the four adjacent transpositions. It is not written as a  *)
-(* program here, because two of the five parts of a SpectralDecay             *)
-(* certificate are out of reach at this instance. Three are available: the    *)
-(* walk's marginal bound, which is the bound of the certificate bundle        *)
-(* s5_security_witness_schreier; the identification of that bound's law with  *)
-(* the law the word model draws its cut from, which is s5_word_cut_distE;     *)
-(* and an ideal cut, which is a free choice. Missing is the distance from the *)
-(* walk to that ideal, a variation distance on the shuffle group, where       *)
-(* s5_word_base_premise records it as a hypothesis nothing in the tree        *)
-(* proves and the instance's spectral theorem bounds one seat's endpoint      *)
-(* marginal on 'I_5 instead. Missing too, and for a reason no proof can       *)
-(* remove, is the constancy of a coalition's reading of the ideal cut in the  *)
-(* secret: four seats reading the canonical encoding hold its last share      *)
-(* under every cut but those sending that share to the single seat they       *)
-(* leave out, and which seat that is varies with the coalition while the      *)
-(* ideal is fixed before it. What the manifest publishes for this path is an  *)
-(* endpoint marginal bound against the encoder-image ideal, and no claim      *)
-(* about a coalition.                                                         *)
+(* program here, because two of the five parts of a SpectralDecay certificate *)
+(* are out of reach at this instance. Three are available: the walk's         *)
+(* marginal bound, which is the bound the certificate                         *)
+(* s5_security_witness_schreier carries; the identification of that bound's   *)
+(* law with the law the word model draws its cut from, which is               *)
+(* s5_word_cut_distE; and an ideal cut, which is a free choice. Missing is    *)
+(* the distance from the walk to that ideal, a variation distance on the      *)
+(* shuffle group, where s5_word_base_premise names it as a premise nothing in *)
+(* the tree proves and the instance's spectral theorem bounds one seat's      *)
+(* endpoint marginal on 'I_5 instead. Missing too, and for a reason no proof  *)
+(* can remove, is the constancy of a coalition's reading of the ideal cut in  *)
+(* the secret, which the field asks for at every coalition below the          *)
+(* threshold and so at every singleton: under every cut exactly one seat      *)
+(* holds the card carrying the whole secret, so that seat's reading law moves *)
+(* with the secret, and no choice of ideal avoids it, the seat in question    *)
+(* varying with the cut while the ideal is fixed before any coalition is      *)
+(* named. What the manifest publishes for this path is an endpoint marginal   *)
+(* bound against the encoder-image ideal, and no claim about a coalition.     *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   s5_dealt             == the dealer-dealt run as a program                *)
-(*   s5_supplied          == the supplied-layout run as a program             *)
+(*   s5_supplied          == the supplied run as a program                    *)
 (*   s5_rand_exact_witness                                                    *)
 (*                        == the exact arm's witness at every field and index *)
 (*   s5_row_rand_tableau  == the randomized row as a program                  *)
@@ -99,8 +100,8 @@
 (*   s5_rand_view_secrecy == the exact arm's four conjuncts at this instance  *)
 (******************************************************************************)
 
-From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
-From mathcomp Require Import fintype finfun finset fingroup perm.
+From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+From mathcomp Require Import fintype finfun finset.
 From mathcomp Require Import matrix zmodp reals.
 From infotheo Require Import fdist proba entropy.
 From pgg_reconstruct Require Import pgg_sharing_framework.
@@ -150,10 +151,10 @@ Lemma s5_dealt_row_observedE :
 Proof. by []. Qed.
 
 (******************************************************************************)
-(*     The supplied-layout run                                                *)
+(*     The supplied run                                                       *)
 (******************************************************************************)
 
-(** The supplied-layout run of the five-seat instance: the algebra, the
+(** The supplied run of the five-seat instance: the algebra, the
     additive layout of a sampler tape at fuel 150, the value the run recovers
     written beside it, and the three run facts. The layout is supplied with
     the run argument and no party commits, so the value recovered is a
@@ -179,12 +180,12 @@ Lemma s5_supplied_paramsE :
   projT1 (projT2 (tableau_at s5_supplied)) = s5_supplied_params.
 Proof. by []. Qed.
 
-(** A model built over one run of the sharing family does not sample the
-    other. The tape model is typed over this run's observed execution, so the
-    positive holds; the dealt run's observed execution is a different value
-    and the same statement at it is rejected. The two modes of the sharing
-    family therefore share no probability model, and no evidence stated in
-    one reaches the other. *)
+(* A model built over one run of the sharing family does not sample the
+   other. The tape model is typed over this run's observed execution, so the
+   positive holds; the dealt run's observed execution is a different value
+   and the same statement at it is rejected. The two modes of the sharing
+   family therefore share no probability model, and no evidence stated in
+   one reaches the other. *)
 Check (s5_supplied sample s5_rand_family : Tableau Sampled).
 Fail Definition s5_dealt_rand : Tableau Sampled :=
   s5_dealt sample s5_rand_family.
@@ -260,7 +261,7 @@ Definition s5_rand_exact_witness (R : realType) (idx : unit)
 (*     The randomized row                                                     *)
 (******************************************************************************)
 
-(** The randomized row: the supplied-layout run above, the uniform tape
+(** The randomized row: the supplied run above, the uniform tape
     model, the witness above, and the manifest row. Its last statement
     publishes a row whose transfer status is StaticExecutedOnly, because the
     model's cut is the identity and no idealized shuffle is being compared
@@ -339,9 +340,9 @@ Proof. by []. Qed.
 Lemma s5_F_thresholdE : fn_threshold s5_F = 4.
 Proof. by []. Qed.
 
-(** Writing five where the scheme tolerates four is rejected, so the number a
-    specification carries is decided by the kernel rather than by the
-    reader. *)
+(* Writing five where the scheme tolerates four is rejected, so the number a
+   specification carries is decided by the kernel rather than by the
+   reader. *)
 Fail Definition s5_F_k5 : s5_F = MkFunctionality id 5 := erefl.
 
 (** The value the dealer-dealt run is built to recover is that

@@ -62,7 +62,8 @@
 (*   publish                == the terminal attaching the row's manifest row  *)
 (*   PublishedRowAt         == a row's data, its manifest row and its theorem *)
 (*   run_correct_of         == run correctness of a published row             *)
-(*   view_identification_of == its executed-to-static view equation           *)
+(*   view_identification_of == its link lemma, the executed view as the       *)
+(*                             direct computation                             *)
 (*   view_secrecy_of        == its security statement, exact-arm name         *)
 (*   view_indist_of         == the same statement, spectral-arm name          *)
 (*                                                                            *)
@@ -700,8 +701,9 @@ Definition run_correct_of (c : Reprice) (r : PublishedRowAt c) :=
   proj1 (proj1 (published_thm r)).
 Arguments run_correct_of {c} r.
 
-(* The executed-to-static view identification of a published row, the fact on
-   which its security statement is stated about a group action. *)
+(* The link lemma of a published row, identifying its executed view with the
+   direct computation, the fact on which its security statement is stated
+   about a group action. *)
 Definition view_identification_of (c : Reprice) (r : PublishedRowAt c) :=
   proj2 (proj1 (published_thm r)).
 Arguments view_identification_of {c} r.

@@ -35,7 +35,7 @@
 (*   s5_dealt_endpoints, s5_dealt_recon                                       *)
 (*                       == the endpoint and reconstruction obligations of    *)
 (*                          that run, through the framework                   *)
-(*   s5_supplied_params  == the run-level data of the supplied-layout run     *)
+(*   s5_supplied_params  == the run-level data of the supplied run            *)
 (*   s5_supplied_endpoints, s5_supplied_recon                                 *)
 (*                       == the same two obligations for that run             *)
 (*   s5_exec_plug        == the deterministic execution plug over s5_profile  *)
@@ -254,7 +254,7 @@ Proof.
 by rewrite /exec_decode /run_recover (eq_irrelevance (etrans sz_ep _) sz_ep').
 Qed.
 
-(** s5_exec_recon — decoding the static-observation endpoints returns the
+(** s5_exec_recon — decoding the direct-computation endpoints returns the
     dealt position s, for any cut w0 in the group and any proof of the
     endpoint count. This is the pure-function recovery fact that
     s5_exec_endpoints above lets s5_exec_recovers restate as a fact about
@@ -833,7 +833,7 @@ Proof.
 by rewrite /exec_decode /run_recover (eq_irrelevance (etrans sz_ep _) sz_ep').
 Qed.
 
-(** s5_rand_recon — decoding the randomized static-observation endpoints
+(** s5_rand_recon — decoding the randomized direct-computation endpoints
     returns the tape secret carried through s5_codec, for any cut w0 in the
     group and any proof of the endpoint count. The randomized counterpart
     of s5_exec_recon, proved via s5_rand_run_recovers rather than a direct
@@ -914,14 +914,14 @@ Definition s5_supplied_params : ExecutionParams s5_algebra :=
     s5_rfree_layout (fun u => s5_codec (s5_tape_secret u)) 150.
 
 (** s5_supplied_execE — the plug derived from those parameters is the
-    instance's own randomized execution plug. The supplied-layout readout of
+    instance's own randomized execution plug. The supplied readout of
     the parameters and the hand-written readout of s5_rand_exec_plug are the
     same term, so the two plugs drive the same interpreter run. *)
 Lemma s5_supplied_execE :
   instance_exec s5_supplied_params = s5_rand_exec_plug.
 Proof. by []. Qed.
 
-(** s5_supplied_terminates — every process of the supplied-layout run reaches
+(** s5_supplied_terminates — every process of the supplied run reaches
     Finish within the fuel 150. The statement is convertible with
     s5_rand_terminates, which states the same reduction at the hand-written
     plug; this one is stated on the plug the framework derives from
@@ -929,8 +929,8 @@ Proof. by []. Qed.
 Lemma s5_supplied_terminates : instance_terminates_stmt s5_supplied_params.
 Proof. by vm_compute. Qed.
 
-(** s5_supplied_endpoints — the endpoint obligation of the supplied-layout
-    run, read off the same profile equation the deterministic run reads. The
+(** s5_supplied_endpoints — the endpoint obligation of the supplied run,
+    read off the same profile equation the deterministic run reads. The
     statement is convertible with s5_rand_endpoints, which proves it through
     the interpreter; the profile's equation already quantifies over the
     content readout, so instantiating it at the additive layout costs this
@@ -957,7 +957,7 @@ Timeout 60 Check (s5_rand_endpoints :
 Timeout 60 Check (@s5_rand_recon : instance_recon_stmt s5_supplied_params).
 
 (** s5_rand_observed — the randomized observed execution, derived by the
-    framework from the algebraic record, the supplied-layout parameters and
+    framework from the algebraic record, the supplied parameters and
     the three run facts above. Two of those facts are framework lemmas, the
     endpoint equation instantiated from the profile and the reconstruction
     read off the sharing claim, and the third is the instance's own

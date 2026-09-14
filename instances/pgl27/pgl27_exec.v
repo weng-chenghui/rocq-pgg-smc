@@ -29,7 +29,7 @@
 (*                                      profile's abstract-readout equation   *)
 (*   pgl27_dealt_recon               == the reconstruction obligation, from   *)
 (*                                      the coordinate law                    *)
-(*   pgl27_content_obs               == the static observation: the share of  *)
+(*   pgl27_content_obs               == the direct computation: the share of  *)
 (*                                      the secret at the cut image of a      *)
 (*                                      starting position                     *)
 (*   pgl27_exec_player_raw_trace     == seat i's raw executed trace           *)
@@ -51,7 +51,7 @@
 (*   pgl27_dealt_terminates == every process of the dealt run reaches Finish  *)
 (*   pgl27_profile_endpoints == at every readout the executed endpoints of a  *)
 (*                              dealer-dealt run over this profile are its    *)
-(*                              static reading                                *)
+(*                              direct computation                            *)
 (*   pgl27_exec_recovers == the derived run decodes to the dealt secret       *)
 (*   pgl27_exec_correct  == termination, endpoint count and recovery of the   *)
 (*                          derived run                                       *)
@@ -132,7 +132,7 @@ Definition pgl27_exec_plug : ExecutionPlug mpP :=
   @dealer_secret_plug mpP bool erefl pgl27_players pgl27_players_enumE
     (fun s _ => tnth (ts_encode orbit_scheme s)) pgl27_fuel.
 
-(** pgl27_content_obs — the PGL(2,7) static observation. The share of the
+(** pgl27_content_obs — the PGL(2,7) direct computation. The share of the
     secret s at the cut image of a starting position, namely tnth (ts_encode
     orbit_scheme s) (pgg_rho w0 p) at a cut w0 and a position p. *)
 Definition pgl27_content_obs (s : bool)
@@ -193,7 +193,7 @@ Proof.
 by rewrite /exec_decode /run_recover (eq_irrelevance (etrans sz_ep _) sz_ep').
 Qed.
 
-(** pgl27_exec_recon — decoding the static observation returns the dealt
+(** pgl27_exec_recon — decoding the direct computation returns the dealt
     secret, for any cut in the group and any proof of the endpoint count. *)
 Lemma pgl27_exec_recon (s : bool) (w0 : pgg_gT pgl27_M) :
   w0 \in pgg_G pgl27_M ->
@@ -316,7 +316,7 @@ by rewrite /pgl27_exec_player_raw_trace /exec_participant_trace /exec_seat_id
 Qed.
 
 (******************************************************************************)
-(*     The algebraic plugin of the eight-card orbit instance                  *)
+(*     The algebraic record of the eight-card orbit instance                  *)
 (******************************************************************************)
 
 (** pgl27_algebra — the algebraic data of the eight-card orbit instance:
@@ -410,7 +410,7 @@ Definition pgl27_dealt_recon : instance_recon_stmt pgl27_dealt_params :=
     those facts are framework lemmas, the endpoint equation instantiated from
     the profile and the reconstruction derived from the coordinate law, and
     the third is the instance's own termination computation; the profile, the
-    plug, the static observation and the recovered value are all read off
+    plug, the direct computation and the recovered value are all read off
     pgl27_algebra and pgl27_dealt_params. *)
 Definition pgl27_observed : OE.ObservedExecution :=
   instance_observed pgl27_dealt_terminates pgl27_dealt_endpoints
@@ -471,7 +471,7 @@ Definition pgl27_sample_coalition_dist (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :=
 
 (** pgl27_sample_seat_distE — the executed seat distribution at pgl27P is the
     distribution of the orbit share at the cut image of the seat's start.  The
-    executed reading has the law of the static observation, so a bound proved
+    executed reading has the law of the direct computation, so a bound proved
     about the static observable holds of what the run produces. *)
 Lemma pgl27_sample_seat_distE (i : 'I_(pi_T' (mp_PI mpP)).+1) :
   pgl27_sample_seat_dist i
@@ -482,7 +482,7 @@ Proof. by apply: sa_seat_distE => u; exact: pgl27_exec_endpoints. Qed.
 (** pgl27_sample_coalition_distE — the executed coalition distribution at
     pgl27P is the distribution of the orbit shares at the cut images of the
     coalition's starts.  The coalition form of the same transfer from the
-    static observation to the executed one. *)
+    direct computation to the executed one. *)
 Lemma pgl27_sample_coalition_distE (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
   pgl27_sample_coalition_dist C
   = fdistmap (@sa_static_coalition_view R mpP pgl27_exec_plug pgl27_sample

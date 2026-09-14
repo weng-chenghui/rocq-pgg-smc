@@ -706,8 +706,8 @@ Definition five_card_row_repeated : AnalysisPathRow :=
     deterministically: S5Analysis.observed, Observed, no model witness,
     NoModelComparison, AcceptsAxioms [:: AxS5GroupOrder]. The path names no
     sample layer, so the model slot is None; the axiom is the instance's
-    group-order fact, needed because the profile's threshold data is
-    proved from the order of the generated group. *)
+    group-order fact, which enters through the reconstruction plug the
+    profile carries. *)
 Definition s5_row_det : AnalysisPathRow :=
   @MkAnalysisPathRow S5Analysis.observed Observed None
     NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder]).
