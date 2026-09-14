@@ -20,6 +20,7 @@
 (* Key results:                                                               *)
 (*   psl211_point_uniform == the single-card pushforward is exactly uniform   *)
 (*   profile_k_psl211     == the plug's privacy threshold is six             *)
+(*   profile_eps_psl211   == the marginal bound's epsilon is zero            *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -117,7 +118,20 @@ End witness.
 Definition psl211_profile : MonodromyProfile :=
   @MkMonodromyProfile psl211_M bool psl211_PI psl211_plug.
 
-(** profile_k_psl211 — the PSL(2,11) plug's privacy threshold is six.
-    Coalitions of at most five card positions are private, k = 6. *)
+(** profile_k_psl211 — the PSL(2,11) plug's privacy threshold is six:
+    coalitions of at most five card positions are private. The threshold
+    is the scheme's and not the group's. PSL(2,11) is only 2-transitive
+    on the twelve positions, so it fixes no arbitrary five-set; the bound
+    comes from the two Steiner systems meeting every five-set in the same
+    block patterns with the same multiplicities (psl211_count_okT).
+    Two-transitivity buys the single-card marginal above and nothing
+    about this threshold. *)
 Lemma profile_k_psl211 : profile_k psl211_profile = 6.
+Proof. by []. Qed.
+
+(** profile_eps_psl211 — the PSL(2,11) marginal bound's epsilon is zero.
+    The epsilon field of psl211_marginal_bound is 0: the single-card
+    pushforward of the uniform-over-the-group shuffle is exactly uniform. *)
+Lemma profile_eps_psl211 (R : realType) :
+  sw_bound_eps (psl211_marginal_bound R) = 0%R.
 Proof. by []. Qed.
