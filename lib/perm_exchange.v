@@ -15,7 +15,7 @@
 (*                      supported on their union                              *)
 (******************************************************************************)
 
-From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat.
 From mathcomp Require Import fintype finset fingroup perm.
 
 Set Implicit Arguments.
@@ -25,7 +25,7 @@ Import Prenex Implicits.
 (* perm_on is a subset statement, so it is monotone in its support. *)
 Lemma perm_onS (T : finType) (S1 S2 : {set T}) (s : {perm T}) :
   S1 \subset S2 -> perm_on S1 s -> perm_on S2 s.
-Proof. by move=> H1 H2; exact: subset_trans H2 H1. Qed.
+Proof. move=> H1 H2; exact: subset_trans H2 H1. Qed.
 
 (* Two equinumerous subsets are exchanged by a permutation supported on their
    union, which therefore fixes every point outside both.  The re-deal needs
@@ -42,8 +42,7 @@ case: (set_0Vmem (U :\: V)) => [HU0 | [u Hu]].
   by apply/setP => x; apply/imsetP/idP => [[y Hy ->]|Hx];
      rewrite ?perm1 //; exists x; rewrite ?perm1.
 have HVU : #|V :\: U| = #|U :\: V| by rewrite !cardsD Hcard setIC.
-have : (0 < #|V :\: U|)%N by rewrite HVU (cardsD1 u) Hu.
-case/card_gt0P => v Hv.
+have /card_gt0P[v Hv] : (0 < #|V :\: U|)%N by rewrite HVU (cardsD1 u) Hu.
 pose t := tperm u v.
 have Hvu : v \notin U by move: Hv; rewrite inE => /andP[].
 have HuU : u \in U by move: Hu; rewrite inE => /andP[].
@@ -76,3 +75,4 @@ apply: perm_onM.
      rewrite ?HuU ?HvV ?orbT.
 by apply: (perm_onS _ Hon1); rewrite subUset HU1sub subsetUr.
 Qed.
+Arguments perm_of_eq_card [T U V] _.

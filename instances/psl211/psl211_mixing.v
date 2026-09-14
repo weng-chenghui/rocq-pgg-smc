@@ -556,10 +556,11 @@ Qed.
 
 (** psl211_endpoint_mixing — the marginal at one card position of the
     584-letter word shuffle is within 2^-40 of uniform in variation distance.
-    Where the card starting at that position ends up after the realistic word
-    shuffle is uniform over the twelve positions to within 2^-40, and the
-    exact shuffle makes the same marginal exactly uniform, so the 2^-40 is
-    the whole price of replacing the exact shuffle by a finite word. *)
+    What a single position receives after the realistic word shuffle, the
+    deck slot sigma s that position s reads, is uniform over the twelve
+    slots to within 2^-40, and the exact shuffle makes the same marginal
+    exactly uniform, so the 2^-40 is the whole price of replacing the exact
+    shuffle by a finite word. *)
 Lemma psl211_endpoint_mixing (s : 'I_12) :
   var_dist (@endpoint_dist_weighted R 10 2 584 psl211_moves psl211_Wuni s)
            (fdist_uniform (card_ord 12))
