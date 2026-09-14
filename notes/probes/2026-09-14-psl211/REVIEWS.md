@@ -30,6 +30,8 @@ steps with explicit `exact:`).
 Step 2c refactor pass (4c08386, 98612df, d9406a2, 6fda271): psl211_closure.v
 split, renames, enumeration-lemma consolidation, wording; nine-anchor
 assumption table reproduced unchanged; a separate Opus review of the four
-commits was run before the full build (verdict recorded in the plan's Task 11
-as-built once returned). Full build at 6fda271: make -j8 nothing to be done,
+commits returned GO with comment-level findings, applied in c7f46f8 and
+recompiled green in order. Full build at 6fda271: make -j8 nothing to be done,
 exit 0. Axiom sweep: standard axioms only, all ten files.
+
+Final Plan A code HEAD: c7f46f8 (chain green; make -n reports nothing to do).
