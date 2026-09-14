@@ -1,0 +1,18 @@
+File "./probe_bridge.v", line 12, characters 0-54:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+File "./probe_bridge.v", line 37, characters 2-10:
+Error: Cannot infer the implicit parameter R of fdistmap whose type is
+"realType" in
+environment:
+R : realType
+X : finType
+A : {set X}
+HA : (0 < #|A|)%N
+T : finType
+f0, f1 : X -> T
+
+sh run.sh probe_bridge.v  3.76s user 0.13s system 99% cpu 3.905 total

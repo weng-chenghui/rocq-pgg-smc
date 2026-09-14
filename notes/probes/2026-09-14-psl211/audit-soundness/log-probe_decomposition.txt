@@ -1,0 +1,7 @@
+File "./probe_decomposition.v", line 14, characters 0-54:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+sh run.sh probe_decomposition.v  4.11s user 0.20s system 99% cpu 4.349 total

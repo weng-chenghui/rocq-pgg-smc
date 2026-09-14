@@ -1,0 +1,9 @@
+File "./probe_mixing.v", line 91, characters 9-28:
+Error:
+In environment
+walkN : nat -> seq N
+L : nat
+The term "1 :: nseq 659 0" has type "seq nat"
+while it is expected to have type "seq N".
+
+sh run.sh probe_mixing.v  8.90s user 0.07s system 99% cpu 9.010 total
