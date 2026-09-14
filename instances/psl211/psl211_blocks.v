@@ -18,6 +18,7 @@
 (*   psl211_leak6                   == a size-6 pattern with unequal counts   *)
 (*   psl211_chirality_swapT         == the transported scaling swaps the two  *)
 (*   psl211_size_subsets            == the enumerator's counts at every size  *)
+(*   psl211_mem_subsets             == the enumerator lists every such list   *)
 (*   psl211_tbl_ok_mirrorT/_hexadT  == each table has the design shape        *)
 (******************************************************************************)
 
@@ -360,6 +361,32 @@ Local Fixpoint psl211_ascending_lists (k lo : nat) : seq (seq nat) :=
 (** psl211_subsets k — every ascending k-list of positions below twelve. *)
 Definition psl211_subsets (k : nat) : seq (seq nat) :=
   psl211_ascending_lists k 0.
+
+(* Completeness of the generator, by induction on the length, with the lower
+   bound carried as a parameter. *)
+Local Lemma mem_ascending (k lo : nat) (L : seq nat) :
+  sorted ltn L -> all (fun n => (lo <= n)%N && (n < 12)%N) L -> size L = k ->
+  L \in psl211_ascending_lists k lo.
+Proof.
+elim: k lo L => [|k IH] lo L Hs Ha Hsz.
+  by move: Hsz => /size0nil ->; rewrite inE.
+case: L Hs Ha Hsz => [|a L] // Hs Ha [Hsz].
+move: Ha => /= /andP[/andP[Hlo Ha12] HaL].
+apply/allpairsPdep; exists a, L; split => //.
+  by rewrite mem_iota Hlo /= subnKC ?Ha12 // (leq_trans Hlo (ltnW Ha12)).
+apply: IH => //; first exact: path_sorted Hs.
+apply/allP => x Hx; have /andP[_ Hx12] := allP HaL _ Hx.
+rewrite Hx12 andbT.
+by move: (order_path_min ltn_trans Hs) => /allP/(_ x Hx).
+Qed.
+
+(** psl211_mem_subsets — every ascending k-list of positions below twelve is
+    enumerated by psl211_subsets k: a certificate quantified over the
+    enumerator therefore speaks about every coalition of that size. *)
+Lemma psl211_mem_subsets (k : nat) (L : seq nat) :
+  sorted ltn L -> all (fun n => (n < 12)%N) L -> size L = k ->
+  L \in psl211_subsets k.
+Proof. by move=> Hs Ha Hsz; apply: mem_ascending. Qed.
 
 (** psl211_size_subsets5 — there are exactly 792 ascending five-lists of
     positions below twelve. *)
