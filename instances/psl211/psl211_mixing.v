@@ -18,13 +18,29 @@
 (*   walkN L  == the length-L walk distribution over the 660 states           *)
 (*   weval w  == the shuffle a length-L letter word evaluates to              *)
 (*   fibc L g == the number of length-L letter words whose product is g       *)
-(*   Wuni     == the uniform letter law of the realistic word shuffle         *)
+(*   psl211_Wuni == the uniform letter law of the realistic word shuffle      *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   mixing_bound_okT   == the length-584 walk meets the 2^-40 mixing bound   *)
 (*   psl211_word_mixing == the 584-letter word law is within 2^-40 of the     *)
 (*                         uniform shuffle in variation distance              *)
 (*                                                                            *)
+(* The certificate is an inequality between two binary naturals over the      *)
+(* common denominator 660 * 3^584, where 3^584 is the number of letter words  *)
+(* and 660 the number of states: 2^40 times the total deviation of the 660    *)
+(* walk counts from the uniform value is at most 660 * 3^584. Every number in *)
+(* it is exact, so the bound it decodes to is an exact rational bound and not *)
+(* a floating-point estimate.                                                 *)
+(*                                                                            *)
+(* Walk convention: weval reads a word as the right-ordered product of its    *)
+(* letters, so appending a letter multiplies on the right, and one reverse    *)
+(* step of the walk is right multiplication by the inverse letter. The        *)
+(* predecessor table psl211_pred_table of psl211_closure.v is indexed in that *)
+(* convention, which is the one pgl27_mixing.v uses.                          *)
+(*                                                                            *)
+(* Not here: the closure enumeration and its checker, which are in            *)
+(* psl211_closure.v, and the endpoint and joint mixing corollaries of         *)
+(* pgl27_mixing.v, which need the single-card marginal of psl211_profile.v.   *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -37,8 +53,8 @@ From mathcomp Require Import primitive_action.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import pgg_interface.
-From pgg_smc Require Import psl211_blocks psl211_group psl211_closure.
-From pgg_smc Require Import pgg_collusion_bound pgg_weighted_words.
+From pgg_smc Require Import psl211_group psl211_closure.
+From pgg_smc Require Import pgg_weighted_words.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -197,7 +213,8 @@ Qed.
 
 (* Every letter of the alphabet lies in the shuffle group. *)
 Local Lemma sym_in_G (j : 'I_3) : tnth psl211_moves j \in pgg_G psl211_M.
-Proof. by move: (psl211_gen3_of_mem (val j)); rewrite /psl211_gen3_of inord_val.
+Proof.
+by move: (psl211_gen3_of_mem (val j)); rewrite /psl211_gen3_of inord_val.
 Qed.
 
 (* The index of the jn-th reverse-walk predecessor of state k: the key at k
@@ -222,7 +239,7 @@ Qed.
 
 Local Lemma predk_lt (k jn : nat) :
   (k < 660)%N -> (jn < 3)%N -> (predk k jn < 660)%N.
-Proof. by move=> Hk Hjn; apply: psl211_tbl_index_lt; exact: predk_mem. Qed.
+Proof. move=> Hk Hjn; apply: psl211_tbl_index_lt; exact: predk_mem. Qed.
 
 (* entry_perm k * sigma_j^-1 is entry_perm (predk k j), for k below 660.  The
    index arithmetic of psl211_pred_table is right multiplication by the
@@ -337,7 +354,7 @@ Qed.
    puts no mass outside the support of the uniform law it is compared with. *)
 Local Lemma word_eval_in_G (L : nat) (w : L.-tuple 'I_3) :
   weval w \in pgg_G psl211_M.
-Proof. by apply: group_prod => i _; exact: sym_in_G. Qed.
+Proof. apply: group_prod => i _; exact: sym_in_G. Qed.
 
 (* A 660-vector meeting the binary-N certificate inequality meets it in nat:
    2^40 times the total absolute deviation of its entries from the uniform
@@ -363,7 +380,7 @@ move: H.
 rewrite !N2Nat.inj_mul !multE !NtoNat_pow e2 e3 e40 e584 e660.
 rewrite foldlN_addsum [N.to_nat 0%num]/= add0n.
 rewrite (big_nth 0%num) Hsz big_mkord.
-move=> H; exact: H.
+exact: id.
 Qed.
 
 (* The length-584 walk vector meets the nat certificate.  This is the only
@@ -387,11 +404,11 @@ Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 
-(** Wuni — the uniform law on the three letters.  The dealer draws each
+(** psl211_Wuni — the uniform law on the three letters.  The dealer draws each
     letter of the word independently and uniformly, so the word shuffle is
     the L-step random walk on the shuffle group along the inverse-closed
     alphabet psl211_moves, and that walk is symmetric. *)
-Definition Wuni : R.-fdist 'I_3 := fdist_uniform (card_ord 3).
+Definition psl211_Wuni : R.-fdist 'I_3 := fdist_uniform (card_ord 3).
 
 (* The nat image of a binary-N absolute difference is the real absolute
    difference of the two images.  It carries the certificate's absolute values
@@ -454,14 +471,14 @@ Qed.
    product is the fibre count divided by the number of words.  This is where
    the counting layer meets the probability layer. *)
 Local Lemma rho_valE (g : {perm 'I_12}) :
-  @rho_from_words_weighted R 10 2 584 psl211_moves Wuni g
+  @rho_from_words_weighted R 10 2 584 psl211_moves psl211_Wuni g
   = (fibc 584 g)%:R / (3 ^ 584)%:R.
 Proof.
 rewrite fiber_prob_weighted.
 rewrite (eq_bigr (fun=> (3 ^ 584)%:R^-1)); last first.
   move=> w _.
   rewrite word_weightedE.
-  under eq_bigr => i _ do rewrite /Wuni fdist_uniformE card_ord.
+  under eq_bigr => i _ do rewrite /psl211_Wuni fdist_uniformE card_ord.
   by rewrite prodr_const card_ord exprVn natrX.
 by rewrite sumr_const [X in _ = X]mulrC mulr_natr; congr (_ *+ _).
 Qed.
@@ -485,7 +502,8 @@ Local Lemma mixing_bound_gen
   (forall w : 584.-tuple 'I_3, weval w \in Gg) ->
   (2 ^ 40 * (\sum_(k < 660) N.to_nat (absdiffN (660 * vN k) (3 ^ 584)%num))
    <= 660 * 3 ^ 584)%N ->
-  var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves Wuni) (`U GposH)
+  var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves psl211_Wuni)
+    (`U GposH)
   <= 2%:R^-40.
 Proof.
 move=> Hcard mem_Gg ep_inj ep_mem fibcnt word_in_G Hcert.
@@ -498,10 +516,10 @@ rewrite [X in _ + X]big1 ?addr0; last first.
   by rewrite rho_valE Hf0 mul0r fdist_uniform_supp_notin // subr0 normr0.
 have Hperm : perm_eq (enum Gg) [seq ep k | k <- iota 0 660].
   apply: uniq_perm; first exact: enum_uniq.
-    by rewrite (map_inj_in_uniq ep_inj); exact: iota_uniq.
+    rewrite (map_inj_in_uniq ep_inj); exact: iota_uniq.
   move=> g; rewrite mem_enum.
   apply/idP/idP; first exact: mem_Gg.
-  by move=> /mapP[k _ ->]; exact: ep_mem.
+  move=> /mapP[k _ ->]; exact: ep_mem.
 rewrite -big_enum (perm_big _ Hperm) big_map.
 rewrite -[iota 0 660]/(index_iota 0 660) big_mkord.
 rewrite (eq_bigr (fun i : 'I_660 =>
@@ -524,13 +542,13 @@ Qed.
     of the idealised uniform shuffle transfers to the shuffle a dealer can
     actually perform at a cost of 2^-40. *)
 Lemma psl211_word_mixing :
-  var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves Wuni)
+  var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves psl211_Wuni)
            (`U psl211_G_pos)
   <= 2%:R^-40.
 Proof.
-apply: (@mixing_bound_gen (pgg_G psl211_M)%G psl211_entry_perm
-  (fun k => nth 0%num (walkN 584) k) psl211_G_pos psl211_card psl211_mem_entry_perm
-  psl211_entry_perm_inj psl211_entry_perm_mem
+exact: (@mixing_bound_gen (pgg_G psl211_M)%G psl211_entry_perm
+  (fun k => nth 0%num (walkN 584) k) psl211_G_pos psl211_card
+  psl211_mem_entry_perm psl211_entry_perm_inj psl211_entry_perm_mem
   (fun k : nat => @fiber_count 584 k)
   (@word_eval_in_G 584) mixing_cert_nat).
 Qed.
