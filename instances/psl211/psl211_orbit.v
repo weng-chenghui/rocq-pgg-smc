@@ -21,10 +21,18 @@
 (*   psl211_sets_of tbl   == the family of position sets coded by a table     *)
 (*   psl211_mirror_blocks == the mirror Steiner system, as a set of sets      *)
 (*   psl211_hexad_blocks  == the M12 hexad system, as a set of sets           *)
+(*   psl211_subset_valid == S is a block of one of the two systems            *)
 (*   psl211_subset_class  == the chirality bit of a six-subset of positions   *)
 (*   psl211_orbit_class   == the chirality bit of a deck's heart set          *)
 (*   psl211_orbit_encode  == a distinct-card deck of a chosen chirality       *)
 (*   psl211_rep_list b    == the representative row of the system b names     *)
+(*   psl211_asc6 L        == L is an ascending six-list of codes below twelve *)
+(*                                                                            *)
+(* The census of six-subsets runs over sorted6, the literal universe of the   *)
+(* 924 = C(12,6) ascending six-lists, which is every six-subset of the twelve *)
+(* positions written as a code list. class_count takes that enumeration as a  *)
+(* parameter rather than naming sorted6 itself, because unifying eq_card      *)
+(* against the literal does not terminate in usable time.                     *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_mirror_invariant, psl211_hexad_invariant                          *)
@@ -33,6 +41,11 @@
 (*   psl211_orbit_class_invariant == the chirality bit survives every shuffle *)
 (*   psl211_deck_stable     == a shuffle preserves distinctness of cards      *)
 (*   psl211_orbit_encodeK   == the encoder deals the requested chirality      *)
+(*   psl211_orbit_populated == both chiralities occur among valid deals       *)
+(*   psl211_tbl_ok_asc6     == a certified table lists ascending six-rows     *)
+(*   psl211_block_card6     == an ascending six-list codes a six-element set  *)
+(*   psl211_mirror_tbl_uniq, psl211_hexad_tbl_uniq                            *)
+(*                          == each table lists its blocks once each          *)
 (*   psl211_card_mirror_blocks, psl211_card_hexad_blocks                      *)
 (*                          == each system has 132 blocks                     *)
 (*   psl211_pattern_countE  == the finset census of a leak pattern equals the *)
@@ -49,10 +62,8 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq path.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action bigop div prime.
+From mathcomp Require Import morphism action div.
 From pgg_smc Require Import pgg_interface psl211_blocks psl211_group.
-
-Import Prenex Implicits.
 
 (* -------------------------------------------------------------------------- *)
 (* Deck, hearts and the chirality classifier.                                 *)
@@ -77,8 +88,9 @@ Definition psl211_heart_set (sh : 12.-tuple 'I_12) : {set 'I_12} :=
 Definition psl211_list_to_set (L : seq nat) : {set 'I_12} :=
   [set x : 'I_12 | val x \in L].
 
-(** psl211_sets_of — the family of position sets coded by the rows of a
-    table. *)
+(** psl211_sets_of — the family of position sets a table of code rows
+    denotes. Every statement about a block system is read off its table
+    through this map. *)
 Definition psl211_sets_of (tbl : seq (seq nat)) : {set {set 'I_12}} :=
   [set S | has (fun R => psl211_list_to_set R == S) tbl].
 
@@ -108,6 +120,33 @@ Definition psl211_orbit_class (sh : 12.-tuple 'I_12) : bool :=
   psl211_subset_class (psl211_heart_set sh).
 
 (* -------------------------------------------------------------------------- *)
+(* The shape of a table row, and what it gives the two block systems.         *)
+(* -------------------------------------------------------------------------- *)
+
+(** psl211_asc6 — L is a strictly ascending six-list of codes below twelve,
+    the code form of a six-subset of the twelve positions. *)
+Definition psl211_asc6 (L : seq nat) : bool :=
+  [&& sorted ltn L, all (fun n => (n < 12)%N) L & size L == 6].
+
+(** psl211_tbl_ok_asc6 — a table of the certified shape is a table of
+    ascending six-lists of positions below twelve, the premise every
+    row-to-finset lemma of this file carries. *)
+Lemma psl211_tbl_ok_asc6 (tbl : seq (seq nat)) :
+  psl211_tbl_ok tbl -> all psl211_asc6 tbl.
+Proof.
+case/andP => _ /allP Htbl; apply/allP => R /Htbl /andP[/andP[Hsz Hso] Hlt].
+by rewrite /psl211_asc6 Hso Hlt Hsz.
+Qed.
+Arguments psl211_tbl_ok_asc6 [tbl].
+
+(* Both tables list ascending six-rows. *)
+Local Lemma asc6_mirrorT : all psl211_asc6 psl211_mirror_tbl.
+Proof. exact: (psl211_tbl_ok_asc6 psl211_tbl_ok_mirrorT). Qed.
+
+Local Lemma asc6_hexadT : all psl211_asc6 psl211_hexad_tbl.
+Proof. exact: (psl211_tbl_ok_asc6 psl211_tbl_ok_hexadT). Qed.
+
+(* -------------------------------------------------------------------------- *)
 (* Invariance of the two systems under the shuffle group.                     *)
 (* -------------------------------------------------------------------------- *)
 
@@ -115,11 +154,11 @@ Definition psl211_orbit_class (sh : 12.-tuple 'I_12) : bool :=
 Local Definition rows_lt12 (tbl : seq (seq nat)) : bool :=
   all (fun R => all (fun x => (x < 12)%N) R) tbl.
 
-Local Lemma rows_lt12_mirror : rows_lt12 psl211_mirror_tbl.
-Proof. by vm_compute. Qed.
+Local Lemma rows_lt12_mirrorT : rows_lt12 psl211_mirror_tbl.
+Proof. by apply/allP => R /(allP asc6_mirrorT) /and3P[_ H _]. Qed.
 
-Local Lemma rows_lt12_hexad : rows_lt12 psl211_hexad_tbl.
-Proof. by vm_compute. Qed.
+Local Lemma rows_lt12_hexadT : rows_lt12 psl211_hexad_tbl.
+Proof. by apply/allP => R /(allP asc6_hexadT) /and3P[_ H _]. Qed.
 
 (* The image of a coded row under a table-given permutation is coded by the
    table image of the row. *)
@@ -166,7 +205,7 @@ have HFA : F @: A = A.
   by apply/subsetP => y /imsetP[z zA ->]; exact: Hsub.
 by rewrite -{1}HFA => /imsetP[z zA /Finj ->].
 Qed.
-Arguments stab_of_sub [T F A].
+Arguments stab_of_sub [T] F [A].
 
 (* The permutations under which membership in a family of sets is invariant. *)
 Local Definition stab_of (A : {set {set 'I_12}}) : {set {perm 'I_12}} :=
@@ -176,9 +215,7 @@ Local Definition stab_of (A : {set {set 'I_12}}) : {set {perm 'I_12}} :=
 Local Lemma stab_ofP (A : {set {set 'I_12}}) (g : {perm 'I_12}) :
   reflect (forall S : {set 'I_12}, ((g @: S) \in A) = (S \in A))
           (g \in stab_of A).
-Proof.
-rewrite inE; apply: (iffP forallP) => H S; by [apply/eqP | apply/eqP].
-Qed.
+Proof. by rewrite inE; apply: (iffP forallP) => Hall S; apply/eqP. Qed.
 
 Local Lemma group_set_stab_of (A : {set {set 'I_12}}) : group_set (stab_of A).
 Proof.
@@ -205,58 +242,40 @@ move=> H1 H2; apply/subsetP => x /imsetP[i _ ->]; apply/stab_ofP.
 by case: i => -[|[|//]] Hlt.
 Qed.
 
-Local Lemma r4_stab_mirror (S : {set 'I_12}) :
-  ((psl211_r4_perm @: S) \in psl211_mirror_blocks)
-  = (S \in psl211_mirror_blocks).
+(* A letter whose table maps a block table into itself reflects membership in
+   the family that table denotes. *)
+Local Lemma stab_of_gen (tbl : seq (seq nat)) (g : {perm 'I_12})
+    (t : seq nat) :
+  (forall x : 'I_12, val (g x) = nth 0 t (val x)) ->
+  rows_lt12 tbl -> psl211_stable_ok t tbl ->
+  forall S : {set 'I_12},
+    ((g @: S) \in psl211_sets_of tbl) = (S \in psl211_sets_of tbl).
 Proof.
-apply: (stab_of_sub (F := fun S0 : {set 'I_12} => psl211_r4_perm @: S0)).
+move=> Hg Hlt Hst.
+apply: (stab_of_sub (fun S0 : {set 'I_12} => g @: S0)).
   exact/imset_inj/perm_inj.
-exact: (sets_of_gen_sub psl211_r4_permE rows_lt12_mirror
-                        psl211_stable_r4_mirrorT).
+exact: (sets_of_gen_sub Hg Hlt Hst).
 Qed.
-
-Local Lemma m6_stab_mirror (S : {set 'I_12}) :
-  ((psl211_m6_perm @: S) \in psl211_mirror_blocks)
-  = (S \in psl211_mirror_blocks).
-Proof.
-apply: (stab_of_sub (F := fun S0 : {set 'I_12} => psl211_m6_perm @: S0)).
-  exact/imset_inj/perm_inj.
-exact: (sets_of_gen_sub psl211_m6_permE rows_lt12_mirror
-                        psl211_stable_m6_mirrorT).
-Qed.
-
-Local Lemma r4_stab_hexad (S : {set 'I_12}) :
-  ((psl211_r4_perm @: S) \in psl211_hexad_blocks)
-  = (S \in psl211_hexad_blocks).
-Proof.
-apply: (stab_of_sub (F := fun S0 : {set 'I_12} => psl211_r4_perm @: S0)).
-  exact/imset_inj/perm_inj.
-exact: (sets_of_gen_sub psl211_r4_permE rows_lt12_hexad
-                        psl211_stable_r4_hexadT).
-Qed.
-
-Local Lemma m6_stab_hexad (S : {set 'I_12}) :
-  ((psl211_m6_perm @: S) \in psl211_hexad_blocks)
-  = (S \in psl211_hexad_blocks).
-Proof.
-apply: (stab_of_sub (F := fun S0 : {set 'I_12} => psl211_m6_perm @: S0)).
-  exact/imset_inj/perm_inj.
-exact: (sets_of_gen_sub psl211_m6_permE rows_lt12_hexad
-                        psl211_stable_m6_hexadT).
-Qed.
+Arguments stab_of_gen [tbl g t].
 
 Local Lemma G_sub_stab_mirror :
   pgg_G psl211_M \subset stab_of psl211_mirror_blocks.
 Proof.
-by rewrite gen_subG; apply: gens_sub_stab;
-   [exact: r4_stab_mirror | exact: m6_stab_mirror].
+rewrite gen_subG; apply: gens_sub_stab.
+- exact: (stab_of_gen psl211_r4_permE rows_lt12_mirrorT
+                      psl211_stable_r4_mirrorT).
+- exact: (stab_of_gen psl211_m6_permE rows_lt12_mirrorT
+                      psl211_stable_m6_mirrorT).
 Qed.
 
 Local Lemma G_sub_stab_hexad :
   pgg_G psl211_M \subset stab_of psl211_hexad_blocks.
 Proof.
-by rewrite gen_subG; apply: gens_sub_stab;
-   [exact: r4_stab_hexad | exact: m6_stab_hexad].
+rewrite gen_subG; apply: gens_sub_stab.
+- exact: (stab_of_gen psl211_r4_permE rows_lt12_hexadT
+                      psl211_stable_r4_hexadT).
+- exact: (stab_of_gen psl211_m6_permE rows_lt12_hexadT
+                      psl211_stable_m6_hexadT).
 Qed.
 
 (** psl211_mirror_invariant — membership in the mirror system is invariant
@@ -265,24 +284,14 @@ Qed.
 Lemma psl211_mirror_invariant (g : pgg_gT psl211_M) (S : {set 'I_12}) :
   g \in pgg_G psl211_M ->
   ((g @: S) \in psl211_mirror_blocks) = (S \in psl211_mirror_blocks).
-Proof.
-move=> gG.
-have /stab_ofP H : g \in stab_of psl211_mirror_blocks
-  by exact: (subsetP G_sub_stab_mirror).
-exact: H.
-Qed.
+Proof. by move=> /(subsetP G_sub_stab_mirror)/stab_ofP. Qed.
 
 (** psl211_hexad_invariant — membership in the hexad system is invariant
     under every shuffle of the group. *)
 Lemma psl211_hexad_invariant (g : pgg_gT psl211_M) (S : {set 'I_12}) :
   g \in pgg_G psl211_M ->
   ((g @: S) \in psl211_hexad_blocks) = (S \in psl211_hexad_blocks).
-Proof.
-move=> gG.
-have /stab_ofP H : g \in stab_of psl211_hexad_blocks
-  by exact: (subsetP G_sub_stab_hexad).
-exact: H.
-Qed.
+Proof. by move=> /(subsetP G_sub_stab_hexad)/stab_ofP. Qed.
 
 (* No row of one table has the same positions as a row of the other. *)
 Local Definition tables_distinct : bool :=
@@ -379,12 +388,14 @@ Local Definition hexad_deck_tbl : seq nat :=
 Local Definition mirror_deck_tbl : seq nat :=
   [:: 6; 7; 0; 1; 8; 2; 9; 3; 4; 5; 10; 11].
 
-(* Ordinal in 'I_12 from a natural number, by reduction modulo twelve. *)
+(* Ordinal in 'I_12 from a natural number, by reduction modulo twelve;
+   restated because psl211_group.v's copy is Local there. *)
 Local Definition Imod (k : nat) : 'I_12 := Ordinal (ltn_pmod k (ltn0Sn 11)).
 
 (** psl211_rep_list — the representative row of each Steiner system: the
     mirror row [2;3;5;7;8;9] at true, the hexad row [0;1;3;7;10;11] at
-    false. *)
+    false. These are the base points at which the two orbit identities are
+    stated, and the rows the encoder places the heart codes on. *)
 Definition psl211_rep_list (b : bool) : seq nat :=
   if b then [:: 2; 3; 5; 7; 8; 9] else [:: 0; 1; 3; 7; 10; 11].
 
@@ -416,11 +427,6 @@ Qed.
 (* -------------------------------------------------------------------------- *)
 (* Ascending code lists of six positions, and the census machinery.           *)
 (* -------------------------------------------------------------------------- *)
-
-(** psl211_asc6 — L is a strictly ascending six-list of codes below twelve,
-    the code form of a six-subset of the twelve positions. *)
-Definition psl211_asc6 (L : seq nat) : bool :=
-  [&& sorted ltn L, all (fun n => (n < 12)%N) L & size L == 6].
 
 (* The 924 strictly ascending six-lists of codes below twelve. *)
 Local Definition sorted6 : seq (seq nat) := [::
@@ -779,7 +785,7 @@ Local Lemma sorted_val_enum (S : {set 'I_12}) : sorted ltn (map val (enum S)).
 Proof.
 rewrite sorted_map.
 have He : enum S = [seq x <- enum 'I_12 | x \in S]
-  by rewrite enumT -deprecated_filter_index_enum.
+  by rewrite [X in _ = [seq _ <- X | _]]enumT.
 rewrite He; apply: sorted_filter.
   by move=> y x z; apply: ltn_trans.
 by rewrite -sorted_map val_enum_ord; exact: iota_ltn_sorted.
@@ -868,19 +874,13 @@ transitivity (size [seq psl211_list_to_set L | L <- filter pn s]).
 by rewrite size_map size_filter.
 Qed.
 
-(* Both tables list ascending six-rows, without repetition. *)
-Local Lemma asc6_mirrorT : all psl211_asc6 psl211_mirror_tbl.
-Proof. by vm_compute. Qed.
-
-Local Lemma asc6_hexadT : all psl211_asc6 psl211_hexad_tbl.
-Proof. by vm_compute. Qed.
-
 (** psl211_mirror_tbl_uniq — the mirror table lists its 132 blocks once
-    each. *)
+    each, the repetition-free premise of the pattern census. *)
 Lemma psl211_mirror_tbl_uniq : uniq psl211_mirror_tbl.
 Proof. by vm_compute. Qed.
 
-(** psl211_hexad_tbl_uniq — the hexad table lists its 132 blocks once each. *)
+(** psl211_hexad_tbl_uniq — the hexad table lists its 132 blocks once each,
+    the repetition-free premise of the pattern census. *)
 Lemma psl211_hexad_tbl_uniq : uniq psl211_hexad_tbl.
 Proof. by vm_compute. Qed.
 
@@ -976,9 +976,10 @@ rewrite (class_count sorted6 (fun S => S \in psl211_sets_of psl211_hexad_tbl)
 by vm_compute.
 Qed.
 
-(** psl211_pattern_countE — the number of blocks of a table meeting the
-    coalition C in exactly A is the table-level count of psl211_blocks.v, so
-    a leak census on position sets is a computation on code lists. *)
+(** psl211_pattern_countE — for a repetition-free table of ascending rows,
+    the number of blocks meeting the coalition C in exactly A is the
+    table-level count of psl211_blocks.v, so a leak census on position sets
+    is a computation on code lists. *)
 Lemma psl211_pattern_countE (tbl : seq (seq nat)) (C A : {set 'I_12}) :
   all psl211_asc6 tbl -> uniq tbl ->
   #|[set B in psl211_sets_of tbl | B :&: C == A]|
@@ -1058,27 +1059,19 @@ Local Definition code_table (b : bool) : seq (seq nat * seq nat) :=
 
 (* Every row of the system carries a word from its representative row. The
    check recomputes each word from scratch, so a BFS bookkeeping error cannot
-   make it true. *)
-Local Definition code_table_ok (b : bool) : bool :=
-  all (fun L => has (fun sw : seq nat * seq nat =>
-                       sort leq (map (psl211_papply sw.2) (psl211_rep_list b))
-                       == L)
-                    (code_table b))
-      (if b then psl211_mirror_tbl else psl211_hexad_tbl).
+   make it true. A Notation rather than a Definition: the allP view that
+   reads this certificate must see all at the head, and unfolding a
+   definition there drags code_table b through the ordinary reduction
+   machine, which does not terminate in usable time. *)
+Local Notation code_table_ok b :=
+  (all (fun L => has (fun sw : seq nat * seq nat =>
+                        sort leq (map (psl211_papply sw.2) (psl211_rep_list b))
+                        == L)
+                     (code_table b))
+       (if b then psl211_mirror_tbl else psl211_hexad_tbl)).
 
-Local Lemma code_table_okP (b : bool) : code_table_ok b.
+Local Lemma code_table_okT (b : bool) : code_table_ok b.
 Proof. by case: b; vm_compute. Qed.
-
-(* The same certificate with all at the head.  The allP view must not be
-   asked to unfold code_table_ok: reducing code_table b outside the virtual
-   machine does not terminate in usable time. *)
-Local Lemma code_table_okA (b : bool) :
-  all (fun L => has (fun sw : seq nat * seq nat =>
-                       sort leq (map (psl211_papply sw.2) (psl211_rep_list b))
-                       == L)
-                    (code_table b))
-      (if b then psl211_mirror_tbl else psl211_hexad_tbl).
-Proof. exact: code_table_okP. Qed.
 
 (* The image of a coded subset is coded by the word applied codewise. *)
 Local Lemma psl211_word_perm_imset (w : seq nat) (L : seq nat) :
@@ -1116,7 +1109,7 @@ apply/setP => T; apply/orbitP/idP => [[g gG <-]|HT].
   rewrite setact_imset (psl211_mirror_invariant _ _ gG) /psl211_mirror_blocks.
   by rewrite (mem_sets_of asc6_mirrorT (asc6_rep true)); vm_compute.
 move: HT; rewrite /psl211_mirror_blocks in_set => /hasP[R Rt /eqP <-].
-move: (code_table_okA true) => /allP/(_ _ Rt)/hasP[sw _ /eqP Hw].
+move: (code_table_okT true) => /allP/(_ _ Rt)/hasP[sw _ /eqP Hw].
 exists (psl211_word_perm sw.2); first exact: psl211_word_perm_mem.
 by rewrite setact_imset (psl211_word_perm_imset sw.2 H12)
    -list_to_set_sort Hw.
@@ -1133,7 +1126,7 @@ apply/setP => T; apply/orbitP/idP => [[g gG <-]|HT].
   rewrite setact_imset (psl211_hexad_invariant _ _ gG) /psl211_hexad_blocks.
   by rewrite (mem_sets_of asc6_hexadT (asc6_rep false)); vm_compute.
 move: HT; rewrite /psl211_hexad_blocks in_set => /hasP[R Rt /eqP <-].
-move: (code_table_okA false) => /allP/(_ _ Rt)/hasP[sw _ /eqP Hw].
+move: (code_table_okT false) => /allP/(_ _ Rt)/hasP[sw _ /eqP Hw].
 exists (psl211_word_perm sw.2); first exact: psl211_word_perm_mem.
 by rewrite setact_imset (psl211_word_perm_imset sw.2 H12)
    -list_to_set_sort Hw.
