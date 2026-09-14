@@ -4,15 +4,34 @@
 (* five_card_exec: the ExecutionPlug of the five-card instance                *)
 (*                                                                            *)
 (* The five-card instance carries an execution plug over its own              *)
-(* MonodromyProfile five_card_profile at an arbitrary bias, built by the      *)
-(* committed-input constructor: the run argument is the committed pair of     *)
-(* bits, both count bridges are erefl at 5 seats, 5 shares and 5 cards, the   *)
-(* participant list is den_boer_players, the input processes are the two      *)
-(* commit processes of the committing parties and the fuel is 100.            *)
+(* MonodromyProfile five_card_profile, built by the committed-input           *)
+(* constructor: the run argument is the committed pair of bits, both count    *)
+(* bridges are erefl at 5 seats, 5 shares and 5 cards, the participant list   *)
+(* is den_boer_players, the input processes are the two commit processes of   *)
+(* the committing parties and the fuel is 100.                                *)
+(*                                                                            *)
+(* The same run is written a second time as framework data. five_card_algebra *)
+(* is the instance's algebraic record and five_card_params drives it in the   *)
+(* committed-input mode, and the observed execution below is what the         *)
+(* framework builds from those two and the three run facts, rather than a     *)
+(* record assembled here. The instance pays two reductions for them:          *)
+(* termination at the run, and the endpoint equation at the profile, where    *)
+(* the readout stays a variable but the two commit processes are run. The     *)
+(* endpoint obligation of the run is that profile equation instantiated, and  *)
+(* reconstruction is read off the sharing claim written into the parameters.  *)
+(* The three interpreter-side lemmas the hand-written record used are kept,   *)
+(* and each proves a proposition convertible with its framework twin.         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
+(*   five_card_algebra     == the algebraic data of the five-card instance    *)
+(*   five_card_commits     == the commit processes of the two committing      *)
+(*                            parties                                         *)
+(*   five_card_payload     == the card positions those processes hand over    *)
+(*   five_card_params      == the run-level data of the committed-input run   *)
+(*   five_card_endpoints   == the endpoint obligation of that run             *)
+(*   five_card_recon       == the reconstruction obligation of that run       *)
 (*   five_card_exec_plug   == the execution plug over five_card_profile       *)
-(*   five_card_content_obs == the static observation: the den Boer layout of  *)
+(*   five_card_content_obs == the direct computation: the den Boer layout of  *)
 (*                            the committed pair at the cut image of a        *)
 (*                            starting position                               *)
 (*   five_card_exec_player_raw_trace == seat i's raw executed trace           *)
@@ -20,9 +39,8 @@
 (*                                      trace                                 *)
 (*   five_card_exec_trace  == seat i's executed trace as a random variable on *)
 (*                            the leakage space                               *)
-(*   five_card_observed    == the ObservedExecution packing the plug, the     *)
-(*                            static observation and the three run facts at   *)
-(*                            process offset 0                                *)
+(*   five_card_observed    == the ObservedExecution the framework builds from *)
+(*                            five_card_params and the three run facts        *)
 (*   den_boer_observed     == the same value, named for the den Boer member   *)
 (*   five_card_sample      == the den Boer sample adapter: the leakage space  *)
 (*                            Omega under P, the cut being the sampled        *)
@@ -37,6 +55,21 @@
 (*                                      space                                 *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   five_card_profileE         == the profile derived from the algebra is    *)
+(*                                 five_card_profile                          *)
+(*   five_card_execE            == the plug derived from the parameters is    *)
+(*                                 five_card_exec_plug                        *)
+(*   five_card_terminates       == every process of the run reaches Finish    *)
+(*   five_card_commit_endpoints == the profile's endpoint equation with these *)
+(*                                 committers                                 *)
+(*   five_card_decodeK          == decoding the payload returns the committed *)
+(*                                 pair                                       *)
+(*   five_card_oe_terminates    == the same termination, from the interpreter *)
+(*                                 lemmas                                     *)
+(*   five_card_oe_endpoints     == the same endpoint equation, from the       *)
+(*                                 interpreter                                *)
+(*   five_card_oe_static_recon  == the same reconstruction, from the          *)
+(*                                 interpreter                                *)
 (*   five_card_exec_recovers    == the derived run decodes to the conjunction *)
 (*                                 of the two committed bits                  *)
 (*   five_card_exec_correct     == termination, endpoint count and recovery   *)
@@ -107,6 +140,7 @@ From pgg_smc Require Import five_card_scheme_I5.
 From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import den_boer_profile den_boer_encoding den_boer_run.
 From pgg_smc Require Import five_card_leakage denboer_trace.
+From pgg_smc Require Import pgg_instance pgg_algebra_syntax.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -149,7 +183,7 @@ Definition five_card_exec_plug : ExecutionPlug mpF :=
                  ; mk_aproc (@pgg_commit FiveCardKim_M 8 (encode_bool ab.2))])
     100.
 
-(** five_card_content_obs — the five-card static observation: the den Boer
+(** five_card_content_obs — the five-card direct computation: the den Boer
     layout of the committed pair ab at the cut image of a starting position,
     namely tnth (den_boer_layout ab) (pgg_rho w0 p) at a cut w0 and a
     position p. *)
@@ -237,7 +271,7 @@ rewrite (five_card_exec_decodeE sz_ep sz_ep).
 by rewrite /ts_recon /fcI_scheme /fcI_recon val_tcast.
 Qed.
 
-(** five_card_exec_recon — decoding the static observation returns the
+(** five_card_exec_recon — decoding the direct computation returns the
     conjunction of the two committed bits, for any cut in the group and any
     proof of the endpoint count. *)
 Lemma five_card_exec_recon (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
@@ -374,6 +408,119 @@ by rewrite /five_card_exec_player_raw_trace /exec_participant_trace
 Qed.
 
 (******************************************************************************)
+(*     The algebraic record of the five-card instance                        *)
+(******************************************************************************)
+
+(** five_card_algebra — the algebraic data of the five-card instance: the
+    five rotations of the deck as generators, the Boolean secret the
+    five-card scheme deals with its encoding, its three-consecutive readout
+    and its privacy obligation, the seats starting at the five card positions
+    in order, and the seat list the run reads because enum 'I_5 does not
+    reduce. The shuffle acts on share indices as it acts on cards, so the
+    coordinate law is the framework's ord_coordE and the instance writes
+    none. The record holds no run, no fuel and no committed input, so the
+    seat interface, the reconstruction plug and the monodromy profile of this
+    instance are all functions of this one value. *)
+Definition five_card_algebra : PGGAlgebraic := algebra {
+  mount   << fc_kim_gens >> ;
+  seat    players (ord_tuple 5) by ord_tuple5_uniq ;
+  secret  bool ;
+  deal    fcI_scheme
+          encode fcI_encode
+          read   fcI_recon
+          private by fcI_private
+          shuffled_by pgg_rho by fcI_perm_compatible_kim ;
+  cache   seats den_boer_players by five_card_players_enumE }.
+
+(** five_card_profileE — the profile derived from the algebra is the
+    instance's own monodromy profile. The two are the same term, so every
+    theorem about five_card_profile is a theorem about the derived
+    profile. *)
+Lemma five_card_profileE :
+  instance_profile five_card_algebra = five_card_profile.
+Proof. by []. Qed.
+
+(** five_card_commits — the commit processes of the two committing parties:
+    party 7 sends the card position encoding the first bit and party 8 the
+    position encoding the second. This is the list the run appends after the
+    dealer, the verifier and the five seats, and the only place a committed
+    input enters the process list. *)
+Definition five_card_commits (ab : bool * bool)
+    : seq (aproc pgg_dtype (pgg_data (pga_n five_card_algebra).+2)) :=
+  [:: mk_aproc (@pgg_commit FiveCardKim_M 7 (encode_bool ab.1))
+    ; mk_aproc (@pgg_commit FiveCardKim_M 8 (encode_bool ab.2))].
+
+(** five_card_payload — the card positions those two processes hand over, in
+    the order the dealer receives them. The endpoint equation of a run with
+    committers is stated at the payload list rather than at the processes,
+    because the payload is what the dealer's readout consumes. *)
+Definition five_card_payload (ab : bool * bool)
+    : seq 'I_(pga_n five_card_algebra).+2 :=
+  [:: encode_bool ab.1; encode_bool ab.2].
+
+(** five_card_params — the run-level data of the committed-input run: the run
+    argument is the pair of committed bits, the two parties above commit it,
+    the dealer assembles the den Boer layout from what they sent, the value
+    the run recovers is the conjunction, and the interpreter budget is 100.
+    The argument between the layout and the decoder is the sharing claim,
+    den_boer_assemble_valid, so the reconstruction obligation below is read
+    back from this term rather than proved again. *)
+Definition five_card_params : ExecutionParams five_card_algebra :=
+  encoded_input_params five_card_algebra (bool * bool)
+    (fun ab => ab.1 && ab.2) den_boer_layout den_boer_assemble_valid
+    den_boer_decode five_card_commits 100.
+
+(** five_card_execE — the plug derived from the run parameters is the
+    instance's own execution plug. The committed-input readout of the
+    parameters and the hand-written readout of five_card_exec_plug are the
+    same term, so the two plugs drive the same interpreter run. *)
+Lemma five_card_execE : instance_exec five_card_params = five_card_exec_plug.
+Proof. by []. Qed.
+
+(** five_card_terminates — every process of the committed-input run reaches
+    Finish within the budget. The one run fact that has no route through the
+    algebra: it depends on the interpreter and on the budget, and is decided
+    by reduction. The statement is convertible with five_card_oe_terminates,
+    which states the same reduction at the hand-written plug. *)
+Lemma five_card_terminates : instance_terminates_stmt five_card_params.
+Proof. by vm_compute. Qed.
+
+(** five_card_commit_endpoints — at every content readout, the executed
+    endpoints of a run whose committers are five_card_commits are its direct
+    computation, the readout taken at the payload those committers send.
+    Keeping the readout a variable removes the dealt card from the reduction,
+    so one decision at the profile serves every run driven over it with these
+    committers. *)
+Lemma five_card_commit_endpoints :
+  profile_commit_endpoints_stmt five_card_commits five_card_payload 100.
+Proof. by vm_compute. Qed.
+
+(** five_card_decodeK — decoding the payload the committers send returns the
+    pair they hold. It is den_boer_decodeK at a pair rather than at two
+    bits, and it is the whole of what this instance adds to the profile's
+    commit-mode equation. *)
+Lemma five_card_decodeK (ab : bool * bool) :
+  den_boer_decode (five_card_payload ab) = ab.
+Proof. by case: ab => a b; exact: den_boer_decodeK. Qed.
+
+(** five_card_endpoints — the endpoint obligation of the committed-input run.
+    The statement is convertible with five_card_oe_endpoints, which proves it
+    directly from the interpreter; this one turns the layout the dealer
+    assembled from the payloads into the layout the direct computation reads,
+    and spends the reduction once at the profile. *)
+Definition five_card_endpoints : instance_endpoints_stmt five_card_params :=
+  encoded_endpointsE five_card_commit_endpoints five_card_decodeK.
+
+(** five_card_recon — decoding the direct computation at a cut in the group
+    returns the conjunction of the committed bits. The statement is
+    convertible with five_card_oe_static_recon, which proves it through the
+    interpreter; this one is encoded_static_recon, which the framework
+    derives from the sharing claim already written into five_card_params, so
+    reconstruction correctness of this instance costs no further proof. *)
+Definition five_card_recon : instance_recon_stmt five_card_params :=
+  encoded_static_recon.
+
+(******************************************************************************)
 (*     The packaged observed execution at five_card_profile                   *)
 (******************************************************************************)
 
@@ -382,21 +529,30 @@ Qed.
    on the pair and nothing else. *)
 
 (** five_card_oe_terminates — every process of the five-card run reaches
-    Finish at every committed pair and cut. *)
+    Finish at every committed pair and cut. It proves the proposition
+    five_card_terminates proves: the two statements are convertible, and this
+    one reaches it from the interpreter lemmas above rather than from the
+    parameter record. *)
 Lemma five_card_oe_terminates (x : bool * bool) (w0 : pgg_gT FiveCardKim_M) :
   (@exec_run mpF five_card_exec_plug x w0 0).1
   = nseq (size (@exec_procs mpF five_card_exec_plug x w0 0)) Finish.
 Proof. by case: x => a b; exact: five_card_exec_terminates. Qed.
 
 (** five_card_oe_endpoints — the five-card verifier endpoints are the static
-    observation at every committed pair and cut. *)
+    observation at every committed pair and cut. It proves the proposition
+    five_card_endpoints proves: the two statements are convertible, and this
+    one runs the interpreter at the dealt layout where the other instantiates
+    the profile's commit-mode equation. *)
 Lemma five_card_oe_endpoints (x : bool * bool) (w0 : pgg_gT FiveCardKim_M) :
   @exec_endpoints mpF five_card_exec_plug x w0 0
   = @exec_static_endpoints mpF five_card_exec_plug five_card_content_obs x w0.
 Proof. by case: x => a b; exact: five_card_exec_endpoints. Qed.
 
-(** five_card_oe_static_recon — decoding the five-card static observation
-    returns the conjunction of the committed pair. *)
+(** five_card_oe_static_recon — decoding the five-card direct computation
+    returns the conjunction of the committed pair. It proves the proposition
+    five_card_recon proves: the two statements are convertible, and this one
+    reaches it through the interpreter where the other reads it off the
+    sharing claim carried by five_card_params. *)
 Lemma five_card_oe_static_recon (x : bool * bool)
     (w0 : pgg_gT FiveCardKim_M) :
   w0 \in pgg_G FiveCardKim_M ->
@@ -415,14 +571,17 @@ Proof. by case: x => a b; exact: five_card_exec_recon. Qed.
    no realType, no bias, no hypothesis pack and no word length, and the three
    proof fields quantify over the cut, not over a distribution on cuts. *)
 
-(** five_card_observed — the five-card observed execution: five_card_profile
-    with plug five_card_exec_plug at process offset 0, static observation
-    five_card_content_obs and expected value the conjunction of the committed
-    pair. *)
+(** five_card_observed — the five-card observed execution, derived by the
+    framework from the algebraic record, the run parameters and the three run
+    facts above. Two of those facts are framework lemmas, the endpoint
+    equation instantiated from the profile's commit-mode statement and the
+    reconstruction read off the sharing claim, and the third is the
+    instance's own termination computation; the profile, the plug, the direct
+    computation and the recovered value are all read off five_card_algebra
+    and five_card_params. The five data fields are the ones the hand-written
+    record above carried, so every theorem stated at them is unchanged. *)
 Definition five_card_observed : OE.ObservedExecution :=
-  OE.MkObservedExecution mpF five_card_exec_plug 0
-    five_card_content_obs (fun ab : bool * bool => ab.1 && ab.2)
-    five_card_oe_terminates five_card_oe_endpoints five_card_oe_static_recon.
+  instance_observed five_card_terminates five_card_endpoints five_card_recon.
 
 (** den_boer_observed — the den Boer observed execution: the five-card
     observed execution, since the den Boer member adds no execution data of
