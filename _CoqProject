@@ -166,6 +166,7 @@ legacy/reconstruct/pgg_assignment.v
 reconstruct/pgg_deck_pairing.v
 legacy/reconstruct/pgg_threshold.v
 reconstruct/transitivity_privacy.v
+reconstruct/design_privacy.v
 instances/pgl27/pgl27_group.v
 instances/pgl27/pgl27_orbit.v
 instances/pgl27/pgl27_scheme.v
