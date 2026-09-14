@@ -17,13 +17,33 @@
 (* the layout of a tape it is s5_rprocs_cut, whose identity cut is            *)
 (* s5_trace.s5_rprocs.                                                        *)
 (*                                                                            *)
+(* Both observed executions are the framework's derivation from one algebraic *)
+(* record, s5_algebra, and one parameter record per mode: dealer-dealt for    *)
+(* the deterministic run, supplied layout for the randomized one. The         *)
+(* instance spends three reductions in all, one termination per mode and the  *)
+(* single profile computation s5_profile_endpoints, which both endpoint       *)
+(* obligations instantiate; the two reconstructions cost no reduction at all, *)
+(* being read off the coordinate law and off the sharing claim. Each of       *)
+(* s5_exec_terminates, s5_exec_endpoints, s5_exec_recon, s5_rand_terminates,  *)
+(* s5_rand_endpoints and s5_rand_recon proves a statement convertible with    *)
+(* its framework counterpart, which the six Check guards below the algebra    *)
+(* record.                                                                    *)
+(*                                                                            *)
 (* Definitions:                                                               *)
+(*   s5_algebra          == the algebraic data of the five-seat instance      *)
+(*   s5_dealt_params     == the run-level data of the dealer-dealt run        *)
+(*   s5_dealt_endpoints, s5_dealt_recon                                       *)
+(*                       == the endpoint and reconstruction obligations of    *)
+(*                          that run, through the framework                   *)
+(*   s5_supplied_params  == the run-level data of the supplied-layout run     *)
+(*   s5_supplied_endpoints, s5_supplied_recon                                 *)
+(*                       == the same two obligations for that run             *)
 (*   s5_exec_plug        == the deterministic execution plug over s5_profile  *)
-(*   s5_content_obs      == the deterministic static observation: the share   *)
+(*   s5_content_obs      == the deterministic direct computation: the share   *)
 (*                          of the dealt position at the cut image of a       *)
 (*                          starting position                                 *)
 (*   s5_observed         == the ObservedExecution packing the deterministic   *)
-(*                          plug, its static observation and its three run    *)
+(*                          plug, its direct computation and its three run    *)
 (*                          facts at process offset 0                         *)
 (*   s5_rfree_share      == the j-th additive share of a tape, stated without *)
 (*                          a realType                                        *)
@@ -35,10 +55,23 @@
 (*                          readout and an arbitrary cut                      *)
 (*   s5_rprocs_cut       == that skeleton at the layout of a tape             *)
 (*   s5_rand_exec_plug   == the randomized execution plug over s5_profile     *)
-(*   s5_rcontent_obs     == the randomized static observation                 *)
+(*   s5_rcontent_obs     == the randomized direct computation                 *)
 (*   s5_rand_observed    == the ObservedExecution of the randomized plug      *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   s5_profileE         == the profile derived from the algebra is           *)
+(*                          s5_profile                                        *)
+(*   profile_k_s5_algebra == the privacy threshold this algebra carries is    *)
+(*                          five                                              *)
+(*   s5_execE, s5_supplied_execE                                              *)
+(*                       == the plugs derived from the two parameter records  *)
+(*                          are the instance's two plugs                      *)
+(*   s5_dealt_terminates, s5_supplied_terminates                              *)
+(*                       == every process of each run reaches Finish within   *)
+(*                          the fuel                                          *)
+(*   s5_profile_endpoints == at every content readout, the executed endpoints *)
+(*                          of a committer-free run over this profile are     *)
+(*                          its direct computation                            *)
 (*   s5_exec_endpoint_count == the deterministic run collects five endpoints  *)
 (*   s5_exec_recovers    == the deterministic run decodes to the dealt        *)
 (*                          position                                          *)
@@ -85,6 +118,8 @@ From pgg_smc Require Import pgg_raag_s5 pgg_raag_path s5_profile s5_run.
 From pgg_smc Require Import pgg_leakage_witness pgg_randomized_sharing.
 From pgg_smc Require Import pgg_canonical_sharing pgg_sharing_mechanism.
 From pgg_smc Require Import pgg_trace_secrecy s5_trace.
+From pgg_smc Require Import rigidity_s5_instance.
+From pgg_smc Require Import pgg_instance pgg_algebra_syntax.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -137,7 +172,7 @@ Definition s5_exec_plug : ExecutionPlug mpS :=
   @dealer_secret_plug mpS 'I_5 erefl s5_run.s5_players s5_players_enumE
     (fun s _ => tnth (ts_encode s5_scheme s)) 150.
 
-(** s5_content_obs — the deterministic static observation: the share of
+(** s5_content_obs — the deterministic direct computation: the share of
     position s at the cut image of a starting position,
     tnth (ts_encode s5_scheme s) (pgg_rho w0 p). This is the value the
     correctness theorems below show the executed endpoints equal, in place
@@ -187,7 +222,7 @@ exact: s5_run_terminates.
 Qed.
 
 (** s5_exec_endpoints — the deterministic run's verifier endpoints equal the
-    static observation s5_content_obs evaluated at each seat's start. This
+    direct computation s5_content_obs evaluated at each seat's start. This
     replaces "run the interpreter and read its trace" with "evaluate a pure
     function," which is what lets s5_exec_recon below prove recovery without
     touching the interpreter. *)
@@ -279,17 +314,123 @@ exact: (@exec_run_correct mpS s5_exec_plug s5_content_obs (fun s : 'I_5 => s)
           (s5_exec_recon Gw0)).
 Qed.
 
-(** s5_observed — the ObservedExecution record packaging s5_profile with
-    plug s5_exec_plug at process offset 0, static observation
-    s5_content_obs, expected value the dealt position, and the three run
-    facts s5_exec_terminates, s5_exec_endpoints and s5_exec_recon proved
-    above. This is the uniform form the coalition-view and leakage
-    analyses elsewhere in the instance consume, rather than the plug and
-    its three facts separately. *)
+(******************************************************************************)
+(*     The algebraic record of the S_5 instance                               *)
+(******************************************************************************)
+
+(** s5_algebra — the algebraic data of the five-seat adjacent-transposition
+    instance: the four adjacent transpositions of five card positions as
+    generators, the sum-mod-5 scheme the dealer shares with its encoding, its
+    reconstruction and its privacy obligation, and the seat list the run
+    reads because enum 'I_5 does not reduce. The seats start at the deck
+    positions in order and the shuffle acts on share indices as it acts on
+    cards, so the coordinate law
+    is the framework's ord_coordE and the instance writes none; the dealer
+    readout is the identity, so a card carries the share dealt to its own
+    position. The record holds no run, no fuel and no probability model, so
+    the seat interface, the reconstruction plug and the monodromy profile of
+    this instance are all functions of this one value, and both the
+    deterministic and the randomized run below are driven over it. *)
+Definition s5_algebra : PGGAlgebraic := algebra {
+  mount   << path_gen_tuple 3 >> ;
+  seat    players (ord_tuple 5) by s5_starts_uniq ;
+  secret  'I_5 ;
+  deal    s5_scheme
+          encode (@sum_mod_encode 3 4)
+          read   (@sum_mod_recon 3 4)
+          private by (@sum_mod_scheme_private 3 4)
+          shuffled_by pgg_rho by s5_sum_mod_perm_compatible ;
+  cache   seats s5_run.s5_players by s5_players_enumE }.
+
+(** s5_profileE — the profile derived from the algebra is the instance's own
+    monodromy profile. The two are the same term, so every theorem about
+    s5_profile is a theorem about the derived profile. *)
+Lemma s5_profileE : instance_profile s5_algebra = s5_profile.
+Proof. by []. Qed.
+
+(** profile_k_s5_algebra — the privacy threshold this algebra carries is
+    five, the full seat count: the sum-mod scheme reveals the secret only to
+    every seat at once, so the coalitions a security statement of this
+    instance is made about are the proper subsets of the five seats. It is
+    profile_k_s5 read at the derived profile, and it is what turns the
+    framework's threshold hypothesis into the numeric one the instance's
+    secrecy theorems take. *)
+Lemma profile_k_s5_algebra : profile_k (instance_profile s5_algebra) = 5.
+Proof. by []. Qed.
+
+(** s5_dealt_params — the run-level data of a run that deals the secret
+    position and recovers it: the run argument is the position itself, no
+    party commits an input, and the interpreter fuel is 150. The
+    dealer-dealt mode is what leaves the instance owing termination alone
+    among the three run facts. *)
+Definition s5_dealt_params : ExecutionParams s5_algebra :=
+  dealt_secret_params s5_algebra 150.
+
+(** s5_execE — the plug derived from the run parameters is the instance's own
+    deterministic execution plug. The dealer-dealt readout of the algebra and
+    the hand-written readout of s5_exec_plug are the same term, so the two
+    plugs drive the same interpreter run. *)
+Lemma s5_execE : instance_exec s5_dealt_params = s5_exec_plug.
+Proof. by []. Qed.
+
+(** s5_dealt_terminates — every process of the dealt run reaches Finish
+    within the fuel 150. The one run fact that has no route through the
+    algebra: it depends on the interpreter and on the fuel, and is decided
+    by reduction. The statement is convertible with s5_exec_terminates, which
+    states the same reduction at the hand-written plug; both spend the
+    instance's own vm_compute, and this one is stated on the plug the
+    framework derives from s5_algebra. *)
+Lemma s5_dealt_terminates : instance_terminates_stmt s5_dealt_params.
+Proof. by vm_compute. Qed.
+
+(** s5_profile_endpoints — at every content readout, the executed endpoints
+    of a run over this profile without committers are its direct computation.
+    Keeping the readout a variable removes the dealt card from the reduction,
+    so this one decision serves both the deterministic run below and the
+    randomized run further down, which share the profile and the fuel. *)
+Lemma s5_profile_endpoints : profile_endpoints_stmt s5_algebra 150.
+Proof. by vm_compute. Qed.
+
+(** s5_dealt_endpoints — the endpoint obligation of the dealt run. The
+    statement is convertible with s5_exec_endpoints, which proves it through
+    the interpreter; this one instantiates the profile's abstract-readout
+    equation at the dealt readout, so the run pays no reduction of its own
+    for it. *)
+Definition s5_dealt_endpoints : instance_endpoints_stmt s5_dealt_params :=
+  profile_endpointsE s5_profile_endpoints.
+
+(** s5_dealt_recon — decoding the direct computation at a cut in the group
+    returns the dealt position. The statement is convertible with
+    s5_exec_recon, which proves it through the interpreter; this one is
+    dealt_static_recon, which the framework derives from the algebra's
+    coordinate law alone, so reconstruction correctness of this run is a
+    consequence of that law and costs no further proof. *)
+Definition s5_dealt_recon : instance_recon_stmt s5_dealt_params :=
+  dealt_static_recon s5_algebra 150.
+
+(* The three convertibility claims of the dealt mode, checked rather than
+   asserted. Each interpreter-route lemma is ascribed at the framework
+   statement of the same run; the conversion is not syntactic, since
+   dealt_content_obs carries a tcast along the share-count equation and
+   dealt_static_recon a cast_ord along the seat-to-share bridge, so a later
+   change to the algebra block could falsify the claim with the build still
+   green. These lines fail where that happens. *)
+Timeout 60 Check (s5_exec_terminates :
+  instance_terminates_stmt s5_dealt_params).
+Timeout 60 Check (s5_exec_endpoints : instance_endpoints_stmt s5_dealt_params).
+Timeout 60 Check (@s5_exec_recon : instance_recon_stmt s5_dealt_params).
+
+(** s5_observed — the deterministic observed execution, derived by the
+    framework from the algebraic record, the run parameters and the three run
+    facts above. Two of those facts are framework lemmas, the endpoint
+    equation instantiated from the profile and the reconstruction derived
+    from the coordinate law, and the third is the instance's own termination
+    computation; the profile, the plug, the content readout and the recovered
+    value are all read off s5_algebra and s5_dealt_params. This is the
+    uniform form the coalition-view and leakage analyses elsewhere in the
+    instance consume, rather than the plug and its three facts separately. *)
 Definition s5_observed : OE.ObservedExecution :=
-  OE.MkObservedExecution mpS s5_exec_plug 0
-    s5_content_obs (fun s : 'I_5 => s)
-    s5_exec_terminates s5_exec_endpoints (@s5_exec_recon).
+  instance_observed s5_dealt_terminates s5_dealt_endpoints s5_dealt_recon.
 
 (** s5_observed_recovers — the packaged deterministic run decodes to the
     dealt position: exec_decode applied to the executed endpoints of
@@ -307,7 +448,7 @@ Proof. exact: (OE.oe_run_recovers s5_observed s w0 Gw0). Qed.
 (*     The observer types read off the deterministic plug                     *)
 (******************************************************************************)
 
-(** s5_exec_seat_endpointE — seat i's endpoint equals the static observation
+(** s5_exec_seat_endpointE — seat i's endpoint equals the direct computation
     at the cut image of seat i's start,
     s5_content_obs s (w0, tnth (pi_starts (mp_PI mpS)) i). This is the
     per-seat reading a single coalition member sees, before any coalition
@@ -617,7 +758,7 @@ Definition s5_rand_exec_plug : ExecutionPlug mpS :=
   @dealer_secret_plug mpS 'rV['Z_5]_5 erefl s5_run.s5_players s5_players_enumE
     (fun u _ => tnth (s5_rfree_layout u)) 150.
 
-(** s5_rcontent_obs — the randomized static observation: the additive share
+(** s5_rcontent_obs — the randomized direct computation: the additive share
     at the cut image of a starting position,
     tnth (s5_rfree_layout u) (pgg_rho w0 p). The randomized counterpart of
     s5_content_obs. *)
@@ -662,7 +803,7 @@ exact: s5_aprocs_cut_terminates.
 Qed.
 
 (** s5_rand_endpoints — the randomized run's verifier endpoints equal the
-    static observation s5_rcontent_obs evaluated at each seat's start, the
+    direct computation s5_rcontent_obs evaluated at each seat's start, the
     randomized counterpart of s5_exec_endpoints. *)
 Lemma s5_rand_endpoints (u : 'rV['Z_5]_5) (w0 : pgg_gT s5_M) :
   @exec_endpoints mpS s5_rand_exec_plug u w0 0
@@ -751,14 +892,80 @@ exact: (@exec_run_correct mpS s5_rand_exec_plug s5_rcontent_obs
           (s5_rand_recon Gw0)).
 Qed.
 
-(** s5_rand_observed — the ObservedExecution record packaging s5_profile with
-    plug s5_rand_exec_plug at process offset 0, static observation
-    s5_rcontent_obs, expected value the encoded tape secret, and the three
-    run facts proved above. The randomized counterpart of s5_observed. *)
+(******************************************************************************)
+(*     The randomized run as a supplied layout                                *)
+(******************************************************************************)
+
+(* Supplied is the framework's name for the mode this instance calls
+   randomized: no party commits, the dealer lays the cards itself from the
+   layout the run argument names, and the value the run recovers is a reading
+   of that argument rather than a function of anyone's input. The three
+   obligations below carry the mode word and the plug, the family and the row
+   keep the instance's own word. *)
+
+(** s5_supplied_params — the run-level data of the randomized run: the run
+    argument is a sampler tape, the dealer lays the probability-free additive
+    layout of that tape, the value the run recovers is the tape's secret
+    coordinate carried through the codec, and the interpreter fuel is 150.
+    No sharing claim is written into the record, which is what leaves this
+    run owing a reconstruction obligation of its own. *)
+Definition s5_supplied_params : ExecutionParams s5_algebra :=
+  supplied_input_params s5_algebra 'rV['Z_5]_5
+    s5_rfree_layout (fun u => s5_codec (s5_tape_secret u)) 150.
+
+(** s5_supplied_execE — the plug derived from those parameters is the
+    instance's own randomized execution plug. The supplied-layout readout of
+    the parameters and the hand-written readout of s5_rand_exec_plug are the
+    same term, so the two plugs drive the same interpreter run. *)
+Lemma s5_supplied_execE :
+  instance_exec s5_supplied_params = s5_rand_exec_plug.
+Proof. by []. Qed.
+
+(** s5_supplied_terminates — every process of the supplied-layout run reaches
+    Finish within the fuel 150. The statement is convertible with
+    s5_rand_terminates, which states the same reduction at the hand-written
+    plug; this one is stated on the plug the framework derives from
+    s5_algebra. *)
+Lemma s5_supplied_terminates : instance_terminates_stmt s5_supplied_params.
+Proof. by vm_compute. Qed.
+
+(** s5_supplied_endpoints — the endpoint obligation of the supplied-layout
+    run, read off the same profile equation the deterministic run reads. The
+    statement is convertible with s5_rand_endpoints, which proves it through
+    the interpreter; the profile's equation already quantifies over the
+    content readout, so instantiating it at the additive layout costs this
+    run no reduction of its own, and the two modes share one decision. *)
+Definition s5_supplied_endpoints
+  : instance_endpoints_stmt s5_supplied_params :=
+  supplied_endpointsE s5_profile_endpoints.
+
+(** s5_supplied_recon — decoding the direct computation at a cut in the
+    group returns the tape secret. The statement is convertible with
+    s5_rand_recon, which proves it through the interpreter; this one is
+    supplied_static_recon, which the framework derives from the sharing claim
+    s5_rfree_valid, that the additive layout of a tape is a valid sharing of
+    that tape's secret coordinate. *)
+Definition s5_supplied_recon : instance_recon_stmt s5_supplied_params :=
+  supplied_static_recon s5_algebra s5_rfree_valid.
+
+(* The three convertibility claims of the supplied mode, checked the way the
+   dealt ones are above. *)
+Timeout 60 Check (s5_rand_terminates :
+  instance_terminates_stmt s5_supplied_params).
+Timeout 60 Check (s5_rand_endpoints :
+  instance_endpoints_stmt s5_supplied_params).
+Timeout 60 Check (@s5_rand_recon : instance_recon_stmt s5_supplied_params).
+
+(** s5_rand_observed — the randomized observed execution, derived by the
+    framework from the algebraic record, the supplied-layout parameters and
+    the three run facts above. Two of those facts are framework lemmas, the
+    endpoint equation instantiated from the profile and the reconstruction
+    read off the sharing claim, and the third is the instance's own
+    termination computation. It is the randomized counterpart of s5_observed
+    and the form the randomized model family is built over. *)
 Definition s5_rand_observed : OE.ObservedExecution :=
-  OE.MkObservedExecution mpS s5_rand_exec_plug 0
-    s5_rcontent_obs (fun u => s5_codec (s5_tape_secret u))
-    s5_rand_terminates s5_rand_endpoints (@s5_rand_recon).
+  instance_observed s5_supplied_terminates s5_supplied_endpoints
+    s5_supplied_recon.
 
 (** s5_rand_observed_recovers — the packaged randomized run decodes to the
     encoded tape secret: exec_decode applied to the executed endpoints of
