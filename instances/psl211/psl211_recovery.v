@@ -5,21 +5,25 @@
 (*                                                                            *)
 (* A valid deck holds six hearts, so eleven revealed colours leave the        *)
 (* twelfth forced by the count: eleven colours determine the heart set and    *)
-(* hence the chirality. Ten never do. Each Steiner system covers every        *)
-(* five-subset of positions exactly once, so the mirror block through five    *)
-(* points of a hexad block is a second block meeting it in exactly those      *)
-(* five, and two decks carrying those two heart sets agree in colour off the  *)
-(* two positions where the blocks differ; 2-transitivity carries that pair    *)
-(* of positions to any other. With the privacy threshold five and the         *)
-(* six-position leak (psl211_secrecy.v) the ramp reads: private to five,      *)
-(* leak at six, ambiguous through ten, determined at eleven, decoder reads    *)
-(* twelve.                                                                    *)
+(* hence the chirality. Ten never do. Each Steiner system covers every five-  *)
+(* subset of positions exactly once, so the mirror block through five points  *)
+(* of a hexad block is a second block: it meets the hexad block in at least   *)
+(* those five, and is not the hexad block itself, since                       *)
+(* psl211_blocks_disjoint puts no six-subset in both systems. It therefore    *)
+(* meets it in exactly five. Two decks carrying those two heart sets agree in *)
+(* colour off the two positions where the blocks differ, and 2-transitivity   *)
+(* carries that pair of positions to any other. With the privacy threshold    *)
+(* five and the six-position leak (psl211_secrecy.v) the ramp reads: private  *)
+(* to five, leak at six, ambiguous through ten, determined at eleven, and the *)
+(* scheme's reconstruction in psl211_scheme.v reads all twelve positions.     *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_eleven_reveal_set    == six-subsets agreeing off one position     *)
 (*                                  are equal                                 *)
 (*   psl211_eleven_reveal_class  == eleven colours determine the chirality    *)
 (*   psl211_ten_reveal_ambiguous == ten colours never determine it            *)
+(*   psl211_reveal_ambiguous     == no revealed set of ten or fewer           *)
+(*                                  positions determines it                   *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -59,9 +63,12 @@ apply/setP => i; have [->|ij] := eqVneq i j; first exact: Hj.
 exact: Hoff.
 Qed.
 
+Arguments psl211_eleven_reveal_set [H H'] j.
+
 (* A block of either Steiner system has six positions, so the heart set of a
    valid deck does. *)
-Local Lemma block_card6 (S : {set 'I_12}) : psl211_subset_valid S -> #|S| = 6.
+Local Lemma subset_valid_card6 (S : {set 'I_12}) :
+  psl211_subset_valid S -> #|S| = 6.
 Proof.
 have key (tbl : seq (seq nat)) :
     psl211_tbl_ok tbl -> S \in psl211_sets_of tbl -> #|S| = 6.
@@ -83,9 +90,9 @@ Lemma psl211_eleven_reveal_class (s s' : bool) (sh sh' : 12.-tuple 'I_12)
 Proof.
 move=> [_ [Hval Hcl]] [_ [Hval' Hcl']] Hoff.
 have E : psl211_heart_set sh' = psl211_heart_set sh.
-  apply: (@psl211_eleven_reveal_set _ _ j).
-  - exact: block_card6 Hval.
-  - exact: block_card6 Hval'.
+  apply: (psl211_eleven_reveal_set j).
+  - exact: subset_valid_card6 Hval.
+  - exact: subset_valid_card6 Hval'.
   - move=> i ij; rewrite !inE; exact: Hoff.
 by rewrite -Hcl -Hcl' /psl211_orbit_class E.
 Qed.
@@ -145,8 +152,7 @@ Qed.
 Local Lemma mirror_swap_mem :
   psl211_list_to_set mirror_swap_row \in psl211_mirror_blocks.
 Proof.
-rewrite inE; apply/hasP; exists mirror_swap_row; last by [].
-by vm_compute.
+by rewrite inE; apply/hasP; exists mirror_swap_row; [vm_compute|].
 Qed.
 
 (* The witness deck is a valid deal of chirality true. *)
@@ -230,4 +236,28 @@ move=> i nip niq; rewrite !tnth_act; apply: decks_agree_off02.
   by rewrite Hgi Hgp.
 apply: contra niq => /eqP Hgi; apply/eqP; apply: (@perm_inj _ g).
 by rewrite Hgi Hgq.
+Qed.
+
+(** psl211_reveal_ambiguous — for every revealed position set of at most ten
+    positions there are valid decks of both chiralities agreeing in colour
+    on all revealed positions: at most ten revealed colours never determine
+    the chirality, for every choice of the revealed set. *)
+Lemma psl211_reveal_ambiguous (D : {set 'I_12}) : (#|D| <= 10)%N ->
+  exists sh sh', psl211_orbit_valid true sh /\ psl211_orbit_valid false sh' /\
+    {in D, forall i,
+       psl211_is_heart (tnth sh' i) = psl211_is_heart (tnth sh i)}.
+Proof.
+move=> HD.
+have Hc : (1 < #|~: D|)%N.
+  have := cardsC D.
+  rewrite card_ord => HDC.
+  rewrite -(leq_add2l #|D|) HDC.
+  by apply: (leq_trans _ (leq_add HD (leqnn _))).
+case/card_gt1P: Hc => p [q [Hp Hq npq]].
+have [sh [sh' [Hv [Hv' Hagree]]]] := psl211_ten_reveal_ambiguous npq.
+exists sh, sh'; split; first exact: Hv.
+split; first exact: Hv'.
+move=> i iD; apply: Hagree.
+  by apply: contraTneq iD => ->; rewrite -in_setC.
+by apply: contraTneq iD => ->; rewrite -in_setC.
 Qed.
