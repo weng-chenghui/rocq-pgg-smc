@@ -16,7 +16,7 @@
 (* the walk alphabet, where the same conclusion holds only up to the distance *)
 (* that walk still has from uniform.                                          *)
 (*                                                                            *)
-(* Each family's row is one program, written in the statement surface of      *)
+(* Each family has one program, written in the statement surface of           *)
 (* pgg_tableau_syntax.v over the statements of pgg_tableau.v: the shared      *)
 (* prefix deals the secret and adjoins the three run facts, one further line  *)
 (* adjoins the family, one adjoins that family's security witness, and the    *)
@@ -48,11 +48,11 @@
 (*   pgl27_word_cert         == the spectral arm's certificate                *)
 (*   pgl27_row_exact_tableau == the exact row as a program                    *)
 (*   pgl27_row_word_tableau  == the word row as a program                     *)
-(*   pgl27_dealt_vm          == the prefix with the termination reduction     *)
+(*   pgl27_inline_dealt      == the prefix with the termination reduction     *)
 (*                              written inline                                *)
-(*   pgl27_exact_family_vm   == the exact model family over that prefix's     *)
-(*                              observed execution                            *)
-(*   pgl27_row_exact_vm      == the exact row over that prefix                *)
+(*   pgl27_inline_family     == the exact model over that prefix's observed   *)
+(*                              execution                                     *)
+(*   pgl27_inline_row        == the exact row over that prefix                *)
 (*   pgl27_reprice39         == the name 2^-39 for the word row's bound       *)
 (*   pgl27_row_word39        == the word row republished at that name         *)
 (*   pgl27_word_target       == the word row's published statement            *)
@@ -75,10 +75,9 @@
 (*   pgl27_row_exact_rowE    == the exact program publishes the manifest's    *)
 (*                              row                                           *)
 (*   pgl27_row_word_rowE     == the word program publishes the manifest's row *)
-(*   pgl27_row_word_certE    == the five written components are               *)
-(*                              pgl27_word_cert                               *)
-(*   pgl27_dealt_vm_paramsE  == the inline prefix builds the same run         *)
-(*   pgl27_row_exact_vm_obsE == its observed execution is pgl27_observed      *)
+(*   pgl27_row_word_certE    == the five written clauses are pgl27_word_cert  *)
+(*   pgl27_inline_paramsE   == the inline prefix builds the same run          *)
+(*   pgl27_inline_obsE      == its observed execution is pgl27_observed       *)
 (*   pgl27_word_bridge       == the word row's proposition gives its          *)
 (*                              published statement                           *)
 (*   pgl27_exact_bridge      == the exact row's proposition gives its         *)
@@ -102,6 +101,7 @@ From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
 From pgg_smc Require Import pgl27_exec pgl27_models.
 From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
+From mathcomp Require Import boolp.
 From pgg_smc Require Import pgg_tableau_syntax.
 
 Set Implicit Arguments.
@@ -270,24 +270,24 @@ Definition pgl27_row_word_tableau : PublishedRow :=
             mixing by (fun R (_ : amf_index pgl27_word_family R) =>
                          pgl27_word_mixing R)
             invariant by (fun R (_ : amf_index pgl27_word_family R) C HC s s' =>
-       let H3 : (#|C| <= 3)%N := HC in
-       (eq_ind_r
-          (fun v => fdistmap v (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
-                    = fdistmap (static_coalition_obs C s')
-                        (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
-          (eq_ind_r
-             (fun v => fdistmap (fun g => pgl27_view R C (s, g))
-                         (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
-                       = fdistmap v
-                           (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
-             (pgl27_view_law_const R s s' H3)
-             (pgl27_static_obs_funE R C s'))
-          (pgl27_static_obs_funE R C s)))
+            let H3 : (#|C| <= 3)%N := HC in
+            (eq_ind_r
+               (fun v => fdistmap v (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
+                         = fdistmap (static_coalition_obs C s')
+                             (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
+               (eq_ind_r
+                  (fun v => fdistmap (fun g => pgl27_view R C (s, g))
+                              (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
+                            = fdistmap v
+                                (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
+                  (pgl27_view_law_const R s s' H3)
+                  (pgl27_static_obs_funE R C s'))
+               (pgl27_static_obs_funE R C s)))
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The same row with the five components bundled as pgl27_word_cert. Writing
-    the certificate out in five slots and writing it as one record give the
-    same term, so the surface renames nothing and hides nothing. *)
+(** The same program with the five components bundled as pgl27_word_cert.
+    Writing the certificate out in five clauses and writing it as one record
+    give the same term, so the surface renames nothing and hides nothing. *)
 Lemma pgl27_row_word_certE :
   pgl27_row_word_tableau
   = (pgl27_dealt ;;; sample_step of pgl27_word_family
@@ -313,16 +313,15 @@ Proof. by []. Qed.
 (*     The same prefix through the literal reduction                          *)
 (******************************************************************************)
 
-(** The shared prefix again, with the termination fact built where the line is
-    written instead of named. The proposition proved is the one pgl27_dealt
-    proves and the run is the same run, but the proof term is not
+(** The shared prefix again, with the termination obligation built where the
+    statement is written instead of named. The proposition proved is the one
+    pgl27_dealt proves and the run is the same run, but the term is not
     pgl27_dealt_terminates, and an opaque lemma is convertible with nothing;
     so the observed execution this prefix reaches is a second value equal to
-    pgl27_observed only up to the irrelevance of a proof. Everything typed
-    against pgl27_observed, the instance's model families first of all, has to
-    be built again over it, which is the cost of writing the reduction inline
-    rather than naming it. *)
-Definition pgl27_dealt_vm : Tableau Observed :=
+    pgl27_observed only up to the irrelevance of an obligation. Everything
+    typed against pgl27_observed, the instance's models first of all, has to
+    be built again over it. *)
+Definition pgl27_inline_dealt : Tableau Observed :=
   pgl27_algebra
     dealt   fuel pgl27_fuel
     execute terminates by vm_compute
@@ -330,53 +329,54 @@ Definition pgl27_dealt_vm : Tableau Observed :=
             recon by pgl27_dealt_recon.
 
 (** The two prefixes are not the same term. *)
-Fail Definition pgl27_dealt_vm_is_dealt : pgl27_dealt_vm = pgl27_dealt := erefl.
+Fail Definition pgl27_inline_neq : pgl27_inline_dealt = pgl27_dealt := erefl.
 
 (** They do build the same run. The run parameters carry no proof, so the fork
     is confined to the three run facts and the value they package. *)
-Lemma pgl27_dealt_vm_paramsE :
-  projT1 (projT2 (tableau_at pgl27_dealt_vm)) = pgl27_dealt_params.
+Lemma pgl27_inline_paramsE :
+  projT1 (projT2 (tableau_at pgl27_inline_dealt)) = pgl27_dealt_params.
 Proof. by []. Qed.
 
-(** The instance's own model family is typed against pgl27_observed and is
-    rejected over the forked one. This is the fork made visible: a row through
-    the literal reduction shares no typed witness with the rows above. *)
-Fail Definition pgl27_vm_sample_reuse : Tableau Sampled :=
-  pgl27_dealt_vm sample pgl27_exact_family.
+(** The instance's own model is typed against pgl27_observed and is rejected
+    over the forked one. This is the fork made visible: a program through the
+    literal reduction shares no typed evidence with the programs above. *)
+Fail Definition pgl27_inline_reuse : Tableau Sampled :=
+  pgl27_inline_dealt sample pgl27_exact_family.
 
-(** The exact-shuffle model family again, over the forked observed execution.
-    Its two components are those of pgl27_exact_family; only the execution it
-    is typed against differs. *)
-Definition pgl27_exact_family_vm
-  : AnalysisModelFamily (ob_obs (tableau_at pgl27_dealt_vm)) :=
-  @MkAnalysisModelFamily (ob_obs (tableau_at pgl27_dealt_vm))
+(** The exact-shuffle model again, over the forked observed execution. Its two
+    components are those of pgl27_exact_family; only the execution it is typed
+    against differs. *)
+Definition pgl27_inline_family
+  : AnalysisModelFamily (ob_obs (tableau_at pgl27_inline_dealt)) :=
+  @MkAnalysisModelFamily (ob_obs (tableau_at pgl27_inline_dealt))
     (fun _ => unit) (fun R _ => pgl27_sample R).
 
-(** The exact row over that prefix. Its security payload is the witness the
-    row above uses, unchanged: a witness is typed against a sample adapter and
-    not against a termination proof, so the fork stops at the family. *)
-Definition pgl27_row_exact_vm : PublishedRow :=
-  pgl27_dealt_vm
-    sample  pgl27_exact_family_vm
+(** The exact row over that prefix. Its certify clause takes the witness the
+    program above uses, unchanged: a witness is typed against a sampler and
+    not against a termination obligation, so the fork stops at the model. *)
+Definition pgl27_inline_row : PublishedRow :=
+  pgl27_inline_dealt
+    sample  pgl27_inline_family
     certify ExactIndependence pgl27_exact_witness
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
 (** The two observed executions are equal, by irrelevance of the termination
-    proof and nothing else. The published rows are then equal as well, but not
-    by conversion: the manifest row carries its observed execution as a field
-    and its model slot is typed against that field, so the equation between
-    the two rows is a transport and not a reduction. *)
-Lemma pgl27_row_exact_vm_obsE :
-  ob_obs (tableau_at pgl27_dealt_vm) = pgl27_observed.
+    obligation and nothing else. It is the one statement in this development
+    that spends boolp.Prop_irrelevance, and it buys only this identification;
+    the published rows are then equal as well, but not by conversion, because
+    the manifest row carries its observed execution as a field and its model
+    is typed against that field. *)
+Lemma pgl27_inline_obsE :
+  ob_obs (tableau_at pgl27_inline_dealt) = pgl27_observed.
 Proof.
 rewrite /ob_obs.
-by rewrite (boolp.Prop_irrelevance (ob_Ht (tableau_at pgl27_dealt_vm))
+by rewrite (boolp.Prop_irrelevance (ob_Ht (tableau_at pgl27_inline_dealt))
               pgl27_dealt_terminates).
 Qed.
 
 (** And not by conversion. *)
-Fail Definition pgl27_row_exact_vm_rowE :
-  published_row pgl27_row_exact_vm = pgl27_row_exact := erefl.
+Fail Definition pgl27_inline_rowE :
+  published_row pgl27_inline_row = pgl27_row_exact := erefl.
 
 (******************************************************************************)
 (*     The word row republished at 2^-39                                      *)
@@ -611,9 +611,9 @@ Definition pgl27_F
     : Functionality (oe_inputT pgl27_observed) (oe_outT pgl27_observed) :=
   algebra_functionality pgl27_algebra.
 
-(** The identity and the number three, as written by hand. Both components are
-    read off the algebra rather than chosen here, and this is where a reader
-    sees which numbers they are. *)
+(** The ideal function and the tolerated coalition size of this instance,
+    written out. Both are read off the algebra, so this equation is where a
+    reader of pgl27_F learns which two values the algebra yields. *)
 Lemma pgl27_FE : pgl27_F = MkFunctionality id 3.
 Proof. by []. Qed.
 

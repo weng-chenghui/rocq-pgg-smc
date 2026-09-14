@@ -110,18 +110,20 @@ Record PGGAlgebraic := MkPGGAlgebraic {
   pga_secretT : Type ;
   pga_scheme  : ThresholdScheme pga_secretT 'I_pga_n.+2 ;
   (* pga_leaks records a coalition size at which this instance's privacy
-     fails, together with a proof that it does. The scheme guarantees privacy
-     below ts_k' pga_scheme and says nothing at or above it; an annotation
-     here is what distinguishes a sharp threshold from the largest coalition
-     anyone has managed to handle. It is carried beside the scheme and enters
-     no proposition a row accumulates, so a row over an annotated instance
-     proves what a row over an unannotated one proves.
+     fails, together with an obligation that it does. The scheme guarantees
+     privacy below the threshold ts_k' pga_scheme and says nothing at or
+     above it; an annotation here says that silence is sharpness. It enters
+     no accumulated proposition, so a program over an annotated instance
+     proves what a program over an unannotated one proves.
 
-     The proposition is left unconstrained and shipped with its own proof,
-     because sharpness is an information-theoretic statement in the
-     instance's probability model and the algebra holds no probability model;
-     typing the field against a model would move the whole sampling stack
-     above this record. None says the instance claims no failure. *)
+     Nothing here ties the number to the proposition. Sharpness is an
+     information-theoretic statement in the instance's probability model, and
+     the algebra holds no probability model, so the proposition is whatever
+     the instance proved and the field checks only that it is inhabited: a
+     number that does not match the proof, or a proof of something else
+     entirely, typechecks. The annotation is evidence a reader follows to the
+     named lemma, not a claim the kernel decides. None says the instance
+     claims no failure. *)
   pga_leaks   : option { k : nat & { P : Prop & P } } ;
   (* pga_share_card states that the scheme deals one share per card position.
      It is what lets a share index be read as a deck position, and the

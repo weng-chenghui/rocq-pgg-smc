@@ -323,7 +323,7 @@ Qed.
     three generating permutations of eight card positions, the symmetrized
     five-letter walk alphabet with the proof that it generates the same group,
     the Boolean secret the orbit scheme deals with its encoding, its class
-    readout and its privacy proof, the coalition size four at which that
+    readout and its privacy obligation, the coalition size four at which that
     privacy fails, and the seat list the run reads because enum 'I_8 does not
     reduce.  The seats start at the eight positions in order and the shuffle
     acts on share indices as it acts on cards, so the coordinate law is the

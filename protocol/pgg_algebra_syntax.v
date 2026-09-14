@@ -18,14 +18,19 @@
 (*                                                                            *)
 (* Three components of the threshold scheme are named in the block and        *)
 (* checked against the scheme by conversion: its encoding, its reconstruction *)
-(* and its privacy proof. The scheme itself would determine all three         *)
+(* and its privacy obligation. The scheme itself would determine all three    *)
 (* silently, and a reader of the block would then have to open the scheme's   *)
 (* own file to learn what a share is; pinned_scheme is what puts them at the  *)
 (* use site without letting them drift from it.                               *)
 (*                                                                            *)
+(* The seat tuple written in the seat clause is a conversion check and not    *)
+(* data: pga_starts is ord_starts, and what an instance writes is compared    *)
+(* against it through the type ascribed to the clause's obligation. A block   *)
+(* naming any other tuple is rejected where it is written.                    *)
+(*                                                                            *)
 (* The token pgg_rho in the shuffle clause is a literal of the rule, not a    *)
 (* slot: this surface fixes the shuffle action on share indices to the deck   *)
-(* action, and the clause's only variable content is the proof that           *)
+(* action, and the clause's only variable content is the obligation that      *)
 (* reconstruction is unchanged by it.                                         *)
 (*                                                                            *)
 (* Two clauses are optional. The walk clause names a second generating        *)
@@ -38,19 +43,22 @@
 (* The block spends five identifiers as global keywords in every file that    *)
 (* requires this one: encode, read, private, leaks and shuffled_by. Each of   *)
 (* them follows a slot in some rule, which is what makes a token a keyword;   *)
-(* the tokens algebra, mount, walk, along, seat, players, secret, deal,       *)
-(* cache, seats and pgg_rho lead a rule or follow a literal and stay          *)
-(* identifiers.                                                               *)
+(* the tokens mount, walk, along, seat, players, secret, deal, cache, seats   *)
+(* and pgg_rho follow a literal and stay identifiers. The leading token       *)
+(* algebra stays an identifier too: measured on 2026-09-14 it can be          *)
+(* declared and then used bare in a term, in an application, as a binder and  *)
+(* as a record field, because the literal that follows it in every rule is    *)
+(* not a slot.                                                                *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   ord_monodromy   == the deck action read as an action on share indices    *)
 (*   ord_starts      == the seats starting at the deck positions in order     *)
-(*   mk_walk         == the walk clause's payload                             *)
+(*   mk_walk         == what the walk clause stores                           *)
 (*   no_walk         == the absent walk clause                                *)
-(*   mk_leaks        == the leaks clause's payload                            *)
+(*   mk_leaks        == what the leaks clause stores                          *)
 (*   no_leaks        == the absent leaks clause                               *)
 (*   pinned_scheme   == a scheme with its encoding, reconstruction and        *)
-(*                      privacy proof checked against the ones written        *)
+(*                      privacy obligation checked against the ones written   *)
 (*   mk_algebra      == the PGGAlgebraic a block builds                       *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -90,8 +98,11 @@ Definition ord_monodromy (m n : nat) (gens : m.+1.-tuple {perm 'I_n.+2})
 Definition ord_starts (n T : nat) (Hc : T = n.+2) : T.-tuple 'I_n.+2 :=
   tcast (esym Hc) (ord_tuple n.+2).
 
-(* No two seats begin at the same card. The uniqueness pga_starts_uniq asks
-   for, discharged once for the whole surface. *)
+(* No two seats begin at the same card. Every instance of this surface has
+   the property, because its seats are the deck positions in order; the block
+   still asks for it in the seat clause, since the obligation written there
+   is what pins the seat tuple, and this is the lemma an instance cites when
+   it has nothing shorter. *)
 Lemma ord_starts_uniq (n T : nat) (Hc : T = n.+2) : uniq (ord_starts Hc).
 Proof. by rewrite /ord_starts val_tcast val_ord_tuple enum_uniq. Qed.
 
@@ -113,8 +124,9 @@ Qed.
 (*     The two optional clauses                                               *)
 (******************************************************************************)
 
-(* The walk clause's payload: a second generating alphabet with the proof that
-   it generates the group the presentation generators generate. *)
+(* What the walk clause stores: a second generating alphabet with the
+   obligation that it generates the group the presentation generators
+   generate. *)
 Definition mk_walk (m n k : nat) (gens : m.+1.-tuple {perm 'I_n.+2})
     (w : k.+1.-tuple {perm 'I_n.+2})
     (Hw : (<<[set tnth w i | i : 'I_k.+1]>>
@@ -133,9 +145,10 @@ Definition no_walk (m n : nat) (gens : m.+1.-tuple {perm 'I_n.+2})
          = <<[set tnth gens i | i : 'I_m.+1]>>)%G } } := None.
 Arguments no_walk {m n} gens.
 
-(* The leaks clause's payload: a coalition size and a proof that privacy fails
-   there. The proposition is whatever the instance proved, because sharpness is
-   stated in the instance's probability model and the algebra has none. *)
+(* What the leaks clause stores: a coalition size and an obligation that
+   privacy fails there. The proposition is whatever the instance proved,
+   because sharpness is stated in the instance's probability model and the
+   algebra has none. *)
 Definition mk_leaks (k : nat) (P : Prop) (H : P)
   : option { k : nat & { P : Prop & P } } :=
   Some (existT _ k (existT _ P H)).
@@ -150,7 +163,8 @@ Definition no_leaks : option { k : nat & { P : Prop & P } } := None.
 (******************************************************************************)
 
 (* The scheme itself, with its encoding, its reconstruction and its privacy
-   proof checked by conversion against the three terms written in the block.
+   obligation checked by conversion against the three terms written in the
+   block.
    The three equations are the whole content: the result is the scheme
    unchanged, and what the combinator buys is that a block naming a different
    encoding from the scheme's own is rejected where it is written. *)
@@ -182,9 +196,9 @@ Arguments pinned_scheme : clear implicits.
 
    The shuffle action is ord_monodromy and is not an argument. A block
    therefore names no action of its own, and the only variable content of its
-   shuffle clause is Hinv, the proof that reconstruction survives that fixed
-   action. An instance whose shares are not its deck positions is outside this
-   surface and writes MkPGGAlgebraic directly. *)
+   shuffle clause is Hinv, the obligation that reconstruction survives that
+   fixed action. An instance whose shares are not its deck positions is
+   outside this surface and writes MkPGGAlgebraic directly. *)
 Definition mk_algebra (m n : nat) (gens : m.+1.-tuple {perm 'I_n.+2})
     (mv : option { k : nat & { w : k.+1.-tuple {perm 'I_n.+2}
             | (<<[set tnth w i | i : 'I_k.+1]>>
@@ -206,8 +220,8 @@ Arguments mk_algebra : clear implicits.
 (******************************************************************************)
 
 (* The four rules are the walk clause present or absent against the leaks
-   clause present or absent. Every rule repeats no slot, and all four are
-   only parsing because the record they build prints as a record.
+   clause present or absent. All four are only parsing, because each repeats
+   the generator slot and the secret slot on its right-hand side.
 
    In shuffled_by pgg_rho by Hinv the token pgg_rho is a literal of the rule
    and not a slot: the shuffle action of this surface is fixed to the deck

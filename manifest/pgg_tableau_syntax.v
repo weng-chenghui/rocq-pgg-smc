@@ -1,31 +1,37 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* The statement surface of a Tableau row                                     *)
+(* The statement surface of a Tableau program                                 *)
 (*                                                                            *)
-(* A row of pgg_tableau.v is a chain of binds whose payloads are anonymous    *)
-(* tuples. This file gives each statement a named surface, so that a line     *)
-(* says which fact occupies which slot and a payload written in the wrong     *)
-(* position is rejected where it is written rather than deep inside an        *)
-(* existT. Nothing here proves anything: every rule expands to one            *)
-(* tableau_bind, and the propositions a row accumulates are those of          *)
-(* pgg_tableau.v unchanged.                                                   *)
+(* A program of pgg_tableau.v is a sequence of binds over anonymous tuples.   *)
+(* This file gives each statement a named surface, so that a statement says   *)
+(* which fact occupies which clause and a term written in the wrong clause is *)
+(* rejected where it is written rather than deep inside an existT. Nothing    *)
+(* here proves anything: every rule expands to one tableau_bind, and the      *)
+(* accumulated proposition is that of pgg_tableau.v unchanged.                *)
 (*                                                                            *)
 (* Two typed builders carry the work. obs_payload takes the three run facts   *)
-(* in order at the coordinate the previous line reached; its point is that    *)
-(* the coordinate is passed explicitly, because a payload slot elaborated at  *)
-(* an evar-typed position accepts a proof of the wrong statement, and an      *)
-(* ltac: slot at such a position is closed by done with a term that proves    *)
-(* nothing. mk_spectral takes the five components of a spectral certificate   *)
-(* separately, each quantified over the real field and the family index, so a *)
-(* line displays the marginal bound, the law identification, the ideal cut,   *)
-(* the mixing distance and the ideal's secret-independence as five named      *)
-(* things rather than one record.                                             *)
+(* in order at the data the previous statement reached; its point is that the *)
+(* data is passed explicitly, because a clause elaborated at an evar-typed    *)
+(* position accepts an obligation for the wrong proposition, and an ltac:     *)
+(* clause at such a position is closed by done with a term that proves        *)
+(* nothing. mk_spectral takes the five components of a certificate            *)
+(* separately, each quantified over the real field and the model index, so a  *)
+(* statement displays the marginal bound, the equation between that bound's   *)
+(* law and the model's cut law, the ideal cut, the mixing distance and the    *)
+(* ideal's secret-independence as five named things rather than one record.   *)
 (*                                                                            *)
-(* The termination line comes in two forms. One names a lemma; the other      *)
-(* writes the literal vm_compute and builds the proof in place. The two are   *)
-(* not the same term, so a row through the literal is a different row from a  *)
-(* row through the lemma, proving the same proposition.                       *)
+(* The termination statement comes in two forms. One names a lemma; the other *)
+(* writes the literal vm_compute and builds the obligation in place. The two  *)
+(* are not the same term, so a program through the literal is a different     *)
+(* program from one through the lemma, proving the same proposition.          *)
+(*                                                                            *)
+(* The publish separator is |>. Measured on 2026-09-14, |> occurs as a        *)
+(* standalone notation token nowhere in the kept tree, MathComp with          *)
+(* analysis, infotheo or Stdlib: every occurrence is inside infotheo's convex *)
+(* notation x <| p |> y, in fdist_scope and fsdist_scope, and in              *)
+(* mathcomp-analysis convex.v, with which it was checked to coexist in one    *)
+(* file.                                                                      *)
 (*                                                                            *)
 (* The surface spends eleven identifiers as global keywords in every file     *)
 (* that requires this one: dealt, functionality, execute, endpoints, recon,   *)
@@ -36,7 +42,8 @@
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   obs_payload  == the three run facts in the shape execute_step wants      *)
-(*   mk_spectral  == a spectral payload from its five components              *)
+(*   mk_spectral  == a certificate at every field and index, from its five    *)
+(*                   components                                               *)
 (*   Targeted     == an algebra with the ideal function a run of it computes  *)
 (*   targeted_F   == the Functionality a Targeted names                       *)
 (******************************************************************************)
@@ -65,12 +72,13 @@ Local Open Scope proba_scope.
 Local Open Scope ring_scope.
 
 (******************************************************************************)
-(*     The two typed payload builders                                         *)
+(*     The two typed builders                                                 *)
 (******************************************************************************)
 
 (* The three run facts of a parameter record, in the order execute_step reads
-   them. The coordinate is an argument and not inferred, which is what fixes
-   each of the three statements before its proof is elaborated. *)
+   them. The accumulated data is an argument and not inferred, which is what
+   fixes each of the three propositions before its obligation is
+   elaborated. *)
 Definition obs_payload (x : StackAt Executable)
     (Ht : instance_terminates_stmt (projT2 x))
     (He : instance_endpoints_stmt (projT2 x))
@@ -78,14 +86,13 @@ Definition obs_payload (x : StackAt Executable)
   existT _ Ht (existT _ He Hr).
 Arguments obs_payload : clear implicits.
 
-(* A spectral payload assembled from its five components, each given at every
-   real field and every index of the accumulated family: the shuffle's
-   marginal bound, the identification of that bound's law with the law the
-   model draws its cut from, the ideal cut, the distance of the shuffle from
-   the ideal, and the constancy of a coalition's reading of the ideal cut in
-   the run argument. The split is what makes the two currencies of the arm
-   visible on the line: the fourth component is the only inexact one, and the
-   fifth is an exact statement about the ideal. *)
+(* A certificate at every real field and every index of the accumulated model,
+   assembled from its five components: the cut's marginal bound, the equation
+   between that bound's law and the law the model draws its cut from, the
+   ideal cut, the distance of the drawn cut from the ideal, and the constancy
+   of a coalition's view of the ideal cut in the run argument. The split is
+   what makes the two currencies of the port visible where it is written: the
+   fourth component is the only inexact one, and the fifth is exact. *)
 Definition mk_spectral (x : StackAt Sampled)
     (b : forall (R : realType) (idx : amf_index (sp_f x) R),
            ShuffleMarginalBound R (instance_M (projT1 x)))
@@ -112,14 +119,14 @@ Arguments mk_spectral : clear implicits.
 (*     The ideal function a run computes                                      *)
 (******************************************************************************)
 
-(* An algebra together with the function a run of it is meant to compute, from
-   whatever a run takes as argument to the value it reconstructs. The record
-   exists because the completion-level stack has no slot for a functionality:
-   the propositions a row accumulates are about a coalition's view and none of
-   them mentions the ideal function, so naming one has to happen beside the
-   chain rather than inside it. For a dealer-dealt run the function is forced
-   to be the identity, and the record is written only where it is not, namely
-   where the run argument is an encoded input. *)
+(* An algebra together with the ideal function a run of it is meant to
+   compute, from whatever a run takes as argument to the value it
+   reconstructs. The record exists because the completion-level stack carries
+   no functionality: the accumulated proposition is about a coalition's view
+   and never mentions the ideal function, so naming one happens beside the
+   program rather than inside it. For a dealer-dealt run the ideal function is
+   forced to be the identity, and the record is written only for an input
+   family, where it is not. *)
 Record Targeted := MkTargeted {
   tg_algebra : PGGAlgebraic ;
   tg_inputT  : Type ;
@@ -130,7 +137,7 @@ Record Targeted := MkTargeted {
    slot; the directive pins it back. *)
 Arguments tg_f : clear implicits.
 
-(* The specification a Targeted names: its own function, at the privacy
+(* The specification a Targeted names: its own ideal function, at the privacy
    threshold of the algebra's scheme. The threshold is read off the scheme and
    not written, because an execution narrows no coalition size the scheme
    already guarantees. *)
@@ -172,5 +179,8 @@ Notation "s 'certify' 'SpectralDecay' b 'tied' 'by' Hd 'ideal' u 'mixing' 'by' H
   (at level 90, left associativity, b at level 0, Hd at level 0, u at level 0,
    Hc at level 0, Hk at level 0, only parsing).
 
+(* The two statuses are written transfer first, against the argument order of
+   publish itself, so that a row's last statement reads in the order the
+   manifest column headings run. *)
 Notation "s |> 'publish' t a" := (s ;;; publish a of t)
   (at level 90, left associativity, t at level 0, a at level 0).

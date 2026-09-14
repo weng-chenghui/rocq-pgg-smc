@@ -80,14 +80,13 @@ Record Functionality (inputT outT : Type) := MkFunctionality {
   fn_threshold : nat }.
 
 (* The specification a dealer-dealt run of an algebra meets: the identity on
-   the dealt secret, tolerating one seat fewer than the scheme's privacy
-   threshold. Both components are forced rather than chosen. The function is
-   the identity because a run that deals a secret and reconstructs it computes
-   nothing from several parties' inputs, and the tolerated size is the
-   scheme's own ts_k', because the coalition sizes at which the shares reveal
-   nothing are the scheme's and no part of the execution narrows them. An
-   instance in this mode therefore names no functionality of its own, and
-   realises_expected against this one holds by conversion. *)
+   the dealt secret, at one seat below the scheme's privacy threshold. Both
+   components are forced rather than chosen. The ideal function is the
+   identity because a run that deals a secret and reconstructs it computes
+   nothing from several parties' inputs, and the tolerated coalition size is
+   the scheme's own ts_k', because the sizes at which the shares reveal
+   nothing are the scheme's and no part of the execution narrows them. A
+   sharing family therefore names no ideal function of its own. *)
 Definition algebra_functionality (A : PGGAlgebraic)
     : Functionality (pga_secretT A) (pga_secretT A) :=
   MkFunctionality id (ts_k' (pga_scheme A)).
