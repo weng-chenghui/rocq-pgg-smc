@@ -1107,6 +1107,7 @@ case/orP: Hcases => [/eqP->|/orP[/eqP->|/orP[/eqP->|/orP[/eqP->|/eqP->]]]].
 - exact: Hk4.
 - exact: Hk5.
 Qed.
+Arguments psl211_count_ok_k_le5 [k].
 
 (** psl211_pattern_transfer — a nonempty coalition of at most five positions
     meets the mirror system in each pattern exactly as often as it meets the
@@ -1131,7 +1132,7 @@ have HCl : map val (enum C) \in psl211_subsets #|C|.
   apply: psl211_mem_subsets;
     [exact: psl211_sorted_val_enum | exact: psl211_all_lt12_enum |].
   by rewrite size_map -cardE.
-by move/allP: (psl211_count_ok_k_le5 _ HC0 HC) => /(_ _ HCl)/allP/(_ _ HAl)/eqP.
+by move/allP: (psl211_count_ok_k_le5 HC0 HC) => /(_ _ HCl)/allP/(_ _ HAl)/eqP.
 Qed.
 
 (* -------------------------------------------------------------------------- *)

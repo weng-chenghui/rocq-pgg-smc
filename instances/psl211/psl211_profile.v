@@ -57,7 +57,7 @@ Section witness.
 Variable R : realType.
 
 (** psl211_rho_dist — the uniform distribution over the PSL(2,11) shuffle
-    group. The shuffle law of the twelve-card orbit scheme. *)
+    group. The shuffle law of the twelve-card chirality scheme. *)
 Definition psl211_rho_dist : R.-fdist {perm 'I_12} := `U psl211_G_pos.
 
 (** psl211_point_uniform — the single-card pushforward of the uniform

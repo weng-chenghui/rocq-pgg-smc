@@ -35,7 +35,7 @@
 (*   psl211_r4_permE, psl211_m6_permE == each letter acts by table lookup     *)
 (*   psl211_m6_permVE   == the inverse of the half-Monge letter acts by the   *)
 (*                         half-milk table                                    *)
-(*   psl211_r4_permVE   == block reversal is an involution                    *)
+(*   psl211_r4_permVE   == segment reversal is an involution                  *)
 (*   psl211_G_pos       == the shuffle group is nonempty                      *)
 (*   psl211_rho_im      == rho's image is the generated group itself          *)
 (*   psl211_word_perm_mem, psl211_word_perm_val == a word permutation lies    *)
@@ -71,7 +71,7 @@ Local Definition Imod (k : nat) : 'I_12 := Ordinal (ltn_pmod k (ltn0Sn 11)).
 Local Definition tbl_fun (tbl : seq nat) (i : 'I_12) : 'I_12 :=
   Imod (nth 0 tbl i).
 
-(** psl211_r4_inj — the block-reversal table is an involution, hence
+(** psl211_r4_inj — the segment-reversal table is an involution, hence
     injective. *)
 Lemma psl211_r4_inj : injective (tbl_fun psl211_r4_tbl).
 Proof.
@@ -89,7 +89,7 @@ by move=> x; apply: val_inj;
    case: x => -[|[|[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]]]] ?.
 Qed.
 
-(** psl211_r4_perm — the block-reversal letter as a permutation of the
+(** psl211_r4_perm — the segment-reversal letter as a permutation of the
     twelve positions. *)
 Definition psl211_r4_perm : {perm 'I_12} := perm psl211_r4_inj.
 
@@ -120,7 +120,7 @@ Proof. by []. Qed.
 Lemma psl211_gens_in_G (i : 'I_2) : tnth psl211_gens i \in pgg_G psl211_M.
 Proof. by apply: mem_gen; apply/imsetP; exists i. Qed.
 
-(** psl211_r4_permE — the block-reversal permutation acts on a position by
+(** psl211_r4_permE — the segment-reversal permutation acts on a position by
     table lookup. *)
 Lemma psl211_r4_permE (x : 'I_12) :
   val (psl211_r4_perm x) = nth 0 psl211_r4_tbl (val x).
@@ -152,8 +152,8 @@ by rewrite /tbl_fun /Imod /=;
    case: x => -[|[|[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]]]] ?.
 Qed.
 
-(** psl211_r4_permVE — the inverse of the block-reversal letter acts on a
-    position by the block-reversal table itself.  Reversing each four-position
+(** psl211_r4_permVE — the inverse of the segment-reversal letter acts on a
+    position by the segment-reversal table itself.  Reversing each four-position
     segment is an involution, so the reverse direction of the walk needs no
     table the forward direction does not already have. *)
 Lemma psl211_r4_permVE (x : 'I_12) :
@@ -182,7 +182,7 @@ Proof. by rewrite morphimEdom imset_id. Qed.
 
 (* -------------------------------------------------------------------------- *)
 (* In-kernel pair-word certificate: nat-level word search.                    *)
-(* A word is a seq of letter indices (0 = block reversal, 1 = half Monge).  *)
+(* A word is a seq of letter indices (0 = segment reversal, 1 = half-Monge).  *)
 (* A fueled BFS from the base pair [:: 0; 1] finds, for each of the 132       *)
 (* ordered distinct position pairs, a word carrying the base pair to it; the  *)
 (* checker re-verifies every entry by computation.                            *)
@@ -190,7 +190,7 @@ Proof. by rewrite morphimEdom imset_id. Qed.
 
 (** psl211_wgenn i — the nat-level action of letter i on a card position,
     read off
-    the block-reversal table for i = 0 and the half-Monge table otherwise. *)
+    the segment-reversal table for i = 0 and the half-Monge table otherwise. *)
 Definition psl211_wgenn (i : nat) : nat -> nat :=
   if i == 0 then (fun a => nth 0 psl211_r4_tbl a)
   else (fun a => nth 0 psl211_m6_tbl a).

@@ -10,8 +10,10 @@
 (* they generate as permutation tables of 'I_12, paired with carrying letter  *)
 (* words, and a six-conjunct checker re-verifies that enumeration by kernel   *)
 (* computation. The enumeration is kept as the search application and not     *)
-(* as its 660-row value, so that a later vm_compute evaluates the search      *)
-(* rather than compiling a written-out literal to bytecode.                   *)
+(* as its 660-row value: storing the value made psl211_mixing.v run past      *)
+(* 997 s at 4 GB against 158 s (measured 2026-09-15), although every single   *)
+(* conversion site measured on its own gets faster with the value; the        *)
+(* mechanism of the whole-file regression is not established.                 *)
 (*                                                                            *)
 (* The table transport psl211_ptbl carries the shuffle group faithfully into  *)
 (* seq nat, where a kernel computation reduces; the checker's closure         *)
@@ -81,7 +83,7 @@ Import Prenex Implicits.
 (* -------------------------------------------------------------------------- *)
 
 (** psl211_moves — the three-letter alphabet the random word walks along:
-    block reversal, the half-Monge shuffle, and the inverse of the half-Monge
+    segment reversal, the half-Monge shuffle, and the inverse of the half-Monge
     shuffle.  Block reversal is an involution and the other two letters are
     mutually inverse, so the alphabet is inverse-closed and the L-letter word
     shuffle is a symmetric random walk on the group the three letters
@@ -161,10 +163,10 @@ Local Fixpoint elem_bfs (fuel : nat) (seen : seq (seq nat * seq nat)) :
     each key paired with a letter word carrying the identity to it.  The
     state space of the word walk, in the representation a kernel computation
     can reduce.  The search is left as an application rather than stored as
-    its 660-row value: with the rows written out, the kernel must compile
-    that literal to bytecode at every vm_compute that reaches the table, and
-    the length-584 walk of psl211_mixing.v then costs minutes instead of
-    seconds. *)
+    its 660-row value: storing the value made psl211_mixing.v run past 997 s
+    at 4 GB against 158 s, although each conversion site measured alone is
+    faster with the value; why the whole file regresses is not established.
+    Do not re-seal without re-measuring the whole file. *)
 Definition psl211_elem_table : seq (seq nat * seq nat) :=
   elem_bfs 12 [:: (psl211_idt, [::])].
 
@@ -435,7 +437,7 @@ Qed.
 
 (* A permutation whose forward images are read off the table F has (g^-1) x at
    Finv, whenever Finv is a right inverse of F on the twelve positions.  The
-   inverse of the block-reversal letter is given by a table this way, so no
+   inverse of the segment-reversal letter is given by a table this way, so no
    permutation is ever inverted inside a kernel computation. *)
 Local Lemma perm_inv_val (g : {perm 'I_12}) (F Finv : seq nat) (x : 'I_12) :
   (forall y : 'I_12, val (g y) = nth 0 F (val y)) ->
@@ -452,7 +454,7 @@ have Hzx : (g^-1)%g x = z by rewrite -Hgz permK.
 by rewrite Hzx.
 Qed.
 
-(* The inverse of the block-reversal letter has the block-reversal letter's
+(* The inverse of the segment-reversal letter has the segment-reversal letter's
    own table.  Reversal of each four-position segment is an involution, which
    is why the inverse-closed alphabet has three letters and not four. *)
 Local Lemma ptbl_r4_inv :
