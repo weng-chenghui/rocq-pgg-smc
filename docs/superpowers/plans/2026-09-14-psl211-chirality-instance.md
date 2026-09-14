@@ -8,13 +8,13 @@
 
 **Tech Stack:** Rocq 9.0, MathComp 2.5 (fingroup, action, perm, finset), infotheo (fdist, proba), the repo's `pgg_smc` / `pgg_reconstruct` namespaces. Build: `make instances/psl211/<file>.vo` from the repo root.
 
-**Spec:** `notes/2026-09-14-003000-psl211-chirality-instance-proposal.md` sections 5, 7, 9. **Probe evidence (verbatim source for every task):** `notes/probes/2026-09-14-psl211/` — `probe_group.v`, `probe_orbit.v`, `probe_bridge.v`, `probe_mixing.v`, `probe_decomposition.v`, `audit-soundness/audit_recovery.v`, `audit-soundness/audit_mixing584.v`, `PROBE-REPORT.md`, `CHANGES.md`, `AUDIT-SOUNDNESS.md`, `AUDIT-NAMING.md`. Probe files are never `Require`d; their code is copied.
+**Spec:** `notes/2026-09-14-003000-psl211-chirality-instance-proposal.md` sections 5, 7, 9. **Probe evidence (verbatim source for every task):** `notes/probes/2026-09-14-psl211/` — `probe_group.v`, `probe_orbit.v`, `probe_bridge.v`, `probe_mixing.v`, `probe_decomposition.v`, `audit-soundness/audit_recovery.v`, `audit-soundness/audit_mixing584.v`, `PROBE-REPORT.md`, `CHANGES.md`, `AUDIT-SOUNDNESS.md`, `AUDIT-NAMING.md`. Probe files are never `Require`d; their code is copied. Note on the audit reports: AUDIT-SOUNDNESS.md findings 9 and 11 (probe_bridge.v and probe_mixing.v not compiling) predate the prover's CHANGES.md fixes; both files compile today (re-measured by the plan audit, 4 s and 15 s). AUDIT-PLAN.md (2026-09-14) is the audit of this plan; its forty findings are folded below.
 
 ---
 
 ## 0. Flow sketch (DSL-first)
 
-The connecting operation is "replace the observed law by an equal or nearby law", and the invariant is the variation distance between the coalition's observed law under the two secrets, accumulated from zero. Two chains, one per dealer model; the currency is variation distance, unconditional throughout (no assumption is invoked anywhere).
+The connecting operation is "replace the observed law by an equal or nearby law", and the invariant is the variation distance between the coalition's observed law under the two secrets, accumulated from zero. Two chains, one per dealer model; the currency is `var_dist` as infotheo defines it (twice the total-variation distance; the audits priced the same hop as 2^-41 in total variation), unconditional throughout (no assumption is invoked anywhere). The precedent lands at the same numbers: pgl27_word_mixing at 2^-40 and pgl27_word_view_indist at 2^-39 (pgl27_word_privacy.v:180-191).
 
 ```
 exact chain (colour observer, coalition C with #|C| <= 5)
@@ -26,15 +26,15 @@ exact chain (colour observer, coalition C with #|C| <= 5)
 
 word chain (same observer, 584-letter word over {r4, m6, milk6})
   start  law_b under the exact shuffle                                        // 0
-  hop    exact -> word   by psl211_word_mixing (L14, L15, 660 states, L = 584) // 2^-41 per secret
-  eval   var_dist(law_word_true, law_word_false) by triangle                  // 2 * 2^-41 = 2^-40
+  hop    exact -> word   by psl211_word_mixing (L14, L15, 660 states, L = 584) // var_dist 2^-40 per secret
+  eval   var_dist(law_word_true, law_word_false) by triangle                  // 2^-40 + 2^-40 = 2^-39
 ```
 
 Roles: objects are the coalition laws; step justifications are `psl211_fiber_eq` and `psl211_count_okT`; the terminal evaluation is `colour_view_indep_fibers` (exact) and the triangle inequality (word); observation changes at cost zero are `colour_law_def` and the orbit-stabiliser rewrite; there is no invocation of an assumption; packaging is `psl211_orbit_scheme` / `psl211_plug` / `psl211_profile`. Outside the DSL: the leak at six (`psl211_colour_view_dep_k6`, a boundary result), recovery at eleven and ambiguity through ten (unconditional combinatorics), and the chirality fact (a statement about a group NOT used as the shuffle).
 
 Monad verdict: a graded monad over the loss monoid (nonnegative reals under addition) indexed by the pair of laws before and after each step; the laws hold propositionally as `fdist` equalities (`fdist_ext`), not definitionally; the framework carries the flow as lemma composition, not as a record (the same status pgl27 has).
 
-Interfaces through which external components enter: the tables enter as the first object through `psl211_mirror_blocks` / `psl211_hexad_blocks`; the group enters through `Gen_PGGTypes` (`psl211_M`); infotheo enters through `inde_prod_fst` and `fdist_uniform_supp_in/notin` (transitivity_privacy.v, fdist.v); mathcomp enters through `card_orbit_stab`, `amove_act`, `card_rcoset` (action.v); the pgl27 walk machinery enters through `mixing_bound_gen` (pgl27_mixing.v:1053) by pre-composition.
+Interfaces through which external components enter: the tables enter as the first object through `psl211_mirror_blocks` / `psl211_hexad_blocks`; the group enters through `Gen_PGGTypes` (`psl211_M`); infotheo enters through `inde_prod_fst` and `fdist_uniform_supp_in/notin` (transitivity_privacy.v, fdist.v); mathcomp enters through `card_orbit_stab`, `amove_act`, `card_rcoset` (action.v); the pgl27 walk machinery enters by COPY: `mixing_bound_gen` is a `Local Lemma` at pgl27_mixing.v:1000 and is invisible across `Require Import`, so Task 9 copies it together with the whole walk layer.
 
 ## 1. Scope split
 
@@ -48,11 +48,13 @@ This plan (Plan A) lands the secret-sharing core: nine files. The executed-proto
 | `instances/psl211/psl211_group.v` | the two generators as perms, the monodromy, 2-transitivity | L1, L2, L19 |
 | `instances/psl211/psl211_orbit.v` | decks, heart sets, block families, invariance, orbit = family, counts | L5, L20, L21, L23, L25 |
 | `reconstruct/design_privacy.v` | framework bridge: equal fibers give independence | L8, L9 |
-| `instances/psl211/psl211_scheme.v` | `ThresholdScheme`, re-deal privacy, `ReconPlug` with `id` content | L12, L13 |
+| `instances/psl211/psl211_scheme.v` | `ThresholdScheme`, re-deal privacy, `ReconPlug` with `id` content | L12, L13 (scheme and plug) |
 | `instances/psl211/psl211_secrecy.v` | fiber counting, colour-view independence at five, leak at six | L22, headline |
 | `instances/psl211/psl211_recovery.v` | eleven colours determine, ten never do | L16 |
 | `instances/psl211/psl211_mixing.v` | closure, group order 660, word walk at 584 | L14, L15, L17 |
-| `instances/psl211/psl211_profile.v` | `PGGInterface`, `MonodromyProfile`, exact certificate bundle | L13 |
+| `instances/psl211/psl211_profile.v` | `PGGInterface`, `MonodromyProfile`, exact certificate bundle | L13 (interface and profile) |
+
+Ledger rows not assigned to a file: L10 (`orbit_fibre_card`) is dropped in favour of mathcomp `amove_act` + `card_rcoset` (spec section 9); L11 is subsumed by L21 and L25; L24 is Plan B.
 
 Build registration: `_CoqProject` gains `-R instances/psl211 pgg_smc` next to the pgl27 line and the nine file paths after the pgl27 block. Another session edits `_CoqProject` concurrently: add the lines with a single `Edit`, rebuild `Makefile.rocq` with `rocq makefile -f _CoqProject -o Makefile.rocq`, commit at once.
 
@@ -152,8 +154,10 @@ Import Prenex Implicits.
 Definition psl211_r4_tbl    : seq nat := [:: 3; 2; 1; 0; 7; 6; 5; 4; 11; 10; 9; 8].
 Definition psl211_m6_tbl    : seq nat := [:: 3; 2; 4; 1; 5; 0; 9; 8; 10; 7; 11; 6].
 Definition psl211_milk6_tbl : seq nat := [:: 5; 3; 1; 0; 2; 4; 11; 9; 7; 6; 8; 10].
-Definition psl211_sc2_tbl   : seq nat := [:: 0; 10; 2; 7; 9; 8; 1; 11; 6; 5; 3; 4].
+Definition psl211_nonsquare_tbl : seq nat := [:: 0; 10; 2; 7; 9; 8; 1; 11; 6; 5; 3; 4].
 ```
+
+`psl211_nonsquare_tbl` (the transported scaling z -> 2z) has NO Rocq probe: it was computed and checked in python only (session of 2026-09-14: it maps the mirror table onto the hexad table and back, and it is not in the group). Ledger L18 stays "to probe" until Step 3 compiles; if `psl211_chirality_swapT` fails, the table is wrong, not the claim, and the python check is the reference.
 
 then the two 132-row tables copied verbatim from `psl211_tables.v` (`tblA` becomes `psl211_mirror_tbl`, `tblB` becomes `psl211_hexad_tbl`).
 
@@ -212,10 +216,10 @@ Proof. by vm_compute. Qed.
     mirror row to a hexad row and every hexad row to a mirror row: the
     PGL(2,11) letter that PSL(2,11) lacks exchanges the two secret classes. *)
 Lemma psl211_chirality_swapT :
-  psl211_stable_ok psl211_sc2_tbl psl211_mirror_tbl = false /\
-  all (fun R => psl211_map_row psl211_sc2_tbl R \in psl211_hexad_tbl)
+  psl211_stable_ok psl211_nonsquare_tbl psl211_mirror_tbl = false /\
+  all (fun R => psl211_map_row psl211_nonsquare_tbl R \in psl211_hexad_tbl)
       psl211_mirror_tbl /\
-  all (fun R => psl211_map_row psl211_sc2_tbl R \in psl211_mirror_tbl)
+  all (fun R => psl211_map_row psl211_nonsquare_tbl R \in psl211_mirror_tbl)
       psl211_hexad_tbl.
 Proof. by vm_compute. Qed.
 ```
@@ -253,13 +257,13 @@ Definition psl211_count_ok : bool :=
 Lemma psl211_count_okT : psl211_count_ok.
 Proof. by vm_compute. Qed.
 
-(** psl211_leak6 — the first mirror row, taken as a six-coalition seeing all
-    hearts, is shown by one mirror block and by no hexad block. *)
+(** psl211_leak6 — the mirror representative row [2;3;5;7;8;9], taken as a
+    six-coalition seeing all hearts, is shown by one mirror block and by no
+    hexad block. The same witness the distributional leak of
+    psl211_secrecy.v (psl211_leak_coalition) uses. *)
 Lemma psl211_leak6 :
-  psl211_pattern_count psl211_mirror_tbl (head [::] psl211_mirror_tbl)
-                                         (head [::] psl211_mirror_tbl) = 1 /\
-  psl211_pattern_count psl211_hexad_tbl (head [::] psl211_mirror_tbl)
-                                        (head [::] psl211_mirror_tbl) = 0.
+  psl211_pattern_count psl211_mirror_tbl [:: 2; 3; 5; 7; 8; 9] [:: 2; 3; 5; 7; 8; 9] = 1 /\
+  psl211_pattern_count psl211_hexad_tbl [:: 2; 3; 5; 7; 8; 9] [:: 2; 3; 5; 7; 8; 9] = 0.
 Proof. by vm_compute. Qed.
 ```
 
@@ -278,6 +282,7 @@ Append temporarily and run, then remove:
 ```coq
 Print Assumptions psl211_count_okT.
 Print Assumptions psl211_chirality_swapT.
+Print Assumptions psl211_leak6.
 ```
 
 Expected: `Closed under the global context` twice.
@@ -372,8 +377,20 @@ Qed.
 Lemma psl211_milk6_permE (x : 'I_12) :
   val ((psl211_m6_perm^-1)%g x) = nth 0 psl211_milk6_tbl (val x).
 Proof.
-(* body: probe_group.v, lemma m6_inv_permE *)
+(* verbatim probe_group.v:75-84 *)
+have HK : cancel (tbl_fun psl211_m6_tbl) (tbl_fun psl211_milk6_tbl).
+  by move=> y; apply: val_inj;
+     case: y => -[|[|[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]]]] ?.
+rewrite -[x](permKV psl211_m6_perm) permK.
+set y := (psl211_m6_perm^-1)%g x.
+have -> : psl211_m6_perm y = tbl_fun psl211_m6_tbl y by rewrite permE.
+by rewrite HK.
 Qed.
+
+(** psl211_G_pos — the shuffle group is nonempty. Lives here so that the
+    secrecy, mixing and profile files all read one constant. *)
+Lemma psl211_G_pos : (0 < #|pgg_G psl211_M|)%N.
+Proof. exact: cardG_gt0. Qed.
 
 (** psl211_rho_im — the image of the monodromy morphism is the group. *)
 Lemma psl211_rho_im :
@@ -381,18 +398,20 @@ Lemma psl211_rho_im :
 Proof. by rewrite morphimEdom imset_id. Qed.
 ```
 
-- [ ] **Step 2: The pair-word certificate (pgl27_group.v lines 150-260 at k = 2, two letters)**
+- [ ] **Step 2: The pair-word certificate (pgl27_group.v lines 169-288 at k = 2, two letters)**
+
+Export (no `Local`) `wgenn`, `papply`, `wapply`, `word_perm`, `word_perm_mem`, `word_perm_val`: Task 4 uses `papply` (the scalar application) and `word_perm`. pgl27 itself re-defines these locally in pgl27_orbit.v:549-595; here they are shared instead.
 
 Adapt the pgl27 code with these substitutions and no others: the nat-level letter action `wgenn i` reads `psl211_r4_tbl` for `i = 0` and `psl211_m6_tbl` otherwise; `word_bfs` starts from `[:: 0; 1]` and iterates over `[:: 0; 1]` letters with fuel 14; `word_table_ok` quantifies over `iota 0 12` twice with the guard `a != b`; `wapply_map` is stated on pairs; `gen_of i` is `psl211_r4_perm` for `i = 0` and `psl211_m6_perm` otherwise; `gen_of_mem` has two cases; `pair_word x y : x != y -> exists w, papply w 0 = val x /\ papply w 1 = val y`.
 
 ```coq
-Local Definition wgenn (i : nat) : nat -> nat :=
+Definition wgenn (i : nat) : nat -> nat :=
   if i == 0 then (fun a => nth 0 psl211_r4_tbl a)
   else (fun a => nth 0 psl211_m6_tbl a).
-Local Definition papply (w : seq nat) (a : nat) : nat :=
+Definition papply (w : seq nat) (a : nat) : nat :=
   foldl (fun x i => wgenn i x) a w.
 Local Definition wstep (i : nat) (t : seq nat) : seq nat := map (wgenn i) t.
-Local Definition wapply (w : seq nat) (t : seq nat) : seq nat :=
+Definition wapply (w : seq nat) (t : seq nat) : seq nat :=
   foldl (fun acc i => wstep i acc) t w.
 Local Fixpoint word_bfs (fuel : nat) (seen : seq (seq nat * seq nat)) :
     seq (seq nat * seq nat) :=
@@ -407,7 +426,7 @@ Local Fixpoint word_bfs (fuel : nat) (seen : seq (seq nat * seq nat)) :
     if size add == 0 then seen else word_bfs f (seen ++ add)
   end.
 Local Definition word_table : seq (seq nat * seq nat) :=
-  word_bfs 14 [:: ([:: 0; 1], [::])].
+  word_bfs 20 [:: ([:: 0; 1], [::])].
 Local Definition word_table_ok : bool :=
   all (fun a => all (fun b =>
     (a != b) ==>
@@ -422,7 +441,7 @@ Local Lemma wapply_map (w : seq nat) (a b : nat) :
 Proof. by elim: w a b => [|i w IH] a b //=. Qed.
 Local Definition gen_of (i : nat) : {perm 'I_12} :=
   if i == 0 then psl211_r4_perm else psl211_m6_perm.
-Local Definition word_perm (w : seq nat) : {perm 'I_12} :=
+Definition word_perm (w : seq nat) : {perm 'I_12} :=
   foldl (fun g i => (g * gen_of i)%g) 1%g w.
 Local Lemma gen_of_mem (i : nat) : gen_of i \in pgg_G psl211_M.
 Proof.
@@ -430,7 +449,7 @@ apply: mem_gen; apply/imsetP; rewrite /gen_of.
 case: (i == 0); first by exists (@Ordinal 2 0 isT).
 by exists (@Ordinal 2 1 isT).
 Qed.
-Local Lemma word_perm_mem (w : seq nat) : word_perm w \in pgg_G psl211_M.
+Lemma word_perm_mem (w : seq nat) : word_perm w \in pgg_G psl211_M.
 Proof.
 rewrite /word_perm.
 have g1 : 1%g \in pgg_G psl211_M by exact: group1.
@@ -444,7 +463,7 @@ rewrite /gen_of /wgenn; case: (i == 0).
 - by rewrite psl211_r4_permE.
 - by rewrite psl211_m6_permE.
 Qed.
-Local Lemma word_perm_val (w : seq nat) (x : 'I_12) :
+Lemma word_perm_val (w : seq nat) (x : 'I_12) :
   val (word_perm w x) = papply w (val x).
 Proof.
 rewrite /word_perm /papply.
@@ -508,7 +527,7 @@ make instances/psl211/psl211_group.vo 2>&1 | tail -3 && echo BUILD-OK
 
 Expected: `BUILD-OK`. Then `Print Assumptions psl211_2transitive.` (temporary line): `Closed under the global context`.
 
-If `word_table_okT` fails: the fuel 14 exceeds the pair-graph diameter (Cayley diameter of the group is 12), so a failure means the guard or the base pair is mistyped, not the fuel; compare with the probe `notes/probes/2026-09-14-psl211/probe_group.v` and with `python3 notes/probes/psl211_physical.py`.
+Fuel: the pair-orbit BFS over the two letters {r4, m6} (no inverse) first covers all 132 ordered pairs at depth exactly 14 (AUDIT-PLAN.md finding 11, `audit-plan/chk_group.v`: 130 pairs at fuel 13, 132 at 14), and the Cayley diameter over {r4, m6} is 15; fuel 20 leaves margin and costs nothing because the recursion stops on an empty round. Task 3 Steps 1-3 compiled verbatim in the plan audit (`audit-plan/chk_group.v`, 27.7 s, `psl211_2transitive` closed under the global context).
 
 - [ ] **Step 5: Commit**
 
@@ -522,7 +541,9 @@ git add instances/psl211/psl211_group.v && git commit -m "feat(psl211): the two 
 
 **Files:**
 - Create: `instances/psl211/psl211_orbit.v`
-- Source: `probe_orbit.v` lines 120-260 (invariance, verbatim), `pgl27_orbit.v` lines 90-120 (deck vocabulary), 289-330 (`orbit_class_invariant`, `deck_stable`), 382-530 (`list_to_set`, `class_count`), 597-730 (`code_bfs`, `subset_class_orbitE`)
+- Source: `probe_orbit.v` lines 144-310 (invariance, verbatim), `pgl27_orbit.v` lines 90-120 (deck vocabulary), 289-334 (`orbit_class_invariant`, `deck_stable`, `ord8_enum`), 382-530 (`list_to_set`, `class_count`), 597-730 (`code_bfs`, `subset_class_orbitE`)
+
+Header discipline: this file does NOT set `Set Implicit Arguments. Unset Strict Implicit.` (pgl27_orbit.v does not either). With them, `g` in `psl211_orbit_class_invariant g sh gG` becomes implicit and Task 6's `orbit_recon_invariant` proof fails (`audit-plan/chk_profile.v`, `chk_impl.v`). Keep `Import Prenex Implicits` only.
 
 - [ ] **Step 1: Deck vocabulary (pgl27_orbit.v lines 90-120 at twelve positions, six hearts)**
 
@@ -533,8 +554,6 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop div prime.
 From pgg_smc Require Import pgg_interface psl211_blocks psl211_group.
 
-Set Implicit Arguments.
-Unset Strict Implicit.
 Import Prenex Implicits.
 
 (** psl211_is_heart — a card with code below six is a heart. *)
@@ -547,16 +566,18 @@ Definition psl211_deck_ok (sh : 12.-tuple 'I_12) : bool := uniq sh.
 Definition psl211_heart_set (sh : 12.-tuple 'I_12) : {set 'I_12} :=
   [set i | psl211_is_heart (tnth sh i)].
 
-Local Definition list_to_set (L : seq nat) : {set 'I_12} :=
+(* Exported, not Local: psl211_mirror_orbitE and psl211_secrecy.v mention
+   them (AUDIT-PLAN.md finding 33). *)
+Definition psl211_list_to_set (L : seq nat) : {set 'I_12} :=
   [set x : 'I_12 | val x \in L].
 
-Local Definition sets_of (tbl : seq (seq nat)) : {set {set 'I_12}} :=
-  [set S | has (fun R => list_to_set R == S) tbl].
+Definition psl211_sets_of (tbl : seq (seq nat)) : {set {set 'I_12}} :=
+  [set S | has (fun R => psl211_list_to_set R == S) tbl].
 
 (** psl211_mirror_blocks — the mirror Steiner system as a family of position
     sets; psl211_hexad_blocks — the M12 hexad system. The two secret classes. *)
-Definition psl211_mirror_blocks : {set {set 'I_12}} := sets_of psl211_mirror_tbl.
-Definition psl211_hexad_blocks  : {set {set 'I_12}} := sets_of psl211_hexad_tbl.
+Definition psl211_mirror_blocks : {set {set 'I_12}} := psl211_sets_of psl211_mirror_tbl.
+Definition psl211_hexad_blocks  : {set {set 'I_12}} := psl211_sets_of psl211_hexad_tbl.
 
 (** psl211_subset_valid — S is a block of one of the two systems. *)
 Definition psl211_subset_valid (S : {set 'I_12}) : bool :=
@@ -572,9 +593,9 @@ Definition psl211_orbit_class (sh : 12.-tuple 'I_12) : bool :=
   psl211_subset_class (psl211_heart_set sh).
 ```
 
-- [ ] **Step 2: Invariance under the group (probe_orbit.v lines 150-260, verbatim, renamed)**
+- [ ] **Step 2: Invariance under the group (probe_orbit.v lines 144-310, verbatim, renamed)**
 
-Copy from the probe, in this order and with these renames: `rows_lt12`, `rows_lt12A -> rows_lt12_mirror`, `rows_lt12B -> rows_lt12_hexad`, `r4_valE -> psl211_r4_permE` (already in psl211_group.v, drop the local copy), `m6_valE -> psl211_m6_permE` (same), `imset_list_to_set`, `sets_of_gen_sub`, `stab_of_sub`, `stab_of`, `stab_ofP`, `group_set_stab_of`, `stab_of_group`, `gens_sub_stab`, `r4_stabA -> r4_stab_mirror`, `m6_stabA -> m6_stab_mirror`, `r4_stabB -> r4_stab_hexad`, `m6_stabB -> m6_stab_hexad`, and the two exported lemmas:
+Copy from the probe (`list_to_set -> psl211_list_to_set`, `sets_of -> psl211_sets_of`, `map_row -> psl211_map_row`, `stable_ok -> psl211_stable_ok`, `G_sub_stabA -> G_sub_stab_mirror`, `G_sub_stabB -> G_sub_stab_hexad`, `tables_distinct`, `tables_distinctT` kept), in this order and with these renames: `rows_lt12`, `rows_lt12A -> rows_lt12_mirror`, `rows_lt12B -> rows_lt12_hexad`, `r4_valE -> psl211_r4_permE` (already in psl211_group.v, drop the local copy), `m6_valE -> psl211_m6_permE` (same), `imset_list_to_set`, `sets_of_gen_sub`, `stab_of_sub`, `stab_of`, `stab_ofP`, `group_set_stab_of`, `stab_of_group`, `gens_sub_stab`, `r4_stabA -> r4_stab_mirror`, `m6_stabA -> m6_stab_mirror`, `r4_stabB -> r4_stab_hexad`, `m6_stabB -> m6_stab_hexad`, and the two exported lemmas:
 
 ```coq
 (** psl211_mirror_invariant — membership in the mirror system is invariant
@@ -583,25 +604,27 @@ Lemma psl211_mirror_invariant (g : pgg_gT psl211_M) (S : {set 'I_12}) :
   g \in pgg_G psl211_M ->
   ((g @: S) \in psl211_mirror_blocks) = (S \in psl211_mirror_blocks).
 Proof.
-(* body: probe_orbit.v setsA_invariant, via gens_sub_stab + gen_subG *)
+(* verbatim probe_orbit.v:279-285 (setsA_invariant), via G_sub_stab_mirror *)
 Qed.
 
 Lemma psl211_hexad_invariant (g : pgg_gT psl211_M) (S : {set 'I_12}) :
   g \in pgg_G psl211_M ->
   ((g @: S) \in psl211_hexad_blocks) = (S \in psl211_hexad_blocks).
 Proof.
-(* body: probe_orbit.v setsB_invariant *)
+(* verbatim probe_orbit.v:287-293 (setsB_invariant) *)
 Qed.
 
 (** psl211_blocks_disjoint — no six-subset lies in both systems. *)
 Lemma psl211_blocks_disjoint :
   [disjoint psl211_mirror_blocks & psl211_hexad_blocks].
 Proof.
-(* body: probe_orbit.v setsA_B_disjoint *)
+(* verbatim probe_orbit.v:296-310 (tables_distinct, tables_distinctT, setsA_B_disjoint) *)
 Qed.
 ```
 
-- [ ] **Step 3: Action on decks (pgl27_orbit.v lines 289-330, twelve positions)**
+- [ ] **Step 3: Action on decks (pgl27_orbit.v lines 289-334, twelve positions)**
+
+`psl211_heart_set_act` is extracted from the inline `have Hheart` of `orbit_class_invariant` (pgl27_orbit.v:293-300); it is not a copy of a pgl27 lemma.
 
 ```coq
 (** psl211_heart_set_act — a shuffle moves the heart set by its inverse. *)
@@ -651,8 +674,20 @@ Qed.
 The hexad representative is the row `[:: 0; 1; 3; 7; 10; 11]`, the mirror representative `[:: 2; 3; 5; 7; 8; 9]` (spec section 3). A deck of class b places the heart codes 0..5 on the representative's positions in ascending order and the club codes 6..11 on the rest in ascending order:
 
 ```coq
+(* vm_compute cannot reduce enum 'I_12, so every ground fact about a
+   mktuple deck goes through the literal enumeration, as pgl27_orbit.v:329-334
+   (ord8_enum / enum_ord8) does; AUDIT-PLAN.md finding 8 measured the
+   failure of the bare `by case: b; vm_compute` and closed the fix as
+   audit-plan/chk_encode.v fix_via_enum. *)
+Local Definition ord12_enum : seq 'I_12 :=
+  [seq Ordinal (ltn_pmod k (ltn0Sn 11)) | k <- iota 0 12].
+Local Lemma enum_ord12 : enum 'I_12 = ord12_enum.
+Proof. (* verbatim pgl27_orbit.v:333-334 at twelve *) Qed.
+
 (* Position -> card for the two representative decks, as 12-entry tables:
-   hearts (codes 0..5) on the block, clubs (codes 6..11) elsewhere. *)
+   hearts (codes 0..5) on the block, clubs (codes 6..11) elsewhere.
+   Checked (AUDIT-PLAN.md finding 27): codes below six sit exactly on
+   {0,1,3,7,10,11} and on {2,3,5,7,8,9}, both permutations of 0..11. *)
 Local Definition hexad_deck_tbl  : seq nat := [:: 0; 1; 6; 2; 7; 8; 9; 3; 10; 11; 4; 5].
 Local Definition mirror_deck_tbl : seq nat := [:: 6; 7; 0; 1; 8; 2; 9; 3; 4; 5; 10; 11].
 
@@ -663,7 +698,13 @@ Definition psl211_orbit_encode (b : bool) : 12.-tuple 'I_12 :=
   [tuple Imod (nth 0 (if b then mirror_deck_tbl else hexad_deck_tbl) i) | i < 12].
 
 Lemma psl211_orbit_encode_deck (b : bool) : psl211_deck_ok (psl211_orbit_encode b).
-Proof. by case: b; vm_compute. Qed.
+Proof.
+(* audit-plan/chk_encode.v fix_via_enum: rewrite the tuple's underlying seq
+   as a map over enum 'I_12, rewrite enum_ord12, then vm_compute.  If this
+   one-liner does not close, copy the exact script of fix_via_enum. *)
+by case: b; rewrite /psl211_deck_ok /= -map_comp map_tnth_enum
+   ?[in X in uniq X]enum_ord12; vm_compute.
+Qed.
 
 (** psl211_orbit_encodeK — the encoder is a section of the class. *)
 Lemma psl211_orbit_encodeK (b : bool) : psl211_orbit_class (psl211_orbit_encode b) = b.
@@ -690,11 +731,21 @@ by exists (psl211_orbit_encode b); split;
 Qed.
 ```
 
-Check the two deck tables against the block rows before compiling: positions {0,1,3,7,10,11} must hold codes < 6 in `hexad_deck_tbl` (they hold 0,1,2,3,4,5) and positions {2,3,5,7,8,9} in `mirror_deck_tbl` (0,1,2,3,4,5). They do.
+Also export here, for Task 7 and for the two encoder facts:
+
+```coq
+(** psl211_encode_heart_setE — the heart set of the encoded deck of class b
+    is its representative row. *)
+Lemma psl211_encode_heart_setE (b : bool) :
+  psl211_heart_set (psl211_orbit_encode b) = psl211_list_to_set (psl211_rep_list b).
+Proof. (* setP; inE; tnth_mktuple; case on the twelve values of i *) Qed.
+```
+
+`psl211_orbit_encodeK` and `psl211_orbit_encode_valid_set` follow from it and from membership of the representative rows in the tables by `vm_compute`.
 
 - [ ] **Step 5: Counts and orbit = family (L20, L21, L23, L25)**
 
-Copy from `pgl27_orbit.v` lines 382-470 the code-list layer at six-lists: `asc6 L := all (< 12) L && sorted ltn L && (size L == 6)`, `sorted6 := psl211_subsets 6` (924 rows, replaces `sorted4`), `sorted6_uniq`, `sorted6_asc`, `sorted6_complete`, `sorted_val_enum`, `list_to_setK`, `perm_list_to_set`, `card_list_to_set` (= 6), `list_to_set_inj`, and `class_count` (lines 482-514) with `#|S| == 6`. Then:
+Copy from `pgl27_orbit.v` lines 382-470 the code-list layer at six-lists: `asc6 L := all (< 12) L && sorted ltn L && (size L == 6)`, `sorted6` as a 924-row LITERAL generated by `python3 -c "from itertools import combinations; print('[::', ';'.join('[:: '+'; '.join(map(str,c))+']' for c in combinations(range(12),6)), ']')"` (pgl27's `sorted4` is a nested-flatten literal and `sorted4_complete` at :406-419 is proved against that literal shape, AUDIT-PLAN.md finding 19; a Fixpoint would need a new induction), `sorted6_uniq`, `sorted6_asc`, `sorted6_complete`, `sorted_val_enum`, `list_to_setK`, `perm_list_to_set`, `psl211_block_card6` (pgl27's `card_list_to_set` at six: `asc6 L -> #|psl211_list_to_set L| = 6`, used by Task 8), `list_to_set_inj`, and `class_count` (lines 482-514) with `#|S| == 6`. Then:
 
 ```coq
 (** psl211_card_mirror_blocks — the mirror system has 132 blocks. *)
@@ -726,15 +777,17 @@ and the orbit certificate (pgl27_orbit.v lines 597-730 at six-subsets, two lette
 
 ```coq
 Local Definition code_step (i : nat) (L : seq nat) : seq nat :=
-  sort leq (map (wgenn i) L).   (* wgenn from psl211_group.v: export it there *)
+  sort leq (map (wgenn i) L).   (* wgenn exported by psl211_group.v *)
 Local Fixpoint code_bfs (fuel : nat) (seen : seq (seq nat * seq nat)) :
     seq (seq nat * seq nat) := (* verbatim, letters [:: 0; 1] *) ...
-Local Definition rep_list (b : bool) : seq nat :=
+(** psl211_rep_list b — the representative row of each system; exported,
+    psl211_secrecy.v states the stabiliser count over it. *)
+Definition psl211_rep_list (b : bool) : seq nat :=
   if b then [:: 2; 3; 5; 7; 8; 9] else [:: 0; 1; 3; 7; 10; 11].
-Local Definition code_table (b : bool) := code_bfs 14 [:: (rep_list b, [::])].
+Local Definition code_table (b : bool) := code_bfs 20 [:: (psl211_rep_list b, [::])].
 Local Definition code_table_ok (b : bool) : bool :=
   all (fun L => has (fun sw : seq nat * seq nat =>
-                       sort leq (map (wapply sw.2) (rep_list b)) == L)
+                       sort leq (map (papply sw.2) (psl211_rep_list b)) == L)
                     (code_table b))
       (if b then psl211_mirror_tbl else psl211_hexad_tbl).
 Local Lemma code_table_okP (b : bool) : code_table_ok b.
@@ -743,18 +796,21 @@ Proof. by case: b; vm_compute. Qed.
 (** psl211_mirror_orbitE — the orbit of the mirror representative under the
     shuffle group is the mirror system (ledger L21). *)
 Lemma psl211_mirror_orbitE :
-  orbit 'P^* (pgg_G psl211_M) (list_to_set (rep_list true)) = psl211_mirror_blocks.
+  orbit 'P^* (pgg_G psl211_M) (psl211_list_to_set (psl211_rep_list true))
+  = psl211_mirror_blocks.
 Proof.
-(* subset_class_orbitE shape: forward inclusion by psl211_mirror_invariant;
-   backward by code_table_okP true, word_perm_imset (psl211_group.v word_perm,
-   export it) and list_to_setK. *)
+(* subset_class_orbitE shape (pgl27_orbit.v:720-730): forward inclusion by
+   psl211_mirror_invariant; backward by code_table_okP true, word_perm_imset
+   (pgl27_orbit.v:643-653, restated over psl211_group.v's word_perm and
+   papply) and list_to_setK. *)
 Qed.
 Lemma psl211_hexad_orbitE :
-  orbit 'P^* (pgg_G psl211_M) (list_to_set (rep_list false)) = psl211_hexad_blocks.
+  orbit 'P^* (pgg_G psl211_M) (psl211_list_to_set (psl211_rep_list false))
+  = psl211_hexad_blocks.
 Proof. (* same with false *) Qed.
 ```
 
-`wgenn`, `wapply`, `word_perm`, `word_perm_mem`, `word_perm_val` must be exported (not `Local`) from `psl211_group.v` for this file; adjust Task 3 accordingly (drop `Local` on those five).
+`wgenn`, `papply`, `word_perm`, `word_perm_mem`, `word_perm_val` are exported by Task 3 Step 2.
 
 - [ ] **Step 6: Compile and check**
 
@@ -981,9 +1037,12 @@ Proof.
       likewise 6 - (#|C| - #|A|).
    5. psl211_heart_set sh' = B' by construction, so psl211_subset_valid and
       the class s2 follow from B' in the s2 family and psl211_blocks_disjoint.
-   This is the one genuinely new proof of the instance (spec section 5); the
-   soundness audit verified the construction on all coalitions <= 5
-   (AUDIT-SOUNDNESS.md finding 7, audit_bridge.v redeal_pattern). *)
+   Steps 2-3 (the pattern fact) are what AUDIT-SOUNDNESS.md finding 7 and
+   audit_bridge.v:154-167 redeal_pattern verify, the latter with the
+   pattern-match premise assumed; steps 4-5 (the tuple construction and its
+   distinctness) have NO probe and are the one genuinely new proof of the
+   instance. The python census audit_psl211.out checks the construction on
+   every coalition <= 5. *)
 Qed.
 ```
 
@@ -1003,7 +1062,7 @@ Lemma psl211_orbit_recon_invariant :
   @ts_recon_perm_invariant _ (pgg_G psl211_M) bool 'I_12
     psl211_orbit_scheme (fun g => @pgg_rho psl211_M g).
 Proof.
-by move=> g s shares gG [_ [_ <-]]; exact: (psl211_orbit_class_invariant g shares gG).
+by move=> g s shares gG [_ [_ <-]]; exact: (@psl211_orbit_class_invariant g shares gG).
 Qed.
 
 (** psl211_plug — the reconstruction plug over psl211_M, content the identity
@@ -1033,7 +1092,7 @@ git add instances/psl211/psl211_scheme.v && git commit -m "feat(psl211): thresho
 
 **Files:**
 - Create: `instances/psl211/psl211_secrecy.v`
-- Source: `probe_decomposition.v` lines 142-170, `transitivity_privacy.v` lines 311-360 (`rho_tuple_fiber_card`, the partition shape), `pgl27_secrecy.v` lines 116-175 (`pgl27_view_dep_k4`)
+- Source: `probe_decomposition.v` lines 142-170, `transitivity_privacy.v` lines 311-360 (`rho_tuple_fiber_card`, the partition shape), `pgl27_secrecy.v` lines 116-186 (`pgl27_view_dep_k4`). The whole chain of this task elaborates at the real carrier with Admitted supports: `audit-plan/chain7.v` (rc 0), the statement source if anything below drifts.
 
 - [ ] **Step 1: The sample space and the colour observer**
 
@@ -1056,12 +1115,10 @@ Import GRing.Theory Num.Theory.
 Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 Local Open Scope ring_scope.
+Local Open Scope group_scope.   (* 'C_G[x | to] parses only here; AUDIT-PLAN.md finding 7 *)
 
 Section secrecy.
 Variables (R : realType) (secretP : R.-fdist bool).
-
-Lemma psl211_G_pos : (0 < #|pgg_G psl211_M|)%N.
-Proof. exact: cardG_gt0. Qed.
 
 (** psl211P — the joint law of the secret prior and a uniform shuffle. *)
 Definition psl211P := secretP `x (`U psl211_G_pos).
@@ -1111,7 +1168,11 @@ Qed.
    B of the family with B cap C = A, times the stabiliser order.  Precedent:
    transitivity_privacy.v rho_tuple_fiber_card (lines 311-360) partitions the
    same way; the stabiliser fiber is mathcomp amove (action.v:198) and
-   amove_act + card_rcoset give its size (probe_bridge.v orbit_fibre_card). *)
+   amove_act (action.v:737) + card_rcoset give its size at the TOTAL action
+   'P^*: audit-soundness/audit_bridge.v:92 and :116, audit-plan/chk_fiber.v
+   fibre_card_tot / fibre_card_const, all closed.  probe_bridge.v
+   orbit_fibre_card is typed over a domain-G action and does not instantiate
+   at 'P^* (AUDIT-PLAN.md finding 12). *)
 Local Lemma fiber_partition (C A : {set 'I_12}) (b : bool) :
   #|[set g in pgg_G psl211_M | (g @: H_of b) :&: C == A]|
   = #|[set B in orbit 'P^* (pgg_G psl211_M) (H_of b) | B :&: C == A]|
@@ -1127,20 +1188,18 @@ Qed.
 Local Lemma stab_card (b : bool) :
   #|'C_(pgg_G psl211_M)[H_of b | 'P^*]| = 5.
 Proof.
-(* card_orbit_stab: #|orbit| * #|stab| = #|G|; orbit = family by
-   psl211_mirror_orbitE / psl211_hexad_orbitE after H_of b = list_to_set (rep_list b)
-   (the encoder's heart set is the representative row, from
-   psl211_orbit_encodeK's helper); #|family| = 132; #|G| = 660 by
-   psl211_card (psl211_mixing.v) -- to avoid a cyclic import, state
-   psl211_card in psl211_group.v via the elem_table of psl211_mixing.v? No:
-   place the group-order certificate in psl211_group.v instead of
-   psl211_mixing.v (Task 9 Step 1 moves it), so this file imports only
-   psl211_group. *)
+(* card_orbit_stab (action.v:989): #|orbit| * #|stab| = #|G|; orbit = family
+   by psl211_mirror_orbitE / psl211_hexad_orbitE after
+   H_of b = psl211_list_to_set (psl211_rep_list b) (psl211_encode_heart_setE);
+   #|family| = 132 (psl211_card_*_blocks); #|G| = 660 (psl211_card, in
+   psl211_group.v by Decision 2); 132 * s = 660 forces s = 5
+   (audit-plan/chk_fiber.v stab_card_shape, closed). *)
 Qed.
 
-(** psl211_fiber_eq — for every coalition of at most five positions and every
-    view value, the two encodings have equally many shuffles showing it. *)
-Lemma psl211_fiber_eq (C : {set 'I_12}) (v : {ffun 'I_12 -> bool}) :
+(** psl211_colour_fiber_cardE — for every coalition of at most five positions
+    and every view value, the two encodings have equally many shuffles
+    showing it (naming audit C6). *)
+Lemma psl211_colour_fiber_cardE (C : {set 'I_12}) (v : {ffun 'I_12 -> bool}) :
   (#|C| <= 5)%N ->
   #|[set g in pgg_G psl211_M | psl211_colour_view C (true, g) == v]|
   = #|[set g in pgg_G psl211_M | psl211_colour_view C (false, g) == v]|.
@@ -1164,7 +1223,7 @@ Lemma psl211_colour_view_indep (C : {set 'I_12}) :
   (#|C| <= 5)%N ->
   psl211P |= psl211_colour_view C _|_ psl211_secret.
 Proof.
-by move=> HC; apply: colour_view_indep_fibers => v; exact: psl211_fiber_eq.
+by move=> HC; apply: colour_view_indep_fibers => v; exact: psl211_colour_fiber_cardE.
 Qed.
 
 (** psl211_leak_coalition — the six positions of the mirror representative. *)
@@ -1182,8 +1241,10 @@ Lemma psl211_colour_view_dep_k6 :
   #|psl211_leak_coalition| = 6 /\
   ~ psl211P |= psl211_colour_view psl211_leak_coalition _|_ psl211_secret.
 Proof.
-(* body: pgl27_view_dep_k4, with v0 := [ffun i => i \in psl211_leak_coalition]
-   and the class contradiction through psl211_blocks_disjoint *)
+(* body: pgl27_secrecy.v:116-186 (pgl27_view_dep_k4), with
+   v0 := [ffun i => i \in psl211_leak_coalition] and the class contradiction
+   through psl211_blocks_disjoint; psl211_leak_coalition is the mirror row
+   [2;3;5;7;8;9], the same witness as psl211_leak6 *)
 Qed.
 
 End secrecy.
@@ -1301,71 +1362,74 @@ Expected: `BUILD-OK`; `Print Assumptions psl211_ten_reveal_ambiguous.`: `Closed 
 
 **Files:**
 - Create: `instances/psl211/psl211_mixing.v`
-- Modify: `instances/psl211/psl211_group.v` (add the group-order certificate, see Step 1)
-- Source: `probe_mixing.v` (verbatim), `audit-soundness/audit_mixing584.v` lines 44-55, `pgl27_mixing.v` lines 132-560 (`ptbl` layer, `pgl27_card`) and 1048-1060 (`pgl27_word_mixing`)
+- Modify: `instances/psl211/psl211_group.v` (Step 1 appends the closure, the `ptbl` layer and the group order)
+- Source: `pgl27_mixing.v` lines 72-557 minus 167-238 (Step 1), 200-238 and 561-1060 (Steps 2-3). NOT `probe_mixing.v` and NOT `audit_mixing584.v` for the walk: those use left multiplication, `index` and a filtered predecessor table, while pgl27_mixing.v uses right multiplication through `inv_letter` and `find` (AUDIT-PLAN.md finding 2: the two predecessor tables agree on 0 of 660 rows). The instance uses the pgl27 convention throughout, so every bridging lemma copies verbatim.
 
-- [ ] **Step 1: The closure and the group order, in `psl211_group.v`**
+Why the certificate transfers: the alphabet is inverse-closed, so the law of the L-letter right-multiplied word is the image under g |-> g^-1 of the law of the left-multiplied word, and `var_dist` to the uniform law is invariant under that bijection of the group. The L = 584 threshold measured in the other convention (audit_mixing584.v) is therefore the threshold here; if `mixing_bound_okT` nevertheless fails at 584, retry at 590 and 600 before anything else, and record the number.
 
-Append to `psl211_group.v` (so that `psl211_secrecy.v` can use `psl211_card` without importing the walk): the `mtbl / mcomp / idt / elem_bfs / elem_table` block of `probe_mixing.v` lines 16-42 with the three letters `[:: psl211_r4_tbl; psl211_m6_tbl; psl211_milk6_tbl]`, `size_elem_table = 660`, `uniq_elem_keys`, `elem_closed_okT`, then the `ptbl` layer of `pgl27_mixing.v` lines 314-420 at twelve positions (`ptbl`, `ptbl_nth`, `ptbl_size = 12`, `ptbl_id`, `ptbl_of_fwd`, `ptbl_morph`, `ptbl_inj`, `keys_closed_mem`, `gen_key_mem`, `group_key`), `entry_perm` (lines 472-492) and
+- [ ] **Step 1: In `psl211_group.v`, the closure and the group order (pgl27_mixing.v 72-166 and 239-557)**
+
+Append to `psl211_group.v`, all EXPORTED (no `Local`; Step 2 reads them from the mixing file, AUDIT-PLAN.md finding 5; naming audit B6's preference for `Local` is overridden for the walk-data layer by this necessity):
+
+1. `psl211_moves : 3.-tuple {perm 'I_12} := [tuple psl211_r4_perm; psl211_m6_perm; (psl211_m6_perm^-1)%g]` and `psl211_inv_letter (j : nat) : nat := nth 0 [:: 0; 2; 1] j`.
+2. `mtbl j := nth [::] [:: psl211_r4_tbl; psl211_m6_tbl; psl211_milk6_tbl] j`, `perm_inv_val` (:83), `gfwd0/1/2 -> gfwd_r4 / gfwd_m6 / gfwd_milk6` (:99-105, the third through `psl211_milk6_permE`), `mtbl_val` (:112), `mcomp` (:132), `idt` (:134, twelve entries), `elem_bfs` (:137, three letters), `elem_table` (:152), `tbl_index` (:156, `find`), `pred_table` (:174-176, through `psl211_inv_letter`), `elem_table_ok` (:182-196, ALL SIX conjuncts: size 660, uniq keys, entry 0 is the identity, every key has size twelve, closure under the three letters, every recorded word re-evaluates to its key; probe_mixing.v certifies only three of these, finding 4), `elem_table_okT` by `vm_compute`, `size_elem_table` (:239), `uniq_elem_keys` (:241), `elem_table0` (:243), `elem_fold_key` (:245), `elem_closed` (:251), `elem_letters` (:260), `size_mcomp` (:269), `size_fold` (:271), `elem_key_size` (:280), `elem_closed_mem` (:285), `idt_in_keys` (:299).
+3. The `ptbl` layer (:314-420): `ptbl`, `ptbl_nth`, `ptbl_size` (= 12), `ptbl_id`, `size_mtbl` (< 3), `ptbl_of_fwd`, `ptbl_gen0/1/2 -> ptbl_r4 / ptbl_m6 / ptbl_milk6`, `ptbl_sym` (over `psl211_moves`, `'I_3`), `ptbl_morph`, `ptbl_inj`, `ptbl_gen` (letters 0 and 1 of `psl211_moves` are the two generators, so `ptbl (tnth psl211_gens i) = mtbl (val i)`), `keys_closed_mem`, `gen_key_mem`, `group_key`, `gen_in_G` (:423, two cases), `gen3_of` / `gen3_of_mem` (:427-441 with `'I_3`), `word3_perm` / `word3_perm_mem` / `ptbl_word3` (:443-470), `entry_perm` / `entry_perm_mem` / `ptbl_entry` (:472-492, `< 660`), `keys_size` (:493), `mem_G_Ps` (:498), `entry_perm_inj` (:513), `psl211_gen3_eq` (:528-543: letters 0 and 1 are the generators, letter 2 is the inverse of letter 1, so `<<moves>> = pgg_G`), and
 
 ```coq
 (** psl211_card — the shuffle group has exactly 660 elements. Body:
-    pgl27_mixing.v pgl27_card (lines 545-556) with 336 replaced by 660. *)
+    pgl27_mixing.v pgl27_card (lines 545-557) with 336 replaced by 660. *)
 Lemma psl211_card : #|pgg_G psl211_M| = 660.
 Proof.
-(* body: pgl27_card *)
+have Hii : pgg_G psl211_M =i [seq entry_perm k | k <- iota 0 660].
+  move=> g; apply/idP/idP; first exact: mem_G_Ps.
+  by move=> /mapP[k _ ->]; exact: entry_perm_mem.
+rewrite (eq_card Hii).
+have Huniq : uniq [seq entry_perm k | k <- iota 0 660].
+  by rewrite map_inj_in_uniq; [exact: iota_uniq | exact: entry_perm_inj].
+move/card_uniqP: Huniq => ->.
+by rewrite size_map size_iota.
 Qed.
 ```
 
-- [ ] **Step 2: The walk at L = 584 (audit_mixing584.v verbatim, renamed)**
+Compile: `make instances/psl211/psl211_group.vo` — expected `BUILD-OK`; `Print Assumptions psl211_card.`: `Closed under the global context`. Commit: `git commit -m "feat(psl211): closure table, ptbl layer and the group order 660"`.
+
+- [ ] **Step 2: In `psl211_mixing.v`, the walk and the certificate (pgl27_mixing.v 200-238)**
 
 ```coq
 From Stdlib Require Import BinNat Nnat.
-(* imports as pgl27_mixing.v *)
+(* imports as pgl27_mixing.v lines 41-52, plus *)
 From pgg_smc Require Import psl211_blocks psl211_group psl211_orbit psl211_scheme.
 
-(** psl211_moves — the inverse-closed three-letter alphabet: reverse
-    quarters, Monge halves, milk halves. *)
-Definition psl211_moves : 3.-tuple {perm 'I_12} :=
-  [tuple psl211_r4_perm; psl211_m6_perm; (psl211_m6_perm^-1)%g].
-
-(** psl211_inv_letter — the letter inverting letter j. *)
-Definition psl211_inv_letter (j : nat) : nat := nth 0 [:: 0; 2; 1] j.
-
-Local Definition keys : seq (seq nat) := unzip1 elem_table.
-Local Definition tbl_index (t : seq nat) : nat := index t keys.
-Local Definition succ (k : nat) : seq nat :=
-  [seq tbl_index (mcomp (mtbl j) (nth [::] keys k)) | j <- [:: 0; 1; 2]].
-Local Definition succ_table : seq (seq nat) := [seq succ k | k <- iota 0 660].
-Local Definition pred_table : seq (seq nat) :=
-  [seq [seq k <- iota 0 660 | s \in nth [::] succ_table k] | s <- iota 0 660].
 Local Fixpoint walkN (L : nat) : seq N :=
   match L with
   | 0 => 1%num :: nseq 659 0%num
   | L'.+1 =>
-    let d := walkN L' in
-    [seq foldl (fun a k => (a + nth 0%num d k)%num) 0%num ps | ps <- pred_table]
+    let v := walkN L' in
+    [seq foldl (fun acc i => (acc + nth 0%num v i)%num) 0%num preds
+    | preds <- pred_table]
   end.
+
 Local Definition absdiffN (a b : N) : N :=
   if (a <? b)%num then (b - a)%num else (a - b)%num.
 
-(* The pgl27_mixing.v integer form of the mixing bound at 660 states, three
-   letters and L = 584: 2^40 times the total absolute deviation of the walk
-   counts from the uniform value 3^584 / 660 is at most 660 * 3^584.  This
-   form fails at L = 570 and first holds at L = 584 (AUDIT-SOUNDNESS.md 13). *)
+(* The integer form of the mixing bound: 2^40 times the total absolute
+   deviation of the 660 walk counts from the uniform value 3^584 / 660, over
+   the common denominator, is at most 660 * 3^584. *)
 Local Definition mixing_bound_ok : bool :=
   let D := (3 ^ 584)%num in
   ((2 ^ 40) * foldl (fun acc c => (acc + absdiffN (660 * c) D)%num) 0%num
                     (walkN 584)
    <=? 660 * D)%num.
-(* 18.8 s measured. *)
+
 Local Lemma mixing_bound_okT : mixing_bound_ok.
 Proof. by vm_compute. Qed.
 ```
 
-- [ ] **Step 3: The mixing theorem through `mixing_bound_gen`**
+Time this lemma (`Time`) and record the number in the as-built section; the audit's 18.8 s was for a file that also forced the tables.
 
-Copy `pgl27_mixing.v` lines 561-1060 (the N-to-nat bridges, `weval`, `fibc`, `rc`, `weval_last`, `fiber_count`, `word_eval_in_G`, `mixing_cert_nat`, `pgl27_gen5_eq -> psl211_gen3_eq`) with `5 -> 3` letters, `200 -> 584`, `336 -> 660`, `pgl27_moves -> psl211_moves`, and conclude
+- [ ] **Step 3: The mixing theorem (pgl27_mixing.v 561-1060, verbatim with 5 -> 3, 200 -> 584, 336 -> 660, pgl27 -> psl211)**
+
+Copy `powE`, `NtoNat_pow`, `Nle_nat`, `foldlN_addsum` (:561-588), `weval`, `fibc`, `rc`, `weval_last` (:589-620), then everything through `mixing_cert_nat` and `mixing_bound_gen` (:1000), and conclude:
 
 ```coq
 (** psl211_word_mixing — the 584-letter word law is within 2^-40 of the
@@ -1382,16 +1446,16 @@ apply: (@mixing_bound_gen (pgg_G psl211_M)%G entry_perm
 Qed.
 ```
 
-The implicit numerals `10 2` are `pgg_N' - 1`-style parameters exactly as `6 4` are for pgl27 (`@rho_from_words_weighted R 6 4 200`); confirm by `About rho_from_words_weighted` and adjust to the signature displayed.
+The numerals `10 2 584` are right: `pgg_weighted_words.v:24-31` sets `N := N''.+2` and `Tg := m.+1`, so twelve positions and three letters give `10 2` (AUDIT-PLAN.md finding 26).
 
 - [ ] **Step 4: Compile, check, commit**
 
 ```bash
-make instances/psl211/psl211_group.vo instances/psl211/psl211_mixing.vo 2>&1 | tail -3 && echo BUILD-OK
-git add instances/psl211/psl211_group.v instances/psl211/psl211_mixing.v && git commit -m "feat(psl211): group order 660 and the 584-letter word mixing certificate"
+make instances/psl211/psl211_mixing.vo 2>&1 | tail -3 && echo BUILD-OK
+git add instances/psl211/psl211_mixing.v && git commit -m "feat(psl211): the 584-letter word mixing certificate"
 ```
 
-Expected: `BUILD-OK` in under two minutes; `Print Assumptions psl211_word_mixing.`: the same axiom set as `pgl27_word_mixing` (run both and diff).
+Expected: `BUILD-OK`; `Print Assumptions psl211_word_mixing.` identical to `Print Assumptions pgl27_word_mixing.` (run both, diff).
 
 ---
 
@@ -1399,7 +1463,7 @@ Expected: `BUILD-OK` in under two minutes; `Print Assumptions psl211_word_mixing
 
 **Files:**
 - Create: `instances/psl211/psl211_profile.v`
-- Source: `pgl27_profile.v` lines 40-130 (verbatim, renamed), `probe_decomposition.v` lines 126-140
+- Source: `pgl27_profile.v` lines 40-130 (verbatim, renamed), `probe_decomposition.v` lines 126-140. Task 10 compiled as written in the plan audit (`audit-plan/chk_profile.v`) once Task 6's `@` fix is in.
 
 - [ ] **Step 1: Write the file**
 
@@ -1414,14 +1478,13 @@ Definition psl211_PI : PGGInterface psl211_M :=
 
 Section witness.
 Variable R : realType.
-Lemma psl211_G_pos' : (0 < #|pgg_G psl211_M|)%N. Proof. exact: cardG_gt0. Qed.
-Definition psl211_rho_dist : R.-fdist {perm 'I_12} := `U psl211_G_pos'.
+Definition psl211_rho_dist : R.-fdist {perm 'I_12} := `U psl211_G_pos.
 Lemma psl211_point_uniform (s : 'I_12) :
   fdistmap (fun sigma : {perm 'I_12} => sigma s) psl211_rho_dist
   = fdist_uniform (card_ord 12).
 Proof.
 exact: (@ttrans_point_uniform (pgg_N' psl211_M) (pgg_gT psl211_M)
-  (pgg_G psl211_M) (@pgg_rho psl211_M) 2 psl211_2transitive R psl211_G_pos' s isT).
+  (pgg_G psl211_M) (@pgg_rho psl211_M) 2 psl211_2transitive R psl211_G_pos s isT).
 Qed.
 (* psl211_se_exact, psl211_sw_bound, psl211_marginal_bound,
    psl211_certificate_bundle: verbatim from pgl27_profile.v lines 78-110 *)
@@ -1482,13 +1545,18 @@ git add docs/superpowers/plans/2026-09-14-psl211-chirality-instance.md notes/202
 
 1. **Content is `id`**, the colour observer is `colour_view` in `design_privacy.v` instantiated in `psl211_secrecy.v`. Reason: `ar_protocol_correct` applies `rp_content` before `ts_valid`, and `psl211_deck_ok = uniq` rejects any colour tuple (naming audit E3, soundness 16).
 2. **The group order lives in `psl211_group.v`**, not the mixing file, because the stabiliser count of Task 7 needs `#|G| = 660` and must not import the walk. The `ptbl` layer therefore moves there too.
-3. **Word length 584**, alphabet `{r4, m6, milk6}` with `psl211_inv_letter = [0; 2; 1]`. Reason: the pgl27 certificate form is `2^-41`; 570 fails, 584 holds (audit_mixing584.v).
+3. **Word length 584**, alphabet `{r4, m6, milk6}` with `psl211_inv_letter = [0; 2; 1]`, the pgl27 walk convention (right multiplication through `inv_letter`, `find`). Reason: the pgl27 certificate form gives `var_dist <= 2^-40` (2^-41 in total variation); 570 fails, 584 holds (audit_mixing584.v, other convention, transferred by inverse-closure).
 4. **Representative rows** are the hexad row `[0;1;3;7;10;11]` and the mirror row `[2;3;5;7;8;9]`; the encoders place heart codes ascending on the row.
 5. **Orbit certificates use BFS over the family's rows** (`code_table_ok` quantifies over the 132 rows of the corresponding table, not over all 924 six-lists), since the family is already a literal table.
 6. **`ntransitive 2`** is certified by the pair-word BFS (132 pairs) and used only by the ambiguity transport and single-card uniformity.
 7. **L24 (all-decks code view) and the executed cone** are Plan B.
-8. **Names** follow the naming audit: `psl211_` prefix on every landed-vocabulary word; `mirror`/`hexad` families; `milk6`; `fiber`; no `_of_`.
+8. **Names** follow the naming audit: `psl211_` prefix on every landed-vocabulary word; `mirror`/`hexad` families; `milk6`; `fiber`; no `_of_`; `psl211_colour_fiber_cardE` (C6); `psl211_nonsquare_tbl` instead of an `sc2` abbreviation (C2). Overridden with reason: C4's `tbl_` object-first order (the repo's own predicates are property-first, e.g. `deck_ok`, `stable_ok`) and C13's rename of `subset_valid` (kept, prefixed, because it pairs with `subset_class` as in pgl27).
+9. **Walk-data layer exported** from `psl211_group.v` (naming audit B6 overridden): the mixing file must see `pred_table`, `elem_table`, `mtbl`, `mcomp`, `entry_perm`.
 
 ## Self-review
 
-Spec coverage: section 5 deck model (Tasks 6, 7), privacy bridge (5, 7), invariant tables (2, 4), word model (9), recovery (8); ledger rows L1-L23, L25 each named in a task; L24 explicitly deferred. Placeholder scan: proof bodies for L11, L12, L16, L17, L21, L22, L23 are given as routes naming the precedent file and lines and the lemmas to use, because no probe has produced those bodies; every other body is verbatim probe or pgl27 code. Type consistency: `psl211_colour_view` is `colour_view` at `N' = 11`, `rho = @pgg_rho psl211_M`, `encode = psl211_orbit_encode`, `colour = psl211_is_heart` throughout Tasks 5 and 7; `psl211_orbit_valid` has three conjuncts in Tasks 6, 7 and 8; `psl211_card` is used by Task 7 and defined in Task 9 Step 1 inside `psl211_group.v`, so Task 9 Step 1 must land before Task 7 compiles — execute Task 9 Step 1 immediately after Task 3 (reordered at execution: 1, 2, 3, 9.1, 4, 5, 6, 7, 8, 9.2-9.4, 10, 11).
+Spec coverage: section 5 deck model (Tasks 6, 7), privacy bridge (5, 7), invariant tables (2, 4), word model (9), recovery (8); ledger rows L1-L9, L12-L23, L25 each named in a task; L10 dropped (mathcomp `amove`), L11 subsumed by L21 and L25, L24 deferred to Plan B. Placeholder scan: proof bodies for L11, L12, L16, L17, L21, L22, L23 are given as routes naming the precedent file and lines and the lemmas to use, because no probe has produced those bodies; every other body is verbatim probe or pgl27 code. Type consistency: `psl211_colour_view` is `colour_view` at `N' = 11`, `rho = @pgg_rho psl211_M`, `encode = psl211_orbit_encode`, `colour = psl211_is_heart` throughout Tasks 5 and 7; `psl211_orbit_valid` has three conjuncts in Tasks 6, 7 and 8; `psl211_card` is used by Task 7 and defined in Task 9 Step 1 inside `psl211_group.v`, so Task 9 Step 1 must land before Task 7 compiles — execute Task 9 Step 1 immediately after Task 3 (reordered at execution: 1, 2, 3, 9.1, 4, 5, 6, 7, 8, 9.2-9.4, 10, 11).
+
+## Plan audit fold (AUDIT-PLAN.md, 2026-09-14, NO-GO -> folded)
+
+Blocking findings and their resolution in the text above: (2) Task 9 now uses the pgl27 walk convention end to end, with the transfer argument for L = 584 and a retry rule; (3, 4) Task 9 Step 1 lists every declaration `psl211_card` needs and the six-conjunct closure checker; (5, 6) the walk-data layer is exported from `psl211_group.v`, and `psl211_G_pos` lives there; (7) `psl211_secrecy.v` opens `group_scope`; (8) the encoder facts go through the literal `enum_ord12`; (9) `psl211_orbit.v` drops `Set Implicit Arguments`, Task 6 writes `@`; (10) the flow sketch prices in `var_dist` (hop 2^-40, total 2^-39); (11) fuel 20, diagnostic corrected (depth 14, diameter 15 over the two letters). Citation and provenance corrections (1, 12-21, 31-37, 40) applied inline. Findings 22-30, 38, 39 confirmed the plan and are recorded where they apply.
