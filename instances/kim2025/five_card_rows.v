@@ -28,19 +28,21 @@
 (* program here.                                                              *)
 (*                                                                            *)
 (* No statement of the program is a theorem about this instance. What the     *)
-(* instance supplies it supplies as a payload: the algebra, the ideal         *)
-(* function, the layout, the committers and the budget on the first two       *)
-(* statements, the three run facts on the third, the probability model on the *)
-(* fourth, and one security record on the fifth. The security mathematics     *)
-(* reaches the row through that last payload alone, and through two named     *)
-(* facts: five_card_static_obsE, which identifies the framework's direct      *)
-(* computation of a coalition's view with the leakage space's colour reading  *)
-(* encoded back into card positions, and five_card_viewS_indep, where         *)
-(* leak_view_set gives that colour reading a leakage of zero at a pattern of  *)
-(* at most one card. The sharpness annotation pgl27_row_exact_tableau         *)
-(* carries, that some coalition at the threshold already leaks, is not        *)
-(* written here, because the closed forms of leak at two or more cards are    *)
-(* proved positive nowhere.                                                   *)
+(* instance supplies it supplies inside a clause. The algebra, the ideal      *)
+(* function, the input carrier, the layout, the decoder, the committers and   *)
+(* the budget are the clause arguments of the first two statements;           *)
+(* den_boer_assemble_valid and the three run facts are the obligations those  *)
+(* same two statements ask for; the probability model is the argument of the  *)
+(* fourth statement and one security record the payload of the fifth. The     *)
+(* security mathematics reaches the row through that last payload alone, and  *)
+(* through two named facts: five_card_static_obsE, which identifies the       *)
+(* framework's direct computation of a coalition's view with the leakage      *)
+(* space's colour reading encoded back into card positions, and               *)
+(* five_card_viewS_indep, where leak_view_set gives that colour reading a     *)
+(* leakage of zero at a pattern of at most one card. The sharpness annotation *)
+(* pgl27_row_exact_tableau carries, that some coalition at the threshold      *)
+(* already leaks, is not written here, because the closed forms of leak at    *)
+(* two or more cards are proved positive nowhere.                             *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   five_card_committed     == the prefix: the committed-input run with its  *)
@@ -84,7 +86,7 @@
 (*                              instance                                      *)
 (******************************************************************************)
 
-From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import reals boolp.
 From infotheo Require Import fdist proba entropy.
@@ -115,10 +117,9 @@ Local Open Scope ring_scope.
 (** The first three statements of the five-card row: the algebra with the
     ideal function a run of it computes, the run driven in the
     committed-input mode at fuel 100, and the three run facts. What has been
-    proved at this point
-    is run correctness, that the interpreter finishes, collects one endpoint
-    per seat and decodes them to the conjunction of the two committed bits,
-    and nothing about a coalition. *)
+    proved at this point is run correctness, that the interpreter finishes,
+    collects one endpoint per seat and decodes them to the conjunction of the
+    two committed bits, and nothing about a coalition. *)
 Definition five_card_committed : Tableau Observed :=
   five_card_algebra functionality (fun ab : bool * bool => ab.1 && ab.2)
   encoded inputs (bool * bool)
@@ -218,8 +219,10 @@ Lemma five_card_viewS_indep (R : realType) (C : {set 'I_5}) :
   (#|C| < 2)%N -> P R |= (ViewS R C) _|_ (Secret R).
 Proof.
 move=> HC; apply/inde_RV_sym; apply: mutual_info_RV0_indep.
-rewrite leak_view_set /leak.
-by move: HC; case: #|C| => [|[|n]].
+rewrite leak_view_set.
+case: (ltnP #|C| 1) => H1.
+  by apply: leakE0; apply/eqP; rewrite -leqn0 -ltnS.
+by apply: leakE1; apply/eqP; rewrite eqn_leq H1 andbT -ltnS.
 Qed.
 
 (** The same identification as five_card_static_obsE, with the committed pair

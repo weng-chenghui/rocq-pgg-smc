@@ -74,8 +74,8 @@
 (*                                 of the two committed bits                  *)
 (*   five_card_exec_correct     == termination, endpoint count and recovery   *)
 (*                                 of the derived run                         *)
-(*   five_card_exec_procs_biasE == the derived process list does not depend   *)
-(*                                 on the bias                                *)
+(*   five_card_exec_procs_biasE == the process list is one list, with no      *)
+(*                                 bias to instantiate                        *)
 (*   five_card_exec_seat_endpointE == seat i's endpoint is the layout entry   *)
 (*                                    at the cut image of seat i's start      *)
 (*   five_card_exec_coalition_endpointsE     == a coalition's endpoint        *)
@@ -721,9 +721,9 @@ Proof. by rewrite five_card_exec_traceE; exact: denboer_trace_secrecy. Qed.
 (******************************************************************************)
 
 (** five_card_card_bool2 — the pair of committed bits has four values. The
-    identical certificate card_bool2 is declared at kim_input_privacy.v:51;
-    this file keeps its own local copy under the five_card prefix rather than
-    add an import edge to that file. *)
+    identical certificate card_bool2 is declared in kim_input_privacy.v; this
+    file keeps its own local copy under the five_card prefix rather than add
+    an import edge to that file. *)
 Lemma five_card_card_bool2 : #|{: bool * bool}| = 3.+1.
 Proof. by rewrite card_prod card_bool. Qed.
 
@@ -847,11 +847,12 @@ Qed.
 
 (** five_card_exec_dealer_readout — the committed pair decoded from a dealer
     row: decode_bool of the two card positions of a three-entry row, the
-    second bit
-    at the head, and (false, false) elsewhere, the row-level companion of
-    five_card_exec_dealer_trace. The (false, false) value returned on a
-    malformed row coincides with a legitimate committed pair, so the readout
-    is meaningful only through five_card_exec_dealer_raw_traceE. *)
+    second bit immediately after the head and the first bit last, and
+    (false, false) elsewhere, the row-level companion of
+    five_card_exec_dealer_trace. The head itself is discarded, being the
+    dealer's own deck index. The (false, false) value returned on a malformed
+    row coincides with a legitimate committed pair, so the readout is
+    meaningful only through five_card_exec_dealer_raw_traceE. *)
 Definition five_card_exec_dealer_readout
     (tr : seq (pgg_data (pgg_N' FiveCardKim_M).+1)) : (bool * bool)%type :=
   if tr is [:: _ ; PGG_sheet y ; PGG_sheet x]
@@ -906,8 +907,11 @@ End five_card_execution.
    the type: five_card_profile and five_card_exec_plug carry neither a bias nor
    a word length, so there is one process list, compared here with itself. *)
 
-(** five_card_exec_procs_biasE — the executed program does not depend on the
-    bias. *)
+(** five_card_exec_procs_biasE — the two sides are one process list, so this
+    equation is reflexivity. What it records is that no bias enters the
+    process list at all: five_card_profile and five_card_exec_plug are closed
+    terms with no bias to instantiate, so the two runs a two-bias statement
+    would have compared cannot be written apart. *)
 Lemma five_card_exec_procs_biasE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
     (P_idx : nat) :
   @exec_procs five_card_profile five_card_exec_plug (a, b) w0 P_idx
