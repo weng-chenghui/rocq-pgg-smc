@@ -1401,7 +1401,7 @@ Qed.
 
 Compile: `make instances/psl211/psl211_group.vo` — expected `BUILD-OK`; `Print Assumptions psl211_card.`: `Closed under the global context`. Commit: `git commit -m "feat(psl211): closure table, ptbl layer and the group order 660"`.
 
-- [ ] **Step 2: In `psl211_mixing.v`, the walk and the certificate (pgl27_mixing.v 200-238)**
+- [x] **Step 2: In `psl211_mixing.v`, the walk and the certificate (pgl27_mixing.v 200-238)**
 
 ```coq
 From Stdlib Require Import BinNat Nnat.
@@ -1435,7 +1435,7 @@ Proof. by vm_compute. Qed.
 
 Time this lemma (`Time`) and record the number in the as-built section; the audit's 18.8 s was for a file that also forced the tables.
 
-- [ ] **Step 3: The mixing theorem (pgl27_mixing.v 561-1060, verbatim with 5 -> 3, 200 -> 584, 336 -> 660, pgl27 -> psl211)**
+- [x] **Step 3: The mixing theorem (pgl27_mixing.v 561-1060, verbatim with 5 -> 3, 200 -> 584, 336 -> 660, pgl27 -> psl211)**
 
 Copy `powE`, `NtoNat_pow`, `Nle_nat`, `foldlN_addsum` (:561-588), `weval`, `fibc`, `rc`, `weval_last` (:589-620), then everything through `mixing_cert_nat` and `mixing_bound_gen` (:1000), and conclude:
 
@@ -1456,7 +1456,7 @@ Qed.
 
 The numerals `10 2 584` are right: `pgg_weighted_words.v:24-31` sets `N := N''.+2` and `Tg := m.+1`, so twelve positions and three letters give `10 2` (AUDIT-PLAN.md finding 26).
 
-- [ ] **Step 4: Compile, check, commit**
+- [x] **Step 4: Compile, check, commit**
 
 ```bash
 make instances/psl211/psl211_mixing.vo 2>&1 | tail -3 && echo BUILD-OK
@@ -1597,3 +1597,5 @@ As built, Task 8 (commits d2af766, 44466cf): the witness pair is the hexad row [
 As built, Task 10 (commits 291712e, 6d8e6f5, 2c5bf01): pgl27_profile.v verbatim with the substitutions; `psl211_G_pos` from psl211_group.v; `profile_eps_psl211` added; the profile_k comment attributes the threshold to the Steiner counts, not to 2-transitivity.
 
 As built, Task 7 (commit 534fab6): `psl211_colour_view_dep_k6` carries the premises `secretP true != 0 -> secretP false != 0 ->` (MATHEMATICAL: the plan's premise-free statement is false at a Dirac prior, where every observable is independent of the almost-surely-constant secret; both premises are minimal); the cardinality conjunct is also exported on its own as `psl211_leak_coalition_card6` so it is not trapped behind the premises; ledger L22's sharpness is therefore conditional on a non-degenerate prior, stated in the header. `psl211_colour_fiber_cardE` and `psl211_colour_view_indep` report the three boolp axioms because they sit in a section with `(R : realType) (secretP : R.-fdist bool)` variables (a proof-free Definition in the same section reports the same three; the Local combinatorial lemmas outside the section are closed). Route: view_fiberE (psl211_heart_set_act) -> fiber_inv_card (invg_inj, card_imset) -> fiber_partitionE (partition_big, amove_act, card_rcoset at 'P^*) -> stab_card (card_orbit_stab, psl211_card, the 132 counts) -> orbit_H_blocksE (the two _orbitE) -> pattern_transferE (psl211_count_okT; the empty coalition separately at 132 = 132). Scope order group then ring; psl211_scheme not imported (nothing used). Duplicated helpers to collapse on the tidy list: `sorted_val_enum` (three copies: orbit, scheme, secrecy), `all_lt12_enum`, `subseq_val_enum` (two each) -> export from psl211_orbit.v.
+
+As built, Task 9 Steps 2-4 (commit 688e10c): L = 584 passes at the first attempt in the pgl27 convention (`mixing_bound_okT` 13.8 s; whole file 175 s, of which about 95 s is copied rewrite-matching on table-sized terms and the rest the walk); `psl211_word_mixing` has exactly pgl27_word_mixing's axiom set (the three boolp axioms); psl211_group.v untouched: `keys_closed_mem` re-derived from `psl211_mem_G_Ps` + `psl211_ptbl_entry` + `psl211_ptbl_morph` + `psl211_ptbl_sym`, and the r4 inverse table fact from `psl211_r4_permE` through a local `perm_inv_val`; `keys_closed_mem` keeps pgl27's `j : nat` with membership premise shape (an `'I_3` index leaves a table-valued impossible-letter goal to `done`, 500 s); the endpoint and joint mixing corollaries of pgl27 (`pgl27_endpoint_mixing`, `pgl27_joint_mixing`) are not ported here because they need `psl211_point_uniform` from psl211_profile.v (add them in the tidy pass or Plan B, importing psl211_profile). Tidy: rename the exported `Wuni` to `psl211_Wuni` (pgl27_mixing.v exports a bare `Wuni`, and the manifest imports pgl27_mixing).
