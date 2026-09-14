@@ -7,8 +7,12 @@
 (* This file gives each statement a named surface, so that a statement says   *)
 (* which fact occupies which clause and a term written in the wrong clause is *)
 (* rejected where it is written rather than deep inside an existT. Nothing    *)
-(* here proves anything: every rule expands to one tableau_bind, and the      *)
-(* accumulated proposition is that of pgg_tableau.v unchanged.                *)
+(* here changes what a program proves: every rule expands to one              *)
+(* tableau_bind, and the accumulated proposition is that of pgg_tableau.v     *)
+(* unchanged. The three lemmas hold by conversion: one identifies the         *)
+(* dealer-dealt statement with params_step, and two say that a run whose      *)
+(* parameters take the ideal function from a Targeted meets the               *)
+(* specification that Targeted names.                                         *)
 (*                                                                            *)
 (* Two typed builders carry the work. obs_payload takes the three run facts   *)
 (* in order at the data the previous statement reached; its point is that the *)
@@ -36,18 +40,40 @@
 (* mathcomp-analysis convex.v, with which it was checked to coexist in one    *)
 (* file.                                                                      *)
 (*                                                                            *)
-(* The surface spends twelve identifiers as global keywords in every file     *)
-(* that requires this one: dealt, functionality, execute, endpoints, recon,   *)
-(* sample, certify, leaks, tied, ideal, mixing and invariant. Each follows a  *)
-(* slot in some rule. The tokens fuel, terminates, publish, vm_compute,       *)
-(* ExactIndependence and SpectralDecay follow a literal and stay identifiers, *)
-(* which is what keeps the two port constructors usable by name; at follows a *)
-(* literal too and was a keyword of Rocq before this file.                    *)
+(* A run is driven in one of three modes and there is a statement for each.   *)
+(* dealt deals the algebra's own secret. Under encoded the committers hand    *)
+(* over their inputs and the dealer assembles the layout from what they       *)
+(* committed. Under supplied the layout arrives with the run argument and no  *)
+(* party commits. Two of the three expand to one statement body, params_step, *)
+(* differing in the parameter record their clauses build; the dealer-dealt    *)
+(* rule expands to dealt_step, which dealt_params_stepE identifies with       *)
+(* params_step at dealt_secret_params.                                        *)
 (*                                                                            *)
-(* One of the twelve shadows a framework definition: endpoints is also the    *)
+(* The three run obligations at execute are the only proofs whose statements  *)
+(* mention the interpreter. The by clause of encoded is a proof too, but      *)
+(* ts_valid takes a secret and a share tuple and nothing else, so it          *)
+(* constrains the layout and not the run, and it is what makes the row's      *)
+(* recon clause a bare lemma name.                                            *)
+(*                                                                            *)
+(* The surface spends nineteen identifiers as global keywords in every file   *)
+(* that requires this one: dealt, functionality, execute, endpoints, recon,   *)
+(* sample, certify, leaks, tied, ideal, mixing, invariant, encoded,           *)
+(* supplied, layout, decoded_by, committed_by, expecting and fuel. Each       *)
+(* follows a slot in some rule. Measured on 2026-09-14, fuel is among them:   *)
+(* it follows the literal dealt in the dealer-dealt rule and would stay an    *)
+(* identifier for that rule alone, but it follows a slot in the two rules     *)
+(* added beside it. The tokens inputs, terminates, publish, vm_compute,       *)
+(* ExactIndependence and SpectralDecay follow a literal and stay              *)
+(* identifiers, which is what keeps the two port constructors usable by       *)
+(* name; at follows a literal too and was a keyword of Rocq before this       *)
+(* file.                                                                      *)
+(*                                                                            *)
+(* One of the nineteen shadows a framework definition: endpoints is also the  *)
 (* verifier's endpoint tuple in pgg_interface.v. A file requiring this        *)
 (* surface must write that one through its module path. No file in the tree   *)
-(* writes it bare.                                                            *)
+(* writes it bare. No file requiring the surface writes any of the other      *)
+(* eighteen bare either, and the three lemmas of this file that do use layout *)
+(* and fuel as binder names stand above the two rules that spend them.        *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   obs_payload  == the three run facts in the shape execute_step wants      *)
@@ -58,6 +84,17 @@
 (*   ExactLeakAt  == some coalition of k seats has a view of positive mutual  *)
 (*                   information with the secret                              *)
 (*   exact_leaks  == the witness again, with such an annotation checked       *)
+(*   params_step  == the statement raising a row to Executable at given       *)
+(*                   parameters                                               *)
+(*                                                                            *)
+(* Key results:                                                               *)
+(*   dealt_params_stepE == the dealer-dealt statement is params_step at the   *)
+(*                         dealer-dealt parameters                            *)
+(*   encoded_realises_expected                                                *)
+(*                      == a committed-input run meets the Targeted's         *)
+(*                         specification                                      *)
+(*   supplied_realises_expected                                               *)
+(*                      == the same for a supplied-layout run                 *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -140,7 +177,12 @@ Arguments mk_spectral : clear implicits.
    targeted_F is what such a run is measured against: a run whose recovered
    value ex_expected is written as this ideal function meets
    realises_expected by conversion, which is the whole obligation of the
-   functionality statement. *)
+   functionality statement.
+
+   The consumer is the encoded statement below: it reads the algebra, the
+   input carrier and the ideal function off this record and writes them into
+   the parameter record the run is driven by, so the function a row names and
+   the value its run recovers are one term and not two that agree. *)
 Record Targeted := MkTargeted {
   tg_algebra : PGGAlgebraic ;
   tg_inputT  : Type ;
@@ -161,6 +203,30 @@ Definition targeted_F (t : Targeted)
 
 Notation "A 'functionality' f" := (@MkTargeted A _ f)
   (at level 90, left associativity, f at level 0).
+
+(* A committed-input run whose parameters take the ideal function from the
+   Targeted itself meets that specification. The two sides are the same term,
+   so the identification realises_expected asks for is conversion and the
+   correctness half of such a row is discharged by reflexivity. *)
+Lemma encoded_realises_expected (t : Targeted) L Hv d procs n Ht He Hr :
+  realises_expected
+    (@instance_observed (tg_algebra t)
+       (encoded_input_params (tg_algebra t) (tg_inputT t) (tg_f t)
+          L Hv d procs n) Ht He Hr)
+    (targeted_F t).
+Proof. by []. Qed.
+
+(* The same for a supplied-layout run. A supplied statement writes the value
+   the run recovers in its own expecting clause rather than taking it from a
+   Targeted, so a row that also names a functionality meets it when the two
+   are convertible, which is what this lemma asks of them. *)
+Lemma supplied_realises_expected (t : Targeted) L n Ht He Hr :
+  realises_expected
+    (@instance_observed (tg_algebra t)
+       (supplied_input_params (tg_algebra t) (tg_inputT t) L (tg_f t) n)
+       Ht He Hr)
+    (targeted_F t).
+Proof. by []. Qed.
 
 (******************************************************************************)
 (*     The tightness annotation of the exact arm                              *)
@@ -204,6 +270,59 @@ Arguments exact_leaks : clear implicits.
 
 Notation "A 'dealt' 'fuel' n" := (tableau_start A ;;; dealt_step of n)
   (at level 90, left associativity, n at level 0).
+
+(* From an algebra and a parameter record, the statement that raises a row to
+   Executable at those parameters. The encoded and supplied rules below differ
+   only in the record their clauses build, and dealt_step is this statement at
+   dealt_secret_params. *)
+Definition params_step (x : StackAt Algebraic) (_ : StackProp Algebraic x)
+    (E : ExecutionParams x) : Tableau Executable :=
+  @MkTableau Executable (StackProp Executable)
+    (existT (fun A : PGGAlgebraic => ExecutionParams A) x E) I.
+
+(* The dealer-dealt statement is this one at the dealer-dealt parameters. The
+   two are the same term, so a row written with either reaches the same
+   completion level. *)
+Lemma dealt_params_stepE (x : StackAt Algebraic) (q : StackProp Algebraic x)
+    (n : nat) :
+  dealt_step q n = params_step q (dealt_secret_params x n).
+Proof. by []. Qed.
+
+(* The committed-input mode. The committers named in committed_by hand over
+   their inputs, decoded_by reads the joint input back out of the payload list
+   they committed, and layout turns that input into the sharing the dealer
+   deals.
+
+   The by clause is the sharing claim of the encoding, that the layout is a
+   valid sharing of the ideal function's value at the same input. It is
+   checked where it is written and read back from the parameter term by
+   encoded_static_recon, so the reconstruction obligation of such a row is
+   that lemma's name and nothing else.
+
+   The algebra and the ideal function come from the Targeted on the left, so
+   the value the run recovers is the one functionality named, and a row cannot
+   name one function and recover another. *)
+Notation "t 'encoded' 'inputs' T 'layout' L 'by' enc 'decoded_by' d 'committed_by' procs 'fuel' n" :=
+  (tableau_start (tg_algebra t) ;;; params_step
+     of (encoded_input_params (tg_algebra t) T (tg_f t) L enc d procs n))
+  (at level 90, left associativity, T at level 10, L at level 10,
+   enc at level 10, d at level 10, procs at level 10, n at level 0,
+   only parsing).
+
+(* The supplied-layout mode. The layout arrives with the run argument and no
+   party commits, so the run carries no commit process and the dealer deals
+   the layout the argument names.
+
+   expecting is the value the run recovers, a reading of the run argument
+   rather than an ideal function of committed inputs, which is why the
+   statement begins at an algebra and not at a Targeted. The sharing claim is
+   not written here, so a row in this family discharges its reconstruction
+   obligation through supplied_static_recon at its own algebra and validity
+   lemma, or through the interpreter. *)
+Notation "A 'supplied' 'inputs' T 'layout' L 'expecting' e 'fuel' n" :=
+  (tableau_start A ;;; params_step of (supplied_input_params A T L e n))
+  (at level 90, left associativity, T at level 10, L at level 10,
+   e at level 10, n at level 0, only parsing).
 
 (* The run the three obligations are made about is the framework's own process
    list, exec_saprocs of pgg_execution_plug.v: a dealer carrying the plug's
