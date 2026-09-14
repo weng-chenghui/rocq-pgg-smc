@@ -35,3 +35,14 @@ recompiled green in order. Full build at 6fda271: make -j8 nothing to be done,
 exit 0. Axiom sweep: standard axioms only, all ten files.
 
 Final Plan A code HEAD: c7f46f8 (chain green; make -n reports nothing to do).
+
+## Plan B (branch feat/psl211-plan-b, 2026-09-15)
+
+Review: notes/probes/2026-09-15-psl211-planb/REVIEW-planb-mechanical.md (Opus,
+independent, read-only, Print Assumptions over the .vo chain). Probe evidence
+for the executed cone: notes/probes/2026-09-15-psl211-planb/PROBE-REPORT.md.
+
+| task | file | landed commits | spec review | quality review | assumptions |
+|---|---|---|---|---|---|
+| B1 | lib/perm_exchange.v | 8c68c7c, ccebf4f (cosmetic fixes) | compliant (landed statement is the pre-move Local one with the `n` binder and fuel premise deleted, conclusion character-identical; ubnP form with the base case written once; mathcomp-only imports, no HB/infotheo/pgg_smc; registered after lib/perm_uniform.v; no exported statement of psl211_scheme.v or psl211_secrecy.v changed, declaration multiset diff) | approved with fixes, all cosmetic (unused `seq` import, measured; redundant `by` before a closing `exact:`; implicit profile `[T] [U V] _` deliberate but undocumented; one `have`/`case/` pair foldable) | perm_onS, perm_of_eq_card and psl211_private all closed under the global context |
+| B2 | instances/psl211/psl211_mixing.v | 5032d4a, ccebf4f (comment fix) | compliant (statements and proof scripts token-identical to pgl27_mixing.v 1055-1112 under 6 4 200 -> 10 2 584, 'I_8 -> 'I_12, Wuni -> psl211_Wuni; psl211_profile and pgg_collusion_bound imported, no cycle, every pairwise name intersection of the six imported modules empty; nothing existing changed) | approved with one blocking comment fix: psl211_endpoint_mixing's second sentence describes sigma^-1 s where the lemma is of sigma s, against transitivity_privacy.v:427/:495 (pgl27's original wording was the correct one and stays); var_dist_prodR duplicated Local in two files, hoist to pgg_collusion_bound.v, does not block; var_dist_fdistmap_prod_mix measured to subsume it in seven lines at the same axiom cost, but yields only the inequality | psl211_endpoint_mixing and psl211_joint_mixing exactly the boolp trio; psl211_word_mixing anchor unchanged |
