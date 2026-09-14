@@ -228,7 +228,7 @@ Rows added after the audits (2026-09-14):
 
 | # | claim | kind | passes when | status |
 |---|---|---|---|---|
-| L18 | chirality: the non-square scaling of P^1(F_11), transported to the probe labelling, maps tblA onto tblB (a PGL(2,11) shuffle swaps the two classes) | new computation | `stable_ok`-style check `map_row sc tblA` subset tblB and back, vm_compute | to probe (python-verified) |
+| L18 | chirality: the non-square scaling of P^1(F_11), transported to the probe labelling, maps tblA onto tblB (a PGL(2,11) shuffle swaps the two classes) | new computation | `stable_ok`-style check `map_row sc tblA` subset tblB and back, vm_compute | GO, landed: instances/psl211/psl211_blocks.v psl211_chirality_swapT (4bc5173), closed under the global context |
 | L19 | `<r4, m6>` is 2-transitive on 'I_12 (consumed by the ten-reveal ambiguity transport) | new computation | BFS over ordered pairs reaches all 132 from (0,1), checker re-verifies, as pgl27_group word_bfs at k = 2 | to probe |
 | L20 | `#|setsA| = 132` and `#|setsB| = 132` | new computation | list_to_set injective on ascending rows plus size of the tables | to probe (audit compiled the 132 counts) |
 | L21 | `setsA_orbitE`: the orbit of a tblA row under `pgg_G` is setsA (and the same for B) | precedent shape (subset_class_orbitE, code_bfs over 924 subsets) | plan task | statement typechecks |

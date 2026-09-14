@@ -76,7 +76,7 @@ Expected: the `ROCQ compile` line and `BUILD-OK`, no `Error`.
 - Modify: `_CoqProject` (the `-R` block near line 16 and the file list after line 187)
 - Create: `instances/psl211/` (directory)
 
-- [ ] **Step 1: Add the namespace line and the file list**
+- [x] **Step 1: Add the namespace line and the file list**
 
 Insert after the line `-R instances/pgl27 pgg_smc`:
 
@@ -98,15 +98,15 @@ instances/psl211/psl211_mixing.v
 instances/psl211/psl211_profile.v
 ```
 
-- [ ] **Step 2: Regenerate the makefile and create the directory**
+- [x] **Step 2: Regenerate the makefile and create the directory**
 
 ```bash
 mkdir -p instances/psl211 && rocq makefile -f _CoqProject -o Makefile.rocq && echo MAKEFILE-OK
 ```
 
-Expected: `MAKEFILE-OK`. (The listed files do not exist yet; `make` targets appear when they do.)
+Expected: `MAKEFILE-OK`. As built: registering files that do not exist yet breaks coqdep for the whole tree (reported by the concurrent Tableau session, fixed in a997e63), so each file is added to `_CoqProject` in the commit that lands it, and every commit builds.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add _CoqProject && git commit -m "build(psl211): register the PSL(2,11) instance directory and its nine files"
@@ -120,7 +120,7 @@ git add _CoqProject && git commit -m "build(psl211): register the PSL(2,11) inst
 - Create: `instances/psl211/psl211_blocks.v`
 - Source: `notes/probes/2026-09-14-psl211/psl211_tables.v` (tables), `probe_orbit.v` lines 1-120 (checkers)
 
-- [ ] **Step 1: Write the file header and the five literal tables**
+- [x] **Step 1: Write the file header and the five literal tables**
 
 Copy the five `Definition`s from `psl211_tables.v` renaming `r4_tbl -> psl211_r4_tbl`, `m6_tbl -> psl211_m6_tbl`, `m6i_tbl -> psl211_milk6_tbl`, `tblA -> psl211_mirror_tbl`, `tblB -> psl211_hexad_tbl`. Add the chirality table (the non-square scaling of P^1(F_11) transported to this labelling, computed 2026-09-14 from the relabelling pi = (0,5,11,9,6,2,8,7,4,1,10,3)):
 
@@ -161,7 +161,7 @@ Definition psl211_nonsquare_tbl : seq nat := [:: 0; 10; 2; 7; 9; 8; 1; 11; 6; 5;
 
 then the two 132-row tables copied verbatim from `psl211_tables.v` (`tblA` becomes `psl211_mirror_tbl`, `tblB` becomes `psl211_hexad_tbl`).
 
-- [ ] **Step 2: Add the ascending-list enumerator and the design check (probe_orbit.v lines 22-55, renamed)**
+- [x] **Step 2: Add the ascending-list enumerator and the design check (probe_orbit.v lines 22-55, renamed)**
 
 ```coq
 (* Ascending code lists of size k with entries in [lo, 12). *)
@@ -192,7 +192,7 @@ Lemma psl211_design5_hexadT : psl211_design5_ok psl211_hexad_tbl.
 Proof. by vm_compute. Qed.
 ```
 
-- [ ] **Step 3: Add the stability checks and the chirality check (probe_orbit.v lines 58-77)**
+- [x] **Step 3: Add the stability checks and the chirality check (probe_orbit.v lines 58-77)**
 
 ```coq
 (* The image of a row under a letter table, sorted. *)
@@ -224,7 +224,7 @@ Lemma psl211_chirality_swapT :
 Proof. by vm_compute. Qed.
 ```
 
-- [ ] **Step 4: Add the pattern counts, the count certificate and the leak witness (probe_orbit.v lines 82-120)**
+- [x] **Step 4: Add the pattern counts, the count certificate and the leak witness (probe_orbit.v lines 82-120)**
 
 ```coq
 (* Intersection of a sorted row with a coalition list. *)
@@ -267,7 +267,7 @@ Lemma psl211_leak6 :
 Proof. by vm_compute. Qed.
 ```
 
-- [ ] **Step 5: Compile**
+- [x] **Step 5: Compile**
 
 ```bash
 make instances/psl211/psl211_blocks.vo 2>&1 | tail -3 && echo BUILD-OK
@@ -275,7 +275,7 @@ make instances/psl211/psl211_blocks.vo 2>&1 | tail -3 && echo BUILD-OK
 
 Expected: `BUILD-OK`, about 45 s (design 2 x 0.9 s, count 38.7 s).
 
-- [ ] **Step 6: Assumption check**
+- [x] **Step 6: Assumption check**
 
 Append temporarily and run, then remove:
 
@@ -287,7 +287,7 @@ Print Assumptions psl211_leak6.
 
 Expected: `Closed under the global context` twice.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add instances/psl211/psl211_blocks.v && git commit -m "feat(psl211): literal Steiner tables, letter tables and every table certificate"
