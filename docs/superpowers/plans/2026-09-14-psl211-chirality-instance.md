@@ -301,7 +301,7 @@ git add instances/psl211/psl211_blocks.v && git commit -m "feat(psl211): literal
 - Create: `instances/psl211/psl211_group.v`
 - Source: `probe_group.v` (all), `instances/pgl27/pgl27_group.v` lines 150-327 (word BFS shape)
 
-- [ ] **Step 1: Header, imports, perms, monodromy (probe_group.v verbatim, renamed)**
+- [x] **Step 1: Header, imports, perms, monodromy (probe_group.v verbatim, renamed)**
 
 ```coq
 (* header comment in the pgl27_group.v style: the two letters as tables,
@@ -377,14 +377,14 @@ Qed.
 Lemma psl211_milk6_permE (x : 'I_12) :
   val ((psl211_m6_perm^-1)%g x) = nth 0 psl211_milk6_tbl (val x).
 Proof.
-(* verbatim probe_group.v:75-84 *)
-have HK : cancel (tbl_fun psl211_m6_tbl) (tbl_fun psl211_milk6_tbl).
+(* verbatim probe_group.v:75-84; as built in bf793ff *)
+have K : cancel (tbl_fun psl211_milk6_tbl) (tbl_fun psl211_m6_tbl).
   by move=> y; apply: val_inj;
      case: y => -[|[|[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]]]] ?.
-rewrite -[x](permKV psl211_m6_perm) permK.
-set y := (psl211_m6_perm^-1)%g x.
-have -> : psl211_m6_perm y = tbl_fun psl211_m6_tbl y by rewrite permE.
-by rewrite HK.
+have -> : (psl211_m6_perm^-1)%g x = tbl_fun psl211_milk6_tbl x.
+  by apply: (@perm_inj _ psl211_m6_perm); rewrite permKV permE K.
+by rewrite /tbl_fun /Imod /=;
+   case: x => -[|[|[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]]]] ?.
 Qed.
 
 (** psl211_G_pos — the shuffle group is nonempty. Lives here so that the
@@ -398,11 +398,11 @@ Lemma psl211_rho_im :
 Proof. by rewrite morphimEdom imset_id. Qed.
 ```
 
-- [ ] **Step 2: The pair-word certificate (pgl27_group.v lines 169-288 at k = 2, two letters)**
+- [x] **Step 2: The pair-word certificate (pgl27_group.v lines 169-288 at k = 2, two letters)**
 
 Export (no `Local`) `wgenn`, `papply`, `wapply`, `word_perm`, `word_perm_mem`, `word_perm_val`: Task 4 uses `papply` (the scalar application) and `word_perm`. pgl27 itself re-defines these locally in pgl27_orbit.v:549-595; here they are shared instead.
 
-Adapt the pgl27 code with these substitutions and no others: the nat-level letter action `wgenn i` reads `psl211_r4_tbl` for `i = 0` and `psl211_m6_tbl` otherwise; `word_bfs` starts from `[:: 0; 1]` and iterates over `[:: 0; 1]` letters with fuel 14; `word_table_ok` quantifies over `iota 0 12` twice with the guard `a != b`; `wapply_map` is stated on pairs; `gen_of i` is `psl211_r4_perm` for `i = 0` and `psl211_m6_perm` otherwise; `gen_of_mem` has two cases; `pair_word x y : x != y -> exists w, papply w 0 = val x /\ papply w 1 = val y`.
+Adapt the pgl27 code with these substitutions and no others: the nat-level letter action `wgenn i` reads `psl211_r4_tbl` for `i = 0` and `psl211_m6_tbl` otherwise; `word_bfs` starts from `[:: 0; 1]` and iterates over `[:: 0; 1]` letters with fuel 20; `word_table_ok` quantifies over `iota 0 12` twice with the guard `a != b`; `wapply_map` is stated on pairs; `gen_of i` is `psl211_r4_perm` for `i = 0` and `psl211_m6_perm` otherwise; `gen_of_mem` has two cases; `pair_word x y : x != y -> exists w, papply w 0 = val x /\ papply w 1 = val y`.
 
 ```coq
 Definition wgenn (i : nat) : nat -> nat :=
@@ -488,7 +488,7 @@ by case=> -> ->.
 Qed.
 ```
 
-- [ ] **Step 3: 2-transitivity (pgl27_3transitive at k = 2)**
+- [x] **Step 3: 2-transitivity (pgl27_3transitive at k = 2)**
 
 ```coq
 (** psl211_2transitive — the shuffle group acts 2-transitively on the twelve
@@ -519,7 +519,7 @@ case: j => -[|[|//]] Hj; apply: val_inj => /=.
 Qed.
 ```
 
-- [ ] **Step 4: Compile and check**
+- [x] **Step 4: Compile and check**
 
 ```bash
 make instances/psl211/psl211_group.vo 2>&1 | tail -3 && echo BUILD-OK
@@ -529,7 +529,7 @@ Expected: `BUILD-OK`. Then `Print Assumptions psl211_2transitive.` (temporary li
 
 Fuel: the pair-orbit BFS over the two letters {r4, m6} (no inverse) first covers all 132 ordered pairs at depth exactly 14 (AUDIT-PLAN.md finding 11, `audit-plan/chk_group.v`: 130 pairs at fuel 13, 132 at 14), and the Cayley diameter over {r4, m6} is 15; fuel 20 leaves margin and costs nothing because the recursion stops on an empty round. Task 3 Steps 1-3 compiled verbatim in the plan audit (`audit-plan/chk_group.v`, 27.7 s, `psl211_2transitive` closed under the global context).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add instances/psl211/psl211_group.v && git commit -m "feat(psl211): the two shuffle letters as permutations, the monodromy, in-kernel 2-transitivity"
