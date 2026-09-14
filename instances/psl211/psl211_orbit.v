@@ -50,6 +50,15 @@
 (*                          == each system has 132 blocks                     *)
 (*   psl211_pattern_countE  == the finset census of a leak pattern equals the *)
 (*                             table-level count of psl211_blocks.v           *)
+(*   psl211_sorted_val_enum, psl211_all_lt12_enum, psl211_subseq_val_enum,    *)
+(*   psl211_mem_sublists   == a coalition and its subsets read as code lists  *)
+(*                             the enumerators of psl211_blocks.v quantify    *)
+(*                             over                                           *)
+(*   psl211_count_ok_k_le5  == the block-count certificate at one coalition   *)
+(*                             size                                           *)
+(*   psl211_pattern_transfer == a nonempty coalition of at most five          *)
+(*                             positions meets the two systems in the same    *)
+(*                             patterns with the same multiplicities          *)
 (*   psl211_mirror_orbitE, psl211_hexad_orbitE                                *)
 (*                          == each system is the shuffle orbit of its        *)
 (*                             representative row                             *)
@@ -155,10 +164,10 @@ Local Definition rows_lt12 (tbl : seq (seq nat)) : bool :=
   all (fun R => all (fun x => (x < 12)%N) R) tbl.
 
 Local Lemma rows_lt12_mirrorT : rows_lt12 psl211_mirror_tbl.
-Proof. by apply/allP => R /(allP asc6_mirrorT) /and3P[_ H _]. Qed.
+Proof. by apply/allP => R /(allP asc6_mirrorT) /and3P[_ Hlt _]. Qed.
 
 Local Lemma rows_lt12_hexadT : rows_lt12 psl211_hexad_tbl.
-Proof. by apply/allP => R /(allP asc6_hexadT) /and3P[_ H _]. Qed.
+Proof. by apply/allP => R /(allP asc6_hexadT) /and3P[_ Hlt _]. Qed.
 
 (* The image of a coded row under a table-given permutation is coded by the
    table image of the row. *)
@@ -262,20 +271,20 @@ Local Lemma G_sub_stab_mirror :
   pgg_G psl211_M \subset stab_of psl211_mirror_blocks.
 Proof.
 rewrite gen_subG; apply: gens_sub_stab.
-- exact: (stab_of_gen psl211_r4_permE rows_lt12_mirrorT
+  exact: (stab_of_gen psl211_r4_permE rows_lt12_mirrorT
                       psl211_stable_r4_mirrorT).
-- exact: (stab_of_gen psl211_m6_permE rows_lt12_mirrorT
-                      psl211_stable_m6_mirrorT).
+exact: (stab_of_gen psl211_m6_permE rows_lt12_mirrorT
+                    psl211_stable_m6_mirrorT).
 Qed.
 
 Local Lemma G_sub_stab_hexad :
   pgg_G psl211_M \subset stab_of psl211_hexad_blocks.
 Proof.
 rewrite gen_subG; apply: gens_sub_stab.
-- exact: (stab_of_gen psl211_r4_permE rows_lt12_hexadT
+  exact: (stab_of_gen psl211_r4_permE rows_lt12_hexadT
                       psl211_stable_r4_hexadT).
-- exact: (stab_of_gen psl211_m6_permE rows_lt12_hexadT
-                      psl211_stable_m6_hexadT).
+exact: (stab_of_gen psl211_m6_permE rows_lt12_hexadT
+                    psl211_stable_m6_hexadT).
 Qed.
 
 (** psl211_mirror_invariant — membership in the mirror system is invariant
@@ -780,8 +789,13 @@ apply/mapP; exists f; first by rewrite mem_iota (subnKC He) Hef Hf.
 by [].
 Qed.
 
-(* The code list of a subset's enumeration is strictly ascending. *)
-Local Lemma sorted_val_enum (S : {set 'I_12}) : sorted ltn (map val (enum S)).
+(** psl211_sorted_val_enum — the code list of a subset's enumeration is
+    strictly ascending.  Coalitions reach the table certificates of
+    psl211_blocks.v as code lists, and those certificates quantify over
+    ascending lists, so this is what lets a statement about a position set be
+    decided by a computation over the enumerator. *)
+Lemma psl211_sorted_val_enum (S : {set 'I_12}) :
+  sorted ltn (map val (enum S)).
 Proof.
 rewrite sorted_map.
 have He : enum S = [seq x <- enum 'I_12 | x \in S]
@@ -848,7 +862,7 @@ Local Lemma class_count (s : seq (seq nat)) (p : {set 'I_12} -> bool)
 Proof.
 move=> Hu Hasc Hcomp Hp.
 have key : forall S : {set 'I_12}, #|S| = 6 -> psl211_asc6 (map val (enum S)).
-  move=> S HcS; rewrite /psl211_asc6 sorted_val_enum /=; apply/andP; split.
+  move=> S HcS; rewrite /psl211_asc6 psl211_sorted_val_enum /=; apply/andP; split.
     by apply/allP => n /mapP[i _ ->]; exact: ltn_ord.
   by rewrite size_map -cardE HcS.
 have Huniq : uniq [seq psl211_list_to_set L | L <- filter pn s].
@@ -995,7 +1009,7 @@ have Hinter (R : seq nat) :
   by apply/setP => x; rewrite !inE /psl211_inter mem_filter HmemC andbC.
 have HA' : psl211_list_to_set A' = A by exact: list_to_setK.
 have HascA' : sorted ltn A' /\ all (fun n => (n < 12)%N) A'.
-  split; first exact: sorted_val_enum.
+  split; first exact: psl211_sorted_val_enum.
   by apply/allP => n /mapP[i _ ->]; exact: ltn_ord.
 have Hasc (R : seq nat) : R \in tbl ->
     sorted ltn (psl211_inter R C')
@@ -1028,6 +1042,95 @@ rewrite (eq_card Hmem).
 transitivity (size [seq psl211_list_to_set R | R <- filter p tbl]).
   by apply/card_uniqP.
 by rewrite size_map size_filter.
+Qed.
+
+(* -------------------------------------------------------------------------- *)
+(* Coalitions read as code lists, and the pattern transfer between systems.   *)
+(* -------------------------------------------------------------------------- *)
+
+(** psl211_all_lt12_enum — every code of a subset's enumeration lies below
+    twelve.  The range side condition the enumerator certificates of
+    psl211_blocks.v carry alongside ascendingness. *)
+Lemma psl211_all_lt12_enum (S : {set 'I_12}) :
+  all (fun n => (n < 12)%N) (map val (enum S)).
+Proof. by apply/allP => n /mapP[i _ ->]; exact: ltn_ord. Qed.
+
+(** psl211_subseq_val_enum — enumerating a subset of a coalition gives a
+    subsequence of the coalition's code list.  Set inclusion becomes list
+    inclusion, which is the form in which a leak pattern is a pattern of its
+    coalition. *)
+Lemma psl211_subseq_val_enum (A C : {set 'I_12}) :
+  A \subset C -> subseq (map val (enum A)) (map val (enum C)).
+Proof.
+move=> HAC; apply: map_subseq.
+have HeA : enum A = [seq x <- enum 'I_12 | x \in A]
+  by rewrite [X in _ = [seq _ <- X | _]]enumT.
+have HeC : enum C = [seq x <- enum 'I_12 | x \in C]
+  by rewrite [X in _ = [seq _ <- X | _]]enumT.
+rewrite HeC subseq_filter HeA filter_subseq andbT.
+by apply/allP => x; rewrite mem_filter => /andP[/(subsetP HAC)].
+Qed.
+
+(** psl211_mem_sublists — every subsequence of a coalition code list is
+    enumerated as a pattern of that coalition.  Together with
+    psl211_subseq_val_enum it puts an arbitrary leak pattern inside the
+    enumeration the count certificate quantifies over. *)
+Lemma psl211_mem_sublists (C L : seq nat) :
+  subseq L C -> L \in psl211_sublists C.
+Proof.
+elim: C L => [|a C IH] L /=.
+  by move=> /eqP ->; rewrite inE.
+case: L => [_ | b L].
+  by rewrite mem_cat IH ?sub0seq.
+rewrite mem_cat; case: (altP (b =P a)) => [-> Hsub | Hne Hsub].
+  by apply/orP; right; apply: map_f; exact: IH.
+by apply/orP; left; exact: IH.
+Qed.
+
+(** psl211_count_ok_k_le5 — the block-count certificate holds at each of the
+    five coalition sizes it covers.  psl211_count_okT is a conjunction over
+    those sizes; this is its projection at one of them, with the impossible
+    sizes discharged in a context holding only numbers, because deciding
+    psl211_count_ok_k i by computation does not terminate in usable time. *)
+Lemma psl211_count_ok_k_le5 (k : nat) :
+  (0 < k)%N -> (k < 5.+1)%N -> psl211_count_ok_k k.
+Proof.
+move=> Hk0 Hk.
+have Hcases : (k == 1) || ((k == 2) || ((k == 3) || ((k == 4) || (k == 5)))).
+  by move: Hk0 Hk; case: k => [|[|[|[|[|[|m]]]]]].
+case/and5P: psl211_count_okT => Hk1 Hk2 Hk3 Hk4 Hk5.
+case/orP: Hcases => [/eqP->|/orP[/eqP->|/orP[/eqP->|/orP[/eqP->|/eqP->]]]].
+- exact: Hk1.
+- exact: Hk2.
+- exact: Hk3.
+- exact: Hk4.
+- exact: Hk5.
+Qed.
+
+(** psl211_pattern_transfer — a nonempty coalition of at most five positions
+    meets the mirror system in each pattern exactly as often as it meets the
+    hexad system.  This is the whole content of privacy at five positions:
+    the two chiralities are distinguished by no pattern a coalition of that
+    size can read, so a count of shuffles showing a view is the same under
+    both secrets. *)
+Lemma psl211_pattern_transfer (C A : {set 'I_12}) :
+  (0 < #|C|)%N -> (#|C| <= 5)%N -> A \subset C ->
+  #|[set B in psl211_mirror_blocks | B :&: C == A]|
+  = #|[set B in psl211_hexad_blocks | B :&: C == A]|.
+Proof.
+move=> HC0 HC HAC.
+rewrite /psl211_mirror_blocks /psl211_hexad_blocks.
+rewrite (psl211_pattern_countE _ _ _
+           (psl211_tbl_ok_asc6 psl211_tbl_ok_mirrorT) psl211_mirror_tbl_uniq).
+rewrite (psl211_pattern_countE _ _ _
+           (psl211_tbl_ok_asc6 psl211_tbl_ok_hexadT) psl211_hexad_tbl_uniq).
+have HAl : map val (enum A) \in psl211_sublists (map val (enum C)).
+  by apply: psl211_mem_sublists; exact: psl211_subseq_val_enum.
+have HCl : map val (enum C) \in psl211_subsets #|C|.
+  apply: psl211_mem_subsets;
+    [exact: psl211_sorted_val_enum | exact: psl211_all_lt12_enum |].
+  by rewrite size_map -cardE.
+by move/allP: (psl211_count_ok_k_le5 _ HC0 HC) => /(_ _ HCl)/allP/(_ _ HAl)/eqP.
 Qed.
 
 (* -------------------------------------------------------------------------- *)

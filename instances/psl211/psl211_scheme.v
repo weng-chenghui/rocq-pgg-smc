@@ -40,7 +40,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq path.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action bigop.
+From mathcomp Require Import morphism action.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 From pgg_smc Require Import psl211_blocks psl211_group psl211_orbit.
@@ -117,71 +117,6 @@ by apply: (perm_onS _ Hon1); rewrite subUset HU1sub subsetUr.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
-(* Reading the design certificate at a coalition of positions.                *)
-(* -------------------------------------------------------------------------- *)
-
-(* Every subsequence of a coalition code list is enumerated as a pattern. *)
-Local Lemma mem_sublists (C L : seq nat) :
-  subseq L C -> L \in psl211_sublists C.
-Proof.
-elim: C L => [|a C IH] L /=.
-  by move=> /eqP ->; rewrite inE.
-case: L => [_ | b L].
-  by rewrite mem_cat IH ?sub0seq.
-rewrite mem_cat; case: (altP (b =P a)) => [-> Hsub | Hne Hsub].
-  by apply/orP; right; apply: map_f; exact: IH.
-by apply/orP; left; exact: IH.
-Qed.
-
-(* The code list of a subset's enumeration is strictly ascending. *)
-Local Lemma sorted_val_enum (S : {set 'I_12}) : sorted ltn (map val (enum S)).
-Proof.
-rewrite sorted_map.
-have He : enum S = [seq x <- enum 'I_12 | x \in S]
-  by rewrite enumT -deprecated_filter_index_enum.
-rewrite He; apply: sorted_filter.
-  by move=> y x z; apply: ltn_trans.
-by rewrite -sorted_map val_enum_ord; exact: iota_ltn_sorted.
-Qed.
-
-(* Every code of a subset's enumeration lies below twelve. *)
-Local Lemma all_lt12_enum (S : {set 'I_12}) :
-  all (fun n => (n < 12)%N) (map val (enum S)).
-Proof. by apply/allP => n /mapP[i _ ->]; exact: ltn_ord. Qed.
-
-(* Enumerating a subset of a coalition gives a subsequence of its code list. *)
-Local Lemma subseq_val_enum (A C : {set 'I_12}) :
-  A \subset C -> subseq (map val (enum A)) (map val (enum C)).
-Proof.
-move=> HAC; apply: map_subseq.
-have HeA : enum A = [seq x <- enum 'I_12 | x \in A]
-  by rewrite enumT -deprecated_filter_index_enum.
-have HeC : enum C = [seq x <- enum 'I_12 | x \in C]
-  by rewrite enumT -deprecated_filter_index_enum.
-rewrite HeC subseq_filter HeA filter_subseq andbT.
-by apply/allP => x; rewrite mem_filter => /andP[/(subsetP HAC)].
-Qed.
-
-(* The certificate is a conjunction over the five coalition sizes; this is its
-   projection at one size.  The false branches are discharged before the
-   certificate enters the context, since deciding a hypothesis of the form
-   psl211_count_ok_k i by computation does not terminate in usable time. *)
-Local Lemma count_ok_k_le5 (k : nat) :
-  (0 < k)%N -> (k < 5.+1)%N -> psl211_count_ok_k k.
-Proof.
-move=> Hk0 Hk.
-have E : (k == 1) || ((k == 2) || ((k == 3) || ((k == 4) || (k == 5)))).
-  by move: Hk0 Hk; case: k => [|[|[|[|[|[|m]]]]]].
-case/and5P: psl211_count_okT => H1 H2 H3 H4 H5.
-case/orP: E => [/eqP->|/orP[/eqP->|/orP[/eqP->|/orP[/eqP->|/eqP->]]]].
-- exact: H1.
-- exact: H2.
-- exact: H3.
-- exact: H4.
-- exact: H5.
-Qed.
-
-(* -------------------------------------------------------------------------- *)
 (* The two systems, indexed by the chirality bit.                             *)
 (* -------------------------------------------------------------------------- *)
 
@@ -236,35 +171,21 @@ Qed.
 
 (* The design certificate, read on position sets: a coalition of at most five
    positions meets the two systems in the same patterns with the same
-   multiplicities.  This is the whole content of privacy at five. *)
+   multiplicities.  This is the whole content of privacy at five.  The
+   mathematics is psl211_orbit.v's psl211_pattern_transfer; here it is only
+   re-indexed by the chirality bit, which is why this stays Local. *)
 Local Lemma sys_pattern_transfer (s1 s2 : bool) (C A : {set 'I_12}) :
   (0 < #|C|)%N -> (#|C| < 5.+1)%N -> A \subset C ->
   #|[set B in sys_blocks s1 | B :&: C == A]|
   = #|[set B in sys_blocks s2 | B :&: C == A]|.
 Proof.
 move=> HC0 HC HAC.
-have Hlift (s : bool) :
-    #|[set B in sys_blocks s | B :&: C == A]|
-    = psl211_pattern_count (sys_tbl s) (map val (enum C)) (map val (enum A)).
-  by rewrite /sys_blocks psl211_pattern_countE //;
-     [exact: asc6_sys_tbl | exact: uniq_sys_tbl].
-have Hmh :
-    psl211_pattern_count psl211_mirror_tbl (map val (enum C))
-      (map val (enum A))
-    = psl211_pattern_count psl211_hexad_tbl (map val (enum C))
-      (map val (enum A)).
-  have HAl : map val (enum A) \in psl211_sublists (map val (enum C)).
-    by apply: mem_sublists; exact: subseq_val_enum.
-  have HCl : map val (enum C) \in psl211_subsets #|C|.
-    apply: psl211_mem_subsets;
-      [exact: sorted_val_enum | exact: all_lt12_enum |].
-    by rewrite size_map -cardE.
-  by move/allP: (count_ok_k_le5 HC0 HC) => /(_ _ HCl)/allP/(_ _ HAl)/eqP.
-rewrite !Hlift; case: s1; case: s2.
-- by [].
+have Hmh := psl211_pattern_transfer C A HC0 HC HAC.
+case: s1; case: s2; rewrite ?sys_blocksT ?sys_blocksF.
+- exact: erefl.
 - exact: Hmh.
 - exact: esym Hmh.
-- by [].
+- exact: erefl.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
@@ -320,16 +241,16 @@ have Hinj : injective (tnth sh) by apply/tuple_uniqP.
 (* the coalition's pattern, and a block of the target system showing it *)
 pose A := psl211_heart_set sh :&: C.
 have HAC : A \subset C by exact: subsetIr.
-have HHfam : psl211_heart_set sh \in sys_blocks s1.
+have HHsys : psl211_heart_set sh \in sys_blocks s1.
   move: Hvalid Hclass; rewrite /psl211_subset_valid /psl211_orbit_class.
   rewrite /psl211_subset_class -sys_blocksT -sys_blocksF.
   by case: s1 => [_ ->|/orP[->|]] //.
 have Hpos : (0 < #|[set B in sys_blocks s2 | B :&: C == A]|)%N.
   rewrite -(sys_pattern_transfer s1 s2 HC0 HC HAC).
-  by apply/card_gt0P; exists (psl211_heart_set sh); rewrite inE HHfam /=;
+  by apply/card_gt0P; exists (psl211_heart_set sh); rewrite inE HHsys /=;
      apply/eqP.
 have [B' HB'] := card_gt0P Hpos.
-move: HB'; rewrite inE => /andP[HB'fam /eqP HB'C].
+move: HB'; rewrite inE => /andP[HB'sys /eqP HB'C].
 (* P the codes on the coalition, U the codes on the target block, V the
    heart codes; the cards on C pin U and V to the same trace on P *)
 pose P := [set tnth sh i | i in C].
@@ -340,7 +261,7 @@ have HVE : V = psl211_list_to_set [:: 0; 1; 2; 3; 4; 5].
   by case: x => -[|[|[|[|[|[|m]]]]]] Hm.
 have HVcard : #|V| = 6 by rewrite HVE; apply: psl211_block_card6; vm_compute.
 have HUcard : #|U| = 6.
-  by rewrite /U (card_imset _ Hinj); exact: sys_card6 HB'fam.
+  by rewrite /U (card_imset _ Hinj); exact: sys_card6 HB'sys.
 have HUP : U :&: P = V :&: P.
   rewrite /U /P -imsetI; last by move=> x y _ _; exact: Hinj.
   rewrite HB'C; apply/setP => x; rewrite inE.
@@ -377,8 +298,8 @@ have Hheart : psl211_heart_set sh' = B'.
   by rewrite -HimU (mem_imset _ _ (@perm_inj _ sg)) (mem_imset _ _ Hinj).
 exists sh'; split; last exact: Hagree.
 split; first by apply/tuple_uniqP.
-split; first by rewrite Hheart; exact: sys_valid HB'fam.
-by rewrite /psl211_orbit_class Hheart; exact: sys_class HB'fam.
+split; first by rewrite Hheart; exact: sys_valid HB'sys.
+by rewrite /psl211_orbit_class Hheart; exact: sys_class HB'sys.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
