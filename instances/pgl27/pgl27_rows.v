@@ -50,9 +50,6 @@
 (*   pgl27_row_word_tableau  == the word row as a program                     *)
 (*   pgl27_inline_dealt      == the prefix with the termination reduction     *)
 (*                              written inline                                *)
-(*   pgl27_inline_family     == the exact model over that prefix's observed   *)
-(*                              execution                                     *)
-(*   pgl27_inline_row        == the exact row over that prefix                *)
 (*   pgl27_reprice39         == the name 2^-39 for the word row's bound       *)
 (*   pgl27_row_word39        == the word row republished at that name         *)
 (*   pgl27_word_target       == the word row's published statement            *)
@@ -77,7 +74,6 @@
 (*   pgl27_row_word_rowE     == the word program publishes the manifest's row *)
 (*   pgl27_row_word_certE    == the five written clauses are pgl27_word_cert  *)
 (*   pgl27_inline_paramsE   == the inline prefix builds the same run          *)
-(*   pgl27_inline_obsE      == its observed execution is pgl27_observed       *)
 (*   pgl27_word_bridge       == the word row's proposition gives its          *)
 (*                              published statement                           *)
 (*   pgl27_exact_bridge      == the exact row's proposition gives its         *)
@@ -317,10 +313,10 @@ Proof. by []. Qed.
     statement is written instead of named. The proposition proved is the one
     pgl27_dealt proves and the run is the same run, but the term is not
     pgl27_dealt_terminates, and an opaque lemma is convertible with nothing;
-    so the observed execution this prefix reaches is a second value equal to
+    so the observed execution this prefix reaches is a second value, equal to
     pgl27_observed only up to the irrelevance of an obligation. Everything
-    typed against pgl27_observed, the instance's models first of all, has to
-    be built again over it. *)
+    typed against pgl27_observed, the instance's models first of all, would
+    have to be built again over it, which is why no row is written here. *)
 Definition pgl27_inline_dealt : Tableau Observed :=
   pgl27_algebra
     dealt   fuel pgl27_fuel
@@ -338,45 +334,11 @@ Lemma pgl27_inline_paramsE :
 Proof. by []. Qed.
 
 (** The instance's own model is typed against pgl27_observed and is rejected
-    over the forked one. This is the fork made visible: a program through the
-    literal reduction shares no typed evidence with the programs above. *)
+    over the forked one. This is the fork made visible, and the reason the
+    demonstration stops at the prefix: a program through the literal
+    reduction shares no typed evidence with the programs above. *)
 Fail Definition pgl27_inline_reuse : Tableau Sampled :=
   pgl27_inline_dealt sample pgl27_exact_family.
-
-(** The exact-shuffle model again, over the forked observed execution. Its two
-    components are those of pgl27_exact_family; only the execution it is typed
-    against differs. *)
-Definition pgl27_inline_family
-  : AnalysisModelFamily (ob_obs (tableau_at pgl27_inline_dealt)) :=
-  @MkAnalysisModelFamily (ob_obs (tableau_at pgl27_inline_dealt))
-    (fun _ => unit) (fun R _ => pgl27_sample R).
-
-(** The exact row over that prefix. Its certify clause takes the witness the
-    program above uses, unchanged: a witness is typed against a sampler and
-    not against a termination obligation, so the fork stops at the model. *)
-Definition pgl27_inline_row : PublishedRow :=
-  pgl27_inline_dealt
-    sample  pgl27_inline_family
-    certify ExactIndependence pgl27_exact_witness
-    |> publish StaticExecutedOnly BaselineClassicalOnly.
-
-(** The two observed executions are equal, by irrelevance of the termination
-    obligation and nothing else. It is the one statement in this development
-    that spends boolp.Prop_irrelevance, and it buys only this identification;
-    the published rows are then equal as well, but not by conversion, because
-    the manifest row carries its observed execution as a field and its model
-    is typed against that field. *)
-Lemma pgl27_inline_obsE :
-  ob_obs (tableau_at pgl27_inline_dealt) = pgl27_observed.
-Proof.
-rewrite /ob_obs.
-by rewrite (boolp.Prop_irrelevance (ob_Ht (tableau_at pgl27_inline_dealt))
-              pgl27_dealt_terminates).
-Qed.
-
-(** And not by conversion. *)
-Fail Definition pgl27_inline_rowE :
-  published_row pgl27_inline_row = pgl27_row_exact := erefl.
 
 (******************************************************************************)
 (*     The word row republished at 2^-39                                      *)
