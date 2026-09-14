@@ -3,13 +3,14 @@
 (******************************************************************************)
 (* PGG: Design Privacy Bridge                                                 *)
 (*                                                                            *)
-(* A coalition whose observation has the same fiber cardinalities over the   *)
+(* A coalition whose observation has the same fiber cardinalities over the    *)
 (* shuffle group under the two secrets observes a law independent of the      *)
 (* secret. This is the sibling of the transitivity bridge                     *)
 (* (transitivity_privacy.v): same sample space, same conclusion, a counting   *)
 (* premise in place of t-transitivity. A t-transitive group satisfies the     *)
-(* counting premise for every t-design orbit, so the transitivity bridge is   *)
-(* the special case; the counting premise also holds for orbits that are     *)
+(* counting premise for every t-design orbit (an informal relation; the       *)
+(* transitivity bridge is proved on its own, not through this file), and the  *)
+(* counting premise also holds for orbits that are                            *)
 (* t-designs of a group that is not t-transitive, which is the PSL(2,11)      *)
 (* twelve-card instance.                                                      *)
 (*                                                                            *)
@@ -75,13 +76,18 @@ Let P := secretP `x (`U card_G_gt0).
 
 (** colour_view C — what a coalition C sees when cards of one colour are
     indistinguishable: the colour of the card dealt to each of its
-    positions, false outside C. The observer of the physical deck model. *)
+    positions. The observer of the physical deck model. Positions outside C
+    carry the constant false, which is also a real colour value; the
+    collision is harmless because C is fixed in the statement, so those
+    coordinates do not vary with the sample. *)
 Definition colour_view (C : {set 'I_N'.+1}) :
     {RV P -> {ffun 'I_N'.+1 -> bool}} :=
   fun u => [ffun i => if i \in C
                       then colour (tnth (encode u.1) (rho u.2 i)) else false].
 
-(** colour_law C b — the law of the colour view given the secret b. *)
+(** colour_law C b — the law of the colour view when the secret is b and
+    the shuffle is drawn uniformly from G. The one place the uniform-shuffle
+    assumption enters the bridge. *)
 Definition colour_law (C : {set 'I_N'.+1}) (b : bool) :
     R.-fdist {ffun 'I_N'.+1 -> bool} :=
   fdistmap (fun g => colour_view C (b, g)) (`U card_G_gt0).
@@ -98,8 +104,9 @@ apply: (@inde_prod_fst R bool gT secretP (`U card_G_gt0) _
 by case: b; first exact: Hlaw.
 Qed.
 
-(** colour_view_indep_fibers — the same from equal fiber counts of the two
-    encodings, the form a table certificate delivers. *)
+(** colour_view_indep_fibers — the same from equal counts, under the two
+    secrets, of the group elements producing each view value: the form a
+    table certificate delivers. *)
 Lemma colour_view_indep_fibers (C : {set 'I_N'.+1}) :
   (forall v : {ffun 'I_N'.+1 -> bool},
      #|[set g in G | colour_view C (true, g) == v]|
