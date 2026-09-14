@@ -1280,7 +1280,7 @@ git add instances/psl211/psl211_secrecy.v && git commit -m "feat(psl211): colour
 - Create: `instances/psl211/psl211_recovery.v`
 - Source: `audit-soundness/audit_recovery.v` (`colour_eleven`, verbatim), `pgl27_recovery.v` lines 60-148
 
-- [ ] **Step 1: Eleven colours determine (audit_recovery.v colour_eleven, verbatim)**
+- [x] **Step 1: Eleven colours determine (audit_recovery.v colour_eleven, verbatim)**
 
 ```coq
 From HB Require Import structures.
@@ -1328,7 +1328,7 @@ Proof.
 Qed.
 ```
 
-- [ ] **Step 2: Ten never determine (pgl27_six_reveal_ambiguous shape at 2-transitivity)**
+- [x] **Step 2: Ten never determine (pgl27_six_reveal_ambiguous shape at 2-transitivity)**
 
 ```coq
 (** psl211_ten_reveal_ambiguous — for every two hidden positions there are
@@ -1355,7 +1355,7 @@ Proof.
 Qed.
 ```
 
-- [ ] **Step 3: Compile, check, commit**
+- [x] **Step 3: Compile, check, commit**
 
 ```bash
 make instances/psl211/psl211_recovery.vo 2>&1 | tail -3 && echo BUILD-OK
@@ -1473,7 +1473,7 @@ Expected: `BUILD-OK`; `Print Assumptions psl211_word_mixing.` identical to `Prin
 - Create: `instances/psl211/psl211_profile.v`
 - Source: `pgl27_profile.v` lines 40-130 (verbatim, renamed), `probe_decomposition.v` lines 126-140. Task 10 compiled as written in the plan audit (`audit-plan/chk_profile.v`) once Task 6's `@` fix is in.
 
-- [ ] **Step 1: Write the file**
+- [x] **Step 1: Write the file**
 
 Copy `pgl27_profile.v` with `pgl27 -> psl211`, `8 -> 12`, `7 -> 11`, `pgl27_plug -> psl211_plug`, and the single-card uniformity through `psl211_2transitive` at `t = 2`:
 
@@ -1508,7 +1508,7 @@ Lemma profile_k_psl211 : profile_k psl211_profile = 6.
 Proof. by []. Qed.
 ```
 
-- [ ] **Step 2: Compile, check, commit**
+- [x] **Step 2: Compile, check, commit**
 
 ```bash
 make instances/psl211/psl211_profile.vo 2>&1 | tail -3 && echo BUILD-OK
@@ -1591,3 +1591,7 @@ Follow-ups recorded from the Task 6 quality review (not blocking Plan A): `perm_
 As built, Task 9 Step 1 (commit 4e8d51f): 29 exported `psl211_`-prefixed declarations (`psl211_moves`, `psl211_inv_letter`, `psl211_mtbl`, `psl211_mcomp`, `psl211_idt`, `psl211_elem_table`, `psl211_tbl_index`, `psl211_pred_table`, `psl211_size_elem_table`, `psl211_uniq_elem_keys`, `psl211_elem_table0`, `psl211_ptbl`, `psl211_ptbl_id`, `psl211_ptbl_of_fwd`, `psl211_ptbl_sym`, `psl211_ptbl_morph`, `psl211_ptbl_inj`, `psl211_gen3_of`, `psl211_gen3_of_mem`, `psl211_word3_perm`, `psl211_word3_perm_mem`, `psl211_entry_perm`, `psl211_entry_perm_mem`, `psl211_ptbl_entry`, `psl211_keys_size`, `psl211_mem_G_Ps`, `psl211_entry_perm_inj`, `psl211_gen3_eq`, `psl211_card`); `perm_inv_val` omitted because `psl211_m6_permVE` is that fact for the only inverse letter; the closure checker is pgl27's actual six conjuncts (key length is derived by `elem_key_size`, not a conjunct); BFS fuel 12 (660 keys; fuel 8 gives 363); `bigop` imported for `group_key`; psl211_group.v now compiles in 94 s (the closure conjunct runs `find` over 660 keys for 660 x 3 successors and `Qed` reruns the vm_compute). Steps 2-3 must use these names: `psl211_pred_table`, `psl211_entry_perm`, `psl211_entry_perm_mem`, `psl211_entry_perm_inj`, `psl211_mem_G_Ps`, `psl211_card`, `psl211_moves`, `psl211_inv_letter`, `psl211_tbl_index`, `psl211_ptbl_entry`, `psl211_keys_size`, `psl211_word3_perm`, `psl211_gen3_of`, `psl211_ptbl_sym`, `psl211_ptbl_inj`, `psl211_ptbl_morph`, `psl211_ptbl_id`, `psl211_ptbl_of_fwd`; and Step 2 ports pgl27_mixing.v 683-800 (`size_pred_table`, `nth_pred_table`, `tbl_index_lt`, `tbl_index_key`, `ptbl_inv_letter`) into psl211_mixing.v. Deferred renames for a later naming pass: `psl211_mem_G_Ps`, `psl211_keys_size` -> `psl211_size_keys`, `psl211_uniq_elem_keys` -> `psl211_elem_keys_uniq`, `psl211_ptbl_sym` -> `psl211_ptbl_moves`.
 
 Step 2 advisories from the Task 9 Step 1 spec review: `keys_closed_mem` (psl211_group.v ~662) and `elem_closed_mem` (~542) are Local but pgl27_mixing.v:752 uses `keys_closed_mem` for `predk_mem`; export one of them (or re-derive in psl211_mixing.v). `ptbl_r4` (~612) is Local but the Step 2 lemma `ptbl_inv_letter` needs `psl211_ptbl (psl211_r4_perm^-1) = psl211_mtbl 0` (r4 is an involution, table-checked); export `ptbl_r4` or prove the fact in psl211_mixing.v from `psl211_ptbl_sym` and the involution.
+
+As built, Task 8 (commits d2af766, 44466cf): the witness pair is the hexad row [0;1;3;7;10;11] (the encoder deck of class false) and the mirror row [1;2;3;7;10;11], a 1-swap at positions 0 and 2, with the mirror deck the encoder's table with entries 0 and 2 exchanged; its block membership is a vm_compute check on the literal row (psl211_design5_mirrorT and psl211_blocks_disjoint are named in a comment as the reason such a row exists, not as proof dependencies); 14 unprefixed Local helpers; `bigop`, `prime` dropped from the imports. Notes for later: `psl211_eleven_reveal_set` holds at any finType with `#|H'| = #|H|` in place of the two `= 6` premises (kept as the probe's statement by decision); a set-form corollary `#|D| <= 10 -> exists two valid decks of opposite chirality agreeing in colour on D` (pgl27_reveal_ambiguous parity) is a ten-line derivation for Plan B or the tidy commit.
+
+As built, Task 10 (commits 291712e, 6d8e6f5, 2c5bf01): pgl27_profile.v verbatim with the substitutions; `psl211_G_pos` from psl211_group.v; `profile_eps_psl211` added; the profile_k comment attributes the threshold to the Steiner counts, not to 2-transitivity.
