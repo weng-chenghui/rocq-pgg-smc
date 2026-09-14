@@ -65,6 +65,7 @@
 (*   pgl27_F                 == the ideal functionality the run realises      *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   pgl27_exact_leak4       == four seats of this instance leak the secret   *)
 (*   pgl27_static_obsE       == the framework's seat reader is the instance's *)
 (*   pgl27_static_obs_funE   == the same with the cut left free               *)
 (*   pgl27_exact_viewE       == the same with the secret left in the sample   *)
@@ -194,6 +195,23 @@ Definition pgl27_exact_witness (R : realType) (idx : unit)
           (pgl27_view_indep R H3)
           (pgl27_exact_viewE R idx C))).
 
+(** A four-seat coalition of this instance reads a view whose mutual
+    information with the dealt secret is strictly positive, so the threshold
+    four is sharp and not merely as far as the independence proof reached. It
+    is pgl27_view_leak_k4, carried to the framework's reader by the same
+    identification the witness above is carried by; the coalition is the four
+    heart seats of the identity deal, and one coalition is all the statement
+    asks for. *)
+Lemma pgl27_exact_leak4 :
+  ExactLeakAt 4 (tableau_at (pgl27_dealt sample pgl27_exact_family))
+    pgl27_exact_witness.
+Proof.
+move=> R idx; exists pgl27_leak_coalition; split.
+  exact: (proj1 (pgl27_view_leak_k4 R)).
+rewrite (pgl27_exact_viewE R idx pgl27_leak_coalition).
+exact: (proj2 (pgl27_view_leak_k4 R)).
+Qed.
+
 (******************************************************************************)
 (*     The word family's certificate                                          *)
 (******************************************************************************)
@@ -241,11 +259,24 @@ Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
     the uniform one and no idealized shuffle is being compared with a real
     one. What the finished row carries about a coalition of fewer than four
     seats is independence of the dealt secret, at every real field, with no
-    numeric bound anywhere in it. *)
+    numeric bound anywhere in it, and beside that the record that four seats
+    already leak. *)
 Definition pgl27_row_exact_tableau : PublishedRow :=
   pgl27_dealt
     sample  pgl27_exact_family
     certify ExactIndependence pgl27_exact_witness
+            leaks at 4 by pgl27_exact_leak4
+    |> publish StaticExecutedOnly BaselineClassicalOnly.
+
+(** The number written in the leaks clause is checked against the proof.
+    Writing seven where the coalition has four seats fails on unification of
+    #|C| = 4 with #|C| = 7, so the clause records a size the kernel decided
+    rather than a size a reader is asked to believe. *)
+Fail Definition pgl27_row_exact_leak7 : PublishedRow :=
+  pgl27_dealt
+    sample  pgl27_exact_family
+    certify ExactIndependence pgl27_exact_witness
+            leaks at 7 by pgl27_exact_leak4
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
 (** The word row: the same prefix, the two-hundred-letter word model, the

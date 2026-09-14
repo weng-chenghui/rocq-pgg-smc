@@ -323,9 +323,8 @@ Qed.
     three generating permutations of eight card positions, the symmetrized
     five-letter walk alphabet with the proof that it generates the same group,
     the Boolean secret the orbit scheme deals with its encoding, its class
-    readout and its privacy obligation, the coalition size four at which that
-    privacy fails, and the seat list the run reads because enum 'I_8 does not
-    reduce.  The seats start at the eight positions in order and the shuffle
+    readout and its privacy obligation, and the seat list the run reads
+    because enum 'I_8 does not reduce.  The seats start at the eight positions in order and the shuffle
     acts on share indices as it acts on cards, so the coordinate law is the
     framework's ord_coordE and the instance writes none; the dealer readout is
     the identity, so a card carries the share dealt to its own position and no
@@ -341,7 +340,6 @@ Definition pgl27_algebra : PGGAlgebraic := algebra {
           encode orbit_encode
           read   orbit_class
           private by pgl27_private
-          leaks at 4 by pgl27_view_leak_k4
           shuffled_by pgg_rho by orbit_recon_invariant ;
   cache   seats pgl27_players by pgl27_players_enumE }.
 
