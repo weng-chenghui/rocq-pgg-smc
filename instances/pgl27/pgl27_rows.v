@@ -16,13 +16,14 @@
 (* the walk alphabet, where the same conclusion holds only up to the distance *)
 (* that walk still has from uniform.                                          *)
 (*                                                                            *)
-(* Each family's row is one program. Its lines are the statements of          *)
-(* pgg_tableau.v: the shared prefix deals the secret and adjoins the three    *)
-(* run facts, one further line adjoins the family, one adjoins that family's  *)
-(* security witness, and the last publishes the manifest row. The published   *)
-(* rows are the manifest's pgl27_row_exact and pgl27_row_word, and the two    *)
-(* rowE lemmas below hold by conversion, so the manifest's claim about this   *)
-(* instance and the proof of it are one term.                                 *)
+(* Each family's row is one program, written in the statement surface of      *)
+(* pgg_tableau_syntax.v over the statements of pgg_tableau.v: the shared      *)
+(* prefix deals the secret and adjoins the three run facts, one further line  *)
+(* adjoins the family, one adjoins that family's security witness, and the    *)
+(* last publishes the manifest row. The published rows are the manifest's     *)
+(* pgl27_row_exact and pgl27_row_word, and the two rowE lemmas below hold by  *)
+(* conversion, so the manifest's claim about this instance and the proof of   *)
+(* it are one term.                                                           *)
 (*                                                                            *)
 (* No line of a program is a theorem about this instance. What the instance   *)
 (* supplies it supplies as a payload: the algebra and the interpreter budget  *)
@@ -47,6 +48,11 @@
 (*   pgl27_word_cert         == the spectral arm's certificate                *)
 (*   pgl27_row_exact_tableau == the exact row as a program                    *)
 (*   pgl27_row_word_tableau  == the word row as a program                     *)
+(*   pgl27_dealt_vm          == the prefix with the termination reduction     *)
+(*                              written inline                                *)
+(*   pgl27_exact_family_vm   == the exact model family over that prefix's     *)
+(*                              observed execution                            *)
+(*   pgl27_row_exact_vm      == the exact row over that prefix                *)
 (*   pgl27_reprice39         == the name 2^-39 for the word row's bound       *)
 (*   pgl27_row_word39        == the word row republished at that name         *)
 (*   pgl27_word_target       == the word row's published statement            *)
@@ -69,6 +75,10 @@
 (*   pgl27_row_exact_rowE    == the exact program publishes the manifest's    *)
 (*                              row                                           *)
 (*   pgl27_row_word_rowE     == the word program publishes the manifest's row *)
+(*   pgl27_row_word_certE    == the five written components are               *)
+(*                              pgl27_word_cert                               *)
+(*   pgl27_dealt_vm_paramsE  == the inline prefix builds the same run         *)
+(*   pgl27_row_exact_vm_obsE == its observed execution is pgl27_observed      *)
 (*   pgl27_word_bridge       == the word row's proposition gives its          *)
 (*                              published statement                           *)
 (*   pgl27_exact_bridge      == the exact row's proposition gives its         *)
@@ -80,6 +90,7 @@
 (*   pgl27_exact_view_secrecy                                                 *)
 (*                           == the exact arm's four conjuncts at this        *)
 (*                              instance                                      *)
+(*   pgl27_FE                == that functionality is the identity at three   *)
 (*   pgl27_realises_expected == the run recovers the functionality's value    *)
 (******************************************************************************)
 
@@ -91,6 +102,7 @@ From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
 From pgg_smc Require Import pgl27_exec pgl27_models.
 From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
+From pgg_smc Require Import pgg_tableau_syntax.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -113,10 +125,11 @@ Local Open Scope ring_scope.
     has been proved at this point is run correctness and nothing about a
     coalition. *)
 Definition pgl27_dealt : Tableau Observed :=
-  tableau_start pgl27_algebra
-    ;;; dealt_step of pgl27_fuel
-    ;;; execute_step of (existT _ pgl27_dealt_terminates
-                           (existT _ pgl27_dealt_endpoints pgl27_dealt_recon)).
+  pgl27_algebra
+    dealt   fuel pgl27_fuel
+    execute terminates by pgl27_dealt_terminates
+            endpoints by pgl27_dealt_endpoints
+            recon by pgl27_dealt_recon.
 
 (******************************************************************************)
 (*     The instance-side reading of a coalition                               *)
@@ -235,9 +248,9 @@ Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
     numeric bound anywhere in it. *)
 Definition pgl27_row_exact_tableau : PublishedRow :=
   pgl27_dealt
-    ;;; sample_step of pgl27_exact_family
-    ;;; certify_exact of pgl27_exact_witness
-    ;;; publish BaselineClassicalOnly of StaticExecutedOnly.
+    sample  pgl27_exact_family
+    certify ExactIndependence pgl27_exact_witness
+    |> publish StaticExecutedOnly BaselineClassicalOnly.
 
 (** The word row: the same prefix, the two-hundred-letter word model, the
     certificate above, and the manifest row at transfer status IdealFinite,
@@ -248,9 +261,39 @@ Definition pgl27_row_exact_tableau : PublishedRow :=
     and each crossing spends the same mixing bound once. *)
 Definition pgl27_row_word_tableau : PublishedRow :=
   pgl27_dealt
-    ;;; sample_step of pgl27_word_family
-    ;;; certify_spectral of pgl27_word_cert
-    ;;; publish BaselineClassicalOnly of IdealFinite.
+    sample  pgl27_word_family
+    certify SpectralDecay (fun R (_ : amf_index pgl27_word_family R) =>
+                             pgl27_word_marginal_bound R)
+            tied by (fun R secretP => esym (pgl27_word_cut_distE secretP))
+            ideal (fun R (_ : amf_index pgl27_word_family R) =>
+                     (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
+            mixing by (fun R (_ : amf_index pgl27_word_family R) =>
+                         pgl27_word_mixing R)
+            invariant by (fun R (_ : amf_index pgl27_word_family R) C HC s s' =>
+       let H3 : (#|C| <= 3)%N := HC in
+       (eq_ind_r
+          (fun v => fdistmap v (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
+                    = fdistmap (static_coalition_obs C s')
+                        (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
+          (eq_ind_r
+             (fun v => fdistmap (fun g => pgl27_view R C (s, g))
+                         (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
+                       = fdistmap v
+                           (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
+             (pgl27_view_law_const R s s' H3)
+             (pgl27_static_obs_funE R C s'))
+          (pgl27_static_obs_funE R C s)))
+    |> publish IdealFinite BaselineClassicalOnly.
+
+(** The same row with the five components bundled as pgl27_word_cert. Writing
+    the certificate out in five slots and writing it as one record give the
+    same term, so the surface renames nothing and hides nothing. *)
+Lemma pgl27_row_word_certE :
+  pgl27_row_word_tableau
+  = (pgl27_dealt ;;; sample_step of pgl27_word_family
+                 ;;; certify_spectral of pgl27_word_cert
+                 ;;; publish BaselineClassicalOnly of IdealFinite).
+Proof. by []. Qed.
 
 (** The row the exact program publishes is the manifest's own row for this
     instance. Conversion decides it, so the descriptive row and the theorem
@@ -265,6 +308,75 @@ Proof. by []. Qed.
 Lemma pgl27_row_word_rowE :
   published_row pgl27_row_word_tableau = pgl27_row_word.
 Proof. by []. Qed.
+
+(******************************************************************************)
+(*     The same prefix through the literal reduction                          *)
+(******************************************************************************)
+
+(** The shared prefix again, with the termination fact built where the line is
+    written instead of named. The proposition proved is the one pgl27_dealt
+    proves and the run is the same run, but the proof term is not
+    pgl27_dealt_terminates, and an opaque lemma is convertible with nothing;
+    so the observed execution this prefix reaches is a second value equal to
+    pgl27_observed only up to the irrelevance of a proof. Everything typed
+    against pgl27_observed, the instance's model families first of all, has to
+    be built again over it, which is the cost of writing the reduction inline
+    rather than naming it. *)
+Definition pgl27_dealt_vm : Tableau Observed :=
+  pgl27_algebra
+    dealt   fuel pgl27_fuel
+    execute terminates by vm_compute
+            endpoints by pgl27_dealt_endpoints
+            recon by pgl27_dealt_recon.
+
+(** The two prefixes are not the same term. *)
+Fail Definition pgl27_dealt_vm_is_dealt : pgl27_dealt_vm = pgl27_dealt := erefl.
+
+(** They do build the same run. The run parameters carry no proof, so the fork
+    is confined to the three run facts and the value they package. *)
+Lemma pgl27_dealt_vm_paramsE :
+  projT1 (projT2 (tableau_at pgl27_dealt_vm)) = pgl27_dealt_params.
+Proof. by []. Qed.
+
+(** The instance's own model family is typed against pgl27_observed and is
+    rejected over the forked one. This is the fork made visible: a row through
+    the literal reduction shares no typed witness with the rows above. *)
+Fail Definition pgl27_vm_sample_reuse : Tableau Sampled :=
+  pgl27_dealt_vm sample pgl27_exact_family.
+
+(** The exact-shuffle model family again, over the forked observed execution.
+    Its two components are those of pgl27_exact_family; only the execution it
+    is typed against differs. *)
+Definition pgl27_exact_family_vm
+  : AnalysisModelFamily (ob_obs (tableau_at pgl27_dealt_vm)) :=
+  @MkAnalysisModelFamily (ob_obs (tableau_at pgl27_dealt_vm))
+    (fun _ => unit) (fun R _ => pgl27_sample R).
+
+(** The exact row over that prefix. Its security payload is the witness the
+    row above uses, unchanged: a witness is typed against a sample adapter and
+    not against a termination proof, so the fork stops at the family. *)
+Definition pgl27_row_exact_vm : PublishedRow :=
+  pgl27_dealt_vm
+    sample  pgl27_exact_family_vm
+    certify ExactIndependence pgl27_exact_witness
+    |> publish StaticExecutedOnly BaselineClassicalOnly.
+
+(** The two observed executions are equal, by irrelevance of the termination
+    proof and nothing else. The published rows are then equal as well, but not
+    by conversion: the manifest row carries its observed execution as a field
+    and its model slot is typed against that field, so the equation between
+    the two rows is a transport and not a reduction. *)
+Lemma pgl27_row_exact_vm_obsE :
+  ob_obs (tableau_at pgl27_dealt_vm) = pgl27_observed.
+Proof.
+rewrite /ob_obs.
+by rewrite (boolp.Prop_irrelevance (ob_Ht (tableau_at pgl27_dealt_vm))
+              pgl27_dealt_terminates).
+Qed.
+
+(** And not by conversion. *)
+Fail Definition pgl27_row_exact_vm_rowE :
+  published_row pgl27_row_exact_vm = pgl27_row_exact := erefl.
 
 (******************************************************************************)
 (*     The word row republished at 2^-39                                      *)
@@ -490,13 +602,20 @@ Fail Definition pgl27_word_arm_is_not_exact (R : realType)
 (******************************************************************************)
 
 (** The functionality the eight-card orbit run realises: the identity on the
-    dealer's secret, tolerating coalitions of up to three seats. The function is
-    the identity because this protocol reconstructs what was dealt rather than
-    computing anything from several parties' inputs, and the tolerated size is
-    one below the scheme's threshold of four. *)
+    dealer's secret, tolerating coalitions of up to three seats. Neither
+    component is chosen here. Both are read off the algebra by
+    algebra_functionality, which is what makes the specification a consequence
+    of the instance rather than a second description of it that could disagree
+    with the first. *)
 Definition pgl27_F
     : Functionality (oe_inputT pgl27_observed) (oe_outT pgl27_observed) :=
-  MkFunctionality id 3.
+  algebra_functionality pgl27_algebra.
+
+(** The identity and the number three, as written by hand. Both components are
+    read off the algebra rather than chosen here, and this is where a reader
+    sees which numbers they are. *)
+Lemma pgl27_FE : pgl27_F = MkFunctionality id 3.
+Proof. by []. Qed.
 
 (** The value the run is built to recover is that functionality's function, as
     terms. Conversion decides it, so this correspondence needs no funext and

@@ -9,22 +9,20 @@
 (* at 8 seats, 8 shares and 8 cards, the participant list is pgl27_players    *)
 (* and the fuel is pgl27_fuel.                                                *)
 (*                                                                            *)
-(* The same instance is also written as a PGGAlgebraic, from which the        *)
-(* framework of pgg_instance.v derives the profile, the plug and the          *)
-(* observed execution. The two descriptions agree as terms, pgl27_profileE    *)
-(* and pgl27_execE, and pgl27_observed is the derived value. Of its three run *)
-(* facts the instance decides two by reduction, termination at its own plug   *)
-(* and the endpoint equation once at its profile with the content readout     *)
-(* left a variable, and owes no proof at all for the third: reconstruction    *)
-(* follows from the coordinate law pgl27_coordE.                              *)
+(* The same instance is also written as a PGGAlgebraic, in the block surface  *)
+(* of pgg_algebra_syntax.v, from which the framework of pgg_instance.v        *)
+(* derives the profile, the plug and the observed execution. The two          *)
+(* descriptions agree as terms, pgl27_profileE and pgl27_execE, and           *)
+(* pgl27_observed is the derived value. Of its three run facts the instance   *)
+(* decides two by reduction, termination at its own plug and the endpoint     *)
+(* equation once at its profile with the content readout left a variable, and *)
+(* owes no proof at all for the third: reconstruction follows from the        *)
+(* coordinate law, which for an instance whose seats start at the deck        *)
+(* positions in order is the framework's own ord_coordE.                      *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_exec_plug                 == the execution plug over               *)
 (*                                      pgl27_profile                         *)
-(*   pgl27_walk_data                 == the five-letter walk alphabet with    *)
-(*                                      the proof that it generates the       *)
-(*                                      shuffle group                         *)
-(*   pgl27_share_card                == one share per card position           *)
 (*   pgl27_algebra                   == the algebraic data of the instance    *)
 (*   pgl27_dealt_params              == the run-level data of the dealt run   *)
 (*   pgl27_dealt_endpoints           == the endpoint obligation, from the     *)
@@ -48,8 +46,6 @@
 (*                                      evaluated word                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   pgl27_coordE   == seat i's share index under a shuffle is that           *)
-(*                     shuffle's image of seat i's start                      *)
 (*   pgl27_profileE == the derived profile is pgl27_profile                   *)
 (*   pgl27_execE    == the derived plug is pgl27_exec_plug                    *)
 (*   pgl27_dealt_terminates == every process of the dealt run reaches Finish  *)
@@ -103,9 +99,10 @@ From pgg_smc Require Import pgg_execution_plug pgg_weighted_words.
 From pgg_smc Require Import pgg_observed_execution pgg_sample_adapter.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     algebraic_rigidity input_encoding.
-From pgg_smc Require Import pgg_instance.
-From pgg_smc Require Import pgl27_group pgl27_scheme pgl27_profile pgl27_run.
-From pgg_smc Require Import pgl27_secrecy pgl27_word_privacy.
+From pgg_smc Require Import pgg_instance pgg_algebra_syntax.
+From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_scheme.
+From pgg_smc Require Import pgl27_profile pgl27_run.
+From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -322,55 +319,31 @@ Qed.
 (*     The algebraic plugin of the eight-card orbit instance                  *)
 (******************************************************************************)
 
-(** pgl27_walk_data — the symmetrized five-letter alphabet together with the
-    proof that it generates the group the three presentation generators
-    generate.  The mixing and spectral arguments of this instance walk on that
-    alphabet rather than on the presentation one, and carrying the equation
-    lets the instance name both alphabets without introducing a second
-    group. *)
-Definition pgl27_walk_data :
-  { k : nat & { w : k.+1.-tuple {perm 'I_8}
-    | (<<[set tnth w i | i : 'I_k.+1]>>
-       = <<[set tnth pgl27_gens i | i : 'I_3]>>)%G } }.
-Proof.
-exists 4; exists pgl27_mixing.pgl27_moves.
-exact: pgl27_mixing.pgl27_gen5_eq.
-Defined.
-
-(** pgl27_share_card — the orbit scheme deals one share per card position,
-    eight of each.  It is the equation along which a share index is read as a
-    deck position; here it is reflexivity, so every transport it induces is
-    the identity on indices. *)
-Definition pgl27_share_card : (ts_T' orbit_scheme).+1 = 8 := erefl.
-
-(** pgl27_coordE — seat i's share index under a shuffle is the deck position
-    that shuffle sends seat i's start to.  This is the record form of "seat i
-    observes the share sitting at the image of seat i's card", the single
-    coordinate hypothesis from which the framework derives static
-    reconstruction; the eight seats start at the eight positions in order, so
-    the image of seat i's start is the image of i. *)
-Lemma pgl27_coordE (w0 : {perm 'I_8}) (i : 'I_(ts_T' orbit_scheme).+1) :
-  (fun g => @pgg_rho pgl27_M g) w0 i
-  = cast_ord (esym pgl27_share_card)
-      (@pgg_rho pgl27_M w0 (tnth (ord_tuple 8) i)).
-Proof. by rewrite cast_ord_id tnth_ord_tuple. Qed.
-
 (** pgl27_algebra — the algebraic data of the eight-card orbit instance:
-    three generating permutations of eight card positions, the five-letter
-    walk alphabet, the Boolean secret the orbit scheme deals, eight seats
-    starting at the eight positions in order, and the shuffle action on share
-    indices with its reconstruction invariance and its coordinate law.  Its
-    dealer readout is the identity, so a card carries the share dealt to its
-    own position and no encoding stands between the two; its seat list is the
-    stored pgl27_players, which the run reads because enum 'I_8 does not
-    reduce.  The record holds no run, no fuel and no probability model, so the
-    seat interface, the reconstruction plug and the monodromy profile of this
-    instance are all functions of this one value. *)
-Definition pgl27_algebra : PGGAlgebraic :=
-  @MkPGGAlgebraic 2 6 pgl27_gens (Some pgl27_walk_data)
-    bool orbit_scheme pgl27_share_card (ord_tuple 8) pgl27_starts_uniq
-    id (fun g => @pgg_rho pgl27_M g) orbit_recon_invariant pgl27_coordE
-    pgl27_players pgl27_players_enumE.
+    three generating permutations of eight card positions, the symmetrized
+    five-letter walk alphabet with the proof that it generates the same group,
+    the Boolean secret the orbit scheme deals with its encoding, its class
+    readout and its privacy proof, the coalition size four at which that
+    privacy fails, and the seat list the run reads because enum 'I_8 does not
+    reduce.  The seats start at the eight positions in order and the shuffle
+    acts on share indices as it acts on cards, so the coordinate law is the
+    framework's ord_coordE and the instance writes none; the dealer readout is
+    the identity, so a card carries the share dealt to its own position and no
+    encoding stands between the two.  The record holds no run, no fuel and no
+    probability model, so the seat interface, the reconstruction plug and the
+    monodromy profile of this instance are all functions of this one value. *)
+Definition pgl27_algebra : PGGAlgebraic := algebra {
+  mount   << pgl27_gens >> ;
+  walk    along pgl27_moves by pgl27_gen5_eq ;
+  seat    players (ord_tuple 8) by pgl27_starts_uniq ;
+  secret  bool ;
+  deal    orbit_scheme
+          encode orbit_encode
+          read   orbit_class
+          private by pgl27_private
+          leaks at 4 by pgl27_view_leak_k4
+          shuffled_by pgg_rho by orbit_recon_invariant ;
+  cache   seats pgl27_players by pgl27_players_enumE }.
 
 (** pgl27_dealt_params — the run-level data of a run that deals the orbit
     secret and recovers it: the run argument is the secret itself, no party
@@ -423,9 +396,9 @@ Definition pgl27_dealt_endpoints : instance_endpoints_stmt pgl27_dealt_params :=
 (** pgl27_dealt_recon — decoding the static endpoint reading at a shuffle in
     the group returns the dealt secret.  The statement is convertible with
     pgl27_exec_recon, which proves it through the interpreter; this one is
-    dealt_static_recon, which the framework derives from pgl27_coordE alone,
-    so reconstruction correctness of this instance is a consequence of its
-    coordinate law and costs no further proof. *)
+    dealt_static_recon, which the framework derives from the algebra's
+    coordinate law alone, so reconstruction correctness of this instance is a
+    consequence of that law and costs no further proof. *)
 Definition pgl27_dealt_recon : instance_recon_stmt pgl27_dealt_params :=
   dealt_static_recon pgl27_algebra pgl27_fuel.
 
