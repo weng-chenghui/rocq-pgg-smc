@@ -12,6 +12,10 @@
 (* law does not depend on the dealt chirality. At six positions, and at any   *)
 (* prior charging both chiralities, the law already depends on it.            *)
 (*                                                                            *)
+(* The two conditional laws are equal, not close. Nothing in the file         *)
+(* is conditional on a computational assumption, and the only inputs          *)
+(* are the block census and the uniformity of the shuffle.                    *)
+(*                                                                            *)
 (* The counting premise of the framework bridge design_privacy.v is met here  *)
 (* by a census of blocks, not by transitivity of the shuffle group.           *)
 (* PSL(2,11) is only 2-transitive on the twelve positions, so the bridge of   *)
@@ -33,6 +37,10 @@
 (*   psl211_colour_view_dep_k6 == at a prior charging both chiralities, a     *)
 (*     six-position coalition's colour view depends on the chirality          *)
 (*                                                                            *)
+(* The coalition observes colours only. The all-decks code view, in           *)
+(* which the dealt deck is redrawn uniformly over the valid decks of its      *)
+(* class and the coalition reads card identities, is not proved here.         *)
+(*                                                                            *)
 (* The fiber count runs through the set action 'P^* of the shuffle group on   *)
 (* the six-subsets of positions. The shuffles carrying the representative     *)
 (* block onto a block with a prescribed trace on the coalition split into     *)
@@ -46,7 +54,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq path.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action bigop div prime.
+From mathcomp Require Import morphism action bigop div.
 From mathcomp Require Import ssralg ssrnum order.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba.
@@ -62,7 +70,9 @@ Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 (* group_scope carries the centraliser notation 'C_G[x | to] of stab_card and
    fiber_partitionE; ring_scope is opened after it so that the real-valued
-   statements of the leak lemma keep their usual reading. *)
+   statements of the leak lemma keep their usual reading.  Nat-valued
+   cardinality statements therefore carry %N, since an unannotated numeral or
+   product there would read in the semiring instead. *)
 Local Open Scope group_scope.
 Local Open Scope ring_scope.
 
@@ -131,8 +141,8 @@ Qed.
    such fiber is a coset of the stabiliser. *)
 Local Lemma fiber_partitionE (C A : {set 'I_12}) (b : bool) :
   #|[set g in pgg_G psl211_M | (g @: H_of b) :&: C == A]|
-  = #|[set B in orbit 'P^* (pgg_G psl211_M) (H_of b) | B :&: C == A]|
-    * #|'C_(pgg_G psl211_M)[H_of b | 'P^*]|.
+  = (#|[set B in orbit 'P^* (pgg_G psl211_M) (H_of b) | B :&: C == A]|
+     * #|'C_(pgg_G psl211_M)[H_of b | 'P^*]|)%N.
 Proof.
 set G := pgg_G psl211_M; set H := H_of b.
 set s := #|'C_G[H | 'P^*]|.
@@ -153,9 +163,9 @@ Qed.
 
 (* Orbit-stabiliser at 660 group elements and 132 blocks. *)
 Local Lemma stab_card (b : bool) :
-  #|'C_(pgg_G psl211_M)[H_of b | 'P^*]| = 5.
+  (#|'C_(pgg_G psl211_M)[H_of b | 'P^*]| = 5)%N.
 Proof.
-have Horb : #|orbit 'P^* (pgg_G psl211_M) (H_of b)| = 132.
+have Horb : (#|orbit 'P^* (pgg_G psl211_M) (H_of b)| = 132)%N.
   rewrite orbit_H_blocksE; case: b;
     [exact: psl211_card_mirror_blocks | exact: psl211_card_hexad_blocks].
 have Hos := card_orbit_stab 'P^* (pgg_G psl211_M) (H_of b).
@@ -230,11 +240,11 @@ case/orP: E => [/eqP->|/orP[/eqP->|/orP[/eqP->|/orP[/eqP->|/eqP->]]]].
 Qed.
 
 (* The certificate read on position sets: at most five positions cannot tell
-   the two systems apart by an intersection pattern.  At no positions both
-   counts are the whole system, which psl211_count_ok does not certify.  That
-   empty branch is why this is not a corollary of sys_pattern_transfer
-   (psl211_scheme.v), which is general in the two chiralities but assumes a
-   nonempty coalition. *)
+   the two systems apart by an intersection pattern.  The empty coalition is
+   a separate branch, at 132 = 132, because psl211_count_ok certifies the
+   sizes one to five only.  psl211_scheme.v proves the nonempty half over
+   both chiralities as sys_pattern_transfer, which is Local there and out of
+   reach of this file, which does not import psl211_scheme.v. *)
 Local Lemma pattern_transferE (C A : {set 'I_12}) :
   (#|C| <= 5)%N -> A \subset C ->
   #|[set B in psl211_mirror_blocks | B :&: C == A]|
@@ -355,15 +365,15 @@ by move=> HC; apply: colour_view_indep_fibers => v;
 Qed.
 
 (** psl211_leak_coalition — the six positions holding a heart in the mirror
-    encoding, the representative row [2;3;5;7;8;9]. The smallest coalition at
-    which the two block systems can be told apart. *)
+    encoding, the representative row [2;3;5;7;8;9]. A coalition of the
+    smallest size at which the two block systems can be told apart. *)
 Definition psl211_leak_coalition : {set 'I_12} :=
   psl211_heart_set (psl211_orbit_encode true).
 
 (** psl211_leak_coalition_card6 — the leak coalition holds six positions, one
     more than the privacy threshold. Unconditional on the prior, so a reader
     at a degenerate prior still has the coalition's size. *)
-Lemma psl211_leak_coalition_card6 : #|psl211_leak_coalition| = 6.
+Lemma psl211_leak_coalition_card6 : (#|psl211_leak_coalition| = 6)%N.
 Proof.
 rewrite /psl211_leak_coalition psl211_encode_heart_setE.
 by apply: psl211_block_card6; vm_compute.
@@ -384,7 +394,7 @@ Qed.
     coalition that achieves it is a block of one of them. *)
 Lemma psl211_colour_view_dep_k6 :
   secretP true != 0 -> secretP false != 0 ->
-  #|psl211_leak_coalition| = 6 /\
+  (#|psl211_leak_coalition| = 6)%N /\
   ~ psl211P |= psl211_colour_view psl211_leak_coalition _|_ psl211_secret.
 Proof.
 move=> Hpt Hpf.
@@ -407,7 +417,7 @@ have Hview_false : forall g, g \in pgg_G psl211_M ->
     have := congr1 (fun f : {ffun 'I_12 -> bool} => f i) Hveq.
     rewrite /psl211_colour_view /colour_view /v0 !ffunE /= colour_heartE Hi /=.
     by move=> ->.
-  have Hcard : #|(g^-1)%g @: H_of false| = 6.
+  have Hcard : (#|(g^-1)%g @: H_of false| = 6)%N.
     rewrite card_imset; last exact: perm_inj.
     rewrite /H_of psl211_encode_heart_setE.
     by apply: psl211_block_card6; vm_compute.
@@ -418,7 +428,7 @@ have Hview_false : forall g, g \in pgg_G psl211_M ->
     by rewrite -Heq -Hhexo; exact: mem_orbit (groupVr gG).
   have Hmir : psl211_leak_coalition \in psl211_mirror_blocks.
     by rewrite HCeq -Hmiro; exact: orbit_refl.
-  exact: (negP (negbT (disjointFr psl211_blocks_disjoint Hmir)) Hhex).
+  by move: Hhex; rewrite (disjointFr psl211_blocks_disjoint Hmir).
 have HP1 (b : bool) : secretP b != 0 -> 0 < psl211P (b, 1%g).
   move=> Hb; rewrite /psl211P fdist_prodE /=; apply: mulr_gt0.
     by rewrite lt0r Hb FDist.ge0.
