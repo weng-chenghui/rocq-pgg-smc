@@ -5,8 +5,9 @@
 (*                                                                            *)
 (* The chirality secret of psl211_orbit is packaged as a ThresholdScheme      *)
 (* bool 'I_12 with privacy threshold five: a coalition of at most five card   *)
-(* positions learns nothing of the secret, while the implemented              *)
-(* reconstruction reads all twelve endpoints.                                 *)
+(* positions sees a view that occurs under both secrets (the distributional   *)
+(* statement is psl211_secrecy.v's), while the implemented reconstruction     *)
+(* reads all twelve endpoints.                                                *)
 (*                                                                            *)
 (* Privacy here does not come from transitivity, as it does for the           *)
 (* eight-card PGL(2,7) scheme: PSL(2,11) is only 2-transitive on the twelve   *)
@@ -25,6 +26,8 @@
 (*                              identity                                      *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   psl211_orbit_correct         == a valid deck reconstructs its chirality  *)
+(*   psl211_orbit_encode_valid    == the encoder deals each chirality         *)
 (*   psl211_private               == coalitions of at most five positions are *)
 (*                                   re-dealable to either chirality          *)
 (*   psl211_orbit_recon_invariant == recovery is invariant under the shuffle  *)
@@ -37,7 +40,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq path.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action bigop div prime.
+From mathcomp Require Import morphism action bigop.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 From pgg_smc Require Import psl211_blocks psl211_group psl211_orbit.
@@ -49,6 +52,9 @@ Import Prenex Implicits.
 (* -------------------------------------------------------------------------- *)
 (* Permutations moving one subset onto another of the same size.              *)
 (* -------------------------------------------------------------------------- *)
+
+(* Candidate for a mathcomp-only lib/perm_exchange.v; kept Local here until
+   then. *)
 
 (* perm_on is a subset statement, so it is monotone in its support. *)
 Local Lemma perm_onS (T : finType) (S1 S2 : {set T}) (s : {perm T}) :
@@ -114,31 +120,6 @@ Qed.
 (* Reading the design certificate at a coalition of positions.                *)
 (* -------------------------------------------------------------------------- *)
 
-(* psl211_subsets enumerates every ascending code list of the given length.
-   The enumerator itself is Local to psl211_blocks.v, so its completeness is
-   stated here on the qualified name and exported through mem_subsets. *)
-Local Lemma mem_ascending (k lo : nat) (L : seq nat) :
-  sorted ltn L -> all (fun n => (lo <= n)%N && (n < 12)%N) L -> size L = k ->
-  L \in psl211_blocks.psl211_ascending_lists k lo.
-Proof.
-elim: k lo L => [|k IH] lo L Hs Ha Hsz.
-  by move: Hsz => /size0nil ->; rewrite inE.
-case: L Hs Ha Hsz => [|a L] // Hs Ha [Hsz].
-move: Ha => /= /andP[/andP[Hlo Ha12] HaL].
-apply/allpairsPdep; exists a, L; split => //.
-  by rewrite mem_iota Hlo /= subnKC ?Ha12 // (leq_trans Hlo (ltnW Ha12)).
-apply: IH => //; first exact: path_sorted Hs.
-apply/allP => x Hx; have /andP[_ Hx12] := allP HaL _ Hx.
-rewrite Hx12 andbT.
-by move: (order_path_min ltn_trans Hs) => /allP/(_ x Hx).
-Qed.
-
-(* Every ascending code list of length k below twelve is enumerated. *)
-Local Lemma mem_subsets (k : nat) (L : seq nat) :
-  sorted ltn L -> all (fun n => (n < 12)%N) L -> size L = k ->
-  L \in psl211_subsets k.
-Proof. by move=> Hs Ha Hsz; apply: mem_ascending. Qed.
-
 (* Every subsequence of a coalition code list is enumerated as a pattern. *)
 Local Lemma mem_sublists (C L : seq nat) :
   subseq L C -> L \in psl211_sublists C.
@@ -185,7 +166,7 @@ Qed.
    projection at one size.  The false branches are discharged before the
    certificate enters the context, since deciding a hypothesis of the form
    psl211_count_ok_k i by computation does not terminate in usable time. *)
-Local Lemma count_ok_le5 (k : nat) :
+Local Lemma count_ok_k_le5 (k : nat) :
   (0 < k)%N -> (k < 5.+1)%N -> psl211_count_ok_k k.
 Proof.
 move=> Hk0 Hk.
@@ -205,65 +186,68 @@ Qed.
 (* -------------------------------------------------------------------------- *)
 
 (* The table of the system named by s. *)
-Local Definition fam_tbl (s : bool) : seq (seq nat) :=
+Local Definition sys_tbl (s : bool) : seq (seq nat) :=
   if s then psl211_mirror_tbl else psl211_hexad_tbl.
 
 (* The blocks of the system named by s, as position sets. *)
-Local Definition fam_blocks (s : bool) : {set {set 'I_12}} :=
-  psl211_sets_of (fam_tbl s).
+Local Definition sys_blocks (s : bool) : {set {set 'I_12}} :=
+  psl211_sets_of (sys_tbl s).
 
-Local Lemma fam_blocksT : fam_blocks true = psl211_mirror_blocks.
+Local Lemma sys_blocksT : sys_blocks true = psl211_mirror_blocks.
 Proof. by []. Qed.
 
-Local Lemma fam_blocksF : fam_blocks false = psl211_hexad_blocks.
+Local Lemma sys_blocksF : sys_blocks false = psl211_hexad_blocks.
 Proof. by []. Qed.
 
-Local Lemma asc6_fam (s : bool) : all psl211_asc6 (fam_tbl s).
-Proof. by case: s; vm_compute. Qed.
+Local Lemma asc6_sys_tbl (s : bool) : all psl211_asc6 (sys_tbl s).
+Proof.
+by case: s; [exact: (psl211_tbl_ok_asc6 psl211_tbl_ok_mirrorT)
+           | exact: (psl211_tbl_ok_asc6 psl211_tbl_ok_hexadT)].
+Qed.
 
-Local Lemma uniq_fam (s : bool) : uniq (fam_tbl s).
+Local Lemma uniq_sys_tbl (s : bool) : uniq (sys_tbl s).
 Proof.
 by case: s; [exact: psl211_mirror_tbl_uniq | exact: psl211_hexad_tbl_uniq].
 Qed.
 
 (* A block of either system has six positions. *)
-Local Lemma fam_card6 (s : bool) (B : {set 'I_12}) :
-  B \in fam_blocks s -> #|B| = 6.
+Local Lemma sys_card6 (s : bool) (B : {set 'I_12}) :
+  B \in sys_blocks s -> #|B| = 6.
 Proof.
-rewrite /fam_blocks inE => /hasP[R HR /eqP <-].
-by apply: psl211_block_card6; exact: (allP (asc6_fam s) _ HR).
+rewrite /sys_blocks inE => /hasP[R HR /eqP <-].
+by apply: psl211_block_card6; exact: (allP (asc6_sys_tbl s) _ HR).
 Qed.
 
 (* A block of the system named by s carries the chirality bit s. *)
-Local Lemma fam_class (s : bool) (B : {set 'I_12}) :
-  B \in fam_blocks s -> psl211_subset_class B = s.
+Local Lemma sys_class (s : bool) (B : {set 'I_12}) :
+  B \in sys_blocks s -> psl211_subset_class B = s.
 Proof.
-case: s; rewrite ?fam_blocksT ?fam_blocksF => HB //.
+case: s; rewrite ?sys_blocksT ?sys_blocksF => HB //.
 exact: (disjointFl psl211_blocks_disjoint HB).
 Qed.
 
 (* A block of either system is a legitimate heart set. *)
-Local Lemma fam_valid (s : bool) (B : {set 'I_12}) :
-  B \in fam_blocks s -> psl211_subset_valid B.
+Local Lemma sys_valid (s : bool) (B : {set 'I_12}) :
+  B \in sys_blocks s -> psl211_subset_valid B.
 Proof.
 rewrite /psl211_subset_valid.
-by case: s; rewrite ?fam_blocksT ?fam_blocksF => ->; rewrite ?orbT.
+by case: s; rewrite ?sys_blocksT ?sys_blocksF => ->; rewrite ?orbT.
 Qed.
 
 (* The design certificate, read on position sets: a coalition of at most five
    positions meets the two systems in the same patterns with the same
    multiplicities.  This is the whole content of privacy at five. *)
-Local Lemma fam_pattern_transfer (s1 s2 : bool) (C A : {set 'I_12}) :
+Local Lemma sys_pattern_transfer (s1 s2 : bool) (C A : {set 'I_12}) :
   (0 < #|C|)%N -> (#|C| < 5.+1)%N -> A \subset C ->
-  #|[set B in fam_blocks s1 | B :&: C == A]|
-  = #|[set B in fam_blocks s2 | B :&: C == A]|.
+  #|[set B in sys_blocks s1 | B :&: C == A]|
+  = #|[set B in sys_blocks s2 | B :&: C == A]|.
 Proof.
 move=> HC0 HC HAC.
 have Hlift (s : bool) :
-    #|[set B in fam_blocks s | B :&: C == A]|
-    = psl211_pattern_count (fam_tbl s) (map val (enum C)) (map val (enum A)).
-  by rewrite /fam_blocks psl211_pattern_countE //;
-     [exact: asc6_fam | exact: uniq_fam].
+    #|[set B in sys_blocks s | B :&: C == A]|
+    = psl211_pattern_count (sys_tbl s) (map val (enum C)) (map val (enum A)).
+  by rewrite /sys_blocks psl211_pattern_countE //;
+     [exact: asc6_sys_tbl | exact: uniq_sys_tbl].
 have Hmh :
     psl211_pattern_count psl211_mirror_tbl (map val (enum C))
       (map val (enum A))
@@ -272,9 +256,10 @@ have Hmh :
   have HAl : map val (enum A) \in psl211_sublists (map val (enum C)).
     by apply: mem_sublists; exact: subseq_val_enum.
   have HCl : map val (enum C) \in psl211_subsets #|C|.
-    apply: mem_subsets; [exact: sorted_val_enum | exact: all_lt12_enum |].
+    apply: psl211_mem_subsets;
+      [exact: sorted_val_enum | exact: all_lt12_enum |].
     by rewrite size_map -cardE.
-  by move/allP: (count_ok_le5 HC0 HC) => /(_ _ HCl)/allP/(_ _ HAl)/eqP.
+  by move/allP: (count_ok_k_le5 HC0 HC) => /(_ _ HCl)/allP/(_ _ HAl)/eqP.
 rewrite !Hlift; case: s1; case: s2.
 - by [].
 - exact: Hmh.
@@ -306,21 +291,22 @@ Proof. by move=> [_ [_ ->]]. Qed.
 Lemma psl211_orbit_encode_valid (s : bool) :
   psl211_orbit_valid s (psl211_orbit_encode s).
 Proof.
-by split; [exact: psl211_orbit_encode_deck | split;
-  [exact: psl211_orbit_encode_valid_set | exact: psl211_orbit_encodeK]].
+split; first exact: psl211_orbit_encode_deck.
+by split; [exact: psl211_orbit_encode_valid_set | exact: psl211_orbit_encodeK].
 Qed.
 
 (** psl211_private — every coalition of at most five positions is re-dealable
-    to either chirality with the same cards at its positions. The exact view
-    of five players therefore occurs under both secrets, so it carries no
-    information about the chirality at all, not merely a small bias. *)
+    to either chirality with the same cards at its positions. The set of
+    five-player views is therefore identical under the two secrets; the
+    distributional half, that the two views are also equally likely, is the
+    counting premise discharged in design_privacy.v. *)
 Lemma psl211_private (s1 s2 : bool) (sh : 12.-tuple 'I_12) (C : {set 'I_12}) :
   (#|C| < 5.+1)%N -> psl211_orbit_valid s1 sh ->
   exists sh', psl211_orbit_valid s2 sh' /\
     (forall i : 'I_12, i \in C -> tnth sh' i = tnth sh i).
 Proof.
 (* The coalition's pattern A = C cap H has the same block count in the target
-   system (psl211_count_okT, lifted by fam_pattern_transfer), so some block B'
+   system (psl211_count_okT, lifted by sys_pattern_transfer), so some block B'
    of that system meets C in A.  Re-deal by permuting the twelve codes rather
    than the positions: a permutation supported off the codes already on C
    carries the codes of B' onto the heart codes, keeps the cards of C where
@@ -334,12 +320,12 @@ have Hinj : injective (tnth sh) by apply/tuple_uniqP.
 (* the coalition's pattern, and a block of the target system showing it *)
 pose A := psl211_heart_set sh :&: C.
 have HAC : A \subset C by exact: subsetIr.
-have HHfam : psl211_heart_set sh \in fam_blocks s1.
+have HHfam : psl211_heart_set sh \in sys_blocks s1.
   move: Hvalid Hclass; rewrite /psl211_subset_valid /psl211_orbit_class.
-  rewrite /psl211_subset_class -fam_blocksT -fam_blocksF.
+  rewrite /psl211_subset_class -sys_blocksT -sys_blocksF.
   by case: s1 => [_ ->|/orP[->|]] //.
-have Hpos : (0 < #|[set B in fam_blocks s2 | B :&: C == A]|)%N.
-  rewrite -(fam_pattern_transfer s1 s2 HC0 HC HAC).
+have Hpos : (0 < #|[set B in sys_blocks s2 | B :&: C == A]|)%N.
+  rewrite -(sys_pattern_transfer s1 s2 HC0 HC HAC).
   by apply/card_gt0P; exists (psl211_heart_set sh); rewrite inE HHfam /=;
      apply/eqP.
 have [B' HB'] := card_gt0P Hpos.
@@ -354,7 +340,7 @@ have HVE : V = psl211_list_to_set [:: 0; 1; 2; 3; 4; 5].
   by case: x => -[|[|[|[|[|[|m]]]]]] Hm.
 have HVcard : #|V| = 6 by rewrite HVE; apply: psl211_block_card6; vm_compute.
 have HUcard : #|U| = 6.
-  by rewrite /U (card_imset _ Hinj); exact: fam_card6 HB'fam.
+  by rewrite /U (card_imset _ Hinj); exact: sys_card6 HB'fam.
 have HUP : U :&: P = V :&: P.
   rewrite /U /P -imsetI; last by move=> x y _ _; exact: Hinj.
   rewrite HB'C; apply/setP => x; rewrite inE.
@@ -391,8 +377,8 @@ have Hheart : psl211_heart_set sh' = B'.
   by rewrite -HimU (mem_imset _ _ (@perm_inj _ sg)) (mem_imset _ _ Hinj).
 exists sh'; split; last exact: Hagree.
 split; first by apply/tuple_uniqP.
-split; first by rewrite Hheart; exact: fam_valid HB'fam.
-by rewrite /psl211_orbit_class Hheart; exact: fam_class HB'fam.
+split; first by rewrite Hheart; exact: sys_valid HB'fam.
+by rewrite /psl211_orbit_class Hheart; exact: sys_class HB'fam.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
@@ -416,7 +402,7 @@ Lemma psl211_orbit_recon_invariant :
     psl211_orbit_scheme (fun g => @pgg_rho psl211_M g).
 Proof.
 by move=> g s shares gG [_ [_ <-]];
-   exact: (@psl211_orbit_class_invariant g shares gG).
+   exact: (psl211_orbit_class_invariant g shares gG).
 Qed.
 
 (** psl211_plug — the reconstruction plug over psl211_M, content the identity.
