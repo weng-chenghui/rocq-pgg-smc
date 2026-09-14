@@ -1100,7 +1100,7 @@ git add instances/psl211/psl211_scheme.v && git commit -m "feat(psl211): thresho
 - Create: `instances/psl211/psl211_secrecy.v`
 - Source: `probe_decomposition.v` lines 142-170, `transitivity_privacy.v` lines 311-360 (`rho_tuple_fiber_card`, the partition shape), `pgl27_secrecy.v` lines 116-186 (`pgl27_view_dep_k4`). The whole chain of this task elaborates at the real carrier with Admitted supports: `audit-plan/chain7.v` (rc 0), the statement source if anything below drifts.
 
-- [ ] **Step 1: The sample space and the colour observer**
+- [x] **Step 1: The sample space and the colour observer**
 
 ```coq
 From HB Require Import structures.
@@ -1140,7 +1140,7 @@ Definition psl211_colour_view (C : {set 'I_12}) :
     psl211_orbit_encode psl211_is_heart C.
 ```
 
-- [ ] **Step 2: Fiber counting (ledger L22)**
+- [x] **Step 2: Fiber counting (ledger L22)**
 
 ```coq
 (* The view value v seen at C, read as the pattern of hearts inside C. *)
@@ -1220,7 +1220,7 @@ move=> HC.
 Qed.
 ```
 
-- [ ] **Step 3: The headline and the leak at six**
+- [x] **Step 3: The headline and the leak at six**
 
 ```coq
 (** psl211_colour_view_indep — every coalition of at most five positions has
@@ -1258,7 +1258,7 @@ Qed.
 End secrecy.
 ```
 
-- [ ] **Step 4: Compile and check**
+- [x] **Step 4: Compile and check**
 
 ```bash
 make instances/psl211/psl211_secrecy.vo 2>&1 | tail -3 && echo BUILD-OK
@@ -1266,7 +1266,7 @@ make instances/psl211/psl211_secrecy.vo 2>&1 | tail -3 && echo BUILD-OK
 
 Expected: `BUILD-OK`; `Print Assumptions psl211_colour_view_indep.`: exactly the three BOOLP axioms.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add instances/psl211/psl211_secrecy.v && git commit -m "feat(psl211): colour-view independence at five from the block counts; the six-card leak"
@@ -1595,3 +1595,5 @@ Step 2 advisories from the Task 9 Step 1 spec review: `keys_closed_mem` (psl211_
 As built, Task 8 (commits d2af766, 44466cf): the witness pair is the hexad row [0;1;3;7;10;11] (the encoder deck of class false) and the mirror row [1;2;3;7;10;11], a 1-swap at positions 0 and 2, with the mirror deck the encoder's table with entries 0 and 2 exchanged; its block membership is a vm_compute check on the literal row (psl211_design5_mirrorT and psl211_blocks_disjoint are named in a comment as the reason such a row exists, not as proof dependencies); 14 unprefixed Local helpers; `bigop`, `prime` dropped from the imports. Notes for later: `psl211_eleven_reveal_set` holds at any finType with `#|H'| = #|H|` in place of the two `= 6` premises (kept as the probe's statement by decision); a set-form corollary `#|D| <= 10 -> exists two valid decks of opposite chirality agreeing in colour on D` (pgl27_reveal_ambiguous parity) is a ten-line derivation for Plan B or the tidy commit.
 
 As built, Task 10 (commits 291712e, 6d8e6f5, 2c5bf01): pgl27_profile.v verbatim with the substitutions; `psl211_G_pos` from psl211_group.v; `profile_eps_psl211` added; the profile_k comment attributes the threshold to the Steiner counts, not to 2-transitivity.
+
+As built, Task 7 (commit 534fab6): `psl211_colour_view_dep_k6` carries the premises `secretP true != 0 -> secretP false != 0 ->` (MATHEMATICAL: the plan's premise-free statement is false at a Dirac prior, where every observable is independent of the almost-surely-constant secret; both premises are minimal); the cardinality conjunct is also exported on its own as `psl211_leak_coalition_card6` so it is not trapped behind the premises; ledger L22's sharpness is therefore conditional on a non-degenerate prior, stated in the header. `psl211_colour_fiber_cardE` and `psl211_colour_view_indep` report the three boolp axioms because they sit in a section with `(R : realType) (secretP : R.-fdist bool)` variables (a proof-free Definition in the same section reports the same three; the Local combinatorial lemmas outside the section are closed). Route: view_fiberE (psl211_heart_set_act) -> fiber_inv_card (invg_inj, card_imset) -> fiber_partitionE (partition_big, amove_act, card_rcoset at 'P^*) -> stab_card (card_orbit_stab, psl211_card, the 132 counts) -> orbit_H_blocksE (the two _orbitE) -> pattern_transferE (psl211_count_okT; the empty coalition separately at 132 = 132). Scope order group then ring; psl211_scheme not imported (nothing used). Duplicated helpers to collapse on the tidy list: `sorted_val_enum` (three copies: orbit, scheme, secrecy), `all_lt12_enum`, `subseq_val_enum` (two each) -> export from psl211_orbit.v.

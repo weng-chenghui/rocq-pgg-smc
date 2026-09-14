@@ -194,5 +194,6 @@ instances/psl211/psl211_group.v
 instances/psl211/psl211_orbit.v
 instances/psl211/psl211_scheme.v
 instances/psl211/psl211_profile.v
+instances/psl211/psl211_secrecy.v
 instances/psl211/psl211_recovery.v
 manifest/pgg_analysis_client.v
