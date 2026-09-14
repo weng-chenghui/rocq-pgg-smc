@@ -66,6 +66,7 @@
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_exact_leak4       == four seats of this instance leak the secret   *)
+(*   pgl27_word_view_const   == two secrets give one reading of the ideal cut *)
 (*   pgl27_static_obsE       == the framework's seat reader is the instance's *)
 (*   pgl27_static_obs_funE   == the same with the cut left free               *)
 (*   pgl27_exact_viewE       == the same with the secret left in the sample   *)
@@ -74,7 +75,7 @@
 (*                              row                                           *)
 (*   pgl27_row_word_rowE     == the word program publishes the manifest's row *)
 (*   pgl27_row_word_certE    == the five written clauses are pgl27_word_cert  *)
-(*   pgl27_inline_paramsE   == the inline prefix builds the same run          *)
+(*   pgl27_inline_paramsE    == the inline prefix builds the same run         *)
 (*   pgl27_word_bridge       == the word row's proposition gives its          *)
 (*                              published statement                           *)
 (*   pgl27_exact_bridge      == the exact row's proposition gives its         *)
@@ -90,7 +91,7 @@
 (*   pgl27_realises_expected == the run recovers the functionality's value    *)
 (******************************************************************************)
 
-From mathcomp Require Import fintype finset reals.
+From mathcomp Require Import fintype finset reals boolp.
 From infotheo Require Import fdist.
 From pgg_smc Require Import pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_functionality.
@@ -98,7 +99,6 @@ From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
 From pgg_smc Require Import pgl27_exec pgl27_models.
 From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
-From mathcomp Require Import boolp.
 From pgg_smc Require Import pgg_tableau_syntax.
 
 Set Implicit Arguments.
@@ -216,6 +216,25 @@ Qed.
 (*     The word family's certificate                                          *)
 (******************************************************************************)
 
+(** Two dealt secrets give a coalition of fewer than four seats the same
+    reading of the ideal uniform cut. It is pgl27_view_law_const, which is
+    three-transitivity of PGL(2,7) read as a privacy statement, carried to the
+    framework's reader at each of the two secrets; the statement is exact, and
+    it is the half of the spectral arm that spends no mixing bound. *)
+Lemma pgl27_word_view_const (R : realType)
+    (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
+  (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
+  forall x x' : bool,
+    fdistmap (@static_coalition_obs pgl27_algebra pgl27_dealt_params C x)
+             (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
+    = fdistmap (@static_coalition_obs pgl27_algebra pgl27_dealt_params C x')
+               (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)).
+Proof.
+move=> HC x x'.
+rewrite (pgl27_static_obs_funE R C x) (pgl27_static_obs_funE R C x').
+exact: (pgl27_view_law_const R x x' HC).
+Qed.
+
 (** The spectral arm's certificate at each secret prior. Its five fields are
     the two-hundred-letter walk's marginal bound; the identification of that
     bound's law with the law the word adapter draws its cut from, which is
@@ -223,7 +242,7 @@ Qed.
     as the ideal cut; the distance pgl27_word_mixing of the walk from that
     ideal, an unconditional theorem about the walk whose bound is 2^-40; and
     the constancy of a coalition's reading of the ideal cut in the dealt secret,
-    which is pgl27_view_law_const and is exact. The two currencies are visible
+    which is pgl27_word_view_const and is exact. The two currencies are visible
     in the fields: everything about the ideal cut is exact and three-transitive,
     and the only inexact quantity anywhere in this row is the walk's 2^-40. *)
 Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
@@ -234,20 +253,7 @@ Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
     (esym (pgl27_word_cut_distE secretP))
     (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
     (pgl27_word_mixing R)
-    (fun C HC s s' =>
-       let H3 : (#|C| <= 3)%N := HC in
-       (eq_ind_r
-          (fun v => fdistmap v (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
-                    = fdistmap (static_coalition_obs C s')
-                        (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
-          (eq_ind_r
-             (fun v => fdistmap (fun g => pgl27_view R C (s, g))
-                         (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
-                       = fdistmap v
-                           (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
-             (pgl27_view_law_const R s s' H3)
-             (pgl27_static_obs_funE R C s'))
-          (pgl27_static_obs_funE R C s))).
+    (pgl27_word_view_const R).
 
 (******************************************************************************)
 (*     The two row programs                                                   *)
@@ -289,27 +295,12 @@ Fail Definition pgl27_row_exact_leak7 : PublishedRow :=
 Definition pgl27_row_word_tableau : PublishedRow :=
   pgl27_dealt
     sample  pgl27_word_family
-    certify SpectralDecay (fun R (_ : amf_index pgl27_word_family R) =>
-                             pgl27_word_marginal_bound R)
-            tied by (fun R secretP => esym (pgl27_word_cut_distE secretP))
-            ideal (fun R (_ : amf_index pgl27_word_family R) =>
-                     (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
-            mixing by (fun R (_ : amf_index pgl27_word_family R) =>
-                         pgl27_word_mixing R)
-            invariant by (fun R (_ : amf_index pgl27_word_family R) C HC s s' =>
-            let H3 : (#|C| <= 3)%N := HC in
-            (eq_ind_r
-               (fun v => fdistmap v (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
-                         = fdistmap (static_coalition_obs C s')
-                             (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
-               (eq_ind_r
-                  (fun v => fdistmap (fun g => pgl27_view R C (s, g))
-                              (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
-                            = fdistmap v
-                                (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M)))
-                  (pgl27_view_law_const R s s' H3)
-                  (pgl27_static_obs_funE R C s'))
-               (pgl27_static_obs_funE R C s)))
+    certify SpectralDecay at R idx
+            pgl27_word_marginal_bound R
+            tied by esym (pgl27_word_cut_distE idx)
+            ideal (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
+            mixing by pgl27_word_mixing R
+            invariant by pgl27_word_view_const R
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The same program with the five components bundled as pgl27_word_cert.

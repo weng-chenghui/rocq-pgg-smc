@@ -66,8 +66,8 @@ From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
-From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
-From pgg_smc Require Import pgg_interface pgg_monodromy_profile.
+From pgg_reconstruct Require Import pgg_sharing_framework.
+From pgg_smc Require Import pgg_interface.
 From pgg_smc Require Import pgg_instance.
 
 Set Implicit Arguments.
@@ -75,7 +75,7 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 (******************************************************************************)
-(*     The three fields the block fills                                       *)
+(*     Three of the five fields the block fills                               *)
 (******************************************************************************)
 
 (* The shuffle action on share indices of an instance whose shares are the

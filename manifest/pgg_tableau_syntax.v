@@ -20,6 +20,9 @@
 (* statement displays the marginal bound, the equation between that bound's   *)
 (* law and the model's cut law, the ideal cut, the mixing distance and the    *)
 (* ideal's secret-independence as five named things rather than one record.   *)
+(* The statement binds those two variables once, after at, and abstracts      *)
+(* every clause over them, so a clause is a term in R and idx rather than a   *)
+(* function of them.                                                          *)
 (*                                                                            *)
 (* The termination statement comes in two forms. One names a lemma; the other *)
 (* writes the literal vm_compute and builds the obligation in place. The two  *)
@@ -41,6 +44,11 @@
 (* which is what keeps the two port constructors usable by name; at follows a *)
 (* literal too and was a keyword of Rocq before this file.                    *)
 (*                                                                            *)
+(* One of the twelve shadows a framework definition: endpoints is also the    *)
+(* verifier's endpoint tuple in pgg_interface.v. A file requiring this        *)
+(* surface must write that one through its module path. No file in the tree   *)
+(* writes it bare.                                                            *)
+(*                                                                            *)
 (* Definitions:                                                               *)
 (*   obs_payload  == the three run facts in the shape execute_step wants      *)
 (*   mk_spectral  == a certificate at every field and index, from its five    *)
@@ -59,10 +67,6 @@ From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist entropy.
 From pgg_reconstruct Require Import pgg_sharing_framework.
-From pgg_smc Require Import pgg_interface pgg_monodromy_profile.
-From pgg_smc Require Import pgg_execution_plug pgg_weighted_words.
-From pgg_smc Require Import pgg_observed_execution pgg_sample_adapter.
-From pgg_smc Require Import pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_functionality.
 From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
 
@@ -131,7 +135,12 @@ Arguments mk_spectral : clear implicits.
    and never mentions the ideal function, so naming one happens beside the
    program rather than inside it. For a dealer-dealt run the ideal function is
    forced to be the identity, and the record is written only for an input
-   family, where it is not. *)
+   family, where it is not.
+
+   targeted_F is what such a run is measured against: a run whose recovered
+   value ex_expected is written as this ideal function meets
+   realises_expected by conversion, which is the whole obligation of the
+   functionality statement. *)
 Record Targeted := MkTargeted {
   tg_algebra : PGGAlgebraic ;
   tg_inputT  : Type ;
@@ -196,6 +205,17 @@ Arguments exact_leaks : clear implicits.
 Notation "A 'dealt' 'fuel' n" := (tableau_start A ;;; dealt_step of n)
   (at level 90, left associativity, n at level 0).
 
+(* The run the three obligations are made about is the framework's own process
+   list, exec_saprocs of pgg_execution_plug.v: a dealer carrying the plug's
+   content function, a verifier, one player per seat, and then ep_input_procs,
+   the commit processes an input family supplies and a sharing family leaves
+   empty. exec_procs is that list erased to what the interpreter consumes, and
+   termination and the endpoint equation are both stated over it.
+
+   What this statement builds is the observed execution, and publish writes it
+   unchanged into the row's apr_observed. A row therefore describes the run
+   these three obligations were proved about, and not a second run that
+   resembles it. *)
 Notation "s 'execute' 'terminates' 'by' t 'endpoints' 'by' e 'recon' 'by' r" :=
   (s ;;; execute_step of (obs_payload (tableau_at s) t e r))
   (at level 90, left associativity, t at level 0, e at level 0, r at level 0,
@@ -220,10 +240,17 @@ Notation "s 'certify' 'ExactIndependence' w 'leaks' 'at' k 'by' H" :=
 Notation "s 'certify' 'SpectralDecay' c" := (s ;;; certify_spectral of c)
   (at level 90, left associativity, c at level 0).
 
-Notation "s 'certify' 'SpectralDecay' b 'tied' 'by' Hd 'ideal' u 'mixing' 'by' Hc 'invariant' 'by' Hk" :=
-  (s ;;; certify_spectral of (mk_spectral (tableau_at s) b Hd u Hc Hk))
-  (at level 90, left associativity, b at level 0, Hd at level 0, u at level 0,
-   Hc at level 0, Hk at level 0, only parsing).
+(* The five clauses name the real field and the model index once, after at,
+   and the statement abstracts every clause over them. Each component is a
+   term in those two variables rather than a function of them, so what a
+   clause displays is the component and not the plumbing that quantifies it. *)
+Notation "s 'certify' 'SpectralDecay' 'at' R idx b 'tied' 'by' Hd 'ideal' u 'mixing' 'by' Hc 'invariant' 'by' Hk" :=
+  (s ;;; certify_spectral of (mk_spectral (tableau_at s)
+     (fun R idx => b) (fun R idx => Hd) (fun R idx => u)
+     (fun R idx => Hc) (fun R idx => Hk)))
+  (at level 90, left associativity, R ident, idx ident,
+   b at level 10, Hd at level 10, u at level 10, Hc at level 10,
+   Hk at level 10, only parsing).
 
 (* The two statuses are written transfer first, against the argument order of
    publish itself, so that a row's last statement reads in the order the

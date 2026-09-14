@@ -324,13 +324,14 @@ Qed.
     five-letter walk alphabet with the proof that it generates the same group,
     the Boolean secret the orbit scheme deals with its encoding, its class
     readout and its privacy obligation, and the seat list the run reads
-    because enum 'I_8 does not reduce.  The seats start at the eight positions in order and the shuffle
-    acts on share indices as it acts on cards, so the coordinate law is the
-    framework's ord_coordE and the instance writes none; the dealer readout is
-    the identity, so a card carries the share dealt to its own position and no
-    encoding stands between the two.  The record holds no run, no fuel and no
-    probability model, so the seat interface, the reconstruction plug and the
-    monodromy profile of this instance are all functions of this one value. *)
+    because enum 'I_8 does not reduce.  The seats start at the eight positions
+    in order and the shuffle acts on share indices as it acts on cards, so the
+    coordinate law is the framework's ord_coordE and the instance writes none;
+    the dealer readout is the identity, so a card carries the share dealt to
+    its own position and no encoding stands between the two.  The record holds
+    no run, no fuel and no probability model, so the seat interface, the
+    reconstruction plug and the monodromy profile of this instance are all
+    functions of this one value. *)
 Definition pgl27_algebra : PGGAlgebraic := algebra {
   mount   << pgl27_gens >> ;
   walk    along pgl27_moves by pgl27_gen5_eq ;
