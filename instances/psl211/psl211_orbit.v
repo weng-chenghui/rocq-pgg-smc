@@ -862,7 +862,8 @@ Local Lemma class_count (s : seq (seq nat)) (p : {set 'I_12} -> bool)
 Proof.
 move=> Hu Hasc Hcomp Hp.
 have key : forall S : {set 'I_12}, #|S| = 6 -> psl211_asc6 (map val (enum S)).
-  move=> S HcS; rewrite /psl211_asc6 psl211_sorted_val_enum /=; apply/andP; split.
+  move=> S HcS; rewrite /psl211_asc6 psl211_sorted_val_enum /=.
+  apply/andP; split.
     by apply/allP => n /mapP[i _ ->]; exact: ltn_ord.
   by rewrite size_map -cardE HcS.
 have Huniq : uniq [seq psl211_list_to_set L | L <- filter pn s].

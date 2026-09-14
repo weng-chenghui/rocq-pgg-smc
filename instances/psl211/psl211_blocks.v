@@ -3,8 +3,9 @@
 (******************************************************************************)
 (* psl211_blocks: the literal data of the twelve-card chirality instance      *)
 (*                                                                            *)
-(* Twelve positions 0..11. Three letter tables: reverse each quarter (r4),    *)
-(* Monge-shuffle each half (m6), and the inverse milk shuffle (milk6).        *)
+(* Twelve positions 0..11. Three letter tables: reverse each four-position    *)
+(* segment (r4), Monge-shuffle each half (m6), and the inverse milk           *)
+(* shuffle (milk6).                                                           *)
 (* Two 132-row tables of ascending six-lists: the two Steiner systems         *)
 (* S(5,6,12) on the twelve positions, the hexad system of M12 and its mirror. *)
 (* psl211_nonsquare_tbl transports the non-square scaling of P^1(F_11) to     *)
@@ -29,7 +30,7 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 (** psl211_r4_tbl — the letter reversing each of the three four-position
-    quarters (0..3, 4..7, 8..11) of the twelve positions; with psl211_m6_tbl,
+    segments (0..3, 4..7, 8..11) of the twelve positions; with psl211_m6_tbl,
     one of the two generators of the shuffle group (psl211_milk6_tbl is the
     inverse letter, psl211_nonsquare_tbl lies outside it). *)
 Definition psl211_r4_tbl : seq nat :=
@@ -362,9 +363,9 @@ Local Fixpoint psl211_ascending_lists (k lo : nat) : seq (seq nat) :=
 Definition psl211_subsets (k : nat) : seq (seq nat) :=
   psl211_ascending_lists k 0.
 
-(* Completeness of the generator, by induction on the length, with the lower
+(* Completeness of the enumerator, by induction on the length, with the lower
    bound carried as a parameter. *)
-Local Lemma mem_ascending (k lo : nat) (L : seq nat) :
+Local Lemma mem_ascending_lists (k lo : nat) (L : seq nat) :
   sorted ltn L -> all (fun n => (lo <= n)%N && (n < 12)%N) L -> size L = k ->
   L \in psl211_ascending_lists k lo.
 Proof.
@@ -386,7 +387,7 @@ Qed.
 Lemma psl211_mem_subsets (k : nat) (L : seq nat) :
   sorted ltn L -> all (fun n => (n < 12)%N) L -> size L = k ->
   L \in psl211_subsets k.
-Proof. by move=> Hs Ha Hsz; apply: mem_ascending. Qed.
+Proof. by move=> Hs Ha Hsz; apply: mem_ascending_lists. Qed.
 
 (** psl211_size_subsets5 — there are exactly 792 ascending five-lists of
     positions below twelve. *)

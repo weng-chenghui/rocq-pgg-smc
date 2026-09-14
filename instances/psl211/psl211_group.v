@@ -7,7 +7,7 @@
 (* generate the monodromy group, each given as an explicit permutation table  *)
 (* of 'I_12 read off psl211_blocks.v:                                         *)
 (*                                                                            *)
-(*   psl211_r4_perm == reverse each of the three four-card blocks             *)
+(*   psl211_r4_perm == reverse each of the three four-position segments       *)
 (*                     0..3, 4..7, 8..11                                      *)
 (*                     (psl211_r4_tbl    = [3;2;1;0;7;6;5;4;11;10;9;8])       *)
 (*   psl211_m6_perm == Monge-shuffle each of the two halves 0..5, 6..11       *)
@@ -97,8 +97,8 @@ Definition psl211_r4_perm : {perm 'I_12} := perm psl211_r4_inj.
     positions. *)
 Definition psl211_m6_perm : {perm 'I_12} := perm psl211_m6_inj.
 
-(** psl211_gens — reverse each four-card block, Monge-shuffle each half. The
-    generator tuple driving psl211_M. *)
+(** psl211_gens — reverse each four-position segment, Monge-shuffle each
+    half. The generator tuple driving psl211_M. *)
 Definition psl211_gens : 2.-tuple {perm 'I_12} :=
   [tuple psl211_r4_perm; psl211_m6_perm].
 

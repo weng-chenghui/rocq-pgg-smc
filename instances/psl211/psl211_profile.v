@@ -3,7 +3,7 @@
 (******************************************************************************)
 (* psl211_profile: the PSL(2,11) plug of the shared MonodromyProfile program  *)
 (*                                                                            *)
-(* The twelve-card orbit scheme (psl211_scheme) is packaged as a              *)
+(* The twelve-card chirality scheme (psl211_scheme) is packaged as a         *)
 (* MonodromyProfile, a program-layer value carrying no epsilon, together with *)
 (* a separate marginal bound at epsilon = 0: the single-card pushforward of   *)
 (* the uniform shuffle over PSL(2,11) is exactly uniform, by the              *)
@@ -26,16 +26,14 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action bigop div prime.
+From mathcomp Require Import morphism action bigop.
 From mathcomp Require Import ssralg ssrnum order.
-From mathcomp Require Import primitive_action.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import pgg_interface pgg_monodromy_profile.
-From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
+From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import transitivity_privacy algebraic_rigidity.
-From pgg_smc Require Import psl211_blocks psl211_group psl211_orbit.
-From pgg_smc Require Import psl211_scheme.
+From pgg_smc Require Import psl211_group psl211_scheme.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -74,8 +72,12 @@ exact: (@ttrans_point_uniform (pgg_N' psl211_M) (pgg_gT psl211_M)
   psl211_G_pos s isT).
 Qed.
 
-(** psl211_se_exact — the single-card pushforward is at variational
-    distance zero from uniform. *)
+(** psl211_se_exact — the single-card pushforward of the uniform shuffle is
+    at variation distance zero from uniform, not merely close to it.  This is
+    the exact certificate the bundle below carries: at one card position the
+    idealised shuffle has no error to price, so every epsilon in this
+    instance's marginal layer is zero and the only price paid anywhere is the
+    2^-40 of psl211_word_mixing for the realistic word shuffle. *)
 Lemma psl211_se_exact (s : 'I_12) :
   var_dist (fdistmap (fun sigma : {perm 'I_12} => sigma s) psl211_rho_dist)
            (fdist_uniform (card_ord 12)) = 0%R.
@@ -84,8 +86,10 @@ rewrite psl211_point_uniform /var_dist.
 by apply: big1 => a _; rewrite subrr normr0.
 Qed.
 
-(** psl211_sw_bound — the single-card pushforward meets the epsilon = 0
-    bound. *)
+(** psl211_sw_bound — the single-card pushforward meets the bound at
+    epsilon = 0.  The inequality form of psl211_se_exact, which is the shape
+    the ShuffleMarginalBound field takes; the record stores a bound, and this
+    instance's bound happens to be met with equality. *)
 Lemma psl211_sw_bound (s : 'I_12) :
   (var_dist (fdistmap (fun sigma : {perm 'I_12} => sigma s) psl211_rho_dist)
             (fdist_uniform (card_ord 12)) <= 0%R)%O.
@@ -113,8 +117,9 @@ Definition psl211_certificate_bundle : ShuffleCertificateBundle R psl211_M :=
 End witness.
 
 (** psl211_profile — the PSL(2,11) plug of the shared MonodromyProfile: the
-    group, the secret type, PI and the orbit plug. The twelve-card
-    orbit-class plug of the MonodromyProfile program. *)
+    group, the secret type, PI and the plug of psl211_scheme.v. The secret
+    type is bool because the secret is the chirality bit, which of the two
+    Steiner systems S(5,6,12) the dealt heart positions form a block of. *)
 Definition psl211_profile : MonodromyProfile :=
   @MkMonodromyProfile psl211_M bool psl211_PI psl211_plug.
 
