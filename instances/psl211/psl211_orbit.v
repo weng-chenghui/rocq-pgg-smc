@@ -1059,19 +1059,27 @@ Local Definition code_table (b : bool) : seq (seq nat * seq nat) :=
 
 (* Every row of the system carries a word from its representative row. The
    check recomputes each word from scratch, so a BFS bookkeeping error cannot
-   make it true. A Notation rather than a Definition: the allP view that
-   reads this certificate must see all at the head, and unfolding a
-   definition there drags code_table b through the ordinary reduction
-   machine, which does not terminate in usable time. *)
-Local Notation code_table_ok b :=
-  (all (fun L => has (fun sw : seq nat * seq nat =>
-                        sort leq (map (psl211_papply sw.2) (psl211_rep_list b))
-                        == L)
-                     (code_table b))
-       (if b then psl211_mirror_tbl else psl211_hexad_tbl)).
+   make it true. *)
+Local Definition code_table_ok (b : bool) : bool :=
+  all (fun L => has (fun sw : seq nat * seq nat =>
+                       sort leq (map (psl211_papply sw.2) (psl211_rep_list b))
+                       == L)
+                    (code_table b))
+      (if b then psl211_mirror_tbl else psl211_hexad_tbl).
 
 Local Lemma code_table_okT (b : bool) : code_table_ok b.
 Proof. by case: b; vm_compute. Qed.
+
+(* The same certificate with all at the head. The allP view that reads it
+   must not be asked to unfold code_table_ok, since reducing code_table b
+   outside the virtual machine does not terminate in usable time. *)
+Local Lemma code_table_ok_allT (b : bool) :
+  all (fun L => has (fun sw : seq nat * seq nat =>
+                       sort leq (map (psl211_papply sw.2) (psl211_rep_list b))
+                       == L)
+                    (code_table b))
+      (if b then psl211_mirror_tbl else psl211_hexad_tbl).
+Proof. exact: code_table_okT. Qed.
 
 (* The image of a coded subset is coded by the word applied codewise. *)
 Local Lemma psl211_word_perm_imset (w : seq nat) (L : seq nat) :
@@ -1109,7 +1117,7 @@ apply/setP => T; apply/orbitP/idP => [[g gG <-]|HT].
   rewrite setact_imset (psl211_mirror_invariant _ _ gG) /psl211_mirror_blocks.
   by rewrite (mem_sets_of asc6_mirrorT (asc6_rep true)); vm_compute.
 move: HT; rewrite /psl211_mirror_blocks in_set => /hasP[R Rt /eqP <-].
-move: (code_table_okT true) => /allP/(_ _ Rt)/hasP[sw _ /eqP Hw].
+move: (code_table_ok_allT true) => /allP/(_ _ Rt)/hasP[sw _ /eqP Hw].
 exists (psl211_word_perm sw.2); first exact: psl211_word_perm_mem.
 by rewrite setact_imset (psl211_word_perm_imset sw.2 H12)
    -list_to_set_sort Hw.
@@ -1126,7 +1134,7 @@ apply/setP => T; apply/orbitP/idP => [[g gG <-]|HT].
   rewrite setact_imset (psl211_hexad_invariant _ _ gG) /psl211_hexad_blocks.
   by rewrite (mem_sets_of asc6_hexadT (asc6_rep false)); vm_compute.
 move: HT; rewrite /psl211_hexad_blocks in_set => /hasP[R Rt /eqP <-].
-move: (code_table_okT false) => /allP/(_ _ Rt)/hasP[sw _ /eqP Hw].
+move: (code_table_ok_allT false) => /allP/(_ _ Rt)/hasP[sw _ /eqP Hw].
 exists (psl211_word_perm sw.2); first exact: psl211_word_perm_mem.
 by rewrite setact_imset (psl211_word_perm_imset sw.2 H12)
    -list_to_set_sort Hw.
