@@ -1537,6 +1537,10 @@ bash $ROCQ_SCRIPTS/check_axioms.sh instances/psl211/*.v reconstruct/design_priva
 
 Expected: no axiom outside `propositional_extensionality`, `functional_extensionality_dep`, `constructive_indefinite_description`; no `Admitted`.
 
+- [ ] **Step 2b: Deferred cosmetic fixes from the Task 4 re-review**
+
+In `instances/psl211/psl211_orbit.v`: the two-subgoal `apply: gens_sub_stab` sites (about lines 264-267 and 274-277) use bullets; replace by two-space indentation as `stab_of_gen` does at 255-257. The `/and3P[_ H _]` at about 158 and 161 introduces a bare `H`; rename to `Hlt`. Recompile (70 s), then recompile psl211_scheme.v and every later psl211 file in order, commit as `style(psl211): indentation and hypothesis names in psl211_orbit.v`. Also carried as a note: `psl211_mirror_tbl_uniq`, `psl211_hexad_tbl_uniq`, `tables_distinct(T)` are table certificates living in psl211_orbit.v rather than psl211_blocks.v (reviewer I5, left in place on purpose).
+
 - [ ] **Step 3: Record deviations**
 
 Append to this plan a section "As built" listing every statement or route that differed from the text above, before/after/why, and update spec section 7 status column for L11, L12, L16, L17, L18, L19, L20-L23, L25.
