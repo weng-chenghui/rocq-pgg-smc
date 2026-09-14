@@ -85,8 +85,14 @@ Record Functionality (inputT outT : Type) := MkFunctionality {
    identity because a run that deals a secret and reconstructs it computes
    nothing from several parties' inputs, and the tolerated coalition size is
    the scheme's own ts_k', because the sizes at which the shares reveal
-   nothing are the scheme's and no part of the execution narrows them. A
-   sharing family therefore names no ideal function of its own. *)
+   nothing are the scheme's and no part of the execution narrows them.
+
+   A sharing family names no ideal function at all. Its expected value, the
+   identity for a dealt secret and the designated entry of the tape for a
+   supplied layout, is the value the run reads back off its own argument, not
+   a function of any committer's input. Only the input family states an ideal
+   function, and only there is a specification something the run could fail
+   to meet. *)
 Definition algebra_functionality (A : PGGAlgebraic)
     : Functionality (pga_secretT A) (pga_secretT A) :=
   MkFunctionality id (ts_k' (pga_scheme A)).
@@ -140,9 +146,9 @@ Definition realises_expected (oe : OE.ObservedExecution)
   OE.oe_expected oe = fn_f F.
 Arguments realises_expected : clear implicits.
 
-(* The executed run, not only its static reading, decodes to the ideal
+(* The executed run, not only its direct computation, decodes to the ideal
    function's value at every argument and every shuffle in the group. The
-   step from the static reading to the executed endpoints is the execution
+   step from the direct computation to the executed endpoints is the execution
    record's own derivation, so identifying the recovered value with the ideal
    function is all an instance supplies to obtain end-to-end correctness. *)
 Lemma realises_expected_run (oe : OE.ObservedExecution)

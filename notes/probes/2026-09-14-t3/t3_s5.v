@@ -70,7 +70,11 @@ Proof. by vm_compute. Qed.
 Definition s5_rand_endpointsP : instance_endpoints_stmt s5_rand_params :=
   supplied_endpointsE s5_profile_endpoints.
 
-(* the framework route, from the sharing claim alone *)
+(* The framework route, from the sharing claim alone. Both this and
+   s5_rand_endpointsP inherit the pre-existing axiom s5_group_order_eq
+   (instances/s5/rigidity_s5_instance.v:179) through s5_algebra, whose
+   reconstruction invariance is read off s5_plug; the axiom is S5's own and
+   is not introduced by the encoded or supplied constructors. *)
 Definition s5_rand_reconP : instance_recon_stmt s5_rand_params :=
   supplied_static_recon s5_algebra s5_rfree_valid.
 
@@ -124,3 +128,26 @@ Definition s5_target : Targeted :=
 Lemma s5_prefix_realises :
   realises_expected (ob_obs (tableau_at s5_prefix)) (targeted_F s5_target).
 Proof. by []. Qed.
+
+(* ------------------------------------------------------------------ *)
+(* 5. the two framework equations this instance does not otherwise use  *)
+(* ------------------------------------------------------------------ *)
+
+(* the dealer-dealt parameters are the supplied ones at the canonical
+   encoding, so a fact about one transports to the other by rewriting *)
+Lemma s5_dealt_suppliedE :
+  instance_exec (dealt_secret_params s5_algebra 150)
+  = instance_exec (supplied_input_params s5_algebra (pga_secretT s5_algebra)
+      (ts_encode (pga_scheme s5_algebra)) id 150).
+Proof. by rewrite dealt_supplied_paramsE. Qed.
+
+(* the functionality obligation through the framework lemma rather than by [] *)
+Lemma s5_realises_expected :
+  realises_expected
+    (@instance_observed s5_algebra s5_rand_params s5_rand_terminatesP
+       s5_rand_endpointsP s5_rand_reconP)
+    (targeted_F s5_target).
+Proof.
+exact (@supplied_realises_expected s5_target s5_rfree_layout 150
+          s5_rand_terminatesP s5_rand_endpointsP s5_rand_reconP).
+Qed.

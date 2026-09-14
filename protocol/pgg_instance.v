@@ -1,7 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* PGGAlgebraic: the algebraic plugin of one protocol instance                *)
+(* PGGAlgebraic: the algebraic instance of one card protocol                  *)
 (*                                                                            *)
 (* An instance of the card-shuffling framework is described by two values     *)
 (* and nothing else. PGGAlgebraic holds what the instance is: a generating    *)
@@ -9,7 +9,7 @@
 (* positions, the seats' starting positions, and the coordinate law that      *)
 (* ties the scheme's share indices to the deck action. ExecutionParams holds  *)
 (* how one run of it is driven: the run argument type, the input mode, the    *)
-(* content readout, the static observation, the value the run recovers and    *)
+(* content readout, the direct computation, the value the run recovers and    *)
 (* the interpreter fuel. From these two the interface, the reconstruction     *)
 (* plug, the monodromy profile, the execution plug and the observed           *)
 (* execution are all derived, so an instance writes down data and the         *)
@@ -33,25 +33,28 @@
 (* Qed, and its dealt instance follows by instantiation with no reduction of  *)
 (* its own.                                                                   *)
 (*                                                                            *)
-(* A run is driven in one of three modes, which are two as far as the         *)
-(* readouts are concerned. dealt_secret_params deals the scheme's own         *)
-(* encoding of the secret; supplied_input_params reads a layout that arrives  *)
-(* with the run argument, and the dealt mode is that one at the canonical     *)
-(* encoding; encoded_input_params reads a layout the dealer assembles from    *)
-(* what the committers handed over, and is the only mode whose run carries    *)
-(* commit processes. Reconstruction is one lemma for the two layout modes,    *)
-(* layout_static_recon, from the layout being a valid sharing of the value    *)
-(* the run recovers; the dealer-dealt mode keeps dealt_static_recon. The      *)
-(* endpoint obligation splits in the same way: the two commit-free            *)
-(* modes instantiate profile_endpoints_stmt, while a run with committers      *)
-(* needs profile_commit_endpoints_stmt, whose reduction runs the commit       *)
-(* processes, and one instance fact, that decoding the payload list returns   *)
-(* the input the committers hold.                                             *)
+(* A run is driven in one of three modes, and the modes fall into two         *)
+(* families. The sharing family has no committer and the dealer lays the      *)
+(* cards itself: dealt_secret_params deals the scheme's own encoding of the   *)
+(* secret, and supplied_input_params lays a layout that arrives with the run  *)
+(* argument, of which the dealt mode is the case at the canonical encoding.   *)
+(* The input family is encoded_input_params alone: the committers hand over   *)
+(* their inputs through commit processes and the run recovers an ideal        *)
+(* function of them.                                                          *)
+(*                                                                            *)
+(* Reconstruction is one lemma for the two layout modes, layout_static_recon, *)
+(* from the layout being a valid sharing of the value the run recovers; the   *)
+(* dealer-dealt mode keeps dealt_static_recon. The endpoint obligation splits *)
+(* along the families: the sharing family instantiates                        *)
+(* profile_endpoints_stmt, while the input family needs                       *)
+(* profile_commit_endpoints_stmt, whose reduction runs the commit processes,  *)
+(* and one instance fact, that decoding the payload list returns the input    *)
+(* the committers hold.                                                       *)
 (*                                                                            *)
 (* What an instance owes is termination, instance_terminates_stmt, which has  *)
 (* no route through the algebra, and one reduction proof at its own profile:  *)
-(* profile_endpoints_stmt without committers, profile_commit_endpoints_stmt   *)
-(* with them.                                                                 *)
+(* profile_endpoints_stmt in the sharing family, and                          *)
+(* profile_commit_endpoints_stmt in the input family.                         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   PGGAlgebraic             == the algebraic data of one instance           *)
@@ -62,7 +65,8 @@
 (*   ExecutionParams          == the run-level data over an algebra           *)
 (*   instance_exec            == the ExecutionPlug of a parameter record      *)
 (*   instance_terminates_stmt == every process of the run reaches Finish      *)
-(*   instance_endpoints_stmt  == the run's endpoints are the static reading   *)
+(*   instance_endpoints_stmt  == the run's endpoints are the direct           *)
+(*                               computation                                  *)
 (*   instance_recon_stmt      == static decoding returns the expected value   *)
 (*   instance_observed        == the ObservedExecution of a parameter record  *)
 (*   dealt_secret_params      == the parameters of a dealer-dealt secret      *)
@@ -70,8 +74,9 @@
 (*   profile_endpoints_stmt   == the endpoint equation with abstract readout  *)
 (*   layout_content           == the dealer's readout of a layout             *)
 (*   layout_content_obs       == the direct computation over a layout         *)
-(*   encoded_input_params     == the parameters of a committed input          *)
-(*   supplied_input_params    == the parameters of a supplied layout          *)
+(*   encoded_input_params     == the input family's parameters                *)
+(*   supplied_input_params    == the sharing family's parameters at a         *)
+(*                               supplied layout                              *)
 (*   profile_commit_endpoints_stmt                                            *)
 (*                            == the endpoint equation with committers        *)
 (*                                                                            *)
@@ -81,8 +86,8 @@
 (*   dealt_static_recon         == the dealer-dealt case, from pga_coordE     *)
 (*   layout_static_recon        == decoding the direct computation of a       *)
 (*                                 valid layout                               *)
-(*   encoded_static_recon       == the committed-input case                   *)
-(*   supplied_static_recon      == the supplied-layout case                   *)
+(*   encoded_static_recon       == the input family's case                    *)
+(*   supplied_static_recon      == the supplied sharing case                  *)
 (*   static_coalition_obsE      == the coalition reading, seat by seat        *)
 (*   profile_endpointsE         == abstract readout to the dealt readout      *)
 (*   supplied_endpointsE        == abstract readout to the supplied readout   *)
@@ -106,7 +111,7 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 (******************************************************************************)
-(*     The algebraic plugin                                                   *)
+(*     The algebraic instance                                                 *)
 (******************************************************************************)
 
 (* The algebraic data of one protocol instance: the generators of its shuffle
@@ -330,8 +335,8 @@ Definition instance_terminates_stmt (A : PGGAlgebraic) (E : ExecutionParams A)
 (* The endpoints the verifier collects from the executed run are the static
    group-action reading of the same run. The second run fact: it says the
    interpreter's message passing computes the action, which is what lets
-   every later security statement be made about the static reading instead of
-   about a trace. *)
+   every later security statement be made about the direct computation
+   instead of about a trace. *)
 Definition instance_endpoints_stmt (A : PGGAlgebraic) (E : ExecutionParams A)
     : Prop :=
   forall (x : ex_inputT E) (w0 : pgg_gT (mp_M (instance_profile A))),
@@ -396,13 +401,14 @@ Definition dealt_secret_params (A : PGGAlgebraic) (fuel : nat)
     (@dealt_content A) (@dealt_content_obs A) id fuel.
 
 (******************************************************************************)
-(*     The layout readout, and the two input families over it                 *)
+(*     The layout readout, and the two layout constructors over it            *)
 (******************************************************************************)
 
 (* The dealer's readout of a layout: card j carries share j of the layout,
-   transported along pga_share_card. The two constructors below differ in what
-   determines the layout, a committed payload list or the run argument itself,
-   and agree on how the dealer reads it once it is determined. *)
+   transported along pga_share_card. The two constructors below are one per
+   family and differ in what determines the layout, a committed payload list
+   for the input family or the run argument itself for the sharing family;
+   they agree on how the dealer reads it once it is determined. *)
 Definition layout_content (A : PGGAlgebraic) (inputT : Type)
     (layout : inputT -> (ts_T' (pga_scheme A)).+1.-tuple 'I_(pga_n A).+2)
     (x : inputT) (j : 'I_(pga_n A).+2) : 'I_(pga_n A).+2 :=
@@ -410,20 +416,20 @@ Definition layout_content (A : PGGAlgebraic) (inputT : Type)
 
 (* What a seat starting at position p observes after the cut w0: the share the
    layout puts at the position w0 moves p to. It names no interpreter state,
-   so it is the direct computation the security statements of a
-   committed-input run and of a supplied-layout run are alike made about, and
-   instance_endpoints_stmt is the assertion that the interpreter's messages
-   compute it. *)
+   so it is the direct computation the security statements of both families
+   are made about, and instance_endpoints_stmt is the assertion that the
+   interpreter's messages compute it. *)
 Definition layout_content_obs (A : PGGAlgebraic) (inputT : Type)
     (layout : inputT -> (ts_T' (pga_scheme A)).+1.-tuple 'I_(pga_n A).+2)
     (x : inputT) (p : pgg_gT (instance_M A) * 'I_(pga_n A).+2)
     : 'I_(pga_n A).+2 :=
   layout_content layout x (@pgg_rho (instance_M A) p.1 p.2).
 
-(* The parameters of a run whose committers hand over their inputs and whose
-   dealer assembles the deck from what they committed: dec reads the joint
-   input back out of the payload list, layout turns it into a sharing, and the
-   value the run recovers is the ideal function f.
+(* The input family's parameters: the committers hand over their inputs
+   through commit processes, dec reads the joint input back out of the payload
+   list they sent, layout turns it into a sharing, and the value the run
+   recovers is the ideal function f. This is the only mode whose run carries a
+   committer, and the only one that states an ideal function.
 
    The argument between layout and dec is the sharing claim of the encoding,
    that the layout is a valid sharing of f x. The record does not store it, so
@@ -443,11 +449,13 @@ Definition encoded_input_params (A : PGGAlgebraic) (inputT : Type)
     (layout_content_obs layout) f fuel.
 Arguments encoded_input_params : clear implicits.
 
-(* The parameters of a run whose layout arrives with the run argument rather
-   than from committed inputs: no party commits, the dealer reads the supplied
-   layout, and the value the run recovers is the one written beside it. The
-   sharing claim is not an argument here, which is what leaves such a run
-   owing a reconstruction obligation of its own. *)
+(* The sharing family's parameters at a supplied layout: no party commits, the
+   dealer lays the cards itself from the layout the run argument names, and
+   the value the run recovers is the one written beside it. That value is a
+   reading of the run argument and not a function of any committer's input,
+   which is what keeps this mode in the sharing family. The sharing claim is
+   not an argument here, which is what leaves such a run owing a
+   reconstruction obligation of its own. *)
 Definition supplied_input_params (A : PGGAlgebraic) (inputT : Type)
     (layout : inputT -> (ts_T' (pga_scheme A)).+1.-tuple 'I_(pga_n A).+2)
     (expected : inputT -> pga_secretT A)
@@ -658,7 +666,7 @@ Hypothesis Hobs : ex_content_obs E = layout_content_obs layout.
    coordinate hypothesis of generic_static_recon_valid is pga_coordE read
    through the plug's seat/share bridge, which casts between two copies of the
    same share count and is therefore the identity on indices. The two
-   hypotheses are what a committed-input run and a supplied-layout run have in
+   hypotheses are what the input family and the supplied sharing mode have in
    common, so the obligation is discharged once for both. *)
 Lemma layout_static_recon : instance_recon_stmt E.
 Proof.
@@ -678,7 +686,7 @@ End layout_static_recon.
    would otherwise take for a reason to infer them. *)
 Arguments layout_static_recon : clear implicits.
 
-(* The reconstruction obligation of a committed-input run, discharged from the
+(* The reconstruction obligation of an input-family run, discharged from the
    sharing claim written in its own parameter statement. Every argument occurs
    in the conclusion, so such a run owes no reconstruction proof beyond the
    encoding it already named. *)
@@ -701,9 +709,10 @@ Qed.
    obligation is owed. *)
 Arguments encoded_static_recon {A inputT f layout Hv dec procs fuel} x w0.
 
-(* The reconstruction obligation of a supplied-layout run, from the supplied
-   layout being a valid sharing of the expected value. The sharing claim is
-   not part of the parameter statement in this mode, so it is written here and
+(* The reconstruction obligation of a sharing-family run at a supplied layout,
+   from that layout being a valid sharing of the expected value. The sharing
+   claim is not part of the parameter statement in this mode, so it is written
+   here and
    the algebra is supplied with it: the claim alone leaves the deck size and
    the share count undetermined. *)
 Lemma supplied_static_recon (A : PGGAlgebraic) (inputT : Type)
@@ -727,7 +736,7 @@ Arguments supplied_static_recon A {inputT layout expected fuel} Hv x w0.
 
 (* The endpoint equation of a profile with the content readout left as a
    variable: for every readout, the executed endpoints of the dealer-dealt
-   plug are its static reading. Leaving the readout abstract is what keeps a
+   plug are its direct computation. Leaving the readout abstract keeps a
    dealt card out of the reduction, so the equation is decided once per
    profile instead of once per plug. *)
 Definition profile_endpoints_stmt (A : PGGAlgebraic) (fuel : nat) : Prop :=
@@ -743,18 +752,18 @@ Definition profile_endpoints_stmt (A : PGGAlgebraic) (fuel : nat) : Prop :=
 
 (* The endpoint obligation of a dealer-dealt run, read off the profile's own
    abstract-readout equation. Instantiating the variable readout at
-   dealt_content gives the dealt static observation by conversion, so the
+   dealt_content gives the dealt direct computation by conversion, so the
    instance-level statement costs no reduction of its own. *)
 Lemma profile_endpointsE (A : PGGAlgebraic) (fuel : nat) :
   profile_endpoints_stmt A fuel ->
   instance_endpoints_stmt (dealt_secret_params A fuel).
 Proof. by move=> H x w0; exact: (H _ (@dealt_content A) x w0). Qed.
 
-(* The endpoint obligation of a supplied-layout run, read off the same
-   abstract-readout equation. The profile statement already quantifies over
-   the content readout, so instantiating it at the supplied layout costs the
-   run no reduction of its own, and the supplied mode shares the profile's one
-   decision with the dealer-dealt mode. *)
+(* The endpoint obligation of a sharing-family run at a supplied layout, read
+   off the same abstract-readout equation. The profile statement already
+   quantifies over the content readout, so instantiating it at the supplied
+   layout costs the run no reduction of its own, and the two modes of the
+   sharing family share the profile's one decision. *)
 Lemma supplied_endpointsE (A : PGGAlgebraic) (inputT : Type)
     (layout : inputT -> (ts_T' (pga_scheme A)).+1.-tuple 'I_(pga_n A).+2)
     (expected : inputT -> pga_secretT A) (fuel : nat) :
@@ -785,7 +794,7 @@ Definition profile_commit_endpoints_stmt (A : PGGAlgebraic) (inputT : Type)
         (fun y p => content y (payload y) (@pgg_rho (instance_M A) p.1 p.2))
         x w0.
 
-(* The endpoint obligation of a committed-input run, from the profile's
+(* The endpoint obligation of an input-family run, from the profile's
    commit-mode equation and the single fact that decoding the payload list
    returns the input the committers hold. That decoding fact is the whole of
    what an instance adds: the reduction is spent once at the profile, and this

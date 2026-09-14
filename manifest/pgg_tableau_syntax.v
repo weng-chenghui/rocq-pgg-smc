@@ -41,13 +41,15 @@
 (* file.                                                                      *)
 (*                                                                            *)
 (* A run is driven in one of three modes and there is a statement for each.   *)
-(* dealt deals the algebra's own secret. Under encoded the committers hand    *)
-(* over their inputs and the dealer assembles the layout from what they       *)
-(* committed. Under supplied the layout arrives with the run argument and no  *)
-(* party commits. Two of the three expand to one statement body, params_step, *)
-(* differing in the parameter record their clauses build; the dealer-dealt    *)
-(* rule expands to dealt_step, which dealt_params_stepE identifies with       *)
-(* params_step at dealt_secret_params.                                        *)
+(* dealt and supplied are the sharing family: no party commits and the dealer *)
+(* lays the cards itself, from the algebra's own secret under dealt and from  *)
+(* the layout the run argument names under supplied. encoded is the input     *)
+(* family: the committers hand over their inputs through commit processes and *)
+(* the dealer assembles the layout from what they committed. Two of the three *)
+(* expand to one statement body, params_step, differing in the parameter      *)
+(* record their clauses build; the dealer-dealt rule expands to dealt_step,   *)
+(* which dealt_params_stepE identifies with params_step at                    *)
+(* dealt_secret_params.                                                       *)
 (*                                                                            *)
 (* The three run obligations at execute are the only proofs whose statements  *)
 (* mention the interpreter. The by clause of encoded is a proof too, but      *)
@@ -72,8 +74,9 @@
 (* verifier's endpoint tuple in pgg_interface.v. A file requiring this        *)
 (* surface must write that one through its module path. No file in the tree   *)
 (* writes it bare. No file requiring the surface writes any of the other      *)
-(* eighteen bare either, and the three lemmas of this file that do use layout *)
-(* and fuel as binder names stand above the two rules that spend them.        *)
+(* eighteen bare either, and no declaration of this file binds any of the     *)
+(* nineteen: the two realisation lemmas bind L and n, and dealt_params_stepE  *)
+(* binds x, q and n.                                                          *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   obs_payload  == the three run facts in the shape execute_step wants      *)
@@ -91,10 +94,10 @@
 (*   dealt_params_stepE == the dealer-dealt statement is params_step at the   *)
 (*                         dealer-dealt parameters                            *)
 (*   encoded_realises_expected                                                *)
-(*                      == a committed-input run meets the Targeted's         *)
+(*                      == an input-family run meets the Targeted's           *)
 (*                         specification                                      *)
 (*   supplied_realises_expected                                               *)
-(*                      == the same for a supplied-layout run                 *)
+(*                      == the same for a sharing-family run                  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -204,10 +207,17 @@ Definition targeted_F (t : Targeted)
 Notation "A 'functionality' f" := (@MkTargeted A _ f)
   (at level 90, left associativity, f at level 0).
 
-(* A committed-input run whose parameters take the ideal function from the
+(* An input-family run whose parameters take the ideal function from the
    Targeted itself meets that specification. The two sides are the same term,
    so the identification realises_expected asks for is conversion and the
-   correctness half of such a row is discharged by reflexivity. *)
+   correctness half of such a row is discharged by reflexivity.
+
+   A row therefore closes this obligation by by [] and never cites the lemma.
+   Where the lemma is applied instead, every argument is written through @:
+   each one before the three run facts occurs in their types and is implicit,
+   and leaving them to unification does not close the goal, because
+   apply-style unification will not reduce the definition a goal names to the
+   parameter record this conclusion builds. *)
 Lemma encoded_realises_expected (t : Targeted) L Hv d procs n Ht He Hr :
   realises_expected
     (@instance_observed (tg_algebra t)
@@ -216,10 +226,13 @@ Lemma encoded_realises_expected (t : Targeted) L Hv d procs n Ht He Hr :
     (targeted_F t).
 Proof. by []. Qed.
 
-(* The same for a supplied-layout run. A supplied statement writes the value
-   the run recovers in its own expecting clause rather than taking it from a
-   Targeted, so a row that also names a functionality meets it when the two
-   are convertible, which is what this lemma asks of them. *)
+(* The same for a sharing-family run at a supplied layout. Such a statement
+   writes the value the run recovers in its own expecting clause rather than
+   taking it from a Targeted, so a row that also names a functionality meets
+   it when the two are convertible, which is what this lemma asks of them.
+
+   It is closed by by [] in a row and applied with every argument written
+   elsewhere, for the reason above. *)
 Lemma supplied_realises_expected (t : Targeted) L n Ht He Hr :
   realises_expected
     (@instance_observed (tg_algebra t)
@@ -280,15 +293,21 @@ Definition params_step (x : StackAt Algebraic) (_ : StackProp Algebraic x)
   @MkTableau Executable (StackProp Executable)
     (existT (fun A : PGGAlgebraic => ExecutionParams A) x E) I.
 
+(* The algebra occurs in the types of the two arguments after it, which the
+   file-level Unset Strict Implicit would otherwise take for a reason to infer
+   it. The rules below pass the name unapplied to tableau_bind and are
+   unaffected. *)
+Arguments params_step : clear implicits.
+
 (* The dealer-dealt statement is this one at the dealer-dealt parameters. The
    two are the same term, so a row written with either reaches the same
    completion level. *)
 Lemma dealt_params_stepE (x : StackAt Algebraic) (q : StackProp Algebraic x)
     (n : nat) :
-  dealt_step q n = params_step q (dealt_secret_params x n).
+  dealt_step q n = params_step x q (dealt_secret_params x n).
 Proof. by []. Qed.
 
-(* The committed-input mode. The committers named in committed_by hand over
+(* The input family. The committers named in committed_by hand over
    their inputs, decoded_by reads the joint input back out of the payload list
    they committed, and layout turns that input into the sharing the dealer
    deals.
@@ -309,14 +328,14 @@ Notation "t 'encoded' 'inputs' T 'layout' L 'by' enc 'decoded_by' d 'committed_b
    enc at level 10, d at level 10, procs at level 10, n at level 0,
    only parsing).
 
-(* The supplied-layout mode. The layout arrives with the run argument and no
-   party commits, so the run carries no commit process and the dealer deals
-   the layout the argument names.
+(* The sharing family at a supplied layout. The layout arrives with the run
+   argument and no party commits, so the run carries no commit process and the
+   dealer lays the cards itself from the layout the argument names.
 
    expecting is the value the run recovers, a reading of the run argument
    rather than an ideal function of committed inputs, which is why the
    statement begins at an algebra and not at a Targeted. The sharing claim is
-   not written here, so a row in this family discharges its reconstruction
+   not written here, so such a row discharges its reconstruction
    obligation through supplied_static_recon at its own algebra and validity
    lemma, or through the interpreter. *)
 Notation "A 'supplied' 'inputs' T 'layout' L 'expecting' e 'fuel' n" :=

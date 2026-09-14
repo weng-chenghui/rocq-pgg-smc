@@ -141,3 +141,40 @@ Proof. by []. Qed.
 Lemma fc_prefix_realises :
   realises_expected (ob_obs (tableau_at fc_prefix)) (targeted_F fc_target).
 Proof. by []. Qed.
+
+(* ------------------------------------------------------------------ *)
+(* 6. the two framework equations this instance does not otherwise use  *)
+(* ------------------------------------------------------------------ *)
+
+(* dealt_step and params_step at the dealer-dealt parameters are one term *)
+Lemma fc_dealt_params_stepE :
+  @dealt_step fc_algebra I 100
+  = params_step fc_algebra I (dealt_secret_params fc_algebra 100).
+Proof. exact: dealt_params_stepE. Qed.
+
+(* the functionality obligation through the framework lemma rather than by [] *)
+Lemma fc_realises_expected :
+  realises_expected
+    (@instance_observed fc_algebra fc_params fc_terminates fc_endpoints
+       fc_recon)
+    (targeted_F fc_target).
+Proof.
+exact (@encoded_realises_expected fc_target den_boer_layout
+          den_boer_assemble_valid den_boer_decode fc_procs 100
+          fc_terminates fc_endpoints fc_recon).
+Qed.
+
+(* every argument before the three run facts occurs in their types and is
+   therefore implicit; leaving them to unification does not close the goal,
+   which is why the lemma is applied with @ above *)
+Lemma fc_realises_expected' :
+  realises_expected
+    (@instance_observed fc_algebra fc_params fc_terminates fc_endpoints
+       fc_recon)
+    (targeted_F fc_target).
+Proof.
+Fail exact: encoded_realises_expected.
+exact (@encoded_realises_expected fc_target den_boer_layout
+         den_boer_assemble_valid den_boer_decode fc_procs 100
+         fc_terminates fc_endpoints fc_recon).
+Qed.
