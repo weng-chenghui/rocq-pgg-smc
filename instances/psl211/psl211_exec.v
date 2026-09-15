@@ -38,7 +38,7 @@
 (*   psl211_profileE         == the derived profile is psl211_profile         *)
 (*   psl211_dealt_terminates == every process of the dealt run reaches Finish *)
 (*                              inside the budget                             *)
-(*   psl211_profile_kE       == the derived privacy threshold is six          *)
+(*   profile_k_psl211_algebra == the derived privacy threshold is six         *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -122,10 +122,12 @@ Definition psl211_dealt_recon : instance_recon_stmt psl211_dealt_params :=
 Lemma psl211_dealt_terminates : instance_terminates_stmt psl211_dealt_params.
 Proof. by vm_compute. Qed.
 
-(** psl211_profile_kE — the privacy threshold the derived profile declares is
-    six, so every arm of a row over this algebra quantifies over coalitions of
-    at most five of the twelve seats.  It is profile_k_psl211 read at the
-    derived profile, and it is what turns the framework's threshold hypothesis
-    into the numeric one the instance's secrecy theorems take. *)
-Lemma psl211_profile_kE : profile_k (instance_profile psl211_algebra) = 6.
+(** profile_k_psl211_algebra — the privacy threshold the derived profile
+    declares is six, so every arm of a row over this algebra quantifies over
+    coalitions of at most five of the twelve seats.  It is profile_k_psl211
+    read at the derived profile, and it is what turns the framework's
+    threshold hypothesis into the numeric one the instance's secrecy theorems
+    take. *)
+Lemma profile_k_psl211_algebra :
+  profile_k (instance_profile psl211_algebra) = 6.
 Proof. by []. Qed.

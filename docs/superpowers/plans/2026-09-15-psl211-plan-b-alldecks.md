@@ -184,9 +184,14 @@ That closure was computed twice, once by the plan audit and once here, by
 walking the live `Require` lines transitively over `lib`, `protocol`, `groups`,
 `security`, `smc`, `reconstruct`, `instances/*` and `manifest`, modelling
 `psl211_exec.v` by the import block of `psl211_planb_defs.v` that T2 copies and
-`psl211_endpoints.v` by T3's own four `Require` lines. Both runs agree: **35
-already-landed files, plus `psl211_exec.v` and `psl211_endpoints.v`
-themselves, 37 in all.**
+`psl211_endpoints.v` by T3's own four `Require` lines. Both runs agree on the
+untrimmed import list: 35 already-landed files, plus `psl211_exec.v` and
+`psl211_endpoints.v` themselves, 37 in all. T2 landed the trimmed list of
+Step 1b, and the closure re-measured over the landed file from `coqdep`'s own
+graph is **33 already-landed files, plus `psl211_exec.v` and
+`psl211_endpoints.v` themselves, 35 in all.** The two that left are
+`security/pgg_sample_adapter.v` and `security/pgg_weighted_words.v`, and the
+list below is the trimmed one.
 
 ```
 groups/pgg_raag.v
@@ -203,24 +208,25 @@ reconstruct/algebraic_rigidity.v      reconstruct/cover_tradeoff.v
 reconstruct/covering_scheme.v         reconstruct/input_encoding.v
 reconstruct/pgg_sharing_framework.v   reconstruct/pgg_sum_mod.v
 reconstruct/pgl_bound.v               reconstruct/transitivity_privacy.v
-security/pgg_collusion_bound.v        security/pgg_sample_adapter.v
-security/pgg_security_solver.v        security/pgg_weighted_words.v
+security/pgg_collusion_bound.v        security/pgg_security_solver.v
 smc/graded_resource.v                 smc/pismc.v
 smc/smc_interpreter.v                 smc/smc_session_types.v
 + instances/psl211/psl211_exec.v      + instances/psl211/psl211_endpoints.v
 ```
 
-Seven of these are reached only transitively and are easy to believe free:
+Six of these are reached only transitively and are easy to believe free:
 `groups/pgg_raag.v`, `reconstruct/cover_tradeoff.v`,
 `reconstruct/pgg_sum_mod.v`, `reconstruct/pgl_bound.v`,
-`security/pgg_collusion_bound.v`, `security/pgg_security_solver.v` and
-`security/pgg_weighted_words.v`. Editing any one of them costs 900 seconds and
-17 GB.
+`security/pgg_collusion_bound.v` and `security/pgg_security_solver.v`. Editing
+any one of them costs 900 seconds and 17 GB.
 
-Trimming T2's import list to the minimum (T2 Step 1b) removes exactly two,
-`security/pgg_sample_adapter.v` and `security/pgg_weighted_words.v`, measured
-here; the other five arrive through `psl211_profile.v` and `psl211_closure.v`
-and cannot be trimmed from `psl211_exec.v` at all.
+Trimming T2's import list to the minimum (T2 Step 1b) removed exactly the two
+predicted, `security/pgg_sample_adapter.v` and `security/pgg_weighted_words.v`;
+the other five arrive through `psl211_profile.v` and `psl211_closure.v` and
+cannot be trimmed from `psl211_exec.v` at any import list. The landed import
+list keeps one Require the minimum above omitted, `pgg_monodromy_profile`,
+without which `profile_k` is not in scope for `profile_k_psl211_algebra`; that module
+is already in the closure through `psl211_profile.v`, so it costs nothing.
 
 `reconstruct/design_privacy.v` is **not** in the closure: the only psl211 file
 that imports it is `psl211_secrecy.v`, which nothing in the executed cone
@@ -532,7 +538,7 @@ Header box: name, the sentence that the file carries the algebraic record of
 the twelve-card chirality instance and the dealt run over it, the `Definitions:`
 list (`psl211_players`, `psl211_algebra`, `psl211_fuel`, `psl211_dealt_params`,
 `psl211_dealt_recon`) and the `Key results:` list (`psl211_players_enumE`,
-`psl211_profileE`, `psl211_profile_kE`, `psl211_dealt_terminates`). Add one
+`psl211_profileE`, `profile_k_psl211_algebra`, `psl211_dealt_terminates`). Add one
 paragraph naming the freeze rule as a fact about the file, not as a status
 marker:
 
@@ -621,7 +627,7 @@ Definition psl211_dealt_recon : instance_recon_stmt psl211_dealt_params :=
 Lemma psl211_dealt_terminates : instance_terminates_stmt psl211_dealt_params.
 Proof. by vm_compute. Qed.
 
-Lemma psl211_profile_kE : profile_k (instance_profile psl211_algebra) = 6.
+Lemma profile_k_psl211_algebra : profile_k (instance_profile psl211_algebra) = 6.
 Proof. by []. Qed.
 ```
 
@@ -640,7 +646,7 @@ probe's two-budget comment describes an experiment rather than the object:
     Finish inside that budget.  The reduction is symbolic in the cut, so it
     does not enumerate the group. *)
 
-(** psl211_profile_kE — the privacy threshold the derived profile declares is
+(** profile_k_psl211_algebra — the privacy threshold the derived profile declares is
     six, so every arm of a row over this algebra quantifies over coalitions of
     at most five of the twelve seats. *)
 ```
@@ -682,7 +688,7 @@ adds the P1b2 measurement of 0.958 s of `vm_compute` and 0.62 s of `Qed`).
 Expected peak: 1.6 GB.
 
 ```bash
-printf 'From pgg_smc Require Import psl211_exec.\nPrint Assumptions psl211_players_enumE.\nPrint Assumptions psl211_profileE.\nPrint Assumptions psl211_profile_kE.\nPrint Assumptions psl211_dealt_recon.\nPrint Assumptions psl211_dealt_terminates.\n' | rocq repl -q $PSL211_RFLAGS
+printf 'From pgg_smc Require Import psl211_exec.\nPrint Assumptions psl211_players_enumE.\nPrint Assumptions psl211_profileE.\nPrint Assumptions profile_k_psl211_algebra.\nPrint Assumptions psl211_dealt_recon.\nPrint Assumptions psl211_dealt_terminates.\n' | rocq repl -q $PSL211_RFLAGS
 ```
 
 Expected: Closed for all five. Four of them were read back directly from the
@@ -1766,7 +1772,7 @@ Proof. by []. Qed.
 
 The `let H5 : (#|C| <= 5)%N := HC` line is where the threshold check bites: the
 field's premise is `(#|C| < profile_k (instance_profile psl211_algebra))%N`,
-the threshold is six by `psl211_profile_kE`, and the coercion is by conversion.
+the threshold is six by `profile_k_psl211_algebra`, and the coercion is by conversion.
 The headline restated at `#|C| <= 6` does not fill the field.
 
 `psl211_alldecks_secret_expectedE` is the row that keeps the arm non-empty.
@@ -2634,11 +2640,13 @@ finding 21 was recomputed independently and agrees.
    members.** Section 2 now carries the measured list: 35 already-landed files
    plus `psl211_exec.v` and `psl211_endpoints.v` themselves, 37 in all,
    recomputed here from the live `Require` lines and agreeing with the audit's
-   count. The seven that were missing are named as the ones easiest to believe
-   free: `groups/pgg_raag.v`, `reconstruct/cover_tradeoff.v`,
-   `reconstruct/pgg_sum_mod.v`, `reconstruct/pgl_bound.v`,
-   `security/pgg_collusion_bound.v`, `security/pgg_security_solver.v`,
-   `security/pgg_weighted_words.v`.
+   count. As built after T2's Step 1b trim the closure is 33 already-landed
+   files and 35 in all; section 2 carries both numbers. The seven that were
+   missing are named as the ones easiest to believe free: `groups/pgg_raag.v`,
+   `reconstruct/cover_tradeoff.v`, `reconstruct/pgg_sum_mod.v`,
+   `reconstruct/pgl_bound.v`, `security/pgg_collusion_bound.v`,
+   `security/pgg_security_solver.v`, `security/pgg_weighted_words.v`, the last
+   of which the T2 trim then removed from the closure altogether.
 3. **#27, `manifest/pgg_analysis_manifest.v:730` is inside the `s5_row_word`
    docstring.** The insertion point for the ninth row `Definition` is `:736`,
    and T6 Step 2 item 3 now says why.
