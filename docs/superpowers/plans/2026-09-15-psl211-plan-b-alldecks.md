@@ -2825,3 +2825,20 @@ Nothing else was rejected.
   two-declaration file; the landed compile 10.45 GB around make) and the
   termination provenance; one 900 s recompile, log
   log-T8-endpoints-recompile.txt.
+- Closure batch landed as d43792c (psl211_endpoints.v and psl211_exec.v headers:
+  the dated range 10.45 GB through make / 17.15 GB probe P1b2, "Budget 17 GB on a
+  32 GB machine", the termination provenance, and the `profile_k_psl211_algebra`
+  docstring no longer claiming the threshold conversion the rows do directly).
+  The recompile: first attempt SIGTERM'd at about 270 s by the harness memory
+  guard (swap 19.2 of 20.5 GB used, RAM 13 GB free; psl211_endpoints.vo kept its
+  bytes); second attempt detached, 576.11 s vm_compute, 335.68 s Qed, 917.56 s
+  wall, max RSS 14.17 GB through the same make path that reported 10.45 GB on
+  the T3 run, so a single peak-RSS reading through make is not reproducible
+  and the headers' range stands (log-T8-endpoints-recompile.txt, both attempts).
+  Eleven stale targets rebuilt in 66 s; psl211_secrecy/recovery/mixing do not
+  depend on psl211_exec. Six-name sweep as expected.
+- Still open, recorded not fixed: the 0.49 s / 0.47 s termination pair has a
+  provenance sentence but no log under notes/probes/ (REVIEW-T3 finding 2's
+  free route: a probe file compiled with run.sh against psl211_exec.vo);
+  REVIEW-T5 #6/#10 and REVIEW-T6 #3-#6 are record items; REVIEW-T7's three
+  header wordings on psl211_rows.v land in the next style commit.
