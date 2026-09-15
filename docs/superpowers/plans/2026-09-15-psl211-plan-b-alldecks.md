@@ -2779,3 +2779,29 @@ manifest block is not a conversion bomb (#38).
   two files, and the plan says what it buys.
 
 Nothing else was rejected.
+
+## As built (2026-09-15, running record)
+
+- T1 e7504cb + 943c021 (review fixes); T2 cbf46c7, 5b06e02, f231e2b (rename
+  `psl211_profile_kE` -> `profile_k_psl211_algebra`, main symbol first as
+  `profile_k_s5_algebra`), 30d54ee (review fixes, fuel-220 termination measured
+  0.49 s / 0.47 s); T3 55933b6 (568.116 s vm_compute, 324.465 s Qed, 897.87 s
+  wall, max RSS 10.45 GB; the two frozen headers still cite the probe's 17.15 GB
+  peak, scheduled for the T8 closure batch); T4 e4b8b99 + 099aca0 (no fallback
+  split; `ad_fiber_at_row` needs an `ad_ok` premise, the audit's unconditional
+  form is false for readings nonzero off the coalition or repeating a code; the
+  step-11 failure's measured cause is ssreflect `rewrite` scanning both goal
+  sides and unfolding both 132-row literals, fixed by transitivity through a
+  one-table term; the empty coalition is handled inside `ad_pattern_classE`);
+  T5 bfc8e39 (4.94 s; assumption split 12 Closed / 2 two-axiom / 18 trio).
+- T5 placement error found at T6: `psl211_exact_witness` in psl211_models.v
+  imports manifest/pgg_tableau.v, which imports the manifest, which after T6
+  imports psl211_analysis -> psl211_models: a cycle ("Cannot load a library with
+  the same name as the current one"). Every other instance defines its witness
+  in its rows file (pgl27_rows.v:187, five_card_rows.v:270, s5_rows.v:256).
+  Repair: the witness leaves psl211_models.v (which drops the pgg_tableau
+  import) and is defined in psl211_rows.v by T7 with the same body. T6 landed in
+  two commits: 9904cfe (facade, _CoqProject, both script tables; the shell
+  script cannot run in this checkout layout, the python test passes 18/18) and
+  the manifest/client commit after the repair. The probes did not catch the
+  cycle because no probe compiled the manifest on top of psl211_models.
