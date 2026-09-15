@@ -24,7 +24,7 @@ Under the all-decks dealer the deck is uniform over every valid deck of the clas
 a block of the class's Steiner system carries the six heart codes in a uniform
 labelling and the complement carries the six club codes in a uniform labelling.
 The raw code reading is then independent of the class for every coalition of at
-most five positions (L24), because the number of class-`b` decks producing a
+most five seats (L24), because the number of class-`b` decks producing a
 given reading is the block count `N_A(b)` of the pattern times two factorials,
 and the block counts agree between the classes (`psl211_pattern_transfer`).
 
@@ -33,12 +33,13 @@ and the block counts agree between the classes (`psl211_pattern_transfer`).
 ```
 start    psl211_algebra                                          by algebra { ... }                        // Algebraic (P0 GO)
 supplied inputs (bool * psl211_deal) layout psl211_alldecks_layout expecting fst fuel 220                 // Executable (P3 GO)
-execute  terminates by vm_compute (0.4 s)                                                                  // Observed:
-         endpoints by psl211_alldecks_endpoints := supplied_endpointsE psl211_profile_endpoints (900 s, 17 GB, once)
+execute  terminates by psl211_alldecks_terminates (named lemma, proved by vm_compute, 0.4 s)              // Observed:
+         endpoints by psl211_alldecks_endpoints : instance_endpoints_stmt psl211_alldecks_params
+                      := supplied_endpointsE psl211_profile_endpoints  (cost 0 here; psl211_profile_endpoints itself is the 900 s, 17 GB fact, paid once)
          recon     by psl211_alldecks_recon := supplied_static_recon psl211_algebra psl211_alldecks_valid   //   Hv new, bookkeeping
-sample   psl211_exact_family  (index unit; law `U input `x `U G)                                          // Sampled
+sample   psl211_exact_family  (index unit; law psl211_alldecks_sampleP := `U input `x `U G)               // Sampled
 certify  ExactIndependence psl211_exact_witness  by L24 = bridge + fiber counts                            // AnalysisBridged, new mathematics
-|> publish BaselineClassicalOnly                                                                          // manifest row psl211_row_alldecks
+|> publish StaticExecutedOnly BaselineClassicalOnly                                                       // manifest row psl211_row_alldecks
 ```
 
 Roles. Objects: the five stack levels. Step justifications: the three run facts,
@@ -47,9 +48,9 @@ of `static_coalition_obs` with the position reading of the laid deck
 (`static_coalition_obsE`, pgg_instance.v:496). External components and their
 interfaces: `psl211_profile` enters as the `algebra` block's image (by `[]`);
 `psl211_pattern_transfer` (psl211_orbit.v:1118) enters as the step justification
-of the block-count equality; `perm_of_eq_card` (lib/perm_exchange.v) enters in the
-extension count; `inde_RV`/`fdist_prod` (infotheo) enter through the new bridge
-lemma. Outside the flow: the fixed-dealer colour result of Plan A (stays in
+of the block-count equality; `card_prescribed` (lib/perm_uniform.v:117) enters as
+the extension count; `inde_RV`/`fdist_prod` (infotheo) enter through the new bridge
+lemma `uniform_prod_inde_fiber`. Outside the flow: the fixed-dealer colour result of Plan A (stays in
 psl211_secrecy.v, no Tableau arm), the word walk (no spectral row: `sc_const` is
 per-input and is not claimed here), trace secrecy (not built, see section 6).
 
@@ -64,28 +65,48 @@ manifest/pgg_tableau.v. Nothing new.
   and the bridge lemma is stated on `X * G` with `s := fst`). The probe's
   left-nested quadruple is replaced by this pair; everything else in
   probe_p3_alldecks.v transfers with `x.1.1.1` becoming `x.1`.
-- `psl211_alldecks_seq (b, (j, ph, pc))`: position p in row j of the class-b
-  table carries heart code `ph (rank of p in the row)`, every other position
-  carries `6 + pc (rank of p in the complement)`; ranks by `index` in the
-  ascending row (probe_p3_alldecks.v:54-62). `psl211_alldecks_layout` casts it to
-  `12.-tuple 'I_12` through `Imod12`.
+- `psl211_alldecks_seq (b, (j, ph, pc))`: position p in block line j of the
+  class-b table carries heart code `ph (rank of p in the line)`, every other
+  position carries `6 + pc (rank of p in the complement)`; ranks by `index` in
+  the ascending line (probe_p3_alldecks.v:54-62). `psl211_alldecks_layout` casts
+  it to `12.-tuple 'I_12` through `psl211_code12` (the probe's `Imod12`, renamed
+  under the psl211_ prefix decision). The cast to the framework's
+  `(ts_T' (pga_scheme psl211_algebra)).+1.-tuple 'I_(pga_n psl211_algebra).+2`
+  is by conversion (audit-naming N35, compiled both ways).
 - `psl211_alldecks_valid : forall x, ts_valid (pga_scheme psl211_algebra) x.1
-  (psl211_alldecks_layout x)`, i.e. `psl211_orbit_valid x.1 (layout x)`: distinct
-  codes, heart set a block of one system, class bit recovered.
+  (psl211_alldecks_layout x)`, i.e. `psl211_orbit_valid x.1 (layout x)`
+  (`ts_valid (pga_scheme psl211_algebra) = psl211_orbit_valid` by erefl): distinct
+  codes, heart set a block of one system, class bit recovered. `expecting fst` is
+  what makes `supplied_static_recon`'s premise `ts_valid _ (expected x) (layout x)`
+  and this statement one term.
 - Sample space `(bool * psl211_deal) * pgg_gT psl211_M`, law
-  `psl211_alldecksP := (`U psl211_alldecks_gt0) `x (`U psl211_G_pos)`; secret
-  `psl211_alldecks_secret u := u.1.1`; family index `unit` as pgl27_exact_family.
+  `psl211_alldecks_sampleP := (`U psl211_alldecks_gt0) `x (`U psl211_G_pos)`
+  (second-mode spelling as `s5_rand_sampleP`; Plan A keeps `psl211P`); adapter
+  `psl211_alldecks_sample := MkSampleAdapter sampleT psl211_alldecks_sampleP fst snd`;
+  secret `psl211_alldecks_secret u := u.1.1`; family `psl211_exact_family` with
+  index `unit` as pgl27_exact_family.
 - Fuel 220 (P1b2: sufficient, cost flat).
-- Files: `psl211_alldecks.v` (layout, validity, fiber counting, L24 at the
-  probability layer; imports psl211_blocks/orbit/scheme and design_privacy),
+- Files: `psl211_alldecks.v` (layout, validity, the per-cut fiber counting C5,
+  stated on the layout alone; imports psl211_blocks/orbit/scheme and
+  lib/perm_uniform; no framework import),
   `psl211_exec.v` (players cache, algebra block, both parameter records,
   termination, recon), `psl211_endpoints.v` (ONLY `psl211_profile_endpoints`, its
   own file, header records 900 s / 17 GB / no concurrent rocqworker),
   `psl211_models.v` (observed execution, sample adapter, static-obs
-  identification, executed content reader, exact family, witness ingredients),
+  identification C2, L24 at the probability layer C6 through the bridge C3,
+  executed content reader, exact family, witness ingredients),
   `psl211_rows.v` (Tableau program, published row, rowE), `psl211_analysis.v`
   (facade `PSL211Analysis`, seven sections), manifest and client edits.
-  `reconstruct/design_privacy.v` gains the generic bridge (section 4, C3).
+  `reconstruct/design_privacy.v` gains the generic bridge `uniform_prod_inde_fiber`
+  (section 4, C3).
+- `_CoqProject`: every psl211 line (now 193-201, after the manifest) moves above
+  `manifest/pgg_analysis_manifest.v` (187) next to `instances/pgl27/pgl27_analysis.v`
+  (186), in the order blocks, group, closure, orbit, scheme, profile, secrecy,
+  recovery, mixing, alldecks, exec, endpoints, models, analysis; `psl211_rows.v`
+  goes after `manifest/pgg_tableau_syntax.v` beside the other row files.
+  `reconstruct/design_privacy.v` (170) already precedes all of them.
+- The claim ledger's status and pass columns stay in this note; no statement
+  comment in a landed file carries a status marker.
 
 ## 4. Claim ledger
 
@@ -96,18 +117,19 @@ manifest/pgg_tableau.v. Nothing new.
 | A3 | `profile_endpoints_stmt psl211_algebra 220` by `vm_compute`, 562 s + 331 s Qed, 17 GB, no axioms | probed | P1b2, P1d | GO, measured |
 | A4 | `supplied_endpointsE` carries A3 to the all-decks mode; `supplied_static_recon psl211_algebra Hv` gives recon | probed | P3 Checks | GO (shape) |
 | B1 | validity, distinct codes: `uniq (psl211_alldecks_layout x)` for all x, proved symbolically in j from the table certificates (rows uniq, size 6, entries < 12: psl211_blocks.v) | new proof shape | miniature Qed over the real tables, no vm_compute over inputs | to probe |
-| B2 | validity, heart set: `psl211_heart_set (layout x) = list_to_set (row j)` and it lies in the system of x.1 | new proof shape | Qed | to probe |
-| B3 | validity, class: `psl211_orbit_class (layout x) = x.1`, from `psl211_subset_class` on rows and `psl211_blocks_disjoint` | precedent shape (psl211_orbit_encode_valid) | Qed | to probe |
-| C1 | sample adapter `MkSampleAdapter` with `sa_sampleT := (bool * psl211_deal) * pgg_gT psl211_M`, `sa_arg := fst`, `sa_cut := snd` elaborates at `instance_exec psl211_alldecks_params` | precedent (pgl27_fixed_sample) | elaborates | to probe |
-| C2 | `static_coalition_obs C x g = [ffun i => if i \in C then tnth (layout x) (pgg_rho g i) else <default>]` in supplied mode, via `static_coalition_obsE` | precedent (pgl27_static_obsE, P2 dealt version) | Qed | to probe |
-| C3 | generic bridge (design_privacy.v): for finTypes X, G, A : {set G} nonempty, s : X -> bool with `#\|[set x \| s x]\| = #\|[set x \| ~~ s x]\|`, and f : X -> G -> T with, for every v, equal counts of `[set u : X * G \| s u.1 == b & u.2 \in A & f u.1 u.2 == v]` over b, the law `(`U HX) `x (`U HA)` makes `fun u => f u.1 u.2` independent of `fun u => s u.1` | new proof shape | miniature Qed at a toy X, G; mutation: drop the equal-class-sizes premise, must fail | to probe |
-| C4 | extension count at 'I_6: for K : {set 'I_6} and t : 'I_6 -> 'I_6 injective on K, `#\|[set ph : {perm 'I_6} \| [forall k in K, ph k == t k]]\| = (6 - #\|K\|)`!`; existence of one extension (through `perm_of_eq_card` or a mathcomp lemma the probe names) and the coset bijection with `perm_on (~: K)` (`card_perm`) | new proof shape | Qed at 'I_6, with the mutation t non-injective giving 0 | to probe |
-| C5 | fiber decomposition: for fixed g, C with 0 < #\|C\| <= 5, and a reading v, `#\|[set y : psl211_deal \| reading (b, y) g == v]\| = #\|[set B in blocks b \| B :&: P == A]\| * e_h * e_c` with P := pgg_rho g @: C (or its inverse image, fixed by C2), A the heart positions of v inside P, `e_h`, `e_c` the two extension counts, or 0 when v is not colour-consistent; the block count equal across b by `psl211_pattern_transfer` (empty C separately) | new proof shape | decomposition probe: headline L24 derived to Qed from the supporting statements Admitted; C4 miniature; the per-g count stated and Qed on ONE fixed g and ONE small coalition by vm_compute as a sanity check | to probe |
-| C6 | L24 at the probability layer: `psl211_alldecksP \|= (fun u => static_coalition_obs C u.1 u.2) _\|_ psl211_alldecks_secret` for #\|C\| <= 5, from C3 with C5 summed over g in G | composition | decomposition probe Qed | to probe |
+| B2 | validity, heart set: `psl211_heart_set (layout x) = psl211_list_to_set (block line j of class x.1)` and it lies in the system of x.1 | new proof shape | Qed | to probe |
+| B3 | validity, class: `psl211_orbit_class (layout x) = x.1`, i.e. `psl211_subset_class (psl211_heart_set (layout x)) = x.1` with `psl211_subset_class` the boolean membership in `psl211_mirror_blocks` (psl211_orbit.v:123), from B2 and `psl211_blocks_disjoint` for the hexad side | precedent shape (psl211_orbit_encode_valid) | Qed | to probe |
+| C1 | sample adapter `MkSampleAdapter` with `sa_sampleT := (bool * psl211_deal) * pgg_gT psl211_M`, `sa_sampleP := psl211_alldecks_sampleP`, `sa_arg := fst`, `sa_cut := snd` elaborates at `instance_exec psl211_alldecks_params` | precedent (pgl27_fixed_sample) | elaborates | to probe |
+| C2 | `static_coalition_obs C x g = [ffun i => if i \in C then tnth (layout x) (pgg_rho g i) else ord0]` in supplied mode: `static_coalition_obsE` gives the right side with a `tcast` (vanishes by conversion) and `tnth (pi_starts _) i` (one `tnth_ord_tuple`), audit-naming N2 | precedent (pgl27_rows.v:142-150, P2 dealt version) | Qed | to probe |
+| C3 | generic bridge `uniform_prod_inde_fiber` (design_privacy.v): for finTypes X, G, A : {set G} nonempty, s : X -> bool with `#\|[set x \| s x]\| = #\|[set x \| ~~ s x]\|`, and f : X -> G -> T with, for every v, equal counts of `[set u : X * G \| s u.1 == b & u.2 \in A & f u.1 u.2 == v]` over b, the law `(`U HX) `x (`U HA)` makes `fun u => f u.1 u.2` independent of `fun u => s u.1`. Nearest landed results, neither applicable: `colour_view_indep_fibers` (design_privacy.v:110, secret is the literal first coordinate, counts over G alone) and `inde_prod_fst` (transitivity_privacy.v:88, second RV is `fst`, premise a conditional law equal for every value); here the secret is `s \o fst` and the view is not independent of `fst` | new proof shape | miniature Qed at a toy X, G; mutation: drop the equal-class-sizes premise, must fail | to probe |
+| C4 | extension count at 'I_6: ALREADY PROVED, `card_prescribed` (lib/perm_uniform.v:117: `injective s -> injective v -> k <= N -> #\|prescribed s v\| = (N - k)`!`, with `prescribed` :33, `Sn_k_transitive` :58, `prescribed_coset` :92, `prescribed_extend` :210). What remains is one restatement from a set `K : {set 'I_6}` with a map `t` to the `'I_k -> 'I_6` sequence shape `prescribed` takes, and the zero case when the prescribed values are not injective | precedent (audit-naming N26) | restatement Qed at 'I_6 | to probe |
+| C5 | fiber decomposition: for fixed g, C with 0 < #\|C\| <= 5, and a reading v, `#\|[set y : psl211_deal \| reading (b, y) g == v]\| = #\|[set B in blocks b \| B :&: P == A]\| * e_h * e_c` with P := pgg_rho g @: C (fixed by C2), `#\|P\| = #\|C\|` by `card_imset` and `perm_inj`, A the heart positions of v inside P (row C5a), `A \subset P`, `e_h`, `e_c` the two extension counts from C4, or 0 when v is not colour-consistent; the block count equal across b by `psl211_pattern_transfer` (premises `0 < #\|C\|`, `#\|C\| <= 5`, `A \subset C`; empty C separately) | new proof shape | decomposition probe: headline L24 derived to Qed from the supporting statements Admitted; C4 miniature; the per-g count stated and Qed on ONE fixed g and ONE small coalition by vm_compute as a sanity check | to probe |
+| C5a | the passage from the per-seat reading to the pattern: for a reading v of C at cut g on a deck laid over block B, the set of seats reading a heart code is `[set i in C \| psl211_is_heart (v i)]` and its image under `pgg_rho g` is `B :&: P`; stated through `psl211_heart_set`/`psl211_is_heart` on the image set | new (audit-naming N32) | Qed in the decomposition probe | to probe |
+| C6 | L24 at the probability layer (lives in psl211_models.v, needs psl211_algebra): `psl211_alldecksP \|= (fun u => static_coalition_obs C u.1 u.2) _\|_ psl211_alldecks_secret` for #\|C\| <= 5, from C3 with C5 summed over g in G | composition | decomposition probe Qed | to probe |
 | C7 | `ExactWitness` for `amf_sample psl211_exact_family R tt` built as pgl27_exact_witness (eq_ind_r over the viewE identification) | precedent (pgl27_rows.v:187-196) | typechecks with C6 Admitted | to probe |
 | D1 | executed content reader and `content_traceE` in supplied mode (pgl27_models.v:168-215 shape), reading the endpoint fact from the probe's `.vo` | precedent | typechecks | to probe |
-| E1 | Tableau row: `supplied inputs ... expecting ... fuel 220`, `execute terminates by vm_compute endpoints by psl211_alldecks_endpoints recon by psl211_alldecks_recon`, `sample`, `certify ExactIndependence`, `\|> publish BaselineClassicalOnly`; named obligations only (no inline applications in notation slots) | precedent (pgl27_rows.v:124-129, 270-275; five_card_rows.v:117-135 for a non-dealt mode) | typechecks with the witness Admitted | to probe |
-| E2 | facade `PSL211Analysis` with one alias per section (1 profile, 2 exec plug, 3 content reader, 4 exact family, 5 observed_recovers, 6 exec_exact_view_indep, 7 StaticExecutedOnly status), manifest `Require Export`, row `psl211_row_alldecks`, checker pins, client Checks | precedent (pgl27_analysis.v, manifest 655-670, client) | plan task | precedent |
+| E1 | Tableau row: `supplied inputs ... expecting ... fuel 220`, `execute terminates by psl211_alldecks_terminates endpoints by psl211_alldecks_endpoints recon by psl211_alldecks_recon`, `sample`, `certify ExactIndependence`, `\|> publish StaticExecutedOnly BaselineClassicalOnly` (two arguments, pgg_tableau_syntax.v:395); named obligations only: the inline `terminates by vm_compute` form forks the observed execution and the following `sample` is rejected (pgl27_rows.v:362, compiled Fail) | precedent (pgl27_rows.v:124-129, 270-275; five_card_rows.v:123-135 for a non-dealt mode) | typechecks with the witness Admitted | to probe |
+| E2 | facade `PSL211Analysis` with one alias per section (1 profile, 2 exec plug, 3 content reader, 4 exact family, 5 observed_recovers, 6 exec_exact_view_indep, 7 StaticExecutedOnly status). Manifest obligations, per audit-naming N33: the `Require Export` (pgg_analysis_manifest.v:74), a documented row block (~65 lines, shape of :121-185), `Definition psl211_row_alldecks` (shape of :659), a per-instance deterministic checker block (~270 lines, shapes at :739-1011, :1012-1303, :1304-1526), and five pins per row (three erefl, `Check (row : AnalysisPathRow)`, `Check (apr_model row : AnalysisModelFamily PSL211Analysis.observed)`, :1535-1541); client: header wording (three facades, eight rows) and one Check per section (pgg_analysis_client.v). Scripts that enumerate facades by hand and need a psl211 entry: scripts/profile_facade_check.sh:87-100 (`EXPECTED` table; `psl211_profile` is a depth-zero Definition, psl211_profile.v:123) and scripts/profile_facade_check_test.py:25-27 | precedent (pgl27_analysis.v, manifest, client) | plan task, sized honestly | precedent |
 | F1 | every published object BaselineClassicalOnly: Print Assumptions of the row, the witness and L24 report exactly the boolp trio; the run facts and validity closed | invariant | rocq repl over the .vo chain | plan task |
 | G1 | `ExactLeakAt 6` under the all-decks dealer | optional | not claimed in this plan; tightness stays with `psl211_colour_view_dep_k6` at the fixed dealer | not claimed |
 
@@ -128,25 +150,29 @@ manifest/pgg_tableau.v. Nothing new.
   `psl211_alldecksP`. Not per input, not per cut.
 - Vacuity: both classes have `132 * 6! * 6!` inputs (`psl211_alldecks_cardE`,
   P3), the group has 660 elements (`psl211_G_pos`), every coalition of size 1..5
-  is covered by `psl211_count_ok` through `psl211_pattern_transfer`, the empty
+  is covered by `psl211_count_ok_k_le5` (psl211_orbit.v:1096) through
+  `psl211_pattern_transfer`, the empty
   coalition is trivial. The threshold is the profile's own `profile_k = 6`.
 - Cited library objects, one line each: `static_coalition_obs`,
   `static_coalition_obsE`, `supplied_input_params`, `supplied_static_recon`,
   `supplied_endpointsE`, `instance_observed` (protocol/pgg_instance.v);
-  `MkSampleAdapter`, `sa_coalition_view` (security/pgg_sample_adapter.v);
+  `MkSampleAdapter` (security/pgg_sample_adapter.v; `sa_coalition_view` enters only
+  through the facade's observer section, not the witness);
   `MkAnalysisModelFamily` (manifest/pgg_analysis_status.v); `ExactWitness`,
   `MkExactWitness`, `tableau_start`, the `supplied inputs`, `execute`, `sample`,
   `certify`, `publish` notations (manifest/pgg_tableau.v, pgg_tableau_syntax.v);
   `inde_RV`, `fdist_prod`, `fdist_uniform`, `fdistmap` (infotheo);
-  `uniform_fdistmap_fiberE` (reconstruct/design_privacy.v); `perm_on`,
-  `card_perm`, `perm_of_eq_card` (mathcomp perm.v, lib/perm_exchange.v);
+  `uniform_fdistmap_fiberE` (reconstruct/design_privacy.v); `prescribed`,
+  `card_prescribed`, `prescribed_extend` (lib/perm_uniform.v); `perm_on`,
+  `card_perm` (mathcomp perm.v); `perm_of_eq_card` (lib/perm_exchange.v) serves
+  Plan A's re-deal only and is not used here;
   `psl211_pattern_transfer`, `psl211_mirror_blocks`, `psl211_hexad_blocks`,
   `psl211_blocks_disjoint`, `psl211_subset_class`, `psl211_orbit_valid`
   (instances/psl211).
 
 ## 6. Not built, with reasons
 
-- No spectral (word) row: `sc_const` is per input and fails at three positions
+- No spectral (word) row: `sc_const` is per input and fails at three seats
   under the dealt mode; under the all-decks mode it is a different statement
   nobody has measured. The corollaries `psl211_endpoint_mixing`,
   `psl211_joint_mixing` stay as cut-level results.
@@ -157,4 +183,18 @@ manifest/pgg_tableau.v. Nothing new.
 
 ## 7. Audit verdicts
 
-(filled after the soundness and naming audits of 2026-09-15)
+Naming/precedent/structure audit (Opus, 2026-09-15,
+notes/probes/2026-09-15-psl211-planb/AUDIT-NAMING-2.md): NO-GO, 43 findings, six
+blocking (N13 inline terminates rejected before `sample`; N12 publish takes two
+statuses; N26 C4 already proved by `card_prescribed`; N37/N33/N34 the fourth
+facade's real size, _CoqProject move, scripts tables; N36 C6 cannot live in
+psl211_alldecks.v; N28 the bridge had no name). All folded above: sketch lines
+rewritten, C1 gains `sa_sampleP`, C2 default `ord0` and the `pi_starts` step, C3
+named `uniform_prod_inde_fiber` with the two nearest results cited, C4 reduced to
+a restatement, C5 gains `A \subset P` and `card_imset`, C5a added, E1 and E2
+rewritten, `Imod12` renamed `psl211_code12`, `psl211_alldecksP` renamed
+`psl211_alldecks_sampleP`, `psl211_list_to_set` and `psl211_count_ok_k_le5` cited
+by their live names, seat/position/block line/row vocabulary fixed, five_card
+cite narrowed to 123-135, lib/perm_uniform.v added to section 5.
+
+Soundness audit: pending.
