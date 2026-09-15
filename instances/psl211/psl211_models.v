@@ -28,11 +28,16 @@
 (*                                                                            *)
 (* Naming: the law of the model is psl211_alldecksP, where the repository's   *)
 (* other two-mode instance writes the mode prefix with a _sampleP suffix      *)
-(* (s5_models.v:105 s5_rand_sampleP).                                         *)
+(* (s5_models.v:106 s5_rand_sampleP).                                         *)
 (*                                                                            *)
 (* content_of lives in instances/pgl27/pgl27_trace.v and nothing shared       *)
 (* exports it, so the row reader is restated here as psl211_content_of and    *)
 (* pinned in both directions by psl211_content_ofE.                           *)
+(*                                                                            *)
+(* The exact arm's witness over psl211_exact_family is built in               *)
+(* psl211_rows.v, beside the Tableau surface whose ExactWitness record gives  *)
+(* it its type, which is where the other three instances build theirs. This   *)
+(* file therefore imports nothing from the manifest layer.                    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_alldecksP        == the law of the model, decks times cuts        *)
@@ -44,14 +49,14 @@
 (*   psl211_exec_content_trace == the coalition's rows read through it        *)
 (*   psl211_content_trace    == the same reader as a random variable          *)
 (*   psl211_exact_family     == the model as a unit-indexed family            *)
-(*   psl211_exact_witness    == the exact arm's witness over that family      *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_alldecks_inputTE == the plug's run argument carrier is the        *)
 (*                              description carrier                           *)
 (*   psl211_alldecks_cut_distE == the model's cut is the uniform shuffle      *)
 (*   psl211_alldecks_static_obsE == the framework's reading at a seat is the  *)
-(*                              card the laid deck puts at its cut image      *)
+(*                              card the laid deck puts at its cut image,     *)
+(*                              and ord0 outside the coalition                *)
 (*   psl211_alldecks_exact_viewE == the same with the description inside the  *)
 (*                              sample point                                  *)
 (*   psl211_alldecks_observed_recovers == the packaged run decodes to the     *)
@@ -59,10 +64,10 @@
 (*   psl211_exec_rowE        == a seat's executed trace is row 2 + i          *)
 (*   psl211_content_traceE   == the executed content reader is that random    *)
 (*                              variable                                      *)
-(*   psl211_alldecks_exec_viewE == the executed coalition reader is the       *)
-(*                              static one                                    *)
 (*   psl211_alldecks_secret_expectedE == the secret is the value the run      *)
 (*                              recovers                                      *)
+(*   psl211_alldecks_exec_viewE == the executed coalition reader is the       *)
+(*                              static one                                    *)
 (*   psl211_alldecks_view_indep == a coalition of at most five seats reads a  *)
 (*                              view independent of the chirality             *)
 (*   psl211_alldecks_static_indep == the same on the framework's side         *)
@@ -86,7 +91,7 @@ From pgg_smc Require Import pgg_sample_adapter.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 From pgg_reconstruct Require Import design_privacy.
 From pgg_smc Require Import pgg_instance.
-From pgg_smc Require Import pgg_analysis_status pgg_tableau.
+From pgg_smc Require Import pgg_analysis_status.
 From pgg_smc Require Import psl211_group psl211_orbit.
 From pgg_smc Require Import psl211_scheme psl211_profile psl211_exec.
 From pgg_smc Require Import psl211_endpoints psl211_alldecks.
@@ -195,9 +200,10 @@ Qed.
 
 (** psl211_alldecks_static_obsE — seat i's entry of the framework's static
     coalition reading is the card the laid deck puts at the shuffle image of
-    seat i. Every security statement of this instance is made about the
-    left-hand side and every counting argument about the right, so this
-    equation is the whole of what carries one to the other. *)
+    seat i, and ord0 at every seat outside C. Every security statement of this
+    instance is made about the left-hand side and every counting argument
+    about the right, so this equation is the whole of what carries one to the
+    other. *)
 Lemma psl211_alldecks_static_obsE (C : {set seatT}) (x : psl211_inputT)
     (g : pgg_gT psl211_M) (i : seatT) :
   @static_coalition_obs psl211_algebra psl211_alldecks_params C x g i
@@ -250,7 +256,7 @@ Qed.
 (** psl211_alldecks_read_position — seat i of the coalition reads the card the
     laid deck puts at position pgg_rho g i. The position is the image of the
     seat under the cut and not its preimage, which is what fixes the set the
-    block census of the counting argument is taken over. *)
+    block count of the counting argument is taken over. *)
 Lemma psl211_alldecks_read_position (C : {set seatT}) (x : psl211_inputT)
     (g : pgg_gT psl211_M) (i : seatT) :
   i \in C ->
@@ -317,8 +323,9 @@ Definition psl211_exec_content_trace (C : {set seatT}) (x : psl211_inputT)
 Lemma psl211_alldecks_fuelE : ep_fuel eP = psl211_fuel.
 (* Stated on its own so that the row equation below never has to compare two
    interpreter applications at two spellings of the fuel: the kernel, asked
-   for that comparison, unfolds run_interp, which is the 561-second reduction
-   of psl211_endpoints.v (measured 2026-09-15). *)
+   for that comparison, unfolds run_interp. That reduction measured 561.4 s in
+   probe P1b2 and 568.1 s in the compile of psl211_endpoints.v itself, both on
+   2026-09-15. *)
 Proof. by []. Qed.
 
 (** psl211_exec_rowE — the executed participant trace at seat i is row 2 + i
@@ -367,11 +374,13 @@ Lemma psl211_content_ofE (N : nat) (m : pgg_data N.+1) (x : 'I_N.+1)
   psl211_content_of (m :: PGG_hand (x :: l) :: rest) = x.
 Proof. by []. Qed.
 
-(** psl211_alldecks_secret_expectedE — the secret the exact witness is about
-    is the value the run recovers, read off the same sample point. ExactWitness
-    has no field relating its secret to the run's expected value, so without
-    this equation the witness could be independent of a bit the protocol never
-    reconstructs and the published independence would be true and empty. *)
+(** psl211_alldecks_secret_expectedE — the secret the exact arm certifies is
+    the value the run recovers, read off the same sample point. The exact
+    arm's witness, built in psl211_rows.v beside the Tableau surface that
+    types it, has no field relating its secret to the run's expected value, so
+    without this equation that secret could be independent of a bit the
+    protocol never reconstructs and the published independence would be true
+    and empty. *)
 Lemma psl211_alldecks_secret_expectedE (R : realType)
     (u : psl211_inputT * pgg_gT psl211_M) :
   psl211_alldecks_secret R u
@@ -425,7 +434,9 @@ by move=> v; exact: psl211_alldecks_fiber_transfer.
 Qed.
 
 (** psl211_alldecks_static_indep — the same independence on the framework's
-    side, which is the form the exact arm's witness field demands. *)
+    side, which is the form the exact arm's witness demands of it. That
+    witness is built in psl211_rows.v, beside the Tableau surface that types
+    it. *)
 Lemma psl211_alldecks_static_indep (R : realType) (C : {set seatT}) :
   (#|C| <= 5)%N ->
   psl211_alldecksP R
@@ -443,26 +454,6 @@ Definition psl211_exact_family : AnalysisModelFamily psl211_alldecks_observed :=
   @MkAnalysisModelFamily psl211_alldecks_observed (fun _ => unit)
     (fun R _ => psl211_alldecks_sample R).
 
-(** psl211_exact_witness — the exact arm's witness: the chirality as a random
-    variable on the all-decks sample space, and at every coalition of fewer
-    than six seats the independence of that coalition's reading from it. The
-    framework derives the zero mutual information, the unchanged conditional
-    entropy and the closure under post-processing from this one field, so the
-    witness is the whole of what this instance owes the exact arm. *)
-Definition psl211_exact_witness (R : realType) (idx : unit)
-  : ExactWitness (amf_sample psl211_exact_family R idx) :=
-  @MkExactWitness R psl211_algebra psl211_alldecks_params
-    (amf_sample psl211_exact_family R idx) bool (psl211_alldecks_secret R)
-    (fun C HC =>
-       (* The field's premise is #|C| < profile_k (instance_profile
-          psl211_algebra), the threshold is six by profile_k_psl211_algebra,
-          and the coercion to #|C| <= 5 is by conversion. *)
-       let H5 : (#|C| <= 5)%N := HC in
-       (eq_ind_r
-          (fun v => psl211_alldecksP R |= v _|_ psl211_alldecks_secret R)
-          (psl211_alldecks_view_indep R H5)
-          (psl211_alldecks_exact_viewE C))).
-
 (** psl211_alldecks_coalition_distE — the executed coalition distribution of
     the all-decks model is the pushforward of the model's own law along the
     instance-side reading. This is the equation that makes a counting result
@@ -473,6 +464,10 @@ Lemma psl211_alldecks_coalition_distE (R : realType) (C : {set seatT}) :
   @sa_coalition_dist R (instance_profile psl211_algebra)
     (instance_exec psl211_alldecks_params) (psl211_alldecks_sample R) 0 C
   = fdistmap (fun u => psl211_alldecks_view C u.1 u.2) (psl211_alldecksP R).
+(* The funext step of the pgl27 script is not needed here:
+   psl211_alldecks_exec_view_instE is already an equality of functions, where
+   pgl27's bridge lemma is pointwise, so exact: closes the goal congr fdistmap
+   leaves. *)
 Proof.
 rewrite /sa_coalition_dist; congr fdistmap.
 exact: psl211_alldecks_exec_view_instE.
