@@ -132,11 +132,11 @@ in an existing surface.
 ## 1. Scope
 
 **Built.** One `_CoqProject` reordering, one generic lemma in
-`reconstruct/design_privacy.v`, five new files under `instances/psl211/`
-(`psl211_exec.v`, `psl211_endpoints.v`, `psl211_alldecks.v`,
-`psl211_models.v`, `psl211_analysis.v`, `psl211_rows.v` — six, counting the row
-file), the manifest's fourth facade block and ninth row, the client's Checks
-and header wording, and two hand-maintained script tables.
+`reconstruct/design_privacy.v`, six new files under `instances/psl211/`,
+namely `psl211_exec.v`, `psl211_endpoints.v`, `psl211_alldecks.v`,
+`psl211_models.v`, `psl211_analysis.v` and `psl211_rows.v`, the manifest's
+fourth facade block and ninth row, the client's Checks and header wording, and
+two hand-maintained script tables.
 
 **Not built, with the reason.**
 
@@ -178,27 +178,60 @@ and header wording, and two hand-maintained script tables.
 
 `make` derives its order from `coqdep`, not from the order of lines in
 `_CoqProject`, so "below the endpoint fact" means "inside the import closure of
-`psl211_endpoints.v`", never "earlier in the file list". That closure, measured
-from the live import lines, is exactly:
+`psl211_endpoints.v`", never "earlier in the file list".
+
+That closure was computed twice, once by the plan audit and once here, by
+walking the live `Require` lines transitively over `lib`, `protocol`, `groups`,
+`security`, `smc`, `reconstruct`, `instances/*` and `manifest`, modelling
+`psl211_exec.v` by the import block of `psl211_planb_defs.v` that T2 copies and
+`psl211_endpoints.v` by T3's own four `Require` lines. Both runs agree: **35
+already-landed files, plus `psl211_exec.v` and `psl211_endpoints.v`
+themselves, 37 in all.**
 
 ```
-lib/perm_exchange.v                (psl211_scheme.v imports it)
-lib/perm_uniform.v                 (reconstruct/algebraic_rigidity.v imports it,
-                                    psl211_profile.v imports algebraic_rigidity)
-reconstruct/*  (sharing framework, covering_scheme, input_encoding,
-                transitivity_privacy, algebraic_rigidity)
-protocol/*, smc/*, security/pgg_sample_adapter.v  (the framework)
-instances/psl211/psl211_blocks.v, psl211_group.v, psl211_closure.v,
-                 psl211_orbit.v, psl211_scheme.v, psl211_profile.v
-instances/psl211/psl211_exec.v
+groups/pgg_raag.v
+instances/psl211/psl211_blocks.v      instances/psl211/psl211_closure.v
+instances/psl211/psl211_group.v       instances/psl211/psl211_orbit.v
+instances/psl211/psl211_profile.v     instances/psl211/psl211_scheme.v
+lib/perm_exchange.v                   lib/perm_uniform.v
+protocol/card_exchange_pismc.v        protocol/pgg_algebra_syntax.v
+protocol/pgg_execution_plug.v         protocol/pgg_input_commitment.v
+protocol/pgg_instance.v               protocol/pgg_interface.v
+protocol/pgg_monodromy_profile.v      protocol/pgg_observed_execution.v
+protocol/pgg_run.v                    protocol/pgg_session_types.v
+reconstruct/algebraic_rigidity.v      reconstruct/cover_tradeoff.v
+reconstruct/covering_scheme.v         reconstruct/input_encoding.v
+reconstruct/pgg_sharing_framework.v   reconstruct/pgg_sum_mod.v
+reconstruct/pgl_bound.v               reconstruct/transitivity_privacy.v
+security/pgg_collusion_bound.v        security/pgg_sample_adapter.v
+security/pgg_security_solver.v        security/pgg_weighted_words.v
+smc/graded_resource.v                 smc/pismc.v
+smc/smc_interpreter.v                 smc/smc_session_types.v
++ instances/psl211/psl211_exec.v      + instances/psl211/psl211_endpoints.v
 ```
 
-`reconstruct/design_privacy.v` is **not** in it: the only psl211 file that
-imports it is `psl211_secrecy.v`, which nothing in the executed cone imports.
-`psl211_alldecks.v` is **not** in it either, because `psl211_endpoints.v`
-imports `psl211_exec.v` alone and `psl211_exec.v` carries no all-decks
-declaration. Both of those are consequences of Decisions 2 and 3 below and they
-are the reason the plan is ordered as it is.
+Seven of these are reached only transitively and are easy to believe free:
+`groups/pgg_raag.v`, `reconstruct/cover_tradeoff.v`,
+`reconstruct/pgg_sum_mod.v`, `reconstruct/pgl_bound.v`,
+`security/pgg_collusion_bound.v`, `security/pgg_security_solver.v` and
+`security/pgg_weighted_words.v`. Editing any one of them costs 900 seconds and
+17 GB.
+
+Trimming T2's import list to the minimum (T2 Step 1b) removes exactly two,
+`security/pgg_sample_adapter.v` and `security/pgg_weighted_words.v`, measured
+here; the other five arrive through `psl211_profile.v` and `psl211_closure.v`
+and cannot be trimmed from `psl211_exec.v` at all.
+
+`reconstruct/design_privacy.v` is **not** in the closure: the only psl211 file
+that imports it is `psl211_secrecy.v`, which nothing in the executed cone
+imports, and a whole-tree scan finds no other file whose transitive closure
+reaches it. `psl211_alldecks.v` is **not** in it either, because
+`psl211_endpoints.v` imports `psl211_exec.v` alone and `psl211_exec.v` carries
+no all-decks declaration. Also outside, and therefore free to edit after T3:
+`psl211_mixing.v`, `psl211_secrecy.v`, `psl211_recovery.v`,
+`instances/pgl27/pgl27_trace.v`, `manifest/pgg_tableau.v` and
+`manifest/pgg_tableau_syntax.v`. Both exclusions are consequences of Decisions
+2 and 3 below and they are the reason the plan is ordered as it is.
 
 ### Freeze rule
 
@@ -321,9 +354,14 @@ instances/psl211/psl211_orbit.v
 instances/psl211/psl211_scheme.v
 instances/psl211/psl211_profile.v
 instances/psl211/psl211_secrecy.v
-instances/psl211/psl211_recovery.v
 instances/psl211/psl211_mixing.v
+instances/psl211/psl211_recovery.v
 ```
+
+This is the current order of `_CoqProject:193-201` unchanged. The move is a
+move and nothing else: do not reorder the nine lines while relocating them, and
+in particular keep `psl211_mixing.v` before `psl211_recovery.v` as they stand
+today.
 
 Reason: `manifest/pgg_analysis_manifest.v` will need `PSL211Analysis.observed`
 to type `apr_model psl211_row_alldecks`, so the whole psl211 cone must precede
@@ -473,8 +511,14 @@ and stage only the two sources.
 **Files:**
 - Create: `instances/psl211/psl211_exec.v`
 - Modify: `_CoqProject` (one line, after `instances/psl211/psl211_mixing.v`)
-- Source: `notes/probes/2026-09-15-psl211-planb/psl211_planb_defs.v`, whole file,
-  with the fuel rename of design note section 8
+- Source: `notes/probes/2026-09-15-psl211-planb/psl211_planb_defs.v:8-30` (the
+  imports and the flags) and `:32-94` (every declaration; the file is 94 lines),
+  plus `probe_p1b2_endpoints_small.v:19-21` for the termination lemma, which the
+  probe states as `psl211_dealt_terminates_small` against
+  `psl211_dealt_params_small`. Decision 8 collapses the two fuels, so the
+  probe's `_small` twin and the lemma landed here are one statement. The probe
+  writes `Proof. Time by vm_compute. Time Qed.`; the `Time` wrappers are
+  dropped here and the measurement lives in the file header
 
 This file is deliberately minimal. Everything it contains is something
 `psl211_endpoints.v` or `psl211_alldecks.v` needs, and nothing else, because
@@ -493,14 +537,22 @@ paragraph naming the freeze rule as a fact about the file, not as a status
 marker:
 
 ```
-(* Every file that Requires this one, and this file itself, lies inside the    *)
-(* import closure of psl211_endpoints.v, whose single declaration costs 561    *)
-(* seconds of vm_compute, 331 seconds of Qed and a 17 GB peak.  Rebuilding     *)
-(* this file from byte-identical sources changes the library digest and        *)
-(* invalidates that .vo.                                                       *)
+(* This file and its whole import closure lie below psl211_endpoints.v, whose*)
+(* single declaration costs 561 seconds of vm_compute, 331 seconds of Qed and *)
+(* a 17 GB peak.  Rebuilding this file from byte-identical sources changes    *)
+(* the library digest and invalidates that .vo.                              *)
 ```
 
-Imports, copied verbatim from `psl211_planb_defs.v:7-25`:
+Every line of a landed `instances/psl211/*.v` file is at most 80 columns wide,
+measured across all ten of them, so each header-box line above is exactly 80
+including the closing `*)`. Keep that width in every file this plan lands, and
+rewrap the copied code where a probe exceeded it: `probe_c3_bridge.v` has six
+lines over 80 (`:73`, `:119`, `:122`, `:127`, `:159`, `:190`, up to 83), and
+`reconstruct/design_privacy.v`, its destination, measures 80.
+
+Imports, copied verbatim from `psl211_planb_defs.v:8-30`, which is the whole
+block from `From HB Require Import structures.` through the second
+`Local Open Scope`:
 
 ```coq
 From HB Require Import structures.
@@ -528,10 +580,10 @@ Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 ```
 
-Declarations, verbatim from `psl211_planb_defs.v:32-95` with `psl211_fuel := 380`
-and `psl211_fuel_small := 220` replaced by the single `psl211_fuel := 220`,
-`psl211_dealt_params_small` deleted, and `psl211_profile_kE` renamed from the
-probe's `psl211_profile_kE` (unchanged):
+Declarations, verbatim from `psl211_planb_defs.v:32-94` with `psl211_fuel := 380`
+and `psl211_fuel_small := 220` replaced by the single `psl211_fuel := 220` and
+`psl211_dealt_params_small` deleted, plus `psl211_dealt_terminates` from
+`probe_p1b2_endpoints_small.v:19-21` at the collapsed fuel:
 
 ```coq
 Definition psl211_players : seq 'I_(pi_T' psl211_PI).+1 :=
@@ -582,8 +634,7 @@ probe's two-budget comment describes an experiment rather than the object:
 (** psl211_fuel — the interpreter budget of the fourteen-process run: the
     dealer, the verifier and the twelve seats.  220 steps, the budget the
     eight-card instance uses.  The interpreter halts once no process advances,
-    so a budget past the number of communication rounds is never spent, and
-    the endpoint reduction below costs the same at 380 as at 220. *)
+    so a budget past the number of communication rounds is never spent. *)
 
 (** psl211_dealt_terminates — every process of the dealer-dealt run reaches
     Finish inside that budget.  The reduction is symbolic in the cut, so it
@@ -594,10 +645,32 @@ probe's two-budget comment describes an experiment rather than the object:
     at most five of the twelve seats. *)
 ```
 
+- [ ] **Step 1b: Trim the import list, before T3 commits**
+
+The declaration list above is minimal, but the import block copied from the
+probe prelude is not, and every import widens the closure that T3 freezes. Drop
+each import in turn, recompile, and keep the drop if the file still compiles.
+The candidates are `pismc`, `smc_session_types`, `pgg_session_types`,
+`card_exchange_pismc`, `pgg_input_commitment`, `pgg_run`, `pgg_weighted_words`,
+`pgg_observed_execution`, `pgg_sample_adapter`, `pgg_execution_plug`,
+`variation_dist`, `realType_ext`, `fdist`, `proba`, `boolp`, `reals`,
+`algebraic_rigidity`, `input_encoding`, `covering_scheme` and
+`pgg_sharing_framework`; what the file genuinely needs is `smc_interpreter` for
+the reduction, `pgg_interface`, `pgg_instance`, `pgg_algebra_syntax` for the
+`algebra { ... }` surface, and the five psl211 files.
+
+Measured here, this trim removes exactly two files from the closure,
+`security/pgg_sample_adapter.v` and `security/pgg_weighted_words.v`, taking it
+from 37 to 35. The other five transitively reached files arrive through
+`psl211_profile.v` and `psl211_closure.v` and cannot be trimmed away from this
+file at any import list. Re-measure the closure after the trim and correct the
+number in the header box and in section 2 before T3 commits, because after T3
+this file cannot be touched for the price of a measurement.
+
 - [ ] **Step 2: Register, compile, check**
 
 Add `instances/psl211/psl211_exec.v` to `_CoqProject` after
-`instances/psl211/psl211_mixing.v`, regenerate the makefile, then:
+`instances/psl211/psl211_recovery.v`, regenerate the makefile, then:
 
 ```bash
 rocq makefile -f _CoqProject -o Makefile.rocq
@@ -612,7 +685,11 @@ Expected peak: 1.6 GB.
 printf 'From pgg_smc Require Import psl211_exec.\nPrint Assumptions psl211_players_enumE.\nPrint Assumptions psl211_profileE.\nPrint Assumptions psl211_profile_kE.\nPrint Assumptions psl211_dealt_recon.\nPrint Assumptions psl211_dealt_terminates.\n' | rocq repl -q $PSL211_RFLAGS
 ```
 
-Expected: Closed for all five.
+Expected: Closed for all five. Four of them were read back directly from the
+probe `.vo` chain by the plan audit. The fifth, `psl211_dealt_terminates`,
+could not be, because `probe_p1a_terminates.vo` is stale and reports
+inconsistent assumptions over `planb.psl211_planb_defs`; its all-decks twin,
+the same `by vm_compute` at the same fuel, measured Closed twice.
 
 - [ ] **Step 3: Commit**
 
@@ -628,7 +705,10 @@ git commit -m "feat(psl211): the algebraic record of the twelve-card instance an
 **Files:**
 - Create: `instances/psl211/psl211_endpoints.v`
 - Modify: `_CoqProject` (one line, after `instances/psl211/psl211_exec.v`)
-- Source: `notes/probes/2026-09-15-psl211-planb/probe_p1b2_endpoints_small.v:15-17`
+- Source: `notes/probes/2026-09-15-psl211-planb/probe_p1b2_endpoints_small.v:15-17`,
+  with the `_small` suffixes dropped from both the lemma name and the fuel
+  constant under Decision 8, which makes the probe's statement and this one one
+  statement
 
 - [ ] **Step 0: Check the machine before starting**
 
@@ -655,13 +735,13 @@ Import Prenex Implicits.
 
 (** psl211_profile_endpoints — at every content readout, the executed
     endpoints of a run over this profile are its static group-action reading.
-    Keeping the readout a variable removes the dealt card from the reduction,
-    so one decision at the profile serves every run driven over it: the
+    Keeping the readout a variable removes the dealt card from the statement,
+    so the equation holds of every run driven over this profile: the
     dealer-dealt mode reads it through profile_endpointsE and the
-    supplied-layout mode through supplied_endpointsE, and neither pays a
-    reduction of its own.  This is the step that turns a claim about the
-    interpreter's messages into a claim about the group action, and it is the
-    only place in the development where that claim is decided. *)
+    supplied-layout mode through supplied_endpointsE.  This is what carries a
+    claim about the interpreter's messages to a claim about the group action,
+    and every security statement of this instance is made on the group-action
+    side. *)
 Lemma psl211_profile_endpoints :
   profile_endpoints_stmt psl211_algebra psl211_fuel.
 Proof. Time by vm_compute. Time Qed.
@@ -718,7 +798,12 @@ probe's.
 printf 'From pgg_smc Require Import psl211_endpoints.\nPrint Assumptions psl211_profile_endpoints.\n' | rocq repl -q $PSL211_RFLAGS
 ```
 
-Expected: Closed. Probe P1d measured exactly this over the P1b `.vo`.
+Expected: Closed. Probe P1d measured Closed for this statement at **fuel 380**,
+over `probe_p1b_endpoints.vo`. The fuel-220 run,
+`probe_p1b2_endpoints_small.v`, carries no `Print Assumptions` and was never
+read back, so this is the first reading at the fuel the row uses. The two
+statements differ only in a `nat` literal and the reduction is the same, so a
+result other than Closed would be a surprise worth stopping for.
 
 - [ ] **Step 3: Commit, and start the freeze**
 
@@ -736,13 +821,17 @@ From this commit on, the freeze rule of section 2 is in force.
 **Files:**
 - Create: `instances/psl211/psl211_alldecks.v`
 - Modify: `_CoqProject` (one line, after `instances/psl211/psl211_endpoints.v`)
-- Source: `planb_alldecks_defs.v` (the carrier, the layout, the parameters, the
-  cardinalities); `probe_b1_uniq.v` (the whole file below the preamble);
-  `probe_b2_heart.v`; `probe_b3_class.v`; `probe_c4_extcount.v`;
-  `probe_c5_sanity.v:44-58` (the two reading lemmas);
-  `probe_c2_bridge.v:31-41` (the view definition);
-  `probe_c56_decomposition.v:106-140` (the two fiber statements, verbatim; their
-  proofs are new)
+- Source: `planb_alldecks_defs.v:34-106` (the carrier, the layout, the
+  parameters and the two cardinalities; `:108-118` is T5's and must not be
+  copied here, or `psl211_alldecksP` and `psl211_alldecks_secret` land in two
+  files and the second will not compile); `probe_b1_uniq.v` (the whole file
+  below the preamble); `probe_b2_heart.v`; `probe_b3_class.v`;
+  `probe_c4_extcount.v`; `probe_c5_sanity.v:48-55`
+  (`psl211_alldecks_read_setE` alone; `psl211_alldecks_read_position` at
+  `:37-46` is T5's); `probe_c2_bridge.v:32-42` (the view definition, docstring
+  through the closing `else ord0].`);
+  `probe_c56_decomposition.v:107-128` (the two fiber statements with their
+  docstrings at `:94-128`; their proofs are new)
 
 This is the largest task and the only one with an unproved statement in it.
 The file is outside the endpoint fact's import closure, so it may be edited and
@@ -750,9 +839,11 @@ recompiled freely at about 20 seconds a pass.
 
 - [ ] **Step 1: Carrier, layout and cardinalities**
 
-Copied from `planb_alldecks_defs.v:37-118`, with `Imod12` renamed
-`psl211_code12` and exported (audit N24: `Imod12` is probe-only and
-off-convention), and `psl211_fuel_small` renamed `psl211_fuel`:
+Copied from `planb_alldecks_defs.v:34-106`, which runs from the `psl211_deal`
+docstring to the `Qed.` of `psl211_alldecks_cardE` and stops there. `:108-118`,
+the law and the secret, belongs to T5 Step 1 and is not copied here. `Imod12`
+is renamed `psl211_code12` and exported (audit N24: `Imod12` is probe-only and
+off-convention), and `psl211_fuel_small` is renamed `psl211_fuel`:
 
 ```coq
 Notation psl211_deal := (('I_132 * {perm 'I_6} * {perm 'I_6})%type).
@@ -860,7 +951,8 @@ The exported statement:
     orbit scheme's validity predicate, and it is what lets the dealer be
     driven by a uniform draw over the whole input carrier instead of by a
     chosen representative deal. *)
-Lemma psl211_alldecks_uniq (x : psl211_inputT) : uniq (psl211_alldecks_layout x).
+Lemma psl211_alldecks_uniq (x : psl211_inputT) :
+  uniq (psl211_alldecks_layout x).
 ```
 
 Four traps the probe paid for, each to be carried as a source comment at the
@@ -1047,8 +1139,11 @@ Statement comments:
 
 - [ ] **Step 7: The coalition's reading and the positions it covers**
 
-The view definition is copied from `probe_c2_bridge.v:31-41` and the two
-reading lemmas from `probe_c5_sanity.v:44-58`:
+The view definition is copied from `probe_c2_bridge.v:32-42`, docstring through
+the closing `else ord0].`, and one reading lemma from
+`probe_c5_sanity.v:48-55`. The probe's other reading lemma,
+`psl211_alldecks_read_position` at `:37-46`, mentions `static_coalition_obs`
+and lands in T5 Step 2 instead:
 
 ```coq
 Local Notation seatT :=
@@ -1100,10 +1195,15 @@ input.
 
 - [ ] **Step 8: The two fiber statements, and the one new proof**
 
-The two statements are copied verbatim from `probe_c56_decomposition.v:106-140`,
-where they were left `Admitted` and where the headline, the witness and the
-published row were derived from them to `Qed`. Their types are therefore pinned
-by compiled evidence; only the proofs are new.
+The two statements are copied from `probe_c56_decomposition.v:107-128`, with
+their docstrings at `:94-128`, where they were left `Admitted` and where the
+headline, the witness and the published row were derived from them to `Qed`.
+Their types are therefore pinned by compiled evidence and only the proofs are
+new. The copy is verbatim modulo the `cardT` notation: the probe spells the
+reading's carrier out as
+`{ffun seatT -> 'I_(pgg_N' (mp_M (instance_profile psl211_algebra))).+1}`
+and the version below uses this file's own `Local Notation cardT` for it, which
+is the same term.
 
 ```coq
 (** psl211_alldecks_per_cut_count — at one cut, one coalition of at most five
@@ -1114,8 +1214,9 @@ by compiled evidence; only the proofs are new.
     for the heart labelling and one for the club labelling; the block counts
     agree between the two systems because both are S(5,6,12) designs and the
     pattern has at most five points, and the two extension counts do not
-    depend on the class at all.  This is the per-cut form and it is the proof
-    route, not a statement the published row rests on. *)
+    depend on the class at all.  This is the per-cut form;
+    psl211_alldecks_fiber_transfer is its sum over the group and is the form
+    the bridge consumes. *)
 Lemma psl211_alldecks_per_cut_count (C : {set seatT}) (g : pgg_gT psl211_M)
     (v : {ffun seatT -> cardT}) :
   (#|C| <= 5)%N ->
@@ -1125,11 +1226,11 @@ Lemma psl211_alldecks_per_cut_count (C : {set seatT}) (g : pgg_gT psl211_M)
 (** psl211_alldecks_fiber_transfer — the same counts summed over the cuts of
     the group: for every reading of a coalition of at most five seats, the
     deck descriptions and cuts producing it are as many under one chirality as
-    under the other.  This is the premise the generic bridge consumes, and it
-    is the whole of what separates the published row from a finished result:
-    Print Assumptions of the row in the decomposition probe lists this
-    statement, the endpoint equation and the boolp trio, and nothing else. *)
-Lemma psl211_alldecks_fiber_transfer (C : {set seatT}) (v : {ffun seatT -> cardT}) :
+    under the other.  This is the counting premise the uniform-pair bridge
+    consumes, and the only instance-specific input to the published
+    independence. *)
+Lemma psl211_alldecks_fiber_transfer (C : {set seatT})
+    (v : {ffun seatT -> cardT}) :
   (#|C| <= 5)%N ->
   #|[set u : psl211_inputT * pgg_gT psl211_M |
        (u.1.1 == true) && (u.2 \in pgg_G psl211_M)
@@ -1139,30 +1240,52 @@ Lemma psl211_alldecks_fiber_transfer (C : {set seatT}) (v : {ffun seatT -> cardT
        && (psl211_alldecks_view C u.1 u.2 == v)]|.
 ```
 
-**The route, in numbered steps. This is the implementer's route, not a verified
-proof.** Every lemma named below exists with the statement given; the
-composition has not been compiled. If a step resists, fix that step rather than
-changing the two statements above, which are pinned by the decomposition probe.
+**The route, in numbered steps.** Steps 1, 2, 3, the subset half of step 5, 8,
+9 and 10 are **compiled**, in the plan audit's counter-probes
+`notes/probes/2026-09-15-psl211-planb/audit-plan/audit_t4_skeleton.v` and
+`audit_t4_percut.v`, both rc 0. Steps 5, 6 and 7 have **no compiled support at
+all** and carry the whole new mathematics. Step 11 is compiled as a failure and
+is the one step with a measured cost. Copy the compiled scripts verbatim; treat
+the rest as the implementer's route, and if a step resists, fix that step rather
+than changing the two statements above, which are pinned by the decomposition
+probe.
 
 For `psl211_alldecks_fiber_transfer` from `psl211_alldecks_per_cut_count`:
 
-1. Partition each side over the second coordinate. `card_fiber_sum` of T1 is
-   this shape already; the direct form is `partition_big` over
-   `fun u : psl211_inputT * pgg_gT psl211_M => u.2` followed by `sum1_card`,
-   giving
-   `#|[set u | (u.1.1 == b) && (u.2 \in pgg_G) && (view C u.1 u.2 == v)]|
-    = \sum_(g in pgg_G psl211_M) #|[set y : psl211_deal | view C (b, y) g == v]|`.
-   The inner set is over `psl211_deal` and not over `psl211_inputT`, so the
-   step also strips the class bit; do that with `card_imset` along
-   `fun y => (b, y)`, injective by `pair_injl`, or with `eq_card` after
-   `cardsX`.
-2. `eq_bigr` with `psl211_alldecks_per_cut_count` at each `g`, then `done`.
+1. **Proved outright** as `audit_B1` in `audit_t4_skeleton.v:66-83`. Copy the
+   six-line script; neither `card_fiber_sum` nor `card_imset` nor `cardsX` is
+   needed, and the class bit is stripped by `reindex_onto`, not by an injection
+   lemma. The name `pair_injl` this plan named in its first draft does not
+   exist: `Fail Check pair_injl.` succeeds under the full import set and
+   `Check pair_inj.` reports the reference not found.
+
+   ```coq
+   rewrite -sum1_card.
+   rewrite (partition_big (fun u : psl211_inputT * pgg_gT psl211_M => u.2)
+                          (fun g => g \in pgg_G psl211_M)) /=; last first.
+     by move=> u; rewrite inE => /andP[/andP[_ ->]].
+   apply: eq_bigr => g Hg.
+   rewrite (reindex_onto (fun y : psl211_deal => ((b, y), g))
+                         (fun u : psl211_inputT * pgg_gT psl211_M => u.1.2)) /=;
+     last by case=> [[bb y] gg]; rewrite inE /= =>
+       /andP[/andP[/andP[/eqP -> _] _] /eqP ->].
+   rewrite -sum1_card; apply: eq_bigl => y.
+   by rewrite !inE /= !eqxx Hg /= !andbT.
+   ```
+
+2. **Proved outright** as `audit_B2` and `audit_fiber_transfer_from_per_cut` in
+   `audit_t4_skeleton.v:91-121`: `rewrite !audit_B1`, then
+   `apply: eq_bigr => g _; exact: Hcut`. Note what this measured: the summed
+   statement follows from the per-cut statement **alone**, and the `#|C| <= 5`
+   premise is consumed only in feeding the per-cut count, never in the
+   summation.
 
 For `psl211_alldecks_per_cut_count`:
 
 3. Set `P := [set (@pgg_rho psl211_M g i) | i in C]`.
    `psl211_alldecks_read_setE` gives `#|P| = #|C|`, hence `#|P| <= 5` from the
-   premise and `0 < #|P|` from `0 < #|C|`.
+   premise and `0 < #|P|` from `0 < #|C|`. Compiled as `audit_step3` in
+   `audit_t4_percut.v:49-50`.
 4. Empty coalition first, by `case: (posnP #|C|)`. When `#|C| = 0`, `C = set0`
    by `cards_eq0`, so `psl211_alldecks_view C x g = [ffun _ => ord0]` for every
    `x` by `ffunP`, `ffunE` and `in_set0`; both sides are then `#|[set: psl211_deal]|`
@@ -1171,11 +1294,18 @@ For `psl211_alldecks_per_cut_count`:
    `psl211_pattern_transfer` has `0 < #|C|` as a premise.
 5. Read the pattern off the reading (ledger row C5a). Put
    `A := [set (@pgg_rho psl211_M g i) | i in [set i in C | psl211_is_heart (v i)]]`.
-   Then `A \subset P` by `imsetS` and `subsetIl`, and for a deal whose hearts
-   sit on the block `B`, seat `i \in C` reads a heart exactly when
-   `pgg_rho g i \in B`, so `B :&: P == A`. Prove that as a `Local` lemma
-   `ad_pattern_ofE`; it is the passage from the per-seat reading to the
-   set-level pattern and it is the one step neither row C2 nor row C5 states.
+   The subset half is compiled as `audit_step5_sub` in `audit_t4_percut.v:52`:
+   `by rewrite /A /P imsetS//; apply/subsetP => i; rewrite inE => /andP[]`.
+   Note the second half of that script: `A` is the image of a comprehension and
+   not of an intersection, so **`subsetIl` does not state the inclusion** and
+   the `subsetP` form above is what closes it. The alternative is to restate the
+   seat set as `C :&: [set i | psl211_is_heart (v i)]`, after which `subsetIl`
+   does apply; pick one spelling and keep it.
+   The other half is the pattern equation: for a deal whose hearts sit on the
+   block `B`, seat `i \in C` reads a heart exactly when `pgg_rho g i \in B`, so
+   `B :&: P == A`. Prove it as a `Local` lemma `ad_pattern_ofE`; it is the
+   passage from the per-seat reading to the set-level pattern and it is the one
+   step neither row C2 nor row C5 states. **No compiled support.**
 6. Colour consistency. Define the two prescriptions the reading forces:
    `th : 'I_6 -> 'I_6` sending the rank in `B` of a position of `A` to the
    heart code `v` reads there, and `tc : 'I_6 -> 'I_6` likewise on the
@@ -1183,27 +1313,70 @@ For `psl211_alldecks_per_cut_count`:
    set, or `tc` is not, the fiber is empty on both sides by
    `psl211_perm_ext_count0`, and `0 = 0` closes the case. Injectivity of `v`
    restricted to `C` is what decides this, and it does not mention the class.
+   **No compiled support.**
 7. Count at a fixed block line. For a fixed `j : 'I_132` the set of
    `(ph, pc)` producing `v` is the product of the two prescribed sets, so by
    `cardsX`, `psl211_perm_ext_count` twice and step 5's pattern condition,
    its cardinality is `(6 - #|A|)`! * (6 - #|P| + #|A|)`!` when
-   `psl211_inter (nth [::] (psl211_class_tbl b) j) P' == A'` holds and `0`
+   `psl211_inter (nth [::] (psl211_class_tbl b) (val j)) P' == A'` holds and `0`
    otherwise, where `P' := map val (enum P)` and `A' := map val (enum A)`.
-   State this as a `Local` lemma `ad_fiber_at_row`.
+   State this as a `Local` lemma `ad_fiber_at_row`. **No compiled support, and
+   this is where the whole new mathematics sits.** Four things the statement of
+   step 7 must get right, each a separate obligation:
+   - **State it at the destructured deal**, `(b, (j, pp.1, pp.2))`, never at an
+     abstract `y : psl211_deal`. `psl211_alldecks_seq` has a
+     `let: (b, (j, ph, pc)) := x in` and only reduces at a destructured input;
+     that is the same trap Step 2 records for `ad_seqE` and `ad_entryE`.
+   - (a) **`#|K| = #|A|`**, where `K : {set 'I_6}` is the set of heart RANKS the
+     coalition pins, the image of `A` under the rank map inside the block. This
+     is a `card_imset` along that map, injective on the block because the block
+     is an ascending six-list, and it is what turns
+     `psl211_perm_ext_count`'s `(6 - #|K|)`!` into the `(6 - #|A|)`!` step 7
+     asserts. Without it the two sides carry different factorials and step 11
+     cannot close. Name it `ad_heart_rank_card`.
+   - (b) **the club decoding.** The reading gives a card code in `'I_12` at a
+     club position; the prescription `tc` needs an element of `'I_6`, so the
+     decoding `val (v i) - 6` back into `'I_6` must be written and its
+     well-formedness proved from `psl211_is_heart (v i) = false`. Name it
+     `ad_club_code`.
+   - (c) **the injectivity premise.** `psl211_perm_ext_count` demands
+     `{in K &, injective t}`. Discharge it from injectivity of `v` on `C`,
+     which is the colour-consistent branch of step 6, and note that the
+     non-injective branch is where `psl211_perm_ext_count0` is used. Name it
+     `ad_prescription_inj`.
 8. Sum over the block line. `psl211_alldecks_row` reads the table at `val j`,
    so the deal set splits as
    `\sum_(j : 'I_132) #|[set pp | ...]|` by `partition_big` over
-   `fun y : psl211_deal => y.1.1`, and by step 7 the summand is a constant times
-   an indicator, so `big_distrl` (or `big_const` after `bigID`) turns the sum
-   into
-   `#|[set j : 'I_132 | psl211_inter (nth [::] (psl211_class_tbl b) j) P' == A']|
-    * (6 - #|A|)`! * (6 - #|P| + #|A|)`!`.
+   `fun y : psl211_deal => y.1.1` (`Local` lemma `ad_split_over_row`), and by
+   step 7 the summand is a constant times an indicator.
 9. Bridge the block-line count to the table count. `psl211_pattern_count tbl C A`
    is `count (fun R => psl211_inter R C == A) tbl` (`psl211_blocks.v:463`) and
    `size (psl211_class_tbl b) = 132` is `ad_class_tbl_size` of Step 2, so
    `#|[set j : 'I_132 | p (nth [::] tbl (val j))]| = count p tbl`
    by `cardE`, `size_filter` and `val_enum_ord`. State it as a `Local` lemma
    `ad_card_index_count`; it is generic in the predicate and in the table.
+
+   Steps 8 and 9 assembled are **compiled** as `audit_step89` in
+   `audit_t4_percut.v:85-101`, from `ad_fiber_at_row`, `ad_split_over_row` and
+   `ad_card_index_count` as hypotheses. The script is:
+
+   ```coq
+   move=> Hsz.
+   rewrite ad_split_over_row (eq_bigr _ (fun j _ => ad_fiber_at_row b j)).
+   rewrite -big_mkcond /= sum_nat_const.
+   congr (_ * _)%N.
+   have -> : psl211_pattern_count (psl211_class_tbl b) (map val (enum P))
+                                  (map val (enum A))
+           = count ptn (psl211_class_tbl b) by [].
+   rewrite -(ad_card_index_count ptn Hsz).
+   by apply: eq_card => j; rewrite !inE.
+   ```
+
+   Two corrections this measured. The lemma that fires on the constant-summand
+   sum is **`sum_nat_const`**, not `big_distrl`, `bigID` or `big_const`. And
+   the goal after `sum_nat_const` still carries `psl211_pattern_count` rather
+   than `count`, so the delta step written out above is needed; it closes
+   `by []` but it does not happen on its own.
 10. Transfer the table count across the classes. `psl211_pattern_countE`
     (`psl211_orbit.v:998`, premises `all psl211_asc6 tbl` and `uniq tbl`,
     supplied by `psl211_tbl_ok_asc6 psl211_tbl_ok_mirrorT` /
@@ -1212,18 +1385,39 @@ For `psl211_alldecks_per_cut_count`:
     `psl211_pattern_transfer` (`psl211_orbit.v:1118`) equates the two finset
     counts at `P` and `A`. Its three premises are `0 < #|P|`, `#|P| <= 5` and
     `A \subset P`, all at `P` and none at `C`; the two cardinality premises are
-    transported from `C` by `card_imset (perm_inj _)` (step 3). The soundness
-    auditor compiled that instantiation as `audit_transfer_at_P` in
-    `audit-soundness/audit_c2_tcast.v`; read it before writing this step.
-    This route never needs `list_to_setK`, which is `Local` in
-    `psl211_orbit.v` and therefore unavailable.
+    transported from `C` by `card_imset (perm_inj _)` (step 3).
+    **Compiled twice.** `audit-soundness/audit_c2_tcast.v:35-45`
+    (`audit_transfer_at_P`) does it at `C : {set 'I_12}`, and
+    `audit-plan/audit_t4_skeleton.v:47-59` (`audit_A1`) does it at
+    `C : {set seatT}`, which is the type this route actually has; the same file
+    proves `seatT = 'I_12`, `cardT = 'I_12` and `(C : {set seatT}) = C :>
+    {set 'I_12}`, each `by []`. The whole of step 10 is compiled as
+    `audit_step10` in `audit_t4_percut.v:106-119`:
+    `psl211_pattern_countE` **backwards** at both tables with its four premises,
+    then `-/psl211_mirror_blocks -/psl211_hexad_blocks`, then
+    `psl211_pattern_transfer`. This route never needs `list_to_setK`, which is
+    `Local` at `psl211_orbit.v:809` and therefore unavailable.
 11. Multiply back. The two labelling factors of step 7 are identical on both
     sides because they depend on `#|A|` and `#|P|` alone, so the class equality
-    of step 10 gives the whole equality by `congr`.
+    of step 10 gives the whole equality.
+
+    **This step has a measured cost and a measured failure.** Written as three
+    rewrites followed by `exact: erefl`, with the two table-size hypotheses
+    `size psl211_mirror_tbl = 132` and `size psl211_hexad_tbl = 132` sitting in
+    the context, it was **killed twice, at 280 s and at 420 s, one rocqworker at
+    3.3 GB** (`audit_t4_percut.v:121-137`, left in the file commented out with
+    its measurement). Steps 8, 9 and 10 in the same file compile in seconds, so
+    the cost is in this last step alone. This is the repository's own
+    `done`-walks-the-table hazard, the same one Plan A recorded for a `Local
+    Notation` over a BFS certificate. Two rules follow: discharge or `clear` the
+    table-size hypotheses before the final rewrite, so that nothing table-valued
+    is in scope when the goal is closed; and end with an explicit `exact:`,
+    never with `by` or `done`, which are free to search the context.
 
 Named mathcomp and repository lemmas the route expects: `partition_big`,
-`sum1_card`, `big_distrl`, `bigID`, `big_const`, `eq_bigr`, `eq_card`,
-`card_imset`, `perm_inj`, `imsetS`, `subsetIl`, `cardsX`, `cardE`,
+`reindex_onto`, `sum1_card`, `sum_nat_const`, `big_mkcond`, `eq_bigr`,
+`eq_bigl`, `eq_card`, `card_imset`, `perm_inj`, `imsetS`, `subsetP`,
+`cardsX`, `cardE`,
 `size_filter`, `val_enum_ord`, `posnP`, `cards_eq0`, `ffunP`, `ffunE`,
 `in_set0`, `congr`; and `psl211_perm_ext_count`, `psl211_perm_ext_count0`,
 `psl211_pattern_count`, `psl211_pattern_countE`, `psl211_pattern_transfer`,
@@ -1231,14 +1425,21 @@ Named mathcomp and repository lemmas the route expects: `partition_big`,
 `psl211_tbl_ok_mirrorT`, `psl211_tbl_ok_hexadT`, `psl211_is_heart`,
 `psl211_heart_set`, `psl211_list_to_set`.
 
-**Budget and fallback.** The two statements together are between 250 and 450
-lines of proof script with five or six `Local` helpers, and they are the only
-unproved statements in the plan. Budget one working day. If step 8 or step 9
-stalls, split this task into two commits at the natural seam: commit T4a with
-everything through step 7 plus `psl211_alldecks_per_cut_count` proved, and
-commit T4b with steps 8 to 11 and `psl211_alldecks_fiber_transfer`. Both
-commits compile, because `psl211_alldecks_per_cut_count` is a self-contained
-statement and nothing above `psl211_alldecks.v` is written yet.
+**Budget and fallback.** Steps 1, 2, 3, 5-subset, 8, 9 and 10 are done and cost
+only transcription. What is left is steps 5-pattern, 6 and 7 with their three
+named sub-lemmas `ad_heart_rank_card`, `ad_club_code` and
+`ad_prescription_inj`, plus `ad_split_over_row`, `ad_card_index_count` and the
+assembly of step 11 under the two rules above. Estimate 250 to 450 lines of
+proof script with eight or nine `Local` helpers, and budget one working day,
+of which step 7 is most of it. If step 7 stalls, split this task into two
+commits at the natural seam: commit T4a with everything through step 7 plus
+`psl211_alldecks_per_cut_count` proved, and commit T4b with the summation and
+`psl211_alldecks_fiber_transfer`. Both commits compile, because
+`psl211_alldecks_per_cut_count` is a self-contained statement and nothing above
+`psl211_alldecks.v` is written yet. The `audit-plan/` counter-probes state the
+route's helpers as section `Hypothesis`es and derive the assembly from them, so
+they double as a scaffold: land the helpers one at a time against that file
+before moving them into `psl211_alldecks.v`.
 
 **What is already known about these statements, so that effort is not spent
 re-deciding it.** L24 is true at the real tables: `audit_alldecks.py` checks the
@@ -1271,7 +1472,17 @@ first for a `rewrite` or `case` that opens `psl211_class_tbl`.
 printf 'From pgg_smc Require Import psl211_alldecks.\nPrint Assumptions psl211_alldecks_uniq.\nPrint Assumptions psl211_alldecks_heart_setE.\nPrint Assumptions psl211_alldecks_subset_valid.\nPrint Assumptions psl211_alldecks_classE.\nPrint Assumptions psl211_alldecks_valid.\nPrint Assumptions psl211_alldecks_ts_valid.\nPrint Assumptions psl211_alldecks_gt0.\nPrint Assumptions psl211_alldecks_cardE.\nPrint Assumptions psl211_alldecks_terminates.\nPrint Assumptions psl211_alldecks_recon.\nPrint Assumptions psl211_perm_ext_count.\nPrint Assumptions psl211_perm_ext_count0.\nPrint Assumptions psl211_alldecks_read_setE.\nPrint Assumptions psl211_alldecks_per_cut_count.\nPrint Assumptions psl211_alldecks_fiber_transfer.\n' | rocq repl -q $PSL211_RFLAGS
 ```
 
-Expected: **Closed for every one of the fifteen.** Nothing in this file touches
+Expected: **Closed for the thirteen already measured, and Closed for the two new
+counting theorems if their proofs use nothing classical.** The thirteen are read
+back from `log-probe_b1_uniq.txt`, `log-probe_b2_heart.txt`,
+`log-probe_b3_class.txt`, `log-probe_c4_extcount.txt`, `log-probe_c5_sanity.txt`
+and `log-probe_c56_decomposition.txt`, plus `psl211_alldecks_recon`,
+`psl211_alldecks_gt0` and `psl211_alldecks_cardE` measured by the plan audit.
+The two that are not measured are exactly `psl211_alldecks_per_cut_count` and
+`psl211_alldecks_fiber_transfer`, which are `Admitted` in the decomposition
+probe at `:112` and `:128`; every lemma the route above uses is itself Closed,
+so a boolp axiom appearing on either of them means a classical step crept into
+the new proof. Nothing in this file touches
 `funext` and nothing sits in a section with a `realType` variable, so a boolp
 axiom appearing here is a defect, not a floor. Also confirm the file carries
 zero `Admitted`, zero `Axiom`, zero `Hypothesis` and zero `Parameter`:
@@ -1296,13 +1507,17 @@ git commit -m "feat(psl211): the all-decks layout, its validity, and equal deal 
 **Files:**
 - Create: `instances/psl211/psl211_models.v`
 - Modify: `_CoqProject` (one line, after `instances/psl211/psl211_alldecks.v`)
-- Source: `planb_alldecks_defs.v:101-118` (the law and the secret);
+- Source: `planb_alldecks_defs.v:108-118` (the law and the secret, and nothing
+  above `:108`, which is T4's);
   `probe_c1_adapter.v` (the adapter and the cut law);
   `probe_c2_bridge.v:43-100` (the four identifications);
-  `probe_c5_sanity.v:44-49` (the framework-side reading at a seat);
+  `probe_c5_sanity.v:37-46` (`psl211_alldecks_read_position`, docstring through
+  its `Qed.`);
   `probe_d1_observed.v` (the observed execution, the executed content reader,
   the fuel and row equations, the secret-is-recovered lemma);
-  `probe_c56_decomposition.v:143-200` (the headline, the family, the witness);
+  `probe_c56_decomposition.v:134-185` (the headline, the static form, the family
+  and the witness, docstring of `psl211_alldecks_view_indep` through the closing
+  paren of `psl211_exact_witness`);
   `instances/pgl27/pgl27_models.v:355-376` (the shape of the corollary)
 
 - [ ] **Step 1: The law, the secret and the sample adapter (ledger row C1)**
@@ -1373,7 +1588,8 @@ Statement comment for the law, naming the dealer:
 
 Copy `probe_c2_bridge.v:43-100` verbatim, less its `Print Assumptions` block
 and its two `Fail Definition`s, and add the framework-side reading at one seat
-from `probe_c5_sanity.v:44-49`. The four statements, with
+from `probe_c5_sanity.v:37-46`, which is that lemma's docstring through its
+`Qed.`. The four statements, with
 `psl211_alldecks_view` now coming from `psl211_alldecks.v`:
 
 ```coq
@@ -1499,7 +1715,7 @@ before being killed.
 - [ ] **Step 5: L24 at the probability layer, the family and the witness
   (ledger rows C6, C7, C7a)**
 
-Copy `probe_c56_decomposition.v:143-200` verbatim, with the two supports now
+Copy `probe_c56_decomposition.v:134-185` verbatim, with the two supports now
 real:
 
 ```coq
@@ -1566,24 +1782,55 @@ reconstructs. Its statement comment must say that.
 ```coq
 (** psl211_alldecks_exec_exact_view_indep — at five seats the executed
     coalition observation of the all-decks model and the chirality have a
-    product joint distribution.  This is psl211_alldecks_view_indep read over
-    the executed sample layer, and it is the alias the analysis facade
-    publishes as its security theorem. *)
-Corollary psl211_alldecks_exec_exact_view_indep (R : realType) (C : {set seatT}) :
+    product joint distribution, for a coalition of at most five of the twelve
+    seats.  This is psl211_alldecks_view_indep transported to the executed
+    sample layer, so the independence is a statement about what the
+    interpreter's messages contain and not only about the instance-side
+    reading. *)
+Corollary psl211_alldecks_exec_exact_view_indep (R : realType)
+    (C : {set seatT}) :
   (#|C| <= 5)%N ->
-  fdistmap (fun u => (psl211_alldecks_view C u.1 u.2, psl211_alldecks_secret R u))
+  fdistmap (fun u => (psl211_alldecks_view C u.1 u.2,
+                      psl211_alldecks_secret R u))
            (psl211_alldecksP R)
   = ((@sa_coalition_dist R (instance_profile psl211_algebra)
         (instance_exec psl211_alldecks_params) (psl211_alldecks_sample R) 0 C)
      `x (fdistmap (psl211_alldecks_secret R) (psl211_alldecksP R)))%fdist.
 ```
 
-Route, from `pgl27_models.v:355-376`: prove
-`psl211_alldecks_coalition_distE`, that the executed coalition distribution is
-the pushforward of `psl211_alldecksP` along the view, by
-`rewrite /sa_coalition_dist; congr fdistmap` and `boolp.funext` with
-`psl211_alldecks_exec_view_instE` of Step 4; then close with
-`inde_dist_of_RV2 (psl211_alldecks_view_indep R HC)`.
+The corollary rests on a second lemma, which T6 aliases as
+`PSL211Analysis.exact_coalition_distE` and the manifest pins by a spelled type,
+so it must be written out here and not left as a step of a proof. No probe
+declares it; its statement is `pgl27_models.v:355-361` at this instance:
+
+```coq
+(** psl211_alldecks_coalition_distE — the executed coalition distribution of
+    the all-decks model is the pushforward of the model's own law along the
+    instance-side reading.  This is the equation that makes a counting result
+    proved about the laid deck a result about what the interpreter's messages
+    carry, so every independence statement below is attached to the executed
+    observer and not only to the static one. *)
+Lemma psl211_alldecks_coalition_distE (R : realType) (C : {set seatT}) :
+  @sa_coalition_dist R (instance_profile psl211_algebra)
+    (instance_exec psl211_alldecks_params) (psl211_alldecks_sample R) 0 C
+  = fdistmap (fun u => psl211_alldecks_view C u.1 u.2) (psl211_alldecksP R).
+Proof.
+rewrite /sa_coalition_dist; congr fdistmap.
+by apply: boolp.funext => u; exact: psl211_alldecks_exec_view_instE.
+Qed.
+```
+
+Then the corollary closes, from `pgl27_models.v:370-376`, by
+`move=> HC; rewrite psl211_alldecks_coalition_distE` and
+`exact: (inde_dist_of_RV2 (psl211_alldecks_view_indep R HC))`.
+
+**Every `*E` constant landed in this file must be stated against `exec_run`,
+never against a fuel literal or a second spelling of a run fact.**
+`psl211_exec_rowE` already is, and `psl211_alldecks_fuelE` is the separate
+statement that lets it be. The reason is T6: the manifest pins each of these
+through its alias by a spelled type under a `Timeout 60`, and an alias has no
+statement of its own to restate, so a constant stated against a fuel literal
+cannot be repaired at T6. It has to be repaired here, and T5 re-run.
 
 - [ ] **Step 7: Register, compile, check**
 
@@ -1597,20 +1844,35 @@ merges measured 4.29 s, 4.20 s, 5.61 s and 7.12 s, each carrying about 1.6 GB
 of shared import cost that is paid once here.
 
 ```bash
-printf 'From pgg_smc Require Import psl211_models.\nPrint Assumptions psl211_alldecks_static_obsE.\nPrint Assumptions psl211_alldecks_static_obs_viewE.\nPrint Assumptions psl211_alldecks_read_position.\nPrint Assumptions psl211_alldecks_endpoints.\nPrint Assumptions psl211_alldecks_observed.\nPrint Assumptions psl211_alldecks_observed_recovers.\nPrint Assumptions psl211_exec_rowE.\nPrint Assumptions psl211_alldecks_fuelE.\nPrint Assumptions psl211_content_ofE.\nPrint Assumptions psl211_alldecks_secret_expectedE.\nPrint Assumptions psl211_alldecks_exact_viewE.\nPrint Assumptions psl211_content_traceE.\nPrint Assumptions psl211_alldecks_view_indep.\nPrint Assumptions psl211_alldecks_static_indep.\nPrint Assumptions psl211_exact_witness.\nPrint Assumptions psl211_alldecks_exec_exact_view_indep.\n' | rocq repl -q $PSL211_RFLAGS
+printf 'From pgg_smc Require Import psl211_models.\nPrint Assumptions psl211_alldecks_static_obsE.\nPrint Assumptions psl211_alldecks_static_obs_viewE.\nPrint Assumptions psl211_alldecks_static_obs_funE.\nPrint Assumptions psl211_alldecks_read_position.\nPrint Assumptions psl211_alldecks_endpoints.\nPrint Assumptions psl211_alldecks_observed.\nPrint Assumptions psl211_alldecks_observed_recovers.\nPrint Assumptions psl211_exec_rowE.\nPrint Assumptions psl211_alldecks_fuelE.\nPrint Assumptions psl211_content_ofE.\nPrint Assumptions psl211_alldecks_secret_expectedE.\nPrint Assumptions psl211_alldecks_exact_viewE.\nPrint Assumptions psl211_alldecks_coalition_distE.\nPrint Assumptions psl211_content_traceE.\nPrint Assumptions psl211_alldecks_view_indep.\nPrint Assumptions psl211_alldecks_static_indep.\nPrint Assumptions psl211_exact_witness.\nPrint Assumptions psl211_alldecks_exec_exact_view_indep.\n' | rocq repl -q $PSL211_RFLAGS
 ```
 
-Expected, split in two groups. Closed: `psl211_alldecks_static_obsE`,
+Expected, in three groups, each read off a probe log rather than predicted.
+
+**Closed under the global context**, measured in `log-probe_c2_bridge.txt` and
+`log-probe_d1_observed.txt`: `psl211_alldecks_static_obsE`,
 `psl211_alldecks_static_obs_viewE`, `psl211_alldecks_read_position`,
 `psl211_alldecks_endpoints`, `psl211_alldecks_observed`,
 `psl211_alldecks_observed_recovers`, `psl211_exec_rowE`,
-`psl211_alldecks_fuelE`, `psl211_content_ofE`,
-`psl211_alldecks_secret_expectedE`. Exactly the boolp trio:
-`psl211_alldecks_exact_viewE` and `psl211_alldecks_static_obs_funE` (both go
-through `boolp.funext`, exactly as `pgl27_exact_viewE` does),
-`psl211_content_traceE`, `psl211_alldecks_view_indep`,
-`psl211_alldecks_static_indep`, `psl211_exact_witness`,
-`psl211_alldecks_exec_exact_view_indep`.
+`psl211_alldecks_fuelE`, `psl211_content_ofE`.
+
+**Exactly `propositional_extensionality` and `functional_extensionality_dep`,
+two axioms and not three**: `psl211_alldecks_static_obs_funE` and
+`psl211_alldecks_exact_viewE`. That is what `boolp.funext` alone carries, and
+`log-probe_c2_bridge.txt` measures it for both. Do not expect the full trio
+here: `pgl27_exact_viewE` does measure the full trio, so the pgl27 analogy
+fails on this line, and a result of two axioms is the correct one.
+
+**Exactly the boolp trio**: `psl211_alldecks_secret_expectedE`,
+`psl211_content_traceE`, `psl211_alldecks_coalition_distE`,
+`psl211_alldecks_view_indep`, `psl211_alldecks_static_indep`,
+`psl211_exact_witness`, `psl211_alldecks_exec_exact_view_indep`.
+`psl211_alldecks_secret_expectedE` is in this group and not in the first, even
+though it closes `by []`: `log-probe_d1_observed.txt` measures the trio for it,
+and the cause is structural, since its statement mentions
+`psl211_alldecks_secret R`, hence `psl211_alldecksP`, hence `` `U `` and
+`fdist_uniform_supp`. A Closed result on that lemma would be the surprise, not
+the trio.
 
 - [ ] **Step 8: Commit**
 
@@ -1629,12 +1891,18 @@ git commit -m "feat(psl211): the all-decks probability model, its executed reade
   `scripts/profile_facade_check.sh`, `scripts/profile_facade_check_test.py`
 - Modify: `_CoqProject` (one line, after `instances/psl211/psl211_models.v` and
   before `manifest/pgg_analysis_manifest.v`)
-- Source: `instances/pgl27/pgl27_analysis.v` (the whole file, as the shape);
-  `manifest/pgg_analysis_manifest.v:121-185` (the documented row block), `:659`
-  (the row `Definition`), `:739-1011` (the checker block), `:1535-1541` (the
-  pins); `manifest/pgg_analysis_client.v:6, :23-33, :106`;
-  `scripts/profile_facade_check.sh:87-100`;
-  `scripts/profile_facade_check_test.py:22-30`
+- Source: `instances/pgl27/pgl27_analysis.v` (the whole file as the shape, and
+  `:304-363` for the retention-check rule);
+  `manifest/pgg_analysis_manifest.v:86-144` (documented row 1, the shape of a
+  row block), `:660-661` (the row `Definition`), `:738-1010` (the pgl27 checker
+  block; five-card is `:1011-1302` and s5 `:1303-1525`), `:562-583` (the
+  no-capability alias table), `:1535-1541` (the five pins per row),
+  `:1604-1628` (the model-family applications);
+  `manifest/pgg_analysis_client.v:6`, `:7`, `:22-32`, `:108`, `:137-153`,
+  `:168`; `scripts/profile_facade_check.sh:44-50` (the contract) and `:87-100`
+  (the `EXPECTED` dictionary with its docstring);
+  `scripts/profile_facade_check_test.py:14-23` (`PROFILES`) and `:24-28`
+  (`FACADES`)
 
 This task is ordered before the row file because the manifest defines the
 `AnalysisPathRow` and `psl211_rows.v` proves that its program publishes that
@@ -1657,13 +1925,27 @@ source sections and the facade contract, the exported type vocabulary
 `Module PSL211Analysis.` with one `Definition` per alias and no proof body
 anywhere.
 
+**Every `Definition` starts at column 0, under a banner line.** The section
+labels below are presentational, for reading this plan only; they must be
+written in the landed file as full-width banner comments in the shape of
+`pgl27_analysis.v:89-91`, with the `Definition` on its own line at column 0
+under them. The reason is mechanical: `scripts/profile_facade_check.sh:258-259`
+matches an alias with `re.compile(r'^Definition\s+...', re.M)`, anchored at
+column 0, and its `strip_comments` at `:103-145` blanks a comment **to spaces
+at the same position**, preserving column numbers on purpose. An inline
+`(* 1 Program *)` prefix therefore leaves the `Definition` indented, the match
+fails, and the script reports `NO ALIAS` and exits 1. The landed precedent is
+`pgl27_analysis.v:93`, `Definition profile := pgl27_profile.` at column 0.
+
 Section by section, the aliases and their targets:
 
 ```coq
 (* 1 Program *)      Definition profile := psl211_profile.
-(* 2 Execution *)    Definition exec_plug := instance_exec psl211_alldecks_params.
-                     Definition observed := psl211_alldecks_observed.
-(* 3 Observers *)    Definition content_trace := @psl211_exec_content_trace.
+(* 2 Execution *)    Definition exec_plug :=
+                       instance_exec psl211_alldecks_params.
+(* 3 Observers *)    Definition observed := psl211_alldecks_observed.
+                     Definition prior := @psl211_alldecksP.
+                     Definition content_trace := @psl211_exec_content_trace.
                      Definition static_view := @psl211_alldecks_view.
                      Definition coalition_endpoints :=
                        @exec_coalition_endpoints
@@ -1676,39 +1958,57 @@ Section by section, the aliases and their targets:
                      Definition secret := @psl211_alldecks_secret.
 (* 4 Models *)       Definition exact_sample := @psl211_alldecks_sample.
                      Definition exact_family := psl211_exact_family.
-                     Definition prior := @psl211_alldecksP.
                      Definition cut_distE := @psl211_alldecks_cut_distE.
                      Definition exact_coalition_distE :=
                        @psl211_alldecks_coalition_distE.
-                     Definition content_traceE := @psl211_content_traceE.
 (* 5 Correctness *)  Definition observed_recovers :=
                        @psl211_alldecks_observed_recovers.
                      Definition secret_expectedE :=
                        @psl211_alldecks_secret_expectedE.
-(* 6 Security *)     Definition exact_view_indep :=
+(* 6 Security *)     Definition content_traceE := @psl211_content_traceE.
+                     Definition exact_view_indep :=
                        @psl211_alldecks_exec_exact_view_indep.
                      Definition static_indep := @psl211_alldecks_static_indep.
                      Definition marginal_bound := @psl211_marginal_bound.
-                     Definition certificate_bundle := @psl211_certificate_bundle.
+                     Definition certificate_bundle :=
+                       @psl211_certificate_bundle.
 (* 7 Transfer *)     Definition exact_transfer_status : TransferStatus :=
                        StaticExecutedOnly.
 ```
 
+The section placement follows pgl27 rather than a fresh reading: `observed` and
+`prior` are in section 3 at `pgl27_analysis.v:152` and `:148`, and
+`content_traceE` is in section 6 at `:244`. T6 Step 2 requires the checker
+block to be grouped by the same seven dividers, which are real at
+`manifest/pgg_analysis_manifest.v:742`, `:746`, `:756`, `:803`, `:873`, `:900`
+and `:990`, so a facade that places an alias in a different section forces its
+checker block out of step with the other three.
+
 Section 7 carries no theorem at this instance, so its representative is the
 typed status alias, which is what `pgg_analysis_client.v:12-14` says a facade
-does in that case. Include `secret_expectedE` in section 5 rather than section 6,
+does in that case. `secret_expectedE` goes in section 5 rather than section 6,
 because it is a statement about what the run recovers and not about what a
 coalition learns.
+
+**Retention checks: only two aliases may be pinned by value.** Copy
+`pgl27_analysis.v:304-363` as the shape and repeat its rule. Its banner at
+`:304-316` records that `Check (erefl : alias = landed)` **diverges** on every
+alias whose body reaches the interpreter, because the unifier unfolds past the
+alias into `exec_participant_trace` and evaluates `run_interp`. Only the two
+program-layer aliases are checked by value, `:318-319`; every other alias is
+retained by a spelled type ascription, one representative per section, each
+under a `Timeout 60`. Writing value-level `erefl` for twenty aliases hangs the
+build.
 
 The header's check table, in the shape of `pgl27_analysis.v:26-51`, lists the
 minimum items and the alias each maps to, and adds one line the pgl27 table does
 not have, naming the dealer:
 
 ```
-(* The dealer this facade is about is the ALL-DECKS one: the run argument is a *)
-(* whole deck description drawn uniformly, not a bare secret.  The            *)
-(* fixed-dealer colour results of psl211_secrecy.v are about a different      *)
-(* dealer and a different observer and are not aliased here.                   *)
+(* The dealer this facade is about is the ALL-DECKS one: the run argument   *)
+(* is a whole deck description drawn uniformly, not a bare secret.  The      *)
+(* fixed-dealer colour results of psl211_secrecy.v are about a different     *)
+(* dealer and a different observer and are not aliased here.                 *)
 ```
 
 Compile:
@@ -1723,13 +2023,14 @@ import closure.
 
 - [ ] **Step 2: the manifest's fourth facade**
 
-Four edits to `manifest/pgg_analysis_manifest.v`, each at the line the audit
-measured.
+Six edits to `manifest/pgg_analysis_manifest.v`, each at a line verified
+against the file.
 
 1. `:74`, the `Require Export` line, becomes
    `From pgg_smc Require Export pgl27_analysis five_card_analysis s5_analysis psl211_analysis.`
-2. After the eighth documented row block, a ninth: about 65 lines in the shape
-   of `:121-185`, with the same field table (protocol family and model, profile
+2. After `:560`, which is the last line of the eighth documented row block, a
+   ninth block of about 65 lines in the shape of documented row 1 at
+   `:86-144`, with the same field table (protocol family and model, profile
    alias, execution alias, observed alias, sample alias, observers,
    distribution-to-observer bridges, bound or certificate, final bridge
    theorem, correctness theorem, model transfer, missing premise, completion
@@ -1744,7 +2045,13 @@ measured.
    value, notion correctness. Transfer status `StaticExecutedOnly`, because the
    cut this model draws is already the uniform one and no idealized shuffle is
    being compared with a real one. Missing premise: none.
-3. After `:730`, the row `Definition`, in the shape of `:659`:
+3. After `:736`, the row `Definition`, in the shape of `pgl27_row_exact` at
+   `:660-661`. The insertion point is `:736` and not `:730`: `:726-732` is the
+   `s5_row_word` docstring, `:733-736` is the last row `Definition`, and
+   inserting after `:730` would land inside a comment. The constructor's field
+   order, read off `:632-650`, is observed, completion, model, transfer,
+   assumptions, and the application below matches `pgl27_row_exact` character
+   for character:
 
 ```coq
 (** The AnalysisPathRow for the twelve-card chirality instance under its
@@ -1762,33 +2069,72 @@ Definition psl211_row_alldecks : AnalysisPathRow :=
 ```
 
 4. A per-instance deterministic checker block of about 270 lines after the s5
-   one, in the shapes of `:739-1011`, `:1012-1303` and `:1304-1526`: one
+   one, which ends at `:1525`, in the shapes of the pgl27 block `:738-1010`,
+   the five-card block `:1011-1302` and the s5 block `:1303-1525`: one
    `Timeout 60 Check` per alias against its spelled type, grouped by the seven
-   sections with the same `(* --- n Section --- *)` dividers. And five pins in
-   the rows block at `:1535-1541`:
+   `(* --- n Section --- *)` dividers, which sit at `:742`, `:746`, `:756`,
+   `:803`, `:873`, `:900` and `:990` in the pgl27 block. And five pins in
+   the rows block at `:1535-1541`, matching that block field for field:
 
 ```coq
 Timeout 60 Check (psl211_row_alldecks : AnalysisPathRow).
 Timeout 60 Check (apr_model psl211_row_alldecks
   : AnalysisModelFamily PSL211Analysis.observed).
 Timeout 60 Check (erefl : apr_completion psl211_row_alldecks = AnalysisBridged).
-Timeout 60 Check (erefl : apr_transfer psl211_row_alldecks = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : apr_transfer psl211_row_alldecks = StaticExecutedOnly).
 Timeout 60 Check
   (erefl : apr_assumptions psl211_row_alldecks = BaselineClassicalOnly).
 ```
 
-Update the header prose at `:56-72` from three facades to four and from eight
-rows to nine wherever a count appears.
+5. `:562-583`, the "Aliases carrying no capability yet" table, gains a
+   `PSL211Analysis` row beside the three at `:570`, `:573` and `:577`. Its own
+   preamble at `:565-566` says the table exists "so that the checker pins the
+   whole facade surface, not only the rows", so a fourth facade with no row
+   here leaves part of its surface unpinned. The psl211 aliases with no
+   capability line are `seat_endpoint`, `coalition_endpoints`, `prior`,
+   `cut_distE`, `content_trace` and `exact_transfer_status`.
+6. `:1604-1628`, the "model families exercised at their index types" block,
+   gains one application. `psl211_exact_family` is unit-indexed, so the line
+   goes beside `:1621-1622`, which is the s5 unit-indexed case:
+
+```coq
+Timeout 60 Check (fun R : realType =>
+  amf_sample (apr_model psl211_row_alldecks) R tt).
+```
+
+The four count-bearing sites in this file are `:6` ("the three instance
+facades"), `:7-8` (the three instances named one by one), `:564` ("the three
+facades") and `:1527` ("the eight typed rows"). Update those four, and no
+others: `:56-72` carries no facade count and no row count.
+
+None of the five row pins forces `apr_observed`, so none is a conversion bomb:
+the row `Check` is an ascription, `apr_model` is a projection of a constructor
+and reduces by one iota step, and the three `erefl` pins project status fields.
+The byte-identical pins for the eight existing rows, all of whose observed
+executions carry run facts, compile today at `:1535-1602`.
 
 - [ ] **Step 3: the client**
 
 `manifest/pgg_analysis_client.v` gains, at the place the other three facades
-have theirs: one `Check` per section of `PSL211Analysis` (seven, plus the typed
-family and the typed status), the observed-execution value, the remaining
-distinct observers, and `Check psl211_row_alldecks.` in the rows block. Its
-header prose at `:6` ("all three facades") becomes four and at `:106` ("the
-eight typed rows") becomes nine; the paragraph at `:136-152` that explains what
-one import reaches names three modules and must name four.
+have theirs: one `Check` per section of `PSL211Analysis`, seven of them plus
+the typed family and the typed status, in the shape of the pgl27 group at
+`:22-32`; the observed-execution value; the remaining distinct observers; and
+`Check psl211_row_alldecks.` in the rows block.
+
+Its counts sit on **six** lines, not three, and every one of them must change:
+
+| line | today | after |
+|---|---|---|
+| `:6` | "all three facades" | four |
+| `:7` | "the eight typed rows" | nine |
+| `:108` | banner, "the typed status vocabulary and the eight rows" | nine |
+| `:140` | "The three facades Require Export" | four |
+| `:144-145` | "the three modules keep the short names apart" | four |
+| `:168` | "what keeps the three facades' short names distinct" | four |
+
+The banner around `:108` is `:107-109`, and the explanatory block the plan
+earlier cited as `:136-152` is `:137-153`.
 
 - [ ] **Step 4: the two script tables**
 
@@ -1800,13 +2146,28 @@ one import reaches names three modules and must name four.
 ```
 
 `instances/psl211/psl211_profile.v:123` declares `Definition psl211_profile :
-MonodromyProfile` at depth zero (the only `Section` in that file is `witness`,
-`:56-117`, and the definition is after `End witness`), so the script's own
-contract at `:44-49` makes it an unknown top-level profile and exits 2 until
-this line is added.
+MonodromyProfile` at depth zero, the only `Section` in that file being
+`witness` at `:56-117` and the definition sitting after `End witness`, so the
+script's own contract at `:44-50` makes it an unknown top-level profile and
+exits 2 until this line is added. The first tuple element is `None` because
+`:124` builds the profile with `@MkMonodromyProfile`; a name there is for the
+alias case only, as at `:95`.
 
-`scripts/profile_facade_check_test.py:22-30` gains the matching rows in
-`SOURCES` and in `FACADES`.
+`scripts/profile_facade_check_test.py` has **no `SOURCES` table**. Its four
+tables are `PROFILES` at `:14-23`, `FACADES` at `:24-28`, `LETS` at `:30-33`
+and `OUT_OF_SCOPE` at `:34-37`. Two of them gain a psl211 row:
+
+```python
+# PROFILES, :14-23
+  'pgg-smc/instances/psl211/psl211_profile.v':
+    'Definition psl211_profile : MonodromyProfile := @MkMonodromyProfile a b c.\n',
+# FACADES, :24-28
+  'pgg-smc/instances/psl211/psl211_analysis.v': ('PSL211Analysis', 'psl211_profile'),
+```
+
+Adding the `EXPECTED` entry to the shell script without these two sandbox
+declarations turns regression cases C0, C3, C10 and C13 from exit 0 to exit 1,
+because an unrepresented profile sets `status = 1` at `:302-307`.
 
 The shell script cannot be exercised in this checkout: it resolves the
 repository as `<checkout>/..` expecting the `pgg-smc/` monorepo layout and
@@ -1817,10 +2178,11 @@ which is self-contained:
 python3 scripts/profile_facade_check_test.py && echo SCRIPTTEST-OK
 ```
 
-If it also needs the monorepo layout, record that the two tables were edited
-and could not be exercised, in the as-built section at T8. Do not leave the
-tables unedited on that ground: an unedited `EXPECTED` makes the shell script
-exit 2 on the real repository, silently for anyone who does not run it here.
+This regression **is** live here: the plan audit ran it and it exits 0 with
+18 of 18 PASS, so a failure after the edit is a real failure and not an
+environment problem. Do not leave the tables unedited on the ground that the
+shell script cannot be run: an unedited `EXPECTED` makes it exit 2 on the real
+repository, silently for anyone who does not run it here.
 
 - [ ] **Step 5: Compile and check**
 
@@ -1832,15 +2194,27 @@ make -j1 manifest/pgg_analysis_client.vo 2>&1 | tail -3 && echo BUILD-OK
 Expected cost: unmeasured. The manifest is the repository's largest checker
 file at 1680 lines of `Timeout 60 Check` and this task adds about 340 lines to
 it. Budget between two and five minutes and record the measured number in the
-as-built section; if any individual `Check` hits its 60-second timeout, the
-alias it names is being compared across a run fact and must be restated against
-`exec_run` rather than a fuel literal, exactly as `psl211_exec_rowE` is.
+as-built section.
+
+If any individual `Check` hits its 60-second timeout, the repair is **not** in
+this file. An alias is a `Definition x := y.` and has no statement of its own to
+restate; what has to change is the landed constant the alias names, in
+`psl211_models.v`, which T5 has already committed. Restate that constant
+against `exec_run` rather than against a fuel literal, exactly as
+`psl211_exec_rowE` is, and re-run T5 and this task. T5's own rule, that every
+`*E` constant is stated against `exec_run` up front, exists to keep this from
+happening.
 
 ```bash
 printf 'From pgg_smc Require Import pgg_analysis_manifest.\nPrint Assumptions psl211_row_alldecks.\n' | rocq repl -q $PSL211_RFLAGS
 ```
 
-Expected: exactly the boolp trio.
+Expected: exactly the boolp trio. This prediction is **by analogy and not by
+measurement**: no probe ever built a psl211 `AnalysisPathRow`, and the only
+measured `psl211_row_alldecks` is the decomposition probe's `PublishedRow`,
+which is a different object that happens to share the name. The landed
+precedent is what supports it: `pgl27_row_exact_tableau` and
+`pgl27_row_exact_rowE` both measure exactly the trio.
 
 - [ ] **Step 6: Commit**
 
@@ -1858,10 +2232,13 @@ git commit -m "feat(manifest): the twelve-card chirality facade and its all-deck
 **Files:**
 - Create: `instances/psl211/psl211_rows.v`
 - Modify: `_CoqProject` (one line, after `instances/s5/s5_rows.v`)
-- Source: `probe_c56_decomposition.v:203-240` (the prefix and the row);
-  `probe_e1_row_variants.v` (the two prefix variants and the refusal);
+- Source: `probe_c56_decomposition.v:191-212` (the prefix at `:191-203` and the
+  row at `:205-212`) and `:217-236` (the two prefix variants themselves);
+  `probe_e1_row_variants.v:31-55` (the two `paramsE` lemmas and the refusal
+  `Fail`, which is all that file contains: it has no prefix definition and
+  reaches the variants by `Require`ing `probe_c56_decomposition` at `:25`);
   `instances/pgl27/pgl27_rows.v:117-135` (the prefix), `:260-275` (the row),
-  `:315-321` (`rowE`)
+  `:316-321` (`rowE`), `:342-363` (the inline-prefix demonstration)
 
 - [ ] **Step 1: Write the file**
 
@@ -1925,11 +2302,35 @@ Three surface facts are compiled evidence and the plan fixes each.
   `fuel psl211_fuel` name the same run by `[]`. The named one is used, so that
   the budget is stated once.
 
-Land the two prefix variants and the refusal from `probe_e1_row_variants.v` at
-the end of the file, as `pgl27_rows.v:342-362` does: the inline-reduction
-prefix, its `paramsE`, the literal-fuel prefix, its `paramsE`, and the
-`Fail Definition psl211_row_vm_reuse`. They are the record that the row's shape
-is forced rather than chosen.
+Land the variants and the refusal at the end of the file. **They come from two
+probe files, not one.** The two prefix definitions themselves,
+`psl211_alldecks_prefix_vm` and `psl211_alldecks_prefix_lit`, are
+`probe_c56_decomposition.v:217-236`; the two `paramsE` lemmas
+(`psl211_alldecks_prefix_vm_paramsE` at `probe_e1_row_variants.v:35-38`,
+`psl211_alldecks_prefix_lit_paramsE` at `:43-46`) and
+`Fail Definition psl211_row_vm_reuse` at `:54-55` are in the other file, which
+reaches the definitions by `Require`. Copying from `probe_e1_row_variants.v`
+alone yields two lemmas over undefined constants.
+
+The pgl27 demonstration this mirrors is `pgl27_rows.v:342-363` and it has
+**four** items, not five, and pgl27 has no literal-fuel prefix and no second
+`paramsE`: `pgl27_inline_dealt` at `:342-347`,
+`Fail Definition pgl27_inline_neq : pgl27_inline_dealt = pgl27_dealt := erefl.`
+at `:350`, `pgl27_inline_paramsE` at `:354-356`, and
+`Fail Definition pgl27_inline_reuse` at `:362-363`. The non-identity `Fail` is
+the one item that records that the two prefixes are different terms, which is
+the whole point of the demonstration, so land its psl211 twin as well:
+
+```coq
+(** The two prefixes are not the same term. *)
+Fail Definition psl211_alldecks_prefix_vm_neq :
+  psl211_alldecks_prefix_vm = psl211_alldecks_prefix := erefl.
+```
+
+The literal-fuel prefix and its `paramsE` are a psl211 addition over the pgl27
+shape, kept because they are what shows `fuel 220` and `fuel psl211_fuel` name
+one run. Together these are the record that the row's shape is forced rather
+than chosen.
 
 The file header, in the shape of `pgl27_rows.v:1-95`, opens with the security
 argument in English and names the dealer, and records under "not claimed" the
@@ -1957,14 +2358,21 @@ Expected cost: 20 to 40 s, dominated by loading the manifest.
 printf 'From pgg_smc Require Import psl211_rows.\nPrint Assumptions psl211_alldecks_prefix.\nPrint Assumptions psl211_row_alldecks_tableau.\nPrint Assumptions psl211_row_alldecks_rowE.\n' | rocq repl -q $PSL211_RFLAGS
 ```
 
-Expected: `psl211_alldecks_prefix` Closed; `psl211_row_alldecks_tableau` and
-`psl211_row_alldecks_rowE` exactly the boolp trio. In the decomposition probe
-`Print Assumptions psl211_row_alldecks` listed exactly
-`psl211_alldecks_fiber_transfer`, `psl211_alldecks_endpoints` and the trio;
-with both of those now proved, the trio is what remains. If any other name
-appears, it is a real defect: trace it with
-`Print Assumptions psl211_exact_witness` and then down through
-`psl211_alldecks_view_indep`.
+Expected: **all three exactly the boolp trio**, including
+`psl211_alldecks_prefix`. The prefix is not Closed and was never expected to be
+by anything measured: over the compiled decomposition probe it carries
+`psl211_alldecks_endpoints` plus the full trio, and the trio enters through the
+Tableau machinery rather than through the three run facts, since in the same run
+`psl211_alldecks_observed` printed `psl211_alldecks_endpoints` and nothing else.
+The landed precedent agrees: `Print Assumptions pgl27_dealt` prints the full
+trio. Once the endpoint equation is proved, which it is from T3, the trio alone
+is what remains on all three names.
+
+In the decomposition probe `Print Assumptions psl211_row_alldecks` listed
+exactly `psl211_alldecks_fiber_transfer`, `psl211_alldecks_endpoints` and the
+trio; with both of those now proved, the trio is what remains. A name outside
+the trio is worth tracing with `Print Assumptions psl211_exact_witness` and then
+down through `psl211_alldecks_view_indep`.
 
 - [ ] **Step 3: Commit**
 
@@ -2202,3 +2610,156 @@ what puts the freeze line below the new mathematics rather than above it.
 T5 follows T3 and T4. `manifest/pgg_analysis_manifest.v` needs
 `psl211_analysis.v`, which needs `psl211_models.v`, so T6 follows T5; and
 `psl211_rows.v` needs the manifest, so T7 follows T6.
+
+## Plan audit fold (AUDIT-PLAN-B.md, 2026-09-15, NO-GO -> folded)
+
+Adversarial audit of this plan at its first draft:
+`notes/probes/2026-09-15-psl211-planb/AUDIT-PLAN-B.md`, 63 findings, 8 blocking,
+verdict NO-GO on the citation layer with the mathematics and the task skeleton
+confirmed. Two compiled counter-probes under
+`notes/probes/2026-09-15-psl211-planb/audit-plan/`, both rc 0:
+`audit_t4_skeleton.v` and `audit_t4_percut.v`. Every finding below was
+re-verified against the files here before being applied; the closure count of
+finding 21 was recomputed independently and agrees.
+
+**The eight blocking findings and where each is now fixed.**
+
+1. **#4, T4 and T5 both claimed `planb_alldecks_defs.v:108-118`.** Following
+   both Source lines literally landed `psl211_alldecksP` and
+   `psl211_alldecks_secret` in two files, and the second would not compile.
+   T4's range is now `:34-106` and T5's is `:108-118`, each stated twice, in the
+   Source line and at the copy instruction, with a sentence in each naming the
+   other file's half.
+2. **#21, the freeze rule's closure list said "exactly" and omitted seven
+   members.** Section 2 now carries the measured list: 35 already-landed files
+   plus `psl211_exec.v` and `psl211_endpoints.v` themselves, 37 in all,
+   recomputed here from the live `Require` lines and agreeing with the audit's
+   count. The seven that were missing are named as the ones easiest to believe
+   free: `groups/pgg_raag.v`, `reconstruct/cover_tradeoff.v`,
+   `reconstruct/pgg_sum_mod.v`, `reconstruct/pgl_bound.v`,
+   `security/pgg_collusion_bound.v`, `security/pgg_security_solver.v`,
+   `security/pgg_weighted_words.v`.
+3. **#27, `manifest/pgg_analysis_manifest.v:730` is inside the `s5_row_word`
+   docstring.** The insertion point for the ninth row `Definition` is `:736`,
+   and T6 Step 2 item 3 now says why.
+4. **#28, the facade alias listing defeats the `^Definition` anchor.** T6 Step 1
+   now opens with the column-0 rule and the mechanism:
+   `scripts/profile_facade_check.sh:258-259` anchors at column 0 and
+   `strip_comments` at `:103-145` preserves column position on purpose, so an
+   inline section marker makes the checker exit 1 with `NO ALIAS`.
+5. **#39, `scripts/profile_facade_check_test.py` has no `SOURCES` table.** T6
+   Step 4 now names `PROFILES` at `:14-23` and `FACADES` at `:24-28`, gives both
+   rows verbatim, and records that omitting them turns regression cases C0, C3,
+   C10 and C13 from exit 0 to exit 1.
+6. **#43, `probe_e1_row_variants.v` contains no prefix definitions.** T7 now
+   cites both sources: the two variants at `probe_c56_decomposition.v:217-236`,
+   the two `paramsE` lemmas and the refusal at `probe_e1_row_variants.v:31-55`.
+7. **#48, T7 predicted `psl211_alldecks_prefix` Closed.** It carries the boolp
+   trio, which enters through the Tableau machinery and not through the run
+   facts; `Print Assumptions pgl27_dealt` prints the trio too. The prediction is
+   corrected to all three names at the trio and the sentence calling any other
+   result a defect is gone.
+8. **#49, T5 predicted `psl211_alldecks_secret_expectedE` Closed.**
+   `log-probe_d1_observed.txt` measures the trio, structurally: the statement
+   mentions `psl211_alldecks_secret R`, hence `psl211_alldecksP`, hence
+   `fdist_uniform_supp`. It is moved to the trio group with that reason.
+
+**The three near-blocking findings.** #19, the one part of the new mathematics
+with no compiled support: T4 route steps 5, 6 and 7 are now labelled **no
+compiled support**, step 7's three unnamed sub-steps are named
+`ad_heart_rank_card` (the `#|K| = #|A|` bridge that turns
+`psl211_perm_ext_count`'s factorial into the one step 7 asserts),
+`ad_club_code` (the decoding of a club card code back into `'I_6`) and
+`ad_prescription_inj` (the discharge of the `{in K &, injective t}` premise),
+and step 7 is required to be stated at the destructured deal
+`(b, (j, pp.1, pp.2))`, since `psl211_alldecks_seq` only reduces there. #33,
+`psl211_alldecks_coalition_distE` was aliased and pinned but never stated: it is
+now a displayed `Lemma` with its proof in T5 Step 6. #29, the manifest header
+counts are at `:6`, `:7-8`, `:564` and `:1527`, not at `:56-72`.
+
+**The citation layer, finding by finding.** Every probe range was re-verified
+here by reading the first and last line of the quoted code out of the file, not
+by trusting the audit. #1 T2 source is `psl211_planb_defs.v:32-94`, the file
+being 94 lines, plus `probe_p1b2_endpoints_small.v:19-21` for the termination
+lemma, which the probe names `psl211_dealt_terminates_small`. #2 T2 imports are
+`:8-30`. #3 T3's source gains the `_small`-under-Decision-8 note. #5 the view
+definition is `probe_c2_bridge.v:32-42`. #6 and #7 the two reading lemmas split:
+`psl211_alldecks_read_setE` at `probe_c5_sanity.v:48-55` to T4,
+`psl211_alldecks_read_position` at `:37-46` to T5. #8 the two fiber statements
+are `probe_c56_decomposition.v:107-128`, with the docstrings at `:94-128`, and
+the copy is verbatim modulo this file's `cardT` notation. #9 T5's headline block
+is `:134-185`. #10 T7's prefix and row are `:191-212`. #30 the documented row
+block's shape is `:86-144` and its insertion point `:560`. #31 the three checker
+blocks are `:738-1010`, `:1011-1302`, `:1303-1525`. #40 the script contract is
+`:44-50`. #41 the client's six count sites and three ranges are corrected and
+"two header edits" becomes six. #46 `rowE` is `pgl27_rows.v:316-321`. #44 the
+pgl27 inline demonstration is `:342-363` and has four items, and its
+non-identity `Fail` is added to T7 as `psl211_alldecks_prefix_vm_neq`.
+
+**The route corrections.** #11 `pair_injl` does not exist and is gone, together
+with the whole step it justified. #12 route step 1 is replaced by the six-line
+script proved outright as `audit_B1`, using `partition_big` and `reindex_onto`
+and needing neither `card_fiber_sum` nor `card_imset` nor `cardsX`. #13 route
+step 2 is `audit_B2`, and the summed statement follows from the per-cut one
+alone. #14 `audit_A1` is cited beside `audit_transfer_at_P`, because it is the
+instantiation at `C : {set seatT}`, the type the route actually has. #15
+`subsetIl` does not state the inclusion, since `A` is the image of a
+comprehension; the compiled `subsetP` form replaces it and the
+restate-as-intersection alternative is named. #16 the lemma that fires on the
+constant-summand sum is `sum_nat_const`, and the `psl211_pattern_count`-to-`count`
+delta step is written out. #18 route step 11 is budgeted with its measurement,
+killed twice at 280 s and 420 s at 3.3 GB with the table-size hypotheses in
+context, and two rules are added: clear those hypotheses first, and end with
+`exact:` and never `by`.
+
+**The other assumption predictions.** #50 `psl211_alldecks_exact_viewE` and
+`psl211_alldecks_static_obs_funE` carry exactly two axioms,
+`propositional_extensionality` and `functional_extensionality_dep`, which is
+what `boolp.funext` alone carries; they now have their own group, and the note
+that the pgl27 analogy fails there is kept. #51 the T5 `printf` gains
+`psl211_alldecks_static_obs_funE` and `psl211_alldecks_coalition_distE`. #52 T4
+expects Closed for the thirteen measured and Closed for the two new counting
+theorems only if their proofs use nothing classical. #54 four of T2's five were
+read back directly and the fifth through its all-decks twin, because
+`probe_p1a_terminates.vo` is stale. #55 P1d measured at fuel 380 and the
+fuel-220 run was never read back. #56 the row's prediction is by analogy, since
+no probe ever built a psl211 `AnalysisPathRow`.
+
+**The comment-rule findings.** #57 the `psl211_fuel` comment loses the
+cross-declaration measurement and the file-layout word. #58
+`psl211_profile_endpoints` loses the cost narration and the organisational
+claim and keeps the domain position. #59 `psl211_alldecks_fiber_transfer` loses
+the probe reference and the status marker, which Decision 15 of this plan
+forbids. #60 `psl211_alldecks_per_cut_count` loses "not a statement the
+published row rests on". #61 the corollary's comment says "at most five" and
+drops the used-by pointer.
+
+**Confirmations that changed nothing.** #13, #17, #20, #22, #25, #32, #34, #38,
+#45, #47, #53, #63. Two are worth restating because they are load-bearing: the
+`MkAnalysisPathRow` field order is observed, completion, model, transfer,
+assumptions and the plan's application matches `pgl27_row_exact` character for
+character (#32); and none of the five row pins forces `apr_observed`, so the
+manifest block is not a conversion bomb (#38).
+
+**Partially applied, with the reason.**
+
+- **#62, the 80-column rule**, is applied to every block this plan asks an
+  implementer to land as Rocq source, and the rule itself is stated in T2 Step 1
+  beside the header box. Two categories are deliberately left over 80. The flow
+  sketch of section 0 is a pseudo-DSL display with a two-column running total
+  and is not Rocq source, so the file-width rule does not reach it. And the
+  quoted discharged signature of `uniform_pair_indep_of_fibers` in T1 is the
+  probe's own text, reproduced so that an implementer can compare byte for byte
+  against `probe_c3_bridge.v`; rewrapping it in the plan would make the
+  comparison harder, and the instruction to rewrap on landing is stated in T2
+  Step 1 with the probe's six over-80 lines named.
+- **#23, trimming T2's import list**, is added as T2 Step 1b, but the audit's
+  description of it as "the one cheap way to shrink the freeze" is corrected by
+  measurement rather than repeated: the trim removes exactly two files,
+  `security/pgg_sample_adapter.v` and `security/pgg_weighted_words.v`, taking
+  the closure from 37 to 35. The other five transitively reached files arrive
+  through `psl211_profile.v` and `psl211_closure.v` and no import list on
+  `psl211_exec.v` can remove them. The step is kept because two files is still
+  two files, and the plan says what it buys.
+
+Nothing else was rejected.
