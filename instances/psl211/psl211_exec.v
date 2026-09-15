@@ -14,15 +14,15 @@
 (* dealer-dealt one: the dealer draws the chirality bit, no party commits an  *)
 (* input, and the interpreter budget is psl211_fuel.  Of the three run facts  *)
 (* it owes termination alone, decided by reduction at 0.45 s of vm_compute    *)
-(* and 0.47 s of Qed; reconstruction follows from the coordinate law and      *)
-(* spends no reduction, and the endpoint equation is stated once at the       *)
-(* profile in psl211_endpoints.v.                                             *)
+(* and 0.47 s of Qed (measured 2026-09-15); reconstruction follows from the   *)
+(* coordinate law and spends no reduction, and the endpoint equation is       *)
+(* stated once at the profile in psl211_endpoints.v.                          *)
 (*                                                                            *)
 (* This file and its whole import closure lie below psl211_endpoints.v, whose *)
 (* single declaration costs 561 seconds of vm_compute, 331 seconds of Qed and *)
-(* a 17 GB peak.  Rebuilding this file from byte-identical sources changes    *)
-(* the library digest and invalidates that .vo.  That closure is 35 files,    *)
-(* this one and psl211_endpoints.v included.                                  *)
+(* a 17 GB peak (measured 2026-09-15).  Rebuilding this file from             *)
+(* byte-identical sources changes the library digest and invalidates that     *)
+(* .vo.  That closure is 35 files, this one and psl211_endpoints.v included.  *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_players      == the twelve explicit seat ordinals                 *)
@@ -104,7 +104,10 @@ Proof. by []. Qed.
 Definition psl211_fuel : nat := 220.
 
 (** psl211_dealt_params — the run-level data of a run that deals the
-    chirality bit and recovers it. *)
+    chirality bit and recovers it: the run argument is the secret itself, no
+    party commits an input, and the interpreter budget is psl211_fuel.  The
+    dealer-dealt mode is what leaves the instance owing termination alone
+    among the three run facts. *)
 Definition psl211_dealt_params : ExecutionParams psl211_algebra :=
   dealt_secret_params psl211_algebra psl211_fuel.
 
