@@ -464,7 +464,7 @@ The two statement comments to write, in the project's style:
     coordinate of a uniform pair and an observation depends on both
     coordinates, equal per-value counts of the observation over the two
     secret classes make the observation independent of the secret.  This is
-    the sibling of colour_view_indep_fibers for a secret that is a FUNCTION of
+    the sibling of colour_view_indep_fibers for a secret that is a function of
     the first coordinate rather than the coordinate itself: there the counts
     are taken over the group alone and the conclusion is independence of the
     coordinate, which is false here, because the rest of the first coordinate

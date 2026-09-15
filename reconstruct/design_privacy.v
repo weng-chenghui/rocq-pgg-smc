@@ -19,8 +19,8 @@
 (* Section 2 -- colour_view, colour_law, colour_view_indep_laws,              *)
 (*   colour_view_indep_fibers == independence of the colour observer.         *)
 (* Section 3 -- card_fiber_sum, pr_countE, uniform_pair_indep_of_class,       *)
-(*   uniform_pair_indep_of_fibers == independence of an observation of both   *)
-(*   coordinates from a secret read off the first one.                        *)
+(*   pair_fibers_class_sizes, uniform_pair_indep_of_fibers == independence of *)
+(*   an observation of both coordinates from a secret read off the first one. *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -126,9 +126,10 @@ Section fiber_sum.
 Variables (Y W : finType).
 
 (** card_fiber_sum — the cardinality of a set is the sum of its cardinalities
-    over the fibers of any map out of it.  Stated here because every counting
-    premise below is a per-value count and every conclusion is a total, and
-    this is the only step between them. *)
+    over the fibers of any map out of it.  The passage from per-value counts
+    of an observation to the count of a whole secret class, which is what
+    turns a design's per-value counting certificate into a statement about
+    class sizes. *)
 Lemma card_fiber_sum (g : Y -> W) (Q : pred Y) :
   #|[set y : Y | Q y]| = (\sum_(w : W) #|[set y : Y | Q y && (g y == w)]|)%N.
 Proof.
@@ -160,8 +161,9 @@ Let P := ((`U HX) `x (`U HA)) : R.-fdist (X * G)%type.
 Let c : R := (#|[set: X]|%:R)^-1 * (#|A|%:R)^-1.
 
 (** pr_countE — an event of the product of a uniform law on X and a uniform
-    law supported on A has probability c times the number of its points whose
-    second coordinate lies in A, for any predicate Q agreeing pointwise with
+    law supported on A has probability the number of its points whose second
+    coordinate lies in A, divided by #|X| * #|A|, for any predicate Q agreeing
+    pointwise with
     the event.  The step out of the probability layer and into the counting
     layer, where the counting premise is stated.  Each of the three
     probabilities of an independence statement crosses by this lemma. *)
@@ -197,7 +199,8 @@ Lemma uniform_pair_indep_of_class :
   #|[set x | s x]| = #|[set x | ~~ s x]| ->
   (forall v : T,
      #|[set u : X * G | (s u.1 == true) && (u.2 \in A) && (f u.1 u.2 == v)]|
-     = #|[set u : X * G | (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)]|) ->
+     = #|[set u : X * G |
+           (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)]|) ->
   P |= (fun u => f u.1 u.2 : T) _|_ (fun u => s u.1 : bool).
 Proof.
 move=> Hclass Hfib v b.
@@ -245,15 +248,16 @@ rewrite HNb.
 (* the marginal count of the reading *)
 have Hsplit : #|[set u : X * G | (f u.1 u.2 == v) && (u.2 \in A)]|
   = (#|[set u : X * G | (s u.1 == true) && (u.2 \in A) && (f u.1 u.2 == v)]|
-   + #|[set u : X * G | (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)]|)%N.
+   + #|[set u : X * G |
+        (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)]|)%N.
   have b1 : [set u : X * G | (f u.1 u.2 == v) && (u.2 \in A)]
               :&: [set u : X * G | s u.1]
-          = [set u : X * G | (s u.1 == true) && (u.2 \in A) && (f u.1 u.2 == v)].
+      = [set u : X * G | (s u.1 == true) && (u.2 \in A) && (f u.1 u.2 == v)].
     apply/setP => u; rewrite !inE.
     by case: (f u.1 u.2 == v); case: (s u.1); case: (u.2 \in A).
   have b2 : [set u : X * G | (f u.1 u.2 == v) && (u.2 \in A)]
               :\: [set u : X * G | s u.1]
-          = [set u : X * G | (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)].
+      = [set u : X * G | (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)].
     apply/setP => u; rewrite !inE.
     by case: (f u.1 u.2 == v); case: (s u.1); case: (u.2 \in A).
   rewrite -(cardsID [set u : X * G | s u.1]
@@ -289,7 +293,8 @@ Qed.
 Lemma pair_fibers_class_sizes :
   (forall v : T,
      #|[set u : X * G | (s u.1 == true) && (u.2 \in A) && (f u.1 u.2 == v)]|
-     = #|[set u : X * G | (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)]|) ->
+     = #|[set u : X * G |
+           (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)]|) ->
   #|[set x | s x]| = #|[set x | ~~ s x]|.
 Proof.
 move=> Hfib.
@@ -321,21 +326,23 @@ Qed.
 (** uniform_pair_indep_of_fibers — when a secret is read off the first
     coordinate of a uniform pair and an observation depends on both
     coordinates, equal per-value counts of the observation over the two
-    secret classes make the observation independent of the secret.  This is
-    the sibling of colour_view_indep_fibers for a secret that is a FUNCTION of
+    secret classes make the observation independent of the secret.  The
+    sibling of colour_view_indep_fibers for a secret that is a function of
     the first coordinate rather than the coordinate itself: there the counts
-    are taken over the group alone and the conclusion is independence of the
-    coordinate, which is false here, because the rest of the first coordinate
-    is not independent of the observation.  inde_prod_fst of
-    transitivity_privacy.v does not reach it either, since its second random
-    variable is fst and its premise is a conditional law equal at every value
-    of the first coordinate, not only across the two classes. *)
+    range over the group alone and the conclusion is independence of the
+    coordinate itself, which the present premise does not give, because the
+    rest of the first coordinate need not be independent of the
+    observation. *)
 Lemma uniform_pair_indep_of_fibers :
   (forall v : T,
      #|[set u : X * G | (s u.1 == true) && (u.2 \in A) && (f u.1 u.2 == v)]|
-     = #|[set u : X * G | (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)]|) ->
+     = #|[set u : X * G |
+           (s u.1 == false) && (u.2 \in A) && (f u.1 u.2 == v)]|) ->
   P |= (fun u => f u.1 u.2 : T) _|_ (fun u => s u.1 : bool).
 Proof.
+(* inde_prod_fst does not apply: its second random variable is fst and its
+   premise is a conditional law equal at every value of the first coordinate,
+   not only across the two classes. *)
 move=> Hfib; apply: uniform_pair_indep_of_class; last exact: Hfib.
 exact: pair_fibers_class_sizes.
 Qed.
