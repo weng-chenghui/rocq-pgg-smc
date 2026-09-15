@@ -197,6 +197,7 @@ instances/psl211/psl211_endpoints.v
 instances/psl211/psl211_alldecks.v
 instances/psl211/psl211_models.v
 instances/psl211/psl211_recovery.v
+instances/psl211/psl211_analysis.v
 manifest/pgg_analysis_manifest.v
 manifest/pgg_tableau.v
 manifest/pgg_tableau_syntax.v

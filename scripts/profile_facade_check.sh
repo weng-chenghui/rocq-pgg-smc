@@ -33,6 +33,7 @@
 #                      FiveCardAnalysis.den_boer_profile with its own model
 #                      rows in the analysis manifest
 #   s5_profile         represented by S5Analysis
+#   psl211_profile     represented by PSL211Analysis
 #
 # Neither half of a line is taken on trust. The alias line is checked against
 # the body of the declaration, so den_boer_profile must really be defined as
@@ -97,6 +98,8 @@ EXPECTED = {
                         'FiveCardAnalysis'),
   's5_profile':        (None, 'pgg-smc/instances/s5/s5_analysis.v',
                         'S5Analysis'),
+  'psl211_profile':    (None, 'pgg-smc/instances/psl211/psl211_analysis.v',
+                        'PSL211Analysis'),
 }
 FACADES = {facade for _, facade, _ in EXPECTED.values()}
 

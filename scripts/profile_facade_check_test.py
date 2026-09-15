@@ -20,11 +20,14 @@ PROFILES = {
     'Definition den_boer_profile : MonodromyProfile := five_card_profile.\n',
   'pgg-smc/instances/s5/s5_profile.v':
     'Definition s5_profile : MonodromyProfile := @MkMonodromyProfile a b c.\n',
+  'pgg-smc/instances/psl211/psl211_profile.v':
+    'Definition psl211_profile : MonodromyProfile := @MkMonodromyProfile a b c.\n',
 }
 FACADES = {
   'pgg-smc/instances/pgl27/pgl27_analysis.v': ('PGL27Analysis', 'pgl27_profile'),
   'pgg-smc/instances/kim2025/five_card_analysis.v': ('FiveCardAnalysis', 'five_card_profile'),
   'pgg-smc/instances/s5/s5_analysis.v': ('S5Analysis', 's5_profile'),
+  'pgg-smc/instances/psl211/psl211_analysis.v': ('PSL211Analysis', 'psl211_profile'),
 }
 # section-local Let shapes, as in the real exec/models files
 LETS = {
