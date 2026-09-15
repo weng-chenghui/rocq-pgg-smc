@@ -2,7 +2,7 @@
 
 Date: 2026-09-15
 
-Status: approved for probe-first validation
+Status: probe-first validation complete
 
 ## Problem
 
@@ -48,17 +48,18 @@ promised by the result:
 Variable R : realType.
 ```
 
-The concrete vacuity probe uses MathComp's constructive real carrier that is
-already accepted by the project's `realType` interfaces. The table and group
-bridge is independent of `R`.
+The concrete vacuity probe uses Coq's standard real carrier through MathComp's
+`Rstruct` instance. This carrier brings the classical real-number assumptions
+reported by `Print Assumptions`. The table and group bridge is independent of
+`R`.
 
 ## Chosen representation bridge
 
 Index the nat table by `'I_336` and convert each row to a permutation of
 `'I_8`. A computed certificate establishes that every row has eight distinct
-entries below eight. A second computed certificate establishes that every
-converted permutation belongs to `pgg_G pgl27_M`. Row uniqueness and
-`pgl27_card` then give a bijection between table indices and group elements.
+entries below eight. The certified mixing enumeration establishes that every
+converted permutation belongs to `pgg_G pgl27_M`. Row uniqueness and the group
+enumeration then give a bijection between table indices and group elements.
 
 For a sequence `S : seq nat`, define its coalition as the positions whose
 natural-number values occur in `S`. Compare a full masked `pgl27_view` with the
@@ -111,6 +112,23 @@ The right side coerces a Boolean membership test into `R`, so it is exactly
 zero or one. The statement does not assign a posterior entropy to unreachable
 views.
 
+## Compiled results
+
+The four ambiguous-view probabilities are certified against the actual
+`pgl27P` distribution:
+
+| Representative | Collision count | Ambiguous-view probability |
+|---|---:|---:|
+| `rep_harmonic` | 96 | $96/336 = 2/7$ |
+| `rep_equianharmonic` | 72 | $72/336 = 3/14$ |
+| `rep_five` | 36 | $36/336 = 3/28$ |
+| `rep_six` | 12 | $12/336 = 1/28$ |
+
+For each representative, every reachable view has posterior entropy exactly
+zero or one. The value is one exactly when both secrets can produce the view.
+The four C11 probes then derive mutual information as one minus the matching
+ambiguous-view probability. These statements remain representative-specific.
+
 ## Supporting proof shapes
 
 1. The table rows define permutations and their application agrees with
@@ -139,18 +157,18 @@ views.
 | ID | Checkable claim | Passing evidence |
 |---|---|---|
 | C1 | Every row of `pgl27_group_table` has length eight, contains distinct entries, and contains only values below eight. | A closed computed certificate and a failed mutation with one duplicated or out-of-range entry. |
-| C2 | Every table row converts to an element of `pgg_G pgl27_M`. | A closed computed membership certificate at the permutation carrier and a failed mutation using a permutation outside the group. |
+| C2 | Every table row converts to an element of `pgg_G pgl27_M`. | `pgl27_table_perm_mem` reuses the certified mixing enumeration. `pgl27_outside_permN` proves that swapping positions three and four is outside the group because it changes the encoded orbit class. |
 | C3 | The converted table rows enumerate `pgg_G pgl27_M` exactly once. | Injectivity from `pgl27_group_table_uniq`, membership from C2, `pgl27_card`, and a surjectivity lemma ending in `Qed`. |
-| C4 | The nat deal agrees with `orbit_encode` for both secrets. | A pointwise lemma ending in `Qed` and a mutation that swaps a different pair of codes. |
+| C4 | The nat deal agrees with `orbit_encode` for both secrets. | `pgl27_code_deal_orbit_encodeE` ends in `Qed`. `pgl27_changed_dealN` shows that a different code swap fails at position two. |
 | C5 | A table row and its converted permutation produce the same restricted view. | A miniature bridge theorem using `code_comp`, `code_deal`, `orbit_encode`, and `pgl27_view`, ending in `Qed`. |
-| C6 | For each representative, equality of restricted nat views is equivalent to equality of full masked views. | Four instantiated lemmas ending in `Qed`, plus a mutation using a sequence that does not enumerate its coalition uniquely. |
+| C6 | For each representative, equality of restricted nat views is equivalent to equality of full masked views. Repeated entries in the sequence are harmless. | Four instantiated lemmas end in `Qed`. The mutation omits a coordinate of the masked coalition and shows why every observed coordinate must be read. |
 | C7 | The two per-secret view maps are injective for each representative. | Derivations from the four existing `pgl27_views_uniq_*` lemmas through C3 to C6. |
-| C8 | The probability of the ambiguous-view event is `pgl27_collisions S / 336`. | A generic counting miniature and four representative instantiations ending in `Qed`. A tautology probe must confirm the equality is not definitional. |
+| C8 | The probability of the ambiguous-view event is `pgl27_collisions S / 336`. | A generic counting lemma and four representative equations ending in `E` and `Qed`. A `Fail reflexivity` probe confirms that the equality is not definitional. |
 | C9 | Every reachable posterior is uniform on one or two compatible secrets. | A conditional-probability miniature over a uniform Boolean product distribution, ending in `Qed`. |
 | C10 | Every reachable posterior entropy is exactly zero or one according to ambiguous-view membership. | An application of `centropy1_uniform_over_set` at `R : realType`, followed by `log 1` or `log 2`, with four representative instantiations ending in `Qed`. |
-| C11 | The entropy theorem composes with `mutual_info_binary_ambiguityE`. | A separate decomposition probe derives the mutual-information shape to `Qed` from admitted supporting declarations. |
-| C12 | The section hypotheses are jointly satisfiable. | A concrete representative instantiation compiles without assumptions beyond the constructive real libraries already used by the project. |
-| C13 | The proposed identifiers do not collide with live declarations and follow project and MathComp naming conventions. | Repository search and the independent naming audit. |
+| C11 | The entropy theorem composes with `mutual_info_binary_ambiguityE`. | Four representative mutual-information equations end in `Qed` and use the same coalition and ambiguous-view objects as C8 and C10. The isolated decomposition probe admits only the uniform-secret supporting lemma. |
+| C12 | The section hypotheses are jointly satisfiable. | Harmonic probability and posterior-entropy wrappers compile at `Rdefinitions.R` through MathComp's `Rstruct` instance. |
+| C13 | The proposed identifiers do not collide with live declarations and follow project and MathComp naming conventions. | Shared objects are defined once in `probe_view_definitions.v`; generic helpers and mutations are local; public equations use the `E` suffix. Final confirmation comes from the independent naming audit. |
 | C14 | Transport to every same-orbit coalition is outside the first version and needs an explicit invariance theorem. | The spec names no universal coalition headline. The audit confirms that no such conclusion follows silently from a representative theorem. |
 
 ## Cited library and project objects
@@ -176,8 +194,8 @@ views.
 
 1. No probe or planned permanent result introduces an axiom, assumed constant,
    or admitted proof. The decomposition probe is the sole exception allowed by
-   the probe-first workflow. Its supporting declarations are admitted only to
-   check composition and are never imported.
+   the probe-first workflow. It admits only the uniform-secret supporting
+   lemma to check composition and is never imported by permanent source.
 2. Every probability equality is information-theoretic and uses the exact
    uniform distribution in `pgl27P`. No computational-security premise is
    converted into distributional equality.
@@ -210,13 +228,22 @@ notes/probes/2026-09-15-pgl27-view-entropy/
 
 It will contain:
 
-1. `table_group_bridge.v` for C1 to C5.
-2. `view_collision_probability.v` for C6 to C8.
-3. `posterior_entropy.v` for C9 and C10.
-4. `headline_decomposition.v` for C11. This file alone may contain admitted
-   supporting declarations.
-5. Mutation files or `Fail` checks that establish sensitivity.
-6. Independent soundness and naming audit reports.
+1. `probe_view_definitions.v` defines the coalition, restricted view, and
+   ambiguous-view set once for all probes.
+2. `table_group_bridge.v` covers C1 to C5.
+3. `view_collision_probability.v` covers C6 and C7.
+4. `ambiguous_probability.v` covers C8 by importing the preceding bridges.
+5. `posterior_entropy.v` covers C9 and C10.
+6. `posterior_entropy_mutations.v` checks the injectivity and reachability
+   premises.
+7. `headline_connection.v` states C10 with the exact event used by C8.
+8. `headline_decomposition.v` covers C11. This file alone may contain the one
+   admitted uniform-secret supporting lemma.
+9. `concrete_real_instance.v` covers C12.
+10. `_CoqProject` records all project mappings and the probe-local `-Q`
+    mapping used by `Makefile.rocq`.
+11. `soundness-audit.md`, `naming-audit.md`, and `flow-sketch-audit.md` retain
+    the independent audit evidence.
 
 No permanent Rocq file may import these probe files.
 
@@ -226,3 +253,25 @@ The specification is ready for an implementation plan only when C1 to C13 are
 marked GO with compiled evidence, C14 remains an explicit later extension, the
 soundness audit returns `VERDICT: GO`, the naming audit returns `VERDICT: GO`,
 and every accepted finding has been folded into this note and committed.
+
+## Final validation
+
+The probe-local `_CoqProject` rebuilds all nine Rocq files under the logical
+root `pgl27_view_entropy_probe`. An ordered `make -f Makefile.rocq -j1` under
+the opam switch `/Users/cheng-huiweng/Projects/coq` completed with exit code
+zero after the final source changes.
+
+The main probability and posterior results use only the project's existing
+boolp assumptions. The C2 and C4 mutations are closed under the global
+context. The concrete `Rdefinitions.R` wrappers report the assumptions of
+Coq's standard real carrier. The isolated C11 decomposition additionally uses
+only its permitted `pgl27_secret_uniform` supporting declaration.
+
+The retained independent reports all conclude:
+
+- `soundness-audit.md`: `VERDICT: GO`
+- `naming-audit.md`: `VERDICT: GO`
+- `flow-sketch-audit.md`: `VERDICT: GO`
+
+C1 to C13 are therefore GO. C14 remains a later theorem for transporting the
+representative results to every coalition in the same orbit.
