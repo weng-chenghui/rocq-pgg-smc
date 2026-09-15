@@ -26,9 +26,11 @@
 (* equation of psl211_endpoints.v, which enters here only through             *)
 (* supplied_endpointsE and is never unfolded.                                 *)
 (*                                                                            *)
-(* Naming: the law of the model is psl211_alldecksP, where the repository's   *)
-(* other two-mode instance writes the mode prefix with a _sampleP suffix      *)
-(* (s5_models.v:106 s5_rand_sampleP).                                         *)
+(* Naming: the law of the model is psl211_alldecksP and not                   *)
+(* psl211_alldecks_sampleP, which is the conventional spelling the            *)
+(* repository's other two-mode instance uses (s5_models.v:106                 *)
+(* s5_rand_sampleP). The short form is the one the probes compiled and the    *)
+(* one psl211_alldecks_sampleP_E is the equation of.                          *)
 (*                                                                            *)
 (* content_of lives in instances/pgl27/pgl27_trace.v and nothing shared       *)
 (* exports it, so the row reader is restated here as psl211_content_of and    *)
@@ -111,6 +113,9 @@ Local Notation mpP := (instance_profile psl211_algebra).
 (** eP — the execution plug the all-decks parametrization derives. *)
 Local Notation eP := (instance_exec psl211_alldecks_params).
 
+(* Both are spelled through the derived profile rather than as 'I_12, so that
+   the framework's obligations unify with the instance's statements by
+   conversion. *)
 (** seatT — a seat of the instance's starting interface, the index a coalition
     is a set of. *)
 Local Notation seatT := ('I_(pi_T' (mp_PI mpP)).+1).
@@ -179,8 +184,7 @@ Lemma psl211_alldecks_sample_cutE (R : realType)
 Proof. by []. Qed.
 
 (** psl211_alldecks_cut_distE — the cut this model draws is the uniform law on
-    the shuffle group. This is the cut the exact arm needs, and it is the law
-    a spectral arm would compare a generator walk against. *)
+    the shuffle group. This is the cut the exact arm needs. *)
 Lemma psl211_alldecks_cut_distE (R : realType) :
   @sa_cut_dist R (instance_profile psl211_algebra)
     (instance_exec psl211_alldecks_params) (psl211_alldecks_sample R)
@@ -199,7 +203,7 @@ Qed.
 (******************************************************************************)
 
 (** psl211_alldecks_static_obsE — seat i's entry of the framework's static
-    coalition reading is the card the laid deck puts at the shuffle image of
+    coalition reading is the card the laid deck puts at the cut image of
     seat i, and ord0 at every seat outside C. Every security statement of this
     instance is made about the left-hand side and every counting argument
     about the right, so this equation is the whole of what carries one to the
@@ -376,11 +380,10 @@ Proof. by []. Qed.
 
 (** psl211_alldecks_secret_expectedE — the secret the exact arm certifies is
     the value the run recovers, read off the same sample point. The exact
-    arm's witness, built in psl211_rows.v beside the Tableau surface that
-    types it, has no field relating its secret to the run's expected value, so
-    without this equation that secret could be independent of a bit the
-    protocol never reconstructs and the published independence would be true
-    and empty. *)
+    arm's witness has no field relating its secret to the run's expected
+    value, so without this equation that secret could be independent of a bit
+    the protocol never reconstructs and the published independence would be
+    true and empty. *)
 Lemma psl211_alldecks_secret_expectedE (R : realType)
     (u : psl211_inputT * pgg_gT psl211_M) :
   psl211_alldecks_secret R u
@@ -434,9 +437,7 @@ by move=> v; exact: psl211_alldecks_fiber_transfer.
 Qed.
 
 (** psl211_alldecks_static_indep — the same independence on the framework's
-    side, which is the form the exact arm's witness demands of it. That
-    witness is built in psl211_rows.v, beside the Tableau surface that types
-    it. *)
+    side, which is the form the exact arm's witness demands of it. *)
 Lemma psl211_alldecks_static_indep (R : realType) (C : {set seatT}) :
   (#|C| <= 5)%N ->
   psl211_alldecksP R
