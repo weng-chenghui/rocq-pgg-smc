@@ -13,16 +13,17 @@
 (* monodromy profile and the execution plug.  The run written here is the     *)
 (* dealer-dealt one: the dealer draws the chirality bit, no party commits an  *)
 (* input, and the interpreter budget is psl211_fuel.  Of the three run facts  *)
-(* it owes termination alone, decided by reduction at 0.45 s of vm_compute    *)
-(* and 0.47 s of Qed (measured 2026-09-15); reconstruction follows from the   *)
-(* coordinate law and spends no reduction, and the endpoint equation is       *)
-(* stated once at the profile in psl211_endpoints.v.                          *)
+(* it owes termination alone, decided by reduction at fuel 220 in 0.49 s of   *)
+(* vm_compute and 0.47 s of Qed (measured 2026-09-15); reconstruction follows *)
+(* from the coordinate law and spends no reduction, and the endpoint equation *)
+(* is stated once at the profile in psl211_endpoints.v.                       *)
 (*                                                                            *)
 (* This file and its whole import closure lie below psl211_endpoints.v, whose *)
 (* single declaration costs 561 seconds of vm_compute, 331 seconds of Qed and *)
 (* a 17 GB peak (measured 2026-09-15).  Rebuilding this file from             *)
 (* byte-identical sources changes the library digest and invalidates that     *)
-(* .vo.  That closure is 35 files, this one and psl211_endpoints.v included.  *)
+(* .vo.  The closure psl211_endpoints.v freezes is 35 files, this one         *)
+(* included.                                                                  *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_players      == the twelve explicit seat ordinals                 *)
@@ -54,9 +55,6 @@ From pgg_smc Require Import psl211_scheme psl211_profile.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
-
-Local Open Scope fdist_scope.
-Local Open Scope proba_scope.
 
 (** psl211_players — the twelve explicit seat ordinals.  Spelled out rather
     than enum 'I_12 so that the dealer's fold_senv reduces under vm_compute. *)
@@ -99,8 +97,8 @@ Proof. by []. Qed.
     dealer, the verifier and the twelve seats.  220 steps, the budget the
     eight-card instance uses.  The value has only to exceed the number of
     communication rounds: the interpreter halts once no process advances, so
-    a budget past that number is never spent, and that 220 exceeds it is what
-    psl211_dealt_terminates decides. *)
+    a budget past that number is never spent, and that 220 exceeds it is
+    decided by reduction, not by counting rounds. *)
 Definition psl211_fuel : nat := 220.
 
 (** psl211_dealt_params — the run-level data of a run that deals the
