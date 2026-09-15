@@ -5,13 +5,14 @@
 (*              as a program                                                  *)
 (*                                                                            *)
 (* The dealer this row is about is the all-decks one. The deck description is *)
-(* drawn uniformly over the two chiralities, the 132 block lines of that      *)
-(* chirality's Steiner system for the six heart positions and the two         *)
-(* labellings of the heart and the club codes; the cut is drawn uniformly     *)
-(* over the 660 elements of the group; each of the twelve seats reads the     *)
-(* card at its own position. Six is the privacy threshold the derived profile *)
-(* declares, so every statement below is about a coalition of at most five of *)
-(* the twelve seats, and what the row carries about such a coalition is       *)
+(* drawn uniformly over all the decks: one of the two chiralities, one of the *)
+(* 132 block lines of that chirality's Steiner system for the six heart       *)
+(* positions, one of the 720 labellings of the heart codes and one of the 720 *)
+(* labellings of the club codes. The cut is drawn uniformly over the 660      *)
+(* elements of the group, and each of the twelve seats reads the card at its  *)
+(* own position. Six is the privacy threshold the derived profile declares,   *)
+(* so every statement below is about a coalition of at most five of the       *)
+(* twelve seats, and what the row carries about such a coalition is           *)
 (* independence of the chirality: exact, at every real field, with no numeric *)
 (* bound in it. The fixed-dealer colour result of psl211_secrecy.v is about a *)
 (* different dealer and a different observer and is not a row.                *)
@@ -37,18 +38,21 @@
 (* importing it would close a cycle through the analysis manifest.            *)
 (*                                                                            *)
 (* Not claimed. There is no spectral arm for this dealer: a certificate's     *)
-(* constancy field is stated per run argument, and under the all-decks dealer *)
-(* nobody has measured it. Trace secrecy is not a field of an                 *)
+(* constancy field asks that a coalition's reading of the ideal cut not vary  *)
+(* with the run argument, which fails at three seats under the dealt mode at  *)
+(* the group-uniform ideal, and under the all-decks dealer it is a different  *)
+(* statement nobody has measured. Trace secrecy is not a field of an          *)
 (* AnalysisPathRow, so no trace row is written and the executed content       *)
 (* reader of psl211_models.v is what the facade carries instead. ExactLeakAt  *)
 (* 6 is not claimed: the six-seat separation is a numeric check and not a     *)
-(* Rocq theorem. And the parametrization (j, ph, pc) |-> deck, injective      *)
-(* through the heart set and the tables' uniqueness and surjective because a  *)
-(* valid deck's heart codes are distinct and below six, enumerates the valid  *)
-(* decks of a chirality once each as a numeric check in                       *)
-(* notes/probes/2026-09-15-psl211-planb/audit-soundness/audit_alldecks.out,   *)
-(* items (e) and (e'); it is not proved in Rocq, and the row's law is stated  *)
-(* on the parameter carrier and does not depend on it.                        *)
+(* Rocq theorem. The parametrization (j, ph, pc) |-> deck is not proved in    *)
+(* Rocq. That it enumerates the valid decks of a chirality once each,         *)
+(* injective through the heart set and the tables' uniqueness and surjective  *)
+(* because a valid deck's heart codes are distinct and below six, is checked  *)
+(* numerically in items (e) and (e') of                                       *)
+(* notes/probes/2026-09-15-psl211-planb/audit-soundness/audit_alldecks.out.   *)
+(* The row's law is stated on the parameter carrier and does not depend on    *)
+(* it.                                                                        *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_alldecks_prefix  == the algebra, the supplied-layout run and the  *)
@@ -239,7 +243,15 @@ Definition psl211_alldecks_prefix_vm : Tableau Observed :=
             endpoints by psl211_alldecks_endpoints
             recon by psl211_alldecks_recon.
 
-(** The two prefixes are not the same term. *)
+(** The two prefixes are not the same term. The rejection is a conversion
+    failure between the two prefixes themselves:
+
+      The term "erefl" has type
+       "psl211_alldecks_prefix_vm = psl211_alldecks_prefix_vm"
+      while it is expected to have type
+       "psl211_alldecks_prefix_vm = psl211_alldecks_prefix"
+      (cannot unify "psl211_alldecks_prefix_vm" and "psl211_alldecks_prefix").
+*)
 Fail Definition psl211_alldecks_prefix_vm_neq :
   psl211_alldecks_prefix_vm = psl211_alldecks_prefix := erefl.
 
