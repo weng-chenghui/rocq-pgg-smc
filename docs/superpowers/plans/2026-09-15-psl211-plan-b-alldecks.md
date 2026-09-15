@@ -225,7 +225,8 @@ predicted, `security/pgg_sample_adapter.v` and `security/pgg_weighted_words.v`;
 the other five arrive through `psl211_profile.v` and `psl211_closure.v` and
 cannot be trimmed from `psl211_exec.v` at any import list. The landed import
 list keeps one Require the minimum above omitted, `pgg_monodromy_profile`,
-without which `profile_k` is not in scope for `profile_k_psl211_algebra`; that module
+without which `profile_k` is not in scope for `profile_k_psl211_algebra`; that
+module
 is already in the closure through `psl211_profile.v`, so it costs nothing.
 
 `reconstruct/design_privacy.v` is **not** in the closure: the only psl211 file
@@ -538,7 +539,8 @@ Header box: name, the sentence that the file carries the algebraic record of
 the twelve-card chirality instance and the dealt run over it, the `Definitions:`
 list (`psl211_players`, `psl211_algebra`, `psl211_fuel`, `psl211_dealt_params`,
 `psl211_dealt_recon`) and the `Key results:` list (`psl211_players_enumE`,
-`psl211_profileE`, `profile_k_psl211_algebra`, `psl211_dealt_terminates`). Add one
+`psl211_profileE`, `profile_k_psl211_algebra`, `psl211_dealt_terminates`). Add
+one
 paragraph naming the freeze rule as a fact about the file, not as a status
 marker:
 
@@ -627,7 +629,8 @@ Definition psl211_dealt_recon : instance_recon_stmt psl211_dealt_params :=
 Lemma psl211_dealt_terminates : instance_terminates_stmt psl211_dealt_params.
 Proof. by vm_compute. Qed.
 
-Lemma profile_k_psl211_algebra : profile_k (instance_profile psl211_algebra) = 6.
+Lemma profile_k_psl211_algebra :
+  profile_k (instance_profile psl211_algebra) = 6.
 Proof. by []. Qed.
 ```
 
@@ -646,7 +649,8 @@ probe's two-budget comment describes an experiment rather than the object:
     Finish inside that budget.  The reduction is symbolic in the cut, so it
     does not enumerate the group. *)
 
-(** profile_k_psl211_algebra — the privacy threshold the derived profile declares is
+(** profile_k_psl211_algebra — the privacy threshold the derived profile
+declares is
     six, so every arm of a row over this algebra quantifies over coalitions of
     at most five of the twelve seats. *)
 ```
@@ -676,7 +680,7 @@ this file cannot be touched for the price of a measurement.
 - [ ] **Step 2: Register, compile, check**
 
 Add `instances/psl211/psl211_exec.v` to `_CoqProject` after
-`instances/psl211/psl211_recovery.v`, regenerate the makefile, then:
+`instances/psl211/psl211_mixing.v` (the Files header's placement, and the landed one; coqdep has no edge either way), regenerate the makefile, then:
 
 ```bash
 rocq makefile -f _CoqProject -o Makefile.rocq
@@ -688,7 +692,10 @@ adds the P1b2 measurement of 0.958 s of `vm_compute` and 0.62 s of `Qed`).
 Expected peak: 1.6 GB.
 
 ```bash
-printf 'From pgg_smc Require Import psl211_exec.\nPrint Assumptions psl211_players_enumE.\nPrint Assumptions psl211_profileE.\nPrint Assumptions profile_k_psl211_algebra.\nPrint Assumptions psl211_dealt_recon.\nPrint Assumptions psl211_dealt_terminates.\n' | rocq repl -q $PSL211_RFLAGS
+printf 'From pgg_smc Require Import psl211_exec.\nPrint Assumptions
+psl211_players_enumE.\nPrint Assumptions psl211_profileE.\nPrint Assumptions
+profile_k_psl211_algebra.\nPrint Assumptions psl211_dealt_recon.\nPrint
+Assumptions psl211_dealt_terminates.\n' | rocq repl -q $PSL211_RFLAGS
 ```
 
 Expected: Closed for all five. Four of them were read back directly from the
@@ -1772,7 +1779,8 @@ Proof. by []. Qed.
 
 The `let H5 : (#|C| <= 5)%N := HC` line is where the threshold check bites: the
 field's premise is `(#|C| < profile_k (instance_profile psl211_algebra))%N`,
-the threshold is six by `profile_k_psl211_algebra`, and the coercion is by conversion.
+the threshold is six by `profile_k_psl211_algebra`, and the coercion is by
+conversion.
 The headline restated at `#|C| <= 6` does not fill the field.
 
 `psl211_alldecks_secret_expectedE` is the row that keeps the arm non-empty.
