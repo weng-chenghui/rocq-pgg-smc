@@ -36,6 +36,14 @@
 (* labellings, and a stolen leading parameter is the most expensive mistake   *)
 (* to diagnose in that position.                                              *)
 (*                                                                            *)
+(* The counting half cites card_prescribed from lib/perm_uniform.v:117, whose *)
+(* own imports pull in all_algebra, boolp, reals and infotheo's fdist, proba, *)
+(* jfdist_cond and entropy.  That import was measured at 4.31 s against       *)
+(* 0.52 s for a version using only perm_exchange, by the plan audit on        *)
+(* 2026-09-15 and not re-measured here.  This file itself compiles in about   *)
+(* ten seconds at a peak of 1.96 GB, one rocqworker (measured 2026-09-15,     *)
+(* 7.3 s to 11.3 s across runs).                                              *)
+(*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_deal             == a block line and two colour labellings        *)
 (*   psl211_inputT           == a chirality bit and a deal                    *)
@@ -676,8 +684,8 @@ Definition psl211_alldecks_view (C : {set seatT}) (x : psl211_inputT)
 (** psl211_alldecks_read_setE — the positions a coalition reads are the image
     of the coalition under the cut, and that image has the coalition's own
     size because a shuffle is a permutation.  The image, not the preimage, is
-    the set the block census is taken over, and its size is what bounds that
-    census to at most five points. *)
+    the set the block count is taken over, and its size is what bounds that
+    count to at most five points. *)
 Lemma psl211_alldecks_read_setE (C : {set seatT}) (g : pgg_gT psl211_M) :
   #|[set (@pgg_rho psl211_M g i) | i in C]| = #|C|.
 Proof. by rewrite card_imset //; exact: perm_inj. Qed.
@@ -849,6 +857,12 @@ Qed.
 (* The deal count at one cut.                                                 *)
 (* -------------------------------------------------------------------------- *)
 
+(* The two counting statements below are pinned by their closed type and not
+   by their source text: they are stated over the section variables C, g and
+   v, generalized in that order, while the plan displays them with explicit
+   binders.  A text diff against the plan shows that difference, which is not
+   drift; the plan's own spelling is closed by exact: in
+   notes/probes/2026-09-15-psl211-planb/t4_landed_canary.v. *)
 Section psl211_alldecks_fibers.
 
 Variable C : {set seatT}.
@@ -999,7 +1013,7 @@ Qed.
 (** ad_patternE — a deal producing the reading has its block line meeting the
     read positions exactly in the reading's heart pattern.  This is the
     passage from the reading seat by seat to the set-level pattern the block
-    census is taken at. *)
+    count is taken at. *)
 Local Lemma ad_patternE (b : bool) (j : 'I_132) (ph pc : {perm 'I_6}) :
   [forall p in ad_P,
      tnth (psl211_alldecks_layout (b, (j, ph, pc))) p == ad_read p] ->
@@ -1156,6 +1170,16 @@ move: (Hri p); rewrite HpP /= => /forallP/(_ q); rewrite HqP /=.
 by rewrite Hr eqxx /= => /eqP ->.
 Qed.
 
+(* The ad_ok premise is a departure from the audit counter-probe, which
+   assumed this equation unconditionally as a section hypothesis
+   (notes/probes/2026-09-15-psl211-planb/audit-plan/audit_t4_percut.v).  The
+   unconditional form is false.  A reading that is nonzero off the coalition,
+   or that names one code at two read positions, is produced by no deal, so
+   its left side is 0 at every block line, while the right side is
+   (6 - #|ad_A|)! * (6 - #|ad_P :\: ad_A|)! at every block line meeting the
+   read positions in the pattern.  The premise constrains the reading and the
+   cut alone and never the class, so ad_fiber_empty answers its negation with
+   0 on both sides. *)
 (** ad_fiber_at_row — the deals on one block line producing the reading are
     the pairs of labellings prescribed by that reading: the product of the two
     extension counts when the block line meets the read positions in the
@@ -1255,10 +1279,17 @@ rewrite -Hc -(ad_card_index_count _ (psl211_class_tbl b) (ad_class_tbl_size b)).
 by apply: eq_card => j; rewrite !inE.
 Qed.
 
+(* The plan's route step 4 puts the empty-coalition case at the top of
+   psl211_alldecks_per_cut_count.  It is discharged here instead, where both
+   sides collapse to the table size by ad_inter_nil and ad_class_tbl_size and
+   the view never has to be shown constant. *)
 (** ad_pattern_classE — the two Steiner systems have equally many block lines
     meeting the read positions in the reading's heart pattern.  Both are
-    S(5,6,12) designs and the pattern has at most five points, so no census a
-    coalition of that size can take separates them. *)
+    S(5,6,12) designs and the pattern has at most five points, so no block
+    count a coalition of that size can take separates them.  At an empty
+    coalition both counts are the whole table, which is where
+    psl211_pattern_transfer's positivity premise is avoided rather than
+    met. *)
 Local Lemma ad_pattern_classE :
   (#|C| <= 5)%N ->
   psl211_pattern_count (psl211_class_tbl true) (map val (enum ad_P))
@@ -1315,9 +1346,12 @@ have Hp := ad_pattern_classE HC5.
 (* The two sides name the two tables, and a rewrite that is free to look at
    both makes unification compare the 132-row literals: psl211_class_tbl
    true and psl211_class_tbl false unfold to the two tables and the match
-   descends into them.  Killed at 40 s and 3.3 GB (measured 2026-09-15, one
-   rocqworker).  Each side is therefore reached by transitivity through a
-   term that names one table only, and the last step is an exact. *)
+   descends into them.  The single rewrite was stopped here by Timeout 40 at
+   40 s (measured 2026-09-15); the plan audit measured the related step-11
+   shape, with the two table-size hypotheses in context, at 280 s and at
+   420 s with one rocqworker at 3.3 GB (AUDIT-PLAN-B.md:37).  Each side is
+   therefore reached by transitivity through a term that names one table
+   only, and the last step is an exact. *)
 transitivity (psl211_pattern_count (psl211_class_tbl true)
                 (map val (enum ad_P)) (map val (enum ad_A))
               * ((6 - #|ad_A|)`! * (6 - #|ad_P :\: ad_A|)`!))%N.
