@@ -2805,3 +2805,23 @@ Nothing else was rejected.
   script cannot run in this checkout layout, the python test passes 18/18) and
   the manifest/client commit after the repair. The probes did not catch the
   cycle because no probe compiled the manifest on top of psl211_models.
+- T6 second commit 943c836 (manifest 5.96 s; downstream pgg_tableau,
+  pgg_tableau_syntax and the three row files rebuilt, about 30 s) after
+  851c0a2 (witness out of psl211_models.v, T5 review fixes). T7 ec46c7d
+  (psl211_rows.v, 5.7 s: the program with named obligations, the witness
+  defined here with the plan's Task 5 body, rowE by `[]`, one added theorem
+  `psl211_alldecks_view_secrecy` as a pure projection of the published
+  proposition through `view_secrecy_of`, two Fail guards reproducing
+  pgl27_rows.v:362's message; every public object the boolp trio, rowE
+  included, as audit-fold finding 48 predicted). Comment batches: 099aca0
+  (alldecks: header timing band 7.3-11.3 s / 1.96 GB, step-11 provenance,
+  recorded departures), b827bf6 (models and manifest rendered bodies, the
+  bridges table). Reviews: REVIEW-T1..T6 under
+  notes/probes/2026-09-15-psl211-planb/, rows B3-B8 in REVIEWS.md; every
+  task compliant, no blocking finding left open.
+- Closure batch (the one budgeted edit inside the frozen closure): the two
+  frozen headers (psl211_endpoints.v, psl211_exec.v) carry both dated
+  endpoint measurements (probe P1b2 17.15 GB around rocq compile of a
+  two-declaration file; the landed compile 10.45 GB around make) and the
+  termination provenance; one 900 s recompile, log
+  log-T8-endpoints-recompile.txt.
