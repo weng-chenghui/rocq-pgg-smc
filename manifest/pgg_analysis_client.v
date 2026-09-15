@@ -3,8 +3,8 @@
 (******************************************************************************)
 (* pgg_analysis_client: the clean client of the analysis manifest             *)
 (*                                                                            *)
-(* One import reaches all three facades, the typed status vocabulary and the  *)
-(* eight typed rows. The file has EXACTLY ONE Require of any kind, and        *)
+(* One import reaches all four facades, the typed status vocabulary and the   *)
+(* nine typed rows. The file has EXACTLY ONE Require of any kind, and         *)
 (* every Check below is a bare Check on an alias, so no scope needs to be     *)
 (* open and no notation needs to be in scope: what is established here is     *)
 (* reachability of the aliases, not their spelling.                           *)
@@ -63,6 +63,18 @@ Check S5Analysis.exec_coalition_secrecy.        (* 6 Security *)
 Check S5Analysis.word_endpoint_bound.           (* bound, not security *)
 Check S5Analysis.rand_transfer_status.          (* 7 Transfer, typed status *)
 
+(* Twelve-card chirality instance under its all-decks dealer, sections 1 to 7.
+   Section 7 carries no theorem, so its representative is the typed transfer
+   status. *)
+Check PSL211Analysis.profile.                   (* 1 Program *)
+Check PSL211Analysis.exec_plug.                 (* 2 Execution *)
+Check PSL211Analysis.content_trace.             (* 3 Observers *)
+Check PSL211Analysis.exact_sample.              (* 4 Models *)
+Check PSL211Analysis.exact_family.              (* 4 Models, typed family *)
+Check PSL211Analysis.observed_recovers.         (* 5 Correctness *)
+Check PSL211Analysis.exact_view_indep.          (* 6 Security *)
+Check PSL211Analysis.exact_transfer_status.     (* 7 Transfer, typed status *)
+
 (******************************************************************************)
 (*     The observed-execution values and the remaining distinct observers     *)
 (******************************************************************************)
@@ -72,6 +84,7 @@ Check FiveCardAnalysis.observed.
 Check FiveCardAnalysis.den_boer_observed.
 Check S5Analysis.observed.
 Check S5Analysis.rand_observed.
+Check PSL211Analysis.observed.
 
 Check PGL27Analysis.verifier_trace.
 Check PGL27Analysis.player_raw_trace.
@@ -104,8 +117,13 @@ Check S5Analysis.rand_verifier_trace.
 Check S5Analysis.rand_verifier_endpoints.
 Check S5Analysis.rand_player_raw_trace.
 
+Check PSL211Analysis.seat_endpoint.
+Check PSL211Analysis.coalition_endpoints.
+Check PSL211Analysis.static_view.
+Check PSL211Analysis.secret.
+
 (******************************************************************************)
-(*     The typed status vocabulary and the eight rows                         *)
+(*     The typed status vocabulary and the nine rows                          *)
 (******************************************************************************)
 
 Check CompletionLevel.
@@ -133,18 +151,19 @@ Check five_card_row_repeated.
 Check s5_row_det.
 Check s5_row_rand.
 Check s5_row_word.
+Check psl211_row_alldecks.
 
 (******************************************************************************)
 (*     What one import actually reaches                                       *)
 (*                                                                            *)
-(* Require is transitive in LOADING but not in IMPORTING. The three facades   *)
+(* Require is transitive in LOADING but not in IMPORTING. The four facades    *)
 (* Require Export their type vocabulary and Require Import the instance       *)
 (* files, so through the single import above this client gets:                *)
 (*                                                                            *)
-(*   - every facade alias, under its module name (the lines above); the three *)
+(*   - every facade alias, under its module name (the lines above); the four  *)
 (*     modules keep the short names apart, so PGL27Analysis.profile,          *)
-(*     FiveCardAnalysis.profile and S5Analysis.profile coexist and none       *)
-(*     shadows another;                                                       *)
+(*     FiveCardAnalysis.profile, S5Analysis.profile and                       *)
+(*     PSL211Analysis.profile coexist and none shadows another;               *)
 (*   - the exported type vocabulary, by short name (the lines below);         *)
 (*   - the manifest's own rows and record, by short name;                     *)
 (*   - every instance-file constant by QUALIFIED name only, because those     *)
@@ -165,7 +184,7 @@ Check sw_rho_dist.
 Check scb_bound.
 
 (* Facade aliases are not visible unqualified either: the module name is the
-   namespace, which is what keeps the three facades' short names distinct. *)
+   namespace, which is what keeps the four facades' short names distinct. *)
 Fail Check profile.
 Fail Check exec_plug.
 Fail Check content_trace.

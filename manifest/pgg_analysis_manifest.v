@@ -3,16 +3,17 @@
 (******************************************************************************)
 (* pgg_analysis_manifest: the repository-level analysis manifest              *)
 (*                                                                            *)
-(* The manifest re-exports the three instance facades, so that one import     *)
+(* The manifest re-exports the four instance facades, so that one import      *)
 (* reaches every public alias of the eight-card orbit instance, the five-card *)
-(* development of den Boer and Kim and the five-seat S_5 instance, and        *)
-(* records one row per analysis path. Each row names its protocol instance,   *)
-(* probability model, profile, execution, observed-execution and sample       *)
-(* aliases, its observers with their carriers, its correctness theorem, its   *)
-(* security, leakage, mixing or limitation theorem, its static-to-executed    *)
-(* bridge and model-transfer theorem when present, the missing model-transfer *)
-(* premise when none is claimed, its exact capability, its completion level   *)
-(* and its assumption status.                                                 *)
+(* development of den Boer and Kim, the five-seat S_5 instance and the        *)
+(* twelve-card chirality instance, and records one row per analysis path.     *)
+(* Each row names its protocol instance, probability model, profile,          *)
+(* execution, observed-execution and sample aliases, its observers with       *)
+(* their carriers, its correctness theorem, its security, leakage, mixing or  *)
+(* limitation theorem, its static-to-executed bridge and model-transfer       *)
+(* theorem when present, the missing model-transfer premise when none is      *)
+(* claimed, its exact capability, its completion level and its assumption     *)
+(* status.                                                                    *)
 (*                                                                            *)
 (* Each row is also a typed value of AnalysisPathRow below, carrying the      *)
 (* observed execution of the path, its typed model slot apr_model, an         *)
@@ -71,7 +72,8 @@
 (* row makes its pin fail, so the tables cannot drift away from the code.     *)
 (******************************************************************************)
 
-From pgg_smc Require Export pgl27_analysis five_card_analysis s5_analysis.
+From pgg_smc Require Export pgl27_analysis five_card_analysis s5_analysis
+                            psl211_analysis.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -559,9 +561,79 @@ Local Open Scope ring_scope.
 (* certificate of s5_mixing.v, so the only named assumption of this row is    *)
 (* the instance's group-order one.                                            *)
 (*                                                                            *)
+(*     Row 9: twelve-card chirality instance, all-decks dealer                *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol family and model | PSL(2,11) twelve-card chirality deck; the    *)
+(*                               deck description drawn uniformly over all of *)
+(*                               them and the cut drawn uniformly over the    *)
+(*                               660 elements of the group, the two           *)
+(*                               independent |                                *)
+(* | profile alias      | PSL211Analysis.profile |                            *)
+(* | execution alias    | PSL211Analysis.exec_plug |                          *)
+(* | observed alias     | PSL211Analysis.observed |                           *)
+(* | sample alias       | PSL211Analysis.exact_sample; the row's typed model  *)
+(*                        witness is PSL211Analysis.exact_family, the family  *)
+(*                        indexed by unit |                                   *)
+(* | observers          | PSL211Analysis.coalition_endpoints                  *)
+(*                          : {ffun 'I_12 -> 'I_12}, executed;                *)
+(*                        PSL211Analysis.content_trace                        *)
+(*                          : {ffun 'I_12 -> 'I_12}, executed;                *)
+(*                        PSL211Analysis.static_view                          *)
+(*                          : {ffun 'I_12 -> 'I_12}, the reading of the laid  *)
+(*                            deck at a description and a cut;                *)
+(*                        PSL211Analysis.seat_endpoint : 'I_12, executed;     *)
+(*                        PSL211Analysis.secret : bool, a random variable on  *)
+(*                          prior |                                           *)
+(* | distribution-to-observer bridges | PSL211Analysis.cut_distE,             *)
+(*                        PSL211Analysis.exact_coalition_distE,               *)
+(*                        PSL211Analysis.content_traceE |                     *)
+(* | bound or certificate | PSL211Analysis.marginal_bound,                    *)
+(*                          PSL211Analysis.certificate_bundle |               *)
+(* | final bridge theorem | PSL211Analysis.exact_view_indep |                 *)
+(* | correctness theorem  | PSL211Analysis.observed_recovers,                 *)
+(*                          PSL211Analysis.secret_expectedE |                 *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | none: the cut this model draws is the uniform     *)
+(*                          distribution on the group already, so the path    *)
+(*                          compares no idealized model |                     *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | StaticExecutedOnly |                              *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
+(* | typed row            | psl211_row_alldecks |                             *)
+(*                                                                            *)
+(* Capabilities, one line per (theorem, distribution, observer, notion):      *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | exact_view_indep | prior R, the distribution of exact_sample             *)
+(*   | coalition_endpoints, through exact_coalition_distE | exact privacy |   *)
+(* | static_indep | prior R, the same distribution                            *)
+(*   | static_view, the coalition's reading of the laid deck                  *)
+(*   | exact privacy |                                                        *)
+(* | observed_recovers | none, the statement is distribution-free             *)
+(*   | the executed endpoint list | correctness |                             *)
+(* | secret_expectedE | none, the statement is distribution-free              *)
+(*   | the value the run recovers | correctness |                             *)
+(*                                                                            *)
+(* Level justification. profile gives Algebraic; exec_plug is indexed by      *)
+(* profile, giving Executable; observed is the ObservedExecution over that    *)
+(* profile and plug, giving Observed; exact_sample is a SampleAdapter over    *)
+(* that plug and exact_coalition_distE identifies its executed coalition      *)
+(* distribution with the pushforward of prior along static_view, giving       *)
+(* Sampled; exact_view_indep is a security theorem whose right-hand side      *)
+(* names sa_coalition_dist (exact_sample R) 0 C itself, so the theorem, the   *)
+(* distribution and the observer are this row's own, giving AnalysisBridged.  *)
+(* Both privacy lines quantify over coalitions of at most five of the twelve  *)
+(* seats, the profile's own privacy threshold being six. The independence is  *)
+(* exact and is an average over deck descriptions and cuts; the fixed-dealer  *)
+(* colour results of the same instance are about a different dealer and a     *)
+(* different observer and are no part of this row.                            *)
+(*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
-(* These are public observers and correctness statements of the three facades *)
+(* These are public observers and correctness statements of the four facades  *)
 (* that no row above attaches a security notion to. They are named here so    *)
 (* that the checker pins the whole facade surface, not only the rows.         *)
 (*                                                                            *)
@@ -581,6 +653,8 @@ Local Open Scope ring_scope.
 (*                rand_player_raw_trace, exec_correct, exec_recovers,         *)
 (*                rand_correct, rand_recovers, word_cut_imageE,               *)
 (*                word_transfer_conditional |                                 *)
+(* | PSL211Analysis | seat_endpoint, coalition_endpoints, prior, cut_distE,   *)
+(*                    content_trace, exact_transfer_status |                  *)
 (*                                                                            *)
 (*     Absent capabilities                                                    *)
 (*                                                                            *)
@@ -734,6 +808,19 @@ Definition s5_row_word : AnalysisPathRow :=
   @MkAnalysisPathRow S5Analysis.observed AnalysisBridged
     S5Analysis.word_family IdealFinite
     (AcceptsAxioms [:: AxS5GroupOrder]).
+
+(** The AnalysisPathRow for the twelve-card chirality instance under its
+    all-decks dealer: PSL211Analysis.observed paired with the unit-indexed
+    exact-uniform family, AnalysisBridged, StaticExecutedOnly,
+    BaselineClassicalOnly.  exact_view_indep is proved at this row's own
+    sample distribution and observer, which is what reaches AnalysisBridged;
+    the cut is already the uniform distribution on the group, so no idealized
+    model is compared, and the deck description is drawn uniformly too, which
+    is what distinguishes this row from the fixed-dealer colour result the
+    same instance also carries. *)
+Definition psl211_row_alldecks : AnalysisPathRow :=
+  @MkAnalysisPathRow PSL211Analysis.observed AnalysisBridged
+    PSL211Analysis.exact_family StaticExecutedOnly BaselineClassicalOnly.
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -1524,7 +1611,132 @@ Timeout 60 Check (S5Analysis.word_transfer_conditional :
     <= delta + delta).
 
 (******************************************************************************)
-(*     The deterministic checker: the eight typed rows                        *)
+(*     The deterministic checker: twelve-card chirality instance              *)
+(*                                                                            *)
+(* The deck description this instance runs on is a class bit paired with a    *)
+(* block line of that class and a labelling of each of the two six-code       *)
+(* colour groups, spelled out below wherever the run argument appears.        *)
+(******************************************************************************)
+
+(* --- 1 Program --- *)
+
+Timeout 60 Check (PSL211Analysis.profile : MonodromyProfile).
+
+(* --- 2 Execution --- *)
+
+Timeout 60 Check (PSL211Analysis.exec_plug :
+  ExecutionPlug PSL211Analysis.profile).
+
+(* --- 3 Observers --- *)
+
+Timeout 60 Check (PSL211Analysis.observed : OE.ObservedExecution).
+
+Timeout 60 Check (PSL211Analysis.prior :
+  forall R : realType,
+    R.-fdist ((bool * ('I_132 * {perm 'I_6} * {perm 'I_6}))
+              * pgg_gT (mp_M PSL211Analysis.profile))%type).
+
+Timeout 60 Check (PSL211Analysis.content_trace :
+  {set 'I_12} -> (bool * ('I_132 * {perm 'I_6} * {perm 'I_6}))%type ->
+  pgg_gT (mp_M PSL211Analysis.profile) -> {ffun 'I_12 -> 'I_12}).
+
+Timeout 60 Check (PSL211Analysis.static_view :
+  {set 'I_12} -> (bool * ('I_132 * {perm 'I_6} * {perm 'I_6}))%type ->
+  pgg_gT (mp_M PSL211Analysis.profile) -> {ffun 'I_12 -> 'I_12}).
+
+Timeout 60 Check (PSL211Analysis.coalition_endpoints :
+  ep_inputT PSL211Analysis.exec_plug ->
+  pgg_gT (mp_M PSL211Analysis.profile) -> nat ->
+  {set 'I_(pi_T' (mp_PI PSL211Analysis.profile)).+1} ->
+  {ffun 'I_(pi_T' (mp_PI PSL211Analysis.profile)).+1 ->
+        'I_(pgg_N' (mp_M PSL211Analysis.profile)).+1}).
+
+Timeout 60 Check (PSL211Analysis.seat_endpoint :
+  ep_inputT PSL211Analysis.exec_plug ->
+  pgg_gT (mp_M PSL211Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI PSL211Analysis.profile)).+1 ->
+  'I_(pgg_N' (mp_M PSL211Analysis.profile)).+1).
+
+Timeout 60 Check (PSL211Analysis.secret :
+  forall R : realType, {RV (PSL211Analysis.prior R) -> bool}).
+
+(* --- 4 Models --- *)
+
+Timeout 60 Check (PSL211Analysis.exact_sample :
+  forall R : realType, SampleAdapter R PSL211Analysis.exec_plug).
+
+Timeout 60 Check (PSL211Analysis.exact_family :
+  AnalysisModelFamily PSL211Analysis.observed).
+
+Timeout 60 Check (PSL211Analysis.cut_distE :
+  forall R : realType,
+    sa_cut_dist (PSL211Analysis.exact_sample R)
+    = (`U psl211_group.psl211_G_pos
+       : R.-fdist (pgg_gT (mp_M PSL211Analysis.profile)))).
+
+Timeout 60 Check (PSL211Analysis.exact_coalition_distE :
+  forall (R : realType) (C : {set 'I_12}),
+    sa_coalition_dist (PSL211Analysis.exact_sample R) 0 C
+    = fdistmap (fun u => PSL211Analysis.static_view C u.1 u.2)
+        (PSL211Analysis.prior R)).
+
+(* --- 5 Correctness --- *)
+
+Timeout 60 Check (PSL211Analysis.observed_recovers :
+  forall (x : (bool * ('I_132 * {perm 'I_6} * {perm 'I_6}))%type)
+         (w0 : pgg_gT (mp_M PSL211Analysis.profile)),
+    w0 \in pgg_G (mp_M PSL211Analysis.profile) ->
+    exec_decode PSL211Analysis.exec_plug
+      (OE.oe_endpoints_size PSL211Analysis.observed x w0) = x.1).
+
+Timeout 60 Check (PSL211Analysis.secret_expectedE :
+  forall (R : realType)
+         (u : ((bool * ('I_132 * {perm 'I_6} * {perm 'I_6}))
+               * pgg_gT (mp_M PSL211Analysis.profile))%type),
+    PSL211Analysis.secret R u
+    = ex_expected psl211_alldecks.psl211_alldecks_params
+        (sa_arg (s := PSL211Analysis.exact_sample R) u)).
+
+(* --- 6 Security --- *)
+
+Timeout 60 Check (PSL211Analysis.content_traceE :
+  forall (R : realType) (C : {set 'I_12})
+         (u : ((bool * ('I_132 * {perm 'I_6} * {perm 'I_6}))
+               * pgg_gT (mp_M PSL211Analysis.profile))%type),
+    PSL211Analysis.content_trace C u.1 u.2
+    = psl211_models.psl211_content_trace R C u).
+
+Timeout 60 Check (PSL211Analysis.exact_view_indep :
+  forall (R : realType) (C : {set 'I_12}),
+    (#|C| <= 5)%N ->
+    fdistmap (fun u => (PSL211Analysis.static_view C u.1 u.2,
+                        PSL211Analysis.secret R u)) (PSL211Analysis.prior R)
+    = ((sa_coalition_dist (PSL211Analysis.exact_sample R) 0 C)
+       `x (fdistmap (PSL211Analysis.secret R) (PSL211Analysis.prior R)))%fdist).
+
+Timeout 60 Check (PSL211Analysis.static_indep :
+  forall (R : realType) (C : {set 'I_12}),
+    (#|C| <= 5)%N ->
+    PSL211Analysis.prior R
+    |= (fun u => @static_coalition_obs psl211_exec.psl211_algebra
+                   psl211_alldecks.psl211_alldecks_params C u.1 u.2)
+    _|_ PSL211Analysis.secret R).
+
+Timeout 60 Check (PSL211Analysis.marginal_bound :
+  forall R : realType,
+    ShuffleMarginalBound R (mp_M PSL211Analysis.profile)).
+
+Timeout 60 Check (PSL211Analysis.certificate_bundle :
+  forall R : realType,
+    ShuffleCertificateBundle R (mp_M PSL211Analysis.profile)).
+
+(* --- 7 Transfer --- *)
+
+Timeout 60 Check
+  (erefl : PSL211Analysis.exact_transfer_status = StaticExecutedOnly).
+
+(******************************************************************************)
+(*     The deterministic checker: the nine typed rows                         *)
 (*                                                                            *)
 (* One Check per row against AnalysisPathRow, one erefl pin per status       *)
 (* field, and one typed check on the model slot: a mandatory family at        *)
@@ -1601,6 +1813,15 @@ Timeout 60 Check (erefl : apr_transfer s5_row_word = IdealFinite).
 Timeout 60 Check (erefl : apr_assumptions s5_row_word
   = AcceptsAxioms [:: AxS5GroupOrder]).
 
+Timeout 60 Check (psl211_row_alldecks : AnalysisPathRow).
+Timeout 60 Check (apr_model psl211_row_alldecks
+  : AnalysisModelFamily PSL211Analysis.observed).
+Timeout 60 Check (erefl : apr_completion psl211_row_alldecks = AnalysisBridged).
+Timeout 60 Check
+  (erefl : apr_transfer psl211_row_alldecks = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions psl211_row_alldecks = BaselineClassicalOnly).
+
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)
 (*                                                                            *)
@@ -1620,6 +1841,9 @@ Timeout 60 Check (fun (R : realType) (secretP : R.-fdist 'I_5) (L : nat) =>
 
 Timeout 60 Check (fun R : realType =>
   amf_sample (apr_model s5_row_rand) R tt).
+
+Timeout 60 Check (fun R : realType =>
+  amf_sample (apr_model psl211_row_alldecks) R tt).
 
 Timeout 60 Check (fun (row : AnalysisPathRow)
     (fam : AnalysisModelFamily (apr_observed row)) (R : realType)
