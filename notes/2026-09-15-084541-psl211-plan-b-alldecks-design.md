@@ -225,3 +225,39 @@ vm_compute sanity check deleted (10); C7a added (13); `psl211_card` cited for 66
 the carrier count restated per class at the pair carrier (16); A2's coverage
 stated honestly with the 220 all-decks measurement assigned to the second probe
 pass (17); the spectral sentence qualified by the ideal (18).
+
+## 8. Second probe pass (2026-09-15, notes/probes/2026-09-15-psl211-planb/PROBE-REPORT-2.md)
+
+Rows B1, B2, B3 (validity, symbolic in j, twelve plus five plus three lemmas,
+all closed), C1, C2 (identification closed), C3 (`uniform_pair_indep_of_fibers`,
+the class-size premise derived, not assumed), C4 (`perm_ext_count` from
+`card_prescribed`, closed), C6/C7 (headline, witness and `psl211_row_alldecks :
+PublishedRow` derived to Qed from five named supports), D1, E1 (named
+termination lemma, two-argument publish): GO. All-decks termination at fuel 220
+measured at about 0.5 s. `Print Assumptions psl211_row_alldecks` in the
+decomposition probe lists exactly `psl211_alldecks_fiber_transfer`,
+`psl211_alldecks_endpoints` and the boolp trio, so what separates the row from a
+finished result is ONE new mathematical statement (the per-cut fiber count summed
+over the group, row C5) and the already-measured endpoint reduction.
+
+Corrections to section 3 from the probes, binding on the plan:
+- `psl211_deal` and `psl211_inputT` are Notations, not Definitions (a Definition
+  hides the finite structure from `#|...|` and `` `U ``).
+- `psl211_alldecks_gt0 : (0 < #|[set: psl211_inputT]|)%N`.
+- Fuel 220 throughout (`psl211_fuel_small` of the probes becomes `psl211_fuel`).
+- The laid deck does NOT reduce under `vm_compute` at any input (`inord`'s
+  `insub` is guarded by the Qed-opaque `idP`); every statement about it is
+  proved symbolically, including the validity lemmas, which the probes already
+  do.
+- The bridge consumes the SUMMED count `psl211_alldecks_fiber_transfer` (for
+  every reading v, equal counts over `psl211_deal * G` restricted to the group),
+  not the per-cut count; the per-cut decomposition (block count times two
+  extension counts) is the proof route, not a statement on the path.
+- No count below six points separates the two tables (both are S(5,6,12)); the
+  only mutation that fails is membership of a six-set.
+- The `.vo` of the 900-second endpoint fact is invalidated by ANY rebuild of
+  psl211_scheme.v, psl211_profile.v or anything below them, even from identical
+  sources (digest change). The plan lands psl211_exec.v and psl211_endpoints.v
+  once and then freezes every file below them; any later edit there is budgeted
+  at 15 minutes and 17 GB.
+- pgl27 keeps `psl211_alldecks_cardE` in the pair shape with a trailing `mulnA`.
