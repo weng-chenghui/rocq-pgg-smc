@@ -14,16 +14,19 @@
 (* dealer-dealt one: the dealer draws the chirality bit, no party commits an  *)
 (* input, and the interpreter budget is psl211_fuel.  Of the three run facts  *)
 (* it owes termination alone, decided by reduction at fuel 220 in 0.49 s of   *)
-(* vm_compute and 0.47 s of Qed (measured 2026-09-15); reconstruction follows *)
-(* from the coordinate law and spends no reduction, and the endpoint equation *)
-(* is stated once at the profile in psl211_endpoints.v.                       *)
+(* vm_compute and 0.47 s of Qed (measured 2026-09-15 with Time in place, then *)
+(* removed); reconstruction follows from the coordinate law and spends no     *)
+(* reduction, and the endpoint equation is stated once at the profile in      *)
+(* psl211_endpoints.v.                                                        *)
 (*                                                                            *)
 (* This file and its whole import closure lie below psl211_endpoints.v, whose *)
-(* single declaration costs 561 seconds of vm_compute, 331 seconds of Qed and *)
-(* a 17 GB peak (measured 2026-09-15).  Rebuilding this file from             *)
-(* byte-identical sources changes the library digest and invalidates that     *)
-(* .vo.  The closure psl211_endpoints.v freezes is 35 files, this one         *)
-(* included.                                                                  *)
+(* single declaration compiled on 2026-09-15 in 568 seconds of vm_compute and *)
+(* 324 seconds of Qed, with a resident set reported at 10.45 GB through make  *)
+(* and at 17.15 GB when the same reduction ran as probe P1b2 directly under   *)
+(* /usr/bin/time -l, in a file that also carried the termination lemma.       *)
+(* Rebuilding this file from byte-identical sources changes the library       *)
+(* digest and invalidates that .vo.  The closure psl211_endpoints.v freezes   *)
+(* is 35 files, this one included.                                            *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_players      == the twelve explicit seat ordinals                 *)
@@ -123,9 +126,9 @@ Proof. by vm_compute. Qed.
 (** profile_k_psl211_algebra — the privacy threshold the derived profile
     declares is six, so every arm of a row over this algebra quantifies over
     coalitions of at most five of the twelve seats.  It is profile_k_psl211
-    read at the derived profile, and it is what turns the framework's
-    threshold hypothesis into the numeric one the instance's secrecy theorems
-    take. *)
+    read at the derived profile.  The rows' witness converts the framework's
+    threshold hypothesis to the numeric bound directly, and this lemma records
+    the number that conversion relies on. *)
 Lemma profile_k_psl211_algebra :
   profile_k (instance_profile psl211_algebra) = 6.
 Proof. by []. Qed.
