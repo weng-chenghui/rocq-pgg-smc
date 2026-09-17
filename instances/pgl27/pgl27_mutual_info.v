@@ -4,41 +4,33 @@
 (* pgl27_mutual_info: the information a PGL(2,7) coalition view carries about *)
 (*                    the orbit secret                                        *)
 (*                                                                            *)
-(* The orbit secret is a uniform bit, the shuffle is uniform on PGL(2,7),     *)
-(* and for each secret the dealt arrangement is the fixed representative      *)
-(* deal orbit_encode of its class. A coalition sees the masked card values    *)
-(* at its own positions before the reveal. When the two census view lists of  *)
-(* a coalition are repetition-free, every view that occurs comes from at      *)
-(* most one shuffle per secret, so it leaves one or two compatible secrets    *)
-(* and its posterior entropy is the indicator of that ambiguity. The mutual   *)
-(* information between the secret and the view is then one minus the census   *)
-(* collision ratio, exactly, with no inequality. At the five representative   *)
-(* coalitions this value is five sevenths on a harmonic four-subset, eleven   *)
-(* fourteenths on an equianharmonic one, twenty-five twenty-eighths at five   *)
-(* positions, twenty-seven twenty-eighths at six, and one bit at seven:       *)
-(* seven of the eight positions determine the orbit secret before the         *)
-(* reveal.                                                                    *)
+(* The orbit secret is a uniform bit, the shuffle is uniform on PGL(2,7), and *)
+(* for each secret the dealt arrangement is the corresponding deck of a deck  *)
+(* pair. A coalition sees the masked card values at its own positions before  *)
+(* the reveal. When the two census view lists of a coalition are              *)
+(* repetition-free, every view that occurs comes from at most one shuffle per *)
+(* secret, so it leaves one or two compatible secrets and its posterior       *)
+(* entropy is the indicator of that ambiguity. The mutual information between *)
+(* the secret and the view is then one minus the census collision ratio,      *)
+(* exactly, with no inequality.                                               *)
+(*                                                                            *)
+(* Everything here holds at every deck pair. The collision counts that turn   *)
+(* the ratio into a number are facts of the pair, established in              *)
+(* pgl27_encoding_r7.v and pgl27_encoding_r5.v, and the closed forms they     *)
+(* give are in pgl27_leakage_r7.v and pgl27_leakage_r5.v.                     *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   pgl27_noncollision_ratio S == one minus the census collision count of S  *)
-(*                                 over 336                                   *)
+(*   pgl27_noncollision_ratio R e S == one minus the census collision count   *)
+(*                                     of S at the deck pair e, over 336      *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_secret_uniform == the dealt orbit secret is uniform on the two     *)
 (*     orbit classes                                                          *)
 (*   pgl27_reachable_view_entropy_ambiguousE == a reachable coalition view    *)
 (*     has posterior entropy equal to the indicator of its ambiguity          *)
-(*   pgl27_reachable_view_entropy_{harmonic, equianharmonic, five, six,       *)
-(*     seven}E == that posterior entropy at the five representative           *)
-(*     coalitions                                                             *)
 (*   pgl27_view_mutual_info_ambiguityE == a coalition with repetition-free    *)
 (*     census view lists shares pgl27_noncollision_ratio bits with the orbit  *)
 (*     secret                                                                 *)
-(*   pgl27_view_mutual_info_harmonicE,                                        *)
-(*   pgl27_view_mutual_info_equianharmonicE,                                  *)
-(*   pgl27_view_mutual_info_fiveE, pgl27_view_mutual_info_sixE,               *)
-(*   pgl27_view_mutual_info_sevenE == that information at the five            *)
-(*     representative coalitions, as closed rational values                   *)
 (*                                                                            *)
 (* The statements concern the pre-reveal execution: after the public reveal   *)
 (* every player learns the secret by design. The all-decks dealer of          *)
@@ -54,7 +46,7 @@ From infotheo Require Import realType_ext fdist proba entropy.
 From pgg_smc Require Import proba_entropy_ext support_posterior.
 From pgg_smc Require Import pgg_interface pgl27_group pgl27_orbit.
 From pgg_smc Require Import pgl27_profile pgl27_secrecy pgl27_leakage_census.
-From pgg_smc Require Import pgl27_view_census.
+From pgg_smc Require Import pgl27_encoding pgl27_view_census.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -63,59 +55,14 @@ Import GRing.Theory Num.Theory.
 
 Local Open Scope ring_scope.
 
-Section pgl27_noncollision_ratio.
-Variable R : realType.
-
-(** This quantity is one minus the overlap count between the two 336-entry
-    restricted-view lists, normalized by 336. When both lists are injective,
-    it is the probability that one pre-reveal view is compatible with only
-    one secret. *)
-Definition pgl27_noncollision_ratio (S : seq nat) : R :=
-  1 - (pgl27_collisions S)%:R / 336%:R.
-
-(** The harmonic four-position representative has complementary collision
-    ratio five sevenths. *)
-Lemma pgl27_noncollision_ratio_harmonic :
-  pgl27_noncollision_ratio rep_harmonic = 5%:R / 7%:R.
-Proof.
-by rewrite /pgl27_noncollision_ratio pgl27_collisions_harmonic; lra.
-Qed.
-
-(** The equianharmonic four-position representative has complementary
-    collision ratio eleven fourteenths. *)
-Lemma pgl27_noncollision_ratio_equianharmonic :
-  pgl27_noncollision_ratio rep_equianharmonic = 11%:R / 14%:R.
-Proof.
-by rewrite /pgl27_noncollision_ratio pgl27_collisions_equianharmonic; lra.
-Qed.
-
-(** The five-position representative has complementary collision ratio
-    twenty-five twenty-eighths. *)
-Lemma pgl27_noncollision_ratio_five :
-  pgl27_noncollision_ratio rep_five = 25%:R / 28%:R.
-Proof.
-by rewrite /pgl27_noncollision_ratio pgl27_collisions_five; lra.
-Qed.
-
-(** The six-position representative has complementary collision ratio
-    twenty-seven twenty-eighths. *)
-Lemma pgl27_noncollision_ratio_six :
-  pgl27_noncollision_ratio rep_six = 27%:R / 28%:R.
-Proof.
-by rewrite /pgl27_noncollision_ratio pgl27_collisions_six; lra.
-Qed.
-
-(** The seven-position representative has complementary collision ratio one.
-    No shuffle produces the same seven-position view under both deals, so
-    every view a seven-position coalition makes is compatible with exactly
-    one orbit secret. *)
-Lemma pgl27_noncollision_ratio_seven :
-  pgl27_noncollision_ratio rep_seven = 1.
-Proof.
-by rewrite /pgl27_noncollision_ratio pgl27_collisions_seven; lra.
-Qed.
-
-End pgl27_noncollision_ratio.
+(** The proportion of shuffles whose view of S under one secret is not also a
+    view of S under the other, at the deck pair e. When both census view
+    lists are repetition-free, it is the probability that one pre-reveal view
+    is compatible with only one secret, hence the exact number of bits the
+    view carries about the secret. *)
+Definition pgl27_noncollision_ratio (R : realType) (e : pgl27_encoding)
+    (S : seq nat) : R :=
+  1 - (pgl27_collisions (enc_code e) S)%:R / 336%:R.
 
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
@@ -129,105 +76,45 @@ Local Lemma support_posteriorP_pgl27E (R : realType) :
     pgl27_G_pos = pgl27P R.
 Proof. by []. Qed.
 
+(** The ambiguous views of a coalition are the views the generic posterior
+    theory calls ambiguous for the pair of per-secret view maps. It is the
+    step that lets the support-posterior results of support_posterior.v speak
+    about this scheme. *)
 Local Lemma pgl27_ambiguous_viewsE
-    (R : realType) (S : seq nat) (v : {ffun 'I_8 -> 'I_8}) :
-  (v \in pgl27_ambiguous_views R S) =
+    (R : realType) (e : pgl27_encoding) (S : seq nat)
+    (v : {ffun 'I_8 -> 'I_8}) :
+  (v \in pgl27_ambiguous_views R e S) =
   support_ambiguous_view (pgg_G pgl27_M)
-    (fun b g => pgl27_view R (pgl27_code_coalition S) (b, g)) v.
+    (fun b g => pgl27_enc_view R e (pgl27_code_coalition S) (b, g)) v.
 Proof.
 by rewrite /pgl27_ambiguous_views /support_ambiguous_view inE.
 Qed.
 
-(** A reachable PGL protocol view has one bit of posterior entropy precisely
-    when both secrets can produce it, and zero bits otherwise. It is the
-    residual uncertainty a coalition retains about the orbit secret after one
-    pre-reveal view. *)
+(** A reachable coalition view has one bit of posterior entropy precisely when
+    both secrets can produce it, and zero bits otherwise. It is the residual
+    uncertainty a coalition retains about the orbit secret after one
+    pre-reveal view, and it is an indicator rather than a general quantity
+    because the secret is one bit and each secret produces a reachable view at
+    most once. *)
 Lemma pgl27_reachable_view_entropy_ambiguousE
-    (R : realType) (S : seq nat)
+    (R : realType) (e : pgl27_encoding) (S : seq nat)
     (Hinj : forall b,
       {in pgg_G pgl27_M &,
         injective
-          (fun g => pgl27_view R (pgl27_code_coalition S) (b, g))})
+          (fun g => pgl27_enc_view R e (pgl27_code_coalition S) (b, g))})
     (v : {ffun 'I_8 -> 'I_8}) :
-  `Pr[(pgl27_view R (pgl27_code_coalition S)) = v] != 0 ->
+  `Pr[(pgl27_enc_view R e (pgl27_code_coalition S)) = v] != 0 ->
   `H[(pgl27_secret R) |
-     (pgl27_view R (pgl27_code_coalition S)) = v] =
-  (v \in pgl27_ambiguous_views R S)%:R.
+     (pgl27_enc_view R e (pgl27_code_coalition S)) = v] =
+  (v \in pgl27_ambiguous_views R e S)%:R.
 Proof.
 move=> Hv.
 rewrite pgl27_ambiguous_viewsE.
 exact: (@support_posterior_entropy_ambiguousE
   R (pgg_gT pgl27_M) {ffun 'I_8 -> 'I_8}
   (pgg_G pgl27_M) pgl27_G_pos
-  (fun b g => pgl27_view R (pgl27_code_coalition S) (b, g))
+  (fun b g => pgl27_enc_view R e (pgl27_code_coalition S) (b, g))
   Hinj v Hv).
-Qed.
-
-(** Every reachable harmonic four-position view has zero or one bit of
-    posterior entropy, according to whether both secrets produce it. *)
-Lemma pgl27_reachable_view_entropy_harmonicE (R : realType)
-    (v : {ffun 'I_8 -> 'I_8}) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_harmonic)) = v] != 0 ->
-  `H[(pgl27_secret R) |
-     (pgl27_view R (pgl27_code_coalition rep_harmonic)) = v] =
-  (v \in pgl27_ambiguous_views R rep_harmonic)%:R.
-Proof.
-apply: pgl27_reachable_view_entropy_ambiguousE.
-exact: pgl27_conditional_view_inj_harmonic.
-Qed.
-
-(** Every reachable equianharmonic four-position view has zero or one bit of
-    posterior entropy, according to whether both secrets produce it. *)
-Lemma pgl27_reachable_view_entropy_equianharmonicE (R : realType)
-    (v : {ffun 'I_8 -> 'I_8}) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_equianharmonic)) = v] != 0 ->
-  `H[(pgl27_secret R) |
-     (pgl27_view R (pgl27_code_coalition rep_equianharmonic)) = v] =
-  (v \in pgl27_ambiguous_views R rep_equianharmonic)%:R.
-Proof.
-apply: pgl27_reachable_view_entropy_ambiguousE.
-exact: pgl27_conditional_view_inj_equianharmonic.
-Qed.
-
-(** Every reachable five-position view has zero or one bit of posterior
-    entropy, according to whether both secrets produce it. *)
-Lemma pgl27_reachable_view_entropy_fiveE (R : realType)
-    (v : {ffun 'I_8 -> 'I_8}) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_five)) = v] != 0 ->
-  `H[(pgl27_secret R) |
-     (pgl27_view R (pgl27_code_coalition rep_five)) = v] =
-  (v \in pgl27_ambiguous_views R rep_five)%:R.
-Proof.
-apply: pgl27_reachable_view_entropy_ambiguousE.
-exact: pgl27_conditional_view_inj_five.
-Qed.
-
-(** Every reachable six-position view has zero or one bit of posterior
-    entropy, according to whether both secrets produce it. *)
-Lemma pgl27_reachable_view_entropy_sixE (R : realType)
-    (v : {ffun 'I_8 -> 'I_8}) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_six)) = v] != 0 ->
-  `H[(pgl27_secret R) |
-     (pgl27_view R (pgl27_code_coalition rep_six)) = v] =
-  (v \in pgl27_ambiguous_views R rep_six)%:R.
-Proof.
-apply: pgl27_reachable_view_entropy_ambiguousE.
-exact: pgl27_conditional_view_inj_six.
-Qed.
-
-(** Every reachable seven-position view has zero or one bit of posterior
-    entropy, according to whether both secrets produce it. No seven-position
-    view is produced by both, so this entropy is zero on every execution the
-    coalition can see. *)
-Lemma pgl27_reachable_view_entropy_sevenE (R : realType)
-    (v : {ffun 'I_8 -> 'I_8}) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_seven)) = v] != 0 ->
-  `H[(pgl27_secret R) |
-     (pgl27_view R (pgl27_code_coalition rep_seven)) = v] =
-  (v \in pgl27_ambiguous_views R rep_seven)%:R.
-Proof.
-apply: pgl27_reachable_view_entropy_ambiguousE.
-exact: pgl27_conditional_view_inj_seven.
 Qed.
 
 (** The secret marginal of the protocol distribution is uniform on the two
@@ -243,92 +130,27 @@ Qed.
 (** A coalition whose two census view lists are repetition-free shares with
     the orbit secret exactly the proportion of views that only one secret
     produces. The equality is exact and unconditional on any computational
-    assumption. *)
-Lemma pgl27_view_mutual_info_ambiguityE (R : realType) (S : seq nat) :
+    assumption, so the leakage of this scheme is a number rather than a bound,
+    and the number is fixed by the deck pair through its collision count. *)
+Lemma pgl27_view_mutual_info_ambiguityE (R : realType) (e : pgl27_encoding)
+    (S : seq nat) :
   all (fun x => (x < 8)%N) S ->
-  uniq (code_views false S) ->
-  uniq (code_views true S) ->
-  `I(pgl27_secret R ; pgl27_view R (pgl27_code_coalition S)) =
-  pgl27_noncollision_ratio R S.
+  uniq (code_views (enc_code e) false S) ->
+  uniq (code_views (enc_code e) true S) ->
+  `I(pgl27_secret R ; pgl27_enc_view R e (pgl27_code_coalition S)) =
+  pgl27_noncollision_ratio R e S.
 Proof.
 move=> HS Hfalse Htrue.
 have Hinj : forall b,
     {in pgg_G pgl27_M &,
       injective
-        (fun g => pgl27_view R (pgl27_code_coalition S) (b, g))}.
+        (fun g => pgl27_enc_view R e (pgl27_code_coalition S) (b, g))}.
   case.
-  - exact: (@pgl27_conditional_view_inj R S true HS Htrue).
-  - exact: (@pgl27_conditional_view_inj R S false HS Hfalse).
+  - exact: (@pgl27_conditional_view_inj R e S true HS Htrue).
+  - exact: (@pgl27_conditional_view_inj R e S false HS Hfalse).
 rewrite /pgl27_noncollision_ratio.
 rewrite -(pgl27_ambiguous_probabilityE R HS Hfalse Htrue).
 apply: mutual_info_binary_ambiguityE; first exact: pgl27_secret_uniform.
 move=> v Hv.
-exact: (@pgl27_reachable_view_entropy_ambiguousE R S Hinj v Hv).
-Qed.
-
-(** The harmonic four-position coalition shares five sevenths of a bit with
-    the orbit secret. It is the exact leakage of the smallest coalition above
-    the privacy threshold in its orbit class. *)
-Lemma pgl27_view_mutual_info_harmonicE (R : realType) :
-  `I(pgl27_secret R ;
-     pgl27_view R (pgl27_code_coalition rep_harmonic)) = 5%:R / 7%:R.
-Proof.
-move/andP: pgl27_views_uniq_harmonic => [Hfalse Htrue].
-rewrite -pgl27_noncollision_ratio_harmonic.
-apply: pgl27_view_mutual_info_ambiguityE;
-  [by vm_compute | exact: Hfalse | exact: Htrue].
-Qed.
-
-(** The equianharmonic four-position coalition shares eleven fourteenths of a
-    bit with the orbit secret. Its leakage exceeds the harmonic one, so the
-    two four-position orbit classes are not interchangeable. *)
-Lemma pgl27_view_mutual_info_equianharmonicE (R : realType) :
-  `I(pgl27_secret R ;
-     pgl27_view R (pgl27_code_coalition rep_equianharmonic)) =
-  11%:R / 14%:R.
-Proof.
-move/andP: pgl27_views_uniq_equianharmonic => [Hfalse Htrue].
-rewrite -pgl27_noncollision_ratio_equianharmonic.
-apply: pgl27_view_mutual_info_ambiguityE;
-  [by vm_compute | exact: Hfalse | exact: Htrue].
-Qed.
-
-(** The five-position coalition shares twenty-five twenty-eighths of a bit
-    with the orbit secret. *)
-Lemma pgl27_view_mutual_info_fiveE (R : realType) :
-  `I(pgl27_secret R ;
-     pgl27_view R (pgl27_code_coalition rep_five)) = 25%:R / 28%:R.
-Proof.
-move/andP: pgl27_views_uniq_five => [Hfalse Htrue].
-rewrite -pgl27_noncollision_ratio_five.
-apply: pgl27_view_mutual_info_ambiguityE;
-  [by vm_compute | exact: Hfalse | exact: Htrue].
-Qed.
-
-(** The six-position coalition shares twenty-seven twenty-eighths of a bit
-    with the orbit secret. Its leakage is below one bit, so six of the eight
-    positions still leave the orbit secret undetermined on some
-    executions. *)
-Lemma pgl27_view_mutual_info_sixE (R : realType) :
-  `I(pgl27_secret R ;
-     pgl27_view R (pgl27_code_coalition rep_six)) = 27%:R / 28%:R.
-Proof.
-move/andP: pgl27_views_uniq_six => [Hfalse Htrue].
-rewrite -pgl27_noncollision_ratio_six.
-apply: pgl27_view_mutual_info_ambiguityE;
-  [by vm_compute | exact: Hfalse | exact: Htrue].
-Qed.
-
-(** The seven-position coalition shares one bit with the orbit secret, the
-    whole prior entropy of the secret. Seven of the eight positions already
-    determine the orbit class before the reveal; this is the largest value
-    the scheme reaches, the smallest being zero at three positions. *)
-Lemma pgl27_view_mutual_info_sevenE (R : realType) :
-  `I(pgl27_secret R ;
-     pgl27_view R (pgl27_code_coalition rep_seven)) = 1.
-Proof.
-move/andP: pgl27_views_uniq_seven => [Hfalse Htrue].
-rewrite -[RHS](pgl27_noncollision_ratio_seven R).
-apply: pgl27_view_mutual_info_ambiguityE;
-  [by vm_compute | exact: Hfalse | exact: Htrue].
+exact: (@pgl27_reachable_view_entropy_ambiguousE R e S Hinj v Hv).
 Qed.

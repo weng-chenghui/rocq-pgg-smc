@@ -7,9 +7,11 @@
 (* natural numbers, while the protocol shuffles with elements of              *)
 (* pgg_G pgl27_M. This file identifies the two: every census row is the table *)
 (* of a group element, distinct rows give distinct elements, every group      *)
-(* element occurs as a row, and composing a row with the nat deal reproduces  *)
-(* the encoded deck the protocol view reads. Every census count is therefore  *)
-(* a count over the shuffle group itself.                                     *)
+(* element occurs as a row, and composing a row with the code table of a deck *)
+(* pair reproduces the dealt deck the protocol view reads. Every census count *)
+(* is therefore a count over the shuffle group itself. The identification of  *)
+(* the rows with the group is fixed by the geometry; only the last step       *)
+(* mentions a deck pair, and it holds at every deck pair.                     *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_ptbl g == the permutation table of the shuffle g                   *)
@@ -22,8 +24,8 @@
 (*   pgl27_table_perm_mem == every census row denotes a PGL(2,7) shuffle      *)
 (*   pgl27_table_perm_inj == distinct census rows denote distinct shuffles    *)
 (*   pgl27_table_perm_surj == every PGL(2,7) shuffle occurs as a census row   *)
-(*   pgl27_code_comp_rowE == a census row and its shuffle produce the same    *)
-(*     encoded card at every position                                         *)
+(*   pgl27_code_comp_rowE == a census row and its shuffle deal the same card  *)
+(*     at every position, at every deck pair                                  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -34,7 +36,7 @@ From mathcomp Require Import ssralg ssrnum order.
 From mathcomp Require Import primitive_action.
 From pgg_smc Require Import pgg_interface.
 From pgg_smc Require Import pgl27_group pgl27_orbit.
-From pgg_smc Require Import pgl27_leakage_census pgl27_mixing.
+From pgg_smc Require Import pgl27_leakage_census pgl27_encoding pgl27_mixing.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -173,37 +175,31 @@ exists k; apply: pgl27_ptbl_inj.
 exact: (etrans (pgl27_table_permE k) Hrow).
 Qed.
 
-(** The nat-level deal table and the tuple-level encoder agree at every card
-    position. Both representations therefore deal the same secret deck. *)
-Lemma pgl27_code_deal_orbit_encodeE (b : bool) (i : 'I_8) :
-  nth 0 (code_deal b) i = val (tnth (orbit_encode b) i).
-Proof.
-by case: b; case: i => -[|[|[|[|[|[|[|[|//]]]]]]]] Hi.
-Qed.
-
-(** Composing a permutation table with a deal table agrees with applying the
-    permutation to the tuple-level encoded deck. Thus census composition and
-    the protocol view use the same action convention. *)
-Lemma pgl27_code_comp_ptblE (b : bool) (g : {perm 'I_8}) (t : seq nat)
-    (Ht : pgl27_ptbl g = t) (i : 'I_8) :
-  nth 0 (code_comp t (code_deal b)) i =
-  val (tnth (orbit_encode b) (g i)).
+(** Composing a permutation table with the code table of a deck agrees with
+    applying the permutation to the deck itself. Census composition and the
+    protocol view therefore use the same action convention, at every deck
+    pair. *)
+Lemma pgl27_code_comp_ptblE (e : pgl27_encoding) (b : bool) (g : {perm 'I_8})
+    (t : seq nat) (Ht : pgl27_ptbl g = t) (i : 'I_8) :
+  nth 0 (code_comp t (enc_code e b)) i =
+  val (tnth (enc_deck e b) (g i)).
 Proof.
 have Hsize : size t = 8 by rewrite -Ht /pgl27_ptbl pgl27_mixing.ptbl_size.
 rewrite /code_comp (nth_map 0); last first.
   by rewrite Hsize; exact: ltn_ord i.
 rewrite -Ht /pgl27_ptbl pgl27_mixing.ptbl_nth.
-exact: pgl27_code_deal_orbit_encodeE.
+exact: enc_code_nthE.
 Qed.
 
-(** An indexed census row and its assigned shuffle give the same encoded card
-    at every position. Thus restricted census views can be compared with the
-    protocol's coalition view coordinate by coordinate. *)
-Lemma pgl27_code_comp_rowE (b : bool) (k : 'I_336) (i : 'I_8) :
+(** An indexed census row and its assigned shuffle deal the same card at every
+    position. Restricted census views can therefore be compared with the
+    protocol's coalition view coordinate by coordinate, at every deck pair. *)
+Lemma pgl27_code_comp_rowE (e : pgl27_encoding) (b : bool) (k : 'I_336)
+    (i : 'I_8) :
   nth 0
-    (code_comp (nth [::] pgl27_group_table k) (code_deal b)) i =
-  val (tnth (orbit_encode b) (pgl27_table_perm k i)).
+    (code_comp (nth [::] pgl27_group_table k) (enc_code e b)) i =
+  val (tnth (enc_deck e b) (pgl27_table_perm k i)).
 Proof.
-exact: (@pgl27_code_comp_ptblE b (pgl27_table_perm k)
+exact: (@pgl27_code_comp_ptblE e b (pgl27_table_perm k)
   (nth [::] pgl27_group_table k) (pgl27_table_permE k) i).
 Qed.

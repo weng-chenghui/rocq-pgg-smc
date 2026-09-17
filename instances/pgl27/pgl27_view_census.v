@@ -5,32 +5,34 @@
 (*                                                                            *)
 (* A coalition is named by a list of card positions and sees the masked       *)
 (* protocol view at those positions. Two facts tie that view to the collision *)
-(* census of natural numbers. When a secret's census view list is             *)
-(* repetition-free, the conditional view map is injective on the shuffle      *)
-(* group, so one view comes from at most one shuffle per secret. And the      *)
-(* probability that a view is produced by both secrets is the census          *)
+(* census of natural numbers, at every deck pair. When a secret's census view *)
+(* list is repetition-free, the conditional view map is injective on the      *)
+(* shuffle group, so one view comes from at most one shuffle per secret. And  *)
+(* the probability that a view is produced by both secrets is the census      *)
 (* collision count divided by the group order.                                *)
+(*                                                                            *)
+(* Both facts take the repetition-freeness of the census view lists of the    *)
+(* deck pair as a premise. Which reveal sets satisfy it, and what the         *)
+(* collision count is there, are facts of the deck pair and are established   *)
+(* in pgl27_encoding_r7.v and pgl27_encoding_r5.v.                            *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_code_coalition S == the card positions listed by S                 *)
 (*   pgl27_view_codes S v == the coordinates of v at the positions listed     *)
 (*                           by S                                             *)
-(*   pgl27_ambiguous_views S == the views produced by both orbit secrets      *)
+(*   pgl27_ambiguous_views R e S == the views of S produced by both secrets   *)
+(*                                  under the deck pair e                     *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_masked_view_eq == two views masked outside a coalition are equal   *)
 (*     exactly when their listed coordinates are equal                        *)
 (*   pgl27_view_outside == a protocol view is zero outside its coalition      *)
 (*   pgl27_view_codesE == the listed coordinates of a protocol view are the   *)
-(*     restricted composite of the shuffle and deal tables                    *)
+(*     restricted composite of the shuffle table and the deck's code table    *)
 (*   pgl27_conditional_view_inj == a repetition-free census view list makes   *)
 (*     the conditional view map injective on the shuffle group                *)
 (*   pgl27_ambiguous_probabilityE == the ambiguous-view event has probability *)
-(*     pgl27_collisions S over 336                                            *)
-(*   pgl27_conditional_view_inj_{harmonic, equianharmonic, five, six, seven}  *)
-(*     and pgl27_ambiguous_probability_{harmonic, equianharmonic, five, six,  *)
-(*     seven}E == the same two results with that representative's side        *)
-(*     conditions discharged by computation                                   *)
+(*     pgl27_collisions (enc_code e) S over 336                               *)
 (*                                                                            *)
 (* Every statement concerns the pre-reveal coalition view of one execution.   *)
 (******************************************************************************)
@@ -44,8 +46,9 @@ From mathcomp Require Import primitive_action.
 From mathcomp Require Import boolp ring lra reals.
 From infotheo Require Import realType_ext fdist proba.
 From pgg_smc Require Import pgg_interface.
+From pgg_reconstruct Require Import transitivity_privacy.
 From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_secrecy.
-From pgg_smc Require Import pgl27_leakage_census.
+From pgg_smc Require Import pgl27_leakage_census pgl27_encoding.
 From pgg_smc Require Import pgl27_table_bridge.
 
 Set Implicit Arguments.
@@ -77,12 +80,13 @@ Definition pgl27_view_codes
     carrier [R] indexes the distribution the view map is typed against and
     does not change which views this set contains. *)
 Definition pgl27_ambiguous_views
-    (R : realType) (S : seq nat) : {set {ffun 'I_8 -> 'I_8}} :=
+    (R : realType) (e : pgl27_encoding) (S : seq nat) :
+    {set {ffun 'I_8 -> 'I_8}} :=
   [set v |
      [exists g in pgg_G pgl27_M,
-        pgl27_view R (pgl27_code_coalition S) (false, g) == v] &&
+        pgl27_enc_view R e (pgl27_code_coalition S) (false, g) == v] &&
      [exists g in pgg_G pgl27_M,
-        pgl27_view R (pgl27_code_coalition S) (true, g) == v]].
+        pgl27_enc_view R e (pgl27_code_coalition S) (true, g) == v]].
 
 (** Two views masked outside the coalition selected by [S] are equal exactly
     when their coordinates listed by [S] are equal. Repeated listed positions
@@ -108,12 +112,12 @@ Qed.
 
 (** The protocol view is zero outside the selected coalition. The mask keeps
     unobserved coordinates from contributing to equality of views. *)
-Lemma pgl27_view_outside (R : realType) (S : seq nat)
+Lemma pgl27_view_outside (R : realType) (e : pgl27_encoding) (S : seq nat)
     (u : bool * pgg_gT pgl27_M) (i : 'I_8) :
   i \notin pgl27_code_coalition S ->
-  pgl27_view R (pgl27_code_coalition S) u i = ord0.
+  pgl27_enc_view R e (pgl27_code_coalition S) u i = ord0.
 Proof.
-move=> Hi; rewrite /pgl27_view ffunE.
+move=> Hi; rewrite /pgl27_enc_view /coalition_view ffunE.
 by rewrite (negbTE Hi).
 Qed.
 
@@ -135,11 +139,12 @@ Qed.
 
 (** A repetition-free census view list makes the restricted composite of a
     census row with one deal injective on the census rows. *)
-Local Lemma pgl27_code_views_inj (S : seq nat) (b : bool) :
-  uniq (code_views b S) ->
+Local Lemma pgl27_code_views_inj (e : pgl27_encoding) (S : seq nat)
+    (b : bool) :
+  uniq (code_views (enc_code e) b S) ->
   {in pgl27_group_table &,
     injective
-      (fun t => code_restrict S (code_comp t (code_deal b)))}.
+      (fun t => code_restrict S (code_comp t (enc_code e b)))}.
 Proof.
 (* Unfolding code_views once and sealing the result with Qed keeps the
    transparent 336-row closure from being expanded again at every use. *)
@@ -150,48 +155,49 @@ Qed.
 (** Reading the listed coordinates of a protocol view gives the same sequence
     as restricting the corresponding permutation and deal tables. It
     identifies the masked view with the restricted census row. *)
-Lemma pgl27_view_codesE (R : realType) (S : seq nat) (b : bool)
-    (g : {perm 'I_8}) :
+Lemma pgl27_view_codesE (R : realType) (e : pgl27_encoding) (S : seq nat)
+    (b : bool) (g : {perm 'I_8}) :
   all (fun x => (x < 8)%N) S ->
   pgl27_view_codes S
-      (pgl27_view R (pgl27_code_coalition S) (b, g)) =
+      (pgl27_enc_view R e (pgl27_code_coalition S) (b, g)) =
     code_restrict S
-      (code_comp (pgl27_ptbl g) (code_deal b)).
+      (code_comp (pgl27_ptbl g) (enc_code e b)).
 Proof.
 move=> HS; rewrite /pgl27_view_codes /code_restrict.
 apply/eq_in_map => x Hx.
 have Hx8 : (x < 8)%N := (allP HS) x Hx.
-rewrite /pgl27_view ffunE /pgl27_code_coalition inE.
+rewrite /pgl27_enc_view /coalition_view ffunE /pgl27_code_coalition inE.
 pose ox : 'I_8 := Ordinal Hx8.
 have Hinord : inord x = ox by apply/val_inj; exact: inordK Hx8.
 rewrite Hinord /ox /= Hx /=.
 symmetry.
-exact: (@pgl27_code_comp_ptblE b g (pgl27_ptbl g) erefl ox).
+exact: (@pgl27_code_comp_ptblE e b g (pgl27_ptbl g) erefl ox).
 Qed.
 
 (** If the census view list for one secret is repetition-free, then the
     protocol's conditional view map is injective on the shuffle group. Thus a
     reachable view has at most one shuffle preimage for that secret. *)
-Lemma pgl27_conditional_view_inj (R : realType) (S : seq nat) (b : bool) :
-  all (fun x => (x < 8)%N) S -> uniq (code_views b S) ->
+Lemma pgl27_conditional_view_inj (R : realType) (e : pgl27_encoding)
+    (S : seq nat) (b : bool) :
+  all (fun x => (x < 8)%N) S -> uniq (code_views (enc_code e) b S) ->
   {in pgg_G pgl27_M &,
     injective
-      (fun g => pgl27_view R (pgl27_code_coalition S) (b, g))}.
+      (fun g => pgl27_enc_view R e (pgl27_code_coalition S) (b, g))}.
 Proof.
 move=> HS Huniq g h gG hG Hview.
 have Hlisted := congr1 (pgl27_view_codes S) Hview.
-have Hgcodes := @pgl27_view_codesE R S b g HS.
-have Hhcodes := @pgl27_view_codesE R S b h HS.
+have Hgcodes := @pgl27_view_codesE R e S b g HS.
+have Hhcodes := @pgl27_view_codesE R e S b h HS.
 have Hlisted' :
     code_restrict S
-      (code_comp (pgl27_ptbl g) (code_deal b)) =
+      (code_comp (pgl27_ptbl g) (enc_code e b)) =
     code_restrict S
-      (code_comp (pgl27_ptbl h) (code_deal b)) :=
+      (code_comp (pgl27_ptbl h) (enc_code e b)) :=
   etrans (esym Hgcodes) (etrans Hlisted Hhcodes).
 have Hfinj :
     {in pgl27_group_table &,
       injective
-        (fun t => code_restrict S (code_comp t (code_deal b)))} :=
+        (fun t => code_restrict S (code_comp t (enc_code e b)))} :=
   pgl27_code_views_inj Huniq.
 have Htable : pgl27_ptbl g = pgl27_ptbl h.
   apply: Hfinj; [exact: pgl27_ptbl_mem gG |
@@ -199,108 +205,22 @@ have Htable : pgl27_ptbl g = pgl27_ptbl h.
 exact: pgl27_ptbl_inj Htable.
 Qed.
 
-(** For each fixed orbit secret, distinct shuffles give the harmonic
-    coalition distinct views. A harmonic view therefore pins down the shuffle
-    once the secret is known, so its posterior on the secret is carried
-    entirely by which secrets can produce it. *)
-Lemma pgl27_conditional_view_inj_harmonic (R : realType) (b : bool) :
-  {in pgg_G pgl27_M &,
-    injective
-      (fun g => pgl27_view R
-        (pgl27_code_coalition rep_harmonic) (b, g))}.
-Proof.
-case: b.
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_harmonic => [].
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_harmonic => [].
-Qed.
-
-(** For each fixed orbit secret, distinct shuffles give the equianharmonic
-    coalition distinct views. An equianharmonic view therefore pins down the
-    shuffle once the secret is known, so its posterior on the secret is
-    carried entirely by which secrets can produce it. *)
-Lemma pgl27_conditional_view_inj_equianharmonic
-    (R : realType) (b : bool) :
-  {in pgg_G pgl27_M &,
-    injective
-      (fun g => pgl27_view R
-        (pgl27_code_coalition rep_equianharmonic) (b, g))}.
-Proof.
-case: b.
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_equianharmonic => [].
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_equianharmonic => [].
-Qed.
-
-(** For each fixed orbit secret, distinct shuffles give the five-position
-    coalition distinct views. A five-position view therefore pins down the
-    shuffle once the secret is known, so its posterior on the secret is
-    carried entirely by which secrets can produce it. *)
-Lemma pgl27_conditional_view_inj_five (R : realType) (b : bool) :
-  {in pgg_G pgl27_M &,
-    injective
-      (fun g => pgl27_view R
-        (pgl27_code_coalition rep_five) (b, g))}.
-Proof.
-case: b.
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_five => [].
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_five => [].
-Qed.
-
-(** For each fixed orbit secret, distinct shuffles give the six-position
-    coalition distinct views. A six-position view therefore pins down the
-    shuffle once the secret is known, so its posterior on the secret is
-    carried entirely by which secrets can produce it. *)
-Lemma pgl27_conditional_view_inj_six (R : realType) (b : bool) :
-  {in pgg_G pgl27_M &,
-    injective
-      (fun g => pgl27_view R
-        (pgl27_code_coalition rep_six) (b, g))}.
-Proof.
-case: b.
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_six => [].
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_six => [].
-Qed.
-
-(** For each fixed orbit secret, distinct shuffles give the seven-position
-    coalition distinct views. A seven-position view therefore pins down the
-    shuffle once the secret is known, so its posterior on the secret is
-    carried entirely by which secrets can produce it. *)
-Lemma pgl27_conditional_view_inj_seven (R : realType) (b : bool) :
-  {in pgg_G pgl27_M &,
-    injective
-      (fun g => pgl27_view R
-        (pgl27_code_coalition rep_seven) (b, g))}.
-Proof.
-case: b.
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_seven => [].
-- apply: pgl27_conditional_view_inj; first by vm_compute.
-  by move/andP: pgl27_views_uniq_seven => [].
-Qed.
-
 (** A masked protocol view is reachable from one secret exactly when its
     listed coordinates occur in that secret's census list. *)
-Local Lemma pgl27_support_codesP (R : realType) (S : seq nat) (b : bool)
-    (v : {ffun 'I_8 -> 'I_8}) :
+Local Lemma pgl27_support_codesP (R : realType) (e : pgl27_encoding)
+    (S : seq nat) (b : bool) (v : {ffun 'I_8 -> 'I_8}) :
   all (fun x => (x < 8)%N) S ->
   (forall i, i \notin pgl27_code_coalition S -> v i = ord0) ->
   ((exists2 g, g \in pgg_G pgl27_M &
-      pgl27_view R (pgl27_code_coalition S) (b, g) = v) <->
-   pgl27_view_codes S v \in code_views b S).
+      pgl27_enc_view R e (pgl27_code_coalition S) (b, g) = v) <->
+   pgl27_view_codes S v \in code_views (enc_code e) b S).
 Proof.
 move=> HS Hv; split.
 - move=> [g gG Hgv].
   rewrite /code_views.
   apply/mapP; exists (pgl27_ptbl g); first exact: pgl27_ptbl_mem.
   rewrite -Hgv.
-  exact: (@pgl27_view_codesE R S b g HS).
+  exact: (@pgl27_view_codesE R e S b g HS).
 - rewrite /code_views => /mapP [t tG Ht].
   have Hklt : (index t pgl27_group_table < 336)%N.
     have Hidx :
@@ -312,14 +232,14 @@ move=> HS Hv; split.
     exact: nth_index tG.
   exists (pgl27_table_perm k); first exact: pgl27_table_perm_mem.
   have Hout : forall i, i \notin pgl27_code_coalition S ->
-      pgl27_view R (pgl27_code_coalition S)
+      pgl27_enc_view R e (pgl27_code_coalition S)
         (b, pgl27_table_perm k) i = ord0 :=
-    @pgl27_view_outside R S (b, pgl27_table_perm k).
+    @pgl27_view_outside R e S (b, pgl27_table_perm k).
   have Heq := @pgl27_masked_view_eq S
-    (pgl27_view R (pgl27_code_coalition S) (b, pgl27_table_perm k))
+    (pgl27_enc_view R e (pgl27_code_coalition S) (b, pgl27_table_perm k))
     v Hout Hv.
   apply: (proj2 Heq).
-  rewrite (@pgl27_view_codesE R S b (pgl27_table_perm k) HS).
+  rewrite (@pgl27_view_codesE R e S b (pgl27_table_perm k) HS).
   rewrite pgl27_table_permE Hrow.
   exact: esym Ht.
 Qed.
@@ -327,77 +247,78 @@ Qed.
 (** Census row [u.2] dealt under secret [u.1] restricts to a view of [S] that
     both secrets can produce. It is the collision event of the nat census,
     stated per row rather than as a count. *)
-Local Definition pgl27_code_ambiguous
+Local Definition pgl27_code_ambiguous (e : pgl27_encoding)
     (S : seq nat) (u : bool * 'I_336) : bool :=
   let t := nth [::] pgl27_group_table u.2 in
-  let v := code_restrict S (code_comp t (code_deal u.1)) in
-  (v \in code_views false S) && (v \in code_views true S).
+  let v := code_restrict S (code_comp t (enc_code e u.1)) in
+  (v \in code_views (enc_code e) false S)
+  && (v \in code_views (enc_code e) true S).
 
 (** The support-intersection event on a table row is the corresponding
     collision event in the nat census. *)
-Local Lemma pgl27_table_ambiguousP (R : realType) (S : seq nat)
-    (b : bool) (k : 'I_336) :
+Local Lemma pgl27_table_ambiguousP (R : realType) (e : pgl27_encoding)
+    (S : seq nat) (b : bool) (k : 'I_336) :
   all (fun x => (x < 8)%N) S ->
-  (pgl27_view R (pgl27_code_coalition S) (b, pgl27_table_perm k)
-       \in pgl27_ambiguous_views R S <->
-   pgl27_code_ambiguous S (b, k)).
+  (pgl27_enc_view R e (pgl27_code_coalition S) (b, pgl27_table_perm k)
+       \in pgl27_ambiguous_views R e S <->
+   pgl27_code_ambiguous e S (b, k)).
 Proof.
 move=> HS.
 rewrite /pgl27_ambiguous_views inE.
 rewrite /pgl27_code_ambiguous.
 cbn beta iota zeta.
 have Hout : forall i, i \notin pgl27_code_coalition S ->
-    pgl27_view R (pgl27_code_coalition S)
+    pgl27_enc_view R e (pgl27_code_coalition S)
       (b, pgl27_table_perm k) i = ord0 :=
-  @pgl27_view_outside R S (b, pgl27_table_perm k).
+  @pgl27_view_outside R e S (b, pgl27_table_perm k).
 have Hcomp :
-    code_comp (pgl27_ptbl (pgl27_table_perm k)) (code_deal b) =
-    code_comp (nth [::] pgl27_group_table k) (code_deal b) :=
-  congr1 (fun t => code_comp t (code_deal b)) (pgl27_table_permE k).
+    code_comp (pgl27_ptbl (pgl27_table_perm k)) (enc_code e b) =
+    code_comp (nth [::] pgl27_group_table k) (enc_code e b) :=
+  congr1 (fun t => code_comp t (enc_code e b)) (pgl27_table_permE k).
 have Hcr := congr1 (code_restrict S) Hcomp.
-have Hvc := @pgl27_view_codesE R S b (pgl27_table_perm k) HS.
+have Hvc := @pgl27_view_codesE R e S b (pgl27_table_perm k) HS.
 have Heq := etrans Hvc Hcr.
 split.
 - move=> /andP [Hfalse Htrue]; apply/andP; split.
   + have Hex : exists2 g, g \in pgg_G pgl27_M &
-        pgl27_view R (pgl27_code_coalition S) (false, g) =
-        pgl27_view R (pgl27_code_coalition S)
+        pgl27_enc_view R e (pgl27_code_coalition S) (false, g) =
+        pgl27_enc_view R e (pgl27_code_coalition S)
           (b, pgl27_table_perm k).
       move/exists_inP: Hfalse => [g gG /eqP Hg].
       by exists g.
     have Hmem :=
-      (proj1 (@pgl27_support_codesP R S false _ HS Hout)) Hex.
+      (proj1 (@pgl27_support_codesP R e S false _ HS Hout)) Hex.
     move: Hmem.
     by rewrite Heq.
   + have Hex : exists2 g, g \in pgg_G pgl27_M &
-        pgl27_view R (pgl27_code_coalition S) (true, g) =
-        pgl27_view R (pgl27_code_coalition S)
+        pgl27_enc_view R e (pgl27_code_coalition S) (true, g) =
+        pgl27_enc_view R e (pgl27_code_coalition S)
           (b, pgl27_table_perm k).
       move/exists_inP: Htrue => [g gG /eqP Hg].
       by exists g.
     have Hmem :=
-      (proj1 (@pgl27_support_codesP R S true _ HS Hout)) Hex.
+      (proj1 (@pgl27_support_codesP R e S true _ HS Hout)) Hex.
     move: Hmem.
     by rewrite Heq.
 - move=> /andP [Hfalse Htrue]; apply/andP; split.
   + have Hmem : pgl27_view_codes S
-          (pgl27_view R (pgl27_code_coalition S)
-            (b, pgl27_table_perm k)) \in code_views false S.
+          (pgl27_enc_view R e (pgl27_code_coalition S)
+            (b, pgl27_table_perm k)) \in code_views (enc_code e) false S.
       move: Hfalse.
       by rewrite -Heq.
     have Hex :=
-      (proj2 (@pgl27_support_codesP R S false _ HS Hout)) Hmem.
+      (proj2 (@pgl27_support_codesP R e S false _ HS Hout)) Hmem.
     apply/exists_inP.
     move: Hex => [g gG Hg].
     exists g; first exact: gG.
     exact/eqP.
   + have Hmem : pgl27_view_codes S
-          (pgl27_view R (pgl27_code_coalition S)
-            (b, pgl27_table_perm k)) \in code_views true S.
+          (pgl27_enc_view R e (pgl27_code_coalition S)
+            (b, pgl27_table_perm k)) \in code_views (enc_code e) true S.
       move: Htrue.
       by rewrite -Heq.
     have Hex :=
-      (proj2 (@pgl27_support_codesP R S true _ HS Hout)) Hmem.
+      (proj2 (@pgl27_support_codesP R e S true _ HS Hout)) Hmem.
     apply/exists_inP.
     move: Hex => [g gG Hg].
     exists g; first exact: gG.
@@ -430,24 +351,26 @@ Qed.
     orbit secrets. Its cardinality over the 2 * 336 executions is the
     probability that one view leaves the secret undetermined. *)
 Local Definition pgl27_ambiguous_samples
-    (R : realType) (S : seq nat) : {set bool * pgg_gT pgl27_M} :=
+    (R : realType) (e : pgl27_encoding) (S : seq nat) :
+    {set bool * pgg_gT pgl27_M} :=
   [set u | let: (b, g) := u in
-     (pgl27_view R (pgl27_code_coalition S) (b, g)
-        \in pgl27_ambiguous_views R S) &&
+     (pgl27_enc_view R e (pgl27_code_coalition S) (b, g)
+        \in pgl27_ambiguous_views R e S) &&
      (g \in pgg_G pgl27_M)].
 
 (** The secret-and-row pairs satisfying the census collision event, the nat
     counterpart of pgl27_ambiguous_samples. *)
-Local Definition pgl27_code_ambiguous_samples
+Local Definition pgl27_code_ambiguous_samples (e : pgl27_encoding)
     (S : seq nat) : {set bool * 'I_336} :=
-  [set u | pgl27_code_ambiguous S u].
+  [set u | pgl27_code_ambiguous e S u].
 
 (** The supported samples of the actual experiment are the injective image
     of the table samples satisfying the census collision event. *)
-Local Lemma pgl27_ambiguous_samplesE (R : realType) (S : seq nat) :
+Local Lemma pgl27_ambiguous_samplesE (R : realType) (e : pgl27_encoding)
+    (S : seq nat) :
   all (fun x => (x < 8)%N) S ->
-  pgl27_ambiguous_samples R S =
-    pgl27_table_sample @: pgl27_code_ambiguous_samples S.
+  pgl27_ambiguous_samples R e S =
+    pgl27_table_sample @: pgl27_code_ambiguous_samples e S.
 Proof.
 move=> HS; apply/setP => [[b g]].
 rewrite /pgl27_ambiguous_samples inE /=.
@@ -456,7 +379,7 @@ apply/idP/imsetP.
   have [k Hkg] := pgl27_table_perm_surj gG.
   exists (b, k).
   + rewrite /pgl27_code_ambiguous_samples inE.
-    apply: (proj1 (@pgl27_table_ambiguousP R S b k HS)).
+    apply: (proj1 (@pgl27_table_ambiguousP R e S b k HS)).
     by rewrite Hkg.
   + rewrite /pgl27_table_sample /=.
     apply/eqP; rewrite xpair_eqE; apply/andP; split; first exact: eqxx.
@@ -467,9 +390,9 @@ apply/idP/imsetP.
   move: Hpair; rewrite xpair_eqE => /andP [/eqP Hb /eqP Hg].
   apply/andP; split.
   + have Hamb :
-        pgl27_view R (pgl27_code_coalition S)
-          (c, pgl27_table_perm k) \in pgl27_ambiguous_views R S.
-      apply: (proj2 (@pgl27_table_ambiguousP R S c k HS)).
+        pgl27_enc_view R e (pgl27_code_coalition S)
+          (c, pgl27_table_perm k) \in pgl27_ambiguous_views R e S.
+      apply: (proj2 (@pgl27_table_ambiguousP R e S c k HS)).
       by move: Hcode; rewrite /pgl27_code_ambiguous_samples inE.
     move: Hb Hg => -> ->.
     exact: Hamb.
@@ -478,11 +401,12 @@ apply/idP/imsetP.
 Qed.
 
 (** The two ambiguous-sample sets have the same cardinality. *)
-Local Lemma card_pgl27_ambiguous_samples (R : realType) (S : seq nat) :
+Local Lemma card_pgl27_ambiguous_samples (R : realType)
+    (e : pgl27_encoding) (S : seq nat) :
   all (fun x => (x < 8)%N) S ->
-  #|pgl27_ambiguous_samples R S| = #|pgl27_code_ambiguous_samples S|.
+  #|pgl27_ambiguous_samples R e S| = #|pgl27_code_ambiguous_samples e S|.
 Proof.
-move=> HS; rewrite (pgl27_ambiguous_samplesE R HS).
+move=> HS; rewrite (pgl27_ambiguous_samplesE R e HS).
 exact: card_imset pgl27_table_sample_inj.
 Qed.
 
@@ -530,15 +454,15 @@ by rewrite !mem_filter andbC.
 Qed.
 
 (** The census view of [S] produced by row [k] under the secret [b]. *)
-Local Definition pgl27_code_view_row
+Local Definition pgl27_code_view_row (e : pgl27_encoding)
     (S : seq nat) (b : bool) (k : 'I_336) : seq nat :=
   code_restrict S
-    (code_comp (nth [::] pgl27_group_table (val k)) (code_deal b)).
+    (code_comp (nth [::] pgl27_group_table (val k)) (enc_code e b)).
 
 (** Every census view of a row occurs in that secret's census view list. *)
-Local Lemma pgl27_code_view_row_mem
+Local Lemma pgl27_code_view_row_mem (e : pgl27_encoding)
     (S : seq nat) (b : bool) (k : 'I_336) :
-  pgl27_code_view_row S b k \in code_views b S.
+  pgl27_code_view_row e S b k \in code_views (enc_code e) b S.
 Proof.
 rewrite /pgl27_code_view_row /code_views.
 apply/mapP.
@@ -554,112 +478,121 @@ Local Opaque pgl27_group_table.
 
 (** Under the secret false the collision event on a row reduces to membership
     of that row's census view in the other secret's list. *)
-Local Lemma pgl27_code_ambiguous_falseE (S : seq nat) (k : 'I_336) :
-  pgl27_code_ambiguous S (false, k) =
-  (pgl27_code_view_row S false k \in code_views true S).
+Local Lemma pgl27_code_ambiguous_falseE (e : pgl27_encoding)
+    (S : seq nat) (k : 'I_336) :
+  pgl27_code_ambiguous e S (false, k) =
+  (pgl27_code_view_row e S false k \in code_views (enc_code e) true S).
 Proof.
-change ((pgl27_code_view_row S false k \in code_views false S) &&
-  (pgl27_code_view_row S false k \in code_views true S) =
-  (pgl27_code_view_row S false k \in code_views true S)).
+change ((pgl27_code_view_row e S false k \in code_views (enc_code e) false S) &&
+  (pgl27_code_view_row e S false k \in code_views (enc_code e) true S) =
+  (pgl27_code_view_row e S false k \in code_views (enc_code e) true S)).
 have Hfalse :
-    (pgl27_code_view_row S false k \in code_views false S) = true :=
-  @pgl27_code_view_row_mem S false k.
+    (pgl27_code_view_row e S false k
+       \in code_views (enc_code e) false S) = true :=
+  @pgl27_code_view_row_mem e S false k.
 exact (@andb_idl
-  (pgl27_code_view_row S false k \in code_views false S)
-  (pgl27_code_view_row S false k \in code_views true S)
+  (pgl27_code_view_row e S false k \in code_views (enc_code e) false S)
+  (pgl27_code_view_row e S false k \in code_views (enc_code e) true S)
   (fun _ => Hfalse)).
 Qed.
 
 (** Under the secret true the collision event on a row reduces to membership
     of that row's census view in the other secret's list. *)
-Local Lemma pgl27_code_ambiguous_trueE (S : seq nat) (k : 'I_336) :
-  pgl27_code_ambiguous S (true, k) =
-  (pgl27_code_view_row S true k \in code_views false S).
+Local Lemma pgl27_code_ambiguous_trueE (e : pgl27_encoding)
+    (S : seq nat) (k : 'I_336) :
+  pgl27_code_ambiguous e S (true, k) =
+  (pgl27_code_view_row e S true k \in code_views (enc_code e) false S).
 Proof.
-change ((pgl27_code_view_row S true k \in code_views false S) &&
-  (pgl27_code_view_row S true k \in code_views true S) =
-  (pgl27_code_view_row S true k \in code_views false S)).
+change ((pgl27_code_view_row e S true k \in code_views (enc_code e) false S) &&
+  (pgl27_code_view_row e S true k \in code_views (enc_code e) true S) =
+  (pgl27_code_view_row e S true k \in code_views (enc_code e) false S)).
 have Htrue :
-    (pgl27_code_view_row S true k \in code_views true S) = true :=
-  @pgl27_code_view_row_mem S true k.
+    (pgl27_code_view_row e S true k
+       \in code_views (enc_code e) true S) = true :=
+  @pgl27_code_view_row_mem e S true k.
 exact (@andb_idr
-  (pgl27_code_view_row S true k \in code_views false S)
-  (pgl27_code_view_row S true k \in code_views true S)
+  (pgl27_code_view_row e S true k \in code_views (enc_code e) false S)
+  (pgl27_code_view_row e S true k \in code_views (enc_code e) true S)
   (fun _ => Htrue)).
 Qed.
 
 (** The rows ambiguous under the secret false number the census collision
     count, once both census view lists are repetition-free. *)
-Local Lemma card_pgl27_code_ambiguous_false (S : seq nat) :
-  uniq (code_views false S) ->
-  uniq (code_views true S) ->
-  #|[set k : 'I_336 | pgl27_code_ambiguous S (false, k)]| =
-  pgl27_collisions S.
+Local Lemma card_pgl27_code_ambiguous_false (e : pgl27_encoding)
+    (S : seq nat) :
+  uniq (code_views (enc_code e) false S) ->
+  uniq (code_views (enc_code e) true S) ->
+  #|[set k : 'I_336 | pgl27_code_ambiguous e S (false, k)]| =
+  pgl27_collisions (enc_code e) S.
 Proof.
 move=> Hfalse Htrue.
 have Hset :
-    [set k : 'I_336 | pgl27_code_ambiguous S (false, k)] =
+    [set k : 'I_336 | pgl27_code_ambiguous e S (false, k)] =
     [set k : 'I_336 |
-      pgl27_code_view_row S false k \in code_views true S].
+      pgl27_code_view_row e S false k \in code_views (enc_code e) true S].
   apply/setP => k.
   rewrite [in LHS]inE [in RHS]inE.
-  exact (@pgl27_code_ambiguous_falseE S k).
+  exact (@pgl27_code_ambiguous_falseE e S k).
 rewrite Hset /pgl27_code_view_row.
 rewrite (@card_ord_count (seq nat) 336
   pgl27_group_table [::]
-  (fun t => code_restrict S (code_comp t (code_deal false))
-    \in code_views true S)
+  (fun t => code_restrict S (code_comp t (enc_code e false))
+    \in code_views (enc_code e) true S)
   pgl27_group_table_size).
 rewrite -(@count_map (seq nat) (seq nat)
-  (fun t => code_restrict S (code_comp t (code_deal false)))
-  (mem (code_views true S)) pgl27_group_table).
-change (count (mem (code_views true S)) (code_views false S) =
-  pgl27_collisions S).
+  (fun t => code_restrict S (code_comp t (enc_code e false)))
+  (mem (code_views (enc_code e) true S)) pgl27_group_table).
+change (count (mem (code_views (enc_code e) true S))
+          (code_views (enc_code e) false S) =
+  pgl27_collisions (enc_code e) S).
 rewrite /pgl27_collisions.
 exact: count_mem_sym Hfalse Htrue.
 Qed.
 
 (** The rows ambiguous under the secret true number the census collision
     count. *)
-Local Lemma card_pgl27_code_ambiguous_true (S : seq nat) :
-  #|[set k : 'I_336 | pgl27_code_ambiguous S (true, k)]| =
-  pgl27_collisions S.
+Local Lemma card_pgl27_code_ambiguous_true (e : pgl27_encoding)
+    (S : seq nat) :
+  #|[set k : 'I_336 | pgl27_code_ambiguous e S (true, k)]| =
+  pgl27_collisions (enc_code e) S.
 Proof.
 have Hset :
-    [set k : 'I_336 | pgl27_code_ambiguous S (true, k)] =
+    [set k : 'I_336 | pgl27_code_ambiguous e S (true, k)] =
     [set k : 'I_336 |
-      pgl27_code_view_row S true k \in code_views false S].
+      pgl27_code_view_row e S true k \in code_views (enc_code e) false S].
   apply/setP => k.
   rewrite [in LHS]inE [in RHS]inE.
-  exact (@pgl27_code_ambiguous_trueE S k).
+  exact (@pgl27_code_ambiguous_trueE e S k).
 rewrite Hset /pgl27_code_view_row.
 rewrite (@card_ord_count (seq nat) 336
   pgl27_group_table [::]
-  (fun t => code_restrict S (code_comp t (code_deal true))
-    \in code_views false S)
+  (fun t => code_restrict S (code_comp t (enc_code e true))
+    \in code_views (enc_code e) false S)
   pgl27_group_table_size).
 rewrite -(@count_map (seq nat) (seq nat)
-  (fun t => code_restrict S (code_comp t (code_deal true)))
-  (mem (code_views false S)) pgl27_group_table).
-change (count (mem (code_views false S)) (code_views true S) =
-  pgl27_collisions S).
+  (fun t => code_restrict S (code_comp t (enc_code e true)))
+  (mem (code_views (enc_code e) false S)) pgl27_group_table).
+change (count (mem (code_views (enc_code e) false S))
+          (code_views (enc_code e) true S) =
+  pgl27_collisions (enc_code e) S).
 by rewrite /pgl27_collisions.
 Qed.
 
 (** The two secret-indexed table samples contribute one copy of the
     cross-secret collision count each. *)
-Local Lemma card_pgl27_code_ambiguous_samplesE (S : seq nat) :
-  uniq (code_views false S) ->
-  uniq (code_views true S) ->
-  #|pgl27_code_ambiguous_samples S| = 2 * pgl27_collisions S.
+Local Lemma card_pgl27_code_ambiguous_samplesE (e : pgl27_encoding)
+    (S : seq nat) :
+  uniq (code_views (enc_code e) false S) ->
+  uniq (code_views (enc_code e) true S) ->
+  #|pgl27_code_ambiguous_samples e S| = 2 * pgl27_collisions (enc_code e) S.
 Proof.
 move=> Hfalse Htrue.
 rewrite /pgl27_code_ambiguous_samples -sum1_card.
 have Hsplit :
-    (\sum_(u in [set z | pgl27_code_ambiguous S z]) 1)%N =
+    (\sum_(u in [set z | pgl27_code_ambiguous e S z]) 1)%N =
     (\sum_(b : bool)
        \sum_(k in [set j : 'I_336 |
-         pgl27_code_ambiguous S (b, j)]) 1)%N.
+         pgl27_code_ambiguous e S (b, j)]) 1)%N.
   symmetry.
   rewrite pair_big_dep.
   apply: eq_bigl => [[b k]].
@@ -670,7 +603,7 @@ rewrite big_bool.
 rewrite [in LHS]sum1_card.
 rewrite [in LHS]sum1_card.
 apply: (etrans (congr2 addn
-  (@card_pgl27_code_ambiguous_true S)
+  (@card_pgl27_code_ambiguous_true e S)
   (card_pgl27_code_ambiguous_false Hfalse Htrue))).
 rewrite addnn.
 symmetry.
@@ -690,17 +623,18 @@ Qed.
 
 (** The Boolean random variable that is true exactly on the executions whose
     coalition view is ambiguous. *)
-Local Definition pgl27_ambiguous_indicator (R : realType) (S : seq nat) :
-    {RV (pgl27P R) -> bool} :=
-  fun u => pgl27_view R (pgl27_code_coalition S) u
-             \in pgl27_ambiguous_views R S.
+Local Definition pgl27_ambiguous_indicator (R : realType)
+    (e : pgl27_encoding) (S : seq nat) : {RV (pgl27P R) -> bool} :=
+  fun u => pgl27_enc_view R e (pgl27_code_coalition S) u
+             \in pgl27_ambiguous_views R e S.
 
 (** The ambiguity indicator is true with mass the common sample mass times
     the number of ambiguous samples. *)
-Local Lemma pgl27_pr_ambiguous_indicatorE (R : realType) (S : seq nat) :
-  `Pr[(pgl27_ambiguous_indicator R S) = true] =
+Local Lemma pgl27_pr_ambiguous_indicatorE (R : realType)
+    (e : pgl27_encoding) (S : seq nat) :
+  `Pr[(pgl27_ambiguous_indicator R e S) = true] =
   ((2%:R : R)^-1 * (336%:R : R)^-1) *+
-    #|pgl27_ambiguous_samples R S|.
+    #|pgl27_ambiguous_samples R e S|.
 Proof.
 rewrite pfwd1E /Pr.
 under eq_bigl => u do
@@ -708,8 +642,8 @@ under eq_bigl => u do
 rewrite -sumr_const big_mkcond [RHS]big_mkcond.
 apply: eq_bigr => [[b g]] _.
 rewrite /pgl27_ambiguous_samples [in RHS]inE /=.
-case: (pgl27_view R (pgl27_code_coalition S) (b, g)
-  \in pgl27_ambiguous_views R S); last by [].
+case: (pgl27_enc_view R e (pgl27_code_coalition S) (b, g)
+  \in pgl27_ambiguous_views R e S); last by [].
 rewrite andTb /pgl27P fdist_prodE /= fdist_uniformE card_bool.
 case: ifPn => gG.
 - rewrite fdist_uniform_supp_in // pgl27_group_card.
@@ -719,10 +653,11 @@ Qed.
 
 (** The ambiguous-view event and the ambiguity indicator have the same
     probability. *)
-Local Lemma pgl27_pr_ambiguousE (R : realType) (S : seq nat) :
-  `Pr[(pgl27_view R (pgl27_code_coalition S))
-        \in pgl27_ambiguous_views R S] =
-  `Pr[(pgl27_ambiguous_indicator R S) = true].
+Local Lemma pgl27_pr_ambiguousE (R : realType) (e : pgl27_encoding)
+    (S : seq nat) :
+  `Pr[(pgl27_enc_view R e (pgl27_code_coalition S))
+        \in pgl27_ambiguous_views R e S] =
+  `Pr[(pgl27_ambiguous_indicator R e S) = true].
 Proof.
 rewrite pr_inE pfwd1E; congr Pr; apply/setP => u.
 rewrite [in LHS]inE [in RHS]inE /=
@@ -734,88 +669,18 @@ Qed.
     compatible with both orbit secrets exactly as often as the census counts
     cross-secret collisions. It is the probability of learning nothing about
     the secret from a single pre-reveal view. *)
-Lemma pgl27_ambiguous_probabilityE (R : realType) (S : seq nat) :
+Lemma pgl27_ambiguous_probabilityE (R : realType) (e : pgl27_encoding)
+    (S : seq nat) :
   all (fun x => (x < 8)%N) S ->
-  uniq (code_views false S) ->
-  uniq (code_views true S) ->
-  `Pr[(pgl27_view R (pgl27_code_coalition S))
-        \in pgl27_ambiguous_views R S] =
-  (pgl27_collisions S)%:R / 336%:R.
+  uniq (code_views (enc_code e) false S) ->
+  uniq (code_views (enc_code e) true S) ->
+  `Pr[(pgl27_enc_view R e (pgl27_code_coalition S))
+        \in pgl27_ambiguous_views R e S] =
+  (pgl27_collisions (enc_code e) S)%:R / 336%:R.
 Proof.
 move=> HS Hfalse Htrue.
 rewrite pgl27_pr_ambiguousE pgl27_pr_ambiguous_indicatorE.
-rewrite (card_pgl27_ambiguous_samples R HS).
+rewrite (card_pgl27_ambiguous_samples R e HS).
 rewrite (card_pgl27_code_ambiguous_samplesE Hfalse Htrue).
 exact: uniform_pair_massE.
-Qed.
-
-(** Under the actual uniform secret and PGL shuffle distribution, the
-    harmonic ambiguous-view probability is its census collision ratio. *)
-Lemma pgl27_ambiguous_probability_harmonicE (R : realType) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_harmonic))
-        \in pgl27_ambiguous_views R rep_harmonic] =
-  (pgl27_collisions rep_harmonic)%:R / 336%:R.
-Proof.
-move/andP: pgl27_views_uniq_harmonic => [Hfalse Htrue].
-apply: (@pgl27_ambiguous_probabilityE R rep_harmonic).
-- by vm_compute.
-- exact: Hfalse.
-- exact: Htrue.
-Qed.
-
-(** Under the actual uniform secret and PGL shuffle distribution, the
-    equianharmonic ambiguous-view probability is its census collision ratio. *)
-Lemma pgl27_ambiguous_probability_equianharmonicE (R : realType) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_equianharmonic))
-        \in pgl27_ambiguous_views R rep_equianharmonic] =
-  (pgl27_collisions rep_equianharmonic)%:R / 336%:R.
-Proof.
-move/andP: pgl27_views_uniq_equianharmonic => [Hfalse Htrue].
-apply: (@pgl27_ambiguous_probabilityE R rep_equianharmonic).
-- by vm_compute.
-- exact: Hfalse.
-- exact: Htrue.
-Qed.
-
-(** Under the actual uniform secret and PGL shuffle distribution, the
-    five-position ambiguous-view probability is its census collision ratio. *)
-Lemma pgl27_ambiguous_probability_fiveE (R : realType) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_five))
-        \in pgl27_ambiguous_views R rep_five] =
-  (pgl27_collisions rep_five)%:R / 336%:R.
-Proof.
-move/andP: pgl27_views_uniq_five => [Hfalse Htrue].
-apply: (@pgl27_ambiguous_probabilityE R rep_five).
-- by vm_compute.
-- exact: Hfalse.
-- exact: Htrue.
-Qed.
-
-(** Under the actual uniform secret and PGL shuffle distribution, the
-    six-position ambiguous-view probability is its census collision ratio. *)
-Lemma pgl27_ambiguous_probability_sixE (R : realType) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_six))
-        \in pgl27_ambiguous_views R rep_six] =
-  (pgl27_collisions rep_six)%:R / 336%:R.
-Proof.
-move/andP: pgl27_views_uniq_six => [Hfalse Htrue].
-apply: (@pgl27_ambiguous_probabilityE R rep_six).
-- by vm_compute.
-- exact: Hfalse.
-- exact: Htrue.
-Qed.
-
-(** Under the actual uniform secret and PGL shuffle distribution, the
-    seven-position ambiguous-view probability is its census collision
-    ratio. *)
-Lemma pgl27_ambiguous_probability_sevenE (R : realType) :
-  `Pr[(pgl27_view R (pgl27_code_coalition rep_seven))
-        \in pgl27_ambiguous_views R rep_seven] =
-  (pgl27_collisions rep_seven)%:R / 336%:R.
-Proof.
-move/andP: pgl27_views_uniq_seven => [Hfalse Htrue].
-apply: (@pgl27_ambiguous_probabilityE R rep_seven).
-- by vm_compute.
-- exact: Hfalse.
-- exact: Htrue.
 Qed.
