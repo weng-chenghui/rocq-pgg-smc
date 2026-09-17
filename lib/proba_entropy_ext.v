@@ -51,6 +51,37 @@ Qed.
 End log_extra.
 
 (* ========================================================================== *)
+(*                 Mutual information of Boolean secrets                      *)
+(* ========================================================================== *)
+
+Section mutual_info_binary_ambiguity.
+Context {R : realType} {U V : finType} {P : R.-fdist U}.
+Variables (S : {RV P -> bool}) (Y : {RV P -> V}) (A : {set V}).
+
+(** For a uniform Boolean secret, if the posterior entropy is one exactly on
+    the reachable observations in [A], its mutual information with the view is
+    one minus the probability of [A]. Thus [A] represents observations that
+    preserve complete uncertainty about the secret. *)
+Lemma mutual_info_binary_ambiguityE :
+  `p_S = fdist_uniform card_bool ->
+  (forall y, `Pr[Y = y] != 0 -> `H[S | Y = y] = (y \in A)%:R) ->
+  `I(S ; Y) = 1 - `Pr[Y \in A].
+Proof.
+move=> HS HY.
+rewrite mutual_info_RVE HS entropy_uniform card_bool realType_ln.log2.
+rewrite centropy_RVE'; congr (1 - _).
+rewrite pr_inE' /Pr [RHS]big_mkcond.
+apply: eq_bigr => y _.
+rewrite -dist_of_RVE.
+have [Py0|Py0] := eqVneq (`p_Y y) 0.
+- rewrite Py0 mul0r; by case: ifP.
+- rewrite HY; last by rewrite -dist_of_RVE.
+  by case: (y \in A); rewrite /= ?mulr1 ?mulr0.
+Qed.
+
+End mutual_info_binary_ambiguity.
+
+(* ========================================================================== *)
 (*                    Independence of random variables                        *)
 (* ========================================================================== *)
 
