@@ -184,6 +184,7 @@ instances/pgl27/pgl27_leakage_census.v
 instances/pgl27/pgl27_encoding.v
 instances/pgl27/pgl27_encoding_r7.v
 instances/pgl27/pgl27_encoding_r5.v
+instances/pgl27/pgl27_trace_encoding.v
 instances/pgl27/pgl27_table_bridge.v
 instances/pgl27/pgl27_view_census.v
 instances/pgl27/pgl27_mutual_info.v
