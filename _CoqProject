@@ -30,6 +30,7 @@
 lib/perm_uniform.v
 lib/perm_exchange.v
 lib/proba_entropy_ext.v
+lib/support_posterior.v
 smc/graded_resource.v
 smc/smc_interpreter.v
 smc/smc_session_types.v
@@ -178,6 +179,9 @@ instances/pgl27/pgl27_profile_privacy.v
 instances/pgl27/pgl27_trace.v
 instances/pgl27/pgl27_recovery.v
 instances/pgl27/pgl27_leakage_census.v
+instances/pgl27/pgl27_table_bridge.v
+instances/pgl27/pgl27_view_census.v
+instances/pgl27/pgl27_mutual_info.v
 instances/pgl27/pgl27_mixing.v
 instances/pgl27/pgl27_spectral.v
 instances/pgl27/pgl27_word_privacy.v
