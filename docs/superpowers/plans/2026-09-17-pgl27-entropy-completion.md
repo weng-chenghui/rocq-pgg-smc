@@ -53,3 +53,24 @@ unconditional, so the loss is zero on every line.
 | T9 | all | rocq-auditor style pass, `Print Assumptions` sweep, fixes, design note status update | T8 |
 
 T7 and T8 live in a new file `instances/pgl27/pgl27_leakage_ramp.v`.
+
+## Audit amendments (2026-09-17, independent Opus audit, VERDICT: GO)
+
+Record: `notes/probes/2026-09-17-pgl27-leakage-ramp/flow-sketch-audit.md` and
+the compiled scratch proofs beside it. Permanent files never import them.
+
+1. The generic transport is stated with `rho g @: C`, for `g \in G`, with no
+   transitivity premise. The pgl27 corollary reads `g @: C` because `pgg_rho`
+   is the inclusion there.
+2. `morphM` holds only inside `G`, so the view identity fails at samples with
+   the shuffle outside `G`. The proof goes through a support-restricted
+   pushforward congruence (`fdistmap_eq_supp`), injective post-processing
+   (`mutual_info_RV_inj`) and left-translation invariance of the product law.
+3. `pgl27_seven_subset_orbit` lives in `pgl27_leakage_census.v` beside the
+   five- and six-subset lemmas (task T6), not in the ramp file. The census
+   file is imported only by the bridge, census-view and mutual-info files.
+4. `subset_class` of a representative does not reduce by `vm_compute`. Use the
+   `heart_set` and `orbit_encodeK` route.
+5. `join |C| = 8` uses `pgl27_secret_uniform` and the size-seven value, so it
+   depends on T6 as well as T7.
+6. `post` needs `pgl27_leak_coalition = pgl27_code_coalition rep_harmonic`.
