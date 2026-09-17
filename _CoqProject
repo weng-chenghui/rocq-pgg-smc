@@ -31,6 +31,7 @@ lib/perm_uniform.v
 lib/perm_exchange.v
 lib/proba_entropy_ext.v
 lib/support_posterior.v
+lib/mutual_info_recoding.v
 smc/graded_resource.v
 smc/smc_interpreter.v
 smc/smc_session_types.v

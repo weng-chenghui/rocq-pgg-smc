@@ -8,7 +8,7 @@
 (* positions (pgl27_orbit.v) and a coalition sees the cards at the positions  *)
 (* it holds. Two combinatorial data fix what such a coalition observes: the   *)
 (* orbit census of the reveal set, and the number of shuffles that produce    *)
-(* the same observation under the two deals.                                  *)
+(* the same view under the two deals.                                         *)
 (*                                                                            *)
 (* Census. On four-subsets the shuffle group has two orbits, of sizes 42 and  *)
 (* 28 (orbit_class_split, subset_class_orbitE). On five-, six- and            *)
@@ -290,7 +290,7 @@ Definition code_subsets (k : nat) : seq (seq nat) :=
   [seq s <- code_powerset (iota 0 8) | size s == k].
 
 (** code_restrict — the codes that the table t places at the positions S. The
-    observation of the position set S under the shuffle t. *)
+    view of the position set S under the shuffle t. *)
 Definition code_restrict (S t : seq nat) : seq nat := [seq nth 0 t x | x <- S].
 
 (** code_image — the image of a code subset under a table, sorted. The action
@@ -405,90 +405,90 @@ Proof. by vm_compute. Qed.
 Definition code_deal (b : bool) : seq nat := if b then code_tau else code_id.
 
 (** code_views — for each group element t, the codes that the deal of b places
-    at the positions S. The list of observations of the reveal set S under the
-    secret bit b, one entry per shuffle. *)
+    at the positions S. The list of views of the reveal set S under the secret
+    bit b, one entry per shuffle. *)
 Definition code_views (b : bool) (S : seq nat) : seq (seq nat) :=
   [seq code_restrict S (code_comp t (code_deal b)) | t <- pgl27_group_table].
 
-(** pgl27_collisions — the number of shuffles whose observation of S under the
-    secret true is also an observation of S under the secret false. The
-    cardinality of the intersection of the two observation sets of the reveal
-    set S, the two lists being repetition-free. *)
+(** pgl27_collisions — the number of shuffles whose view of S under the secret
+    true is also a view of S under the secret false. The cardinality of the
+    intersection of the two view sets of the reveal set S, the two lists being
+    repetition-free. *)
 Definition pgl27_collisions (S : seq nat) : nat :=
   count (fun v => v \in code_views false S) (code_views true S).
 
 (** pgl27_views_uniq_harmonic — both deals restrict {0, 1, 2, 3} injectively.
-    At {0, 1, 2, 3} neither observation list repeats, so the collision count
-    below is a genuine set-intersection cardinality, out of
-    pgl27_group_table_size's 336. *)
+    At {0, 1, 2, 3} neither view list repeats, so the collision count below is
+    a genuine set-intersection cardinality, out of pgl27_group_table_size's
+    336. *)
 Lemma pgl27_views_uniq_harmonic :
   uniq (code_views false rep_harmonic) && uniq (code_views true rep_harmonic).
 Proof. by vm_compute. Qed.
 
 (** pgl27_views_uniq_equianharmonic — both deals restrict {0, 1, 2, 4}
-    injectively. At {0, 1, 2, 4} neither observation list repeats, so the
-    collision count below is a genuine set-intersection cardinality. *)
+    injectively. At {0, 1, 2, 4} neither view list repeats, so the collision
+    count below is a genuine set-intersection cardinality. *)
 Lemma pgl27_views_uniq_equianharmonic :
   uniq (code_views false rep_equianharmonic)
   && uniq (code_views true rep_equianharmonic).
 Proof. by vm_compute. Qed.
 
 (** pgl27_views_uniq_five — both deals restrict {0, 1, 2, 3, 4} injectively.
-    At {0, 1, 2, 3, 4} neither observation list repeats, so the collision
-    count below is a genuine set-intersection cardinality. *)
+    At {0, 1, 2, 3, 4} neither view list repeats, so the collision count below
+    is a genuine set-intersection cardinality. *)
 Lemma pgl27_views_uniq_five :
   uniq (code_views false rep_five) && uniq (code_views true rep_five).
 Proof. by vm_compute. Qed.
 
 (** pgl27_views_uniq_six — both deals restrict {0, 1, 2, 3, 4, 5} injectively.
-    At {0, 1, 2, 3, 4, 5} neither observation list repeats, so the collision
-    count below is a genuine set-intersection cardinality. *)
+    At {0, 1, 2, 3, 4, 5} neither view list repeats, so the collision count
+    below is a genuine set-intersection cardinality. *)
 Lemma pgl27_views_uniq_six :
   uniq (code_views false rep_six) && uniq (code_views true rep_six).
 Proof. by vm_compute. Qed.
 
-(** pgl27_views_uniq_seven — both deals restrict {0, 1, 2, 3, 4, 5, 6}
-    injectively. At {0, 1, 2, 3, 4, 5, 6} neither observation list repeats, so
-    the collision count below is a genuine set-intersection cardinality. *)
+(** pgl27_views_uniq_seven — both deals restrict rep_seven injectively.
+    Neither view list repeats there, so the collision count is a
+    set-intersection cardinality rather than a raw multiplicity. *)
 Lemma pgl27_views_uniq_seven :
   uniq (code_views false rep_seven) && uniq (code_views true rep_seven).
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_harmonic — the four-subset {0, 1, 2, 3} has 96
-    collisions. 96 of pgl27_group_table's 336 observations of {0, 1, 2, 3} are
-    common to the two deals. *)
+    collisions. 96 of pgl27_group_table's 336 views of {0, 1, 2, 3} are common
+    to the two deals. *)
 Lemma pgl27_collisions_harmonic : pgl27_collisions rep_harmonic = 96.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_equianharmonic — the four-subset {0, 1, 2, 4} has 72
-    collisions. 72 of pgl27_group_table's 336 observations of {0, 1, 2, 4} are
-    common to the two deals. *)
+    collisions. 72 of pgl27_group_table's 336 views of {0, 1, 2, 4} are common
+    to the two deals. *)
 Lemma pgl27_collisions_equianharmonic :
   pgl27_collisions rep_equianharmonic = 72.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_five — the five-subset {0, 1, 2, 3, 4} has 36 collisions.
-    36 of pgl27_group_table's 336 observations of {0, 1, 2, 3, 4} are common
-    to the two deals. *)
+    36 of pgl27_group_table's 336 views of {0, 1, 2, 3, 4} are common to the
+    two deals. *)
 Lemma pgl27_collisions_five : pgl27_collisions rep_five = 36.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_six — the six-subset {0, 1, 2, 3, 4, 5} has 12
-    collisions. 12 of pgl27_group_table's 336 observations of {0, 1, 2, 3, 4,
-    5} are common to the two deals. *)
+    collisions. 12 of pgl27_group_table's 336 views of {0, 1, 2, 3, 4, 5} are
+    common to the two deals. *)
 Lemma pgl27_collisions_six : pgl27_collisions rep_six = 12.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_three — the three-subset {0, 1, 2} has 336 collisions.
-    Every one of pgl27_group_table's 336 observations of the positions 0, 1, 2
-    is common to the two deals, the lower end of the ramp that
-    pgl27_view_indep states. *)
+    Every one of pgl27_group_table's 336 views of the positions 0, 1, 2 is
+    common to the two deals, the smallest value, zero, that pgl27_view_indep
+    states. *)
 Lemma pgl27_collisions_three : pgl27_collisions [:: 0; 1; 2] = 336.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_seven — the seven-subset {0, ..., 6} has no collision.
-    None of pgl27_group_table's 336 observations of the positions 0 to 6 is
-    common to the two deals, the upper end of the ramp
+    None of pgl27_group_table's 336 views of the positions 0 to 6 is common to
+    the two deals, the largest value, reached at seven positions, that
     pgl27_seven_reveal_class states. *)
 Lemma pgl27_collisions_seven : pgl27_collisions rep_seven = 0.
 Proof. by vm_compute. Qed.

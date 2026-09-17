@@ -5,37 +5,37 @@
 (*                    injective on a support set                              *)
 (*                                                                            *)
 (* A uniform Boolean secret is drawn independently of a uniform element of a  *)
-(* nonempty subset A of a finite type, and the adversary observes a           *)
-(* secret-indexed map that is injective on A for each secret. Every           *)
-(* observation that occurs at all is then produced by at most one element of  *)
-(* A per secret, so it leaves one or two compatible secrets and its posterior *)
-(* entropy is the indicator of that ambiguity.                                *)
+(* nonempty subset A of a finite type, and the adversary sees a map indexed   *)
+(* by the secret that is injective on A for each secret. Every view that      *)
+(* occurs at all is then produced by at most one element of A per secret, so  *)
+(* it leaves one or two compatible secrets and its posterior entropy is the   *)
+(* indicator of that ambiguity.                                               *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   support_posteriorP == the joint law of a uniform Boolean secret and a    *)
 (*                         uniform element of A                               *)
 (*   support_posterior_secret == the Boolean secret of a sample               *)
-(*   support_posterior_view == the observation of a sample                    *)
+(*   support_posterior_view == the view of a sample                           *)
 (*   support_compatible_secrets v == the secrets that produce v from A        *)
 (*   support_ambiguous_view v == both secrets produce v from A                *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   support_posterior_secret_uniform == at a reachable observation the       *)
-(*     posterior is uniform on the compatible secrets                         *)
-(*   support_compatible_secret_cardE == a reachable observation has two       *)
-(*     compatible secrets when it is ambiguous and one otherwise              *)
+(*   support_posterior_secret_uniformE == at a reachable view the posterior   *)
+(*     is uniform on the compatible secrets                                   *)
+(*   support_compatible_secrets_cardE == a reachable view has two compatible  *)
+(*     secrets when it is ambiguous and one otherwise                         *)
 (*   support_posterior_entropy_ambiguousE == the posterior entropy of a       *)
-(*     reachable observation is the indicator of its ambiguity                *)
+(*     reachable view is the indicator of its ambiguity                       *)
 (*                                                                            *)
-(* The statements concern one pre-reveal observation of a single execution,   *)
-(* before any value is published.                                             *)
+(* The statements concern one pre-reveal view of a single execution, before   *)
+(* any value is published.                                                    *)
 (******************************************************************************)
 
 From HB Require Import structures.
-From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
-From mathcomp Require Import zmodp boolp ring lra reals.
+From mathcomp Require Import all_boot all_order all_algebra.
+From mathcomp Require Import ring reals.
 From infotheo Require Import realType_ext realType_ln ssr_ext ssralg_ext.
-From infotheo Require Import bigop_ext fdist proba jfdist_cond graphoid entropy.
+From infotheo Require Import bigop_ext fdist proba entropy.
 From infotheo.dumas2017dual.entropy_fiber Require Import entropy_fiber.
 
 Import GRing.Theory Num.Theory.
@@ -45,7 +45,6 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 Local Open Scope ring_scope.
-Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
@@ -53,37 +52,37 @@ Local Open Scope entropy_scope.
 Section support_posterior.
 
 Variable R : realType.
-Variables (G V : finType).
-Variable A : {set G}.
+Variables (T V : finType).
+Variable A : {set T}.
 Hypothesis card_A_gt0 : (0 < #|A|)%N.
-Variable view_of : bool -> G -> V.
+Variable view_of : bool -> T -> V.
 Hypothesis view_of_injective_on : forall b, {in A &, injective (view_of b)}.
 
 (** The source is the independent product of a uniform Boolean secret with a
-    uniform draw from [A]. It is the law under which every posterior below is
-    taken. *)
-Definition support_posteriorP : R.-fdist (bool * G) :=
+    uniform draw from [A]. It is the law under which the adversary's posterior
+    about the secret is taken. *)
+Definition support_posteriorP : R.-fdist (bool * T) :=
   (fdist_uniform card_bool) `x
-    (@fdist_uniform_supp R G A card_A_gt0).
+    (@fdist_uniform_supp R T A card_A_gt0).
 
 (** The secret is the Boolean component of a sample. It is the quantity whose
-    residual uncertainty the adversary is measured against. *)
+    residual uncertainty given the adversary's view the posterior entropy
+    measures, so secrecy of the scheme is a statement about this variable. *)
 Definition support_posterior_secret : {RV support_posteriorP -> bool} := fst.
 
-(** The observation applies the secret-indexed map to the drawn element. It
-    carries no other coordinate of the sample, so the adversary sees the
-    secret only through this image. *)
+(** The view applies the secret-indexed map to the drawn element. It carries
+    no other coordinate of the sample, so the adversary sees the secret only
+    through this image. *)
 Definition support_posterior_view : {RV support_posteriorP -> V} :=
   fun u => view_of u.1 u.2.
 
-(** These are the secrets that produce the observation [v] from some element of
-    [A]. They are exactly the secrets an adversary seeing [v] cannot rule
-    out. *)
+(** These are the secrets that produce the view [v] from some element of [A].
+    They are exactly the secrets an adversary seeing [v] cannot rule out. *)
 Definition support_compatible_secrets (v : V) : {set bool} :=
   [set b | [exists g in A, view_of b g == v]].
 
-(** An observation is ambiguous when both secrets produce it from [A]. Such an
-    observation leaves the secret completely undetermined. *)
+(** A view is ambiguous when both secrets produce it from [A]. Such a view
+    leaves the secret completely undetermined. *)
 Definition support_ambiguous_view (v : V) : bool :=
   [exists g in A, view_of false g == v] &&
   [exists g in A, view_of true g == v].
@@ -93,11 +92,11 @@ Definition support_ambiguous_view (v : V) : bool :=
     turns every probability of the posterior computation into a count of
     supported samples. *)
 Lemma support_pr_countE (W : eqType)
-    (Y : {RV support_posteriorP -> W}) (w : W) (Q : pred (bool * G)) :
+    (Y : {RV support_posteriorP -> W}) (w : W) (Q : pred (bool * T)) :
   (forall u, (Y u == w) = Q u) ->
   `Pr[Y = w] =
     (2%:R^-1 * #|A|%:R^-1) *+
-      #|[set u : bool * G | Q u && (u.2 \in A)]|.
+      #|[set u : bool * T | Q u && (u.2 \in A)]|.
 Proof.
 move=> HQ; rewrite pfwd1E /Pr.
 under eq_bigl => u do rewrite inE /= HQ.
@@ -121,9 +120,9 @@ Lemma support_joint_secret_viewE b v :
 Proof.
 rewrite (support_pr_countE
   (Q := fun u => (u.1 == b) && (view_of u.1 u.2 == v))).
-set F : {set G} := [set g in A | view_of b g == v].
-set J : {set bool * G} := [set (b, g) | g in F].
-have HJ : [set u : bool * G |
+set F : {set T} := [set g in A | view_of b g == v].
+set J : {set bool * T} := [set (b, g) | g in F].
+have HJ : [set u : bool * T |
     ((u.1 == b) && (view_of u.1 u.2 == v)) && (u.2 \in A)] = J.
   apply/setP => -[b' g].
   rewrite !inE /J /F.
@@ -145,9 +144,11 @@ by move=> [b' g]; rewrite /support_posterior_secret
   /support_posterior_view /= xpair_eqE.
 Qed.
 
-(** Restricted injectivity makes every secret-indexed supported view fibre
-    empty or a singleton according to compatibility with the view. It is the
-    only place where the hypothesis on the observation map is used. *)
+(** At a fixed secret, restricted injectivity makes the supported fibre of the
+    view map over [v] empty or a singleton, according to whether that secret is
+    compatible with [v]. Injectivity on [A] is the assumption that no secret
+    reaches one view from two distinct elements of [A], so the weight a view
+    puts on a secret is a compatibility bit and never a multiplicity. *)
 Lemma support_injective_fiber_card b v :
   #|[set g in A | view_of b g == v]| =
     if b \in support_compatible_secrets v then 1 else 0.
@@ -155,7 +156,7 @@ Proof.
 case Hb: (b \in support_compatible_secrets v) => /=.
 - move: Hb; rewrite /support_compatible_secrets inE =>
     /exists_inP[g gA /eqP Hg].
-  apply: (@eq_card1 G g _) => g'.
+  apply: (@eq_card1 T g _) => g'.
   rewrite inE; apply/idP/eqP.
   + move=> /andP[g'A /eqP Hg'].
     exact: (view_of_injective_on (b:=b) g'A gA
@@ -193,8 +194,8 @@ Qed.
 
 (** At a reachable view, the posterior is uniform on the compatible Boolean
     secrets under the distribution supported on [A]. The adversary therefore
-    gains no preference among the secrets the observation still allows. *)
-Lemma support_posterior_secret_uniform v :
+    gains no preference among the secrets the view still allows. *)
+Lemma support_posterior_secret_uniformE v :
   `Pr[support_posterior_view = v] != 0 ->
   forall b, b \in support_compatible_secrets v ->
   `Pr[support_posterior_secret = b | support_posterior_view = v] =
@@ -211,9 +212,9 @@ apply/andP; split.
 Qed.
 
 (** At a reachable view, incompatible Boolean secrets have posterior
-    probability zero under the distribution supported on [A]. The observation
-    thus rules out exactly the secrets that cannot produce it. *)
-Lemma support_posterior_secret_zero v :
+    probability zero under the distribution supported on [A]. The view thus
+    rules out exactly the secrets that cannot produce it. *)
+Lemma support_posterior_secret_eq0 v :
   `Pr[support_posterior_view = v] != 0 ->
   forall b, b \notin support_compatible_secrets v ->
   `Pr[support_posterior_secret = b | support_posterior_view = v] = 0.
@@ -225,9 +226,10 @@ by rewrite Hb0 /= !mul0r.
 Qed.
 
 (** A reachable view has two compatible secrets exactly when it is ambiguous,
-    and otherwise has one compatible secret. It is the step that makes the
-    posterior support a two-valued quantity. *)
-Lemma support_compatible_secret_cardE v :
+    and one otherwise. The posterior support of a reachable view is therefore
+    a two-valued quantity, which is what makes its entropy a Boolean
+    indicator. *)
+Lemma support_compatible_secrets_cardE v :
   `Pr[support_posterior_view = v] != 0 ->
   #|support_compatible_secrets v| =
     if support_ambiguous_view v then 2 else 1.
@@ -256,17 +258,17 @@ Qed.
 
 (** Every reachable view has posterior entropy one precisely when both
     Boolean secrets are compatible, and zero otherwise. It is the exact
-    per-observation uncertainty an adversary restricted to this view retains
-    about the secret. *)
+    per-view uncertainty an adversary restricted to this view retains about
+    the secret. *)
 Lemma support_posterior_entropy_ambiguousE v :
   `Pr[support_posterior_view = v] != 0 ->
   `H[support_posterior_secret | support_posterior_view = v] =
     (support_ambiguous_view v)%:R.
 Proof.
 move=> Hv.
-have Hsol := support_posterior_secret_uniform Hv.
-have Hout := support_posterior_secret_zero Hv.
-have Hcard := support_compatible_secret_cardE Hv.
+have Hsol := support_posterior_secret_uniformE Hv.
+have Hout := support_posterior_secret_eq0 Hv.
+have Hcard := support_compatible_secrets_cardE Hv.
 rewrite (@centropy1_uniform_over_set R _ _ _ _
            support_posterior_secret support_posterior_view
            (support_compatible_secrets v) v Hv Hsol Hout); last first.

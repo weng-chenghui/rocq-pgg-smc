@@ -8,11 +8,17 @@
 (* the orbit secret and the coalition view is a function of the coalition     *)
 (* size alone, except at size four, where it also depends on the cross-ratio  *)
 (* class of the four positions. It is zero up to the privacy threshold three, *)
-(* five sevenths or eleven fourteenths at four according to that class,       *)
-(* twenty-five twenty-eighths at five, twenty-seven twenty-eighths at six,    *)
-(* and the full bit from seven positions on. Every value is exact and         *)
-(* unconditional on any computational assumption, and measures one pre-reveal *)
-(* observation under a uniform orbit secret and a uniform PGL(2,7) shuffle.   *)
+(* eleven fourteenths at four on an equianharmonic quadruple and five         *)
+(* sevenths on a harmonic one, twenty-five twenty-eighths at five,            *)
+(* twenty-seven twenty-eighths at six, and the full bit from seven positions  *)
+(* on. Every value is exact and unconditional on any computational            *)
+(* assumption.                                                                *)
+(*                                                                            *)
+(* Scope. One pre-reveal view, a uniform Boolean orbit secret, a uniform      *)
+(* shuffle drawn from pgg_G pgl27_M, and for each secret the fixed            *)
+(* representative deal orbit_encode of its class. The all-decks dealer of     *)
+(* pgl27_view_indep_alldecks, which deals a uniform valid deck of the         *)
+(* secret's class, is not covered by any value of this file.                  *)
 (*                                                                            *)
 (* The file joins three statements of pgl27_secrecy.v. The independence of a  *)
 (* coalition view of at most three positions from the orbit secret            *)
@@ -20,11 +26,16 @@
 (* information under coalition inclusion (pgl27_view_leakage_le) carries the  *)
 (* seven-position value to the whole deck and the four-position values up to  *)
 (* every larger coalition; and the single four-position coalition of strictly *)
-(* positive mutual information (pgl27_view_leak_k4) becomes the exact value   *)
-(* five sevenths there, and an equivalence between vanishing mutual           *)
-(* information and coalition size at most three for every coalition.          *)
+(* positive mutual information (pgl27_view_dep_k4, pgl27_view_leak_k4)        *)
+(* becomes the exact value five sevenths there, and an equivalence between    *)
+(* vanishing mutual information and coalition size at most three for every    *)
+(* coalition.                                                                 *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   pgl27_subset_class_harmonicE, pgl27_subset_class_equianharmonicE == the  *)
+(*     cross-ratio class of the two four-position representatives             *)
+(*   pgl27_leak_coalitionE == the four heart positions of the identity deal   *)
+(*     are the positions listed by the harmonic representative                *)
 (*   pgl27_view_mutual_info_imset == relabelling the positions of a coalition *)
 (*     by a shuffle leaves its mutual information with the orbit secret       *)
 (*     unchanged                                                              *)
@@ -78,10 +89,10 @@ Local Open Scope proba_scope.
 Local Open Scope entropy_scope.
 Variable R : realType.
 
-(** The harmonic representative lists four of the eight positions. The
-    transport of a leakage value along the shuffle group matches coalitions
-    of equal size, so the size of each representative is what selects the
-    coalitions its value governs. *)
+(** The harmonic representative lists four of the eight positions. At size
+    four the shuffle group has two orbits, so a representative's size
+    selects the coalitions its value governs only together with the
+    cross-ratio class of its positions. *)
 Local Lemma pgl27_card_harmonic : #|pgl27_code_coalition rep_harmonic| = 4.
 Proof.
 rewrite /pgl27_code_coalition -sum1dep_card big_mkcond /=.
@@ -198,7 +209,7 @@ Qed.
 
 (** A coalition of at most three positions shares zero bits with the orbit
     secret. Below the privacy threshold a coalition learns nothing at all
-    about the orbit secret from one pre-reveal observation. *)
+    about the orbit secret from one pre-reveal view. *)
 Lemma pgl27_view_mutual_info_le3E (C : {set 'I_8}) : (#|C| <= 3)%N ->
   `I(pgl27_secret R ; pgl27_view R C) = 0.
 Proof.
@@ -223,11 +234,11 @@ case HcC : (subset_class C).
     (pgl27_code_coalition rep_equianharmonic) C pgl27_card_equianharmonic HC)
     (etrans pgl27_subset_class_equianharmonicE (esym HcC)).
   by rewrite (pgl27_view_mutual_info_imset _ gG)
-     pgl27_mutual_info_equianharmonicE.
+     pgl27_view_mutual_info_equianharmonicE.
 have [g [gG ->]] := iffLR (subset_class_orbit
   (pgl27_code_coalition rep_harmonic) C pgl27_card_harmonic HC)
   (etrans pgl27_subset_class_harmonicE (esym HcC)).
-by rewrite (pgl27_view_mutual_info_imset _ gG) pgl27_mutual_info_harmonicE.
+by rewrite (pgl27_view_mutual_info_imset _ gG) pgl27_view_mutual_info_harmonicE.
 Qed.
 
 (** A coalition of five positions shares twenty-five twenty-eighths of a bit
@@ -238,34 +249,35 @@ Lemma pgl27_view_mutual_info_k5E (C : {set 'I_8}) : #|C| = 5 ->
 Proof.
 move=> HC.
 have [g gG ->] := pgl27_five_subset_orbit pgl27_card_five HC.
-by rewrite (pgl27_view_mutual_info_imset _ gG) pgl27_mutual_info_fiveE.
+by rewrite (pgl27_view_mutual_info_imset _ gG) pgl27_view_mutual_info_fiveE.
 Qed.
 
 (** A coalition of six positions shares twenty-seven twenty-eighths of a bit
     with the orbit secret. The value is still below one bit, so six of the
-    eight cards leave the orbit secret undetermined on some executions. *)
+    eight positions leave the orbit secret undetermined on some
+    executions. *)
 Lemma pgl27_view_mutual_info_k6E (C : {set 'I_8}) : #|C| = 6 ->
   `I(pgl27_secret R ; pgl27_view R C) = 27%:R / 28%:R.
 Proof.
 move=> HC.
 have [g gG ->] := pgl27_six_subset_orbit pgl27_card_six HC.
-by rewrite (pgl27_view_mutual_info_imset _ gG) pgl27_mutual_info_sixE.
+by rewrite (pgl27_view_mutual_info_imset _ gG) pgl27_view_mutual_info_sixE.
 Qed.
 
 (** A coalition of seven positions shares one bit with the orbit secret, the
-    whole of its prior entropy. Seven of the eight cards determine the orbit
-    secret before the reveal, so the scheme keeps nothing from a coalition of
-    that size. *)
+    whole of its prior entropy. Seven of the eight positions determine the
+    orbit secret before the reveal, so the scheme keeps nothing from a
+    coalition of that size. *)
 Lemma pgl27_view_mutual_info_k7E (C : {set 'I_8}) : #|C| = 7 ->
   `I(pgl27_secret R ; pgl27_view R C) = 1.
 Proof.
 move=> HC.
 have [g gG ->] := pgl27_seven_subset_orbit pgl27_card_seven HC.
-by rewrite (pgl27_view_mutual_info_imset _ gG) pgl27_mutual_info_sevenE.
+by rewrite (pgl27_view_mutual_info_imset _ gG) pgl27_view_mutual_info_sevenE.
 Qed.
 
 (** No coalition shares more than one bit with the orbit secret. One
-    pre-reveal observation never tells a coalition more than the orbit secret
+    pre-reveal view never tells a coalition more than the orbit secret
     itself carries, whatever its positions. *)
 Lemma pgl27_view_mutual_info_le1 (C : {set 'I_8}) :
   `I(pgl27_secret R ; pgl27_view R C) <= 1.
@@ -285,7 +297,7 @@ have HCT : C = [set: 'I_8].
 (* one bit from above by the prior entropy of the secret, one bit from below
    by monotonicity along a seven-position subcoalition *)
 apply: le_anti; apply/andP; split; first exact: pgl27_view_mutual_info_le1.
-rewrite -(pgl27_mutual_info_sevenE R); apply: pgl27_view_leakage_le.
+rewrite -(pgl27_view_mutual_info_sevenE R); apply: pgl27_view_leakage_le.
 by rewrite HCT subsetT.
 Qed.
 
@@ -303,14 +315,14 @@ by move: HC; rewrite leq_eqVlt eq_sym (negbTE E7) /=.
 Qed.
 
 (** The mutual information between the orbit secret and the view of a
-    coalition of the eight positions is zero up to size three, five sevenths
-    or eleven fourteenths at size four according to the cross-ratio class of
-    the positions, twenty-five twenty-eighths at five, twenty-seven
-    twenty-eighths at six, and one bit from seven positions on. The scheme
-    hides the orbit secret completely below the privacy threshold three and
-    reveals it completely from seven positions on, and between those two
-    sizes it leaks a known exact amount rather than an amount bounded only
-    from above. *)
+    coalition of the eight positions is zero up to size three, eleven
+    fourteenths at size four on the twenty-eight equianharmonic quadruples
+    and five sevenths on the forty-two harmonic ones, twenty-five
+    twenty-eighths at five, twenty-seven twenty-eighths at six, and one bit
+    from seven positions on. The scheme hides the orbit secret completely
+    below the privacy threshold three and reveals it completely from seven
+    positions on, and between those two sizes it leaks a known exact
+    amount rather than an amount bounded only from above. *)
 Theorem pgl27_view_mutual_infoE (C : {set 'I_8}) :
   `I(pgl27_secret R ; pgl27_view R C) =
     if (#|C| <= 3)%N then 0
@@ -333,19 +345,18 @@ exact: (pgl27_view_mutual_info_ge7E (step 6 H6 E6)).
 Qed.
 
 (** A coalition shares no information with the orbit secret exactly when it
-    holds at most three positions. The privacy threshold three is sharp for
-    every coalition of four or more positions and not only for one witness,
-    so no seating of four players escapes the leakage. *)
+    holds at most three positions. The privacy threshold three is sharp at
+    every coalition of four or more positions and not only at one witness
+    coalition, so no four of the eight positions are information-free. *)
 Lemma pgl27_view_mutual_info_eq0 (C : {set 'I_8}) :
   (`I(pgl27_secret R ; pgl27_view R C) == 0) = (#|C| <= 3)%N.
 Proof.
 apply/idP/idP; last by move=> HC; rewrite (pgl27_view_mutual_info_le3E HC) eqxx.
 move=> /eqP HI; rewrite leqNgt; apply/negP => H4.
-have H4' : (4 <= #|C|)%N by [].
 (* a coalition of four or more positions contains a four-position one, whose
    value is strictly positive in either cross-ratio class *)
 have [D DC HD] : exists2 D : {set 'I_8}, D \subset C & #|D| = 4.
-  have [s [Us Ss subsC]] := card_geqP H4'.
+  have [s [Us Ss subsC]] := card_geqP H4.
   exists [set x in s]; first by apply/subsetP => x; rewrite inE; exact: subsC.
   by rewrite cardsE (card_uniqP Us).
 have Hpos : 0 < `I(pgl27_secret R ; pgl27_view R D).
@@ -357,12 +368,13 @@ by move: (lt_le_trans Hpos Hle); rewrite ltxx.
 Qed.
 
 (** The four heart positions of the identity deal share five sevenths of a
-    bit with the orbit secret. It is the exact value behind the strict
-    positivity that pgl27_view_leak_k4 states for that coalition. *)
+    bit with the orbit secret. This is the exact value at the coalition
+    that witnesses sharpness of the privacy threshold three, where the
+    threshold statements give only strict positivity. *)
 Lemma pgl27_view_mutual_info_leak_coalitionE :
   `I(pgl27_secret R ; pgl27_view R pgl27_leak_coalition) = 5%:R / 7%:R.
 Proof.
-by rewrite pgl27_leak_coalitionE pgl27_mutual_info_harmonicE.
+by rewrite pgl27_leak_coalitionE pgl27_view_mutual_info_harmonicE.
 Qed.
 
 (** A coalition of four or more positions shares at least five sevenths of a

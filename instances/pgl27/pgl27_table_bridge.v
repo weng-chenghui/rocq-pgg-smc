@@ -12,11 +12,13 @@
 (* a count over the shuffle group itself.                                     *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   pgl27_table_row_ok == a census row is a table of a permutation of the    *)
-(*                         eight card positions                               *)
+(*   pgl27_ptbl g == the permutation table of the shuffle g                   *)
 (*   pgl27_table_perm k == the shuffle denoted by census row k                *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   pgl27_group_card == the PGL(2,7) shuffle group has 336 elements          *)
+(*   pgl27_ptbl_inj == distinct shuffles have distinct tables                 *)
+(*   pgl27_ptbl_mem == the table of a PGL(2,7) shuffle is a census row        *)
 (*   pgl27_table_perm_mem == every census row denotes a PGL(2,7) shuffle      *)
 (*   pgl27_table_perm_inj == distinct census rows denote distinct shuffles    *)
 (*   pgl27_table_perm_surj == every PGL(2,7) shuffle occurs as a census row   *)
@@ -45,19 +47,39 @@ Lemma pgl27_group_table_perm :
   perm_eq pgl27_group_table (unzip1 pgl27_mixing.elem_table).
 Proof. by vm_compute. Qed.
 
-(** A valid census row lists eight distinct card positions below eight. This
-    is the row condition needed to interpret a nat table as a permutation. *)
-Definition pgl27_table_row_ok (t : seq nat) : bool :=
-  [&& size t == 8, uniq t & all (fun x => x < 8) t].
+(** The permutation table of a shuffle: the images of the eight card
+    positions, listed in position order. It is the form in which the census
+    names a group element, so every count over census rows is a statement
+    about shuffles once read along this map. *)
+Definition pgl27_ptbl (g : {perm 'I_8}) : seq nat := pgl27_mixing.ptbl g.
 
-(** Every census row has eight distinct entries below eight. Thus each row is
-    the table of a permutation of the eight card positions. *)
-Lemma pgl27_group_table_rows_ok :
-  all pgl27_table_row_ok pgl27_group_table.
-Proof. by vm_compute. Qed.
+(** Distinct shuffles have distinct tables. A census row therefore names at
+    most one element of the shuffle group. *)
+Lemma pgl27_ptbl_inj : injective pgl27_ptbl.
+Proof. exact: pgl27_mixing.ptbl_inj. Qed.
 
-(** The mixing-table permutation indexed by the matching census row. This map
-    turns census indices into elements of the shuffle permutation carrier. *)
+(** The table of a PGL(2,7) shuffle occurs among the census rows. Every
+    shuffle the protocol can draw is therefore already one of the 336
+    executions the census enumerates. *)
+Lemma pgl27_ptbl_mem (g : {perm 'I_8}) :
+  g \in pgg_G pgl27_M -> pgl27_ptbl g \in pgl27_group_table.
+Proof.
+move=> gG; have Hgkey := pgl27_mixing.group_key gG.
+have Heq :
+    (pgl27_ptbl g \in pgl27_group_table) =
+    (pgl27_ptbl g \in unzip1 pgl27_mixing.elem_table) :=
+  perm_mem pgl27_group_table_perm _.
+by rewrite Heq.
+Qed.
+
+(** The PGL(2,7) shuffle group has 336 elements. It is the number every
+    census count is normalized by to become a probability. *)
+Lemma pgl27_group_card : #|pgg_G pgl27_M| = 336.
+Proof. exact: pgl27_mixing.pgl27_card. Qed.
+
+(** The PGL(2,7) shuffle whose table is census row [k]. It is the map along
+    which every count over the 336 census rows is read as a count over the
+    shuffle group the protocol samples from. *)
 Definition pgl27_table_perm (k : 'I_336) : {perm 'I_8} :=
   pgl27_mixing.entry_perm
     (index (nth [::] pgl27_group_table k)
@@ -94,13 +116,14 @@ have Hlt :
 by move: Hlt; rewrite pgl27_mixing.keys_size.
 Qed.
 
-(** The permutation assigned to an index has exactly the census row at that
-    index as its table. This preserves the action of every card position. *)
+(** The shuffle named by census index [k] has census row [k] as its table.
+    Row and shuffle therefore send each card position to the same place, so a
+    statement proved about one transfers verbatim to the other. *)
 Lemma pgl27_table_permE (k : 'I_336) :
-  pgl27_mixing.ptbl (pgl27_table_perm k) =
+  pgl27_ptbl (pgl27_table_perm k) =
   nth [::] pgl27_group_table k.
 Proof.
-rewrite /pgl27_table_perm
+rewrite /pgl27_ptbl /pgl27_table_perm
   (pgl27_mixing.ptbl_entry (pgl27_table_index_lt k)).
 exact: nth_index (pgl27_table_row_mem k).
 Qed.
@@ -133,26 +156,20 @@ Lemma pgl27_table_perm_surj (g : {perm 'I_8}) :
   g \in pgg_G pgl27_M -> exists k : 'I_336, pgl27_table_perm k = g.
 Proof.
 move=> gG.
-have Hgkey := pgl27_mixing.group_key gG.
-have Heq :
-    (pgl27_mixing.ptbl g \in pgl27_group_table) =
-    (pgl27_mixing.ptbl g \in unzip1 pgl27_mixing.elem_table) :=
-  perm_mem pgl27_group_table_perm _.
-have Hgrow : pgl27_mixing.ptbl g \in pgl27_group_table.
-  by rewrite Heq.
-have Hklt : index (pgl27_mixing.ptbl g) pgl27_group_table < 336.
-  have Hind : index (pgl27_mixing.ptbl g) pgl27_group_table <
+have Hgrow : pgl27_ptbl g \in pgl27_group_table := pgl27_ptbl_mem gG.
+have Hklt : index (pgl27_ptbl g) pgl27_group_table < 336.
+  have Hind : index (pgl27_ptbl g) pgl27_group_table <
       size pgl27_group_table.
     rewrite index_mem.
     exact: Hgrow.
   by move: Hind; rewrite pgl27_group_table_size.
 pose k : 'I_336 := Ordinal Hklt.
-have Hrow : nth [::] pgl27_group_table k = pgl27_mixing.ptbl g.
+have Hrow : nth [::] pgl27_group_table k = pgl27_ptbl g.
   change (nth [::] pgl27_group_table
-    (index (pgl27_mixing.ptbl g) pgl27_group_table) =
-    pgl27_mixing.ptbl g).
+    (index (pgl27_ptbl g) pgl27_group_table) =
+    pgl27_ptbl g).
   exact: nth_index Hgrow.
-exists k; apply: pgl27_mixing.ptbl_inj.
+exists k; apply: pgl27_ptbl_inj.
 exact: (etrans (pgl27_table_permE k) Hrow).
 Qed.
 
@@ -168,14 +185,14 @@ Qed.
     permutation to the tuple-level encoded deck. Thus census composition and
     the protocol view use the same action convention. *)
 Lemma pgl27_code_comp_ptblE (b : bool) (g : {perm 'I_8}) (t : seq nat)
-    (Ht : pgl27_mixing.ptbl g = t) (i : 'I_8) :
+    (Ht : pgl27_ptbl g = t) (i : 'I_8) :
   nth 0 (code_comp t (code_deal b)) i =
   val (tnth (orbit_encode b) (g i)).
 Proof.
-have Hsize : size t = 8 by rewrite -Ht pgl27_mixing.ptbl_size.
+have Hsize : size t = 8 by rewrite -Ht /pgl27_ptbl pgl27_mixing.ptbl_size.
 rewrite /code_comp (nth_map 0); last first.
   by rewrite Hsize; exact: ltn_ord i.
-rewrite -Ht pgl27_mixing.ptbl_nth.
+rewrite -Ht /pgl27_ptbl pgl27_mixing.ptbl_nth.
 exact: pgl27_code_deal_orbit_encodeE.
 Qed.
 
