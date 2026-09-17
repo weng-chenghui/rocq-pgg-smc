@@ -4,14 +4,15 @@
 (* pgl27_table_bridge: the collision census rows as PGL(2,7) shuffles         *)
 (*                                                                            *)
 (* The collision census counts restricted views over a 336-row table of       *)
-(* natural numbers, while the protocol shuffles with elements of              *)
-(* pgg_G pgl27_M. This file identifies the two: every census row is the table *)
-(* of a group element, distinct rows give distinct elements, every group      *)
-(* element occurs as a row, and composing a row with the code table of a deck *)
-(* pair reproduces the dealt deck the protocol view reads. Every census count *)
-(* is therefore a count over the shuffle group itself. The identification of  *)
-(* the rows with the group is fixed by the geometry; only the last step       *)
-(* mentions a deck pair, and it holds at every deck pair.                     *)
+(* natural numbers, while the protocol shuffles with elements of pgg_G        *)
+(* pgl27_M. This file identifies the two: every census row is the table of a  *)
+(* group element, distinct rows give distinct elements, every group element   *)
+(* occurs as a row, and composing a row with the code table of the deck a     *)
+(* secret is dealt reproduces the arrangement the protocol view reads. Every  *)
+(* census count is therefore a count over the shuffle group itself. The       *)
+(* identification of the rows with the group is fixed by the geometry. The    *)
+(* deck pair enters only in the composition step, which holds at every deck   *)
+(* pair.                                                                      *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_ptbl g == the permutation table of the shuffle g                   *)
@@ -24,8 +25,6 @@
 (*   pgl27_table_perm_mem == every census row denotes a PGL(2,7) shuffle      *)
 (*   pgl27_table_perm_inj == distinct census rows denote distinct shuffles    *)
 (*   pgl27_table_perm_surj == every PGL(2,7) shuffle occurs as a census row   *)
-(*   pgl27_code_comp_rowE == a census row and its shuffle deal the same card  *)
-(*     at every position, at every deck pair                                  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -189,17 +188,4 @@ rewrite /code_comp (nth_map 0); last first.
   by rewrite Hsize; exact: ltn_ord i.
 rewrite -Ht /pgl27_ptbl pgl27_mixing.ptbl_nth.
 exact: enc_code_nthE.
-Qed.
-
-(** An indexed census row and its assigned shuffle deal the same card at every
-    position. Restricted census views can therefore be compared with the
-    protocol's coalition view coordinate by coordinate, at every deck pair. *)
-Lemma pgl27_code_comp_rowE (e : pgl27_encoding) (b : bool) (k : 'I_336)
-    (i : 'I_8) :
-  nth 0
-    (code_comp (nth [::] pgl27_group_table k) (enc_code e b)) i =
-  val (tnth (enc_deck e b) (pgl27_table_perm k i)).
-Proof.
-exact: (@pgl27_code_comp_ptblE e b (pgl27_table_perm k)
-  (nth [::] pgl27_group_table k) (pgl27_table_permE k) i).
 Qed.

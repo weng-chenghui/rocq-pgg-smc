@@ -57,12 +57,11 @@
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_encoding == a deck pair of the eight-card scheme                   *)
-(*   pgl27_enc_view R e C == the cards a coalition C sees before the reveal,  *)
-(*                           under the deck pair e                            *)
+(*   pgl27_enc_view R e C == the cards a coalition C sees before the reveal   *)
+(*                           under the deck pair e, and ord0 elsewhere        *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   enc_code_nthE == the code list and the deck agree position by position   *)
-(*   enc_code_size, enc_code_uniq == the code list has eight distinct entries *)
 (*   pgl27_enc_view_indep == a coalition of at most three positions has a     *)
 (*     view independent of the secret, at every deck pair                     *)
 (*   pgl27_enc_view_leakage_le == leakage is monotone in the coalition, at    *)
@@ -104,22 +103,6 @@ Record pgl27_encoding := PGL27Encoding {
   enc_classK : forall s, orbit_class (enc_deck s) = s;
   enc_codeE : forall s, enc_code s = [seq val x | x <- enc_deck s]
 }.
-
-(** enc_code_size — the code table of a deck lists eight entries. A reveal set
-    of positions below eight therefore selects a card code at each of its
-    positions. *)
-Lemma enc_code_size (e : pgl27_encoding) (s : bool) :
-  size (enc_code e s) = 8.
-Proof. by rewrite enc_codeE size_map size_tuple. Qed.
-
-(** enc_code_uniq — the code table of a deck repeats no entry. It is
-    deck validity read at the nat level, where the census counts. *)
-Lemma enc_code_uniq (e : pgl27_encoding) (s : bool) :
-  uniq (enc_code e s).
-Proof.
-rewrite enc_codeE map_inj_uniq; first exact: enc_deck_ok.
-exact: val_inj.
-Qed.
 
 (** enc_code_nthE — the code table and the deck name the same card at every
     position. It is the pointwise form of the agreement field, and the step

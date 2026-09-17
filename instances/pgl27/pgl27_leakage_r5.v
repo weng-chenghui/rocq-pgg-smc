@@ -202,7 +202,7 @@ Proof. exact: (pgl27_enc_view_mutual_info_k5E pgl27_r5_fiveE). Qed.
 Lemma pgl27_r5_view_mutual_info_ge5E (C : {set 'I_8}) : (5 <= #|C|)%N ->
   `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r5 C) = 1.
 Proof.
-apply: (pgl27_enc_view_mutual_info_ge_one (k := 5)) => D HD.
+apply: (pgl27_enc_view_mutual_info1_card_ge (k := 5)) => D HD.
 exact: pgl27_r5_k5E.
 Qed.
 

@@ -26,15 +26,17 @@
 (* Key results:                                                               *)
 (*   pgl27_secret_uniform == the dealt orbit secret is uniform on the two     *)
 (*     orbit classes                                                          *)
-(*   pgl27_reachable_view_entropy_ambiguousE == a reachable coalition view    *)
-(*     has posterior entropy equal to the indicator of its ambiguity          *)
 (*   pgl27_view_mutual_info_ambiguityE == a coalition with repetition-free    *)
 (*     census view lists shares pgl27_noncollision_ratio bits with the orbit  *)
 (*     secret                                                                 *)
 (*                                                                            *)
 (* The statements concern the pre-reveal execution: after the public reveal   *)
-(* every player learns the secret by design. The all-decks dealer of          *)
-(* pgl27_view_indep_alldecks is not covered.                                  *)
+(* every player learns the secret by design. Each statement fixes one deck    *)
+(* pair and is universally quantified over pairs, which is not a statement    *)
+(* about the dealer of pgl27_view_indep_alldecks. That dealer draws a deck    *)
+(* inside the execution, so the deck is itself random and carries             *)
+(* information, and the coalition's posterior is averaged over decks. It is   *)
+(* not covered here.                                                          *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -55,11 +57,11 @@ Import GRing.Theory Num.Theory.
 
 Local Open Scope ring_scope.
 
-(** The proportion of shuffles whose view of S under one secret is not also a
-    view of S under the other, at the deck pair e. When both census view
-    lists are repetition-free, it is the probability that one pre-reveal view
-    is compatible with only one secret, hence the exact number of bits the
-    view carries about the secret. *)
+(** The proportion of shuffles whose view at the positions listed by S under
+    one secret is not also such a view under the other, at the deck pair e.
+    When both census view lists are repetition-free, it is the probability
+    that one pre-reveal view is compatible with only one secret, hence the
+    exact number of bits the view carries about the secret. *)
 Definition pgl27_noncollision_ratio (R : realType) (e : pgl27_encoding)
     (S : seq nat) : R :=
   1 - (pgl27_collisions (enc_code e) S)%:R / 336%:R.
@@ -76,10 +78,11 @@ Local Lemma support_posteriorP_pgl27E (R : realType) :
     pgl27_G_pos = pgl27P R.
 Proof. by []. Qed.
 
-(** The ambiguous views of a coalition are the views the generic posterior
-    theory calls ambiguous for the pair of per-secret view maps. It is the
-    step that lets the support-posterior results of support_posterior.v speak
-    about this scheme. *)
+(** The ambiguous views of a coalition are exactly the views the generic
+    posterior theory calls ambiguous for the pair of per-secret view maps. A
+    view is ambiguous when both secrets can produce it, so the ambiguous set
+    is the event on which a coalition's pre-reveal view leaves the orbit
+    secret undetermined. *)
 Local Lemma pgl27_ambiguous_viewsE
     (R : realType) (e : pgl27_encoding) (S : seq nat)
     (v : {ffun 'I_8 -> 'I_8}) :
@@ -87,6 +90,7 @@ Local Lemma pgl27_ambiguous_viewsE
   support_ambiguous_view (pgg_G pgl27_M)
     (fun b g => pgl27_enc_view R e (pgl27_code_coalition S) (b, g)) v.
 Proof.
+(* support_ambiguous_view is the generic name, in support_posterior.v *)
 by rewrite /pgl27_ambiguous_views /support_ambiguous_view inE.
 Qed.
 
@@ -96,7 +100,7 @@ Qed.
     pre-reveal view, and it is an indicator rather than a general quantity
     because the secret is one bit and each secret produces a reachable view at
     most once. *)
-Lemma pgl27_reachable_view_entropy_ambiguousE
+Local Lemma pgl27_reachable_view_entropy_ambiguousE
     (R : realType) (e : pgl27_encoding) (S : seq nat)
     (Hinj : forall b,
       {in pgg_G pgl27_M &,

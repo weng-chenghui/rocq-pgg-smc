@@ -291,7 +291,7 @@ Lemma pgl27_r7_view_mutual_info_ge7E (C : {set 'I_8}) : (7 <= #|C|)%N ->
   `I(pgl27_secret R ; pgl27_view R C) = 1.
 Proof.
 move=> HC; rewrite -pgl27_r7_viewE.
-apply: (pgl27_enc_view_mutual_info_ge_one (k := 7)) => // D HD.
+apply: (pgl27_enc_view_mutual_info1_card_ge (k := 7)) => // D HD.
 by rewrite pgl27_r7_viewE; exact: pgl27_r7_k7E.
 Qed.
 

@@ -11,10 +11,11 @@
 (* the probability that a view is produced by both secrets is the census      *)
 (* collision count divided by the group order.                                *)
 (*                                                                            *)
-(* Both facts take the repetition-freeness of the census view lists of the    *)
-(* deck pair as a premise. Which reveal sets satisfy it, and what the         *)
-(* collision count is there, are facts of the deck pair and are established   *)
-(* in pgl27_encoding_r7.v and pgl27_encoding_r5.v.                            *)
+(* Both facts take two premises: that S lists card positions below eight, and *)
+(* that the census view lists of the deck pair are repetition-free. Which     *)
+(* reveal sets satisfy the second, and what the collision count is there, are *)
+(* facts of the deck pair and are established in pgl27_encoding_r7.v and      *)
+(* pgl27_encoding_r5.v.                                                       *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_code_coalition S == the card positions listed by S                 *)
@@ -26,9 +27,6 @@
 (* Key results:                                                               *)
 (*   pgl27_masked_view_eq == two views masked outside a coalition are equal   *)
 (*     exactly when their listed coordinates are equal                        *)
-(*   pgl27_view_outside == a protocol view is zero outside its coalition      *)
-(*   pgl27_view_codesE == the listed coordinates of a protocol view are the   *)
-(*     restricted composite of the shuffle table and the deck's code table    *)
 (*   pgl27_conditional_view_inj == a repetition-free census view list makes   *)
 (*     the conditional view map injective on the shuffle group                *)
 (*   pgl27_ambiguous_probabilityE == the ambiguous-view event has probability *)
@@ -112,8 +110,8 @@ Qed.
 
 (** The protocol view is zero outside the selected coalition. The mask keeps
     unobserved coordinates from contributing to equality of views. *)
-Lemma pgl27_view_outside (R : realType) (e : pgl27_encoding) (S : seq nat)
-    (u : bool * pgg_gT pgl27_M) (i : 'I_8) :
+Local Lemma pgl27_view_outside (R : realType) (e : pgl27_encoding)
+    (S : seq nat) (u : bool * pgg_gT pgl27_M) (i : 'I_8) :
   i \notin pgl27_code_coalition S ->
   pgl27_enc_view R e (pgl27_code_coalition S) u i = ord0.
 Proof.
@@ -138,7 +136,7 @@ by rewrite -(nth_index x Hx) -(nth_index x Hy) Hidx.
 Qed.
 
 (** A repetition-free census view list makes the restricted composite of a
-    census row with one deal injective on the census rows. *)
+    census row with one deck's code table injective on the census rows. *)
 Local Lemma pgl27_code_views_inj (e : pgl27_encoding) (S : seq nat)
     (b : bool) :
   uniq (code_views (enc_code e) b S) ->
@@ -153,10 +151,10 @@ exact: map_uniq_inj_in.
 Qed.
 
 (** Reading the listed coordinates of a protocol view gives the same sequence
-    as restricting the corresponding permutation and deal tables. It
-    identifies the masked view with the restricted census row. *)
-Lemma pgl27_view_codesE (R : realType) (e : pgl27_encoding) (S : seq nat)
-    (b : bool) (g : {perm 'I_8}) :
+    as restricting the composite of the shuffle table and that deck's code
+    table. It identifies the masked view with the restricted census row. *)
+Local Lemma pgl27_view_codesE (R : realType) (e : pgl27_encoding)
+    (S : seq nat) (b : bool) (g : {perm 'I_8}) :
   all (fun x => (x < 8)%N) S ->
   pgl27_view_codes S
       (pgl27_enc_view R e (pgl27_code_coalition S) (b, g)) =

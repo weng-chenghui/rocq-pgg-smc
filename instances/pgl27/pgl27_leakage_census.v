@@ -18,26 +18,26 @@
 (* permutation, and the complement of a k-subset of the projective line is an *)
 (* (8 - k)-subset.                                                            *)
 (*                                                                            *)
-(* Collisions. A deck pair enters here as its deal table, the map from the    *)
+(* Collisions. A deck pair enters here as its code table, the map from the    *)
 (* secret bit to the eight card codes in position order. For a reveal set S,  *)
-(* the collision count of a deal is the number of restrictions to S shared by *)
-(* its two decks. Which counts a particular deck pair has, and whether its    *)
-(* two view lists repeat an entry, are facts of that pair and are established *)
-(* in its own file, pgl27_encoding_r7.v and pgl27_encoding_r5.v. Both are     *)
-(* nat-table arithmetic on the 336 tables, as in pgl27_group.v (word_bfs),    *)
-(* pgl27_orbit.v (code_bfs) and pgl27_mixing.v (elem_table): PGL(2,7)         *)
-(* permutations do not reduce under vm_compute, tables do. The real-valued    *)
-(* mutual information read off these counts is computed outside the kernel by *)
-(* pgl_leakage_targets.py.                                                    *)
+(* the collision count of a code table is the number of restrictions to S     *)
+(* shared by its two decks. Which counts a particular deck pair has, and      *)
+(* whether its two view lists repeat an entry, are facts of that pair and are *)
+(* established in its own file, pgl27_encoding_r7.v and pgl27_encoding_r5.v.  *)
+(* Both are nat-table arithmetic on the 336 tables, as in pgl27_group.v       *)
+(* (word_bfs), pgl27_orbit.v (code_bfs) and pgl27_mixing.v (elem_table):      *)
+(* PGL(2,7) permutations do not reduce under vm_compute, tables do. The       *)
+(* real-valued mutual information read off these counts is computed outside   *)
+(* the kernel by pgl_leakage_targets.py.                                      *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_group_table  == the 336 group elements as permutation tables       *)
 (*   code_subsets k     == the k-subsets of the eight codes                   *)
 (*   code_orbit S       == the orbit of a code subset under the group table   *)
-(*   code_views deal b S == the restrictions to S of the deck that deal gives *)
-(*                          to the secret bit b                               *)
-(*   pgl27_collisions deal S == the number of views of S shared by the two    *)
-(*                              decks of deal                                 *)
+(*   code_views code b S == the restrictions to S of the deck that the code   *)
+(*                          table gives to the secret bit b                   *)
+(*   pgl27_collisions code S == the number of views of S shared by the two    *)
+(*                              decks of the code table                       *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_five_subset_orbitE  == the fifty-six five-subsets form one orbit   *)
@@ -395,20 +395,20 @@ Lemma pgl27_four_not_transitive :
 Proof. by vm_compute. Qed.
 
 (* -------------------------------------------------------------------------- *)
-(* The collision count of a reveal set, at a deck pair given by its deal.     *)
+(* The collision count of a reveal set, at a deck pair given as a code table. *)
 (* -------------------------------------------------------------------------- *)
 
 (** code_views — for each group element t, the codes that the deck dealt to b
     places at the positions S. The list of views of the reveal set S under the
     secret bit b, one entry per shuffle. *)
-Definition code_views (deal : bool -> seq nat) (b : bool) (S : seq nat) :
+Definition code_views (code : bool -> seq nat) (b : bool) (S : seq nat) :
     seq (seq nat) :=
-  [seq code_restrict S (code_comp t (deal b)) | t <- pgl27_group_table].
+  [seq code_restrict S (code_comp t (code b)) | t <- pgl27_group_table].
 
 (** pgl27_collisions — the number of shuffles whose view of S under the secret
     true is also a view of S under the secret false. It is the cardinality of
     the intersection of the two view sets of the reveal set S whenever the two
     lists are repetition-free, and the count of ambiguous executions a
     coalition holding S can face. *)
-Definition pgl27_collisions (deal : bool -> seq nat) (S : seq nat) : nat :=
-  count (fun v => v \in code_views deal false S) (code_views deal true S).
+Definition pgl27_collisions (code : bool -> seq nat) (S : seq nat) : nat :=
+  count (fun v => v \in code_views code false S) (code_views code true S).
