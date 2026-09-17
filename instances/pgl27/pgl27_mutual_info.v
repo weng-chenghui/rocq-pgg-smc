@@ -11,9 +11,10 @@
 (* two compatible secrets and its posterior entropy is the indicator of that  *)
 (* ambiguity. The mutual information between the secret and the view is then  *)
 (* one minus the census collision ratio, exactly, with no inequality. At the  *)
-(* four representative coalitions this value is five sevenths, eleven         *)
-(* fourteenths, twenty-five twenty-eighths and twenty-seven twenty-eighths of *)
-(* a bit.                                                                     *)
+(* five representative coalitions this value is five sevenths, eleven         *)
+(* fourteenths, twenty-five twenty-eighths, twenty-seven twenty-eighths and   *)
+(* one bit: seven of the eight positions determine the orbit secret before    *)
+(* the reveal.                                                                *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_noncollision_ratio S == one minus the census collision count of S  *)
@@ -27,8 +28,9 @@
 (*   pgl27_mutual_info_ambiguityE == a coalition with repetition-free census  *)
 (*     view lists shares pgl27_noncollision_ratio bits with the orbit secret  *)
 (*   pgl27_mutual_info_harmonicE, pgl27_mutual_info_equianharmonicE,          *)
-(*   pgl27_mutual_info_fiveE, pgl27_mutual_info_sixE == that information at   *)
-(*     the four representative coalitions, as closed rational values          *)
+(*   pgl27_mutual_info_fiveE, pgl27_mutual_info_sixE,                         *)
+(*   pgl27_mutual_info_sevenE == that information at the five representative  *)
+(*     coalitions, as closed rational values                                  *)
 (*                                                                            *)
 (* The statements concern the pre-reveal execution: after the public reveal   *)
 (* every player learns the secret by design.                                  *)
@@ -91,6 +93,16 @@ Lemma pgl27_noncollision_ratio_six :
   pgl27_noncollision_ratio rep_six = 27%:R / 28%:R.
 Proof.
 by rewrite /pgl27_noncollision_ratio pgl27_collisions_six; lra.
+Qed.
+
+(** The seven-position representative has complementary collision ratio one.
+    No shuffle produces the same seven-card observation under both deals, so
+    every observation a seven-card coalition makes is compatible with exactly
+    one orbit secret. *)
+Lemma pgl27_noncollision_ratio_seven :
+  pgl27_noncollision_ratio rep_seven = 1.
+Proof.
+by rewrite /pgl27_noncollision_ratio pgl27_collisions_seven; lra.
 Qed.
 
 End pgl27_noncollision_ratio.
@@ -193,6 +205,24 @@ apply: pgl27_reachable_view_entropy_ambiguousE.
 exact: pgl27_conditional_view_inj_six.
 Qed.
 
+(** Every reachable seven-position view has zero or one bit of posterior
+    entropy, according to whether both secrets produce it. No seven-position
+    view is produced by both, so this entropy is zero on every execution the
+    coalition can observe. *)
+Lemma pgl27_reachable_view_entropy_sevenE (R : realType)
+    (v : {ffun 'I_8 -> 'I_8}) :
+  `Pr[(pgl27_view R (pgl27_code_coalition rep_seven)) = v] != 0 ->
+  `H[(pgl27_secret R) |
+     (pgl27_view R (pgl27_code_coalition rep_seven)) = v] =
+  (v \in pgl27_ambiguous_views R rep_seven)%:R.
+Proof.
+move/andP: pgl27_views_uniq_seven => [Hfalse Htrue].
+apply: pgl27_reachable_view_entropy_ambiguousE.
+case.
+- by apply: pgl27_conditional_view_inj; [by vm_compute | exact: Htrue].
+- by apply: pgl27_conditional_view_inj; [by vm_compute | exact: Hfalse].
+Qed.
+
 (** The secret marginal of the protocol distribution is uniform on the two
     orbit classes. It fixes the prior entropy of the secret at one bit, which
     is the quantity every coalition's information is measured against. *)
@@ -277,6 +307,20 @@ Lemma pgl27_mutual_info_sixE (R : realType) :
 Proof.
 move/andP: pgl27_views_uniq_six => [Hfalse Htrue].
 rewrite -pgl27_noncollision_ratio_six.
+apply: pgl27_mutual_info_ambiguityE;
+  [by vm_compute | exact: Hfalse | exact: Htrue].
+Qed.
+
+(** The seven-position coalition shares one bit with the orbit secret, the
+    whole prior entropy of the secret. Seven of the eight cards already
+    determine the orbit class before the reveal, the upper end of the leakage
+    ramp whose lower end is the independence at three cards. *)
+Lemma pgl27_mutual_info_sevenE (R : realType) :
+  `I(pgl27_secret R ;
+     pgl27_view R (pgl27_code_coalition rep_seven)) = 1.
+Proof.
+move/andP: pgl27_views_uniq_seven => [Hfalse Htrue].
+rewrite -[RHS](pgl27_noncollision_ratio_seven R).
 apply: pgl27_mutual_info_ambiguityE;
   [by vm_compute | exact: Hfalse | exact: Htrue].
 Qed.

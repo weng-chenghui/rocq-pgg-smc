@@ -11,17 +11,17 @@
 (* the same observation under the two deals.                                  *)
 (*                                                                            *)
 (* Census. On four-subsets the shuffle group has two orbits, of sizes 42 and  *)
-(* 28 (orbit_class_split, subset_class_orbitE). On five-subsets and on        *)
-(* six-subsets it has a single orbit, obtained here from 3-transitivity and   *)
-(* from 2-transitivity by complementation: complementation is equivariant     *)
-(* for a permutation, and the complement of a k-subset of the projective      *)
-(* line is an (8 - k)-subset.                                                 *)
+(* 28 (orbit_class_split, subset_class_orbitE). On five-, six- and            *)
+(* seven-subsets it has a single orbit, obtained here from 3-, 2- and         *)
+(* 1-transitivity by complementation: complementation is equivariant for a    *)
+(* permutation, and the complement of a k-subset of the projective line is an *)
+(* (8 - k)-subset.                                                            *)
 (*                                                                            *)
 (* Collisions. For a reveal set C, the collision count is the number of       *)
 (* restrictions to C shared by the two deals. Both deals restrict injectively *)
-(* for the four-, five- and six-subset representatives below, so those counts *)
-(* are intersection cardinalities, and the three- and seven-subset counts are *)
-(* raw multiplicities. All are nat-table arithmetic on the 336 tables, as in  *)
+(* for the four-, five-, six- and seven-subset representatives below, so      *)
+(* those counts are intersection cardinalities, and the three-subset count is *)
+(* a raw multiplicity. All are nat-table arithmetic on the 336 tables, as in  *)
 (* pgl27_group.v (word_bfs), pgl27_orbit.v (code_bfs) and pgl27_mixing.v      *)
 (* (elem_table): PGL(2,7) permutations do not reduce under vm_compute,        *)
 (* tables do. The real-valued mutual information read off these counts is     *)
@@ -37,6 +37,7 @@
 (* Key results:                                                               *)
 (*   pgl27_five_subset_orbitE  == the fifty-six five-subsets form one orbit   *)
 (*   pgl27_six_subset_orbitE   == the twenty-eight six-subsets form one orbit *)
+(*   pgl27_seven_subset_orbitE == the eight seven-subsets form one orbit      *)
 (*   pgl27_orbit_four_cover    == the two four-subset orbits, of sizes 42 and *)
 (*                                28, are disjoint and cover the seventy      *)
 (*   pgl27_collisions_*        == the six collision counts 336, 96, 72, 36,   *)
@@ -132,6 +133,22 @@ have [g gG Hg] :=
 by exists g => //; rewrite -[T]setCK Hg perm_imsetC setCK.
 Qed.
 
+(** pgl27_seven_subset_orbit — any two seven-subsets of the projective line
+    are shuffle images of one another. The shuffle group is transitive on
+    seven-subsets. *)
+Lemma pgl27_seven_subset_orbit (S T : {set 'I_8}) :
+  #|S| = 7 -> #|T| = 7 ->
+  exists2 g : pgg_gT pgl27_M, g \in pgg_G pgl27_M & T = g @: S.
+Proof.
+move=> HS HT.
+have Hc (C : {set 'I_8}) : #|C| = 7 -> #|~: C| = 1.
+  by move=> HC; apply: (@addnI 7); rewrite -{1}HC cardsC8.
+have H1 : ntransitive 1 (@pgg_rho pgl27_M @* pgg_G pgl27_M) [set: 'I_8] 'P :=
+  ntransitive_weak (isT : (1 <= 3)%N) pgl27_3transitive.
+have [g gG Hg] := ntransitive_subset_orbit H1 (Hc S HS) (Hc T HT).
+by exists g => //; rewrite -[T]setCK Hg perm_imsetC setCK.
+Qed.
+
 (** pgl27_five_subset_orbitE — the orbit of a five-subset of the projective
     line under the shuffle group is the set of all five-subsets. The
     five-subsets are a single orbit, so no reveal pattern of five positions is
@@ -158,6 +175,20 @@ move=> HS; apply/setP => T; rewrite inE.
 apply/orbitP/idP => [[g gG <-]|/eqP HT].
   by rewrite (card_imset _ perm_inj) HS.
 by have [g gG ->] := pgl27_six_subset_orbit HS HT; exists g.
+Qed.
+
+(** pgl27_seven_subset_orbitE — the orbit of a seven-subset of the projective
+    line under the shuffle group is the set of all seven-subsets. The
+    seven-subsets are a single orbit, so no reveal pattern of seven positions
+    is distinguished from another. *)
+Lemma pgl27_seven_subset_orbitE (S : {set 'I_8}) :
+  #|S| = 7 ->
+  orbit 'P^* (pgg_G pgl27_M) S = [set T : {set 'I_8} | #|T| == 7].
+Proof.
+move=> HS; apply/setP => T; rewrite inE.
+apply/orbitP/idP => [[g gG <-]|/eqP HT].
+  by rewrite (card_imset _ perm_inj) HS.
+by have [g gG ->] := pgl27_seven_subset_orbit HS HT; exists g.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
@@ -288,6 +319,11 @@ Definition rep_five : seq nat := [:: 0; 1; 2; 3; 4].
     single orbit on six-subsets. *)
 Definition rep_six : seq nat := [:: 0; 1; 2; 3; 4; 5].
 
+(** rep_seven — the seven-subset {0, 1, 2, 3, 4, 5, 6}. The representative of
+    the single orbit on seven-subsets, the largest reveal set a coalition can
+    hold without holding the whole deck. *)
+Definition rep_seven : seq nat := [:: 0; 1; 2; 3; 4; 5; 6].
+
 (** pgl27_subsets_four — the projective line has seventy four-subsets. The
     seventy four-subsets are the domain that the harmonic and equianharmonic
     orbits partition. *)
@@ -411,6 +447,13 @@ Lemma pgl27_views_uniq_six :
   uniq (code_views false rep_six) && uniq (code_views true rep_six).
 Proof. by vm_compute. Qed.
 
+(** pgl27_views_uniq_seven — both deals restrict {0, 1, 2, 3, 4, 5, 6}
+    injectively. At {0, 1, 2, 3, 4, 5, 6} neither observation list repeats, so
+    the collision count below is a genuine set-intersection cardinality. *)
+Lemma pgl27_views_uniq_seven :
+  uniq (code_views false rep_seven) && uniq (code_views true rep_seven).
+Proof. by vm_compute. Qed.
+
 (** pgl27_collisions_harmonic — the four-subset {0, 1, 2, 3} has 96
     collisions. 96 of pgl27_group_table's 336 observations of {0, 1, 2, 3} are
     common to the two deals. *)
@@ -447,8 +490,7 @@ Proof. by vm_compute. Qed.
     None of pgl27_group_table's 336 observations of the positions 0 to 6 is
     common to the two deals, the upper end of the ramp
     pgl27_seven_reveal_class states. *)
-Lemma pgl27_collisions_seven :
-  pgl27_collisions [:: 0; 1; 2; 3; 4; 5; 6] = 0.
+Lemma pgl27_collisions_seven : pgl27_collisions rep_seven = 0.
 Proof. by vm_compute. Qed.
 
 (** pgl27_collisions_harmonic_neq — the four-subset {0, 1, 2, 3} does not have
