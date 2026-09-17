@@ -191,6 +191,7 @@ instances/pgl27/pgl27_mutual_info.v
 instances/pgl27/pgl27_leakage_transport.v
 instances/pgl27/pgl27_leakage_r7.v
 instances/pgl27/pgl27_leakage_r5.v
+instances/pgl27/pgl27_encoding_compare.v
 instances/pgl27/pgl27_mixing.v
 instances/pgl27/pgl27_spectral.v
 instances/pgl27/pgl27_word_privacy.v
