@@ -275,3 +275,50 @@ The retained independent reports all conclude:
 
 C1 to C13 are therefore GO. C14 remains a later theorem for transporting the
 representative results to every coalition in the same orbit.
+
+## Status update, 2026-09-17: implemented and extended
+
+Branch `feat/pgl27-view-entropy`. Plan:
+`docs/superpowers/plans/2026-09-17-pgl27-entropy-completion.md`. The audit of
+the extension and its compiled scratch proofs are retained under
+`notes/probes/2026-09-17-pgl27-leakage-ramp/`.
+
+1. C1 to C11 are in permanent source. `lib/support_posterior.v` holds the
+   generic posterior result. `instances/pgl27/pgl27_table_bridge.v` holds C1
+   to C5. `instances/pgl27/pgl27_view_census.v` holds the shared definitions
+   and C6 to C8. `instances/pgl27/pgl27_mutual_info.v` holds C9 to C11. The
+   mutation checks and the concrete real instance stay in the probe directory.
+2. `pgl27_secret_uniform`, the one declaration the C11 probe admitted, is
+   proved from `fdist_prod1`. The four mutual-information equations carry only
+   the three boolp axioms.
+3. The seven-position representative is included. `rep_seven` restricts both
+   deals injectively with no collision, so `pgl27_mutual_info_sevenE` gives
+   one full bit.
+4. C14 is proved. `coalition_view_mutual_info_imset` in
+   `reconstruct/coalition_view_transport.v` states that for `g \in G` the
+   coalition view at `rho g @: C` shares the same mutual information with the
+   dealt secret as the view at `C`. It is exact and needs no transitivity
+   premise. The proof uses a pushforward congruence restricted to the support,
+   because `morphM` holds only inside `G`.
+5. `instances/pgl27/pgl27_leakage_ramp.v` joins the results with the threshold
+   theorems of `pgl27_secrecy.v`. `pgl27_view_mutual_infoE` gives the mutual
+   information for every coalition `C`:
+
+   | $\lvert C\rvert$ | $I(\text{secret};\text{view}_C)$ |
+   |---|---|
+   | at most 3 | $0$ |
+   | 4, harmonic (`subset_class C = false`, 42 sets) | $5/7$ |
+   | 4, equianharmonic (`subset_class C = true`, 28 sets) | $11/14$ |
+   | 5 | $25/28$ |
+   | 6 | $27/28$ |
+   | 7 or 8 | $1$ |
+
+   `pgl27_view_mutual_info_eq0` states that the mutual information vanishes
+   exactly when the coalition holds at most three positions, for every
+   coalition. `pgl27_view_leak_k4` gave one witness. Its exact value is
+   `pgl27_view_mutual_info_leak_coalitionE`, five sevenths.
+
+The scope is unchanged: one pre-reveal observation, a uniform Boolean secret,
+a uniform shuffle from `pgg_G pgl27_M`, and the fixed deal `orbit_encode` for
+each secret. The all-decks dealer of `pgl27_view_indep_alldecks` is not
+covered.
