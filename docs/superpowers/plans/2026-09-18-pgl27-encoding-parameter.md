@@ -93,3 +93,55 @@ through `pgl27_table_bridge.v`.
 A second `ThresholdScheme`/`ReconPlug`/`ExecutionPlug`; word-shuffle privacy
 for `_r5`; manifest rows; the four-profile classification and the
 non-existence of `r_info = 4` stay script evidence.
+
+## Amendments from the flow-sketch audit (A0, verdict GO-WITH-FIXES)
+
+Full report: `notes/probes/2026-09-18-pgl27-encoding-parameter/A0-flow-sketch-audit.md`.
+These amendments override the text above where they differ.
+
+Corrected sketch:
+
+```
+flow leakage_of_encoding e            (e = r7 or r5)     // known about the secret: nothing
+object run    := interpreter run dealing deck e(s) at cut g   [pgl27_procs_deck]   // one executed trace per seat
+change run -> card    by pgl27_procs_deck_abs, pgl27_full_p0..p7                    // seat i's trace = card e(s)[g i]; cost 0
+change cards -> view  by the twin of pgl27_coalition_trace_E at e (T1)              // coalition trace = coalition view, equality of random variables
+join   |C| <= 3       by ttrans_view_indep_gen        [needs uniq (e s)]            // I = 0 up to three positions
+extern census := collisions of e over the 336-row table                             // nat counts; enters by pre-composition through the ambiguous-probability lemma
+change census -> view by table bridge + agreement of e with its nat table (G1)      // Pr[ambiguous view] = m/336
+eval   representative by pgl27_view_mutual_info_ambiguityE generalised over e (G1)  // I = 1 - m/336 at five representatives
+step   rep -> orbit   by coalition_view_mutual_info_imset + subset orbit lemmas     // every C with 4 <= |C| <= 7
+join   |C| >= r(e)    by monotonicity from the top representative                   // I = 1; r7: 7, r5: 5
+join   |C| = 8        by le_anti of I <= H(secret) and monotonicity                 // the one line where two BOUNDS meet
+final  view closed form for e, then the same closed form for the EXECUTED trace     // r7: five branches; r5: three branches
+post   outside the flow: recovery threshold of the fixed pair, which class carries the minimum above the threshold, decoder equality
+```
+
+- F1. At a fixed pair, "the view determines the secret" is `m = 0`, so the
+  possibilistic recovery threshold of the fixed pair and `r_info` are the same
+  number: 7 for `_r7`, 5 for `_r5`. The `r = 7` of the paper is the all-decks
+  statement `pgl27_seven_reveal_class`, which is encoding-free. C1 cites it as
+  such and does not attribute it to either pair.
+- F2. For `_r5` the minimum above the threshold is `11/14`, at the
+  equianharmonic class (`11/14 < 6/7`). For `_r7` it is `5/7`, at the harmonic
+  class. R5 statement comments are written fresh, not copied.
+- F4. The privacy premise is `uniq (e s)`. `deck_ok` is `uniq` by definition.
+- F7. Termination is not re-claimed per encoding unless T1 proves it at
+  abstract readout by the same `vm_compute`.
+- F8. `pgl27_subset_class_harmonicE`, `pgl27_subset_class_equianharmonicE`
+  and `pgl27_leak_coalitionE` are encoding-free. They move to a shared file
+  and are not reproved per encoding.
+- Record: add the derived fact that the nat table row has size 8 and is
+  duplicate-free (from agreement and `uniq`).
+- The ten specialisations `pgl27_conditional_view_inj_*` and
+  `pgl27_ambiguous_probability_*E` are per-encoding and move to R7/R5.
+- T1 adds new declarations alongside `pgl27_coalition_trace`. The manifest
+  pins the existing ones, which stay untouched.
+- Build rule, reworded: the tripwire is a RECIPE shown by `make -n` for
+  `pgl27_mixing`, `pgl27_secrecy`, `pgl27_orbit`, `pgl27_trace`, `protocol/`
+  or `instances/psl211/`. Their presence in the closure is expected.
+- D1 covers the arity change of `pgl27_collisions`, the paper citations at
+  `paper-wadt2026/main.tex:1379-1399` and `candidate-main.tex:1430`, and
+  `instances/pgl27/pgl_leakage_targets.py`.
+- The script counts sets, so it is no evidence for `uniq (code_views b S)`
+  at `_r5`. P0 decides that in the kernel.
