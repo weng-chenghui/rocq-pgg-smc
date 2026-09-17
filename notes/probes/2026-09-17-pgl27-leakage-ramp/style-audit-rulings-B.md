@@ -137,3 +137,21 @@ Note on wording: S6 and S7 use "observation" for what a coalition sees. Audit A
 and audit C fix the word as "view". Apply these texts with "view" in place of
 "observation" wherever the object is the coalition view, so the six files use
 one word.
+
+## Ruling change, 2026-09-17, by the user's criterion
+
+The user's criterion: a declaration stays only if the paper will claim
+something related, or a later development needs it as a premise.
+
+Checked: `paper-wadt2026/main.tex`,
+`paper-wadt2026-baseline-application/candidate-main.tex`,
+`notes/20260917-general-dealer-law-feasibility-design.md`, and every use in
+`instances/`, `lib/`, `reconstruct/`, `protocol/`, `manifest/`.
+
+| Row | New ruling | Reason |
+|---|---|---|
+| B1 | DELETE the four `pgl27_view_eq_codes_*`, and the generic `pgl27_view_eq_codes` once it has no user | The paper's leakage paragraph claims the collision counts, the identity $I = 1 - m/336$ and the orbit extension. None of these goes through these lemmas. The chain uses `pgl27_masked_view_eq` and `pgl27_view_outside` directly. No later note names them |
+| B3 | DELETE `pgl27_table_row_ok` and `pgl27_group_table_rows_ok` | The bridge reaches the group through `pgl27_group_table_perm`. The row certificate is used nowhere, the paper makes no claim about row shape, and the general dealer-law note does not use the table |
+
+The probe directory `notes/probes/2026-09-15-pgl27-view-entropy/` keeps its
+copies of all of them as the evidence for claims C1 and C6.

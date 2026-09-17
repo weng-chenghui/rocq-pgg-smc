@@ -322,3 +322,17 @@ The scope is unchanged: one pre-reveal observation, a uniform Boolean secret,
 a uniform shuffle from `pgg_G pgl27_M`, and the fixed deal `orbit_encode` for
 each secret. The all-decks dealer of `pgl27_view_indep_alldecks` is not
 covered.
+
+### Evidence that stays in the probe only
+
+Two pieces of ledger evidence are not in permanent source. Neither is used by
+the chain, claimed by the paper, or needed by a later development.
+
+1. C1, the row certificate `pgl27_table_row_ok` with
+   `pgl27_group_table_rows_ok`. The permanent bridge reaches the group through
+   `pgl27_group_table_perm`.
+2. C6, the lemma `pgl27_view_eq_codes` and its four representative
+   instantiations. The permanent chain uses `pgl27_masked_view_eq` and
+   `pgl27_view_outside` directly.
+
+Both remain compiled in `notes/probes/2026-09-15-pgl27-view-entropy/`.
