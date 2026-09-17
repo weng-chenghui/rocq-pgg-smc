@@ -33,7 +33,7 @@
 (* Definitions:                                                               *)
 (*   pgl27_enc_player_trace R e i    == seat i executed-trace content of the  *)
 (*                                      run dealing the deck of e             *)
-(*   pgl27_enc_coalition_trace R e C == the coalition joint executed trace   *)
+(*   pgl27_enc_coalition_trace R e C == the coalition joint executed trace    *)
 (*                                      of that run                           *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -45,9 +45,13 @@
 (*     coalition view                                                         *)
 (*   pgl27_enc_coalition_trace_secrecy == a coalition of at most three seats  *)
 (*     learns nothing about the secret from its executed trace                *)
+(*   pgl27_enc_endpoints_size == the run collects eight endpoints at the      *)
+(*     verifier, the arity the decoder reads                                  *)
 (*   pgl27_enc_run_recovers_class == the run recovers the dealt secret from   *)
 (*     the verifier's endpoints                                               *)
 (*   pgl27_enc_run_terminates == every process of that run reaches Finish     *)
+(*   pgl27_aprocs_abs_terminates == every process of the run over an          *)
+(*     abstract card readout reaches Finish                                   *)
 (*   pgl27_r7_player_traceE, pgl27_r7_coalition_traceE == at the deck pair of *)
 (*     pgl27_encoding_r7.v these are the traces of pgl27_trace.v              *)
 (*                                                                            *)
@@ -95,9 +99,9 @@ Definition pgl27_enc_player_trace (i : 'I_8) : {RV (pgl27P R) -> 'I_8} :=
                    (pgl27_procs_deck (enc_deck e u.1) u.2)).2 (2 + i)).
 
 (** pgl27_enc_player_traceE — seat i's executed-trace content is the card the
-    dealt deck holds at the cut-permuted position of seat i. The run puts no
-    other card in reach of a seat, so one seat's whole knowledge before the
-    reveal is that single value, at every deck pair. *)
+    dealt deck holds at the cut-permuted position of seat i. The shuffle
+    reaches a seat only through that position, so the deck pair and the cut
+    together fix what the seat reads, at every deck pair. *)
 Lemma pgl27_enc_player_traceE (i : 'I_8) :
   pgl27_enc_player_trace i
   = (fun u => tnth (enc_deck e u.1) (@pgg_rho pgl27_M u.2 i)).
@@ -155,8 +159,8 @@ Qed.
 
 (** pgl27_enc_coalition_trace — the joint executed trace of a coalition C: the
     card each member observes in the run, and ord0 outside C. It is the
-    coalition's whole pre-reveal knowledge of one execution, and it refuses to
-    hold the shuffle that produced those cards. *)
+    coalition's whole pre-reveal knowledge at its seat processes, and it
+    refuses to hold the shuffle that produced those cards. *)
 Definition pgl27_enc_coalition_trace (C : {set 'I_8}) :
     {RV (pgl27P R) -> {ffun 'I_8 -> 'I_8}} :=
   fun u => [ffun i => if i \in C then pgl27_enc_player_trace i u else ord0].
@@ -240,6 +244,9 @@ Qed.
 
 End pgl27_trace_encoding.
 
+(* pgl27_aprocs_abs_terminates is encoding-free and would sit in pgl27_trace.v
+   if that file were open for edit; it is proved here because it is not. *)
+
 (* -------------------------------------------------------------------------- *)
 (* Termination of the same run, at an abstract card readout.                  *)
 (* -------------------------------------------------------------------------- *)
@@ -276,7 +283,7 @@ Qed.
 Lemma pgl27_r7_player_traceE (R : realType) (i : 'I_8) :
   pgl27_enc_player_trace R pgl27_encoding_r7 i = pgl27_player_trace R i.
 Proof.
-by rewrite pgl27_enc_player_traceE pgl27_player_trace_E.
+by rewrite /pgl27_enc_player_trace /pgl27_player_trace.
 Qed.
 
 (** pgl27_r7_coalition_traceE — at the deck pair of pgl27_encoding_r7.v the
@@ -287,5 +294,6 @@ Lemma pgl27_r7_coalition_traceE (R : realType) (C : {set 'I_8}) :
   pgl27_enc_coalition_trace R pgl27_encoding_r7 C
   = pgl27_coalition_trace R C.
 Proof.
-by rewrite pgl27_enc_coalition_traceE pgl27_coalition_trace_E.
+by rewrite /pgl27_enc_coalition_trace /pgl27_coalition_trace
+           /pgl27_enc_player_trace /pgl27_player_trace.
 Qed.

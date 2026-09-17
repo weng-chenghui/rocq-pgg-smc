@@ -35,10 +35,15 @@
 (* pgl27_recovery.v is a different claim: it quantifies over every valid deck *)
 (* the dealer might use, holds independently of the deck pair, and is cited   *)
 (* here rather than reproved or attributed to either pair.                    *)
+(* The two numbers differ because the quantifier differs: seven positions are *)
+(* needed against an arbitrary valid deck, while a fixed pair puts only two   *)
+(* decks in play, and five positions already separate them at the pair of     *)
+(* pgl27_encoding_r5.v.                                                       *)
 (*                                                                            *)
-(* Every value below is a value of the running protocol as well as of the     *)
-(* coalition view, by pgl27_r7_trace_mutual_infoE and                         *)
-(* pgl27_r5_trace_mutual_infoE.                                               *)
+(* Every leakage value below is a value of the running protocol as well as    *)
+(* of the coalition view, by pgl27_r5_trace_mutual_infoE and, through         *)
+(* pgl27_r7_coalition_traceE, by pgl27_r7_trace_mutual_infoE. The recovery    *)
+(* thresholds transfer with them, being read off those same closed forms.     *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_compare_heart_setE, pgl27_compare_classE == the two pairs put      *)
@@ -76,7 +81,7 @@ From pgg_smc Require Import pgl27_leakage_r7 pgl27_leakage_r5.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
-Import GRing.Theory Num.Theory Order.POrderTheory.
+Import GRing.Theory Num.Theory.
 
 Local Open Scope fdist_scope.
 
@@ -93,15 +98,15 @@ Lemma pgl27_compare_heart_setE (s : bool) :
   = heart_set (enc_deck pgl27_encoding_r7 s).
 Proof. exact: pgl27_r5_hearts. Qed.
 
-(** pgl27_compare_classE — the two deck pairs decode to the same secret. A
-    decoder that reads the heart positions returns the dealt secret on either
-    pair, so a coalition holding enough positions recovers the same bit
-    whichever pair the dealer uses, and the leakage values below compare like
-    with like. *)
+(** pgl27_compare_classE — the two deck pairs decode to the same secret. The
+    decoder reads the whole dealt deck, so the dealer's choice between the
+    pairs changes nothing a correct receiver sees, and the leakage values
+    below compare like with like; what the choice does change is the
+    coalition size at which the secret becomes recoverable. *)
 Lemma pgl27_compare_classE (s : bool) :
   orbit_class (enc_deck pgl27_encoding_r5 s)
   = orbit_class (enc_deck pgl27_encoding_r7 s).
-Proof. by rewrite !enc_classK. Qed.
+Proof. by rewrite /orbit_class pgl27_compare_heart_setE. Qed.
 
 Section pgl27_encoding_compare.
 Local Open Scope ring_scope.

@@ -58,8 +58,9 @@
 (*     not, so seven is the recovery threshold of this pair                   *)
 (*   pgl27_r7_view_mutual_info_ge4 == every coalition above the privacy       *)
 (*     threshold shares at least five sevenths of a bit with the orbit secret *)
-(*   pgl27_r7_view_mutual_info_leak_coalitionE == the four heart positions of *)
-(*     the identity deal share five sevenths of a bit with the orbit secret   *)
+(*   pgl27_r7_view_mutual_info_leak_coalitionE == the harmonic                *)
+(*     four-position representative shares five sevenths of a bit with the    *)
+(*     orbit secret                                                           *)
 (*   pgl27_r7_view_determines == a coalition view determines the orbit secret *)
 (*     exactly when the coalition holds at least seven positions              *)
 (*   pgl27_r7_trace_mutual_infoE == the same value at every coalition, on the *)
@@ -362,7 +363,7 @@ Proof.
 by move=> HC; rewrite (pgl27_r7_k6E HC); lra.
 Qed.
 
-(** The four heart positions of the identity deal share five sevenths of a bit
+(** The harmonic four-position representative shares five sevenths of a bit
     with the orbit secret. This is the exact value at the coalition that
     witnesses sharpness of the privacy threshold three, where the threshold
     statements give only strict positivity. *)
