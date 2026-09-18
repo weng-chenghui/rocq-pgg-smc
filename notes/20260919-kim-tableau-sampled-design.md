@@ -2,9 +2,10 @@
 
 Date: 2026-09-19
 
-Status: spec written. Probe and audits not yet run. No plan is written until
-every ledger row is GO or NO-GO with an isolating counter-probe and two audits
-end in `VERDICT: GO`.
+Status: probe run on 2026-09-19 and verified by the main session's own compile.
+K1 to K11 are GO, and K8 ends in the compiled conclusion that neither arm can
+be supplied for the biased row. The audits are next. No plan is written until
+two audits end in `VERDICT: GO`.
 
 ## Problem
 
@@ -184,10 +185,78 @@ Directory `notes/probes/2026-09-19-kim-tableau-sampled/`, logical path
 copy of the permanent file with the additions, `_CoqProject`, `STATUS.md`, and
 the two audit reports.
 
+## Probe results, 2026-09-19
+
+Probe directory `notes/probes/2026-09-19-kim-tableau-sampled/`. All four files
+compile one at a time in 4 to 7 s under 1.9 GB, recompiled by the main session.
+`kim_fidelity.v` reports the three `boolp` axioms for ten of the eleven new
+declarations and `Closed under the global context` for
+`five_card_row_biased_levelE`.
+
+- K1, K2. Both definitions elaborate in no measurable time.
+- K3. `five_card_row_repeated_prefixE` and `five_card_row_biased_prefixE` state
+  that the algebra, the run parameters and the observed execution of each
+  program are those of `five_card_committed`, and close by `by split`. The
+  observed execution carries the three run facts as fields, so three conjuncts
+  pin five components. A program sampling `S5Analysis.rand_family` is rejected
+  with a type error naming `FamPayload (tableau_at five_card_committed)`.
+- K4. `sp_f (tableau_at t) = apr_model row` closes by conversion for both rows.
+- K5, stronger than this note asked. The repeated program is accepted at the
+  type `Tableau (apr_completion five_card_row_repeated)`, which makes the
+  manifest's level term and the program's level index one term. The same
+  ascription for the biased program is a recorded `Fail`, and
+  `five_card_row_biased_levelE : apr_completion five_card_row_biased =
+  AnalysisBridged` is the positive fact beside it. The level gap of the biased
+  row is therefore a compiled fact, and the comment only explains it. A
+  separate `five_card_row_repeated_levelE` is not landed, because the
+  ascription already forces it and the manifest checks that equation itself.
+- K6. `five_card_row_repeated_endpoint_lt` is
+  `by rewrite kim_centi_cut_distE; exact: kim_deal_centi_lt`, stated through
+  `sa_cut_dist (amf_sample kim_centi_family R tt)`. `kim_centi_witness_rhoE`
+  is not needed. The bound tightened to $2^{-41}$ and the version over a pair
+  of seats both fail at the `exact:` step. Those two mutations stay in the
+  probe, because they are `ltac:` terms inside a `Fail`, which does not read
+  as a permanent file's idiom.
+- K7, GO in three lines. The law the biased row samples is Kim's input law by
+  `erefl`, so `five_card_colour_view_leak_bound` already lives on it and no
+  bridge lemma is used. The one cost is a side condition the tree did not
+  have: `0 < 5%:R^-1 - `|1 / 100|`, the smallness condition of
+  `kim_input_private`. It lands as `kim_centi_small`, one line of arithmetic
+  of the shape of `kim_centi_lt`, `kim_centi_gt` and `kim_centi_spec`. The
+  landed bound is `five_card_row_biased_leak_bound`: the conditional mutual
+  information between the inputs and the executed colour reading given the
+  secret is at most `kim_leak_bound (1 / 100)`. The tree has no lemma saying
+  that this number is positive, so no comment says so.
+- K8, the answer is no. For the exact arm the only missing field is
+  `ew_indep`, and no independence statement in the tree is made under Kim's
+  biased law. For the spectral arm `sc_b`, `sc_Hd` and `sc_ideal` can be built
+  and were compiled one by one in the probe, while `sc_close`, a variation
+  distance on the cut group, and `sc_const`, constancy of a coalition's reading
+  of the ideal law in the run argument, have nothing behind them. The first is
+  the gap `s5_rows.v` records for `s5_row_word`. The three buildable fields
+  stay in the probe.
+- K9. The reverse-dependency closure of `five_card_rows.v` is empty.
+- K10. None of the eleven new names occurs in the tree or in installed
+  infotheo or mathcomp.
+- K11. The header sentence is replaced, the title line now speaks of three
+  rows, and the diff against the production file removes four lines and adds
+  197.
+
+Decisions taken by the main session after the probe:
+
+- `kim_centi_small` lands in `five_card_rows.v`, above its one use.
+  `five_card_kim.v`, where the other three side conditions at this bias live,
+  has 20 importers, and the user's rule is to compile only related files. Its
+  natural home is recorded as a note for the next time that file is edited.
+- The landing copy gains one import, `kim_input_privacy`, for `kim_inputs`,
+  `kim_secret` and `kim_leak_bound`. `five_card_models`, already imported,
+  imports it, so the build graph gains no edge.
+- Landed mutations: the program sampling another instance's family, and the
+  biased program at the manifest's level. This file already carries one `Fail`.
+
 ## Acceptance condition
 
-K1 to K6 and K9 to K11 are GO. K7 and K8 each end in a compiled fact or in a
-reported obstruction. An independent soundness audit and an independent naming
+K1 to K11 are GO, K8 in the sense that its negative conclusion is compiled. An independent soundness audit and an independent naming
 audit end in `VERDICT: GO`. Findings are folded into this note before the plan.
 
 ## Out of scope
