@@ -14,11 +14,14 @@
 (* t-designs of a group that is not t-transitive, which is the PSL(2,11)      *)
 (* twelve-card instance.                                                      *)
 (*                                                                            *)
-(* Section 1 -- uniform_fdistmap_fiberE == equal fibers over a uniform law    *)
-(*   give equal pushforwards.                                                 *)
-(* Section 2 -- colour_view, colour_law, colour_view_indep_laws,              *)
+(* Section 1 -- uniform_fdistmap_pointE == the mass a pushed-forward uniform  *)
+(*   law gives to one value; uniform_fdistmap_fiberE == equal fibers over a   *)
+(*   uniform law give equal pushforwards.                                     *)
+(* Section 2 -- uniform_fdistmap_fiberTE == the same at the full set, with    *)
+(*   the fibers written as comprehensions over the type.                      *)
+(* Section 3 -- colour_view, colour_law, colour_view_indep_laws,              *)
 (*   colour_view_indep_fibers == independence of the colour observer.         *)
-(* Section 3 -- card_fiber_sum, pr_countE, uniform_pair_indep_of_class,       *)
+(* Section 4 -- card_fiber_sum, pr_countE, uniform_pair_indep_of_class,       *)
 (*   pair_fibers_class_sizes, uniform_pair_indep_of_fibers == independence of *)
 (*   an observation of both coordinates from a secret read off the first one. *)
 (******************************************************************************)
@@ -46,26 +49,59 @@ Section fibers.
 Variables (R : realType) (X : finType) (A : {set X}) (HA : (0 < #|A|)%N).
 Variable T : finType.
 
+(** uniform_fdistmap_pointE — the mass a pushed-forward uniform law gives to a
+    value is the size of that value's fiber inside the support, divided by the
+    size of the support.  It is the point form of uniform_fdistmap_fiberE, and
+    it is what turns a difference of two fiber counts into a difference of two
+    laws, which is the direction fiberE does not give. *)
+Lemma uniform_fdistmap_pointE (f : X -> T) (v : T) :
+  (fdistmap f ((`U HA) : R.-fdist X)) v =
+    (#|A|%:R)^-1 *+ #|[set x in A | f x == v]| :> R.
+Proof.
+rewrite fdistmapE -sumr_const big_mkcond [RHS]big_mkcond /=.
+apply: eq_bigr => x _; rewrite !inE /=.
+case: (f x == v); last by rewrite andbF.
+rewrite andbT; case: ifPn => xA.
+  by rewrite fdist_uniform_supp_in.
+by rewrite fdist_uniform_supp_notin.
+Qed.
+
 (** uniform_fdistmap_fiberE — two maps with equal fiber cardinalities on A
     push the uniform law on A to the same law. *)
 Lemma uniform_fdistmap_fiberE (f0 f1 : X -> T) :
   (forall v, #|[set x in A | f0 x == v]| = #|[set x in A | f1 x == v]|) ->
   fdistmap f0 (`U HA : R.-fdist X) = fdistmap f1 (`U HA).
 Proof.
-move=> Hfib; apply/fdist_ext => v; rewrite !fdistmapE.
-have key (f : X -> T) :
-    \sum_(x in X | x \in f @^-1 v) (`U HA) x
-    = (#|A|%:R)^-1 *+ #|[set x in A | f x == v]| :> R.
-  rewrite -sumr_const big_mkcond [RHS]big_mkcond /=.
-  apply: eq_bigr => x _; rewrite !inE /=.
-  case: (f x == v); last by rewrite andbF.
-  rewrite andbT; case: ifPn => xA.
-    by rewrite fdist_uniform_supp_in.
-  by rewrite fdist_uniform_supp_notin.
-by rewrite !key Hfib.
+move=> Hfib; apply/fdist_ext => v.
+by rewrite (uniform_fdistmap_pointE f0 v) (uniform_fdistmap_pointE f1 v) Hfib.
 Qed.
 
 End fibers.
+
+Section full_set_fibers.
+Variable R : realType.
+
+(** uniform_fdistmap_fiberTE — two maps out of a finite type whose fibers over
+    every value are equinumerous push the uniform law on the whole type to the
+    same law.  It is uniform_fdistmap_fiberE at the full set, with the fibers
+    written as comprehensions over the type, which is the shape a count of the
+    deals producing one reading takes. *)
+Lemma uniform_fdistmap_fiberTE (X T : finType)
+    (HX : (0 < #|[set: X]|)%N) (f0 f1 : X -> T) :
+  (forall v, #|[set x : X | f0 x == v]| =
+             #|[set x : X | f1 x == v]|) ->
+  fdistmap f0 ((`U HX) : R.-fdist X) = fdistmap f1 (`U HX).
+Proof.
+(* f0 and f1 are still variables here, so the two comprehension shapes are
+   reconciled without any instance's map being reachable by conversion. *)
+have Hfull : forall (k : X -> T) (w : T),
+    [set x in [set: X] | k x == w] = [set x : X | k x == w].
+  by move=> k w; apply/setP => x; rewrite !inE.
+move=> Hfib; apply: uniform_fdistmap_fiberE => v.
+rewrite (Hfull f0 v) (Hfull f1 v); exact: Hfib v.
+Qed.
+
+End full_set_fibers.
 
 Section colour_view.
 Variables (N' : nat) (gT : finGroupType) (G : {group gT}).
