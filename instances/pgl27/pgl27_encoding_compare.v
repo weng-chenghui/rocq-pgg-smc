@@ -6,9 +6,11 @@
 (*                                                                            *)
 (* The shuffle group, the decoder and the privacy threshold of the eight-card *)
 (* scheme are fixed by the geometry of PGL(2,7). The deck pair is not, and    *)
-(* pgl27_leakage_r7.v and pgl27_leakage_r5.v compute the exact leakage at two *)
-(* choices of it. This file puts the two closed forms next to each other and  *)
-(* reads off what the geometry fixes and what the choice of decks fixes.      *)
+(* pgl27_leakage_r5.v and pgl27_leakage_r7.v compute the exact leakage at two *)
+(* choices of it. The scheme of pgl27_scheme.v deals the pair of              *)
+(* pgl27_encoding_r5.v; the pair of pgl27_encoding_r7.v is the comparison.    *)
+(* This file puts the two closed forms next to each other and reads off what  *)
+(* the geometry fixes and what the choice of decks fixes.                     *)
 (*                                                                            *)
 (* The two pairs deal the same deck to the secret false and differ in the     *)
 (* deck they deal to the secret true, by the transposition of the cards 6 and *)
@@ -40,10 +42,13 @@
 (* decks in play, and five positions already separate them at the pair of     *)
 (* pgl27_encoding_r5.v.                                                       *)
 (*                                                                            *)
-(* Every leakage value below is a value of the running protocol as well as    *)
-(* of the coalition view, by pgl27_r5_trace_mutual_infoE and, through         *)
-(* pgl27_r7_coalition_traceE, by pgl27_r7_trace_mutual_infoE. The recovery    *)
-(* thresholds transfer with them, being read off those same closed forms.     *)
+(* Every leakage value below is a value of a running protocol as well as of a *)
+(* coalition view, by pgl27_r5_trace_mutual_infoE and                         *)
+(* pgl27_r7_trace_mutual_infoE. For the pair the scheme deals,                *)
+(* pgl27_r5_coalition_traceE identifies that executed trace with the          *)
+(* coalition trace the manifest pins, so those values are values of the       *)
+(* published run. The recovery thresholds transfer with them, being read off  *)
+(* those same closed forms.                                                   *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_compare_heart_setE, pgl27_compare_classE == the two pairs put      *)
@@ -94,9 +99,9 @@ Local Open Scope fdist_scope.
     four-subset, so this is what makes the two pairs two encodings of one
     secret rather than two secrets. *)
 Lemma pgl27_compare_heart_setE (s : bool) :
-  heart_set (enc_deck pgl27_encoding_r5 s)
-  = heart_set (enc_deck pgl27_encoding_r7 s).
-Proof. exact: pgl27_r5_hearts. Qed.
+  heart_set (enc_deck pgl27_encoding_r7 s)
+  = heart_set (enc_deck pgl27_encoding_r5 s).
+Proof. exact: pgl27_r7_hearts. Qed.
 
 (** pgl27_compare_classE — the two deck pairs decode to the same secret. The
     decoder reads the whole dealt deck, so the dealer's choice between the
@@ -104,8 +109,8 @@ Proof. exact: pgl27_r5_hearts. Qed.
     below compare like with like; what the choice does change is the
     coalition size at which the secret becomes recoverable. *)
 Lemma pgl27_compare_classE (s : bool) :
-  orbit_class (enc_deck pgl27_encoding_r5 s)
-  = orbit_class (enc_deck pgl27_encoding_r7 s).
+  orbit_class (enc_deck pgl27_encoding_r7 s)
+  = orbit_class (enc_deck pgl27_encoding_r5 s).
 Proof. by rewrite /orbit_class pgl27_compare_heart_setE. Qed.
 
 Section pgl27_encoding_compare.
@@ -128,8 +133,8 @@ Lemma pgl27_compare_le3E (C : {set 'I_8}) : (#|C| <= 3)%N ->
   /\ `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r5 C) = 0.
 Proof.
 move=> HC; split.
-- by rewrite pgl27_r7_viewE pgl27_r7_view_mutual_infoE HC.
-- by rewrite pgl27_r5_view_mutual_infoE HC.
+- by rewrite pgl27_r7_view_mutual_infoE HC.
+- by rewrite pgl27_r5_viewE pgl27_r5_view_mutual_infoE HC.
 Qed.
 
 (** pgl27_compare_equianharmonicE — both pairs leak eleven fourteenths of a
@@ -144,8 +149,8 @@ Lemma pgl27_compare_equianharmonicE (C : {set 'I_8}) :
      = 11%:R / 14%:R.
 Proof.
 move=> H4 Hsc; split.
-- by rewrite pgl27_r7_viewE pgl27_r7_view_mutual_infoE H4 Hsc.
-- by rewrite pgl27_r5_view_mutual_infoE H4 Hsc.
+- by rewrite pgl27_r7_view_mutual_infoE H4 Hsc.
+- by rewrite pgl27_r5_viewE pgl27_r5_view_mutual_infoE H4 Hsc.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
@@ -163,8 +168,8 @@ Lemma pgl27_compare_harmonicE (C : {set 'I_8}) :
   /\ `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r5 C) = 6%:R / 7%:R.
 Proof.
 move=> H4 Hsc; split.
-- by rewrite pgl27_r7_viewE pgl27_r7_view_mutual_infoE H4 Hsc.
-- by rewrite pgl27_r5_view_mutual_infoE H4 Hsc.
+- by rewrite pgl27_r7_view_mutual_infoE H4 Hsc.
+- by rewrite pgl27_r5_viewE pgl27_r5_view_mutual_infoE H4 Hsc.
 Qed.
 
 (** pgl27_compare_k5E — at five positions one pair leaks twenty-five
@@ -177,8 +182,8 @@ Lemma pgl27_compare_k5E (C : {set 'I_8}) : #|C| = 5 ->
   /\ `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r5 C) = 1.
 Proof.
 move=> H5; split.
-- by rewrite pgl27_r7_viewE pgl27_r7_view_mutual_infoE H5.
-- by rewrite pgl27_r5_view_mutual_infoE H5.
+- by rewrite pgl27_r7_view_mutual_infoE H5.
+- by rewrite pgl27_r5_viewE pgl27_r5_view_mutual_infoE H5.
 Qed.
 
 (** pgl27_compare_k6E — at six positions one pair leaks twenty-seven
@@ -189,8 +194,8 @@ Lemma pgl27_compare_k6E (C : {set 'I_8}) : #|C| = 6 ->
   /\ `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r5 C) = 1.
 Proof.
 move=> H6; split.
-- by rewrite pgl27_r7_viewE pgl27_r7_view_mutual_infoE H6.
-- by rewrite pgl27_r5_view_mutual_infoE H6.
+- by rewrite pgl27_r7_view_mutual_infoE H6.
+- by rewrite pgl27_r5_viewE pgl27_r5_view_mutual_infoE H6.
 Qed.
 
 (** pgl27_compare_recovery_thresholdE — the recovery thresholds of the two
@@ -203,8 +208,8 @@ Lemma pgl27_compare_recovery_thresholdE (C : {set 'I_8}) :
   /\ (`I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r5 C) == 1)
     = (5 <= #|C|)%N.
 Proof.
-split; last exact: pgl27_r5_view_determines.
-by rewrite pgl27_r7_viewE pgl27_r7_view_determines.
+split; first exact: pgl27_r7_view_determines.
+by rewrite pgl27_r5_viewE pgl27_r5_view_determines.
 Qed.
 
 End pgl27_encoding_compare.

@@ -5,9 +5,11 @@
 (*                   pair whose recovery threshold is seven                   *)
 (*                                                                            *)
 (* The deck pair is the one of pgl27_encoding_r7.v, dealing 0 1 2 3 4 5 6 7   *)
-(* for the secret false and 0 1 2 4 3 5 6 7 for the secret true. It is the    *)
-(* pair the rest of the development executes, so the values below are the     *)
-(* leakage of the scheme as it stands.                                        *)
+(* for the secret false and 0 1 2 4 3 5 6 7 for the secret true. It encodes   *)
+(* the same secret as the pair the scheme deals (pgl27_leakage_r5.v), since   *)
+(* the two pairs put their hearts at the same positions, and it is the        *)
+(* comparison that separates what the geometry of PGL(2,7) fixes from what    *)
+(* the choice of decks fixes.                                                 *)
 (*                                                                            *)
 (* For every coalition of the eight positions, the mutual information between *)
 (* the orbit secret and the coalition view is a function of the coalition     *)
@@ -19,37 +21,25 @@
 (* on. Every value is exact and unconditional on any computational            *)
 (* assumption.                                                                *)
 (*                                                                            *)
-(* Seven is therefore the recovery threshold of this pair: a coalition of six *)
-(* positions still leaves the secret undetermined on some executions, and a   *)
-(* coalition of seven never does. Three is the privacy threshold, and the     *)
+(* Seven is therefore the recovery threshold of this pair, against five for   *)
+(* the pair the scheme deals: a coalition of six positions still leaves the   *)
+(* secret undetermined on some executions, and a coalition of seven never     *)
+(* does. Three is the privacy threshold, as at the other pair, and the        *)
 (* smallest amount a coalition above it shares with the secret is five        *)
 (* sevenths of a bit, on the harmonic class.                                  *)
 (*                                                                            *)
 (* Each value holds twice: of the coalition view, and of the joint executed   *)
-(* trace of the same coalition in the run of the protocol. The two are the    *)
-(* same random variable by pgl27_coalition_trace_E of pgl27_trace.v, so the   *)
-(* numbers are the amounts a coalition learns from an execution.              *)
+(* trace of the same coalition in the run that deals this pair. The two are   *)
+(* the same random variable by pgl27_enc_coalition_traceE of                  *)
+(* pgl27_trace_encoding.v, so the numbers are the amounts a coalition learns  *)
+(* from an execution.                                                         *)
 (*                                                                            *)
 (* Scope. One pre-reveal view, a uniform Boolean orbit secret and a uniform   *)
 (* shuffle drawn from pgg_G pgl27_M. The all-decks dealer of                  *)
 (* pgl27_view_indep_alldecks, which deals a uniform valid deck of the         *)
 (* secret's class, is not covered by any value of this file.                  *)
 (*                                                                            *)
-(* The values below supersede three qualitative statements of                 *)
-(* pgl27_secrecy.v. The independence of a coalition view of at most three     *)
-(* positions from the orbit secret (pgl27_view_indep) becomes the value zero, *)
-(* and an equivalence: vanishing mutual information holds exactly at          *)
-(* coalitions of at most three positions. The single four-position coalition  *)
-(* of strictly positive mutual information (pgl27_view_dep_k4,                *)
-(* pgl27_view_leak_k4) becomes the exact value five sevenths there. The value *)
-(* at every coalition of seven or more positions comes from the               *)
-(* seven-position representative through pgl27_enc_view_mutual_info1_card_ge, *)
-(* where monotonicity under coalition inclusion gives one bit from below and  *)
-(* the prior entropy of the secret gives one bit from above.                  *)
-(*                                                                            *)
 (* Key results:                                                               *)
-(*   pgl27_r7_viewE == the coalition view at this deck pair is the coalition  *)
-(*     view of pgl27_secrecy.v                                                *)
 (*   pgl27_r7_view_mutual_infoE == the value at every coalition of the eight  *)
 (*     positions                                                              *)
 (*   pgl27_r7_view_mutual_info_eq0 == a coalition shares no information with  *)
@@ -90,7 +80,7 @@ From pgg_reconstruct Require Import transitivity_privacy algebraic_rigidity.
 From pgg_reconstruct Require Import coalition_view_transport.
 From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_scheme pgl27_profile.
 From pgg_smc Require Import pgl27_secrecy pgl27_leakage_census.
-From pgg_smc Require Import pgl27_trace.
+From pgg_smc Require Import pgl27_trace_encoding.
 From pgg_smc Require Import pgl27_encoding pgl27_encoding_r7.
 From pgg_smc Require Import pgl27_view_census pgl27_mutual_info.
 From pgg_smc Require Import pgl27_leakage_transport.
@@ -108,14 +98,6 @@ Local Open Scope ring_scope.
 Local Open Scope proba_scope.
 Local Open Scope entropy_scope.
 Variable R : realType.
-
-(** pgl27_r7_viewE — the coalition view at this deck pair is the coalition
-    view of pgl27_secrecy.v. The values below are therefore values of the
-    scheme the rest of the development runs, and not of a separate model of
-    it. *)
-Lemma pgl27_r7_viewE (C : {set 'I_8}) :
-  pgl27_enc_view R pgl27_encoding_r7 C = pgl27_view R C.
-Proof. by []. Qed.
 
 (* -------------------------------------------------------------------------- *)
 (* The value at each representative reveal set, from its collision count.     *)
@@ -237,8 +219,8 @@ Qed.
     with the orbit secret. Below the privacy threshold a coalition learns
     nothing at all about the orbit secret from one pre-reveal view. *)
 Local Lemma pgl27_r7_le3E (C : {set 'I_8}) : (#|C| <= 3)%N ->
-  `I(pgl27_secret R ; pgl27_view R C) = 0.
-Proof. rewrite -pgl27_r7_viewE; exact: pgl27_enc_view_mutual_info_le3E. Qed.
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) = 0.
+Proof. exact: pgl27_enc_view_mutual_info_le3E. Qed.
 
 (** pgl27_r7_k4E — a coalition of four positions shares eleven fourteenths
     of a bit with the orbit secret when its positions are an equianharmonic
@@ -246,12 +228,11 @@ Proof. rewrite -pgl27_r7_viewE; exact: pgl27_enc_view_mutual_info_le3E. Qed.
     privacy threshold already leaks, by an amount that depends on the
     cross-ratio class of the four positions and not only on their number. *)
 Local Lemma pgl27_r7_k4E (C : {set 'I_8}) : #|C| = 4 ->
-  `I(pgl27_secret R ; pgl27_view R C) =
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) =
   (if subset_class C then 11%:R / 14%:R else 5%:R / 7%:R).
 Proof.
-move=> HC; rewrite -pgl27_r7_viewE.
 exact: (pgl27_enc_view_mutual_info_k4E pgl27_r7_harmonicE
-  pgl27_r7_equianharmonicE HC).
+  pgl27_r7_equianharmonicE).
 Qed.
 
 (** pgl27_r7_k5E — a coalition of five positions shares twenty-five
@@ -259,43 +240,33 @@ Qed.
     coalitions form one shuffle orbit, so no choice of five positions leaks
     more than another. *)
 Local Lemma pgl27_r7_k5E (C : {set 'I_8}) : #|C| = 5 ->
-  `I(pgl27_secret R ; pgl27_view R C) = 25%:R / 28%:R.
-Proof.
-move=> HC; rewrite -pgl27_r7_viewE.
-exact: (pgl27_enc_view_mutual_info_k5E pgl27_r7_fiveE HC).
-Qed.
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) = 25%:R / 28%:R.
+Proof. exact: (pgl27_enc_view_mutual_info_k5E pgl27_r7_fiveE). Qed.
 
 (** pgl27_r7_k6E — a coalition of six positions shares twenty-seven
     twenty-eighths of a bit with the orbit secret. The value is still below
     one bit, so six of the eight positions leave the orbit secret undetermined
     on some executions. *)
 Local Lemma pgl27_r7_k6E (C : {set 'I_8}) : #|C| = 6 ->
-  `I(pgl27_secret R ; pgl27_view R C) = 27%:R / 28%:R.
-Proof.
-move=> HC; rewrite -pgl27_r7_viewE.
-exact: (pgl27_enc_view_mutual_info_k6E pgl27_r7_sixE HC).
-Qed.
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) = 27%:R / 28%:R.
+Proof. exact: (pgl27_enc_view_mutual_info_k6E pgl27_r7_sixE). Qed.
 
 (** pgl27_r7_k7E — a coalition of seven positions shares one bit with the
     orbit secret, the whole of its prior entropy. Seven of the eight positions
     determine the orbit secret before the reveal. *)
 Local Lemma pgl27_r7_k7E (C : {set 'I_8}) : #|C| = 7 ->
-  `I(pgl27_secret R ; pgl27_view R C) = 1.
-Proof.
-move=> HC; rewrite -pgl27_r7_viewE.
-exact: (pgl27_enc_view_mutual_info_k7E pgl27_r7_sevenE HC).
-Qed.
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) = 1.
+Proof. exact: (pgl27_enc_view_mutual_info_k7E pgl27_r7_sevenE). Qed.
 
 (** pgl27_r7_view_mutual_info_ge7E — a coalition of seven or eight positions
     shares one bit with the orbit secret. Seven is the recovery threshold of
     this deck pair: from seven positions on the coalition view determines the
     orbit secret before the reveal, and no larger coalition can learn more. *)
 Local Lemma pgl27_r7_view_mutual_info_ge7E (C : {set 'I_8}) : (7 <= #|C|)%N ->
-  `I(pgl27_secret R ; pgl27_view R C) = 1.
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) = 1.
 Proof.
-move=> HC; rewrite -pgl27_r7_viewE.
-apply: (pgl27_enc_view_mutual_info1_card_ge (k := 7)) => // D HD.
-rewrite pgl27_r7_viewE; exact: pgl27_r7_k7E.
+apply: (pgl27_enc_view_mutual_info1_card_ge (k := 7)) => D HD;
+  exact: pgl27_r7_k7E.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
@@ -307,12 +278,12 @@ Qed.
     size three, eleven fourteenths at size four on the twenty-eight
     equianharmonic quadruples and five sevenths on the forty-two harmonic
     ones, twenty-five twenty-eighths at five, twenty-seven twenty-eighths at
-    six, and one bit from seven positions on. The scheme hides the orbit
-    secret completely below the privacy threshold three and reveals it
-    completely from seven positions on, and between those two sizes it leaks a
-    known exact amount rather than an amount bounded only from above. *)
+    six, and one bit from seven positions on. This pair hides the orbit secret
+    completely below the privacy threshold three and reveals it completely
+    from seven positions on, and between those two sizes it leaks a known
+    exact amount rather than an amount bounded only from above. *)
 Theorem pgl27_r7_view_mutual_infoE (C : {set 'I_8}) :
-  `I(pgl27_secret R ; pgl27_view R C) =
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) =
     if (#|C| <= 3)%N then 0
     else if #|C| == 4 then
       (if subset_class C then 11%:R / 14%:R else 5%:R / 7%:R)
@@ -338,7 +309,8 @@ Qed.
     not only at one witness coalition, so no four of the eight positions are
     information-free. *)
 Lemma pgl27_r7_view_mutual_info_eq0 (C : {set 'I_8}) :
-  (`I(pgl27_secret R ; pgl27_view R C) == 0) = (#|C| <= 3)%N.
+  (`I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) == 0)
+  = (#|C| <= 3)%N.
 Proof.
 apply/idP/idP; last by move=> HC; rewrite (pgl27_r7_le3E HC) eqxx.
 move=> /eqP HI; rewrite leqNgt; apply/negP => H4.
@@ -348,10 +320,10 @@ have [D DC HD] : exists2 D : {set 'I_8}, D \subset C & #|D| = 4.
   have [s [Us Ss subsC]] := card_geqP H4.
   exists [set x in s]; first by apply/subsetP => x; rewrite inE; exact: subsC.
   by rewrite cardsE (card_uniqP Us).
-have Hpos : 0 < `I(pgl27_secret R ; pgl27_view R D).
+have Hpos : 0 < `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 D).
   rewrite (pgl27_r7_k4E HD).
   by case: (subset_class D); rewrite divr_gt0 // ltr0n.
-have := pgl27_view_leakage_le R DC.
+have := pgl27_enc_view_leakage_le R pgl27_encoding_r7 DC.
 rewrite HI => Hle.
 by move: (lt_le_trans Hpos Hle); rewrite ltxx.
 Qed.
@@ -361,7 +333,7 @@ Qed.
     threshold that no single coalition size witnesses: every size below seven
     leaves the orbit secret undetermined on some executions. *)
 Local Lemma pgl27_r7_le6_lt1 (C : {set 'I_8}) : (#|C| <= 6)%N ->
-  `I(pgl27_secret R ; pgl27_view R C) < 1.
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) < 1.
 Proof.
 move=> H6.
 case H3 : (#|C| <= 3)%N; first by rewrite (pgl27_r7_le3E H3); lra.
@@ -380,7 +352,7 @@ Qed.
     orbit secret undetermined on some executions, so the recovery threshold of
     this deck pair is seven and not lower. *)
 Lemma pgl27_r7_view_mutual_info_k6_lt1 (C : {set 'I_8}) : #|C| = 6 ->
-  `I(pgl27_secret R ; pgl27_view R C) < 1.
+  `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) < 1.
 Proof.
 by move=> HC; apply: pgl27_r7_le6_lt1; rewrite HC.
 Qed.
@@ -391,9 +363,10 @@ Qed.
     privacy threshold three, where the threshold statements give only strict
     positivity. *)
 Lemma pgl27_r7_view_mutual_info_leak_coalitionE :
-  `I(pgl27_secret R ; pgl27_view R pgl27_leak_coalition) = 5%:R / 7%:R.
+  `I(pgl27_secret R ;
+     pgl27_enc_view R pgl27_encoding_r7 pgl27_leak_coalition) = 5%:R / 7%:R.
 Proof.
-rewrite pgl27_leak_coalitionE -pgl27_r7_viewE.
+rewrite pgl27_leak_coalitionE.
 exact: pgl27_r7_harmonicE.
 Qed.
 
@@ -404,7 +377,7 @@ Qed.
     negligible amount, and the harmonic four-position coalitions are where
     this pair comes closest to zero. *)
 Lemma pgl27_r7_view_mutual_info_card_ge4 (C : {set 'I_8}) : (4 <= #|C|)%N ->
-  5%:R / 7%:R <= `I(pgl27_secret R ; pgl27_view R C).
+  5%:R / 7%:R <= `I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C).
 Proof.
 move=> H4; rewrite pgl27_r7_view_mutual_infoE.
 have -> : (#|C| <= 3)%N = false by apply/negbTE; rewrite -ltnNge.
@@ -419,7 +392,8 @@ Qed.
     pair the view determines the secret exactly when no shuffle produces that
     view under both decks, which is one full bit of mutual information. *)
 Lemma pgl27_r7_view_determines (C : {set 'I_8}) :
-  (`I(pgl27_secret R ; pgl27_view R C) == 1) = (7 <= #|C|)%N.
+  (`I(pgl27_secret R ; pgl27_enc_view R pgl27_encoding_r7 C) == 1)
+  = (7 <= #|C|)%N.
 Proof.
 case H7 : (7 <= #|C|)%N.
   by rewrite (pgl27_r7_view_mutual_info_ge7E H7) eqxx.
@@ -434,11 +408,11 @@ Qed.
 (** pgl27_r7_trace_mutual_infoE — the mutual information between the orbit
     secret and the joint executed trace of a coalition follows the same closed
     form as its view. The coalition trace is what the interpreter writes at
-    the eight player processes when the protocol runs, so every value above is
-    the amount a coalition of that size learns from an execution and not from
-    a model of one. *)
+    the eight player processes when the protocol deals this pair, so every
+    value above is the amount a coalition of that size learns from an
+    execution and not from a model of one. *)
 Theorem pgl27_r7_trace_mutual_infoE (C : {set 'I_8}) :
-  `I(pgl27_secret R ; pgl27_coalition_trace R C) =
+  `I(pgl27_secret R ; pgl27_enc_coalition_trace R pgl27_encoding_r7 C) =
     if (#|C| <= 3)%N then 0
     else if #|C| == 4 then
       (if subset_class C then 11%:R / 14%:R else 5%:R / 7%:R)
@@ -446,28 +420,31 @@ Theorem pgl27_r7_trace_mutual_infoE (C : {set 'I_8}) :
     else if #|C| == 6 then 27%:R / 28%:R
     else 1.
 Proof.
-by rewrite pgl27_coalition_trace_E pgl27_r7_view_mutual_infoE.
+by rewrite pgl27_enc_coalition_traceE pgl27_r7_view_mutual_infoE.
 Qed.
 
 (** pgl27_r7_trace_mutual_info_eq0 — the executed trace of a coalition shares
     no information with the orbit secret exactly when the coalition holds at
     most three positions. Three is the privacy threshold of the running
-    protocol, and not only of the view the leakage argument is stated about. *)
+    protocol at this pair as well, so the two pairs are separated by their
+    recovery thresholds alone. *)
 Lemma pgl27_r7_trace_mutual_info_eq0 (C : {set 'I_8}) :
-  (`I(pgl27_secret R ; pgl27_coalition_trace R C) == 0) = (#|C| <= 3)%N.
+  (`I(pgl27_secret R ; pgl27_enc_coalition_trace R pgl27_encoding_r7 C) == 0)
+  = (#|C| <= 3)%N.
 Proof.
-by rewrite pgl27_coalition_trace_E pgl27_r7_view_mutual_info_eq0.
+by rewrite pgl27_enc_coalition_traceE pgl27_r7_view_mutual_info_eq0.
 Qed.
 
 (** pgl27_r7_trace_determines — the executed trace of a coalition determines
     the orbit secret exactly when the coalition holds at least seven
     positions. Seven is the recovery threshold of this deck pair on an
-    execution, and six seats of the running protocol still leave the orbit
+    execution, and six seats of a run dealing this pair still leave the orbit
     secret undetermined. *)
 Lemma pgl27_r7_trace_determines (C : {set 'I_8}) :
-  (`I(pgl27_secret R ; pgl27_coalition_trace R C) == 1) = (7 <= #|C|)%N.
+  (`I(pgl27_secret R ; pgl27_enc_coalition_trace R pgl27_encoding_r7 C) == 1)
+  = (7 <= #|C|)%N.
 Proof.
-by rewrite pgl27_coalition_trace_E pgl27_r7_view_determines.
+by rewrite pgl27_enc_coalition_traceE pgl27_r7_view_determines.
 Qed.
 
 End pgl27_leakage_r7.

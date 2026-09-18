@@ -26,9 +26,9 @@
 (* class recovery, where the decoder must return the secret the deck was      *)
 (* dealt for.                                                                 *)
 (*                                                                            *)
-(* At the deck pair of pgl27_encoding_r7.v the definitions below are the      *)
-(* pgl27_trace.v ones, so the executed-trace results of the two files are     *)
-(* results about one object.                                                  *)
+(* At the deck pair the scheme deals (pgl27_encoding_r5.v) the definitions    *)
+(* below are the pgl27_trace.v ones, so the executed-trace results of the two *)
+(* files are results about one object.                                        *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_enc_player_trace R e i    == seat i executed-trace content of the  *)
@@ -52,8 +52,8 @@
 (*   pgl27_enc_run_terminates == every process of that run reaches Finish     *)
 (*   pgl27_aprocs_abs_terminates == every process of the run over an          *)
 (*     abstract card readout reaches Finish                                   *)
-(*   pgl27_r7_player_traceE, pgl27_r7_coalition_traceE == at the deck pair of *)
-(*     pgl27_encoding_r7.v these are the traces of pgl27_trace.v              *)
+(*   pgl27_r5_player_traceE, pgl27_r5_coalition_traceE == at the deck pair    *)
+(*     the scheme deals these are the traces of pgl27_trace.v                 *)
 (*                                                                            *)
 (* The statements concern the pre-reveal execution: after the public reveal   *)
 (* every player learns the secret by design.                                  *)
@@ -73,7 +73,7 @@ From pgg_reconstruct Require Import transitivity_privacy.
 From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_scheme pgl27_profile.
 From pgg_smc Require Import pgl27_run pgl27_secrecy pgl27_trace.
 From pgg_smc Require Import pgg_trace_secrecy.
-From pgg_smc Require Import pgl27_encoding pgl27_encoding_r7.
+From pgg_smc Require Import pgl27_encoding pgl27_encoding_r5.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -273,25 +273,25 @@ by rewrite pgl27_procs_deck_abs pgl27_aprocs_abs_terminates.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
-(* The deck pair of pgl27_encoding_r7.v: the traces of pgl27_trace.v.         *)
+(* The deck pair the scheme deals: the traces of pgl27_trace.v.               *)
 (* -------------------------------------------------------------------------- *)
 
-(** pgl27_r7_player_traceE — at the deck pair of pgl27_encoding_r7.v the seat
-    trace above is the seat trace of pgl27_trace.v. The generic executed trace
+(** pgl27_r5_player_traceE — at the deck pair the scheme deals the seat trace
+    above is the seat trace of pgl27_trace.v. The generic executed trace
     therefore extends the one the rest of the development runs instead of
     modelling it a second time. *)
-Lemma pgl27_r7_player_traceE (R : realType) (i : 'I_8) :
-  pgl27_enc_player_trace R pgl27_encoding_r7 i = pgl27_player_trace R i.
+Lemma pgl27_r5_player_traceE (R : realType) (i : 'I_8) :
+  pgl27_enc_player_trace R pgl27_encoding_r5 i = pgl27_player_trace R i.
 Proof.
 by rewrite /pgl27_enc_player_trace /pgl27_player_trace.
 Qed.
 
-(** pgl27_r7_coalition_traceE — at the deck pair of pgl27_encoding_r7.v the
+(** pgl27_r5_coalition_traceE — at the deck pair the scheme deals the
     coalition executed trace above is the coalition executed trace of
-    pgl27_trace.v. Every leakage value proved below at this pair is a value of
-    that object. *)
-Lemma pgl27_r7_coalition_traceE (R : realType) (C : {set 'I_8}) :
-  pgl27_enc_coalition_trace R pgl27_encoding_r7 C
+    pgl27_trace.v, the one the manifest pins. It is the bridge along which a
+    leakage value of that pair is a value of the published run. *)
+Lemma pgl27_r5_coalition_traceE (R : realType) (C : {set 'I_8}) :
+  pgl27_enc_coalition_trace R pgl27_encoding_r5 C
   = pgl27_coalition_trace R C.
 Proof.
 by rewrite /pgl27_enc_coalition_trace /pgl27_coalition_trace

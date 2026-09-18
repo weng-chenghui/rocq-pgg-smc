@@ -10,14 +10,16 @@
 (*                                                                            *)
 (* The cards 0, 1, 2 and 3 are the hearts (is_heart, pgl27_orbit.v), so the   *)
 (* deck of the secret false holds its hearts at the positions {0, 1, 2, 3}    *)
-(* and the deck of the secret true holds them at {0, 1, 2, 4}. Those two      *)
-(* four-subsets have different cross-ratio classes, which is what makes the   *)
-(* pair encode a bit: the secret is the class of the heart positions, and the *)
-(* decoder orbit_class reads it back.                                         *)
+(* and the deck of the secret true holds them at {0, 1, 2, 4}. Those are the  *)
+(* same two heart four-subsets as the pair orbit_encode deals                 *)
+(* (pgl27_encoding_r5.v), so the two pairs encode the same secret and the     *)
+(* decoder orbit_class cannot tell them apart. The pairs differ only in where *)
+(* each deck puts the cards 6 and 7, which the decoder never reads and a      *)
+(* coalition of enough positions does.                                        *)
 (*                                                                            *)
-(* Its decks are orbit_encode of pgl27_orbit.v, so this is the pair the       *)
-(* scheme of pgl27_scheme.v executes and the pair whose leakage values are    *)
-(* values of that scheme rather than of a variant.                            *)
+(* This is the comparison pair. The scheme of pgl27_scheme.v deals the pair   *)
+(* of pgl27_encoding_r5.v, and the values below are the leakage the scheme    *)
+(* would have had it dealt this pair instead.                                 *)
 (*                                                                            *)
 (* Census. Over the 336 shuffles, the number of restrictions to a reveal set  *)
 (* that both decks produce is                                                 *)
@@ -34,10 +36,13 @@
 (* the secret before the reveal, and a coalition of six does not.             *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   code_table_r7 == the two decks as nat code tables                        *)
+(*   deck_r7 == the two decks as tuples of cards                              *)
+(*   code_table_r7 == the same two decks as nat code tables                   *)
 (*   pgl27_encoding_r7 == the deck pair as an encoding                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   pgl27_r7_hearts == the two decks of this pair hold their hearts at the   *)
+(*     same positions as the decks orbit_encode deals                         *)
 (*   pgl27_r7_views_uniq_* == at each representative reveal set, neither      *)
 (*     deck's view list repeats an entry, so its collision count is a         *)
 (*     set-intersection cardinality                                           *)
@@ -55,27 +60,67 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** code_table_r7 — the two decks of this pair as tables of the eight card
-    codes: the identity table for the secret false and the transposition of
-    the codes 3 and 4 for the secret true. It is the form in which the
-    collision census evaluates the pair. *)
+(** deck_r7 — the two decks of this pair as arrangements of the eight cards:
+    0 1 2 3 4 5 6 7 for the secret false and 0 1 2 4 3 5 6 7 for the secret
+    true. It is the arrangement the protocol would hand to the shuffle at this
+    pair. *)
+Definition deck_r7 (b : bool) : 8.-tuple 'I_8 :=
+  if b then [tuple @Ordinal 8 0 isT; @Ordinal 8 1 isT; @Ordinal 8 2 isT;
+                   @Ordinal 8 4 isT; @Ordinal 8 3 isT; @Ordinal 8 5 isT;
+                   @Ordinal 8 6 isT; @Ordinal 8 7 isT]
+  else [tuple @Ordinal 8 0 isT; @Ordinal 8 1 isT; @Ordinal 8 2 isT;
+              @Ordinal 8 3 isT; @Ordinal 8 4 isT; @Ordinal 8 5 isT;
+              @Ordinal 8 6 isT; @Ordinal 8 7 isT].
+
+(** code_table_r7 — the same two decks as tables of the eight card codes: the
+    identity table for the secret false and the table exchanging the codes 3
+    and 4 for the secret true. It is the form in which the collision census
+    evaluates the pair. *)
 Definition code_table_r7 (b : bool) : seq nat :=
   if b then [:: 0; 1; 2; 4; 3; 5; 6; 7] else code_id.
+
+(** pgl27_r7_deck_ok — each deck of this pair deals eight distinct cards. It
+    is the premise under which a coalition below the privacy threshold learns
+    nothing. *)
+Local Lemma pgl27_r7_deck_ok (s : bool) : deck_ok (deck_r7 s).
+Proof. by case: s; vm_compute. Qed.
+
+(** pgl27_r7_hearts — each deck of this pair holds its hearts at the same
+    positions as the deck orbit_encode deals to the same secret. The two pairs
+    are therefore interchangeable as far as the decoder is concerned, and
+    differ only in what a coalition above the privacy threshold sees. *)
+Lemma pgl27_r7_hearts (s : bool) :
+  heart_set (deck_r7 s) = heart_set (orbit_encode s).
+Proof.
+apply/setP => x; rewrite !inE /is_heart.
+by case: s; case: x => -[|[|[|[|[|[|[|[|//]]]]]]]] ?.
+Qed.
+
+(** pgl27_r7_classK — the deck dealt to a secret decodes back to that secret.
+    It is correctness of the scheme at this pair, and it holds because the
+    heart positions agree with those of orbit_encode rather than by any
+    computation: the decoder reads the cross-ratio class of the heart
+    four-subset through an enumeration that does not reduce. *)
+Lemma pgl27_r7_classK (s : bool) : orbit_class (deck_r7 s) = s.
+Proof.
+by rewrite /orbit_class pgl27_r7_hearts -/(orbit_class (orbit_encode s))
+  orbit_encodeK.
+Qed.
 
 (** pgl27_r7_codeE — the nat table of this pair is the tuple deck read code by
     code. It is the agreement field of the encoding record, and the step that
     turns a count over nat tables into a count over shuffles. *)
 Local Lemma pgl27_r7_codeE (s : bool) :
-  code_table_r7 s = [seq val x | x <- orbit_encode s].
+  code_table_r7 s = [seq val x | x <- deck_r7 s].
 Proof. by case: s. Qed.
 
 (** pgl27_encoding_r7 — the deck pair 0 1 2 3 4 5 6 7 against
-    0 1 2 4 3 5 6 7, as an encoding. Its decks are the orbit encoder of
-    pgl27_orbit.v, so every leakage value proved at this encoding is a value
-    of the scheme the rest of the development executes. *)
+    0 1 2 4 3 5 6 7, as an encoding. It encodes the same secret as the pair
+    the scheme deals and leaks differently above the privacy threshold, so it
+    separates what the geometry fixes from what the choice of decks fixes. *)
 Definition pgl27_encoding_r7 : pgl27_encoding :=
-  @PGL27Encoding orbit_encode code_table_r7
-    orbit_encode_deck orbit_encodeK pgl27_r7_codeE.
+  @PGL27Encoding deck_r7 code_table_r7
+    pgl27_r7_deck_ok pgl27_r7_classK pgl27_r7_codeE.
 
 (* -------------------------------------------------------------------------- *)
 (* Repetition-freeness of the view lists at the representative reveal sets.   *)
