@@ -2,8 +2,8 @@
 
 Date: 2026-09-19. Spec: `notes/20260919-kim-tableau-sampled-design.md`.
 Verbatim source: the probe `notes/probes/2026-09-19-kim-tableau-sampled/`
-(PROBE), file `five_card_rows_landing.v`, commit be73f76. Audits: soundness GO;
-naming round 2 must be GO before task 1 starts.
+(PROBE), file `five_card_rows_landing.v`, commit 2e567e0. Audits: soundness GO,
+naming GO in round 3.
 
 This plan is also the as-built record. Every deviation is written under its
 task: before, after, why.
@@ -51,12 +51,11 @@ task: before, after, why.
 Replace the file with `PROBE/five_card_rows_landing.v`, byte for byte. Compile
 it, with `-time`.
 
-Passes when: exit 0; `diff` against the landing copy is empty; `git diff`
-removes only header comment lines, the title line, the first paragraph's
-sentences on one seat and on input privacy, and the sentence saying that
-neither further row is written as a program; no code line is removed; no
-sentence costs more than a tenth of a second beyond its landing-copy
-counterpart.
+Passes when: exit 0; `diff` against the landing copy is empty; every line that
+`git diff` removes is a comment line of the file header; after stripping
+comments the 146 code lines of the old file all survive, in order, among the
+214 of the new one; no sentence costs more than a tenth of a second beyond its
+landing-copy counterpart.
 
 ### Task 2. As-built fidelity, in the probe
 

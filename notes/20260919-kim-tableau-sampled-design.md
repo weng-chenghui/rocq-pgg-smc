@@ -2,10 +2,11 @@
 
 Date: 2026-09-19
 
-Status: probe run on 2026-09-19 and verified by the main session's own compile.
-K1 to K11 are GO, and K8 ends in the compiled conclusion that neither arm can
-be supplied for the biased row. The audits are next. No plan is written until
-two audits end in `VERDICT: GO`.
+Status: probe verified by the main session's own compile. Soundness audit GO.
+Naming audit GO in round 3, after two rounds that each stopped on sentences of
+the file header. Both state that `five_card_rows_landing.v` is fit to replace
+`instances/kim2025/five_card_rows.v` byte for byte. Plan:
+`docs/superpowers/plans/2026-09-19-kim-tableau-sampled.md`.
 
 ## Problem
 
