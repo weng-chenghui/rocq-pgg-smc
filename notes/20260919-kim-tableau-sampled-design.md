@@ -168,7 +168,8 @@ dependent type of `apr_model`.
 | `kim_deal_centi_lt` | `instances/kim2025/five_card_kim.v:646` | One seat's endpoint marginal under that shuffle is within $2^{-40}$ of uniform. |
 | `five_card_colour_view_leak_bound` | `instances/kim2025/five_card_models.v:360` | A conditional mutual information is at most `kim_leak_bound eps`, under three hypotheses on `eps`. |
 | `five_card_row_biased`, `five_card_row_repeated` | `manifest/pgg_analysis_manifest.v:766`, `:776` | Manifest rows at `AnalysisBridged` and `Sampled`. |
-| `ExactWitness`, `SpectralCert`, `SecurityPort` | `manifest/pgg_tableau.v:150` and above | The two arms of `certify`. |
+| `ExactWitness`, `SpectralCert`, `SecurityPort` | `manifest/pgg_tableau.v:114`, `:131`, `:149` | The two arms of `certify`. |
+| the completion levels | `manifest/pgg_analysis_status.v:55-59` | `AnalysisBridged` adds a theorem about the sampled distribution and the observer. Any security, leakage, mixing or limitation theorem meets it. The Tableau admits a row to the same level only through one of the two arms. |
 
 ## Soundness invariants
 
@@ -263,6 +264,54 @@ Decisions taken by the main session after the probe:
   imports it, so the build graph gains no edge.
 - Landed mutations: the program sampling another instance's family, and the
   biased program at the manifest's level. This file already carries one `Fail`.
+
+## Audit results, 2026-09-19
+
+Soundness audit (`soundness-audit.md` in the probe): GO. A `Tableau Sampled`
+proves run correctness and that the executed coalition reader is the static
+one, and asserts nothing about security. `modelE` pins the law: the manifest
+row's model evaluates by conversion to the adapter that the manifest's bound
+theorems name. Neither bound is vacuous. By the auditor's computation from the
+definition, not by a compiled lemma, `kim_leak_bound (1 / 100)` is about 0.0091
+bits against a trivial ceiling of about 1.19 bits, and $2^{-40}$ stands against
+a trivial ceiling of 2. No lemma proves the leak bound positive and no comment
+says so. The statement that neither arm can be supplied is scoped to existing
+theorems and is conservative, since exact independence under a biased cut is
+expected to be false.
+
+Naming audit (`naming-audit.md`): NO-GO on two items. The first paragraph of
+the file header, which the landing left untouched, says that every statement
+below is about a coalition of at most one seat and that input privacy is not
+what the file states. Both sentences become false once
+`five_card_row_biased_leak_bound` lands, which holds at any list of card
+positions and is Kim's input privacy bound. The soundness audit raised the same
+paragraph. The second item is the mutation's name, a figure of speech; it
+lands as `five_card_row_s5_family`.
+
+Folded in:
+
+- The header paragraph is rewritten so that its restriction to one seat covers
+  the coalition statements only, and it names the biased bound as a ceiling on
+  input privacy at any list of card positions.
+- The level gap of the biased row is explained by the two criteria for one
+  constructor. The manifest admits a row to `AnalysisBridged` on any theorem
+  about the sampled distribution and the observer. The Tableau admits it only
+  through an arm of `certify`. Both assignments are correct under their own
+  definitions, and the manifest does not overclaim. The exposition sits in the
+  header, and the biased program's comment is shortened to point at it.
+- The endpoint bound is worded for a starting position, not a seat.
+- `five_card_row_biased_prefixE`, `five_card_row_biased_modelE` and
+  `five_card_row_biased_levelE` get statement comments that say what they are
+  for.
+- `prefixE` states three conjuncts. That the observed execution carries the
+  three run facts is a remark about the record, not part of the statement, and
+  the comment says no more than the statement.
+
+Kept, by the naming audit's judgement: the `_tableau` suffix at the type
+`Tableau Sampled`, the name `five_card_row_repeated_at_manifest_level`, the
+asymmetry between an ascription for one row and a lemma for the other, the
+suffixes `_endpoint_lt` and `_leak_bound` that echo their source lemmas, and
+`kim_centi_small` with its name and its home.
 
 ## Acceptance condition
 
