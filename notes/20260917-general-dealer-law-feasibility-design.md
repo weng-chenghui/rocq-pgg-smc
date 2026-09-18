@@ -2,7 +2,10 @@
 
 Date: 2026-09-17
 
-Status: probe-first validation in progress
+Status: probe-first validation complete on 2026-09-18. C1 to C10 are GO.
+The record is `notes/probes/2026-09-17-general-dealer-law/STATUS.md`, and the
+outcome is summarised in [[20260918-general-dealer-law-probe-result]]. This note
+was revised on 2026-09-18 to the compiled names and statements.
 
 ## Problem
 
@@ -41,10 +44,10 @@ The generic probe uses the weakest finite probability carrier needed by the
 paper model.
 
 ```coq
-Variables (R : realType) (secretT deckT cutT viewT : finType).
+Variables (R : realType) (secretT deckT shuffleT viewT : finType).
 Variable secretP : R.-fdist secretT.
 Variable delta : secretT -> R.-fdist deckT.
-Variable nu : R.-fdist cutT.
+Variable nu : R.-fdist shuffleT.
 ```
 
 The concrete bridge probes instantiate this carrier at the live PGL and PSL
@@ -54,7 +57,7 @@ types under the opam switch `/Users/cheng-huiweng/Projects/coq`.
 
 ### A. Canonical nested carrier
 
-Use `secretT * (deckT * cutT)` and define the law directly by a kernel product.
+Use `secretT * (deckT * shuffleT)` and define the law directly by a kernel product.
 This matches the paper and lets `inde_prod_kernel_fst` prove the general privacy
 transfer. Concrete models with another product association need a pushforward
 bridge.
@@ -62,7 +65,7 @@ bridge.
 ### B. Arbitrary sample carrier with projections
 
 Keep each instance's current sample carrier and describe the dealer law by an
-equality after pushing it through secret, deck, and cut projections. This
+equality after pushing it through secret, deck, and shuffle projections. This
 reduces carrier conversion in instances, but the definition no longer displays
 the paper's factorization directly.
 
@@ -77,56 +80,90 @@ The probe uses A. It keeps the paper equation visible and tests whether the
 required pushforward bridges are small enough to justify that choice. A
 permanent record remains outside this spike.
 
-## Proposed generic declarations
+## Generic declarations
+
+The probe produced ten generic declarations. The first seven are the dealer
+model and its carrier transport. The last three are the facts about
+pushforwards that the PSL(2,11) instance and its refutation needed and the
+repository did not have.
 
 ```coq
 Definition dealer_shuffleP
-    : R.-fdist (secretT * (deckT * cutT)) :=
-  secretP `X (fun s => delta s `x nu).
+    : R.-fdist (secretT * (deckT * shuffleT)) :=
+  secretP `X (fun s => (delta s) `x nu).
 
-Definition dealer_secret
+Definition dealer_shuffle_secret
     : {RV dealer_shuffleP -> secretT} := fun u => u.1.
 
-Definition dealer_view
-    (view : secretT -> deckT -> cutT -> viewT)
+Definition dealer_shuffle_view
+    (view : secretT -> deckT -> shuffleT -> viewT)
     : {RV dealer_shuffleP -> viewT} :=
   fun u => view u.1 u.2.1 u.2.2.
-```
 
-The pointwise law must compile as follows.
-
-```coq
 Lemma dealer_shufflePE s d g :
   dealer_shuffleP (s, (d, g)) = secretP s * (delta s d * nu g).
 ```
 
-The headline privacy transfer has a mixed-law premise. This premise is the
-exact place where the concrete PGL or PSL argument enters.
+The mixed-law condition. Its premise is the exact place where the concrete
+PGL or PSL argument enters, and it is the only condition the paper presents.
 
 ```coq
-Lemma dealer_view_indep
-    (view : secretT -> deckT -> cutT -> viewT)
+Lemma dealer_shuffle_view_indep
+    (view : secretT -> deckT -> shuffleT -> viewT)
     (mu : R.-fdist viewT) :
   (forall s, secretP s != 0 ->
-     fdistmap (fun dg => view s dg.1 dg.2) (delta s `x nu) = mu) ->
-  dealer_shuffleP |= dealer_view view _|_ dealer_secret.
+     fdistmap (fun dg => view s dg.1 dg.2) ((delta s) `x nu) = mu) ->
+  dealer_shuffleP |= dealer_shuffle_view view _|_ dealer_shuffle_secret.
 ```
 
-A stronger sufficient premise may be useful for transitive PGL models.
+The per-deck condition. It implies the mixed-law condition through
+`fdistmap_prod_const`, and the PGL(2,7) all-decks instance uses it.
 
 ```coq
-Lemma dealer_view_indep_of_deck
+Lemma dealer_shuffle_view_indep_of_deck
     (valid : secretT -> deckT -> bool)
-    (view : secretT -> deckT -> cutT -> viewT)
+    (view : secretT -> deckT -> shuffleT -> viewT)
     (mu : R.-fdist viewT) :
   (forall s d, delta s d != 0 -> valid s d) ->
   (forall s d, secretP s != 0 -> valid s d ->
      fdistmap (view s d) nu = mu) ->
-  dealer_shuffleP |= dealer_view view _|_ dealer_secret.
+  dealer_shuffleP |= dealer_shuffle_view view _|_ dealer_shuffle_secret.
 ```
 
-The first theorem should reuse `inde_prod_kernel_fst`. The second should use
-`fdistmap_prod_const` to establish the first theorem's mixed-law premise.
+The carrier transport, stated once as an equivalence.
+
+```coq
+Lemma inde_RV_fdistmap
+    (A B TA TB : finType) (P : R.-fdist A)
+    (f : A -> B) (X : B -> TA) (Y : B -> TB) :
+  fdistmap f P |= X _|_ Y <-> P |= (X \o f) _|_ (Y \o f).
+```
+
+Three facts about pushforwards.
+
+```coq
+Lemma fdistmap_prod_sectionE (D G V : finType)
+    (PD : R.-fdist D) (PG : R.-fdist G) (f h : D -> G -> V) :
+  (forall g, PG g != 0 ->
+     fdistmap (fun d => f d g) PD = fdistmap (fun d => h d g) PD) ->
+  fdistmap (fun dg => f dg.1 dg.2) (PD `x PG) =
+  fdistmap (fun dg => h dg.1 dg.2) (PD `x PG).
+
+Lemma uniform_fdistmap_fiberTE (X T : finType)
+    (HX : (0 < #|[set: X]|)%N) (f0 f1 : X -> T) :
+  (forall v, #|[set x : X | f0 x == v]| = #|[set x : X | f1 x == v]|) ->
+  fdistmap f0 ((`U HX) : R.-fdist X) = fdistmap f1 (`U HX).
+
+Lemma uniform_fdistmap_pointE (X T : finType)
+    (A : {set X}) (HA : (0 < #|A|)%N) (f : X -> T) (v : T) :
+  (fdistmap f ((`U HA) : R.-fdist X)) v =
+    (#|A|%:R)^-1 *+ #|[set x in A | f x == v]| :> R.
+```
+
+`uniform_fdistmap_fiberTE` is `uniform_fdistmap_fiberE` of
+`reconstruct/design_privacy.v` at the full set. `uniform_fdistmap_pointE` is
+the internal step of that lemma's proof lifted to a statement, so in a
+permanent file `uniform_fdistmap_fiberE` should be re-proved through it.
 
 ## Required concrete bridges
 
@@ -138,23 +175,24 @@ Prove separately that the generic view under the deterministic deck is
 `pgl27_view`. A carrier-transport lemma must then move independence from the
 generic law back to the current PGL sample carrier.
 
-The transport lemma has this mathematical shape.
-
-```coq
-Lemma inde_RV_fdistmap_pullback
-    (A B TA TB : finType) (P : R.-fdist A)
-    (f : A -> B) (X : B -> TA) (Y : B -> TB) :
-  fdistmap f P |= X _|_ Y ->
-  P |= X \o f _|_ Y \o f.
-```
+The transport lemma is `inde_RV_fdistmap` above, used from right to left after
+rewriting with the two reader equations.
 
 ### PGL all-decks theorem
 
 Instantiate `delta s` as the uniform distribution on `class_decks s` and `nu`
-as the uniform group distribution. The generic law should be definitionally
-equal, or reducibly equal, to `alldecksP`. The existing
-`alldecks_view_law` should discharge the mixed-law premise without reproducing
-its counting proof.
+as the uniform group distribution. The generic law is definitionally
+`alldecksP` on the same carrier, so there is no carrier map. The instance goes
+through the per-deck condition with `valid s d := uniq d`. Its second premise
+is a per-deck view law proved from `ktuple_encode_uniform`.
+
+`alldecks_view_law` of `reconstruct/transitivity_privacy.v` does not serve this
+route. It states the law of the view under the pair of deck and shuffle at a
+fixed secret, which is the mixed law, and a constant average does not make each
+term constant. A route through the mixed-law condition that reuses it was also
+compiled, by the soundness auditor, and needs no counting. The per-deck route
+was chosen on 2026-09-18 so that the per-deck condition is instantiated by a
+real instance and is not an unused declaration.
 
 ### PSL all-decks row
 
@@ -174,11 +212,11 @@ shows whether the claim is false or only the attempted proof is wrong.
 | ID | Checkable claim | Passing evidence |
 |---|---|---|
 | C1 | `dealer_shuffleP` elaborates at arbitrary finite carriers and has the stated pointwise factorization. | A `Qed` theorem using the actual kernel and product constructors. Dropping one product factor in a mutation must fail. |
-| C2 | A secret-independent mixed view law implies independence of `dealer_view` and `dealer_secret`. | A `Qed` miniature using `inde_prod_kernel_fst`. Removing the common `mu` premise must make the mutation fail. |
+| C2 | A secret-independent mixed view law implies independence of `dealer_shuffle_view` and `dealer_shuffle_secret`. | A `Qed` miniature using `inde_prod_kernel_fst`. Removing the common `mu` premise must make the mutation fail. |
 | C3 | Per-deck constant view laws plus supported validity imply the mixed-law premise. | A `Qed` miniature using `fdistmap_prod_const`, then C2. Removing validity from the link to the per-deck theorem must fail in the PGL instantiation. |
-| C4 | Independence transports from a pushforward law to the original carrier through composed readers. | `inde_RV_fdistmap_pullback` ends in `Qed` and is mutation-checked with a reader that does not commute. |
+| C4 | Independence transports from a pushforward law to the original carrier through composed readers. | `inde_RV_fdistmap` ends in `Qed` and is mutation-checked with a reader that does not commute. |
 | C5 | The deterministic PGL model is a pushforward instance of the generic law and its view commutes with the bridge. | Compiled distribution and view equations, followed by a theorem deriving the existing PGL independence statement through C2 to C4. A wrong secret encoding must fail the view equation. |
-| C6 | The PGL all-decks law is an instance of the generic law. | A compiled equality with `alldecksP`, followed by reuse of `alldecks_view_law` to derive `ttrans_view_indep_alldecks` through C2. |
+| C6 | The PGL all-decks law is an instance of the generic law. | A compiled equality with `alldecksP`, a per-deck view law from `ktuple_encode_uniform`, and a theorem deriving `pgl27_view_indep_alldecks` through C3. |
 | C7 | The PSL uniform all-decks law is a reassociated instance of the generic law. | Compiled distribution and view equations, followed by a theorem deriving `psl211_alldecks_view_indep` through C2 and C4 while reusing its fiber-counting content. |
 | C8 | The general theorem does not silently strengthen PSL from uniform average privacy to privacy for every dealer law. | Either a compiled per-deck theorem or a compiled concrete counterexample. Failure to prove it without an isolating counter-probe is not evidence. |
 | C9 | The generic hypotheses are jointly satisfiable. | Concrete PGL and PSL instantiations compile at a real field and `Print Assumptions` reports no unexpected axioms. |
@@ -191,7 +229,10 @@ shows whether the claim is false or only the attempted proof is wrong.
 | `inde_prod_kernel_fst` | `reconstruct/transitivity_privacy.v` | A constant conditional pushforward under `P `X W` implies independence from the first coordinate. |
 | `fdistmap_prod_const` | `reconstruct/transitivity_privacy.v` | Constant section pushforwards imply a constant pushforward of a kernel product. |
 | `alldecksP` | `reconstruct/transitivity_privacy.v` | Uniform valid deck per secret, paired with an independent uniform group element. |
-| `alldecks_view_law` | `reconstruct/transitivity_privacy.v` | The PGL-style all-decks conditional view law is constant. |
+| `alldecks_view_law` | `reconstruct/transitivity_privacy.v` | The view law under the pair of deck and shuffle at a fixed secret is constant. It is the mixed law, so it serves C2 and not C3. It is `Local`, and reachable by its qualified name. |
+| `ktuple_encode_uniform` | `reconstruct/transitivity_privacy.v` | A t-transitive group pushes the uniform shuffle to the uniform law on the k-tuples a coalition reads, at one repetition-free deck. |
+| `uniform_fdistmap_fiberE` | `reconstruct/design_privacy.v` | Two maps with equal fiber cardinalities on a set push the uniform law on it to the same law. |
+| `psl211_alldecks_per_cut_count` | `instances/psl211/psl211_alldecks.v` | At one cut the two chiralities have equally many deals producing a reading. |
 | `pgl27P` | `instances/pgl27/pgl27_secrecy.v` | Uniform Boolean secret paired with a uniform group shuffle. |
 | `pgl27_view` | `instances/pgl27/pgl27_secrecy.v` | The masked view of `orbit_encode s` after the sampled action. |
 | `pgl27_view_indep_alldecks` | `instances/pgl27/pgl27_secrecy.v` | The PGL uniform all-decks privacy theorem. |
@@ -209,9 +250,9 @@ shows whether the claim is false or only the attempted proof is wrong.
 3. The model is average-case over `secretP`, then conditional over `delta s`,
    then over the independent law `nu`. The quantifier order is fixed in
    `dealer_shuffleP`.
-4. `dealer_view_indep` does not claim privacy for arbitrary `delta`. It claims
+4. `dealer_shuffle_view_indep` does not claim privacy for arbitrary `delta`. It claims
    privacy when every positive-mass secret has the same mixed view law.
-5. `dealer_view_indep_of_deck` is applicable only when every positive-mass deck
+5. `dealer_shuffle_view_indep_of_deck` is applicable only when every positive-mass deck
    is valid and every valid deck has the same view law under `nu`.
 6. The PGL bridge may use per-deck transitivity. The PSL bridge must retain the
    uniform average over deck descriptions unless a stronger statement is
@@ -230,18 +271,24 @@ The retained scratch directory is:
 notes/probes/2026-09-17-general-dealer-law/
 ```
 
-It will contain:
+It contains seven probe files, compiled one at a time under
+`-Q . general_dealer_law_probe`.
 
 1. `dealer_kernel_probe.v` for C1 to C3.
 2. `carrier_transport_probe.v` for C4.
-3. `pgl27_deterministic_bridge.v` for C5.
-4. `pgl27_alldecks_bridge.v` for C6.
-5. `psl211_alldecks_bridge.v` for C7 and C8.
-6. `concrete_instances.v` for C9.
-7. `headline_decomposition.v` for the allowed decomposition-only admitted
-   supporting statements.
-8. `_CoqProject` and `Makefile.rocq` for the project build.
-9. `soundness-audit.md` and `naming-audit.md` for independent verdicts.
+3. `pgl27_deterministic_bridge.v` for C5 and C6.
+4. `psl211_alldecks_bridge.v` for C7.
+5. `psl211_per_deck_counter.v` for C8, the fiber count at one deal.
+6. `psl211_per_deck_law_counter.v` for the consequences of C8: the per-deck
+   premises are jointly unsatisfiable at PSL(2,11), and the point-mass dealer
+   at that deal is not private.
+7. `concrete_instances.v` for C9.
+
+It also holds `STATUS.md`, `_CoqProject`, the audit reports
+`flow-sketch-audit.md`, `soundness-audit.md`, `soundness-audit-delta.md`,
+`naming-audit.md`, `naming-audit-round2.md`, `naming-audit-round3.md`, and
+`history/` with every superseded version. No decomposition probe with admitted
+statements was written, because every supporting lemma ends in `Qed`.
 
 ## Acceptance condition
 
@@ -251,7 +298,6 @@ privacy genuinely depends on the uniform dealer average. In both cases the
 general mixed-law theorem must bridge to the current PSL row without assuming
 the stronger alternative.
 
-Every probe except `headline_decomposition.v` must contain no `Admitted`,
-`Abort`, or `Axiom`. Each mutation must fail for the intended reason. The final
+Every probe must contain no `Admitted`, `Abort`, or `Axiom`. Each mutation must fail for the intended reason. The final
 spec requires independent soundness and naming reports ending in
 `VERDICT: GO` before an implementation plan is written.
