@@ -73,12 +73,6 @@
 (*     dealer_shuffle_view_indep                                              *)
 (*   pgl27_view_indep_alldecks_via_dealer == pgl27_view_indep_alldecks        *)
 (*     obtained from dealer_shuffle_view_indep_of_deck                        *)
-(*   pgl27_dealer_viewE == the model's view along the embedding is the exact  *)
-(*     row's view                                                             *)
-(*   pgl27_dealer_secretE == and its secret is the row's orbit secret         *)
-(*   pgl27_alldecks_dealerPE == the all-decks row's law is the model's law    *)
-(*   pgl27_alldecks_dealer_viewE == and its view is the all-decks view        *)
-(*   pgl27_alldecks_dealer_secretE == and its secret the all-decks secret     *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -332,7 +326,7 @@ Local Notation deckT := (8.-tuple 'I_8).
 Local Notation shuffleT := (pgg_gT pgl27_M).
 Local Notation viewT := ({ffun 'I_8 -> 'I_8}).
 
-(** pgl27_dealer_delta == the deterministic dealer of the exact PGL(2,7) row:
+(** pgl27_dealer_delta — the deterministic dealer of the exact PGL(2,7) row:
     at each orbit secret it lays the one representative deck orbit_encode s,
     with no randomness of its own.  It is the extreme case of a dealer kernel,
     and the one for which the deck is a function of the secret rather than a
@@ -340,22 +334,22 @@ Local Notation viewT := ({ffun 'I_8 -> 'I_8}).
 Definition pgl27_dealer_delta (s : bool) : R.-fdist deckT :=
   fdist1 (orbit_encode s).
 
-(** pgl27_dealer_nu == a uniform element of the PGL(2,7) shuffle group. *)
+(** pgl27_dealer_nu — a uniform element of the PGL(2,7) shuffle group. *)
 Definition pgl27_dealer_nu : R.-fdist shuffleT := `U pgl27_G_pos.
 
-(** pgl27_dealerP == the exact row's data placed in the dealer model's sample
+(** pgl27_dealerP — the exact row's data placed in the dealer model's sample
     space, an orbit secret paired with a deck and a shuffle. *)
 Definition pgl27_dealerP : R.-fdist (bool * (deckT * shuffleT)) :=
   @dealer_shuffleP R bool deckT shuffleT
     (fdist_uniform card_bool) pgl27_dealer_delta pgl27_dealer_nu.
 
-(** pgl27_dealer_embed == the map that restores the deterministic deck to a
+(** pgl27_dealer_embed — the map that restores the deterministic deck to a
     sample of the exact row, which carries only a secret and a shuffle. *)
 Definition pgl27_dealer_embed (u : bool * shuffleT) :
     bool * (deckT * shuffleT) :=
   (u.1, (orbit_encode u.1, u.2)).
 
-(** pgl27_dealerPE == the exact row's law pushed along pgl27_dealer_embed is
+(** pgl27_dealerPE — the exact row's law pushed along pgl27_dealer_embed is
     the dealer model's law at the deterministic kernel.  Here the modelling
     claim is checked rather than assumed: the row's two-coordinate law and the
     model's three-coordinate law agree once the deck coordinate is filled in by
@@ -379,7 +373,7 @@ case Hd: (d == orbit_encode s).
   by move: Hd; rewrite -H eqxx.
 Qed.
 
-(** pgl27_dealer_view C == the card values a coalition C reads off the laid
+(** pgl27_dealer_view C — the card values a coalition C reads off the laid
     deck after the shuffle has acted, and ord0 at every position outside C.
     Written as a function of the dealer model's three coordinates, it reads the
     secret only through the deck. *)
@@ -388,7 +382,7 @@ Definition pgl27_dealer_view (C : {set 'I_8})
   [ffun i => if i \in C then
      tnth d (@pgg_rho pgl27_M g i) else ord0].
 
-(** pgl27_dealer_viewE == the dealer model's view, composed with
+(** pgl27_dealer_viewE — the dealer model's view, composed with
     pgl27_dealer_embed, is the exact row's view.  One of the two commuting
     equations carrier transport demands. *)
 Lemma pgl27_dealer_viewE (C : {set 'I_8}) :
@@ -397,7 +391,7 @@ Lemma pgl27_dealer_viewE (C : {set 'I_8}) :
      (pgl27_dealer_view C) \o pgl27_dealer_embed = pgl27_view R C.
 Proof. by []. Qed.
 
-(** pgl27_dealer_secretE == the dealer model's secret, composed with
+(** pgl27_dealer_secretE — the dealer model's secret, composed with
     pgl27_dealer_embed, is the exact row's orbit secret.  The other commuting
     equation. *)
 Lemma pgl27_dealer_secretE :
@@ -407,7 +401,7 @@ Lemma pgl27_dealer_secretE :
     pgl27_secret R.
 Proof. by []. Qed.
 
-(** pgl27_dealer_mu C Hdt == the law of a uniformly chosen injective placement
+(** pgl27_dealer_mu C Hdt — the law of a uniformly chosen injective placement
     of #|C| of the eight card values on the positions of C.  It is the common
     view law the two secrets must share, and it names no secret, which is the
     whole content of privacy at this coalition size. *)
@@ -418,13 +412,14 @@ Definition pgl27_dealer_mu (C : {set 'I_8})
       [ffun i : 'I_8 => nth ord0 (val r) (index i (enum C))])
     (`U Hdt).
 
-(** pgl27_alldecks_dealer_view_law == at every deck without repeated cards,
+(** pgl27_alldecks_dealer_view_law — at every deck without repeated cards,
     whatever the secret, the uniform shuffle sends a coalition of at most three
     positions to the common law.  This is 3-transitivity of PGL(2,7), stated at
     an arbitrary valid deck rather than at a representative, which is the form
     dealer_shuffle_view_indep_of_deck takes as its per-deck premise and the
     only place where the group-theoretic content of the instance enters the
-    dealer model. *)
+    dealer model.  Validity is the last premise so that dropping it leaves an
+    arrow rather than shifting an argument. *)
 Lemma pgl27_alldecks_dealer_view_law (C : {set 'I_8}) (s : bool) (d : deckT)
     (Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_8]|)%N) :
   (#|C| <= 3)%N -> uniq d ->
@@ -466,7 +461,7 @@ by rewrite (@ktuple_encode_uniform 7 shuffleT (pgg_G pgl27_M)
   (fun _ : bool => d) k p true Hdt Hk Huniq Hp).
 Qed.
 
-(** pgl27_dealer_view_law == the same law at the representative deck of either
+(** pgl27_dealer_view_law — the same law at the representative deck of either
     secret, which is the deck the exact row lays.  It is the general per-deck
     law instantiated there, the representative being repetition-free, so the
     counting is done once. *)
@@ -481,7 +476,7 @@ exact: (@pgl27_alldecks_dealer_view_law C s (orbit_encode s) Hdt HC
   (orbit_encode_deck s)).
 Qed.
 
-(** pgl27_dealer_view_indep == in the dealer model's sample space at the
+(** pgl27_dealer_view_indep — in the dealer model's sample space at the
     deterministic kernel, the view of a coalition of at most three positions
     is independent of the orbit secret.  It is dealer_shuffle_view_indep at
     pgl27_dealer_mu; the deterministic kernel makes the mixed-law premise a
@@ -513,7 +508,7 @@ subst d.
 exact: (@pgl27_dealer_view_law C s Hdt HC).
 Qed.
 
-(** pgl27_view_indep_via_dealer == the statement is pgl27_view_indep verbatim;
+(** pgl27_view_indep_via_dealer — the statement is pgl27_view_indep verbatim;
     only the route differs.  It is the exact row's own privacy statement,
     obtained by transporting the dealer model's independence back along
     pgl27_dealer_embed.  No group theory is redone here: 3-transitivity entered
@@ -529,7 +524,7 @@ rewrite -(@pgl27_dealer_viewE C) -pgl27_dealer_secretE.
 by apply/inde_RV_fdistmap.
 Qed.
 
-(** pgl27_dealer_bad_embed == the embedding with the orbit secret negated in
+(** pgl27_dealer_bad_embed — the embedding with the orbit secret negated in
     the deck coordinate, used only to show that the view equation is not
     automatic. *)
 Definition pgl27_dealer_bad_embed (u : bool * shuffleT) :
@@ -556,7 +551,7 @@ Variable Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_8]|)%N.
 Hypothesis HC : (#|C| <= 3)%N.
 Hypothesis Huniq : uniq d.
 
-(** pgl27_alldecks_dealer_view_law_with_validity == the positive control for
+(** pgl27_alldecks_dealer_view_law_with_validity — the positive control for
     the mutation below: with the repetition-free premise supplied, the same
     spelling is the per-deck view law. *)
 Definition pgl27_alldecks_dealer_view_law_with_validity :
@@ -564,8 +559,6 @@ Definition pgl27_alldecks_dealer_view_law_with_validity :
     ((`U pgl27_G_pos) : R.-fdist (pgg_gT pgl27_M)) = @pgl27_dealer_mu R C Hdt
   := @pgl27_alldecks_dealer_view_law R C s d Hdt HC Huniq.
 
-(* the premises are declared coalition size first and validity last, so that
-   dropping validity leaves an arrow rather than shifting an argument *)
 (* Expected failure: the per-deck view law with the validity premise dropped.
    The two premises are declared coalition size first and validity last, so
    omitting the last argument leaves `uniq d ->` as an arrow in the term's
@@ -586,20 +579,20 @@ Local Notation deckT := (8.-tuple 'I_8).
 Local Notation shuffleT := (pgg_gT pgl27_M).
 Local Notation viewT := ({ffun 'I_8 -> 'I_8}).
 
-(** pgl27_alldecks_dealer_delta == the all-decks dealer: at each orbit secret
+(** pgl27_alldecks_dealer_delta — the all-decks dealer: at each orbit secret
     it lays a uniform deck of that secret's class.  Unlike pgl27_dealer_delta it
     hides a genuine draw, and the privacy argument must survive every deck the
     draw can produce. *)
 Definition pgl27_alldecks_dealer_delta (s : bool) : R.-fdist deckT :=
   `U (pgl27_class_decks_pos s).
 
-(** pgl27_alldecks_dealerP == the all-decks row's data in the dealer model's
+(** pgl27_alldecks_dealerP — the all-decks row's data in the dealer model's
     sample space. *)
 Definition pgl27_alldecks_dealerP : R.-fdist (bool * (deckT * shuffleT)) :=
   @dealer_shuffleP R bool deckT shuffleT (fdist_uniform card_bool)
     pgl27_alldecks_dealer_delta (`U pgl27_G_pos).
 
-(** pgl27_alldecks_dealerPE == that law is the all-decks law of the
+(** pgl27_alldecks_dealerPE — that law is the all-decks law of the
     reconstruction layer, with no map between them: the two definitions are the
     same three-coordinate kernel product written in two vocabularies. *)
 Lemma pgl27_alldecks_dealerPE :
@@ -608,7 +601,7 @@ Lemma pgl27_alldecks_dealerPE :
     (R := R) pgl27_class_decks_pos.
 Proof. by []. Qed.
 
-(** pgl27_alldecks_dealer_viewE == and the dealer model's view at
+(** pgl27_alldecks_dealer_viewE — and the dealer model's view at
     pgl27_dealer_view is the all-decks view of the reconstruction layer. *)
 Lemma pgl27_alldecks_dealer_viewE (C : {set 'I_8}) :
   @dealer_shuffle_view R bool deckT shuffleT viewT
@@ -618,7 +611,7 @@ Lemma pgl27_alldecks_dealer_viewE (C : {set 'I_8}) :
     pgl27_G_pos pgl27_class_decks_pos C.
 Proof. by []. Qed.
 
-(** pgl27_alldecks_dealer_secretE == the dealer model's secret is the all-decks
+(** pgl27_alldecks_dealer_secretE — the dealer model's secret is the all-decks
     secret of the reconstruction layer.  Carrier transport asks for a named
     equation on each reader, and this is the second one. *)
 Lemma pgl27_alldecks_dealer_secretE :
@@ -628,7 +621,7 @@ Lemma pgl27_alldecks_dealer_secretE :
     pgl27_class_decks_pos.
 Proof. by []. Qed.
 
-(** pgl27_view_indep_alldecks_via_dealer == the statement is
+(** pgl27_view_indep_alldecks_via_dealer — the statement is
     pgl27_view_indep_alldecks verbatim; only the route differs.  Under the
     all-decks dealer the view of a coalition of at most three positions is
     independent of the orbit secret.  It is dealer_shuffle_view_indep_of_deck

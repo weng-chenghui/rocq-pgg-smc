@@ -63,9 +63,9 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 Import GRing.Theory Num.Theory.
 
-Local Open Scope fdist_scope.
-Local Open Scope proba_scope.
 Local Open Scope ring_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
 
 Section dealer_kernel.
 
@@ -154,6 +154,47 @@ Qed.
 
 End dealer_kernel.
 
+Section dealer_kernel_mutations.
+
+Variables (R : realType) (secretT deckT shuffleT viewT : finType).
+Variable secretP : R.-fdist secretT.
+Variable delta : secretT -> R.-fdist deckT.
+Variable nu : R.-fdist shuffleT.
+Variable view : secretT -> deckT -> shuffleT -> viewT.
+Variable x : viewT.
+Hypothesis Hmix : forall s, secretP s != 0 ->
+  fdistmap (fun dg => view s dg.1 dg.2) ((delta s) `x nu) =
+    fdist1 x.
+
+(* Expected failure: a dealer law with no shuffle.  The ascribed type is a law
+   on secretT * (deckT * shuffleT), while secretP `X delta is a law on secretT *
+   deckT, so the two types do not unify. *)
+Fail Definition dealer_shuffleP_missing_shuffle :
+    R.-fdist (secretT * (deckT * shuffleT)) :=
+  secretP `X delta.
+
+(** dealer_shuffle_view_indep_with_common_law — the positive control for the
+    mutation below: with the common mixed law supplied, the same spelling of
+    dealer_shuffle_view_indep is the independence statement. *)
+Definition dealer_shuffle_view_indep_with_common_law :
+  @dealer_shuffleP R secretT deckT shuffleT secretP delta nu
+  |= @dealer_shuffle_view R secretT deckT shuffleT viewT secretP delta nu view
+     _|_ @dealer_shuffle_secret R secretT deckT shuffleT secretP delta nu :=
+  @dealer_shuffle_view_indep R secretT deckT shuffleT viewT secretP delta nu
+    view (fdist1 x) Hmix.
+
+(* Expected failure: the common mixed law premise dropped.  Without Hmix the
+   term still has the premise as an arrow in its type, so what is ascribed a
+   bare independence statement is a function into one. *)
+Fail Definition dealer_shuffle_view_indep_without_common_law :
+  @dealer_shuffleP R secretT deckT shuffleT secretP delta nu
+  |= @dealer_shuffle_view R secretT deckT shuffleT viewT secretP delta nu view
+     _|_ @dealer_shuffle_secret R secretT deckT shuffleT secretP delta nu :=
+  @dealer_shuffle_view_indep R secretT deckT shuffleT viewT secretP delta nu
+    view (fdist1 x).
+
+End dealer_kernel_mutations.
+
 Section carrier_transport.
 
 Variables (R : realType) (A B TA TB : finType).
@@ -179,15 +220,31 @@ Qed.
 
 End carrier_transport.
 
+Section carrier_transport_mutation.
+
+Variables (R : realType) (A B TA TB : finType).
+Variable P : R.-fdist A.
+Variables (f : A -> B) (X : B -> TA) (Y : B -> TB).
+Variable Ybad : A -> TB.
+
+(* Expected failure: a reader that is not a composite with f.  The transported
+   statement concludes with Y \o f, and Ybad is an unrelated function out of A,
+   so the ascribed type does not unify with the type of the transport. *)
+Fail Definition inde_RV_fdistmap_bad_reader :
+  fdistmap f P |= X _|_ Y -> P |= (X \o f) _|_ Ybad :=
+  proj1 (@inde_RV_fdistmap R A B TA TB P f X Y).
+
+End carrier_transport_mutation.
+
 Section product_sections.
 
 Variable R : realType.
 
 (** fdistmap_prod_sectionE — two observations of an independent pair agree in
     law on the pair as soon as they agree in law on every section through a
-    section of positive mass.  It is the section form of fdistmap_prod_const,
-    with observation in place of a constant target law, and it is what carries
-    a per-section count up to the law of the whole sample. *)
+    cut of positive mass.  It is the section form of fdistmap_prod_const, with
+    observation in place of a constant target law, and it is what carries a
+    per-cut count of deals up to the law of the whole sample. *)
 Lemma fdistmap_prod_sectionE (D G V : finType)
     (PD : R.-fdist D) (PG : R.-fdist G)
     (f h : D -> G -> V) :
@@ -211,8 +268,8 @@ under [in RHS]eq_bigr => d _ do rewrite fdist_prodE /=.
 under [in LHS]eq_bigl => d do rewrite /= eqxx andbT.
 under [in RHS]eq_bigl => d do rewrite /= eqxx andbT.
 rewrite -!big_distrl /=.
-(* a section of zero mass contributes zero to both sums, so the premise is
-   needed only where the second law is supported *)
+(* a cut of zero mass contributes zero to both sums, so the premise is needed
+   only where the cut law is supported *)
 have [->|Hg] := eqVneq (PG g) 0; first by rewrite !mulr0.
 move: (congr1 (fun q : R.-fdist V => q v) (H g Hg)).
 rewrite !fdistmapE => Heq; congr (_ * _).
@@ -222,3 +279,29 @@ transitivity (\sum_(a in D | a \in preim (f^~ g) (pred1 v)) PD a).
 Qed.
 
 End product_sections.
+
+Section product_section_mutation.
+
+Variables (R : realType) (D G V : finType).
+Variables (PD : R.-fdist D) (PG : R.-fdist G).
+Variables (f h : D -> G -> V).
+Hypothesis Hs : forall g, PG g != 0 ->
+  fdistmap (fun d => f d g) PD = fdistmap (fun d => h d g) PD.
+
+(** fdistmap_prod_sectionE_with_sections — the positive control for the
+    mutation below: with the section-wise premise supplied, the same spelling
+    is the equality of the two laws on the pair. *)
+Definition fdistmap_prod_sectionE_with_sections :
+  fdistmap (fun dg => f dg.1 dg.2) (PD `x PG) =
+  fdistmap (fun dg => h dg.1 dg.2) (PD `x PG) :=
+  @fdistmap_prod_sectionE R D G V PD PG f h Hs.
+
+(* Expected failure: the section-wise premise dropped.  Without Hs the term
+   still has that premise as an arrow in its type, so what is ascribed a bare
+   equality of laws is a function into one. *)
+Fail Definition fdistmap_prod_sectionE_without_sections :
+  fdistmap (fun dg => f dg.1 dg.2) (PD `x PG) =
+  fdistmap (fun dg => h dg.1 dg.2) (PD `x PG) :=
+  @fdistmap_prod_sectionE R D G V PD PG f h.
+
+End product_section_mutation.

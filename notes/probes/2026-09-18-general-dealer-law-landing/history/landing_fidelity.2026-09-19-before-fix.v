@@ -3,7 +3,7 @@
 (*                   they claim to restate, and assume nothing new            *)
 (*                                                                            *)
 (* This file is a probe artifact and is not a candidate for the permanent     *)
-(* tree.  It holds four kinds of check.                                       *)
+(* tree.  It holds three kinds of check.                                      *)
 (*                                                                            *)
 (* 1. Two-way type ascriptions.  Each _via_dealer theorem is ascribed the     *)
 (*    type of the theorem it restates, and that theorem is ascribed the type  *)
@@ -18,13 +18,11 @@
 (*    lemmas of design_privacy.v in both the production and the landing       *)
 (*    copy, to show that the edit moved no assumption.                        *)
 (*                                                                            *)
-(* 4. The four generic mutations and their two positive controls. They were   *)
-(*    moved out of the candidate reconstruct/dealer_privacy.v so that it      *)
-(*    holds exactly the three sections and eight declarations its header      *)
-(*    lists, and so that no positive control is left naming a mutation that   *)
-(*    is no longer beside it. The mutations of the two instance copies stay   *)
-(*    in those copies, beside the declarations they mutate, where the         *)
-(*    repository has a precedent for a Fail in a permanent file.              *)
+(* Every mutation of the feasibility probe is kept inside the candidate file  *)
+(* that owns the declaration it mutates: the three kernel and transport ones  *)
+(* in dealer_privacy.v, the two PGL(2,7) ones in                              *)
+(* pgl27_profile_privacy_landing.v, and the PSL(2,11) one in                  *)
+(* psl211_models_landing.v.  None is left over for this file.                 *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -36,9 +34,6 @@ From infotheo Require Import realType_ext fdist proba.
 From pgg_reconstruct Require Import transitivity_privacy.
 From pgg_smc Require Import pgg_interface pgl27_group pgl27_orbit.
 From pgg_smc Require Import pgl27_scheme pgl27_profile pgl27_secrecy.
-(* psl211_alldecks supplies psl211_alldecks_view, which the transcribed
-   PSL(2,11) statement of section 1c names. *)
-From pgg_smc Require Import psl211_alldecks.
 From general_dealer_law_landing Require Import dealer_privacy.
 From general_dealer_law_landing Require Import design_privacy_landing.
 From general_dealer_law_landing Require Import pgl27_profile_privacy_landing.
@@ -123,32 +118,6 @@ Definition pgl27_alldecks_secrecy_at_written_type :
   @pgl27_view_indep_alldecks.
 
 (******************************************************************************)
-(*     1c. The same for PSL(2,11), statement copied from the production file  *)
-(******************************************************************************)
-
-(* instances/psl211/psl211_models.v:427-430, with the file's Local Notation
-   seatT written out, since a Local Notation is not exported. *)
-Definition psl211_via_dealer_at_written_type :
-  forall (R : realType)
-    (C : {set ('I_(pi_T' (pgg_monodromy_profile.mp_PI
-                  (pgg_instance.instance_profile
-                     psl211_exec.psl211_algebra))).+1)}),
-  (#|C| <= 5)%N ->
-  psl211_alldecksP R |= (fun u => psl211_alldecks_view C u.1 u.2)
-                    _|_ psl211_alldecks_secret R :=
-  @psl211_alldecks_view_indep_via_dealer.
-
-Definition psl211_models_at_written_type :
-  forall (R : realType)
-    (C : {set ('I_(pi_T' (pgg_monodromy_profile.mp_PI
-                  (pgg_instance.instance_profile
-                     psl211_exec.psl211_algebra))).+1)}),
-  (#|C| <= 5)%N ->
-  psl211_alldecksP R |= (fun u => psl211_alldecks_view C u.1 u.2)
-                    _|_ psl211_alldecks_secret R :=
-  @psl211_models.psl211_alldecks_view_indep.
-
-(******************************************************************************)
 (*     2. uniform_fdistmap_fiberE keeps its statement                         *)
 (******************************************************************************)
 
@@ -169,92 +138,6 @@ Definition fiberE_landing_at_production_type :
 Definition fiberE_production_at_landing_type :
   ltac:(let t := type of (@uniform_fdistmap_fiberE) in exact t) :=
   @design_privacy.uniform_fdistmap_fiberE.
-
-(******************************************************************************)
-(*     2b. The generic mutations, moved out of dealer_privacy.v               *)
-(******************************************************************************)
-
-Section dealer_kernel_mutations.
-
-Variables (R : realType) (secretT deckT shuffleT viewT : finType).
-Variable secretP : R.-fdist secretT.
-Variable delta : secretT -> R.-fdist deckT.
-Variable nu : R.-fdist shuffleT.
-Variable view : secretT -> deckT -> shuffleT -> viewT.
-Variable x : viewT.
-Hypothesis Hmix : forall s, secretP s != 0 ->
-  fdistmap (fun dg => view s dg.1 dg.2) ((delta s) `x nu) =
-    fdist1 x.
-
-(* Expected failure: a dealer law with no shuffle.  The ascribed type is a law
-   on secretT * (deckT * shuffleT), while secretP `X delta is a law on secretT *
-   deckT, so the two types do not unify. *)
-Fail Definition dealer_shuffleP_missing_shuffle :
-    R.-fdist (secretT * (deckT * shuffleT)) :=
-  secretP `X delta.
-
-(* the positive control for the mutation below: with the common mixed law
-   supplied, the same spelling of dealer_shuffle_view_indep is the
-   independence statement *)
-Definition dealer_shuffle_view_indep_with_common_law :
-  @dealer_shuffleP R secretT deckT shuffleT secretP delta nu
-  |= @dealer_shuffle_view R secretT deckT shuffleT viewT secretP delta nu view
-     _|_ @dealer_shuffle_secret R secretT deckT shuffleT secretP delta nu :=
-  @dealer_shuffle_view_indep R secretT deckT shuffleT viewT secretP delta nu
-    view (fdist1 x) Hmix.
-
-(* Expected failure: the common mixed law premise dropped.  Without Hmix the
-   term still has the premise as an arrow in its type, so what is ascribed a
-   bare independence statement is a function into one. *)
-Fail Definition dealer_shuffle_view_indep_without_common_law :
-  @dealer_shuffleP R secretT deckT shuffleT secretP delta nu
-  |= @dealer_shuffle_view R secretT deckT shuffleT viewT secretP delta nu view
-     _|_ @dealer_shuffle_secret R secretT deckT shuffleT secretP delta nu :=
-  @dealer_shuffle_view_indep R secretT deckT shuffleT viewT secretP delta nu
-    view (fdist1 x).
-
-End dealer_kernel_mutations.
-
-Section carrier_transport_mutation.
-
-Variables (R : realType) (A B TA TB : finType).
-Variable P : R.-fdist A.
-Variables (f : A -> B) (X : B -> TA) (Y : B -> TB).
-Variable Ybad : A -> TB.
-
-(* Expected failure: a reader that is not a composite with f.  The transported
-   statement concludes with Y \o f, and Ybad is an unrelated function out of A,
-   so the ascribed type does not unify with the type of the transport. *)
-Fail Definition inde_RV_fdistmap_bad_reader :
-  fdistmap f P |= X _|_ Y -> P |= (X \o f) _|_ Ybad :=
-  proj1 (@inde_RV_fdistmap R A B TA TB P f X Y).
-
-End carrier_transport_mutation.
-
-Section product_section_mutation.
-
-Variables (R : realType) (D G V : finType).
-Variables (PD : R.-fdist D) (PG : R.-fdist G).
-Variables (f h : D -> G -> V).
-Hypothesis Hs : forall g, PG g != 0 ->
-  fdistmap (fun d => f d g) PD = fdistmap (fun d => h d g) PD.
-
-(* the positive control for the mutation below: with the section-wise premise
-   supplied, the same spelling is the equality of the two laws on the pair *)
-Definition fdistmap_prod_sectionE_with_sections :
-  fdistmap (fun dg => f dg.1 dg.2) (PD `x PG) =
-  fdistmap (fun dg => h dg.1 dg.2) (PD `x PG) :=
-  @fdistmap_prod_sectionE R D G V PD PG f h Hs.
-
-(* Expected failure: the section-wise premise dropped.  Without Hs the term
-   still has that premise as an arrow in its type, so what is ascribed a bare
-   equality of laws is a function into one. *)
-Fail Definition fdistmap_prod_sectionE_without_sections :
-  fdistmap (fun dg => f dg.1 dg.2) (PD `x PG) =
-  fdistmap (fun dg => h dg.1 dg.2) (PD `x PG) :=
-  @fdistmap_prod_sectionE R D G V PD PG f h.
-
-End product_section_mutation.
 
 (******************************************************************************)
 (*     3. Assumptions of every landed declaration                             *)
@@ -328,7 +211,7 @@ Print Assumptions psl211_perdeck_corow_size.
 Print Assumptions psl211_perdeck_seqE.
 Print Assumptions psl211_perdeck_testE.
 Print Assumptions psl211_perdeck_raw_countE.
-Print Assumptions psl211_perdeck_entry_perm_enum.
+Print Assumptions psl211_entry_perm_enum.
 Print Assumptions psl211_perdeck_ptbl_nth.
 Print Assumptions psl211_perdeck_raw_viewE.
 Print Assumptions psl211_perdeck_ptbl_enum.

@@ -41,16 +41,6 @@
 (* it its type, which is where the other three instances build theirs. This   *)
 (* file therefore imports nothing from the manifest layer.                    *)
 (*                                                                            *)
-(* The dealer route. The all-decks independence is obtained a second way,     *)
-(* from the dealer model of reconstruct/dealer_privacy.v, by placing the      *)
-(* chirality, the deck description and the cut in its sample space. The       *)
-(* route is the mixed-law condition, whose premise the per-cut deal count of  *)
-(* psl211_alldecks.v discharges. Two refutations follow it: the per-deck      *)
-(* condition has no solution under this dealer, and under a dealer laying     *)
-(* one fixed deck description the reading of three seats is not independent   *)
-(* of the chirality. Both restate or bound an existing result and replace     *)
-(* no proof.                                                                  *)
-(*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_alldecksP        == the law of the model, decks times cuts        *)
 (*   psl211_alldecks_secret  == the chirality of the sampled description      *)
@@ -69,14 +59,13 @@
 (*   psl211_dealer_view      == the coalition's reading as a function of the  *)
 (*                              dealer model's three coordinates              *)
 (*   psl211_dealer_mixed_law == the reading's law at one chirality,           *)
-(*                              averaged over deck description and cut        *)
-(*   psl211_perdeck_deal     == the deck description fixing the              *)
-(*                              counterexample                               *)
+(*                              averaged over deal and cut                    *)
+(*   psl211_perdeck_deal     == the deal fixing the counterexample            *)
 (*   psl211_perdeck_coalition == the three seats 0, 1 and 2                   *)
 (*   psl211_perdeck_view     == the reading that fixes the counterexample     *)
 (*   psl211_perdeck_fiber    == the cuts producing that reading               *)
-(*   psl211_fixed_deal_delta == the dealer laying one deck description at    *)
-(*                              both chiralities                              *)
+(*   psl211_fixed_deal_delta == the dealer laying one deal at both            *)
+(*                              chiralities                                   *)
 (*   psl211_fixed_dealP      == the dealer law at that kernel                 *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -107,15 +96,12 @@
 (*   psl211_dealerPE         == the reassociation carries the all-decks law   *)
 (*                              to the dealer model's law                     *)
 (*   psl211_dealer_sectionE  == at one cut the two chiralities send the       *)
-(*                              uniform law on deck descriptions to the same  *)
-(*                              reading law                                   *)
-(*   psl211_dealer_mixed_lawE == and so do they averaged over deck            *)
-(*                              description and cut                           *)
+(*                              uniform deal law to the same reading law      *)
+(*   psl211_dealer_mixed_lawE == and so do they averaged over deal and cut    *)
 (*   psl211_dealer_view_indep == independence in the dealer sample space      *)
 (*   psl211_alldecks_view_indep_via_dealer == psl211_alldecks_view_indep      *)
 (*                              obtained from dealer_shuffle_view_indep       *)
-(*   psl211_perdeck_raw_countE == at one deck description the two            *)
-(*                              chiralities have 0 and                        *)
+(*   psl211_perdeck_raw_countE == at one deal the two chiralities have 0 and  *)
 (*                              1 cuts producing one reading                  *)
 (*   psl211_perdeck_fiber_card_neq == the same as a statement about the       *)
 (*                              fibers in the group                           *)
@@ -123,14 +109,9 @@
 (*   psl211_dealer_view_indep_of_deck_unsat == the two premises of            *)
 (*                              dealer_shuffle_view_indep_of_deck have no     *)
 (*                              common solution at this instance's dealer     *)
-(*   psl211_fixed_deal_view_dep == under a dealer laying one fixed deck       *)
-(*                              description the reading of three seats is    *)
-(*                              not independent of the chirality             *)
-(*   psl211_dealer_viewE == the model's reading along the reassociation is    *)
-(*                              the instance's reading                        *)
-(*   psl211_dealer_secretE == and its secret the instance's chirality         *)
-(*   psl211_dealer_valid_forced == the all-decks dealer forces every validity *)
-(*                              predicate to accept psl211_perdeck_deal       *)
+(*   psl211_fixed_deal_view_dep == under a dealer laying one fixed deal the   *)
+(*                              reading of three seats is not independent of  *)
+(*                              the chirality                                 *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -562,7 +543,7 @@ Qed.
 (*     The same independence through the dealer model                         *)
 (******************************************************************************)
 
-(** dealT — a deck description: a chirality-free block index together with
+(** dealT — a deal description: a chirality-free block index together with the
     two labellings. *)
 Local Notation dealT := psl211_deal.
 
@@ -583,7 +564,7 @@ Local Opaque psl211_alldecks_view.
 Section psl211_dealer.
 Variable R : realType.
 
-(** psl211_deal_pos — the type of deck descriptions is inhabited, so it
+(** psl211_deal_pos — the type of deal descriptions is inhabited, so it
     carries a uniform law. *)
 Lemma psl211_deal_pos : (0 < #|[set: dealT]|)%N.
 Proof.
@@ -592,7 +573,7 @@ by exists (ord0, 1%g, 1%g); rewrite inE.
 Qed.
 
 (** psl211_dealer_delta — the all-decks dealer: whatever the chirality, the
-    deck description is drawn uniformly and independently of it.  This is the
+    deal description is drawn uniformly and independently of it.  This is the
     instance's dealer kernel, and its independence of the chirality is what
     makes the averaged symmetry of psl211_alldecks available. *)
 Definition psl211_dealer_delta (_ : bool) : R.-fdist dealT :=
@@ -688,7 +669,7 @@ Definition psl211_dealer_mixed_law (C : {set seatT}) (b : bool) :
     ((psl211_dealer_delta b) `x psl211_dealer_nu).
 
 (** psl211_dealer_sectionE — at one cut, the two chiralities send the uniform
-    law on deck descriptions to the same law on what a coalition of at most
+    law on deal descriptions to the same law on what a coalition of at most
     five seats reads.  This is the per-cut deal count of psl211_alldecks read
     as an equality of laws, and it is the only place where the instance's laid
     deck enters the bridge. *)
@@ -785,7 +766,7 @@ Local Transparent psl211_alldecks_view.
    the reading and the shuffle group symbolically. *)
 
 (** psl211_perdeck_deal — the deal that fixes the counterexample: block index
-    zero of the chirality's table, with both labellings the identity. *)
+    zero of the class's table, with both labellings the identity. *)
 Definition psl211_perdeck_deal : dealT := (ord0, 1%g, 1%g).
 
 (** psl211_perdeck_coalition — the three seats 0, 1 and 2. *)
@@ -797,16 +778,16 @@ Definition psl211_perdeck_coalition : {set seatT} :=
 Definition psl211_perdeck_view : viewT :=
   [ffun i => psl211_code12 (nth 0 [:: 0; 1; 5] (val i))].
 
-(** psl211_perdeck_seq b — the deck psl211_perdeck_deal names at chirality b,
-    as raw codes by position: a position of block zero carries its own rank in
-    that block, and every other position carries six plus its rank in the
-    complement, the identity labellings acting trivially. *)
+(** psl211_perdeck_seq b — the deck psl211_perdeck_deal names in class b, as
+    raw codes by position: a position of block zero carries its own rank in that
+    block, and every other position carries six plus its rank in the complement,
+    the identity labellings acting trivially. *)
 Definition psl211_perdeck_seq (b : bool) : seq nat :=
   let H := psl211_alldecks_row (b, psl211_perdeck_deal) in
   let K := psl211_alldecks_corow (b, psl211_perdeck_deal) in
   [seq (if p \in H then index p H else 6 + index p K) | p <- iota 0 12].
 
-(** psl211_perdeck_row_size — block zero of either chirality's table has six
+(** psl211_perdeck_row_size — block zero of either class's table has six
     positions, the heart block of a Steiner sextet. *)
 Lemma psl211_perdeck_row_size (b : bool) :
   size (psl211_alldecks_row (b, psl211_perdeck_deal)) = 6.
@@ -843,7 +824,7 @@ by rewrite Hin Hp.
 Qed.
 
 (** psl211_perdeck_raw_view sq t — the reading the coalition gets from the
-    deck sq under the cut whose table is t, written on raw data. *)
+    deck sq under the shuffle whose table is t, written on raw data. *)
 Definition psl211_perdeck_raw_view (sq t : seq nat) : viewT :=
   [ffun i => if val i \in [:: 0; 1; 2]
              then psl211_code12 (nth 0 sq (nth 0 t (val i)))
@@ -876,23 +857,23 @@ rewrite /psl211_perdeck_test; apply/idP/idP.
   + by rewrite nth_default.
 Qed.
 
-(** psl211_perdeck_raw_count b — how many of the 660 cuts carry the deck
-    of chirality b to psl211_perdeck_view. *)
+(** psl211_perdeck_raw_count b — how many of the 660 shuffles carry the deck
+    of class b to psl211_perdeck_view. *)
 Definition psl211_perdeck_raw_count (b : bool) : nat :=
   let sq := psl211_perdeck_seq b in
   count (psl211_perdeck_test sq) (unzip1 psl211_elem_table).
 
-(** psl211_perdeck_raw_countE — that count is zero at one chirality and one
-    at the other, which is the per-deck failure of the chirality symmetry: at
-    a fixed deck description the two chiralities do not have equally many cuts
+(** psl211_perdeck_raw_countE — that count is zero in one class and one in the
+    other, which is the per-deck failure of the chirality symmetry: at a fixed
+    deck description the two classes do not have equally many shuffles
     producing a given reading, even though summing over deals they do. *)
 Lemma psl211_perdeck_raw_countE :
   psl211_perdeck_raw_count true = 0 /\ psl211_perdeck_raw_count false = 1.
 Proof. by split; vm_compute. Qed.
 
-(** psl211_perdeck_entry_perm_enum — the 660 tabulated entries list the
-    shuffle group. *)
-Lemma psl211_perdeck_entry_perm_enum :
+(** psl211_entry_perm_enum — the 660 tabulated entries list the shuffle
+    group. *)
+Lemma psl211_entry_perm_enum :
   perm_eq (enum (pgg_G psl211_M))
     [seq psl211_entry_perm k | k <- iota 0 660].
 Proof.
@@ -908,7 +889,7 @@ apply: uniq_perm.
   exact: psl211_entry_perm_mem.
 Qed.
 
-(** psl211_perdeck_ptbl_nth — a cut's table reads off its images. *)
+(** psl211_perdeck_ptbl_nth — a shuffle's table reads off its images. *)
 Lemma psl211_perdeck_ptbl_nth (g : cutT) (i : seatT) :
   nth 0 (psl211_ptbl g) i = val (g i).
 Proof.
@@ -940,7 +921,7 @@ Lemma psl211_perdeck_ptbl_enum :
   perm_eq [seq psl211_ptbl g | g <- enum (pgg_G psl211_M)]
     (unzip1 psl211_elem_table).
 Proof.
-apply: (perm_trans (perm_map psl211_ptbl psl211_perdeck_entry_perm_enum)).
+apply: (perm_trans (perm_map psl211_ptbl psl211_entry_perm_enum)).
 rewrite -map_comp.
 have Heq :
     [seq (psl211_ptbl \o psl211_entry_perm) k | k <- iota 0 660] =
@@ -962,8 +943,8 @@ Qed.
    to a tactic that searches for a match. *)
 Local Opaque psl211_alldecks_view psl211_elem_table.
 
-(** psl211_perdeck_fiber b — the cuts of the group carrying the deck of
-    chirality b at psl211_perdeck_deal to psl211_perdeck_view. *)
+(** psl211_perdeck_fiber b — the shuffles of the group carrying the deck of
+    class b at psl211_perdeck_deal to psl211_perdeck_view. *)
 Definition psl211_perdeck_fiber (b : bool) : {set cutT} :=
   [set g in pgg_G psl211_M |
      psl211_alldecks_view psl211_perdeck_coalition
@@ -991,10 +972,11 @@ exact: (perm_filter _ psl211_perdeck_ptbl_enum).
 Qed.
 
 (** psl211_perdeck_fiber_card_neq — at one deck description the two
-    chiralities have different numbers of cuts producing one reading.  The
-    per-cut symmetry that the all-decks counting argument uses is therefore
-    a statement about the average over deck descriptions: at the deck
-    description psl211_perdeck_deal it fails. *)
+    chiralities have different numbers of shuffles producing one reading.  The
+    per-deal symmetry that the all-decks counting argument uses is therefore
+    genuinely a statement about the average over deals and not about a single
+    deal, so that symmetry is not available once a representative deck is
+    fixed. *)
 Lemma psl211_perdeck_fiber_card_neq :
   #|psl211_perdeck_fiber true| != #|psl211_perdeck_fiber false|.
 Proof.
@@ -1013,7 +995,7 @@ Qed.
 (* psl211_perdeck_raw_count is sealed for the rest of the file: nothing below
    needs its body, psl211_perdeck_raw_countE supplies both values, and leaving
    it transparent lets a unifier that falls back to conversion evaluate the
-   count over the 660 tabulated cuts. *)
+   count over the 660 tabulated shuffles. *)
 Local Opaque psl211_perdeck_raw_count.
 
 (** psl211_perdeck_massE b — at the deal psl211_perdeck_deal, the law of what
@@ -1089,7 +1071,7 @@ exact: etrans (Hlaw true psl211_perdeck_deal (Hpos true) (Hvalid true))
   (esym (Hlaw false psl211_perdeck_deal (Hpos false) (Hvalid false))).
 Qed.
 
-(** psl211_dealer_valid_forced — the all-decks dealer gives every deck
+(** psl211_dealer_valid_forced — the all-decks dealer gives every deal
     description positive mass, so the first premise of
     dealer_shuffle_view_indep_of_deck cannot exclude any deal: a validity
     predicate satisfying it accepts psl211_perdeck_deal at both chiralities.
@@ -1110,7 +1092,7 @@ Qed.
     solution, for every validity predicate and every candidate reading law.
     So of the model's two conditions only the mixed-law condition of
     dealer_shuffle_view_indep is available to this instance, and the uniform
-    deal law meets it. *)
+    deal law is the law that meets it. *)
 Lemma psl211_dealer_view_indep_of_deck_unsat (R : realType)
     (valid : bool -> psl211_deal -> bool) (mu : R.-fdist viewT) :
   (forall (b : bool) (d : psl211_deal),
@@ -1127,17 +1109,17 @@ exact: Hlaw.
 Qed.
 
 (** psl211_fixed_deal_delta — the degenerate dealer that lays one and the same
-    deck description whatever the chirality.  It is a dealer kernel in the
+    deal description whatever the chirality.  It is a dealer kernel in the
     sense of dealer_shuffleP, and it is named here so that the general model
     can be asked whether it claims privacy for it.  The kernel does not depend
     on the chirality at all, and what the coalition reads still does, because
-    psl211_alldecks_seq reads the chirality table at the chirality: one deck
+    psl211_alldecks_seq reads the class table at the chirality: one deal
     description names two different decks. *)
 Definition psl211_fixed_deal_delta (R : realType) (_ : bool) :
     R.-fdist psl211_deal := fdist1 psl211_perdeck_deal.
 
 (** psl211_fixed_dealP — the dealer law at that kernel: a uniform chirality, a
-    fixed deck description, a uniform cut. *)
+    fixed deal description, a uniform shuffle. *)
 Definition psl211_fixed_dealP (R : realType) :
     R.-fdist (bool * (psl211_deal * cutT)) :=
   @dealer_shuffleP R bool psl211_deal cutT (fdist_uniform card_bool)
@@ -1190,8 +1172,8 @@ have /card_gt0P[g0 Hg0] : (0 < #|psl211_perdeck_fiber false|)%N.
 move: Hg0; rewrite inE => /andP[Hg0G /eqP Hg0v].
 move: (H psl211_perdeck_view true).
 (* the joint vanishes term by term: off the fixed deal the deal factor is
-   zero, off the group the cut factor is zero, and on both the sample
-   would put its cut in the empty true fiber *)
+   zero, off the group the shuffle factor is zero, and on both the sample
+   would put its shuffle in the empty true fiber *)
 (* no /= and no case on a boolean numeral anywhere below: the sample carries
    psl211_perdeck_deal, whose permutations a simplification would try to
    compute, and the reading is only ever moved by conversion at an ascription
