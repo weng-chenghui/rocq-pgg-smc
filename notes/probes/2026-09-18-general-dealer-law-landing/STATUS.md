@@ -391,8 +391,32 @@ whose name is followed by an argument.
 | naming N1 | `dealer_privacy.v` now opens `fdist_scope`, `proba_scope`, `ring_scope`, with `ring_scope` innermost as its three siblings do. The file compiles unchanged. |
 | soundness S3 | The verbatim-transcription ascription for PSL(2,11) was missing; it is now `landing_fidelity.v` section 1c, in both directions. |
 
-Vocabulary after the pass, measured in Python over the landed block and over
-its target file:
+A second comment pass followed on 2026-09-19, answering naming audit round 2.
+Each file it touched is kept in `history/<name>.2026-09-19-before-fix2.v`, and
+both are code-identical to those copies after comments are stripped, checked
+in Python with a nesting-aware stripper. It rewrote the
+`psl211_perdeck_fiber_card_neq` comment once more, because the first rewrite
+left "it" with "the per-cut symmetry" as its grammatical antecedent, which
+would say that the symmetry the file's headline result rests on fails at
+`psl211_perdeck_deal`; the comment now says that the symmetry holds only in
+its per-cut form and that the statement with the roles exchanged is what
+`psl211_perdeck_deal` refutes. It deleted the rationale comment moved in the
+first pass, which duplicated the mutation comment directly beneath it word for
+word. It padded the seven header lines of `psl211_models_landing.v` that
+closed one column early, six of them introduced by the first pass, and
+rewrapped the `psl211_perdeck_raw_countE` entry so that no line opens with a
+bare numeral; every line of that header block is now exactly 80 bytes, and the
+four short header lines of the pgl27 copy are left alone because they are
+byte-identical to `instances/pgl27/pgl27_profile_privacy.v` and are that
+file's own. It brought three statement comments into line with the header
+glosses that had been normalised without them, at `psl211_perdeck_deal`,
+`psl211_perdeck_raw_countE` and `psl211_dealer_view_indep_of_deck_unsat`.
+And it replaced the "The dealer route." paragraph, which had called the route
+a condition rather than a route through one and had attributed "restate an
+existing result" to the two refutations, which restate nothing.
+
+Vocabulary after the first pass, measured in Python over the landed block and
+over its target file:
 
 | | class | chirality | shuffle (element) | shuffle group | cut | deal description | deck description |
 |---|---|---|---|---|---|---|---|

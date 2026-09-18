@@ -564,6 +564,8 @@ Definition pgl27_alldecks_dealer_view_law_with_validity :
     ((`U pgl27_G_pos) : R.-fdist (pgg_gT pgl27_M)) = @pgl27_dealer_mu R C Hdt
   := @pgl27_alldecks_dealer_view_law R C s d Hdt HC Huniq.
 
+(* the premises are declared coalition size first and validity last, so that
+   dropping validity leaves an arrow rather than shifting an argument *)
 (* Expected failure: the per-deck view law with the validity premise dropped.
    The two premises are declared coalition size first and validity last, so
    omitting the last argument leaves `uniq d ->` as an arrow in the term's
