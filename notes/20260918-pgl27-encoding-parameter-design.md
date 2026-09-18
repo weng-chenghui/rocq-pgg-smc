@@ -123,6 +123,6 @@ lemmas.
 ## Out of scope
 
 A second `ThresholdScheme`/`ReconPlug`/`ExecutionPlug`; word-shuffle privacy
-for `_r5`; manifest rows for `_r5`; a third pair would need `orbit_classE` of
-`pgl27_orbit.v` made non-Local (class recovery for `_r5` goes through
-heart-set equality with `_r7`).
+for `_r5`; manifest rows for `_r5`; a third pair whose heart positions differ from `orbit_encode`'s would need
+`orbit_classE` of `pgl27_orbit.v` made non-Local (class recovery for `_r7`
+goes through heart-set equality with `orbit_encode`).
