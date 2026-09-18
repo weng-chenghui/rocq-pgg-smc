@@ -32,26 +32,24 @@ Local Open Scope fdist_scope.
 (*     The colour census of den Boer's deck                                   *)
 (******************************************************************************)
 
-(* Counting a colour in den Boer's dealt row gives the same number at every
-   committed pair: three hearts and two clubs. The colour census is the
-   coarsening of the deal that the two bits leave fixed, and the level at
-   which a single seat's reading stops depending on them. *)
-Lemma fc_arrange_countE (a b : bool) (p : pred bool) :
+(* Every committed pair is dealt as the same multiset of cards: three hearts
+   and two clubs. The arrangement moves with the bits and the census does
+   not, which is the whole of what makes one revealed card carry nothing. *)
+Lemma fc_arrange_count (a b : bool) (p : pred bool) :
   count p (fc_arrange a b) = count p [:: true; true; true; false; false].
 Proof.
 by case: a; case: b; rewrite /fc_arrange /fc_negate /fc_encode /=;
    case: (p true); case: (p false).
 Qed.
 
-Section five_card_static_obs_const.
+Section five_card_sc_const.
 Variable R : realType.
 
 (* The card at a uniformly chosen position has the same law at every
-   committed pair. The arrangement moves with the two bits and the colour
-   census does not, and this is that census read as a distribution on card
-   positions. It is the level at which the spectral arm's two run arguments
-   become indistinguishable to a single seat. *)
-Lemma den_boer_layout_law_const (x x' : bool * bool) :
+   committed pair. It is the census above read as a distribution, and it is
+   the level at which the two run arguments of the spectral arm become
+   indistinguishable. *)
+Lemma den_boer_layout_law (x x' : bool * bool) :
   fdistmap (tnth (den_boer_layout x)) (fdist_uniform (card_ord 5))
   = fdistmap (tnth (den_boer_layout x')) (fdist_uniform (card_ord 5))
   :> R.-fdist 'I_5.
@@ -74,21 +72,20 @@ suff Hc : forall y : bool * bool,
   by rewrite !Hval !Hc.
 move=> y.
 rewrite (card_tnth_count (den_boer_layout y) (fun z : 'I_5 => z == c)).
-by rewrite /den_boer_layout /= count_map fc_arrange_countE.
+by rewrite /den_boer_layout /= count_map fc_arrange_count.
 Qed.
 
 (******************************************************************************)
 (*     S5: the ideal cut's reading does not depend on the committed pair      *)
 (******************************************************************************)
 
-(* The privacy threshold is two, so a coalition below it is empty or holds
-   one seat. At every such coalition the static endpoint reading of the
-   uniform rotation law has the same law at both committed pairs. One seat
-   reads one card of a deck whose colour census den Boer's encoding fixes
-   at three hearts and two clubs, so the reading cannot separate the pairs.
-   This is the invariance field of the spectral certificate, and it is
-   exact. It spends no mixing bound. *)
-Lemma five_card_static_obs_const
+(* Below the privacy threshold, a coalition reads the same law from the
+   uniform rotation law at every committed pair. The threshold is two, so the
+   coalition is empty or one seat, and one seat reads one position of a deck
+   whose colour census the encoding fixes. This is the fifth field of a
+   SpectralCert for the five-card instance, and it is exact: it spends no
+   mixing bound. *)
+Lemma five_card_sc_const
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   (#|C| < profile_k (instance_profile five_card_algebra))%N ->
   forall x x' : ex_inputT five_card_params,
@@ -99,8 +96,7 @@ Lemma five_card_static_obs_const
 Proof.
 move=> HC x x'.
 have HC2 : (#|C| < 2)%N := HC.
-have Hst :
-    forall i : 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1,
+have Hst : forall i : 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1,
     tnth (pi_starts (mp_PI (instance_profile five_card_algebra))) i = i.
   by move=> i; rewrite tnth_ord_tuple.
 case/boolP: (C == set0) => [/eqP HC0|HCn].
@@ -123,10 +119,10 @@ have Hfac : forall y : bool * bool,
   have Hii : i = i0 by apply/eqP; move: iC; rewrite Hi0 inE.
   by rewrite Hst Hii.
 rewrite !Hfac -!fdistmap_comp five_card_ideal_point_uniform.
-by rewrite (den_boer_layout_law_const x x').
+by rewrite (den_boer_layout_law x x').
 Qed.
 
-End five_card_static_obs_const.
+End five_card_sc_const.
 
-Print Assumptions den_boer_layout_law_const.
-Print Assumptions five_card_static_obs_const.
+Print Assumptions den_boer_layout_law.
+Print Assumptions five_card_sc_const.

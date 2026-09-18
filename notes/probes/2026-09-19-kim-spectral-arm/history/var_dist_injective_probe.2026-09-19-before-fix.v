@@ -23,34 +23,10 @@ Local Open Scope fdist_scope.
 (* The data processing inequality and its equality case at a globally
    injective reader. A reader of the form sigma |-> sigma s on a permutation
    group is not globally injective, so neither statement decides a distance
-   between two laws carried by the rotations from a bound on the reading of
-   one card position. *)
+   between two laws carried by one regular orbit from a bound on the reading
+   of one position. *)
 Check var_dist_fdistmap.
 Check var_dist_fdistmap_inj.
-
-(******************************************************************************)
-(*     The ceiling of a variation distance                                    *)
-(******************************************************************************)
-
-(* The variation distance between two laws on a finite carrier is at most
-   two, since it is the sum of the absolute differences and each law sums to
-   one. It is the scale a published number is read against: a certificate
-   says something about a coalition's two readings exactly in so far as its
-   number is below two, and the total variation distance of the literature
-   is half of this quantity. *)
-Lemma var_dist_le2 (R : realType) (A : finType) (P Q : R.-fdist A) :
-  var_dist P Q <= 2%:R.
-Proof.
-have Hf1 : forall d : R.-fdist A, \sum_(a : A) d a = 1.
-  by move=> d; rewrite -(FDist.f1 d); apply: eq_bigl => a; rewrite inE.
-rewrite /var_dist.
-have -> : (2%:R : R) = \sum_(a : A) (P a + Q a).
-  by rewrite big_split /= !Hf1 mulr2n.
-apply: ler_sum => a _.
-rewrite -[X in _ <= X + _](ger0_norm (FDist.ge0 P a)).
-rewrite -[X in _ <= _ + X](ger0_norm (FDist.ge0 Q a)).
-exact: ler_normB.
-Qed.
 
 (******************************************************************************)
 (*     Transport of the distance along a reader injective on the supports     *)
@@ -107,10 +83,10 @@ End var_dist_supp_inj.
 (*     Mutation: the same equality at a reader that separates nothing         *)
 (******************************************************************************)
 
-(* At a constant reader the transported distance is not the original one,
-   and it fails by the whole distance: two distinct point masses coincide
-   on the image. This fixes the boundary the support hypothesis draws. *)
-Lemma var_dist_fdistmap_const_neq (R : realType) :
+(* At a constant reader the equality fails, and it fails by the whole
+   distance: two distinct point masses coincide on the image. This is the
+   boundary the support hypothesis above draws. *)
+Lemma var_dist_const_reader_false (R : realType) :
   var_dist (fdistmap (fun _ : bool => tt) (fdist1 true : R.-fdist bool))
            (fdistmap (fun _ : bool => tt) (fdist1 false))
   <> var_dist (fdist1 true : R.-fdist bool) (fdist1 false).
@@ -118,8 +94,8 @@ Proof.
 by rewrite !fdistmap1 var_dist_refl => /esym/def_var_dist/fdist1_inj H.
 Qed.
 
-(* The support hypothesis is not discharged at a constant reader, so the
-   transport lemma does not apply there. *)
+(* The script of var_dist_fdistmap_supp_inj leaves the support hypothesis
+   open at that reader, and no fact about the reader discharges it. *)
 Fail Definition var_dist_const_reader_mutation (R : realType) :
   var_dist (fdistmap (fun _ : bool => tt) (fdist1 true : R.-fdist bool))
            (fdistmap (fun _ : bool => tt) (fdist1 false))
@@ -130,13 +106,10 @@ Fail Definition var_dist_const_reader_mutation (R : realType) :
 (*     A bijective reader on one finite type keeps a law uniform              *)
 (******************************************************************************)
 
-(* An injective endomap of a finite type leaves the uniform law fixed. It
-   is the endomap case of fdistmap_inj_uniform, whose conclusion is uniform
-   on the image and which does not simplify back to the uniform law when
-   the two types differ. The ideal cut of the five-card instance is uniform
-   on the rotations, and one card position of it is read by such an
-   endomap, so the ideal cut read at a position is the uniform law a
-   marginal bound is stated against. *)
+(* An injective endomap leaves the uniform law fixed. The ideal cut of the
+   five-card instance is the uniform law on the rotations, and the reading of
+   one seat is such an endomap of card positions, so the reading of the ideal
+   cut is the uniform law a marginal bound is stated against. *)
 Lemma fdistmap_inj_uniform_id (R : realType) (A : finType) (n : nat)
     (cA : #|A| = n.+1) (f : A -> A) :
   injective f ->
@@ -151,10 +124,9 @@ rewrite big1; last first.
 by rewrite addr0 !fdist_uniformE.
 Qed.
 
-(* A pushforward gives mass only to points in the image of the map. It is
-   how the support of a cut law defined as a word-shuffle pushforward is
-   read off the word evaluation. *)
-Lemma fdistmap_neq0_codom (R : realType) (A B : finType) (f : A -> B)
+(* A pushforward gives mass only to points of the image. It is how a support
+   statement about a law defined as a pushforward is read off the map. *)
+Lemma fdistmap_supp (R : realType) (A B : finType) (f : A -> B)
     (P : R.-fdist A) (b : B) :
   fdistmap f P b != 0 -> exists a : A, f a = b.
 Proof.
@@ -179,8 +151,7 @@ Lemma card_tnth_count (n : nat) (T : Type) (t : n.-tuple T) (p : pred T) :
   #|[pred k : 'I_n | p (tnth t k)]| = count p t.
 Proof. by rewrite -sum1_card -sum1_count big_tuple. Qed.
 
-Print Assumptions var_dist_le2.
 Print Assumptions var_dist_fdistmap_supp_inj.
 Print Assumptions fdistmap_inj_uniform_id.
 Print Assumptions card_tnth_count.
-Print Assumptions var_dist_fdistmap_const_neq.
+Print Assumptions var_dist_const_reader_false.

@@ -28,39 +28,35 @@ Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 
 (******************************************************************************)
-(*     A rotation is determined by one card position                          *)
+(*     The rotations act regularly on the card positions                      *)
 (******************************************************************************)
 
-(* The fifth power of the five-cycle is the identity, so the order of the
-   rotation group divides five. It is what makes the exponent of a cut a
-   residue modulo five, and so what lets the exponent be read back from the
-   image of a single card position. *)
-Lemma fc_sigma_pow5_eq1 : (fc_sigma ^+ 5 = 1)%g.
+(* The five-cycle has order dividing five. It is the fact that makes the
+   exponent of a cut a residue modulo five, so that the cut group of the
+   five-card instance has exactly the five elements the deck has positions. *)
+Lemma fc_sigma_pow5 : (fc_sigma ^+ 5 = 1)%g.
 Proof.
 apply/permP => i; rewrite perm1; apply: val_inj.
 rewrite /= fc_sigma_pow_val modnDr modn_small //.
 exact: ltn_ord.
 Qed.
 
-(* Two powers of the five-cycle that agree at one card position are equal:
-   the stabiliser of a position in the rotation group is trivial. This is
-   the step that carries a statement about the law of one card position
-   back to the law of the cut that produced it, which is what the spectral
-   arm needs and a per-position marginal bound does not supply. *)
-Lemma fc_sigma_pow_point_inj (s : 'I_5) (j k : nat) :
+(* A rotation is determined by where it sends one position. This is
+   regularity of the cyclic action, and it is what lets a statement about the
+   reading of a single seat be carried back to the cut that produced it. *)
+Lemma fc_rot_pow_faithful (s : 'I_5) (j k : nat) :
   (fc_sigma ^+ j)%g s = (fc_sigma ^+ k)%g s ->
   (fc_sigma ^+ j = fc_sigma ^+ k)%g.
 Proof.
 move=> /(congr1 val); rewrite !fc_sigma_pow_val => /eqP.
 rewrite eqn_modDl => /eqP Hjk.
-by rewrite -(expg_mod j fc_sigma_pow5_eq1) -(expg_mod k fc_sigma_pow5_eq1) Hjk.
+by rewrite -(expg_mod j fc_sigma_pow5) -(expg_mod k fc_sigma_pow5) Hjk.
 Qed.
 
-(* The five rotation amounts send one card position to five distinct
-   positions. It is the injectivity the uniform law on rotation amounts is
-   pushed forward along, so one card position read under the ideal cut
-   carries the uniform law on positions. *)
-Lemma fc_sigma_pow_ord_inj (s : 'I_5) :
+(* Reading one position separates the five rotation amounts. It is the same
+   regularity, stated on the exponents, and it is the injectivity the uniform
+   rotation law is pushed forward along. *)
+Lemma fc_rot_point_inj (s : 'I_5) :
   injective (fun k : 'I_5 => (fc_sigma ^+ k)%g s).
 Proof.
 move=> j k /(congr1 val); rewrite !fc_sigma_pow_val => H.
@@ -75,9 +71,8 @@ Qed.
 
 (* A word over Kim's alphabet evaluates to the rotation by the sum of its
    letters. The alphabet is the five powers of one five-cycle, so a word
-   shuffle never leaves the rotation group however long the word is, and
-   one statement at arbitrary length covers every Kim cut law. *)
-Lemma fc_kim_word_eval_powE (L : nat) (w : L.-tuple 'I_5) :
+   shuffle never leaves the cyclic group however long the word is. *)
+Lemma fc_word_eval_pow (L : nat) (w : L.-tuple 'I_5) :
   @word_eval (Gen_PGGTypes fc_kim_gens) L w
   = (fc_sigma ^+ (\sum_(i < L) \val (tnth w i)))%g.
 Proof.
@@ -87,48 +82,45 @@ transitivity (\prod_(i < L) (fc_sigma ^+ \val (tnth w i)))%g.
 by rewrite -(big_morph _ (expgD fc_sigma) (expg0 fc_sigma)).
 Qed.
 
-(* Every cut the weighted word shuffle gives mass to is a power of the
-   five-cycle, at every word length and every letter weighting. Kim's
-   alphabet is the five powers of one five-cycle, so no word shuffle leaves
-   the rotation group however long the word is, and every Kim cut law is
-   comparable with the uniform rotation law on that group. *)
-Lemma fc_kim_rho_supp_pow (R : realType) (L : nat) (W : R.-fdist 'I_5)
+(* Every cut the weighted word shuffle gives mass to is a rotation, at every
+   word length and every letter weighting. The three cut laws of the
+   five-card instance are instances of this one law, so the support fact
+   below is stated once. *)
+Lemma rho_words_rot_supp (R : realType) (L : nat) (W : R.-fdist 'I_5)
     (g : {perm 'I_5}) :
   @rho_from_words_weighted R 3 4 L fc_kim_gens W g != 0 ->
   exists k : nat, g = (fc_sigma ^+ k)%g.
 Proof.
-rewrite /rho_from_words_weighted => /fdistmap_neq0_codom [w Hw].
-by exists (\sum_(i < L) \val (tnth w i)); rewrite -Hw fc_kim_word_eval_powE.
+rewrite /rho_from_words_weighted => /fdistmap_supp [w Hw].
+by exists (\sum_(i < L) \val (tnth w i)); rewrite -Hw fc_word_eval_pow.
 Qed.
 
-(* Every cut the den Boer model's ideal gives mass to is a power of the
-   five-cycle. The ideal is the uniform law on the five rotation amounts
-   pushed along k |-> fc_sigma ^+ k, which is five_card_sample_cut_distE,
-   so the ideal and every Kim cut law are carried by one group and a
-   variation distance between them is a distance on that group. *)
-Lemma five_card_ideal_supp_pow (R : realType) (g : {perm 'I_5}) :
+(* The uniform rotation law of the den Boer model, as a pushforward of the
+   uniform law on rotation amounts. *)
+Lemma five_card_ideal_distE (R : realType) :
+  sa_cut_dist (five_card_sample R)
+  = fdistmap (fun k : 'I_5 => (fc_sigma ^+ k)%g) (fdist_uniform (card_ord 5)).
+Proof. exact: five_card_sample_cut_distE. Qed.
+
+(* The uniform rotation law is carried by the rotations. *)
+Lemma five_card_ideal_rot_supp (R : realType) (g : {perm 'I_5}) :
   sa_cut_dist (five_card_sample R) g != 0 ->
   exists k : nat, g = (fc_sigma ^+ k)%g.
 Proof.
-have Hid : sa_cut_dist (five_card_sample R)
-    = fdistmap (fun k : 'I_5 => (fc_sigma ^+ k)%g) (fdist_uniform (card_ord 5)).
-  exact: five_card_sample_cut_distE.
-rewrite Hid => /fdistmap_neq0_codom [k Hk].
+rewrite five_card_ideal_distE => /fdistmap_supp [k Hk].
 by exists (\val k); rewrite -Hk.
 Qed.
 
-(* One card position of the ideal cut carries the uniform law on card
-   positions. This is the law a shuffle's marginal bound is stated against,
-   so it is where the certificate's number and the ideal cut meet. *)
+(* Reading one seat of the uniform rotation law gives the uniform law on card
+   positions. This is the law the marginal bound of a shuffle is stated
+   against, so it is the point at which the certificate's number and the
+   ideal cut meet. *)
 Lemma five_card_ideal_point_uniform (R : realType) (s : 'I_5) :
   fdistmap (fun g : {perm 'I_5} => g s) (sa_cut_dist (five_card_sample R))
   = fdist_uniform (card_ord 5).
 Proof.
-have Hid : sa_cut_dist (five_card_sample R)
-    = fdistmap (fun k : 'I_5 => (fc_sigma ^+ k)%g) (fdist_uniform (card_ord 5)).
-  exact: five_card_sample_cut_distE.
-rewrite Hid fdistmap_comp.
-by apply: fdistmap_inj_uniform_id; exact: fc_sigma_pow_ord_inj.
+rewrite five_card_ideal_distE fdistmap_comp.
+by apply: fdistmap_inj_uniform_id; exact: fc_rot_point_inj.
 Qed.
 
 (******************************************************************************)
@@ -138,26 +130,22 @@ Qed.
 Section kim_cut_supports.
 Variable R : realType.
 
-(* Kim's cut law at word length one gives mass only to powers of the
-   five-cycle. Its distance to the ideal is therefore a distance inside the
-   rotation group, where one card position determines the cut. *)
-Lemma kim_single_cut_supp_pow (g : {perm 'I_5}) :
+(* The one-biased-cut law is carried by the rotations. *)
+Lemma kim_single_rot_supp (g : {perm 'I_5}) :
   sw_rho_dist (scb_bound (@fc_kim_security_bundle R (1 / 100)
     (kim_centi_lt R) (kim_centi_gt R) (kim_centi_spec R) 1)) g != 0 ->
   exists k : nat, g = (fc_sigma ^+ k)%g.
-Proof. exact: fc_kim_rho_supp_pow. Qed.
+Proof. exact: rho_words_rot_supp. Qed.
 
-(* Kim's cut law at word length seven gives mass only to powers of the
-   five-cycle. The repeated row's distance to the ideal is therefore a
-   distance inside the rotation group. *)
-Lemma kim_centi_cut_supp_pow (g : {perm 'I_5}) :
+(* The seven-biased-cut law is carried by the rotations. *)
+Lemma kim_centi_rot_supp (g : {perm 'I_5}) :
   sw_rho_dist (scb_bound (kim_security_bundle_centi R)) g != 0 ->
   exists k : nat, g = (fc_sigma ^+ k)%g.
-Proof. exact: fc_kim_rho_supp_pow. Qed.
+Proof. exact: rho_words_rot_supp. Qed.
 
 End kim_cut_supports.
 
-Print Assumptions fc_sigma_pow_point_inj.
-Print Assumptions fc_kim_rho_supp_pow.
+Print Assumptions fc_rot_pow_faithful.
+Print Assumptions rho_words_rot_supp.
 Print Assumptions five_card_ideal_point_uniform.
-Print Assumptions kim_centi_cut_supp_pow.
+Print Assumptions kim_centi_rot_supp.
