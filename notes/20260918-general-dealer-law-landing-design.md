@@ -2,11 +2,12 @@
 
 Date: 2026-09-18
 
-Status: landing probe run on 2026-09-18 and verified by the main session's own
-compile. Soundness audit GO on 2026-09-19. Naming audit NO-GO on 2026-09-19 on
-two comment sentences; its findings are folded in below and the fix pass on the
-landing copies is followed by a second naming round. No plan is written until
-both audits end in `VERDICT: GO`.
+Status: landing probe verified by the main session's own compile. Soundness
+audit GO on 2026-09-19. Naming audit GO in round 3 on 2026-09-19, after two
+rounds that each stopped on a comment sentence in the PSL block. Both audits
+state that the landing copies, with the three import substitutions recorded
+below, are fit to be written into the permanent files verbatim. Plan:
+`docs/superpowers/plans/2026-09-19-general-dealer-law-landing.md`.
 
 Sources: [[20260917-general-dealer-law-feasibility-design]] (C1 to C10, all
 GO), [[20260918-general-dealer-law-probe-result]], and the compiled probe
