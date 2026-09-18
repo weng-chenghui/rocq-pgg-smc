@@ -365,3 +365,36 @@ conjuncts and already state exactly those three, phrasing the run facts as
 what the observed execution record carries rather than as a conjunct; the
 header table gloss does the same. Not applied, because not requested and
 cosmetic: the naming auditor's N3, N7 and N8.
+
+## Fix pass 2, 2026-09-19, after naming round 2
+
+Second comment-only pass, before-fix copy in
+`history/five_card_rows_landing.2026-09-19-before-fix2.v`. The four blocks of
+`naming-audit-round2.md` were extracted from that report programmatically and
+spliced in byte-exactly, each checked to be exactly 80 bytes per boxed line
+before writing and each replaced range checked against its named first and
+last line: Fix A at lines 21-50, thirty for thirty; Fix B at 52-67, sixteen
+for sixteen; Fix C at 383-389, the repeated program's doc comment, six lines
+for seven; Fix D at 119-122, the biased `levelE` header gloss, three for four,
+which is round 1's N3. The blocking item was one false sentence: "The two
+levels are one constructor admitted by two criteria" reads `Sampled` and
+`AnalysisBridged` as one constructor, and they are two. The header now says
+that `AnalysisBridged` is one constructor with two admission criteria, that
+the manifest admits a row to it on any theorem about the sampled distribution
+and the observer while a program reaches it only through one of the two arms
+of `certify`, each of which produces a theorem of that same kind, so the
+Tableau's criterion is the stricter of the two and the gap at this row is the
+manifest's criterion met by a theorem no arm takes. The clause "is not an
+error" is gone, the judgement being carried by the strictness statement
+instead. Two header paragraphs now say "The uniform row is written ..." and
+"In the uniform row ..." where they enumerate five statements, which the two
+Kim programs, of two statements each, do not have. The repeated program's
+comment now says one starting position's endpoint, so it no longer disagrees
+with the endpoint lemma's own comment, and the reflow removes the ragged line
+"(* although the manifest". File-level result: 582 lines, 144 boxed comment
+lines all exactly 80 bytes, no line over 80 bytes, zero banned-vocabulary
+hits, and the code, with comments stripped, is line-for-line identical to the
+before-fix2 copy at 214 lines on both sides. `five_card_rows_landing.v` and
+`kim_fidelity.v` recompile clean, the latter still printing ten three-axiom
+blocks and one closed context. Of the round-2 report only Fix E is left, and
+it is an edit to the spec note rather than to a probe file.
