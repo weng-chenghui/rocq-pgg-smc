@@ -1,43 +1,65 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* five_card_rows: the five-card instance's uniform row, written as a program *)
+(* five_card_rows: the five-card instance's three rows, written as programs   *)
 (*                                                                            *)
 (* The security argument a five-card row makes is the threshold-sharing half  *)
 (* of den Boer's trick: two parties commit one bit each, the dealer assembles *)
 (* the five-card layout of that pair, the deck is cut at a uniformly drawn    *)
 (* rotation, each seat reads the card at its own position, and one seat alone *)
 (* is meant to learn nothing about the conjunction. Two is the privacy        *)
-(* threshold of the five-card scheme, so every statement below is about a     *)
-(* coalition of at most one of the five seats, and that restriction is the    *)
-(* scheme's own: leak_view_set records the exact leakage of every one of the  *)
-(* thirty-two reveal patterns, and sends to zero the patterns of at most one  *)
-(* card. The other half of den Boer's claim, that the full reveal discloses   *)
-(* the conjunction and nothing further about the two bits separately, is      *)
-(* input privacy and is not what this row states.                             *)
+(* threshold of the five-card scheme, so every coalition statement below is   *)
+(* about a coalition of at most one of the five seats, and that restriction   *)
+(* is the scheme's own: leak_view_set records the exact leakage of every one  *)
+(* of the thirty-two reveal patterns, and sends to zero the patterns of at    *)
+(* most one card. Not every statement below is a coalition statement. The     *)
+(* other half of den Boer's claim, that the full reveal discloses the         *)
+(* conjunction and nothing further about the two bits separately, is input    *)
+(* privacy, and five_card_row_biased_leak_bound states a ceiling on it under  *)
+(* the biased cut, at a reveal of any list of card positions.                 *)
 (*                                                                            *)
-(* The row is written in the statement surface of pgg_tableau_syntax.v over   *)
-(* the statements of pgg_tableau.v: the prefix names the ideal function,      *)
-(* drives the run in the encoded-run mode and adjoins the three run           *)
-(* facts, one further statement adjoins the uniform rotation model, one       *)
-(* adjoins the exact witness, and the last publishes the manifest row. The    *)
-(* published row is the manifest's five_card_row_uniform, and the rowE lemma  *)
-(* below holds by conversion, so the manifest's claim about this instance and *)
-(* the proof of it are one term. The manifest carries two further five-card   *)
-(* rows, the biased and the repeated ones, and neither is written as a        *)
-(* program here.                                                              *)
+(* The uniform row is written in the statement surface of                     *)
+(* pgg_tableau_syntax.v over the statements of pgg_tableau.v: the prefix      *)
+(* names the ideal function, drives the run in the encoded-run mode and       *)
+(* adjoins the three run facts, one further statement adjoins the uniform     *)
+(* rotation model, one adjoins the exact witness, and the last publishes the  *)
+(* manifest row. The published row is the manifest's five_card_row_uniform,   *)
+(* and the rowE lemma below holds by conversion, so the manifest's claim      *)
+(* about this instance and the proof of it are one term. The manifest's two   *)
+(* further five-card rows are written as programs below, and both stop at     *)
+(* Sampled. The repeated row stops there because the manifest does: what is   *)
+(* proved of the seven-cut model is the endpoint marginal of one starting     *)
+(* position under its cut law, which five_card_row_repeated_endpoint_lt       *)
+(* carries beside the program rather than inside it. The biased row stops     *)
+(* there although the manifest places it at AnalysisBridged, because the      *)
+(* theorem that carries it to that level, five_card_colour_view_leak_bound,   *)
+(* bounds a conditional mutual information, and neither arm of certify        *)
+(* carries a bound of that kind: the exact arm asks for independence of the   *)
+(* static coalition observation from a secret, which the development states   *)
+(* under the uniform cut and not under the biased one, and the spectral arm   *)
+(* asks for a variation distance to an ideal cut on the shuffle group         *)
+(* together with the constancy of a coalition's reading of that ideal, and    *)
+(* neither of those is proved at this instance. AnalysisBridged is one        *)
+(* constructor with two admission criteria. The manifest admits a row to it   *)
+(* on any theorem about the sampled distribution and the observer, which is   *)
+(* how manifest/pgg_analysis_status.v:55-59 defines the level and which a     *)
+(* leakage bound meets. A program reaches it only through one of the two arms *)
+(* of certify, each of which produces a theorem of that same kind, so the     *)
+(* Tableau's criterion is the stricter of the two and the gap at this row is  *)
+(* the manifest's criterion met by a theorem no arm takes. This is the        *)
+(* situation instances/s5/s5_rows.v already records for s5_row_word.          *)
 (*                                                                            *)
-(* No statement of the program is a theorem about this instance. What the     *)
-(* instance supplies it supplies inside a clause. The algebra, the ideal      *)
-(* function, the input carrier, the layout, the decoder, the committers and   *)
-(* the budget are the clause arguments of the first two statements;           *)
-(* den_boer_assemble_valid and the three run facts are the obligations those  *)
-(* same two statements ask for; the probability model is the argument of the  *)
-(* fourth statement and one security record the payload of the fifth. The     *)
-(* security mathematics reaches the row through that last payload alone, and  *)
-(* through two named facts: five_card_static_obsE, which identifies the       *)
-(* framework's direct computation of a coalition's view with the leakage      *)
-(* space's colour reading encoded back into card positions, and               *)
+(* No statement of a program is a theorem about this instance. What the       *)
+(* instance supplies it supplies inside a clause. In the uniform row the      *)
+(* algebra, the ideal function, the input carrier, the layout, the decoder,   *)
+(* the committers and the budget are the clause arguments of the first two    *)
+(* statements; den_boer_assemble_valid and the three run facts are the        *)
+(* obligations those same two statements ask for; the probability model is    *)
+(* the argument of the fourth statement and one security record the payload   *)
+(* of the fifth. The security mathematics reaches that row through the last   *)
+(* payload alone, and through two named facts: five_card_static_obsE, which   *)
+(* identifies the framework's direct computation of a coalition's view with   *)
+(* the leakage space's colour reading encoded back into card positions, and   *)
 (* five_card_viewS_indep, where leak_view_set gives that colour reading a     *)
 (* leakage of zero at a pattern of at most one card. The sharpness annotation *)
 (* pgl27_row_exact_tableau carries, that some coalition at the threshold      *)
@@ -53,6 +75,15 @@
 (*                              index                                         *)
 (*   five_card_row_uniform_tableau                                            *)
 (*                           == the uniform row as a program                  *)
+(*   five_card_row_repeated_tableau                                           *)
+(*                           == the repeated row as a program, stopping at    *)
+(*                              Sampled                                       *)
+(*   five_card_row_biased_tableau                                             *)
+(*                           == the biased row as a program, stopping at      *)
+(*                              Sampled                                       *)
+(*   five_card_row_repeated_at_manifest_level                                 *)
+(*                           == the repeated row's program read at the        *)
+(*                              manifest row's own completion level           *)
 (*   five_card_target        == the algebra with the ideal function a run of  *)
 (*                              it computes                                   *)
 (*   five_card_F             == the ideal functionality the run realises      *)
@@ -77,6 +108,26 @@
 (*                              names                                         *)
 (*   five_card_row_uniform_rowE                                               *)
 (*                           == the program publishes the manifest's row      *)
+(*   five_card_row_repeated_prefixE                                           *)
+(*   five_card_row_biased_prefixE                                             *)
+(*                           == each Kim row carries the prefix's algebra,    *)
+(*                              parameters and observed execution             *)
+(*   five_card_row_repeated_modelE                                            *)
+(*   five_card_row_biased_modelE                                              *)
+(*                           == each Kim row samples its manifest row's       *)
+(*                              model                                         *)
+(*   five_card_row_biased_levelE                                              *)
+(*                           == the manifest's completion level for the       *)
+(*                              biased row, which its program does not        *)
+(*                              reach                                         *)
+(*   five_card_row_repeated_endpoint_lt                                       *)
+(*                           == one starting position's endpoint marginal     *)
+(*                              under the repeated row's cut law              *)
+(*   kim_centi_small         == the smallness condition at bias one           *)
+(*                              hundredth                                     *)
+(*   five_card_row_biased_leak_bound                                          *)
+(*                           == Kim's input-privacy bound at the law the      *)
+(*                              biased row samples                            *)
 (*   five_card_FE            == that functionality is the conjunction at one  *)
 (*                              tolerated seat                                *)
 (*   five_card_realises_expected                                              *)
@@ -97,6 +148,7 @@ From pgg_smc Require Import five_card_group five_card_program.
 From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import den_boer_encoding den_boer_run.
 From pgg_smc Require Import five_card_leakage five_card_exec five_card_models.
+From pgg_smc Require Import kim_input_privacy.
 From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
 From pgg_smc Require Import pgg_tableau_syntax.
 
@@ -323,6 +375,158 @@ Theorem five_card_exact_view_secrecy (R : realType) (C : {set 'I_5})
                         five_card_exec_plug (five_card_sample R) 0 C))
                _|_ (Secret R)].
 Proof. exact: (view_secrecy_of five_card_row_uniform_tableau R tt C HC). Qed.
+
+(******************************************************************************)
+(*     Kim's two rows                                                         *)
+(******************************************************************************)
+
+(** The repeated row: the prefix above and the seven-cut model at bias one
+    hundredth. The program stops at Sampled, the level the manifest records
+    for this row. What is proved of this model is the law of one starting
+    position's endpoint under its cut, stated below beside the program, and
+    that is a statement about where a single starting position is sent and
+    not about what any set of seats reads, so no security payload follows
+    it. *)
+Definition five_card_row_repeated_tableau : Tableau Sampled :=
+  five_card_committed
+    sample kim_centi_family.
+
+(** The biased row: the same prefix and the single cut at the same bias. The
+    program stops at Sampled, one level below the AnalysisBridged the
+    manifest records for this row, because the theorem that carries the
+    manifest's level bounds a conditional mutual information and neither arm
+    of certify takes a bound of that kind. The header says which request of
+    each arm the development does not meet. The manifest's higher level for
+    this row rests on that theorem and not on any payload of the program. *)
+Definition five_card_row_biased_tableau : Tableau Sampled :=
+  five_card_committed
+    sample kim_biased_family.
+
+(** A model built over one run does not sample another. The two models above
+    are typed over this prefix's observed execution, so the two statements
+    hold; a family typed over a different instance's observed execution is
+    rejected where it is written. *)
+Fail Definition five_card_row_s5_family : Tableau Sampled :=
+  five_card_committed
+    sample S5Analysis.rand_family.
+
+(** The three rows are one prefix and three continuations: the algebra, the
+    run parameters and the observed execution of each Kim row are those of
+    five_card_committed, as terms, and the observed execution carries the
+    three run facts in its own fields. A reader comparing the three rows is
+    therefore comparing probability models and nothing else. *)
+Lemma five_card_row_repeated_prefixE :
+  [/\ projT1 (tableau_at five_card_row_repeated_tableau)
+      = projT1 (tableau_at five_card_committed),
+      projT1 (projT2 (tableau_at five_card_row_repeated_tableau))
+      = projT1 (projT2 (tableau_at five_card_committed))
+    & sp_obs (tableau_at five_card_row_repeated_tableau)
+      = ob_obs (tableau_at five_card_committed)].
+Proof. by split. Qed.
+
+(** The same for the biased row. *)
+Lemma five_card_row_biased_prefixE :
+  [/\ projT1 (tableau_at five_card_row_biased_tableau)
+      = projT1 (tableau_at five_card_committed),
+      projT1 (projT2 (tableau_at five_card_row_biased_tableau))
+      = projT1 (projT2 (tableau_at five_card_committed))
+    & sp_obs (tableau_at five_card_row_biased_tableau)
+      = ob_obs (tableau_at five_card_committed)].
+Proof. by split. Qed.
+
+(** The model each program samples is the model the manifest's row for it
+    names. Conversion decides both, so the manifest's description of these
+    two five-card paths and the programs are one term, as
+    five_card_row_uniform_rowE makes them for the uniform path. *)
+Lemma five_card_row_repeated_modelE :
+  sp_f (tableau_at five_card_row_repeated_tableau)
+  = apr_model five_card_row_repeated.
+Proof. by []. Qed.
+
+(** The same for the biased row and the manifest's biased row. *)
+Lemma five_card_row_biased_modelE :
+  sp_f (tableau_at five_card_row_biased_tableau)
+  = apr_model five_card_row_biased.
+Proof. by []. Qed.
+
+(** The repeated row's program, read at the completion level the manifest
+    records for that row. A level is a type index and not a value the
+    program carries, so this ascription is the one place where the
+    manifest's level and the program's level meet the kernel. *)
+Definition five_card_row_repeated_at_manifest_level
+  : Tableau (apr_completion five_card_row_repeated) :=
+  five_card_row_repeated_tableau.
+
+(** The manifest's completion level for the biased row is AnalysisBridged.
+    The program above reaches Sampled, so this equation and the rejected
+    ascription below are the two halves of the level gap: the equation is a
+    fact about the manifest's row and not about anything the program
+    proves. *)
+Lemma five_card_row_biased_levelE :
+  apr_completion five_card_row_biased = AnalysisBridged.
+Proof. by []. Qed.
+
+(** The biased row admits no ascription of the shape above: its program
+    reaches Sampled and the manifest records AnalysisBridged for it. The
+    two levels differ, and the difference is rejected by the kernel here
+    rather than asserted in prose. *)
+Fail Definition five_card_row_biased_at_manifest_level
+  : Tableau (apr_completion five_card_row_biased) :=
+  five_card_row_biased_tableau.
+
+(******************************************************************************)
+(*     What the two rows carry beside their programs                          *)
+(******************************************************************************)
+
+(** The law of the image of one starting position under the cut the repeated
+    row samples is within two to the minus fortieth of the uniform law on the
+    five card positions, in variation distance, at every starting position and
+    every real field. Both laws are laws on card positions, so this is one
+    position's endpoint marginal, and the statement names no seat, no set of
+    seats and no secret. It is kim_deal_centi_lt read at the law the program
+    names, through kim_centi_cut_distE. *)
+Lemma five_card_row_repeated_endpoint_lt (R : realType) (s : 'I_5) :
+  var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
+              (sa_cut_dist (amf_sample kim_centi_family R tt)))
+           (fdist_uniform (card_ord 5))
+  < 2%:R ^- 40.
+Proof. by rewrite kim_centi_cut_distE; exact: kim_deal_centi_lt. Qed.
+
+(** The bias one hundredth is smaller in absolute value than one fifth, the
+    smallness condition of kim_input_private. It is the fourth of the side
+    conditions on this bias, beside kim_centi_lt, kim_centi_gt and
+    kim_centi_spec of five_card_kim.v, and the one Kim's input-privacy bound
+    consumes. *)
+Lemma kim_centi_small (R : realType) : 0 < 5%:R^-1 - `|1 / 100 : R|.
+Proof.
+by rewrite subr_gt0 ger0_norm ?divr_ge0// ltr_pdivrMr ?ltr0n//
+   mulrC ltr_pdivlMr ?ltr0n// mul1r ltr_nat.
+Qed.
+
+(** The conditional mutual information between the two committed inputs and
+    the executed colour reading at a list of card positions, given the
+    conjunction the run computes, is at most kim_leak_bound at bias one
+    hundredth, under the law the biased row samples. It is
+    five_card_colour_view_leak_bound with every random variable typed at
+    that law, which is what sa_sampleP of the family's member is by
+    conversion. The statement is a numeric ceiling on that information and
+    not the assertion that the information vanishes, it is about a reading
+    at a list of card positions and not about a coalition of seats, and it
+    is carried beside the program above rather than by it. *)
+Lemma five_card_row_biased_leak_bound (R : realType) (A : seq nat) :
+  cond_mutual_info
+    (`p_ [% (kim_inputs (kim_centi_lt R) (kim_centi_gt R)
+             : {RV (sa_sampleP (amf_sample kim_biased_family R tt))
+                   -> bool * bool}),
+            ((fun w : five_card_leakage.Omega =>
+                five_card_exec_colour_view A w.1
+                  (five_card_group.fc_sigma ^+ w.2)%g)
+             : {RV (sa_sampleP (amf_sample kim_biased_family R tt))
+                   -> (size A).-tuple bool}),
+            (kim_secret (kim_centi_lt R) (kim_centi_gt R)
+             : {RV (sa_sampleP (amf_sample kim_biased_family R tt)) -> bool})])
+  <= kim_leak_bound (1 / 100 : R).
+Proof. exact: (five_card_colour_view_leak_bound _ _ (kim_centi_small R)). Qed.
 
 (******************************************************************************)
 (*     The ideal functionality                                                *)
