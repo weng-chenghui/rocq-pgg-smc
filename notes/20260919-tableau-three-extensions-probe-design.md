@@ -24,15 +24,25 @@ Three things the repository has proved cannot be written there today.
    distance between the word shuffle and the uniform law on the group by
    $2^{-40}$. No row carries it. The spectral arm cannot take it, and the reason
    is the arm's proposition and not a missing lemma. `SpectralPropAt` compares
-   the readings at every two run arguments. At PSL(2,11) the run argument is
-   the deck description, so that is a statement per deck, and
-   `psl211_dealer_view_indep_of_deck_unsat` shows the per-deck condition has no
-   solution at this instance. The probe of 2026-09-19 proved the certificate's
-   constancy field false at the field type, in both run modes
-   (`notes/probes/2026-09-19-psl211-sc-const/`). What PSL(2,11) does have is
-   independence on average over decks, under the uniform cut. The statement
-   the story needs is that the word model is close to that model, and the
-   Tableau has no proposition of that kind.
+   the readings at every two run arguments and takes no account of the law of
+   the run argument. In the all-decks mode the run argument is the public deck
+   description, so that is a statement per deck. The probe of 2026-09-19
+   proved the certificate's constancy field false at the field type
+   (`notes/probes/2026-09-19-psl211-sc-const/`), and its soundness audit
+   measured that the failure is not about the secret: under the uniform cut
+   the 660 cuts give 660 distinct readings at seats 0, 1 and 2, and two deck
+   descriptions of the same chirality already differ, by more than two of
+   opposite chirality do. By that diagnostic, which is a computation and not a
+   theorem, a spectral certificate at this model would have to publish a
+   number of at least $10/11$. Three seats nevertheless learn nothing about
+   the chirality under the all-decks law. What PSL(2,11) has is independence
+   on average over deck descriptions, under the uniform cut. The statement the
+   story needs is that the word model is close to that model, and the Tableau
+   has no proposition of that kind. In the dealer-dealt mode the run argument
+   is the secret alone and the same field fails for a different reason, the
+   group being 2-transitive and not 3-transitive. That mode has no private
+   ideal model to be close to, so extension A is about the all-decks mode
+   only.
 2. **Kim's leakage bound.** `five_card_row_biased_leak_bound` bounds a
    conditional mutual information, and it holds at the full reveal. Both arms
    are about a coalition below the threshold, one in exact independence and one
@@ -126,6 +136,7 @@ independence field, `five_card_colour_view_leak_bound` through `lc_bound`, and
 | B6 | The keyword measurement of `pgg_tableau_syntax.v` repeated for every new arm name. | `Check` of each new constructor name still passes after the notation is declared. |
 | D1 | Names and homes. | Each new declaration has a proposed name and file. The reverse-dependency closure of `manifest/pgg_tableau.v` is recomputed from `.Makefile.rocq.d`, and `psl211_endpoints` is confirmed absent from it. Generic lemmas go to a new file under `lib/`. |
 | D2 | What each landing would make false. | For each extension, the header sentences and recorded `Fail`s in the six files that a landing falsifies, by file and line. The known ones are the header of `five_card_rows.v` on two admission criteria and the header of `psl211_rows.v` on the absent spectral arm. |
+| D3 | What the manifest pins. | `manifest/pgg_analysis_manifest.v` pins each row's level and statuses with `Check (erefl : ...)` and names each row's theorems through the instance's analysis facade, which sits below the manifest. For each new program the probe lists the pins and header tables a landing changes, and says where the instance theorem has to live to be named by the facade. The previous batch missed both points twice (`notes/probes/2026-09-19-kim-spectral-arm/soundness-audit-round2.md`, G1 and G4). The manifest has seven reverse-dependants, `pgg_tableau.v` and `pgg_tableau_syntax.v` among them. |
 
 ## Cited objects
 
