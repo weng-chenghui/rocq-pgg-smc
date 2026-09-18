@@ -33,3 +33,4 @@ kim_rows_probe.v
 kim_biased_arms_probe.v
 five_card_rows_landing.v
 kim_fidelity.v
+kim_production_fidelity.v

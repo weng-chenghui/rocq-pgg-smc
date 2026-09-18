@@ -3,7 +3,8 @@
 Date: 2026-09-19. Spec: `notes/20260919-kim-tableau-sampled-design.md`.
 Verbatim source: the probe `notes/probes/2026-09-19-kim-tableau-sampled/`
 (PROBE), file `five_card_rows_landing.v`, commit 2e567e0. Audits: soundness GO,
-naming GO in round 3.
+naming GO in round 3. Executed on 2026-09-19; the as-built record is at the end
+of this file.
 
 This plan is also the as-built record. Every deviation is written under its
 task: before, after, why.
@@ -81,3 +82,27 @@ probe's `STATUS.md` and the project memory.
 A new `certify` arm. Any edit under `manifest/`. The paper. A coalition result
 for Kim's biased or repeated cuts. Moving `kim_centi_small` into
 `five_card_kim.v`. The `s5_row_word` program.
+
+## As built, 2026-09-19
+
+Branch `feat/kim-tableau-sampled`. Tasks 1 and 2 were carried out by an Opus
+`rocq-prover` subagent. The main session checked each pass condition itself,
+committed, and recompiled both files into a scratch directory.
+
+| Task | Compile | Result |
+|---|---|---|
+| 1, commit 8dc3ba0 | `instances/kim2025/five_card_rows.v`, 3.9 s, the only `.vo` rewritten in the tree | byte-identical to the audited landing copy; `git diff` removes 29 lines, all boxed comment lines of the header; the 146 code lines of the old file all survive in order among 214; no sentence slower than its landing counterpart beyond a tenth of a second |
+| 2 | `kim_production_fidelity.v`, 7.1 s, 1.93 GB | imports the production module only; ten `Print Assumptions` blocks report the three `boolp` axioms and `five_card_row_biased_levelE` is closed under the global context; the law each program samples is the law its manifest row's theorems name, by `erefl`, and the same `erefl` at the uniform family is rejected with a type error |
+
+Deviation. Before: the plan asked task 2 for two positive facts, the biased
+row's sample law and the repeated row's cut law. After: the file carries four,
+adding equality of the whole sample adapter for both rows. Why: adapter
+equality implies the cut-law equality and is the form the soundness audit
+verified, so the audited fact is repeated against the permanent file.
+
+Not done, by decision: `kim_centi_small` stays in `five_card_rows.v`. Its
+natural home is `instances/kim2025/five_card_kim.v`, beside `kim_centi_lt`,
+`kim_centi_gt` and `kim_centi_spec`. That file has 20 importers.
+
+Not verified, and why: nothing was compiled against the `.vo` files that
+commit 1654fde will produce, because the tree is not rebuilt (user rule).

@@ -398,3 +398,46 @@ before-fix2 copy at 214 lines on both sides. `five_card_rows_landing.v` and
 `kim_fidelity.v` recompile clean, the latter still printing ten three-axiom
 blocks and one closed context. Of the round-2 report only Fix E is left, and
 it is an edit to the spec note rather than to a probe file.
+
+## As built, 2026-09-19
+
+Tasks 1 and 2 of `docs/superpowers/plans/2026-09-19-kim-tableau-sampled.md`.
+`five_card_rows_landing.v` was copied over `instances/kim2025/five_card_rows.v`
+with `cp`, no line retyped and no line edited: `cmp` reports the two files
+byte identical and `diff` is empty. Before the copy the landing text was
+scanned for the words `landing`, `probe` and `kim_tableau_sampled`, zero hits
+each, and its fourteen `Require` lines name only `mathcomp`, `infotheo` and
+`pgg_smc` modules, so no probe file reaches the production tree. The file was
+then compiled from the repository root with `rocq compile -time` under the
+flags read out of the production `_CoqProject`, both tokens of each
+`-arg -w -arg <name>` line and the `-R` paths as written, with no `-o` and no
+`make`, so the `.vo` landed beside its source. Exit 0, 3.824 s summed per
+sentence, against 4.112 s for the landing copy, and no sentence more than a
+tenth of a second slower; the whole file is in fact 0.278 s faster. The four
+pass conditions hold: the diff against the landing copy is empty; all
+twenty-nine lines `git diff` removes are header comment lines of the old file,
+checked against the set of lines above the old file's first `From`; the old
+file's 146 code lines, comments stripped, all survive in order among the new
+file's 214, checked as a subsequence in Python; and `find` against a marker
+touched before the copy shows exactly one `.vo` rewritten anywhere in the
+tree, `instances/kim2025/five_card_rows.vo`, with only that file's own `.v`,
+`.glob`, `.vok`, `.vos` and `.aux` beside it. `git status --short` over
+tracked files shows one modified path.
+
+`kim_production_fidelity.v` is `kim_fidelity.v` with its import pointed at the
+production module `pgg_smc.five_card_rows` and at no probe module, the landing
+copy defining the same names under `kim_tableau_sampled_probe`. It compiles in
+6.929 s, exit 0, and reports the eleven landed declarations as ten blocks of
+the three `boolp` axioms with `five_card_row_biased_levelE`, the eighth,
+`Closed under the global context`. It also repeats against the permanent file
+the facts the two programs rest on, each by `erefl`: the biased row's law is
+Kim's own `kim_input_dist` at the centi side conditions; the manifest row's
+model slot at its unique index is `FiveCardAnalysis.centi_sample` for the
+repeated row and `FiveCardAnalysis.single_biased_sample` for the biased one;
+the cut law of the repeated row's slot is that of `FiveCardAnalysis.centi_sample`;
+and both programs have type `Tableau Sampled` when taken from the production
+module. The negative control is a `Fail` and it fires with a type error, not a
+parse error and not an unbound name: `cannot unify "sa_sampleP (amf_sample
+five_card_uniform_family R tt)" and "kim_input_dist (kim_centi_lt R)
+(kim_centi_gt R)"`, so the biased row's bound is stated at the biased row's
+law and the ascription is not vacuous about which law it names.

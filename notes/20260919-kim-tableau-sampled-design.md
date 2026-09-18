@@ -5,8 +5,9 @@ Date: 2026-09-19
 Status: probe verified by the main session's own compile. Soundness audit GO.
 Naming audit GO in round 3, after two rounds that each stopped on sentences of
 the file header. Both state that `five_card_rows_landing.v` is fit to replace
-`instances/kim2025/five_card_rows.v` byte for byte. Plan:
-`docs/superpowers/plans/2026-09-19-kim-tableau-sampled.md`.
+`instances/kim2025/five_card_rows.v` byte for byte. Plan and as-built record:
+`docs/superpowers/plans/2026-09-19-kim-tableau-sampled.md`. Landed on
+2026-09-19 in commit 8dc3ba0.
 
 ## Problem
 
