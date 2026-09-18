@@ -24,7 +24,7 @@ manifest table sees three unrelated rows. A reader who sees the programs sees
 one prefix and three continuations.
 
 The risk in fixing this is overclaiming. Kim's repeated-cut result bounds the
-endpoint marginal of one card. It is not a statement about what a coalition of
+endpoint marginal of one starting position. It is not a statement about what a coalition of
 seats learns. A program that carried it to the `AnalysisBridged` level would
 make endpoint mixing look like coalition privacy.
 
@@ -117,18 +117,28 @@ dependent type of `apr_model`.
 - `five_card_row_biased_modelE` and `five_card_row_repeated_modelE`: the family
   the program samples is the model of the manifest row, and both rows name the
   same observed execution. By conversion if possible.
-- `five_card_row_repeated_levelE`: the manifest row's completion level is
-  `Sampled`, the level the program reaches. For the biased row the
-  corresponding statement is false by design, the manifest says
-  `AnalysisBridged`, and the file records the gap in a comment and not in a
-  lemma.
-- `five_card_row_repeated_endpoint_lt`: for every seat, the endpoint marginal
-  of the cut law that the repeated row samples is within $2^{-40}$ of uniform
-  in variation distance. It is `kim_deal_centi_lt` carried along
-  `kim_centi_cut_distE`. Its comment says that it bounds one seat's endpoint
-  marginal and says nothing about a coalition or about a second secret.
+- `five_card_row_repeated_at_manifest_level`: the repeated program ascribed
+  the type `Tableau (apr_completion five_card_row_repeated)`, which makes the
+  manifest's level term and the program's level index one term. No separate
+  `levelE` lemma is landed for this row, because the ascription forces it.
+- `five_card_row_biased_levelE`: the manifest's completion level for the
+  biased row is `AnalysisBridged`. It stands beside the rejected ascription
+  `five_card_row_biased_at_manifest_level`, a `Fail`, and the two are the two
+  halves of the level gap of that row.
+- `five_card_row_s5_family`, a `Fail`: a program sampling a family typed over
+  another instance's observed execution is rejected where it is written.
+- `five_card_row_repeated_endpoint_lt`: for every starting position, the law
+  of its image under the cut that the repeated row samples is within $2^{-40}$
+  of the uniform law on the five card positions, in variation distance. It is `kim_deal_centi_lt` carried along
+  `kim_centi_cut_distE`. Its comment says that it bounds one starting
+  position's endpoint marginal and names no seat, no set of seats and no
+  secret. The file does not prove the identification of seats with card
+  positions, so the statement is about positions.
 
-Whether the biased row gets a restated bound is a probe question (K7).
+- `kim_centi_small` and `five_card_row_biased_leak_bound`: the smallness side
+  condition at bias one hundredth, and the ceiling on the conditional mutual
+  information between the inputs and the executed colour reading given the
+  secret, under the law the biased row samples (K7).
 
 ## Claim ledger
 
@@ -138,7 +148,7 @@ Whether the biased row gets a restated bound is a probe question (K7).
 | K2 | The same with `kim_biased_family`. | As K1. |
 | K3 | The two programs and the uniform program share their prefix as one value. | A lemma stating that the first components of the three stacks are equal, proved by `by []` or `erefl`. A mutation that samples a family typed over another observed execution is rejected, as `s5_rows.v:192` does. |
 | K4 | The family each program samples is its manifest row's model. | The `modelE` lemmas compile, by conversion. If conversion is too slow or fails, the probe reports the term that blocks it and the smallest lemma that does go through. |
-| K5 | The repeated row's manifest level is the level the program reaches. | `five_card_row_repeated_levelE` compiles. The manifest already checks `apr_completion five_card_row_repeated = Sampled` by `erefl`. |
+| K5 | The repeated row's manifest level is the level the program reaches, and the biased row's is not. | `five_card_row_repeated_at_manifest_level` compiles, the repeated program being accepted at the type `Tableau (apr_completion five_card_row_repeated)`. The same ascription for the biased program is rejected with a level mismatch, and `five_card_row_biased_levelE` states the manifest's level for that row. |
 | K6 | The endpoint bound holds on the cut law the repeated row samples. | `five_card_row_repeated_endpoint_lt` ends in `Qed`, from `kim_centi_cut_distE` and `kim_deal_centi_lt`, with `Print Assumptions` reported. A mutation with the bound tightened to $2^{-41}$, or with the seat replaced by a pair of seats, must fail, so that the lemma is shown to say what its comment says. |
 | K7 | Whether `five_card_colour_view_leak_bound` can be restated on the law the biased row samples in a few lines. | Either a compiled restatement, or a report of the exact obstruction: the theorem lives on `five_card_leakage.Omega` with Kim's input distribution, the row samples `kim_single_sample`. If it is not short, the row's comment cites the theorem and the manifest's three bridge lemmas and no lemma is added. |
 | K8 | Neither `certify` arm can be supplied for the biased row from existing theorems. | The probe states which field of `ExactWitness` and which fields of `SpectralCert` have no existing theorem behind them, by grep and by attempting the record. It does not try to prove a new security theorem. |
@@ -154,10 +164,10 @@ Whether the biased row gets a restated bound is a probe question (K7).
 | `five_card_row_uniform_tableau`, `five_card_row_uniform_rowE` | same file, `:286`, `:295` | The existing program and its link to the manifest row by conversion. |
 | `sample_step`, the `sample` notation | `manifest/pgg_tableau.v:502`, `manifest/pgg_tableau_syntax.v:366` | From an observed stack and a family over its observed execution to `Tableau Sampled`. |
 | `kim_biased_family`, `kim_centi_family` | `instances/kim2025/five_card_models.v:435`, `:443` | Unit-indexed families over `five_card_observed`. |
-| `kim_centi_cut_distE`, `kim_centi_witness_rhoE` | `instances/kim2025/five_card_models.v:402`, `:391` | The repeated model's cut law is the certificate bundle's weighted word shuffle at length seven. |
+| `kim_centi_cut_distE` | `instances/kim2025/five_card_models.v:402` | The repeated model's cut law is the certificate bundle's weighted word shuffle at length seven. |
 | `kim_deal_centi_lt` | `instances/kim2025/five_card_kim.v:646` | One seat's endpoint marginal under that shuffle is within $2^{-40}$ of uniform. |
 | `five_card_colour_view_leak_bound` | `instances/kim2025/five_card_models.v:360` | A conditional mutual information is at most `kim_leak_bound eps`, under three hypotheses on `eps`. |
-| `five_card_row_biased`, `five_card_row_repeated` | `manifest/pgg_analysis_manifest.v`, `:776` for the second | Manifest rows at `AnalysisBridged` and `Sampled`. |
+| `five_card_row_biased`, `five_card_row_repeated` | `manifest/pgg_analysis_manifest.v:766`, `:776` | Manifest rows at `AnalysisBridged` and `Sampled`. |
 | `ExactWitness`, `SpectralCert`, `SecurityPort` | `manifest/pgg_tableau.v:150` and above | The two arms of `certify`. |
 
 ## Soundness invariants
@@ -165,8 +175,8 @@ Whether the biased row gets a restated bound is a probe question (K7).
 1. No new axiom, assumed constant, `Admitted` or `Abort`. `Print Assumptions`
    is run from the probe, not from the permanent file.
 2. No statement or comment says or suggests that the repeated row, or the
-   $2^{-40}$ bound, gives coalition privacy. The bound is about one seat's
-   endpoint marginal under the cut law. It does not mention a secret.
+   $2^{-40}$ bound, gives coalition privacy. The bound is about one starting
+   position's endpoint marginal under the cut law. It does not mention a secret.
 3. No statement or comment says that the biased row is certified by the
    Tableau. Its program stops at `Sampled`. The manifest's higher level for it
    is attributed to the theorem that carries it.
