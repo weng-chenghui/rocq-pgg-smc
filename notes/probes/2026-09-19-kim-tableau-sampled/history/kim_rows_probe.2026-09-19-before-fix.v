@@ -73,13 +73,13 @@ Proof. by split. Qed.
 (* Expected failure: S5Analysis.rand_family is an AnalysisModelFamily over
    S5Analysis.rand_observed, a different observed execution, so sample_step
    has no payload type for it at this prefix. *)
-Fail Definition five_card_row_s5_family : Tableau Sampled :=
+Fail Definition five_card_row_alien_tableau : Tableau Sampled :=
   five_card_committed
     sample S5Analysis.rand_family.
 
-(* Expected failure: the same for PGL27Analysis.exact_family, which is typed
-   over pgl27_exec.pgl27_observed. *)
-Fail Definition five_card_row_pgl27_family : Tableau Sampled :=
+(* Expected failure: the same for the den Boer run's own observed execution
+   under the uniform family's type. *)
+Fail Definition five_card_row_alien2_tableau : Tableau Sampled :=
   five_card_committed
     sample PGL27Analysis.exact_family.
 

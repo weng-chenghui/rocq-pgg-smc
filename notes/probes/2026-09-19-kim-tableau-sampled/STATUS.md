@@ -13,13 +13,13 @@ manifest/` or the production `_CoqProject` was touched. No `make` was run.
 |---|---|---|
 | K1 | GO | `Definition five_card_row_repeated_tableau : Tableau Sampled := five_card_committed sample kim_centi_family.` elaborates in 0.000 s (`-time`, `kim_rows_probe.v` chars 1619-1732). |
 | K2 | GO | The same with `kim_biased_family`, 0.000 s (chars 1734-1846). |
-| K3 | GO | `five_card_row_repeated_prefixE` and `five_card_row_biased_prefixE`, `by split` in 0.033 s each, `Qed` 0.007 s. Two alien-family `Fail` mutations fire, error texts below. |
+| K3 | GO | `five_card_row_repeated_prefixE` and `five_card_row_biased_prefixE`, `by split` in 0.033 s each, `Qed` 0.007 s. Two `Fail` mutations sampling another instance's family fire, error texts below. |
 | K4 | GO | `five_card_row_repeated_modelE` and `five_card_row_biased_modelE`, `by []` in 0.000 s. Conversion decides both; `AnalysisModelSlot` iota-reduces to `AnalysisModelFamily` at `Sampled` and at `AnalysisBridged` alike. |
 | K5 | GO | Stronger than the spec asked: `Definition five_card_row_repeated_at_manifest_level : Tableau (apr_completion five_card_row_repeated) := five_card_row_repeated_tableau.` typechecks. The biased analogue is a recorded `Fail`; `five_card_row_biased_levelE : apr_completion five_card_row_biased = AnalysisBridged` is `by []`. |
 | K6 | GO | `five_card_row_repeated_endpoint_lt`, `by rewrite kim_centi_cut_distE; exact: kim_deal_centi_lt`, 0.002 s tactic, 0.002 s `Qed`. Classical trio only. Both mutations fail at the `exact:` step. |
 | K7 | GO, with one new side condition | `five_card_row_biased_leak_bound`, one `exact:`. Needs `kim_centi_small`, the fourth side condition at bias one hundredth, which the tree does not carry. |
 | K8 | NO, reported | Neither arm can be supplied. Exact arm: `ew_indep` has no theorem. Spectral arm: `sc_b`, `sc_Hd`, `sc_ideal` build; `sc_close` and `sc_const` have no theorem. |
-| K9 | GO | The reverse-dependency closure of `instances/kim2025/five_card_rows.v` in `.Makefile.rocq.d` contains no other `.v` file. |
+| K9 | GO | The forward closure of `instances/kim2025/five_card_rows.vo` in `.Makefile.rocq.d` contains no other module's `.vo`, and a whole-tree scan finds `five_card_rows` on one line only, this file's own header. |
 | K10 | GO | Whole-word scan of eleven new names over 521 `.v` files: zero hits. |
 | K11 | GO | Header sentence replaced, title line and both header tables updated; the landing copy compiles. |
 
@@ -51,14 +51,14 @@ the cut law alone.
 
 ## Mutation error first lines
 
-K3, alien family, in `kim_rows_probe.v` and in the landing copy:
+K3, `five_card_row_s5_family`, in `kim_rows_probe.v` and in the landing copy:
 
     The term "S5Analysis.rand_family" has type
      "AnalysisModelFamily s5_exec.s5_rand_observed"
     while it is expected to have type
      "FamPayload (tableau_at five_card_committed)".
 
-K3, second alien family, probe only:
+K3, `five_card_row_pgl27_family`, probe only:
 
     The term "PGL27Analysis.exact_family" has type
      "AnalysisModelFamily pgl27_exec.pgl27_observed"
@@ -108,10 +108,18 @@ target, and taking the transitive closure forward from
     closure non-.v targets: ['instances/kim2025/five_card_rows.required_vos']
     closure size          : 1
 
-The one non-`.v` target is that file's own auxiliary target, not another
-file. Sanity check on the same traversal: `manifest/pgg_tableau.vo` has 20
-dependent targets, so the closure is empty because nothing imports this file
-and not because the traversal is broken. Editing `five_card_rows.v` therefore
+That output is restated here as the independent soundness audit verified it,
+because "closure `.v` files: NONE" is vacuous on its own: a `.v` file is
+never a Make target, so no traversal of this file could ever return one. The
+two decisive facts are that the forward closure of
+`instances/kim2025/five_card_rows.vo` contains no other module's `.vo`, only
+that file's own auxiliary targets, and that a whole-tree scan for the string
+`five_card_rows` finds one line, this file's own header. The auditor's
+traversal reported three auxiliary targets where mine reported one, a
+difference in which suffixes were seeded and not in the conclusion. Sanity
+check on the same traversal: `manifest/pgg_tableau.vo` has 20 dependent
+targets, so the closure is empty because nothing imports this file and not
+because the traversal is broken. Editing `five_card_rows.v` therefore
 recompiles that file alone, as the spec's decision 7 says.
 
 ## K10, the collision scan
@@ -177,20 +185,25 @@ Landed in `five_card_rows_landing.v`, eleven declarations: the two programs,
 the two `prefixE`, the two `modelE`, `five_card_row_repeated_at_manifest_level`,
 `five_card_row_biased_levelE`, `five_card_row_repeated_endpoint_lt`,
 `kim_centi_small` and `five_card_row_biased_leak_bound`. Two `Fail`
-mutations: the alien family (the S5 one) and the biased row at the manifest's
-level.
+mutations: `five_card_row_s5_family`, the program sampling a family typed
+over another instance's observed execution, and
+`five_card_row_biased_at_manifest_level`, the biased program ascribed the
+manifest row's completion level.
 
 `five_card_row_repeated_levelE : apr_completion five_card_row_repeated =
-Sampled` was NOT landed. The ascription
+Sampled` was NOT landed, for one reason and one only. The ascription
 `Tableau (apr_completion five_card_row_repeated)` already forces
 `apr_completion five_card_row_repeated` to be convertible to `Sampled`,
 because `TableauAt` takes the level as a parameter, so the equation adds
-nothing the ascription does not already check; and the manifest itself checks
-that equation at `manifest/pgg_analysis_manifest.v:1785`. The biased row's
-level is landed as a lemma because there is no ascription to carry it, the
-ascription being the recorded `Fail` beside it.
+nothing the ascription does not already check. The biased row's level is
+landed as a lemma because there is no ascription to carry it, the ascription
+being the recorded `Fail` beside it. That the manifest checks the repeated
+equation itself, at `manifest/pgg_analysis_manifest.v:1787`, is NOT a reason
+to drop the lemma and was wrongly given as one in the first version of this
+file: the manifest checks the biased equation too, at `:1778`, by the same
+`Timeout 60 Check (erefl : ...)` idiom, and the biased lemma is landed.
 
-Kept in the probe and not landed: the second alien family (PGL(2,7)), the two
+Kept in the probe and not landed: `five_card_row_pgl27_family`, the two
 K6 mutations, and the three buildable `SpectralCert` fields. The K6 mutations
 are `Fail Definition ... := ltac:(rewrite ...; exact: ...)` terms, and the
 one `Fail` this file already carries, `five_card_F_or`, is a clean `erefl`
@@ -296,6 +309,15 @@ from theorems that exist today.
    `kim_inputs`, `kim_secret` and `kim_leak_bound`. It adds no edge to the
    build graph: `five_card_models`, already required by this file, requires
    `kim_input_privacy`.
+6. Three line numbers in the note's `Cited objects` table are wrong. The row
+   for `ExactWitness`, `SpectralCert` and `SecurityPort` gives
+   `manifest/pgg_tableau.v:150 and above`; the three records are declared at
+   `:114`, `:131` and `:149`. The same table gives no line for
+   `five_card_row_biased`, which is at `manifest/pgg_analysis_manifest.v:766`.
+7. The note names neither landed mutation. Its closing list says only "the
+   program sampling another instance's family, and the biased program at the
+   manifest's level"; the identifiers are `five_card_row_s5_family` and
+   `five_card_row_biased_at_manifest_level`.
 
 ## Implementation-plan notes
 
@@ -310,3 +332,36 @@ from theorems that exist today.
   `s5_rows.v` records as missing for `s5_row_word`. If either is ever proved
   for the five-card cut, the biased row's comment and the file header both
   name the gap and would both need revising.
+
+## Fix pass, 2026-09-19, after the two independent audits
+
+One comment, header and rename pass over `five_card_rows_landing.v`, with the
+before-fix copies of the three touched `.v` files kept in `history/`, which is
+not in `_CoqProject`. No statement, proof or type changed: with comments
+stripped and the one rename applied, the file is line-for-line identical to
+`history/five_card_rows_landing.2026-09-19-before-fix.v`, 214 code lines on
+both sides, and it removes no code line of the production original. Applied:
+the header's opening paragraph, which promised that every statement below is
+about a coalition of at most one seat and that input privacy is not stated
+here, both false once `five_card_row_biased_leak_bound` lands, replaced by the
+naming auditor's nine lines; the mutation `five_card_row_alien_tableau`
+renamed `five_card_row_s5_family`, a metaphor replaced by the combination that
+is rejected, and the probe's second mutation renamed
+`five_card_row_pgl27_family` to match; statement comments added to
+`five_card_row_biased_prefixE` and `five_card_row_biased_modelE`; the comment
+of `five_card_row_biased_levelE` rewritten to say that it and the rejected
+ascription are the two halves of the level gap; "seat" replaced by "starting
+position" for the index of the endpoint bound in the statement comment, the
+header sentence and the Key results gloss, since this file does not prove the
+identification of seats with card positions; the biased program's comment
+shortened to point at the header rather than repeat it; and the header given
+the two-criteria sentence, that the manifest admits a row to AnalysisBridged
+on any theorem about the sampled distribution and the observer
+(`manifest/pgg_analysis_status.v:55-59`), which a leakage bound meets, while a
+program reaches that level only through one of the two arms of `certify`, so
+both assignments are correct and the manifest's level for this row is not an
+error. The two `prefixE` comments were checked against the landed three
+conjuncts and already state exactly those three, phrasing the run facts as
+what the observed execution record carries rather than as a conjunct; the
+header table gloss does the same. Not applied, because not requested and
+cosmetic: the naming auditor's N3, N7 and N8.
