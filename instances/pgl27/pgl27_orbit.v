@@ -344,12 +344,14 @@ apply: uniq_perm; first exact: enum_uniq.
 by move=> x; rewrite mem_enum inE mem_filter -enum_ord8 mem_enum inE andbT.
 Qed.
 
-(** orbit_encode — a distinct-card deck whose heart four-subset has class b.
-    The encoder dealing a chosen one-bit secret. *)
+(** orbit_encode — a distinct-card deck whose heart four-subset has class b:
+    0 1 2 3 4 5 6 7 for the secret false and 0 1 2 4 3 5 7 6 for the secret
+    true. The encoder dealing a chosen one-bit secret, and the deck pair the
+    eight-card scheme executes. *)
 Definition orbit_encode (b : bool) : 8.-tuple 'I_8 :=
   if b then [tuple @Ordinal 8 0 isT; @Ordinal 8 1 isT; @Ordinal 8 2 isT;
                    @Ordinal 8 4 isT; @Ordinal 8 3 isT; @Ordinal 8 5 isT;
-                   @Ordinal 8 6 isT; @Ordinal 8 7 isT]
+                   @Ordinal 8 7 isT; @Ordinal 8 6 isT]
   else [tuple @Ordinal 8 0 isT; @Ordinal 8 1 isT; @Ordinal 8 2 isT;
               @Ordinal 8 3 isT; @Ordinal 8 4 isT; @Ordinal 8 5 isT;
               @Ordinal 8 6 isT; @Ordinal 8 7 isT].
