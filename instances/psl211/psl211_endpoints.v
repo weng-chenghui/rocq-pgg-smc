@@ -49,4 +49,8 @@ Import Prenex Implicits.
     side. *)
 Lemma psl211_profile_endpoints :
   profile_endpoints_stmt psl211_algebra psl211_fuel.
-Proof. Time by vm_compute. Time Qed.
+Proof.
+  Time by vm_compute.
+  Optimize Proof.
+  Optimize Heap.
+Time Qed.
