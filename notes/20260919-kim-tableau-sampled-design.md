@@ -296,8 +296,9 @@ Folded in:
 - The level gap of the biased row is explained by the two criteria for one
   constructor. The manifest admits a row to `AnalysisBridged` on any theorem
   about the sampled distribution and the observer. The Tableau admits it only
-  through an arm of `certify`. Both assignments are correct under their own
-  definitions, and the manifest does not overclaim. The exposition sits in the
+  through an arm of `certify`. Each arm produces a theorem of that same kind,
+  so the Tableau's criterion is the stricter of the two, and the gap at this
+  row is the manifest's criterion met by a theorem no arm takes. The exposition sits in the
   header, and the biased program's comment is shortened to point at it.
 - The endpoint bound is worded for a starting position, not a seat.
 - `five_card_row_biased_prefixE`, `five_card_row_biased_modelE` and
@@ -306,6 +307,18 @@ Folded in:
 - `prefixE` states three conjuncts. That the observed execution carries the
   three run facts is a remark about the record, not part of the statement, and
   the comment says no more than the statement.
+
+Two wordings elsewhere in this note keep the word seat on purpose. "One seat's
+endpoint marginal" in the Cited objects row for `kim_deal_centi_lt` and "a pair
+of seats" in ledger row K6 describe the upstream lemma and a probe mutation,
+both outside the landed text, and are left as their sources write them.
+
+Naming round 2 stopped on one sentence of the passage just described, which
+called the two levels one constructor. `Sampled` and `AnalysisBridged` are two
+constructors, and the point is that `AnalysisBridged` has two admission
+criteria. The same round asked that the header speak of the uniform row where
+it enumerates five statements, since the two Kim programs have two each, and
+that the repeated program's comment stop saying seat.
 
 Kept, by the naming audit's judgement: the `_tableau` suffix at the type
 `Tableau Sampled`, the name `five_card_row_repeated_at_manifest_level`, the
