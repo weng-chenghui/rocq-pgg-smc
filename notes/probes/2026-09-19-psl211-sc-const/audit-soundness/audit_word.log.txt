@@ -1,0 +1,92 @@
+rocq1: waiting for the Rocq lock
+Chars 66 - 100 [From~HB~Require~Import~structu...] 0.047 secs (0.039u,0.007s)
+Chars 101 - 173 [From~mathcomp~Require~Import~s...] 0.035 secs (0.031u,0.003s)
+Chars 174 - 249 [From~mathcomp~Require~Import~d...] 0.093 secs (0.088u,0.004s)
+Chars 250 - 321 [From~mathcomp~Require~Import~m...] 1.395 secs (1.351u,0.042s)
+Chars 322 - 363 [From~mathcomp~Require~Import~b...] 0.717 secs (0.695u,0.021s)
+File "/private/tmp/claude-501/-Users-cheng-huiweng-Projects-coq-rocq-pgg-smc/493d5ea4-6d9f-45fd-89c2-07339e63cb36/scratchpad/psl_audit/audit_word.v", line 7, characters 0-69:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+Chars 364 - 433 [From~infotheo~Require~Import~r...] 1.281 secs (1.241u,0.039s)
+Chars 434 - 502 [From~pgg_smc~Require~Import~sm...] 0.017 secs (0.015u,0.001s)
+Chars 503 - 583 [From~pgg_smc~Require~Import~pg...] 0.02 secs (0.018u,0.001s)
+Chars 584 - 663 [From~pgg_smc~Require~Import~pg...] 0. secs (0.u,0.s)
+Chars 664 - 734 [From~pgg_smc~Require~Import~pg...] 0.002 secs (0.002u,0.s)
+Chars 735 - 802 [From~pgg_smc~Require~Import~pg...] 0. secs (0.u,0.s)
+Chars 803 - 877 [From~pgg_reconstruct~Require~I...] 0. secs (0.u,0.s)
+Chars 878 - 948 [From~pgg_reconstruct~Require~I...] 0.001 secs (0.001u,0.s)
+Chars 949 - 990 [From~pgg_smc~Require~Import~pg...] 0. secs (0.u,0.s)
+Chars 991 - 1061 [From~pgg_smc~Require~Import~pg...] 0.577 secs (0.567u,0.009s)
+Chars 1062 - 1102 [From~pgg_smc~Require~Import~pg...] 0.001 secs (0.u,0.s)
+Chars 1103 - 1157 [From~pgg_smc~Require~Import~ps...] 0. secs (0.u,0.s)
+Chars 1158 - 1227 [From~pgg_smc~Require~Import~ps...] 0. secs (0.u,0.s)
+Chars 1228 - 1303 [From~pgg_smc~Require~Import~ps...] 0. secs (0.u,0.s)
+Chars 1304 - 1361 [From~pgg_smc~Require~Import~ps...] 0. secs (0.u,0.s)
+Chars 1362 - 1426 [From~psl211_sc_const_probe~Req...] 0. secs (0.u,0.s)
+Chars 1427 - 1497 [From~psl211_sc_const_probe~Req...] 0. secs (0.u,0.s)
+Chars 1499 - 1522 [Set~Implicit~Arguments.] 0. secs (0.u,0.s)
+Chars 1523 - 1545 [Unset~Strict~Implicit.] 0. secs (0.u,0.s)
+Chars 1546 - 1570 [Unset~Printing~Implicit~Defens...] 0. secs (0.u,0.s)
+Chars 1571 - 1591 [Import~GRing.Theory.] 0. secs (0.u,0.s)
+Chars 1592 - 1610 [Import~Num.Theory.] 0. secs (0.u,0.s)
+Chars 1612 - 1641 [#[local]~Open~Scope~fdist_scope.] 0. secs (0.u,0.s)
+Chars 1642 - 1671 [#[local]~Open~Scope~proba_scope.] 0. secs (0.u,0.s)
+Chars 1672 - 1700 [#[local]~Open~Scope~ring_scope.] 0. secs (0.u,0.s)
+Chars 1702 - 1743 [#[local]~Notation~cutT~:=~(pgg...] 0. secs (0.u,0.s)
+Chars 1745 - 1822 [#[local]~Opaque~psl211_alldeck...] 0. secs (0.u,0.s)
+fun (R : realType) (A : PGGAlgebraic) (E : ExecutionParams A)
+  (sa : SampleAdapter R (instance_exec E)) (cert : SpectralCert sa) =>
+sc_const cert : sc_const_prop E (sc_ideal cert)
+     : forall (R : realType) (A : PGGAlgebraic) (E : ExecutionParams A)
+         (sa : SampleAdapter R (instance_exec E)) 
+         (cert : SpectralCert sa),
+       sc_const_prop E (sc_ideal cert)
+Chars 1904 - 2113 [Check~~~fun~(R~:~realType)~(A~...] 0.001 secs (0.001u,0.s)
+Chars 2298 - 2737 [Definition~audit_mk~(R~:~realT...] 0.002 secs (0.002u,0.s)
+erefl
+:
+ex_inputT psl211_alldecks_params =
+(bool * ('I_132 * {perm 'I_6} * {perm 'I_6}))%type
+     : ex_inputT psl211_alldecks_params =
+       (bool * ('I_132 * {perm 'I_6} * {perm 'I_6}))%type
+Chars 2950 - 3015 [Check~erefl~:~ex_inputT~psl211...] 0.002 secs (0.002u,0.s)
+(true, psl211_perdeck_deal) : ex_inputT psl211_alldecks_params
+     : ex_inputT psl211_alldecks_params
+Chars 3016 - 3087 [Check~(true,~psl211_perdeck_de...] 0. secs (0.u,0.s)
+(false, psl211_perdeck_deal) : ex_inputT psl211_alldecks_params
+     : ex_inputT psl211_alldecks_params
+Chars 3088 - 3160 [Check~(false,~psl211_perdeck_d...] 0. secs (0.u,0.s)
+Chars 3268 - 3391 [Lemma~audit_var_dist_tri~(R~:~...] 0. secs (0.u,0.s)
+Chars 3392 - 3398 [Proof.] 0. secs (0.u,0.s)
+Chars 3399 - 3431 [rewrite~/var_dist~-big_split~/=.] 0.002 secs (0.002u,0.s)
+Chars 3432 - 3454 [apply~:~ler_sum~~=>~a~_.] 0. secs (0.u,0.s)
+Chars 3455 - 3526 [have~E:~P~a~-~Q~a~+~(Q~a~-~S~a...] 0.002 secs (0.002u,0.s)
+Chars 3527 - 3559 [by~rewrite~-E;~exact~:~ler_nor...] 0. secs (0.u,0.s)
+Chars 3560 - 3564 [Qed.] 0.003 secs (0.003u,0.s)
+Chars 3930 - 4209 [Lemma~audit_sc_const_false_wor...] 0.001 secs (0.001u,0.s)
+Chars 4210 - 4216 [Proof.] 0. secs (0.u,0.s)
+Chars 4217 - 4241 [move~~=>HW~Hi~Hlt~Hconst.] 0. secs (0.u,0.s)
+Chars 4242 - 4318 [have~Hclose:~var_dist~(`U~psl2...] 0.005 secs (0.005u,0.s)
+Chars 4321 - 4385 [apply~:~(Order.POrderTheory.le...] 0. secs (0.u,0.s)
+Chars 4388 - 4406 [exact~:~lerD~HW~Hi~.] 0. secs (0.u,0.s)
+Chars 4407 - 4500 [exact~~:~(@psl211_alldecks_sc_...] 0. secs (0.u,0.s)
+Chars 4501 - 4505 [Qed.] 0.001 secs (0.001u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4507 - 4544 [Print~Assumptions~audit_var_di...] 0.019 secs (0.017u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4545 - 4589 [Print~Assumptions~audit_sc_con...] 0.153 secs (0.15u,0.002s)

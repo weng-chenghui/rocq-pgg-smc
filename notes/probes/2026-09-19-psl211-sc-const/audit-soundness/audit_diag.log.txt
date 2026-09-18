@@ -1,0 +1,64 @@
+Chars 73 - 107 [From~HB~Require~Import~structu...] 0.045 secs (0.038u,0.007s)
+Chars 108 - 180 [From~mathcomp~Require~Import~s...] 0.034 secs (0.031u,0.003s)
+Chars 181 - 256 [From~mathcomp~Require~Import~d...] 0.092 secs (0.088u,0.004s)
+Chars 257 - 328 [From~mathcomp~Require~Import~m...] 1.385 secs (1.34u,0.044s)
+Chars 329 - 370 [From~mathcomp~Require~Import~b...] 0.713 secs (0.691u,0.021s)
+File "/private/tmp/claude-501/-Users-cheng-huiweng-Projects-coq-rocq-pgg-smc/493d5ea4-6d9f-45fd-89c2-07339e63cb36/scratchpad/psl_audit/audit_diag.v", line 7, characters 0-54:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+Chars 371 - 425 [From~infotheo~Require~Import~r...] 1.275 secs (1.235u,0.039s)
+Chars 426 - 490 [From~pgg_smc~Require~Import~pg...] 0.032 secs (0.029u,0.002s)
+Chars 491 - 561 [From~pgg_smc~Require~Import~pg...] 0.002 secs (0.002u,0.s)
+Chars 562 - 636 [From~pgg_reconstruct~Require~I...] 0. secs (0.u,0.s)
+Chars 637 - 678 [From~pgg_smc~Require~Import~pg...] 0. secs (0.u,0.s)
+Chars 679 - 733 [From~pgg_smc~Require~Import~ps...] 0.001 secs (0.001u,0.s)
+Chars 734 - 803 [From~pgg_smc~Require~Import~ps...] 0.002 secs (0.002u,0.s)
+Chars 804 - 879 [From~pgg_smc~Require~Import~ps...] 0.002 secs (0.002u,0.s)
+Chars 880 - 937 [From~pgg_smc~Require~Import~ps...] 0. secs (0.u,0.s)
+Chars 939 - 962 [Set~Implicit~Arguments.] 0. secs (0.u,0.s)
+Chars 963 - 985 [Unset~Strict~Implicit.] 0. secs (0.u,0.s)
+Chars 986 - 1010 [Unset~Printing~Implicit~Defens...] 0. secs (0.u,0.s)
+Chars 1217 - 1418 [Definition~audit_deck~(x~:~psl...] 0.001 secs (0.001u,0.s)
+Chars 1497 - 1707 [Definition~audit_readings~(x~:...] 0.001 secs (0.001u,0.s)
+Chars 1887 - 2125 [Definition~audit_l1gap~(l1~l2~...] 0. secs (0.u,0.s)
+Chars 2127 - 2181 [Definition~audit_d0~:~psl211_d...] 0. secs (0.u,0.s)
+Chars 2182 - 2250 [Definition~audit_d1~:~psl211_d...] 0. secs (0.u,0.s)
+     = [:: 0; 1; 2; 3; 4; 10]
+     : seq nat
+Chars 2314 - 2381 [Eval~vm_compute~in~psl211_alld...] 0.002 secs (0.001u,0.s)
+     = [:: 0; 1; 2; 3; 4; 11]
+     : seq nat
+Chars 2382 - 2450 [Eval~vm_compute~in~psl211_alld...] 0. secs (0.u,0.s)
+     = [:: 2; 3; 5; 7; 8; 9]
+     : seq nat
+Chars 2451 - 2491 [Eval~vm_compute~in~psl211_rep_...] 0. secs (0.u,0.s)
+     = [:: 0; 1; 3; 7; 10; 11]
+     : seq nat
+Chars 2492 - 2533 [Eval~vm_compute~in~psl211_rep_...] 0. secs (0.u,0.s)
+     = [:: 0; 1; 2; 3; 4; 6; 7; 8; 9; 10; 5; 11]
+     : seq nat
+Chars 2534 - 2577 [Eval~vm_compute~in~psl211_perd...] 0.001 secs (0.u,0.s)
+     = [:: 0; 1; 2; 3; 4; 6; 7; 8; 9; 10; 11; 5]
+     : seq nat
+Chars 2578 - 2622 [Eval~vm_compute~in~psl211_perd...] 0. secs (0.u,0.s)
+     = [:: 0; 1; 2; 3; 4; 6; 7; 8; 9; 10; 5; 11]
+     : seq nat
+Chars 2773 - 2831 [Eval~vm_compute~in~audit_deck~...] 0. secs (0.u,0.s)
+     = [:: 0; 1; 2; 3; 4; 6; 7; 8; 9; 10; 11; 5]
+     : seq nat
+Chars 2832 - 2891 [Eval~vm_compute~in~audit_deck~...] 0. secs (0.u,0.s)
+     = [:: 0; 1; 2; 3; 6; 4; 7; 8; 5; 9; 10; 11]
+     : seq nat
+Chars 2892 - 2939 [Eval~vm_compute~in~audit_deck~...] 0.001 secs (0.001u,0.s)
+     = 660
+     : nat
+Chars 3008 - 3074 [Eval~vm_compute~in~size~(undup...] 5.056 secs (5.034u,0.019s)
+     = 360
+     : nat
+Chars 3172 - 3288 [Eval~vm_compute~in~~~audit_l1g...] 1.547 secs (1.54u,0.006s)
+     = 600
+     : nat
+Chars 3464 - 3579 [Eval~vm_compute~in~~~audit_l1g...] 1.72 secs (1.712u,0.006s)
