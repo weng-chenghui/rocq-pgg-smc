@@ -3,7 +3,8 @@
 Date: 2026-09-19. Spec: `notes/20260918-general-dealer-law-landing-design.md`.
 Verbatim source: the landing probe
 `notes/probes/2026-09-18-general-dealer-law-landing/` (LAND), commit 82e7d4e.
-Audits: soundness GO; naming round 2 must be GO before task 1 starts.
+Audits: soundness GO, naming GO in round 3. Executed on 2026-09-19; the
+as-built record is at the end of this file.
 
 This plan is also the as-built record. Every deviation is written under its
 task: before, after, why.
@@ -134,3 +135,45 @@ landing `STATUS.md` and the project memory.
 `Arguments` directives, the text of the paper, a Tableau or manifest row for
 the dealer law, necessity of `uniq`, necessity of the uniform PSL(2,11) dealer
 law, and any file the list above does not name.
+
+## As built, 2026-09-19
+
+Branch `feat/dealer-privacy`. Tasks 1 to 6 were carried out by an Opus
+`rocq-prover` subagent. The main session checked each task against its pass
+condition, committed it, and recompiled the four permanent files and the
+fidelity file into a scratch directory.
+
+| Task | Commit | Compile | Result |
+|---|---|---|---|
+| 1 | 6b1e418 | `dealer_privacy.v` 4 s | identical to the landing copy; `_CoqProject` gained one line |
+| 2 | 5f574d2 | `design_privacy.v` 4 s | identical to the landing copy; 15 removed lines, the header table and the old proof of `uniform_fdistmap_fiberE`; its statement is unchanged |
+| 3 | 1284f7f | `pgl27_profile_privacy.v` 4 s | no removed line; one substituted import |
+| 4 | 025cc99 | `psl211_models.v` 29 s | no removed line; one substituted and one deleted import; no sentence slower than its landing counterpart beyond a tenth of a second |
+| 5 | none, no source change | ten importers, 56 s in total, each under 1.7 GB | all exit 0, no inconsistent-assumption message |
+| 6 | with this record | `production_fidelity.v` 29 s | 87 `Print Assumptions` blocks: 59 the three `boolp` axioms, 28 closed under the global context |
+
+Task 5, wall time in seconds: `psl211_secrecy` 7, `psl211_analysis` 4,
+`pgg_analysis_manifest` 5, `pgg_tableau` 13, `pgg_tableau_syntax` 4,
+`pgl27_rows` 6, `five_card_rows` 4, `s5_rows` 4, `psl211_rows` 5,
+`pgg_analysis_client` 3.
+
+`psl211_endpoints`, `psl211_profile` and `psl211_exec` were not compiled. Their
+`.vo` files keep their timestamps of 2026-09-17.
+
+Deviation. Before: the brief allowed merging the substituted import into an
+adjacent `From pgg_reconstruct Require Import` group. After: each substituted
+line stands alone. Why: the diff against the audited landing copy stays
+confined to import lines, and both files already have consecutive imports of
+that shape.
+
+Deviation in `production_fidelity.v`. Before: `landing_fidelity.v` compared the
+landing constant `uniform_fdistmap_fiberE` with the production one. After: with
+one module left, the landed constant is ascribed the statement the file gave it
+before the landing, pasted verbatim. Ten `Print Assumptions` commands that
+named a constant twice, once qualified, collapsed to one each, so the count
+went from 97 to 87.
+
+Not verified, and why: nothing here was compiled against the `.vo` files that
+commit 1654fde will produce, because the tree is not rebuilt (user rule). The
+landed blocks and the 13 recompiled files name none of the three definitions
+that commit changed.

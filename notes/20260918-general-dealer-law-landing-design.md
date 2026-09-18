@@ -6,8 +6,10 @@ Status: landing probe verified by the main session's own compile. Soundness
 audit GO on 2026-09-19. Naming audit GO in round 3 on 2026-09-19, after two
 rounds that each stopped on a comment sentence in the PSL block. Both audits
 state that the landing copies, with the three import substitutions recorded
-below, are fit to be written into the permanent files verbatim. Plan:
-`docs/superpowers/plans/2026-09-19-general-dealer-law-landing.md`.
+below, are fit to be written into the permanent files verbatim. Plan and as-built
+record: `docs/superpowers/plans/2026-09-19-general-dealer-law-landing.md`.
+Landed on 2026-09-19 in commits 6b1e418, 5f574d2, 1284f7f and 025cc99. L10 is
+closed by `production_fidelity.v` in the landing probe.
 
 Sources: [[20260917-general-dealer-law-feasibility-design]] (C1 to C10, all
 GO), [[20260918-general-dealer-law-probe-result]], and the compiled probe

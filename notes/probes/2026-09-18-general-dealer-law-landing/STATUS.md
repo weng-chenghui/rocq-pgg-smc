@@ -428,6 +428,36 @@ wrapped across two lines. The two "class" uses left in the PGL(2,7) block are
 a secret's class of decks, which is that instance's own concept and not a
 chirality.
 
+## As built, 2026-09-19
+
+The landing was carried out on branch `feat/dealer-privacy` by the plan
+`docs/superpowers/plans/2026-09-19-general-dealer-law-landing.md`. Each
+permanent file is its landing copy, written by `cp` and not retyped, so what
+compiled here is byte for byte what the two audits read. Three lines differ:
+the `From general_dealer_law_landing Require Import dealer_privacy.` line of
+each instance file became `From pgg_reconstruct Require Import
+dealer_privacy.`, and the `design_privacy_landing` import of
+`psl211_models.v` was deleted, because after the landing both fiber lemmas
+come from the `design_privacy` that file already imports. `_CoqProject` gained
+one line. The four edited files and the ten remaining importers were compiled
+once each, single-file, in dependency order, all rc=0; the ten importers cost
+56 s in total and none exceeded 1.69 GB. `psl211_endpoints`, `psl211_profile`
+and `psl211_exec` were not compiled and their `.vo` files still carry their
+2026-09-17 timestamps.
+
+`production_fidelity.v` is `landing_fidelity.v` with its imports pointed at
+the permanent modules. It repeats every check of the probe against what was
+landed: the two-way ascriptions of the three `_via_dealer` theorems in both
+the `ltac:` and the written form, the four kernel mutations against the landed
+`reconstruct/dealer_privacy.v`, and `Print Assumptions` on every landed
+declaration. Since there is now one `design_privacy` module rather than two,
+the cross-module ascription of `uniform_fdistmap_fiberE` is replaced by
+`fiberE_at_its_pre_landing_statement`, which ascribes the landed constant the
+statement the file gave it before the landing, pasted verbatim. It compiles
+rc=0 in 28 s at 1.71 GB, and all 87 of its `Print Assumptions` blocks are
+either the three `boolp` axioms, 59 of them, or `Closed under the global
+context`, 28. This closes ledger row L10.
+
 ## Non-compiling checks
 
 - No LAND `.v` line exceeds 80 bytes.
