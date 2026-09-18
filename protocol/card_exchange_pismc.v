@@ -250,14 +250,12 @@ Definition exchange_player (i : 'I_T)
 Definition player_aprocs (js : seq 'I_T) : seq (aproc pgg_dtype data) :=
   [seq mk_aproc (exchange_player i) | i <- js].
 
-(* Verifier: observe card position from each player into the Init buffer.
-   After the loop, the buffer contains [rho(w)(s_0), ..., rho(w)(s_{T-1})].
-   Reconstruction (applying recon to these T values) happens outside piSMC. *)
+(* The verifier observes one card position from each player. The trace records
+   one endpoint per observation; reconstruction happens outside piSMC. *)
 Definition exchange_verifier (players : seq 'I_T)
     : sproc pgg_dtype data verifier_idx :=
-  \pi{ ForList players step (fun k => k.+2) enstep verifier_env_step as j cont k =>
+  \pi{ ForList players step S enstep verifier_env_step as j cont k =>
        Observe<(player_idx j)> &ep =>
-       Init (PGG_sheet ep) ;
        k
      end ;
      Finish }.

@@ -17,9 +17,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-(** evens — every other element from the front ([a0; a2; a4; ...]). The verifier
-    records each endpoint twice (Recv of the revealed card, then Init into its
-    buffer), so the two copies are extracted by taking alternates. *)
+(** evens — every other element from the front ([a0; a2; a4; ...]). *)
 Fixpoint evens {T : Type} (s : seq T) : seq T :=
   match s with
   | x :: _ :: s' => x :: evens s'
@@ -59,11 +57,11 @@ Definition dealer_with_input_encoding
 Definition sheets_of (tr : seq data) : seq 'I_N :=
   pmap (fun d => if d is PGG_sheet x then Some x else None) tr.
 
-(** endpoints_of_trace — the endpoints the verifier collected, in player order.
-    Each endpoint is recorded twice (Recv then Init); [evens] keeps one copy.
-    The verifier pushes player T-1 first, so [rev] restores player order. *)
+(** endpoints_of_trace — the endpoints the verifier collected, in player
+    order. The verifier pushes player T-1 first, so [rev] restores player
+    order. *)
 Definition endpoints_of_trace (verifier_trace : seq data) : seq 'I_N :=
-  rev (evens (sheets_of verifier_trace)).
+  rev (sheets_of verifier_trace).
 
 End pgg_run.
 
