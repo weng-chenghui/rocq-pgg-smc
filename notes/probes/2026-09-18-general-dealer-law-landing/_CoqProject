@@ -1,0 +1,25 @@
+-arg -w -arg -projection-no-head-constant
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -notation-overridden
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -notation-incompatible-format
+
+-R ../../../lib pgg_smc
+-R ../../../protocol pgg_smc
+-R ../../../groups pgg_smc
+-R ../../../security pgg_smc
+-R ../../../smc pgg_smc
+-R ../../../reconstruct pgg_reconstruct
+-R ../../../instances/denboer1989 pgg_smc
+-R ../../../instances/kim2025 pgg_smc
+-R ../../../instances/s5 pgg_smc
+-R ../../../instances/pgl27 pgg_smc
+-R ../../../instances/psl211 pgg_smc
+-R ../../../manifest pgg_smc
+-Q . general_dealer_law_landing
+
+dealer_privacy.v
+design_privacy_landing.v
+pgl27_profile_privacy_landing.v
+psl211_models_landing.v
+landing_fidelity.v

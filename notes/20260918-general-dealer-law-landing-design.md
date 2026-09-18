@@ -2,8 +2,10 @@
 
 Date: 2026-09-18
 
-Status: spec written, landing probe and audits not yet run. No plan is written
-until every ledger row below is GO and two audits end in `VERDICT: GO`.
+Status: landing probe run on 2026-09-18 and verified by the main session's own
+compile. L1 to L9 and L12 are GO, L10 is OPEN by design, L11 belongs to the
+naming audit. The audits are next. No plan is written until two audits end in
+`VERDICT: GO`.
 
 Sources: [[20260917-general-dealer-law-feasibility-design]] (C1 to C10, all
 GO), [[20260918-general-dealer-law-probe-result]], and the compiled probe
@@ -151,12 +153,12 @@ files from before that commit.
 | L2 | The two fiber lemmas fit inside `design_privacy.v`, and `uniform_fdistmap_fiberE` can be re-proved through `uniform_fdistmap_pointE` with its statement unchanged. | A full copy of `design_privacy.v` with the additions compiles. A `Check (uniform_fdistmap_fiberE : T)` with `T` the old statement copied verbatim succeeds. Every other lemma of the file reports the same assumptions as before. No identifier of the file is shadowed. |
 | L3 | The PGL(2,7) block fits inside `pgl27_profile_privacy.v` after adding an import of `dealer_privacy`, with no cycle. | A full copy of that file with the additions compiles against the landing copy of `dealer_privacy`. Both `_via_dealer` theorems pass a two-way type ascription against `pgl27_view_indep` and `pgl27_view_indep_alldecks`. The validity mutation and its positive control behave as recorded. |
 | L4 | The PSL(2,11) block fits inside `psl211_models.v`. That file has no sections, binds `R` per lemma, and defines `seatT` and `cardT` as local notations with definitions different from the probe's. | A full copy of that file with the additions compiles. The additions use no local notation that the file already defines with another meaning, which is shown by compiling and by printing the elaborated statement of `psl211_alldecks_view_indep_via_dealer`. The two-way type ascription against `psl211_alldecks_view_indep` succeeds. |
-| L5 | Sealing `psl211_alldecks_view`, `psl211_elem_table` and `psl211_perdeck_raw_count` around the new block does not break any existing lemma of `psl211_models.v`, and each seal is released before the block ends. | The full copy compiles with the block placed at the end of the file, each `Local Opaque` paired with a `Local Transparent`. `rocq compile -time` shows no sentence of the new block over 2 s except the one `vm_compute` of the raw count, and the file's total time is reported next to its time without the block. |
-| L6 | None of the four recorded hang shapes reappears in the permanent context. | `rocq compile -time` on each landing copy. Any sentence of the new material over 2 s, other than the raw count, is a finding. |
+| L5 | Sealing `psl211_alldecks_view`, `psl211_elem_table` and `psl211_perdeck_raw_count` around the new block does not break any existing lemma of `psl211_models.v`, and each seal is released before the block ends. | The full copy compiles with the block placed at the end of the file, each `Local Opaque` paired with a `Local Transparent`. No sentence of the new block costs more under `rocq compile -time` than the same sentence costs in the feasibility probe, and the file's total time is reported next to its time without the block. |
+| L6 | None of the four recorded hang shapes reappears in the permanent context. | `rocq compile -time` on each landing copy. Any sentence of the new material that costs more than its feasibility-probe counterpart is a finding. |
 | L7 | The edit set does not invalidate `psl211_endpoints`. | The reverse-dependency computation above, repeated by the prover from `.Makefile.rocq.d` after adding `reconstruct/dealer_privacy.v` to a copy of `_CoqProject` and regenerating the dependency file in the probe directory. No `make` in the production tree. |
 | L8 | The new names collide with nothing, inside each target file and across the tree. | A whole-word search of the tree and of installed infotheo and mathcomp for every landed name, plus the compile of each full copy. |
 | L9 | The landed statements are the probe's statements. | After applying the identity renaming, each landed declaration is character-identical to its probe counterpart apart from binders that the target file's context supplies. Differences are listed one by one. |
-| L10 | The result does not depend on the stale snapshot. | After the production tree is rebuilt, the seven feasibility probe files and the landing copies recompile with the same assumption reports. This row stays OPEN until that rebuild happens and is recorded as such. |
+| L10 | The landing holds against the compiled files that exist at landing time. | The landed files and the importers listed under L7 compile one at a time against whatever `.vo` files exist then. No full rebuild is run or waited for (user rule of 2026-09-18). The row is closed by the implementation, not by the probe. |
 | L11 | Header tables and statement comments meet the project rule in each target file. | The naming audit: each new declaration appears in its file's header table, each has a statement comment giving the fact and its place in the privacy argument, and no comment claims more than a named lemma proves. |
 | L12 | The position of `reconstruct/dealer_privacy.v` in `_CoqProject` is after `reconstruct/transitivity_privacy.v` and before the first file that imports it. | The regenerated dependency file orders it correctly and reports no cycle. |
 
@@ -180,8 +182,10 @@ Line numbers are those of the stale snapshot and are rechecked by the probe.
 ## Soundness invariants
 
 1. No landed file gains an axiom, an assumed constant, `Admitted` or `Abort`.
-   Every new declaration ends in `Qed` or is a definition, and is checked with
-   `Print Assumptions` after the enclosing `End`.
+   Every new declaration ends in `Qed` or is a definition. No permanent file of
+   the repository contains a `Print Assumptions` command, so the landed files
+   contain none and every assumption check lives in the probe's
+   `landing_fidelity.v`.
 2. Every equality of laws is information-theoretic and exact. No computational
    premise appears.
 3. The model is average-case over `secretP`, then conditional over `delta s`,
@@ -222,9 +226,59 @@ There is no decomposition probe with admitted statements. Every supporting
 lemma already ends in `Qed` in the feasibility probe, and the full copies are
 stronger evidence than a composition of admitted statements.
 
+## Landing probe results, 2026-09-18
+
+All five landing files compile one at a time. The main session recompiled them
+in order into a scratch directory: `dealer_privacy.v` 3.7 s,
+`design_privacy_landing.v` 3.9 s, `pgl27_profile_privacy_landing.v` 4.3 s,
+`psl211_models_landing.v` 28.6 s, `landing_fidelity.v` 49.2 s, each under
+1.9 GB. `landing_fidelity.v` reports the three `boolp` axioms in 67 blocks and
+`Closed under the global context` in 30.
+
+Findings that the feasibility probe could not see, all caused by the context
+of `psl211_models.v`:
+
+- It must gain imports of `psl211_blocks` and `psl211_closure`, because
+  `psl211_elem_table` is not in scope there.
+- It must gain `Import Num.Theory`, because `pnatr_eq0` is not in scope.
+- One rewrite pattern needs `%N`, because the file opens `ring_scope` at file
+  level and the probe file opened no scope.
+- L4 is settled in the good direction. The block uses the file's own `seatT`
+  and `cardT`, redefines neither, and the elaborated statement of
+  `psl211_alldecks_view_indep_via_dealer` is character-identical to that of
+  `psl211_alldecks_view_indep`.
+
+Corrections to this note made after the probe:
+
+- L5 and L6 expected one sentence over 2 s. Four sentences of the PSL block
+  exceed it, and each costs what it costs in the feasibility probe, so landing
+  adds no cost. The rows now compare against the feasibility probe.
+- Invariant 1 no longer asks for `Print Assumptions` inside permanent files.
+- The feasibility probe's `STATUS.md` had proposed `design_privacy.v` for
+  `fdistmap_prod_sectionE`. This note's file plan supersedes it:
+  `reconstruct/dealer_privacy.v`.
+- L9: 74 of the 75 landed statements are character-identical to the probe's
+  after whitespace normalisation. `uniform_fdistmap_pointE` differs only in
+  that Section `fibers` supplies its five binders.
+- L8: none of the 75 landed names occurs in the tree, in installed infotheo or
+  mathcomp, or among the identifiers already in a target file.
+
+Decision on mutations, taken by the main session: no file under `reconstruct/`,
+`lib/`, `protocol/`, `security/`, `smc/` or `groups/` contains a `Fail`
+command, while six files under `instances/` and two under `manifest/` do.
+`reconstruct/dealer_privacy.v` therefore carries no mutation, and its four
+mutations with their positive controls move to the probe's
+`landing_fidelity.v`. The mutations in the two instance files stay.
+
+What a landing recompiles (L7), and nothing else: the 11 importers of
+`design_privacy.v`, the 9 importers of `psl211_models.v`, none for
+`pgl27_profile_privacy.v`. Their union with the edited files is 13 files,
+listed in dependency order in the landing probe's `STATUS.md`.
+`psl211_endpoints`, `psl211_profile` and `psl211_exec` are in none of them.
+
 ## Acceptance condition
 
-L1 to L9, L11 and L12 are GO, and L10 is recorded as OPEN with its reason. An
+L1 to L9, L11 and L12 are GO. L10 is closed by the implementation. An
 independent soundness audit and an independent naming audit, both able to
 compile, end in `VERDICT: GO`. Findings are folded into this note before a plan
 is written. The plan then quotes the landing copies verbatim, one commit per
