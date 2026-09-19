@@ -2,12 +2,14 @@
 
 Date: 2026-09-19
 
-Status: spec, third version, after the design audit
+Status: PROBED on 2026-09-19, all four stages, every ledger row GO except P8,
+which is partial. The results, and what they change in this spec, are in the
+last section, "Results of the probe". The text above that section is the
+third version of the spec, after the design audit
 [[20260919-tableau-extensions-design-audit]] (DESIGN NO-GO on the second
-version, with a recommended shape, adopted here). The probe starts when the
-batch of [[20260919-kim-spectral-arm-probe-design]] is closed. This is a probe
-batch. It edits no permanent file. A landing is a separate batch and needs the
-user's decision.
+version, with a recommended shape, adopted here), and is kept as written. This
+is a probe batch. It edits no permanent file. A landing is a separate batch
+and needs the user's decision.
 
 Two directions from the user govern the design. The Tableau presents what we
 have, so a finding it cannot hold is a reason to extend it, and an extension is
@@ -279,3 +281,149 @@ phase before any probe.
 
 Any edit under `manifest/` or `instances/`. The paper. Removing or changing the
 spectral arm. Every group of the previous section.
+
+## Results of the probe
+
+Probe directory `notes/probes/2026-09-19-tableau-extensions/`, twenty-four
+`.v` files, no permanent file edited, `psl211_endpoints` never compiled. Every
+`.v` file was written by an Opus rocq-prover agent and recompiled from source
+in a fresh directory by the main session. Each stage had an independent
+soundness audit and an independent naming audit by Opus auditors, and every
+fix pass was audited, by an Opus auditor or, for the small last passes, by the
+main session reading the diff. The records are `STATUS.md` (stage A),
+`STATUS-stageB.md`, `STATUS-stageC.md`, `STATUS-stageD.md` and the audit
+reports beside them. No file holds `Admitted`, `Abort`, `Axiom` or
+`Parameter`. Every `Print Assumptions` block shows the three `boolp` axioms
+only, except the production S5 row, which rests on the production
+`Axiom s5_group_order_eq` as it did before.
+
+### Verdicts
+
+| Row | Verdict | What was built |
+|---|---|---|
+| T0 | GO, no framework change | one named `Tableau Sampled` value continued twice, at the five-card instance and at PGL(2,7) |
+| C1, C2 | GO | `conclude`'s obligation is `<=` (`ConcludePayload`, `port_conclude`); `pgl27_reprice41` with `pgl27_word_reprice41_false`, and `kim_biased_conclude_below_false`, show that a number below the proved one is refutable and not only unprovable |
+| C3 | GO | `five_card_row_repeated39` publishes `2^-39` from `kim_centi_cert` by `ltW (kim_centi_cert_eps_lt R idx)`; `kim_centi_cert40` and its three supporting declarations are then used by no row |
+| K1 | GO | `SecurityArm`, `port_arm`, `ab_arm`, `security_arm_of`, five general `_armE` lemmas, one `<row>_armE` per program |
+| G1, G2, G3 | GO | every existing program compiles after each change; `|> conclude c by p` and `certify IdealProximity cert` cost no keyword; the header sentences that count arms or statements are listed |
+| P1 | GO | `p1_joint_law_distance.v`: `var_dist_fdistmap_pair`, `var_dist_prodR`, `fdist_prod_snd` |
+| P2 | GO | `IdealProximityCert`, the `IdealProximity` port constructor, `IdealProximityPropAt`, `idealproximity_tail`, `certify_idealproximity`, `IdealProximityArm`, `view_proximity_of`; seven declarations, four `match` sites extended |
+| P3 | GO | at each instance the certificate's ideal and the published exact program's data are one term, by `erefl` |
+| P4 | GO | the five-card one-cut row publishes one fiftieth |
+| P5 | GO | the PGL(2,7) word row: certificate at `2^-40`, published `2^-39` |
+| P6 | GO | the PSL(2,11) word model and its row: `2^-40`, at coalitions of at most five of the twelve seats |
+| P7 | GO | ceiling comparisons, cross-instance and cross-index rejections with their decisive error lines, and compiled checks that the PSL(2,11) certificate's secret is the real secret bit |
+| P8 | partial | see below |
+| P9 | GO | the actual joint law is within three times the number of the product of its own marginals |
+| D1, D2 | GO | homes and landing lists per stage, built by searching the tree |
+
+### What the probe changed in this spec
+
+1. **The certificate has five fields, not four.** The number is a field,
+   `ipc_eps`: the spectral arm computes its number from a marginal bound and
+   this arm has nothing to compute from. The number is an upper bound the
+   instance chooses. It is not determined by the record.
+2. **The ideal's link lemma is not an instance of `sampled_viewE_prop`.** The
+   ideal adapter is not a member of the row's family. `certify_idealproximity`
+   builds the ideal's link from `sa_coalition_viewE` with the row's own
+   execution, which is what typing the ideal over `instance_exec E` buys.
+3. **P8 as written was not the right question.** `SpectralPropAt cert c` does
+   not mention its certificate (`spectral_prop_cert_free`, by conversion), so
+   the ideal cut and the constancy field are spent inside `spectral_tail` and
+   are gone from what a spectral row publishes. Compiled: that fact, and that
+   at the five-card instance the proximity proposition is a theorem, so the
+   implication holds there without reading its premise, and at the constant
+   two it holds at every certificate. Not compiled: that no implication holds
+   uniformly in the proximity certificate at a constant below two (argued; it
+   needs a countermodel), and the statement this spec intended, the proximity
+   proposition derived from the spectral certificate's own fields.
+4. **`var_dist` is the sum of absolute differences**, twice the total
+   variation distance of the literature (`lib/var_dist_supp.v` says so). A
+   distinguisher's advantage is at most half the published number, and P9's
+   constant three gives an advantage of at most one and a half times it. The
+   first drafts of the comments said "the whole advantage"; two audits caught
+   it.
+5. **A certificate is as meaningful as its ideal and its secret.** An auditor
+   compiled a certificate whose ideal is the actual model with a unit secret:
+   the proposition is then true at zero and says nothing. `SpectralCert`'s
+   `sc_ideal` and `ExactWitness`'s secret have the same freedom in production
+   today, so the arm adds none. A landing says this in the framework's header.
+   At PSL(2,11) the probe compiles that the certificate is not of that kind.
+6. **The five-card number is one fiftieth.** The first certificate used the
+   spectral marginal bound, sqrt 5 over eighty. The tree already had
+   `kim_biased_cut_mixing_exact` at one fiftieth, an auditor compiled the row
+   at it, and the row now publishes one fiftieth plainly, with no `conclude`.
+   The spectral sibling publishes one twenty-fifth, and the two numbers are
+   bounds in two different propositions.
+7. **"The spectral number is twice the proximity number" is a relation
+   between two chosen certificates and not between the two arms.** `cert_eps`
+   is by definition the marginal bound added to itself, and a proximity
+   certificate is free to choose another number.
+8. **PGL(2,7) needed no new lemma.** Independence at every prior is
+   `pgl27_view_indep_gen`, point masses included. The distance field is one
+   step (`inde_dist_of_RV2`) from `pgl27_view_mixing`. The ideal at the wrong
+   prior is refuted by a compiled lemma at the point-mass prior
+   (`pgl27_word_uniform_ideal_not_close`), and nothing is claimed near the
+   uniform prior.
+9. **PSL(2,11)'s word model shares the all-decks carrier.** Only the cut law
+   changes, so the all-decks secret serves unchanged and the distance field is
+   four lines from `psl211_word_mixing`. The independence of run argument and
+   cut is how the model is built, a dealer premise, and not a theorem about an
+   execution. The row cites the refutations at two fixed run arguments beside
+   it, with `psl211_alldecks_constancy_false_word584` at its own cut law, and
+   has no spectral sibling: `psl211_alldecks_no_small_eps_cert` excludes every
+   spectral number strictly below 1/1320, and nothing excludes the larger ones.
+10. **Two of the three new programs publish a manifest row the manifest does
+    not hold.** An `AnalysisPathRow` records the model family, and
+    `pgl27_prior_exact_family` and `psl211_word_family` are new. Each stage
+    states the whole row by `erefl` (`pgl27_row_prior_exact_rowE`,
+    `psl211_row_word_proximity_rowE`), which is the text a landing adds to the
+    manifest.
+11. **Stale entries of "Cited objects".** `var_dist_le2` is in production,
+    `lib/var_dist_supp.v`, since the Kim landing. `RepricePayload` and
+    `port_reprice` are the production names of what the probe calls
+    `ConcludePayload` and `port_conclude`. This note's C labels and stage A's
+    are shifted by one; `STATUS.md` holds the mapping.
+
+### Proof-engineering facts to carry into a landing
+
+- `by []`, `done` and `by split` do not return on an equation between
+  `published_at` of a concluded row and an unconcluded one (683 s measured).
+  `exact: erefl` is usually instant, and on `five_card_row_repeated39_atE` it
+  costs 157 s where `reflexivity` costs 0.07 s, the proof term being the same.
+  Rule: `exact: erefl`, read the `-time` line, `reflexivity` if it is slow.
+- At PGL(2,7), row-against-row data equations cost 48 to 96 s; each row
+  against the named `Tableau Sampled` value costs under 0.01 s and says the
+  same.
+- `Print Assumptions` on a declaration whose type names
+  `psl211_alldecks_observed` costs about 20 s. The source files of stage D
+  have no sentence above 0.3 s outside `Require`.
+- Auditors' replacement sentences were false about a dozen times in this
+  batch, and provers caught several by checking each against the declaration
+  before pasting. That check stays in every brief.
+
+### Landing order, when the user decides to land
+
+1. Stage A first: the `<=` obligation, the two renames at seven sites of
+   `manifest/pgg_tableau.v`, the arm reader, the `conclude` notation,
+   `pgl27_rows.v`'s payload wrapped in `eqW`, the repeated five-card row on
+   the `ltW` route, and the decision on withdrawing `kim_centi_cert40` with
+   its three supporting declarations. Stage B cannot land before it.
+2. Stage B: the arm in `manifest/pgg_tableau.v` and its notation, the header
+   sentences and counts, `var_dist_prodR` and `fdist_prod_snd` promoted into
+   `lib/var_dist_supp.v` (reverse closure eleven files, `psl211_endpoints` not
+   among them; two `Local` copies of `var_dist_prodR` stay or are retired, and
+   `psl211_endpoints` depends on neither mixing file), the five-card row.
+3. Stages C and D: `pgl27_prior_sample` in `pgl27_exec.v`, the prior-indexed
+   family in `pgl27_models.v`, the programs in the rows files, a new
+   `instances/psl211/psl211_word_model.v` with an empty reverse closure, one
+   manifest row for each new family, and the production comment of
+   `psl211_alldecks_constancy_false_word584`, whose stated reason the word
+   adapter makes false.
+
+Names: the long form (`IdealProximityCert`, `certify_idealproximity`,
+`idealproximity_tail`, `ipc_*`) is kept. The tree forms these names from the
+port literal's first word, and `ideal` is already a surface keyword and a
+field name, so the whole literal is used. A naming auditor compiled the short
+form (`certify_proximity` and so on); it stays available as a mechanical
+rename.
