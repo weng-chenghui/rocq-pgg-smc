@@ -48,8 +48,8 @@ Variable R : realType.
 
 (* The card at a uniformly chosen position has the same law at every
    committed pair. The arrangement moves with the two bits and the colour
-   census does not, and this is that census read as the law of the card
-   drawn. It is the level at which the spectral arm's two run arguments
+   census does not, and this is that census read as a distribution on card
+   positions. It is the level at which the spectral arm's two run arguments
    become indistinguishable to a single seat. *)
 Lemma den_boer_layout_law_const (x x' : bool * bool) :
   fdistmap (tnth (den_boer_layout x)) (fdist_uniform (card_ord 5))
@@ -86,7 +86,7 @@ Qed.
    uniform rotation law has the same law at both committed pairs. One seat
    reads one card of a deck whose colour census den Boer's encoding fixes
    at three hearts and two clubs, so the reading cannot separate the pairs.
-   This is the constancy field of the spectral certificate, and it is
+   This is the invariance field of the spectral certificate, and it is
    exact. It spends no mixing bound. *)
 Lemma five_card_static_obs_const
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :

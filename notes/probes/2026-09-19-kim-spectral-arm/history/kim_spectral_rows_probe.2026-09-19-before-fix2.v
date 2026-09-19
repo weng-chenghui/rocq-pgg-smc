@@ -60,9 +60,9 @@ Definition kim_biased_sample_cut_witnessE (R : realType)
    seven-cut bundle's marginal bound; the identification of that bound's law
    with the law the repeated adapter draws its cut from; the uniform rotation
    law as the ideal cut; the distance of the seven-cut law from that ideal;
-   and the constancy of a coalition's reading of the ideal cut in the
+   and the invariance of a coalition's reading of the ideal cut in the
    committed pair. The only inexact quantity in the row is the bundle's
-   spectral number; the ideal cut and the constancy field are exact. *)
+   spectral number; the two fields about the ideal cut are exact. *)
 Definition kim_centi_cert (R : realType) (idx : unit)
   : SpectralCert (amf_sample kim_centi_family R idx) :=
   @MkSpectralCert R five_card_algebra five_card_params
@@ -74,7 +74,7 @@ Definition kim_centi_cert (R : realType) (idx : unit)
     (@five_card_static_obs_const R).
 
 (* The spectral certificate of the one-cut row, with the same five fields at
-   word length one. The ideal cut and the constancy of a coalition's
+   word length one. The ideal cut and the invariance of a coalition's
    reading of it are the same two terms as in the repeated row's
    certificate, so the two rows differ only in the shuffle and its number. *)
 Definition kim_biased_cert (R : realType) (idx : unit)
@@ -92,11 +92,9 @@ Definition kim_biased_cert (R : realType) (idx : unit)
 (******************************************************************************)
 
 (* Kim's repeated row certified by the spectral arm and published at
-   IdealFinite. The status is a parameter of publish and nothing checks it,
-   so it is claimed against the criterion pgg_analysis_status.v states for
-   IdealFinite: a cut-carrier transfer whose base premise is discharged,
-   which is what a certificate comparing a finite shuffle with a named
-   ideal cut supplies. *)
+   IdealFinite. A certificate that compares a finite shuffle with a named
+   ideal cut and discharges the base premise on the cut carrier is what
+   pgg_analysis_status.v admits at that transfer status. *)
 Definition five_card_row_repeated_spectral_tableau : PublishedRow :=
   five_card_committed
     sample kim_centi_family
@@ -105,7 +103,7 @@ Definition five_card_row_repeated_spectral_tableau : PublishedRow :=
 
 (* Kim's one-cut row certified by the same arm and published at the same
    transfer status. Its certificate has the shape the repeated row's has,
-   over the same ideal cut and with the same constancy field, so the same
+   over the same ideal cut and with the same invariance field, so the same
    status is the honest one for it. *)
 Definition five_card_row_biased_ideal_tableau : PublishedRow :=
   five_card_committed
@@ -159,10 +157,9 @@ Lemma kim_biased_cert_epsE (idx : unit) :
 Proof. by rewrite /cert_eps !kim_biased_epsE. Qed.
 
 (* The one-cut row's bound is below two, the ceiling var_dist_le2 gives for
-   a variation distance. The row therefore rules out a coalition telling the
-   two committed pairs apart with certainty, which a bound at the ceiling
-   would not. At about three percent of the ceiling it is not a strong
-   statement. *)
+   a variation distance. The row therefore excludes readings that the
+   trivial bound permits, which is what makes it non-vacuous; at about
+   three percent of the ceiling it is not strong. *)
 Lemma kim_biased_cert_eps_lt2 (idx : unit) :
   cert_eps (kim_biased_cert R idx) < 2%:R.
 Proof.
@@ -252,11 +249,9 @@ by apply: five_card_cut_mixing_of_supp_pow; exact: kim_centi_cut_supp_pow.
 Qed.
 
 (* The repeated row's certificate with the constant in the marginal-bound
-   field. That field and the mixing statement proved against it are the two
-   that change. The ideal cut, the tying equation and the constancy of a
-   coalition's reading are the same terms as in the certificate at the
-   spectral number, and the mixing statement differs only in the number it
-   bounds by. *)
+   field. Only that field changes: the ideal cut, the tying equation and the
+   invariance of a coalition's reading are the same terms as in the
+   certificate at the spectral number. *)
 Definition kim_centi_cert40 (R : realType) (idx : unit)
   : SpectralCert (amf_sample kim_centi_family R idx) :=
   @MkSpectralCert R five_card_algebra five_card_params
@@ -288,9 +283,8 @@ Definition five_card_row_repeated39 : PublishedRowAt five_card_reprice39 :=
     ;;; conclude five_card_reprice39 of (fun R _ => five_card_pow2_39_split R)
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
-(* The reprice obligation is one identity per real field and per index.
-   five_card_pow2_39_split is quantified over every real field but not over
-   the family index, so it does not have the shape conclude asks for. *)
+(* The reprice obligation is one identity per real field and per index, and
+   five_card_pow2_39_split alone is an identity at one field. *)
 Fail Definition five_card_row_repeated39_bare
   : PublishedRowAt five_card_reprice39 :=
   five_card_committed
