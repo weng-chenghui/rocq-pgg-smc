@@ -15,8 +15,8 @@
 (* most one card. Not every statement below is a coalition statement. The     *)
 (* other half of den Boer's claim, that the full reveal discloses the         *)
 (* conjunction and nothing further about the two bits separately, is input    *)
-(* privacy, and five_card_row_biased_leak_bound states a ceiling on it under  *)
-(* the biased cut, at a reveal of any list of card positions.                 *)
+(* privacy, and five_card_row_biased_leak_bound states an upper bound on it   *)
+(* under the biased cut, at a reveal of any list of card positions.           *)
 (*                                                                            *)
 (* The uniform row is written in the statement surface of                     *)
 (* pgg_tableau_syntax.v over the statements of pgg_tableau.v: the prefix      *)
@@ -45,7 +45,7 @@
 (* The two Sampled programs stay as the programs that stop before a claim.    *)
 (* What is proved beside them is of another kind: the endpoint marginal of    *)
 (* one starting position under the seven-cut law, which                       *)
-(* five_card_row_repeated_endpoint_lt carries, and Kim's ceiling on the       *)
+(* five_card_row_repeated_endpoint_lt carries, and Kim's upper bound on the   *)
 (* information a reveal of any list of card positions gives about the two     *)
 (* inputs, which five_card_row_biased_leak_bound carries. No arm of certify   *)
 (* takes a bound of either kind: the exact arm asks for independence of the   *)
@@ -158,14 +158,13 @@
 (*                           == the number each certificate publishes         *)
 (*   kim_centi_cert_eps_lt   == the repeated row's number is under the        *)
 (*                              constant PGL(2,7)'s word row publishes        *)
-(*   kim_biased_cert_eps_lt2 == the one-cut row's number is under the         *)
-(*                              ceiling a variation distance has              *)
+(*   kim_biased_cert_eps_lt2 == the one-cut row's number is under two, the    *)
+(*                              bound var_dist_le2 gives                      *)
 (*   five_card_inv50_split   == the identity that discharges the one-cut      *)
 (*                              row's terminal obligation                     *)
 (*   five_card_pow2_39_split == 2^-39 as a sum of two per-pair bounds         *)
 (*   five_card_reprice_inv25_lt2                                              *)
-(*                           == the concluded one-cut number under the        *)
-(*                              ceiling                                       *)
+(*                           == the concluded one-cut number under two        *)
 (*   five_card_row_repeated_prefixE                                           *)
 (*   five_card_row_biased_prefixE                                             *)
 (*                           == each Kim row carries the prefix's algebra,    *)
@@ -750,11 +749,11 @@ Lemma kim_biased_cert_epsE (idx : unit) :
   = Num.sqrt 5%:R * (1 / 80) + Num.sqrt 5%:R * (1 / 80).
 Proof. by rewrite /cert_eps !kim_biased_epsE. Qed.
 
-(** The one-cut row's bound is under two, the ceiling var_dist_le2 gives for
-    a variation distance. The row therefore rules out a coalition of at most
+(** The one-cut row's bound is under two, the bound var_dist_le2 gives for a
+    variation distance. The row therefore rules out a coalition of at most
     one seat telling the two committed pairs apart with certainty, which a
-    bound at the ceiling would not. At about three percent of the ceiling it
-    is not a strong statement. *)
+    bound at two would not. At about three percent of that bound it is not a
+    strong statement. *)
 Lemma kim_biased_cert_eps_lt2 (idx : unit) :
   cert_eps (kim_biased_cert R idx) < 2%:R.
 Proof.
@@ -886,7 +885,7 @@ Lemma five_card_row_biased_inv25_armE (R : realType)
   = InputIndistinguishabilityArm.
 Proof. exact: erefl. Qed.
 
-(** One twenty-fifth is under two, the ceiling var_dist_le2 gives for a
+(** One twenty-fifth is under two, the bound var_dist_le2 gives for a
     variation distance, so the concluded one-cut row is not vacuous. *)
 Lemma five_card_reprice_inv25_lt2 (R : realType) : (1 / 25 : R) < 2%:R.
 Proof. by lra. Qed.
@@ -926,7 +925,7 @@ Qed.
     hundredth, under the law the biased row samples. It is
     five_card_colour_view_leak_bound with every random variable typed at
     that law, which is what sa_sampleP of the family's member is by
-    conversion. The statement is a numeric ceiling on that information and
+    conversion. The statement is a numeric upper bound on that information and
     not the assertion that the information vanishes, it is about a reading
     at a list of card positions and not about a coalition of seats, and it
     is carried beside the program above rather than by it. *)

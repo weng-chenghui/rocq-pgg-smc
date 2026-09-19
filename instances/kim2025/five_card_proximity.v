@@ -268,10 +268,11 @@ Definition kim_biased_proximity_cert (R : realType) (idx : unit)
     (1 / 50)
     (fun C _ => @kim_biased_proximity_close R C).
 
-(** The model the certificate calls ideal, and the witness it carries for it,
-    are the model and the witness of the published uniform row. Conversion
-    decides both, so the ideal a biased row is measured against is the model
-    the published uniform row carries and not a second description of it. *)
+(** The model the certificate calls ideal is the model the published uniform
+    row carries, and the port built from the certificate's witness is that
+    row's port. Conversion decides both, so the ideal a biased row is
+    measured against is the uniform row's own model and not a second
+    description of it. *)
 Lemma kim_biased_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (kim_biased_proximity_cert R idx)
   = amf_sample (ab_f (published_at five_card_row_uniform_tableau)) R idx

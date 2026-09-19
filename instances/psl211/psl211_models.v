@@ -43,12 +43,12 @@
 (*                                                                            *)
 (* The dealer route. The all-decks independence is obtained a second way,     *)
 (* from the dealer model of reconstruct/dealer_privacy.v, by placing the      *)
-(* chirality, the deck description and the cut in its sample space. The       *)
+(* chirality, the deal and the cut in its sample space. The                   *)
 (* route goes through the mixed-law condition, whose premise the per-cut      *)
 (* count of psl211_alldecks.v discharges, and it restates                     *)
 (* psl211_alldecks_view_indep without replacing its proof. Two refutations    *)
 (* bound it: the per-deck condition has no solution under this dealer, and    *)
-(* under a dealer laying one fixed deck description the reading of three      *)
+(* under a dealer laying one fixed deal the reading of three                  *)
 (* seats is not independent of the chirality.                                 *)
 (*                                                                            *)
 (* Definitions:                                                               *)
@@ -69,13 +69,12 @@
 (*   psl211_dealer_view      == the coalition's reading as a function of the  *)
 (*                              dealer model's three coordinates              *)
 (*   psl211_dealer_mixed_law == the reading's law at one chirality,           *)
-(*                              averaged over deck description and cut        *)
-(*   psl211_perdeck_deal     == the deck description fixing the               *)
-(*                              counterexample                                *)
+(*                              averaged over the deal and the cut            *)
+(*   psl211_perdeck_deal     == the deal fixing the counterexample            *)
 (*   psl211_perdeck_coalition == the three seats 0, 1 and 2                   *)
 (*   psl211_perdeck_view     == the reading that fixes the counterexample     *)
 (*   psl211_perdeck_fiber    == the cuts producing that reading               *)
-(*   psl211_fixed_deal_delta == the dealer laying one deck description at     *)
+(*   psl211_fixed_deal_delta == the dealer laying one deal at                 *)
 (*                              both chiralities                              *)
 (*   psl211_fixed_dealP      == the dealer law at that kernel                 *)
 (*                                                                            *)
@@ -107,14 +106,13 @@
 (*   psl211_dealerPE         == the reassociation carries the all-decks law   *)
 (*                              to the dealer model's law                     *)
 (*   psl211_dealer_sectionE  == at one cut the two chiralities send the       *)
-(*                              uniform law on deck descriptions to the same  *)
-(*                              reading law                                   *)
-(*   psl211_dealer_mixed_lawE == and so do they averaged over deck            *)
-(*                              description and cut                           *)
+(*                              uniform law on deals to the same reading law  *)
+(*   psl211_dealer_mixed_lawE == and so do they averaged over the deal        *)
+(*                              and the cut                                   *)
 (*   psl211_dealer_view_indep == independence in the dealer sample space      *)
 (*   psl211_alldecks_view_indep_via_dealer == psl211_alldecks_view_indep      *)
 (*                              obtained from dealer_shuffle_view_indep       *)
-(*   psl211_perdeck_raw_countE == at one deck description the two             *)
+(*   psl211_perdeck_raw_countE == at one deal the two                         *)
 (*                              chiralities have 0 and 1 cuts producing one   *)
 (*                              reading                                       *)
 (*   psl211_perdeck_fiber_card_neq == the same as a statement about the       *)
@@ -561,8 +559,8 @@ Qed.
 (*     The same independence through the dealer model                         *)
 (******************************************************************************)
 
-(** dealT — a deck description: a chirality-free block index together with
-    two labellings. *)
+(** dealT — a deal, the chirality-free part of a deck description: a block
+    index together with two labellings. *)
 Local Notation dealT := psl211_deal.
 
 (** cutT — an element of the shuffle group. *)
@@ -582,8 +580,8 @@ Local Opaque psl211_alldecks_view.
 Section psl211_dealer.
 Variable R : realType.
 
-(** psl211_deal_pos — the type of deck descriptions is inhabited, so it
-    carries a uniform law. *)
+(** psl211_deal_pos — the type of deals is inhabited, so it carries a
+    uniform law. *)
 Lemma psl211_deal_pos : (0 < #|[set: dealT]|)%N.
 Proof.
 apply/card_gt0P.
@@ -591,7 +589,7 @@ by exists (ord0, 1%g, 1%g); rewrite inE.
 Qed.
 
 (** psl211_dealer_delta — the all-decks dealer: whatever the chirality, the
-    deck description is drawn uniformly and independently of it.  This is the
+    deal is drawn uniformly and independently of it.  This is the
     instance's dealer kernel, and its independence of the chirality is what
     makes the averaged symmetry of psl211_alldecks available. *)
 Definition psl211_dealer_delta (_ : bool) : R.-fdist dealT :=
@@ -687,7 +685,7 @@ Definition psl211_dealer_mixed_law (C : {set seatT}) (b : bool) :
     ((psl211_dealer_delta b) `x psl211_dealer_nu).
 
 (** psl211_dealer_sectionE — at one cut, the two chiralities send the uniform
-    law on deck descriptions to the same law on what a coalition of at most
+    law on deals to the same law on what a coalition of at most
     five seats reads.  This is the per-cut deal count of psl211_alldecks read
     as an equality of laws, and it is the only place where the instance's laid
     deck enters the bridge. *)
@@ -783,7 +781,7 @@ Local Transparent psl211_alldecks_view.
    psl211_perdeck_raw_viewE and psl211_perdeck_testE carry it back to the deck,
    the reading and the shuffle group symbolically. *)
 
-(** psl211_perdeck_deal — the deck description that fixes the counterexample:
+(** psl211_perdeck_deal — the deal that fixes the counterexample:
     block index zero of the chirality's table, with both labellings the
     identity. *)
 Definition psl211_perdeck_deal : dealT := (ord0, 1%g, 1%g).
@@ -884,9 +882,8 @@ Definition psl211_perdeck_raw_count (b : bool) : nat :=
 
 (** psl211_perdeck_raw_countE — that count is zero at one chirality and one
     at the other, which is the per-deck failure of the chirality symmetry: at
-    a fixed deck description the two chiralities do not have equally many cuts
-    producing a given reading, even though summing over deck descriptions
-    they do. *)
+    a fixed deal the two chiralities do not have equally many cuts producing
+    a given reading, even though summing over the deals they do. *)
 Lemma psl211_perdeck_raw_countE :
   psl211_perdeck_raw_count true = 0 /\ psl211_perdeck_raw_count false = 1.
 Proof. by split; vm_compute. Qed.
@@ -991,12 +988,12 @@ rewrite -!size_filter; apply: perm_size.
 exact: (perm_filter _ psl211_perdeck_ptbl_enum).
 Qed.
 
-(** psl211_perdeck_fiber_card_neq — at one deck description the two
-    chiralities have different numbers of cuts producing one reading.  The
-    symmetry the all-decks counting argument uses holds only in its per-cut
-    form, which fixes a cut and counts deck descriptions.  The statement with
-    the roles exchanged, fixing a deck description and counting cuts, is
-    false, and psl211_perdeck_deal witnesses it. *)
+(** psl211_perdeck_fiber_card_neq — at one deal the two chiralities have
+    different numbers of cuts producing one reading.  The symmetry the
+    all-decks counting argument uses holds only in its per-cut form, which
+    fixes a cut and counts deals.  The statement with the roles exchanged,
+    fixing a deal and counting cuts, is false, and psl211_perdeck_deal
+    witnesses it. *)
 Lemma psl211_perdeck_fiber_card_neq :
   #|psl211_perdeck_fiber true| != #|psl211_perdeck_fiber false|.
 Proof.
@@ -1091,8 +1088,8 @@ exact: etrans (Hlaw true psl211_perdeck_deal (Hpos true) (Hvalid true))
   (esym (Hlaw false psl211_perdeck_deal (Hpos false) (Hvalid false))).
 Qed.
 
-(** psl211_dealer_valid_forced — the all-decks dealer gives every deck
-    description positive mass, so the first premise of
+(** psl211_dealer_valid_forced — the all-decks dealer gives every deal
+    positive mass, so the first premise of
     dealer_shuffle_view_indep_of_deck cannot exclude any deal: a validity
     predicate satisfying it accepts psl211_perdeck_deal at both chiralities.
     This is what stops the per-deck route from being repaired by a narrower
@@ -1112,7 +1109,7 @@ Qed.
     solution, for every validity predicate and every candidate reading law.
     So of the model's two conditions only the mixed-law condition of
     dealer_shuffle_view_indep is available to this instance, and the uniform
-    law on deck descriptions meets it. *)
+    law on deals meets it. *)
 Lemma psl211_dealer_view_indep_of_deck_unsat (R : realType)
     (valid : bool -> psl211_deal -> bool) (mu : R.-fdist viewT) :
   (forall (b : bool) (d : psl211_deal),
@@ -1129,17 +1126,17 @@ exact: Hlaw.
 Qed.
 
 (** psl211_fixed_deal_delta — the degenerate dealer that lays one and the same
-    deck description whatever the chirality.  It is a dealer kernel in the
+    deal whatever the chirality.  It is a dealer kernel in the
     sense of dealer_shuffleP, and it is named here so that the general model
     can be asked whether it claims privacy for it.  The kernel does not depend
     on the chirality at all, and what the coalition reads still does, because
-    psl211_alldecks_seq reads the chirality table at the chirality: one deck
-    description names two different decks. *)
+    psl211_alldecks_seq reads the chirality table at the chirality: one deal
+    names two different decks. *)
 Definition psl211_fixed_deal_delta (R : realType) (_ : bool) :
     R.-fdist psl211_deal := fdist1 psl211_perdeck_deal.
 
 (** psl211_fixed_dealP — the dealer law at that kernel: a uniform chirality, a
-    fixed deck description, a uniform cut. *)
+    fixed deal, a uniform cut. *)
 Definition psl211_fixed_dealP (R : realType) :
     R.-fdist (bool * (psl211_deal * cutT)) :=
   @dealer_shuffleP R bool psl211_deal cutT (fdist_uniform card_bool)

@@ -56,10 +56,10 @@ Open. One file per phase, per instance. Needs its own plan after step 1.
 
 | # | Item | State |
 |---|---|---|
-| 3.1 | Eighteen "deck description" sentences in `instances/psl211/psl211_models.v` (file is not in the endpoint file's forward closure) | open |
+| 3.1 | "deck description" in `instances/psl211/psl211_models.v`: the tree's word for the whole run argument `psl211_inputT` (a chirality bit and a deal); 21 of 30 sites meant the deal `psl211_deal` and now say so, 9 kept | done by an Opus rocq-prover, audited by the main session (code tokens identical by script, the two notations read, sixteen files recompiled rc=0) |
 | 3.2 | Home of `card_tnth_count`: decided, `instances/kim2025/five_card_mixing.v`, its only user, whose den Boer colour census its comment already speaks of; moved at the landing of stage B, which edits `lib/var_dist_supp.v` anyway | done with landing 2 (0397f8e) |
 | 3.3 | Dated note recording the removed `five_card_row_repeated_at_manifest_level` | done: `notes/2026-09-19-223500-removed-five-card-row-repeated-at-manifest-level.md` |
-| 3.5 | Pass over production comments recorded by the landing audits (witness vs port in `five_card_proximity.v`, "in one column" in `psl211_word_proximity.v`, five economic words in `psl211_reading_constancy.v`, eight "ceiling" in `five_card_rows.v`); waits for the owner's decision on "spend" and on `Reprice` | open |
+| 3.5 | Pass over production comments recorded by the landing audits | partly done in the same commit: witness and port in `five_card_proximity.v`, "in one column" (one of two sentences) in `psl211_word_proximity.v`, nine "ceiling" in `five_card_rows.v`. Still open: the second "in one column" sentence of `psl211_word_proximity.v` (about lines 23-25), and everything that waits for the owner: "spend", "price", "currency", "cost", and `Reprice` |
 | 3.4 | P8, the two parts not compiled: a countermodel for the implication below the ceiling two; proximity derived from the certificate's own fields | open |
 
 ## Step 4. Roadmap groups of the spec (each probe-first: spec and ledger, probe, two audits, fold, plan, landing)
