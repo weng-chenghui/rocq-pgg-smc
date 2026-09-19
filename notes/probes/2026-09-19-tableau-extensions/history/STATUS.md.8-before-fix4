@@ -6,9 +6,7 @@ no permanent file edited, `instances/psl211/psl211_endpoints.v` never touched
 and never compiled.
 
 Stage A covers ledger rows T0, C1, C2, C3, K1, G1, G2, and the start of G3
-and D2. The C labels of this note are shifted against the spec's: this note's
-C1 and C2 together answer the spec's C1, this note's C3 answers the spec's
-C2, and the spec's C3 has its own verdict row below. The IdealProximity arm and the instance programs are later stages.
+and D2. The IdealProximity arm and the instance programs are later stages.
 
 ## Verdict table
 
@@ -18,7 +16,6 @@ C2, and the spec's C3 has its own verdict row below. The IdealProximity arm and 
 | C1 | GO | `pgg_tableau.v`, `ConcludePayload` and `port_conclude` |
 | C2 | GO, three payloads change in the tree | `pgl27_rows.v` and, since the Kim landing, `five_card_rows.v` |
 | C3 | GO | `pgl27_rows.v`, `pgl27_reprice41` and `pgl27_word_reprice41_false`, with the `Fail pgl27_row_word41` beside them |
-| the spec's C3 | GO since fix pass 3 | `five_card_rows.v`, `five_card_row_repeated39` continuing from `kim_centi_cert`, see F2 |
 | G2 | GO, `conclude` costs no keyword | `pgg_tableau_syntax.v`, the `conclude` notation rule before the `publish` one |
 | K1 | GO | `pgg_tableau.v`, four rows copies |
 | G1 | GO at baseline, after C, and after K | compile table below |
@@ -76,8 +73,7 @@ Both continuations write `certify ExactIndependence five_card_exact_witness`,
 so they certify the same arm with the same witness: this is one security claim
 published under two pairs of statuses, together with a branch point whose
 payload type reduces through the name. It is not two claims over one model,
-and `five_card_row_uniform_branch_atE` with
-`five_card_row_uniform_branch_ideal_atE` prove it is not, since both
+and `five_card_row_uniform_branch_atE` proves it is not, since the two
 continuations hold one `AnalysisBridged` coordinate.
 
 `t0_sampled_branch_pgl27.v` runs the same shape at PGL(2,7), where the exact
@@ -111,14 +107,13 @@ Lemma five_card_row_uniform_branch_rowE :
 Proof. by []. Qed.
 
 Lemma five_card_row_uniform_branch_atE :
-  published_at five_card_row_uniform_branch
-  = published_at five_card_row_uniform_tableau.
-Proof. exact: erefl. Qed.
-
-Lemma five_card_row_uniform_branch_ideal_atE :
-  published_at five_card_row_uniform_branch
-  = published_at five_card_row_uniform_branch_ideal.
-Proof. exact: erefl. Qed.
+  [/\ published_at five_card_row_uniform_branch
+      = published_at five_card_row_uniform_tableau,
+      published_at five_card_row_uniform_branch_ideal
+      = published_at five_card_row_uniform_tableau
+    & published_at five_card_row_uniform_branch
+      = published_at five_card_row_uniform_branch_ideal].
+Proof. split; exact: erefl. Qed.
 
 Lemma five_card_row_uniform_branch_transfer_neq :
   published_row five_card_row_uniform_branch
@@ -635,7 +630,7 @@ rewrote that file's header on 2026-09-19.
 
 ## What in the brief or the spec turned out wrong
 
-1. The spec's ledger row C1 expects "every existing `conclude` in the five
+1. The spec's ledger row C2 expects "every existing `conclude` in the five
    importer copies" to need a payload change. There is exactly one `conclude`
    in the whole tree outside the framework, and one `Fail` beside it.
 2. The brief's example payload `fun R _ => eq_le (pow2_split R)` names a
@@ -1087,10 +1082,12 @@ quotes as fragments, and Rocq commands.
 | `pgl27_row_word39_raw`, `pgl27_row_word39_bare_raw` | the bind spellings before fix pass 1 |
 | `pgl27_row_word39E`, `pgl27_row_word_arm_exactE` | renamed in fix pass 2, see E1 |
 | `t0_row_uniform`, `t0_row_uniform_transfer`, `t0_row_uniform_rowE`, `t0_row_uniform_manifestE`, `t0_row_uniform_atE`, `t0_row_uniform_row_neq`, `t0_s5_sampled`, `t0_cross_instance`, `t0_cross_instance_back` | the five-card T0 declarations before fix pass 2, see E1 |
-| `eq_le` | a lemma with the statement the brief wanted, which MathComp's `eq_le` does not have |
+| `eq_le` | a lemma the brief named and MathComp does not have |
 | `kw_sample`, `kw_by` | binders written in a scratch file for the keyword measurement, never in a probe file, since a parse error is raised before `Fail` can see the command |
 | `closed_binder` | a token of the parse error quoted above, not a declaration |
+| `five_card_row_repeated39`, `five_card_row_repeated39_bare`, `kim_centi_cert`, `kim_centi_cert40`, `kim_centi_cert_eps_lt` | declarations of the Kim probes, cited here as seed items |
 | `kim_spectral_rows_probe` | the Kim arm probe's module, cited as a code site |
+| `var_dist_le2` | a lemma of the Kim arm probe, cited for a landing |
 | `SecurityClaim`, `ExactViewIndependence`, `SpectralViewDecay` | the tag and its two constructors before fix pass 1, in the D1 rename table |
 | `IdealProximityArm`, `LeakageCeilingArm`, `DependenceArm` | names D1 proposes for the arms of later stages, written nowhere yet |
 | `IdealProximity`, `certify_idealproximity` | stage B's port constructor and its certify statement, named here for the price in D1 |
@@ -1177,9 +1174,9 @@ a search before it reaches reflexivity, is not the reason here: the refine
 path `exact: erefl` takes is what costs the time.
 
 **The one-cut row keeps its second certificate.** `conclude` may publish only
-a number at least the certificate's, and `kim_biased_cert` publishes twice the
-one-cut bundle's number, sqrt 5 over forty, about 0.0559, while the constant
-the row publishes is one twenty-fifth, 0.04. The inequality runs the wrong way, so the one-cut row
+a number at least the certificate's, and the one-cut bundle's number is
+sqrt 5 over forty, about 0.0559, while the constant the row publishes is one
+twenty-fifth, 0.04. The inequality runs the wrong way, so the one-cut row
 cannot be concluded at one twenty-fifth from `kim_biased_cert`, and
 `kim_biased_cert_exact` at the exact number stays. `kim_biased_exact_le_eps`
 is the tree's statement of that direction, `1 / 50 <= sw_bound_eps
@@ -1194,13 +1191,12 @@ They are left in the copy. Their uses, measured over the tree:
 
 | name | production | elsewhere |
 |---|---|---|
-| `kim_centi_cert40` | `instances/kim2025/five_card_rows.v`, its definition, its index line, `kim_centi_cert40_epsE`'s statement, and the two row lines a landing removes | the Kim arm probe, the Kim landing probe and that probe's two fidelity files; the notes `notes/20260919-kim-spectral-landing-design.md` and `notes/2026-09-19-112500-spectral-arm-at-kim-and-psl211-summary.md` |
+| `kim_centi_cert40` | `instances/kim2025/five_card_rows.v`, its definition, its index line, and the two row lines a landing removes | the Kim arm probe, the Kim landing probe and that probe's two fidelity files |
 | `kim_centi_cert40_epsE` | the same file, its statement and its index line | the same three probes |
-| `kim_centi_marginal_bound40` | `instances/kim2025/five_card_mixing.v`, its definition, its index line, and `kim_centi_cut_mixing40`'s statement; and `instances/kim2025/five_card_rows.v`, inside `kim_centi_cert40`'s definition | the same three probes |
-| `kim_centi_cut_mixing40` | `instances/kim2025/five_card_mixing.v`, its statement and its index line; and `instances/kim2025/five_card_rows.v`, inside `kim_centi_cert40`'s definition | the same three probes |
+| `kim_centi_marginal_bound40` | `instances/kim2025/five_card_mixing.v`, its definition, its index line, and `kim_centi_cut_mixing40`'s statement | the same three probes |
+| `kim_centi_cut_mixing40` | the same file, its statement and its index line | the same three probes |
 
-Every use outside the four declarations sits inside `kim_centi_cert40`, so
-the four can be withdrawn together. Withdrawing them is a Kim decision and not stage A's: a landing that takes
+Withdrawing them is a Kim decision and not stage A's: a landing that takes
 this route should say so in the Kim landing's own note first.
 
 **The recorded failure.** `five_card_row_repeated39_bare` becomes
@@ -1317,20 +1313,13 @@ describe:
 | the same header, on the two kinds of bound | "Neither arm of certify takes a bound of either kind" | "No arm of certify takes a bound of either kind" |
 | `five_card_rows.v`, the biased row's docstring | "neither arm of certify takes a bound of that kind" | "no arm of certify takes a bound of that kind" |
 
-**Counts stage B changes.** Five sentences carry a count that is the point of
-the sentence, so the count is kept and the number is what stage B edits. The
-last three were found by the fourth audit:
+**Counts stage B changes.** Two sentences carry a count that is the point of
+the sentence, so the count is kept and the number is what stage B edits:
 
 - `pgg_tableau.v`, the header's "There are five statements." Stage A adds no
   statement; stage B's `certify_idealproximity` makes it six.
 - `pgg_tableau_syntax.v`, the count of nineteen keywords in its header. Stage
   B's `certify` rule changes it only if the rule writes a word after a slot.
-- `pgg_tableau.v`, the banner "The two security witnesses" over
-  `ExactWitness` and `SpectralCert`. Stage B adds a third certificate record.
-- `pgg_tableau_syntax.v`, "keep the two port constructors and the `conclude`
-  terminal usable by name". Stage B adds a third port constructor.
-- `pgg_tableau_syntax.v`, the banner "The two typed builders" over `mk_exact`
-  and `mk_spectral`. Both banners are padded to exactly 80 bytes.
 
 `five_card_rows.v`'s "no arm of certify takes a bound of that kind" is kept
 as a statement about every arm, and it stays true at three arms: the new arm
@@ -1366,26 +1355,3 @@ alone; `s5_row_rand_armE` holds those three and
 `rigidity_s5_instance.s5_group_order_eq`, which is production's and reaches
 the report through the S5 instance's own witness. The scan allows dots in a
 constant name.
-
-## Fix pass 4, after the fourth audit
-
-The fourth audit (`audit-stageA-4.md`, an Opus auditor independent of the
-prover, working from an export of commit d5f70cd) returned GO with no blocking
-item, seven SHOULD items and three notes. The main session checked each
-proposed replacement against the code and applied the ones that touch this
-note: the C labels and the verdict row for the spec's C3, the Step 2
-transcript, the E6 table, the object named in F2's paragraph on the one-cut
-row, the withdrawal table, and the three added Counts items. The five edits
-to `.v` files (the one-cut row's docstring, the orientation of
-`five_card_row_uniform_branch_ideal_atE`, the measured 147 s and the full path
-in the source comment above `five_card_row_repeated39_atE`, the first sentence
-of `kim_centi_cert40`'s docstring, and the three counting sentences) were
-handed to the stage B prover, which holds those files, and are recorded in
-`STATUS-stageB.md`. The state before this pass is
-`history/STATUS.md.8-before-fix4`.
-
-The auditor reproduced the measurement behind the `reflexivity` deviation:
-`reflexivity` 0.068 s, `exact: erefl` 156.9 s, and `exact: erefl` with its
-argument given 162.0 s, all three proof terms being `erefl` at the same type
-and `Qed` under 0.01 s.
-
