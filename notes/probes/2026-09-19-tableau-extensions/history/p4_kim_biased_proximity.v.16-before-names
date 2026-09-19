@@ -14,24 +14,22 @@
 (*                                                                            *)
 (* One named Tableau Sampled value, five_card_row_biased_tableau of           *)
 (* five_card_rows.v, carries both claims about the one-cut model: the         *)
-(* input-indistinguishability one, which the tree already publishes, and the  *)
-(* proximity one. The two are two rows over one model, and the equations      *)
-(* below say that the input-indistinguishability branch and the unbranched    *)
-(* input-indistinguishability program hold one coordinate.                    *)
+(* spectral one, which the tree already publishes, and the proximity one. The *)
+(* two are two rows over one model, and the equations below say that the      *)
+(* spectral branch and the unbranched spectral program hold one coordinate.   *)
 (*                                                                            *)
 (* Both numbers come from one distance on the cut group, the one fiftieth of  *)
-(* kim_biased_cut_mixing_exact. The input-indistinguishability arm spends it  *)
-(* once for each of the two committed pairs it compares and the proximity arm *)
-(* spends it once, so the proximity row publishes one fiftieth where the      *)
-(* input-indistinguishability row of the same model publishes one             *)
-(* twenty-fifth. The proximity row publishes its certificate's own number,    *)
-(* with no terminal between the certificate and the reader.                   *)
+(* kim_biased_cut_mixing_exact. The spectral arm spends it once for each of   *)
+(* the two committed pairs it compares and the proximity arm spends it once,  *)
+(* so the proximity row publishes one fiftieth where the spectral row of the  *)
+(* same model publishes one twenty-fifth. The proximity row publishes its     *)
+(* certificate's own number, with no terminal between the certificate and     *)
+(* the reader.                                                                *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   kim_biased_proximity_cert == the one-cut model's proximity certificate   *)
-(*   five_card_row_biased_branch_indistinguishability                         *)
-(*                              == the input-indistinguishability claim,      *)
-(*                                 from the named value                       *)
+(*   five_card_row_biased_branch_spectral                                     *)
+(*                             == the spectral claim, from the named value    *)
 (*   five_card_row_biased_proximity                                           *)
 (*                             == the proximity claim, published at 1/50      *)
 (*                                                                            *)
@@ -208,15 +206,15 @@ Lemma kim_biased_proximity_cert_epsE (idx : unit) :
   ipc_eps (kim_biased_proximity_cert R idx) = 1 / 50 :> R.
 Proof. exact: erefl. Qed.
 
-(** The number kim_biased_cert_exact carries at this model is twice the
-    number kim_biased_proximity_cert carries. Both are read off
+(** The number kim_biased_cert_exact carries at this model is twice the number
+    kim_biased_proximity_cert carries. Both are read off
     kim_biased_cut_mixing_exact, the one distance on the cut group; the
-    input-indistinguishability arm spends it once for each of the two
-    committed pairs it compares and the proximity arm compares one law with
-    one law. The relation is between these two certificates and not between
-    the two arms: the same model also carries kim_biased_cert, whose marginal
-    bound is sqrt 5 over eighty and which therefore publishes sqrt 5 over
-    forty, so neither arm determines the number of the other. *)
+    spectral arm spends it once for each of the two committed pairs it
+    compares and the proximity arm compares one law with one law. The relation
+    is between these two certificates and not between the two arms: the same
+    model also carries kim_biased_cert, whose marginal bound is sqrt 5 over
+    eighty and which therefore publishes sqrt 5 over forty, so neither arm
+    determines the number of the other. *)
 Lemma kim_biased_proximity_eps_halfE (idx : unit) :
   cert_eps (kim_biased_cert_exact R idx)
   = ipc_eps (kim_biased_proximity_cert R idx)
@@ -224,9 +222,9 @@ Lemma kim_biased_proximity_eps_halfE (idx : unit) :
 Proof. exact: erefl. Qed.
 
 (** The certificate's own number is under two, the ceiling var_dist_le2 gives
-    for a variation distance, so the certificate is not vacuous. At one
-    percent of the ceiling it is a weak separation and not a cryptographic
-    one, as the input-indistinguishability certificate of the same model is. *)
+    for a variation distance, so the certificate is not vacuous. At one percent
+    of the ceiling it is a weak separation and not a cryptographic one, as the
+    spectral certificate of the same model is. *)
 Lemma kim_biased_proximity_cert_eps_lt2 (idx : unit) :
   ipc_eps (kim_biased_proximity_cert R idx) < 2%:R.
 Proof. by rewrite kim_biased_proximity_cert_epsE; lra. Qed.
@@ -237,51 +235,49 @@ End kim_biased_proximity_numbers.
 (*     One model, two claims, two rows                                        *)
 (******************************************************************************)
 
-(** Kim's one-cut model certified by the input-indistinguishability arm,
-    continued from the named Sampled value rather than written out from the
-    prefix. It is the sibling of the proximity row below: the two continue
-    one term, so what separates them is the arm and nothing about the
-    algebra, the run or the law. *)
-Definition five_card_row_biased_branch_indistinguishability : PublishedRow :=
+(** Kim's one-cut model certified by the spectral arm, continued from the
+    named Sampled value rather than written out from the prefix. It is the
+    sibling of the proximity row below: the two continue one term, so what
+    separates them is the arm and nothing about the algebra, the run or the
+    law. *)
+Definition five_card_row_biased_branch_spectral : PublishedRow :=
   five_card_row_biased_tableau
-    certify InputIndistinguishability kim_biased_cert
+    certify SpectralDecay kim_biased_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The branch and the program written out from the prefix hold one
-    AnalysisBridged coordinate, so naming the Sampled value costs the
-    input-indistinguishability row nothing. *)
+    AnalysisBridged coordinate, so naming the Sampled value costs the spectral
+    row nothing. *)
 (* exact: erefl and not by [], following the hang shape recorded in STATUS.md:
    done does not return on an equation between two rows' coordinates. *)
-Lemma five_card_row_biased_branch_indistinguishability_atE :
-  published_at five_card_row_biased_branch_indistinguishability
-  = published_at five_card_row_biased_indistinguishability_tableau.
+Lemma five_card_row_biased_branch_spectral_atE :
+  published_at five_card_row_biased_branch_spectral
+  = published_at five_card_row_biased_spectral_tableau.
 Proof. exact: erefl. Qed.
 
 (** The branch publishes the manifest's own row for the biased path. *)
-Lemma five_card_row_biased_branch_indistinguishability_rowE :
-  published_row five_card_row_biased_branch_indistinguishability
-  = five_card_row_biased.
+Lemma five_card_row_biased_branch_spectral_rowE :
+  published_row five_card_row_biased_branch_spectral = five_card_row_biased.
 Proof. exact: erefl. Qed.
 
 (** Kim's one-cut model certified by the proximity arm and published at its
-    certificate's own number, one fiftieth. What a coalition of fewer than
-    two seats is shown is that the joint law of its reading with the
-    conjunction of the committed bits is within that number of the product of
-    the two marginals the den Boer uniform execution has, where the reading
-    and the conjunction are independent outright. The number is spent once,
-    against the input-indistinguishability row's twice, and the transfer
-    status is the one the input-indistinguishability row earns, since the
-    same ideal cut is what both certificates compare against. *)
+    certificate's own number, one fiftieth. What a coalition of fewer than two
+    seats is shown is that the joint law of its reading with the conjunction
+    of the committed bits is within that number of the product of the two
+    marginals the den Boer uniform execution has, where the reading and the
+    conjunction are independent outright. The number is spent once, against
+    the spectral row's twice, and the transfer status is the one the spectral
+    row earns, since the same ideal cut is what both certificates compare
+    against. *)
 Definition five_card_row_biased_proximity : PublishedRow :=
   five_card_row_biased_tableau
     certify IdealProximity kim_biased_proximity_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The proximity row publishes the manifest's row for the biased path, as
-    its input-indistinguishability sibling does. An AnalysisPathRow holds
-    descriptive metadata and no Prop, so one manifest row carrying an
-    input-indistinguishability row and a proximity row says nothing about
-    either claim. *)
+(** The proximity row publishes the manifest's row for the biased path, as its
+    spectral sibling does. An AnalysisPathRow holds descriptive metadata and
+    no Prop, so one manifest row carrying a spectral row and a proximity row
+    says nothing about either claim. *)
 Lemma five_card_row_biased_proximity_rowE :
   published_row five_card_row_biased_proximity = five_card_row_biased.
 Proof. exact: erefl. Qed.
@@ -295,15 +291,12 @@ Lemma five_card_row_biased_proximity_publishedE :
      = BaselineClassicalOnly.
 Proof. by []. Qed.
 
-(** The arm the input-indistinguishability branch carries, at every real
-    field and index. *)
-Lemma five_card_row_biased_branch_indistinguishability_armE (R : realType)
-    (idx : amf_index
-             (ab_f (published_at
-                      five_card_row_biased_branch_indistinguishability))
+(** The arm the spectral branch carries, at every real field and index. *)
+Lemma five_card_row_biased_branch_spectral_armE (R : realType)
+    (idx : amf_index (ab_f (published_at five_card_row_biased_branch_spectral))
              R) :
-  security_arm_of five_card_row_biased_branch_indistinguishability R idx
-  = InputIndistinguishabilityArm.
+  security_arm_of five_card_row_biased_branch_spectral R idx
+  = SpectralDecayArm.
 Proof. by []. Qed.
 
 (** The arm the proximity row carries, at every real field and index: the
@@ -321,7 +314,7 @@ Proof. by []. Qed.
 Lemma five_card_row_biased_arm_neq (R : realType)
     (idx : amf_index (ab_f (published_at five_card_row_biased_proximity)) R) :
   security_arm_of five_card_row_biased_proximity R idx
-  <> security_arm_of five_card_row_biased_branch_indistinguishability R idx.
+  <> security_arm_of five_card_row_biased_branch_spectral R idx.
 Proof. by []. Qed.
 
 (******************************************************************************)

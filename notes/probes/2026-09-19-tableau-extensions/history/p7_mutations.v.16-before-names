@@ -26,9 +26,8 @@
 (* certificate built over one model of the five-card instance is rejected at  *)
 (* another model of the same instance, although the two model families carry  *)
 (* one index type, because a certificate is typed over the sample adapter and *)
-(* not over the family. The fourth runs the same mutation at the              *)
-(* input-indistinguishability arm, so the two arms are rejected by one        *)
-(* coordinate.                                                                *)
+(* not over the family. The fourth runs the same mutation at the spectral     *)
+(* arm, so the two arms are rejected by one coordinate.                       *)
 (*                                                                            *)
 (* Lemmas:                                                                    *)
 (*   idealproximity_ceiling    == every certificate satisfies the arm's       *)
@@ -209,13 +208,10 @@ Fail Definition five_card_row_repeated_proximity : Tableau AnalysisBridged :=
   five_card_row_repeated_tableau
     certify IdealProximity kim_biased_proximity_cert.
 
-(** The converse direction, at the arm the tree already carries: the
-    seven-cut model's input-indistinguishability certificate is rejected
-    where the one-cut model's is required. The proximity arm and the
-    input-indistinguishability arm are rejected by the same coordinate, so
-    the proximity arm adds no new way for two models of one instance to be
-    confused. *)
-Fail Definition kim_biased_indistinguishability_from_centi
-  (R : realType) (idx : unit)
-  : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
-  kim_centi_cert R idx.
+(** The converse direction, at the arm the tree already carries: the seven-cut
+    model's spectral certificate is rejected where the one-cut model's is
+    required. The proximity arm and the spectral arm are rejected by the same
+    coordinate, so the proximity arm adds no new way for two models of one
+    instance to be confused. *)
+Fail Definition kim_biased_spectral_from_centi (R : realType) (idx : unit)
+  : SpectralCert (amf_sample kim_biased_family R idx) := kim_centi_cert R idx.

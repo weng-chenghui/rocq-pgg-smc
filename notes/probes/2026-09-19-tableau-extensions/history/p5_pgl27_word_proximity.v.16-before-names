@@ -14,20 +14,20 @@
 (*                                                                            *)
 (* One named Tableau Sampled value, pgl27_word_sampled of                     *)
 (* t0_sampled_branch_pgl27.v, carries both claims about the word model: the   *)
-(* input-indistinguishability one, which pgl27_row_word_branch39 already      *)
-(* publishes, and the proximity one below. The two are two rows over one      *)
-(* model, and pgl27_row_word_arms_sampledE says that both read their model    *)
-(* family off that one name.                                                  *)
+(* spectral one, which pgl27_row_word_branch39 already publishes, and the     *)
+(* proximity one below. The two are two rows over one model, and              *)
+(* pgl27_row_word_arms_sampledE says that both read their model family off    *)
+(* that one name.                                                             *)
 (*                                                                            *)
 (* Both numbers come from one distance, pgl27_word_mixing on the cut group.   *)
 (* The number pgl27_word_cert carries at this model is twice the number       *)
-(* pgl27_word_proximity_cert carries: the input-indistinguishability arm      *)
-(* spends the distance once for each of the two dealt secrets it compares and *)
-(* the proximity arm compares one law with one law. The relation is between   *)
-(* these two certificates and not between the two arms, since the number of a *)
+(* pgl27_word_proximity_cert carries: the spectral arm spends the distance    *)
+(* once for each of the two dealt secrets it compares and the proximity arm   *)
+(* compares one law with one law. The relation is between these two           *)
+(* certificates and not between the two arms, since the number of a           *)
 (* proximity certificate is a field the instance chooses. The row is          *)
 (* concluded at 2^-39, the number pgl27_row_word39 publishes for the          *)
-(* input-indistinguishability arm, so the two rows are read in one column.    *)
+(* spectral arm, so the two rows are read in one column.                      *)
 (*                                                                            *)
 (* What the row claims is an average over the run argument under the prior:   *)
 (* both laws are pushforwards of whole sample laws and neither is a           *)
@@ -63,8 +63,7 @@
 (*   pgl27_row_word_proximity_armE                                            *)
 (*                             == that row carries the proximity arm          *)
 (*   pgl27_row_word_branch39_armE                                             *)
-(*                              == the input-indistinguishability row         *)
-(*                                 carries that arm                           *)
+(*                             == the spectral row carries the spectral arm   *)
 (*   pgl27_row_word_arms_sampledE                                             *)
 (*                             == both rows read their model family off the   *)
 (*                                one named Sampled value                     *)
@@ -223,14 +222,13 @@ Proof. exact: erefl. Qed.
 
 (** The number pgl27_word_cert carries at this model is twice the number
     pgl27_word_proximity_cert carries. Both are read off pgl27_word_mixing,
-    the one distance on the cut group; the input-indistinguishability arm
-    spends it once for each of the two dealt secrets it compares and the
-    proximity arm compares one law with one law. The relation is between
-    these two certificates and not between the two arms: cert_eps is by
-    definition the walk's marginal number added to itself, and this proximity
-    certificate chooses that same marginal number as its own field, which a
-    proximity certificate over the same model and the same ideal is free not
-    to do. *)
+    the one distance on the cut group; the spectral arm spends it once for
+    each of the two dealt secrets it compares and the proximity arm compares
+    one law with one law. The relation is between these two certificates and
+    not between the two arms: cert_eps is by definition the walk's marginal
+    number added to itself, and this proximity certificate chooses that same
+    marginal number as its own field, which a proximity certificate over the
+    same model and the same ideal is free not to do. *)
 Lemma pgl27_word_proximity_eps_halfE (R : realType) (secretP : R.-fdist bool) :
   cert_eps (pgl27_word_cert secretP)
   = ipc_eps (pgl27_word_proximity_cert secretP)
@@ -246,8 +244,8 @@ Fact pow2_40_gt0 (R : realType) : (0:R) < 2%:R^+40.
 Proof. by rewrite exprn_gt0 // ltr0n. Qed.
 
 (** The certificate's number is under 2^-39, the constant the word row
-    publishes for the input-indistinguishability arm. It is the obligation of
-    the terminal that concludes the proximity row at that constant. *)
+    publishes for the spectral arm. It is the obligation of the terminal that
+    concludes the proximity row at that constant. *)
 Lemma pgl27_word_proximity_le39 (R : realType) (secretP : R.-fdist bool) :
   ipc_eps (pgl27_word_proximity_cert secretP) <= 2%:R^-39 :> R.
 Proof.
@@ -274,13 +272,12 @@ Qed.
 (******************************************************************************)
 
 (** The word model certified by the proximity arm and concluded at 2^-39, the
-    constant the input-indistinguishability row of the same model publishes.
-    What a coalition of fewer than four seats is shown is that the joint law
-    of its reading with the dealt secret is within that number of the product
-    of the two marginals the prior-indexed exact execution has, where the
-    reading and the secret are independent outright. The number is spent
-    once, against the input-indistinguishability row's twice, and the
-    transfer status is the one the input-indistinguishability row earns,
+    constant the spectral row of the same model publishes. What a coalition of
+    fewer than four seats is shown is that the joint law of its reading with
+    the dealt secret is within that number of the product of the two marginals
+    the prior-indexed exact execution has, where the reading and the secret
+    are independent outright. The number is spent once, against the spectral
+    row's twice, and the transfer status is the one the spectral row earns,
     since the same ideal cut is what both certificates compare against. *)
 Definition pgl27_row_word_proximity : PublishedRowAt pgl27_reprice39 :=
   pgl27_word_sampled
@@ -292,10 +289,9 @@ Definition pgl27_row_word_proximity : PublishedRowAt pgl27_reprice39 :=
    two rows' coordinates. *)
 
 (** The proximity row publishes the manifest's row for the word path, as its
-    input-indistinguishability sibling does. An AnalysisPathRow holds
-    descriptive metadata and no Prop, so one manifest row carrying an
-    input-indistinguishability row and a proximity row says nothing about
-    either claim. *)
+    spectral sibling does. An AnalysisPathRow holds descriptive metadata and
+    no Prop, so one manifest row carrying a spectral row and a proximity row
+    says nothing about either claim. *)
 Lemma pgl27_row_word_proximity_rowE :
   published_row pgl27_row_word_proximity = pgl27_row_word.
 Proof. exact: erefl. Qed.
@@ -309,11 +305,10 @@ Lemma pgl27_row_word_proximity_armE (R : realType)
   security_arm_of pgl27_row_word_proximity R idx = IdealProximityArm.
 Proof. by []. Qed.
 
-(** The arm the input-indistinguishability continuation of the same named
-    value carries. *)
+(** The arm the spectral continuation of the same named value carries.        *)
 Lemma pgl27_row_word_branch39_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word_branch39)) R) :
-  security_arm_of pgl27_row_word_branch39 R idx = InputIndistinguishabilityArm.
+  security_arm_of pgl27_row_word_branch39 R idx = SpectralDecayArm.
 Proof. by []. Qed.
 
 (** Both rows over the word model read their analysis model family off the one
@@ -364,7 +359,7 @@ Proof.
 have Hp : security_arm_of pgl27_row_word_proximity R secretP
   = IdealProximityArm by [].
 have Hs : security_arm_of pgl27_row_word_branch39 R secretP
-  = InputIndistinguishabilityArm by [].
+  = SpectralDecayArm by [].
 move=> Harm; move: Hp; rewrite Harm Hs => Hf; discriminate Hf.
 Qed.
 

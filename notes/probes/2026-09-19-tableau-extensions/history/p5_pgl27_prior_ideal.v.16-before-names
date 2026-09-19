@@ -1,0 +1,161 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
+(******************************************************************************)
+(* Probe P5, first half: the ideal execution of PGL(2,7) at every prior       *)
+(*                                                                            *)
+(* The eight-card orbit instance has two probability models over one          *)
+(* execution: the exact shuffle, which draws its cut uniformly from PGL(2,7), *)
+(* and the two-hundred-letter word walk, which draws it by evaluating a       *)
+(* sampled generator word. The word model is indexed by the law of the dealt  *)
+(* secret and the exact model of pgl27_models.v is not: its family index is   *)
+(* the unit type and its one member fixes the uniform secret. A proximity     *)
+(* certificate compares the two models at one index, so an ideal indexed by   *)
+(* unit can only be the ideal of a word model at the uniform prior, and the   *)
+(* distance of the word model at another prior to that one ideal is the       *)
+(* distance between the two priors, which is not small. The family below is   *)
+(* the exact shuffle carrying the prior as its index, so that the ideal and   *)
+(* the actual model speak of one secret law at every index.                   *)
+(*                                                                            *)
+(* Its privacy is exact at every prior and not only at the uniform one:       *)
+(* pgl27_view_indep_gen is three-transitivity of PGL(2,7) on the eight points *)
+(* read as a privacy statement, and three-transitivity says nothing about how *)
+(* the secret is drawn. That is why the ideal this file publishes is an       *)
+(* execution whose coalitions below four seats learn nothing at all, and not  *)
+(* merely a law the word model happens to be near.                            *)
+(*                                                                            *)
+(* Definitions:                                                               *)
+(*   pgl27_prior_sample        == the exact-shuffle sample layer at a prior   *)
+(*   pgl27_prior_exact_family  == that layer as a prior-indexed family        *)
+(*   pgl27_prior_exact_witness == its exact-arm witness                       *)
+(*   pgl27_row_prior_exact_tableau                                            *)
+(*                             == the ideal published as its own program      *)
+(*                                                                            *)
+(* Key results:                                                               *)
+(*   pgl27_prior_viewE         == the framework's reading of a coalition is   *)
+(*                                the instance's coalition view               *)
+(*   pgl27_row_prior_exact_armE                                               *)
+(*                             == the ideal row carries the exact arm         *)
+(*   pgl27_row_prior_exact_rowE                                               *)
+(*                             == the manifest row the ideal program          *)
+(*                                publishes, in full                          *)
+(******************************************************************************)
+
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import bigop order ssrnum ssralg reals boolp.
+From infotheo Require Import realType_ext fdist proba variation_dist entropy.
+From pgg_smc Require Import pgg_interface pgg_session_types.
+From pgg_smc Require Import pgg_monodromy_profile pgg_execution_plug.
+From pgg_smc Require Import pgg_observed_execution pgg_analysis_status.
+From pgg_smc Require Import pgg_instance pgg_sample_adapter.
+From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
+From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
+From pgg_smc Require Import pgl27_exec pgl27_models.
+From pgg_smc Require Import pgg_analysis_manifest.
+From tableau_ext_probe Require Import pgg_tableau pgg_tableau_syntax.
+From tableau_ext_probe Require Import pgl27_rows.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+Import GRing.Theory Num.Theory.
+
+Local Open Scope ring_scope.
+Local Open Scope fdist_scope.
+Local Open Scope proba_scope.
+
+(******************************************************************************)
+(*     The exact shuffle at an arbitrary prior                                *)
+(******************************************************************************)
+
+(** The sample layer of the exact shuffle over the eight-card execution, with
+    the law of the dealt secret left free. Its sample space is the pair of the
+    dealt secret and the cut, under the product of the given prior with the
+    uniform law on PGL(2,7); the run argument is the secret and the cut is the
+    group element itself. It differs from pgl27_sample only in refusing to fix
+    the prior, which is the coordinate a comparison with the word model at
+    that prior needs to hold. *)
+Definition pgl27_prior_sample (R : realType) (secretP : R.-fdist bool)
+  : SampleAdapter R pgl27_exec_plug :=
+  @MkSampleAdapter R pgl27_profile pgl27_exec_plug
+    [the finType of (bool * pgg_gT pgl27_M)%type]
+    (pgl27P_gen secretP) fst snd.
+
+(** The exact shuffle as an analysis model family indexed by the prior. Its
+    index type is the one pgl27_word_family carries, so a row over the word
+    model and a row over this one are read at one index. *)
+Definition pgl27_prior_exact_family : AnalysisModelFamily pgl27_observed :=
+  @MkAnalysisModelFamily pgl27_observed (fun R => R.-fdist bool)
+    (fun R p => @pgl27_prior_sample R p).
+
+(** The framework's static reading of a coalition at this model is the
+    instance's coalition view, with the secret left inside the sample point.
+    Every security statement of a row is made about the left-hand side and
+    every theorem of the instance about the right, so this equation is the
+    whole of what carries one to the other at the prior-indexed model. *)
+Lemma pgl27_prior_viewE (R : realType) (secretP : R.-fdist bool)
+    (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
+  (fun u => @static_coalition_obs pgl27_algebra pgl27_dealt_params C
+              ((amf_sample pgl27_prior_exact_family R secretP).(sa_arg) u)
+              ((amf_sample pgl27_prior_exact_family R secretP).(sa_cut) u))
+  = pgl27_view R C.
+Proof. by apply: boolp.funext; case=> s g; exact: pgl27_static_obsE. Qed.
+
+(** The exact arm's witness at every prior: the dealt secret as a random
+    variable on this sample space, and, at every coalition of fewer than four
+    seats, the independence of that coalition's reading from it. The
+    independence is pgl27_view_indep_gen, three-transitivity of PGL(2,7) read
+    as a privacy statement, which holds whatever the law of the secret is. The
+    reading carries no information about the secret at all and not a small
+    amount, so this model is an execution a proximity certificate may call
+    ideal. *)
+Definition pgl27_prior_exact_witness (R : realType) (secretP : R.-fdist bool)
+  : ExactWitness (amf_sample pgl27_prior_exact_family R secretP) :=
+  @MkExactWitness R pgl27_algebra pgl27_dealt_params
+    (amf_sample pgl27_prior_exact_family R secretP) bool (pgl27_secret R)
+    (fun C HC =>
+       let H3 : (#|C| <= 3)%N := HC in
+       (eq_ind_r
+          (fun v => pgl27P_gen secretP |= v _|_ pgl27_secret R)
+          (pgl27_view_indep_gen secretP H3)
+          (pgl27_prior_viewE secretP C))).
+
+(******************************************************************************)
+(*     The ideal as its own program                                           *)
+(******************************************************************************)
+
+(** The prior-indexed exact shuffle, from the observed prefix the two existing
+    PGL(2,7) rows share, certified by the exact arm and published. Its
+    transfer status is StaticExecutedOnly, because this model draws the
+    uniform cut itself and no idealized shuffle is being compared with a real
+    one; what the row carries about a coalition of fewer than four seats is
+    independence of the dealt secret, at every real field and every prior,
+    with no numeric bound anywhere in it. *)
+Definition pgl27_row_prior_exact_tableau : PublishedRow :=
+  pgl27_dealt
+    sample  pgl27_prior_exact_family
+    certify ExactIndependence pgl27_prior_exact_witness
+    |> publish StaticExecutedOnly BaselineClassicalOnly.
+
+(** The arm the ideal row carries, at every real field and prior:
+    independence of the dealt secret, and not a distance to some other model.
+    This is the value a paper's table prints in the arm column for the ideal
+    row. *)
+Lemma pgl27_row_prior_exact_armE (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_prior_exact_tableau)) R) :
+  security_arm_of pgl27_row_prior_exact_tableau R idx = ExactIndependenceArm.
+Proof. by []. Qed.
+
+(** The whole manifest row the ideal program publishes. It agrees with
+    pgl27_row_exact on the completion level, the transfer status and the
+    assumption status, and differs from it in the fourth coordinate, the
+    model family an AnalysisPathRow records: pgl27_row_exact carries the
+    unit-indexed exact family and this row carries the prior-indexed one. The
+    equation published_row pgl27_row_prior_exact_tableau = pgl27_row_exact
+    typechecks and is not provable by conversion, so the manifest of the tree
+    holds no row at this model. *)
+Lemma pgl27_row_prior_exact_rowE :
+  published_row pgl27_row_prior_exact_tableau
+  = @MkAnalysisPathRow pgl27_observed AnalysisBridged
+      pgl27_prior_exact_family StaticExecutedOnly BaselineClassicalOnly.
+Proof. exact: erefl. Qed.

@@ -1,57 +1,49 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* Probe P8: the proximity arm against the input-indistinguishability arm     *)
+(* Probe P8: the proximity arm against the spectral arm                       *)
 (*                                                                            *)
-(* The input-indistinguishability arm and the proximity arm each carry a      *)
-(* number, and both numbers can be read off one variation distance on the cut *)
-(* group, so a reader may take one proposition for a restatement of the       *)
-(* other. Four statements separate them, and two of the four are compiled.    *)
+(* The spectral arm and the proximity arm each carry a number, and both       *)
+(* numbers can be read off one variation distance on the cut group, so a      *)
+(* reader may take one proposition for a restatement of the other. Four       *)
+(* statements separate them, and two of the four are compiled.                *)
 (*                                                                            *)
-(* Compiled: the input-indistinguishability arm's proposition does not        *)
-(* mention its certificate. indistinguishability_prop_cert_free says it is    *)
-(* one proposition at two certificates over one model, so the ideal cut and   *)
-(* the constancy field are spent inside indistinguishability_tail and have    *)
-(* left the claim.                                                            *)
+(* Compiled: the spectral arm's proposition does not mention its certificate. *)
+(* spectral_prop_cert_free says it is one proposition at two certificates     *)
+(* over one model, so the ideal cut and the constancy field are spent inside  *)
+(* spectral_tail and have left the claim.                                     *)
 (*                                                                            *)
 (* Compiled: at the five-card instance the proximity proposition at the       *)
 (* published one fiftieth is a theorem outright, so the implication from the  *)
-(* input-indistinguishability proposition holds there for a reason that does  *)
-(* not read the input-indistinguishability premise at all, and                *)
-(* idealproximity_ceiling of p7_mutations.v holds the same implication at two *)
-(* from any premise whatever.                                                 *)
+(* spectral proposition holds there for a reason that does not read the       *)
+(* spectral premise at all, and idealproximity_ceiling of p7_mutations.v      *)
+(* holds the same implication at two from any premise whatever.               *)
 (*                                                                            *)
 (* Argued and not compiled: at a constant below two, no implication holds     *)
 (* uniformly in the proximity certificate. A countermodel is what would       *)
-(* settle it, and it needs a model whose reading law is the same at every run *)
-(* argument, which is what the input-indistinguishability proposition asks,   *)
-(* and far from the ideal's, which is what the proximity conclusion forbids.  *)
-(* No such model is built here.                                               *)
+(* settle it, and it needs a model whose reading law is the same at every     *)
+(* run argument, which is what the spectral proposition asks, and far from    *)
+(* the ideal's, which is what the proximity conclusion forbids. No such       *)
+(* model is built here.                                                       *)
 (*                                                                            *)
 (* Not compiled: the statement the spec intends, in which the proximity       *)
-(* proposition is derived from the input-indistinguishability certificate's   *)
-(* own fields at a stated constant, rather than proved beside it at one       *)
-(* instance.                                                                  *)
+(* proposition is derived from the spectral certificate's own fields at a     *)
+(* stated constant, rather than proved beside it at one instance.             *)
 (*                                                                            *)
 (* What the two arms share is a carrier: idealproximity_reading_le reads the  *)
 (* proximity number as a bound between the two models' reading marginals,     *)
-(* which is the carrier the input-indistinguishability arm states its own     *)
-(* bound on.                                                                  *)
+(* which is the carrier the spectral arm states its own bound on.             *)
 (*                                                                            *)
 (* Lemmas:                                                                    *)
-(*   indistinguishability_prop_cert_free                                      *)
-(*                              == the input-indistinguishability             *)
-(*                                 proposition does not mention the           *)
-(*                                 certificate it is stated at                *)
+(*   spectral_prop_cert_free   == the spectral proposition does not mention   *)
+(*                                the certificate it is stated at             *)
 (*   idealproximity_reading_le == the proximity number bounds the distance    *)
 (*                                between the two models' reading marginals   *)
 (*   five_card_biased_proximity_prop_holds                                    *)
 (*                             == the proximity proposition at one fiftieth,  *)
 (*                                at the five-card instance                   *)
-(*   five_card_biased_indistinguishability_implies_proximity                  *)
-(*                              == the same, from an                          *)
-(*                                 input-indistinguishability premise         *)
-(*                                 unread                                     *)
+(*   five_card_biased_spectral_implies_proximity                              *)
+(*                             == the same, from a spectral premise unread    *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -80,26 +72,24 @@ Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 
-Section proximity_against_indistinguishability.
+Section proximity_against_spectral.
 Variable R : realType.
 Variable A : PGGAlgebraic.
 Variable E : ExecutionParams A.
 Variable sa : SampleAdapter R (instance_exec E).
 
-(** The input-indistinguishability arm's proposition at two certificates over
-    one model is one proposition. The certificate is a parameter of the
-    statement and occurs nowhere in it, so what the
-    input-indistinguishability arm claims is a property of the model's own
-    cut law and the number, and the ideal law the certificate names has left
-    the claim. An ideal a proximity certificate names can therefore not be
-    recovered from an input-indistinguishability premise, and a bound on the
+(** The spectral arm's proposition at two certificates over one model is one
+    proposition. The certificate is a parameter of the statement and occurs
+    nowhere in it, so what the spectral arm claims is a property of the
+    model's own cut law and the number, and the ideal law the certificate
+    names has left the claim. An ideal a proximity certificate names can
+    therefore not be recovered from a spectral premise, and a bound on the
     distance to that ideal has to be proved from something else. The
     implication is not empty for all that: idealproximity_ceiling holds it at
     two whatever the premise, and the two lemmas at the end of this file hold
     it at the five-card instance at one fiftieth. *)
-Lemma indistinguishability_prop_cert_free
-    (cert cert' : IndistinguishabilityCert sa) (c : R) :
-  IndistinguishabilityPropAt cert c = IndistinguishabilityPropAt cert' c.
+Lemma spectral_prop_cert_free (cert cert' : SpectralCert sa) (c : R) :
+  SpectralPropAt cert c = SpectralPropAt cert' c.
 Proof. by []. Qed.
 
 (** The proximity arm's proposition mentions its certificate, through the
@@ -113,23 +103,21 @@ Fail Definition idealproximity_prop_cert_free
   IdealProximityPropAt cert c = IdealProximityPropAt cert' c
   := ltac:(by []).
 
-(** The two propositions do not take one certificate either: an
-    input-indistinguishability certificate carries no secret and no ideal
-    model, so the proximity proposition cannot be stated at it, and the two
-    are not two readings of one object. *)
-Fail Definition indistinguishability_cert_in_proximity_prop
-    (cert : IndistinguishabilityCert sa) (c : R) : Prop :=
-  IdealProximityPropAt cert c.
+(** The two propositions do not take one certificate either: a spectral
+    certificate carries no secret and no ideal model, so the proximity
+    proposition cannot be stated at it, and the two are not two readings of
+    one object. *)
+Fail Definition spectral_cert_in_proximity_prop
+    (cert : SpectralCert sa) (c : R) : Prop := IdealProximityPropAt cert c.
 
 (** The proximity number bounds the distance between the two models' reading
     marginals, at every coalition below the threshold. The secret leaves the
     statement by data processing along the first projection, and the ideal's
     joint law is a product, so its first marginal is the ideal reading
-    outright. This is the arm's number read on the carrier the
-    input-indistinguishability arm states its bound on, and it is the
-    sharpest comparison of the input-indistinguishability arm with the
-    proximity arm that does not need a model of one to be a model of the
-    other. *)
+    outright. This is the arm's number read on the carrier the spectral arm
+    states its bound on, and it is the sharpest comparison of the spectral
+    arm with the proximity arm that does not need a model of one to be a model
+    of the other. *)
 Lemma idealproximity_reading_le (cert : IdealProximityCert sa) (c : R) :
   IdealProximityPropAt cert c ->
   forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
@@ -161,7 +149,7 @@ rewrite -Hl -Hr.
 exact: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _) (H C HC)).
 Qed.
 
-End proximity_against_indistinguishability.
+End proximity_against_spectral.
 
 (******************************************************************************)
 (*     Where the implication does hold, and why that is not the spec's claim  *)
@@ -174,15 +162,13 @@ Lemma five_card_biased_proximity_prop_holds (R : realType) :
   IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50).
 Proof. exact: (view_proximity_of five_card_row_biased_proximity R tt). Qed.
 
-(** The input-indistinguishability proposition implies the proximity
-    proposition at the five-card instance, at every constant the
-    input-indistinguishability premise is stated at, because the conclusion
-    is a theorem there and the premise is discarded. The implication holds
-    and carries no information: what the spec asks for is a derivation that
-    reads the input-indistinguishability certificate's fields, and this is
+(** The spectral proposition implies the proximity proposition at the
+    five-card instance, at every constant the spectral premise is stated at,
+    because the conclusion is a theorem there and the premise is discarded.
+    The implication holds and carries no information: what the spec asks for
+    is a derivation that reads the spectral certificate's fields, and this is
     not one. *)
-Lemma five_card_biased_indistinguishability_implies_proximity
-    (R : realType) (c : R) :
-  IndistinguishabilityPropAt (kim_biased_cert R tt) c ->
+Lemma five_card_biased_spectral_implies_proximity (R : realType) (c : R) :
+  SpectralPropAt (kim_biased_cert R tt) c ->
   IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50).
 Proof. by move=> _; exact: five_card_biased_proximity_prop_holds. Qed.

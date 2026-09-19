@@ -11,10 +11,10 @@
 (*                                                                            *)
 (* One target prints a fourth constant. s5_row_rand_armE rests also on        *)
 (* rigidity_s5_instance.s5_group_order_eq, the order of the five-seat group,  *)
-(* declared as an Axiom in instances/s5/rigidity_s5_instance.v. It reaches    *)
-(* this report through the S5 instance's own witness and not through anything *)
-(* the Tableau or this probe adds: the production s5_row_rand_tableau and     *)
-(* s5_rand_exact_witness rest on it already.                                  *)
+(* declared as an Axiom in instances/s5/rigidity_s5_instance.v. It            *)
+(* reaches this report through the S5 instance's own witness and not through  *)
+(* anything the Tableau or this probe adds: the production s5_row_rand_tableau*)
+(* and s5_rand_exact_witness rest on it already.                              *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
@@ -39,7 +39,7 @@ Print Assumptions security_arm_of.
 (* Where a row's arm is decided: the certify statements write it and the two
    terminals carry it through. *)
 Print Assumptions certify_exact_armE.
-Print Assumptions certify_indistinguishability_armE.
+Print Assumptions certify_spectral_armE.
 Print Assumptions conclude_armE.
 Print Assumptions publish_armE.
 
@@ -67,8 +67,7 @@ Print Assumptions five_card_row_uniform_branch_atE.
 Print Assumptions five_card_row_uniform_branch_ideal_atE.
 Print Assumptions five_card_row_uniform_branch_transfer_neq.
 
-(* The same branch shape at PGL(2,7), under an input-indistinguishability     *)
-(* payload.                                                                   *)
+(* The same branch shape at PGL(2,7), under a spectral payload. *)
 Print Assumptions pgl27_row_exact_branch_atE.
 Print Assumptions pgl27_row_exact_branch_ideal_atE.
 Print Assumptions pgl27_row_exact_branch_rowE.

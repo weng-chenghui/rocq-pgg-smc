@@ -53,10 +53,10 @@ Print Assumptions kim_biased_proximity_cert_idealE.
 Print Assumptions kim_biased_proximity_cert_epsE.
 Print Assumptions kim_biased_proximity_eps_halfE.
 Print Assumptions kim_biased_proximity_cert_eps_lt2.
-Print Assumptions five_card_row_biased_branch_indistinguishability.
-Print Assumptions five_card_row_biased_branch_indistinguishability_atE.
-Print Assumptions five_card_row_biased_branch_indistinguishability_rowE.
-Print Assumptions five_card_row_biased_branch_indistinguishability_armE.
+Print Assumptions five_card_row_biased_branch_spectral.
+Print Assumptions five_card_row_biased_branch_spectral_atE.
+Print Assumptions five_card_row_biased_branch_spectral_rowE.
+Print Assumptions five_card_row_biased_branch_spectral_armE.
 Print Assumptions five_card_row_biased_proximity.
 Print Assumptions five_card_row_biased_proximity_rowE.
 Print Assumptions five_card_row_biased_proximity_publishedE.
@@ -64,11 +64,11 @@ Print Assumptions five_card_row_biased_proximity_armE.
 Print Assumptions five_card_row_biased_arm_neq.
 Print Assumptions five_card_biased_view_proximity.
 
-(* The relation to the input-indistinguishability arm.                        *)
-Print Assumptions indistinguishability_prop_cert_free.
+(* The relation to the spectral arm. *)
+Print Assumptions spectral_prop_cert_free.
 Print Assumptions idealproximity_reading_le.
 Print Assumptions five_card_biased_proximity_prop_holds.
-Print Assumptions five_card_biased_indistinguishability_implies_proximity.
+Print Assumptions five_card_biased_spectral_implies_proximity.
 
 (* The corollary about the actual model alone. *)
 Print Assumptions var_dist_own_marginals.

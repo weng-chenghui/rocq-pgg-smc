@@ -1389,3 +1389,33 @@ The auditor reproduced the measurement behind the `reflexivity` deviation:
 argument given 162.0 s, all three proof terms being `erefl` at the same type
 and `Qed` under 0.01 s.
 
+
+## Names, after the four stages (2026-09-19)
+
+The 24 `.v` files were brought to production's names of commits bf42b4d and
+7bae082: the arm `SpectralDecay` is `InputIndistinguishability`, its
+certificate `IndistinguishabilityCert` with fields `ic_*`, the probe-only
+reader constructor `InputIndistinguishabilityArm`, and "indistinguishability"
+is spelled out in every identifier. The full map is
+`notes/2026-09-19-230614-renamed-identifiers-input-indistinguishability.md`,
+with the probe-only names in its section 5 and
+`kim_biased_indistinguishability_from_centi`,
+`indistinguishability_cert_in_proximity_prop`,
+`proximity_against_indistinguishability` besides. File names are unchanged,
+`p8_spectral_relation.v` included, because the audit reports cite them. The
+audit reports, the earlier sections of the four STATUS files and the
+`history/` snapshots keep the old names: they are records of their date.
+Snapshots before this pass: `history/*.16-before-names`.
+
+Done by an Opus rocq-prover; audited by the main session: comment-stripped
+code of all 24 files is token-identical to the previous commit under the map
+(script), no old name is left, and a recompile from source in a fresh
+directory gives rc=0 for every file with the same `Axioms:` block counts as
+before (34, 35 and one closed, 27, 23) and the same single name outside the
+three classical axioms, `rigidity_s5_instance.s5_group_order_eq`. The prose of
+production's comment fix pass dc1321e was ported where the passage exists.
+Eight recorded `Fail`s whose subject is a renamed name were re-read by the
+prover with the `Fail` removed in a scratch copy: each still fails with the
+same type error as before. The tracked `assumptions_report_stageC.cclog`
+predates the last edit of its `.v` (24 blocks in the log, 27 in the file); it
+is regenerated at the landing.

@@ -195,12 +195,11 @@ Fail Definition pgl27_word_proximity_cert_uniform_ideal (R : realType)
     (sw_bound_eps (pgl27_word_marginal_bound R))
     (fun C HC => pgl27_word_proximity_close secretP HC).
 
-(** The word model's proximity certificate does not continue the exact
-    model's branch point. The payload type is IdealProximityPayload at the
-    coordinate the name holds, so the clause is checked first against the
-    index type that coordinate's family carries, unit against a distribution
-    on the booleans. Two models of one instance are separated here as they
-    are for the exact and the input-indistinguishability payloads at
-    pgl27_exact_sampled. *)
+(** The word model's proximity certificate does not continue the exact model's
+    branch point. The payload type is IdealProximityPayload at the coordinate
+    the name holds, so the clause is checked first against the index type that
+    coordinate's family carries, unit against a distribution on the booleans.
+    Two models of one instance are separated here as they are for the exact
+    and the spectral payloads at pgl27_exact_sampled. *)
 Fail Definition pgl27_cross_model_proximity : Tableau AnalysisBridged :=
   pgl27_exact_sampled certify IdealProximity pgl27_word_proximity_cert.

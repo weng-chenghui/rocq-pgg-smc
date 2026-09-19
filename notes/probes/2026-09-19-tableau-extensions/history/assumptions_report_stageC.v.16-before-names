@@ -1,0 +1,61 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
+(******************************************************************************)
+(* What every declaration stage C adds rests on                               *)
+(*                                                                            *)
+(* One Print Assumptions per lemma and per published program written by stage *)
+(* C of this probe, so that the constants a second carrier of the proximity   *)
+(* arm brings in are read off a compiled file and not off a reading of the    *)
+(* proofs. The expected answer is the three boolp constants,                  *)
+(* functional_extensionality_dep, propositional_extensionality and            *)
+(* constructive_indefinite_description, wherever a PGL(2,7) probability model *)
+(* is mentioned, since an fdist record carries them through its own section   *)
+(* context, and nothing at all for the lemmas that speak of a bare real       *)
+(* field. No new axiom, assumed constant, Admitted or Abort is written        *)
+(* anywhere in stage C.                                                       *)
+(*                                                                            *)
+(* The blocks are grouped by the file that writes the declaration.            *)
+(******************************************************************************)
+
+From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+From mathcomp Require Import fintype finfun finset reals.
+From infotheo Require Import fdist proba variation_dist.
+From pgg_smc Require Import pgg_instance pgg_sample_adapter.
+From pgg_smc Require Import pgg_analysis_manifest.
+From tableau_ext_probe Require Import pgg_tableau pgg_tableau_syntax.
+From tableau_ext_probe Require Import p5_pgl27_prior_ideal.
+From tableau_ext_probe Require Import p5_pgl27_word_proximity.
+From tableau_ext_probe Require Import p5_mutations.
+
+(* The prior-indexed ideal execution.                                         *)
+Print Assumptions pgl27_prior_sample.
+Print Assumptions pgl27_prior_exact_family.
+Print Assumptions pgl27_prior_viewE.
+Print Assumptions pgl27_prior_exact_witness.
+Print Assumptions pgl27_row_prior_exact_tableau.
+Print Assumptions pgl27_row_prior_exact_armE.
+Print Assumptions pgl27_row_prior_exact_rowE.
+
+(* The word model's proximity certificate and its row.                        *)
+Print Assumptions pgl27_word_secret.
+Print Assumptions pgl27_word_proximity_close.
+Print Assumptions pgl27_word_proximity_cert.
+Print Assumptions pgl27_word_proximity_cert_idealE.
+Print Assumptions pgl27_word_proximity_cert_epsE.
+Print Assumptions pgl27_word_proximity_eps_halfE.
+Print Assumptions pow2_40_ge1.
+Print Assumptions pow2_40_gt0.
+Print Assumptions pgl27_word_proximity_le39.
+Print Assumptions pgl27_word_proximity_cert_eps_lt2.
+Print Assumptions pgl27_row_word_proximity.
+Print Assumptions pgl27_row_word_proximity_rowE.
+Print Assumptions pgl27_row_word_proximity_armE.
+Print Assumptions pgl27_row_word_branch39_armE.
+Print Assumptions pgl27_row_word_arms_sampledE.
+Print Assumptions pgl27_row_word_obs_sampledE.
+Print Assumptions pgl27_row_word_arm_neq.
+Print Assumptions pgl27_word_view_proximity.
+
+(* The two rejections about the prior, refuted at a point-mass prior.         *)
+Print Assumptions var_dist_fdist1_uniform.
+Print Assumptions pgl27_word_uniform_ideal_not_close.
