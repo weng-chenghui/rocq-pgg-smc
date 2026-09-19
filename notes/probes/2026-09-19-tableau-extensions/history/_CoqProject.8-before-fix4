@@ -29,7 +29,6 @@
 
 -Q . tableau_ext_probe
 
-p1_joint_law_distance.v
 pgg_tableau.v
 pgg_tableau_syntax.v
 pgl27_rows.v
@@ -38,10 +37,5 @@ s5_rows.v
 psl211_rows.v
 t0_sampled_branch.v
 t0_sampled_branch_pgl27.v
-p4_kim_biased_proximity.v
-p8_spectral_relation.v
-p9_actual_marginals.v
-p7_mutations.v
 g2_keyword_measure.v
 assumptions_report.v
-assumptions_report_stageB.v

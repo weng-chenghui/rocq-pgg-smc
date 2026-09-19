@@ -117,8 +117,8 @@ Proof. exact: erefl. Qed.
     rows of this branch point differ in their manifest row alone, and naming
     the Sampled value costs the row nothing it would otherwise have. *)
 Lemma five_card_row_uniform_branch_ideal_atE :
-  published_at five_card_row_uniform_branch
-  = published_at five_card_row_uniform_branch_ideal.
+  published_at five_card_row_uniform_branch_ideal
+  = published_at five_card_row_uniform_branch.
 Proof. exact: erefl. Qed.
 
 (** The two published rows differ, in the one coordinate their two publish

@@ -1,0 +1,185 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
+(******************************************************************************)
+(* Probe P7: the proximity arm is neither vacuous nor trivially true          *)
+(*                                                                            *)
+(* Four things could make the arm say nothing. Its number could be at or      *)
+(* above the ceiling a variation distance cannot exceed, and                  *)
+(* idealproximity_ceiling says that a row at two is exactly that empty        *)
+(* statement, against which the one twenty-fifth Kim's one-cut row publishes  *)
+(* is read. Its hypotheses could be unsatisfiable, and the singleton          *)
+(* instantiation below discharges every one of them at a concrete coalition   *)
+(* of the five-card instance. Its conclusion could hold by computation, and   *)
+(* the two recorded failures on reflexivity and done say it does not. And its *)
+(* certificate could be free of the fields the argument claims to use: the    *)
+(* composition law is rerun below with the ideal witness's independence       *)
+(* deleted from the proof, and does not close.                                *)
+(*                                                                            *)
+(* Beside those, three recorded failures fix what a certificate may name. An  *)
+(* ideal drawn from another instance is rejected where the ideal adapter is   *)
+(* written, because that field is typed over the row's own execution. A       *)
+(* certificate built over one model of the five-card instance is rejected at  *)
+(* another model of the same instance, although the two model families carry  *)
+(* one index type, because a certificate is typed over the sample adapter and *)
+(* not over the family.                                                       *)
+(*                                                                            *)
+(* Lemmas:                                                                    *)
+(*   idealproximity_ceiling    == every certificate satisfies the arm's       *)
+(*                                proposition at two                          *)
+(*                                                                            *)
+(* Definitions:                                                               *)
+(*   five_card_biased_proximity_at_singleton                                  *)
+(*                             == the row's claim at one concrete seat        *)
+(******************************************************************************)
+
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import bigop order ssrnum ssralg reals boolp lra.
+From infotheo Require Import realType_ext fdist proba variation_dist entropy.
+From pgg_smc Require Import pgg_interface pgg_session_types.
+From pgg_smc Require Import pgg_monodromy_profile pgg_execution_plug.
+From pgg_smc Require Import pgg_observed_execution pgg_analysis_status.
+From pgg_smc Require Import pgg_instance pgg_sample_adapter.
+From pgg_smc Require Import pgg_collusion_bound var_dist_supp.
+From pgg_reconstruct Require Import algebraic_rigidity.
+From pgg_smc Require Import five_card_group five_card_family.
+From pgg_smc Require Import five_card_exec five_card_models five_card_leakage.
+From pgg_smc Require Import five_card_mixing.
+From pgg_smc Require Import s5_exec s5_models.
+From tableau_ext_probe Require Import pgg_tableau pgg_tableau_syntax.
+From tableau_ext_probe Require Import p1_joint_law_distance.
+From tableau_ext_probe Require Import five_card_rows s5_rows.
+From tableau_ext_probe Require Import p4_kim_biased_proximity.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+Import GRing.Theory Num.Theory.
+
+Local Open Scope ring_scope.
+Local Open Scope fdist_scope.
+Local Open Scope proba_scope.
+
+(******************************************************************************)
+(*     The ceiling the arm's number is read against                           *)
+(******************************************************************************)
+
+(** Every proximity certificate satisfies the arm's proposition at two,
+    whatever its model, its ideal and its own number, because a variation
+    distance between two laws on a finite carrier never exceeds two. A row
+    publishing two therefore rules nothing out, and a published number says
+    something about a coalition exactly in so far as it is below two. Kim's
+    one-cut row publishes one twenty-fifth, and five_card_reprice_inv25_lt2
+    of five_card_rows.v is the comparison. *)
+Lemma idealproximity_ceiling (R : realType) (A : PGGAlgebraic)
+    (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
+    (cert : IdealProximityCert sa) :
+  IdealProximityPropAt cert 2%:R.
+Proof. by move=> C _; exact: var_dist_le2. Qed.
+
+(******************************************************************************)
+(*     Every hypothesis discharged at one concrete coalition                  *)
+(******************************************************************************)
+
+(** One seat is below the five-card privacy threshold. *)
+Fact five_card_singleton_below_threshold (i : 'I_5) :
+  (#|[set i]| < profile_k (instance_profile five_card_algebra))%N.
+Proof. by rewrite cards1. Qed.
+
+(** Kim's one-cut row's claim with every hypothesis discharged: one real
+    field, one coalition of one named seat, and the threshold condition proved
+    rather than assumed. The coalition is not empty, so the reading it bounds
+    is not the constant finfun and the statement is about a seat that sees a
+    card. *)
+Definition five_card_biased_proximity_at_singleton (R : realType) (i : 'I_5) :=
+  @five_card_biased_view_proximity R [set i]
+    (five_card_singleton_below_threshold i).
+
+Check five_card_biased_proximity_at_singleton.
+
+(******************************************************************************)
+(*     The conclusion does not hold by computation                            *)
+(******************************************************************************)
+
+(** The arm's proposition at Kim's one-cut certificate is not closed by
+    conversion. A variation distance between two laws on a real field is not a
+    Boolean a kernel reduces, so a proof of the row's claim has to be the
+    mathematics and cannot be the computation. *)
+Fail Definition five_card_biased_proximity_by_computation (R : realType)
+    (idx : unit)
+  : IdealProximityPropAt (kim_biased_proximity_cert R idx)
+      (sw_bound_eps (kim_biased_marginal_bound R))
+  := ltac:(move=> C HC; reflexivity).
+
+(** Nor by done, which is what a clause left to a tactic in a row would
+    reach. *)
+Fail Definition five_card_biased_proximity_by_done (R : realType) (idx : unit)
+  : IdealProximityPropAt (kim_biased_proximity_cert R idx)
+      (sw_bound_eps (kim_biased_marginal_bound R))
+  := ltac:(by []).
+
+(******************************************************************************)
+(*     The ideal witness's independence is load-bearing                       *)
+(******************************************************************************)
+
+(** The composition law with the ideal witness's independence deleted from its
+    proof. What remains is the certificate's distance between two joint laws
+    and the two link lemmas, and the arm's proposition compares the actual
+    joint law with a product, so the step that turns the ideal joint law into
+    the product of its marginals is where the witness is spent. Without it the
+    final application does not typecheck. *)
+Fail Definition idealproximity_tail_without_independence (R : realType)
+    (A : PGGAlgebraic) (E : ExecutionParams A)
+    (sa : SampleAdapter R (instance_exec E)) (cert : IdealProximityCert sa)
+    (Hview : forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
+       @sa_coalition_view R (instance_profile A) (instance_exec E) sa 0 C
+       = (fun u => static_coalition_obs C (sa.(sa_arg) u) (sa.(sa_cut) u)))
+    (Hideal : forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
+       @sa_coalition_view R (instance_profile A) (instance_exec E)
+         (ipc_ideal cert) 0 C
+       = (fun u => static_coalition_obs C ((ipc_ideal cert).(sa_arg) u)
+                     ((ipc_ideal cert).(sa_cut) u)))
+  : IdealProximityPropAt cert (ipc_eps cert)
+  := ltac:(move=> C HC; rewrite (Hview C) (Hideal C);
+           exact: (@ipc_close _ _ _ _ cert C HC)).
+
+(******************************************************************************)
+(*     What a certificate may name as its ideal                               *)
+(******************************************************************************)
+
+(** Another instance's model is not an ideal for this one. The ideal adapter
+    is typed over the row's own execution parameters, so a model of the S5
+    instance and the witness proved about it are rejected where they are
+    written and not deep inside the proposition. *)
+Fail Definition kim_biased_cert_s5_ideal (R : realType) (idx : unit)
+  : IdealProximityCert (amf_sample kim_biased_family R idx) :=
+  @MkIdealProximityCert R five_card_algebra five_card_params
+    (amf_sample kim_biased_family R idx)
+    (amf_sample s5_rand_family R idx)
+    (s5_rand_exact_witness R idx)
+    (five_card_leakage.Secret R)
+    (sw_bound_eps (kim_biased_marginal_bound R))
+    (fun C _ => @kim_biased_proximity_close R C).
+
+(** Two models of one instance whose families carry one index type are still
+    two adapters. The one-cut model's proximity certificate is rejected where
+    the seven-cut model's is required: a certificate is typed over the sample
+    adapter, and the two adapters differ in their sample space as well as in
+    their law. *)
+Fail Definition kim_centi_proximity_from_biased (R : realType) (idx : unit)
+  : IdealProximityCert (amf_sample kim_centi_family R idx) :=
+  kim_biased_proximity_cert R idx.
+
+(** The same rejection where it is written in a row: the seven-cut model's
+    named Sampled value does not take the one-cut model's certificate. *)
+Fail Definition five_card_row_repeated_proximity : Tableau AnalysisBridged :=
+  five_card_row_repeated_tableau
+    certify IdealProximity kim_biased_proximity_cert.
+
+(** The converse direction, at the arm the tree already carries: the seven-cut
+    model's spectral certificate is rejected where the one-cut model's is
+    required. The proximity arm and the spectral arm are rejected by the same
+    coordinate, so the proximity arm adds no new way for two models of one
+    instance to be confused. *)
+Fail Definition kim_biased_spectral_from_centi (R : realType) (idx : unit)
+  : SpectralCert (amf_sample kim_biased_family R idx) := kim_centi_cert R idx.

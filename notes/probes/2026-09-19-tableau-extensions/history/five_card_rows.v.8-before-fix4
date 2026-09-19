@@ -734,12 +734,12 @@ End kim_cert_numbers.
 (*     The same two rows at the constants they publish                        *)
 (******************************************************************************)
 
-(** A certificate over the repeated row's model with the constant in the
-    marginal-bound field. The ideal cut, the identification equation and the
-    constancy of the reading at every coalition of at most one seat are the
-    same terms as in kim_centi_cert; the marginal bound carries two to the
-    minus fortieth in place of the spectral expression, and the mixing field
-    is the same distance bounded by that constant. *)
+(** The repeated row's certificate with the constant in the marginal-bound
+    field. The ideal cut, the identification equation and the constancy of
+    the reading at every coalition of at most one seat are the same terms as
+    in kim_centi_cert; the marginal bound carries two to the minus fortieth
+    in place of the spectral expression, and the mixing field is the same
+    distance bounded by that constant. *)
 Definition kim_centi_cert40 (R : realType) (idx : unit)
   : SpectralCert (amf_sample kim_centi_family R idx) :=
   @MkSpectralCert R five_card_algebra five_card_params
@@ -793,9 +793,8 @@ Fail Definition five_card_row_repeated39_unindexed
     claims a reader must reconcile. *)
 (* reflexivity and not exact: erefl. Both close this goal by the kernel's
    conversion, and only reflexivity reaches it: the refine path ssreflect's
-   erefl takes spent 147 s here against reflexivity's 0.07 s. Measured on
-   2026-09-19; the numbers are in
-   notes/probes/2026-09-19-tableau-extensions/STATUS.md, section F2. *)
+   erefl takes spent 151 s here against reflexivity's 0.07 s. Measured on
+   2026-09-19; the numbers are in STATUS.md, under the Kim refresh. *)
 Lemma five_card_row_repeated39_atE :
   published_at five_card_row_repeated39
   = published_at five_card_row_repeated_spectral_tableau.
@@ -826,9 +825,8 @@ Definition five_card_reprice_inv25 : Reprice := fun R => Some (1 / 25 : R).
     compares the same cut with the same ideal, so the number it publishes
     changes and the status it earns does not. It continues from the exact
     certificate and not from kim_biased_cert, because a row publishes a number
-    at least its certificate's, and the bound kim_biased_cert publishes is
-    twice the bundle's number, sqrt 5 over forty, which is above one
-    twenty-fifth. *)
+    at least its certificate's and the bundle's number, sqrt 5 over forty, is
+    above one twenty-fifth. *)
 Definition five_card_row_biased_inv25
   : PublishedRowAt five_card_reprice_inv25 :=
   five_card_committed

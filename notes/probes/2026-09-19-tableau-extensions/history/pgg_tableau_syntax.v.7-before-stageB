@@ -59,14 +59,14 @@
 (*                                                                            *)
 (* The surface spends nineteen identifiers as global keywords in every file   *)
 (* that requires this one: dealt, functionality, execute, endpoints, recon,   *)
-(* sample, certify, leaks, tied, ideal, mixing, invariant, encoded, supplied, *)
-(* layout, decoded_by, committed_by, expecting and fuel. Each follows a slot  *)
-(* in some rule. Measured on 2026-09-14, fuel is among them: it follows the   *)
-(* literal dealt in the dealer-dealt rule and would stay an identifier for    *)
-(* that rule alone, but it follows a slot in the two rules added beside it.   *)
-(* The tokens inputs, terminates, publish, conclude, vm_compute,              *)
-(* ExactIndependence, SpectralDecay and IdealProximity follow a literal and   *)
-(* stay identifiers, which is what keeps the three port constructors and the  *)
+(* sample, certify, leaks, tied, ideal, mixing, invariant, encoded,           *)
+(* supplied, layout, decoded_by, committed_by, expecting and fuel. Each       *)
+(* follows a slot in some rule. Measured on 2026-09-14, fuel is among them:   *)
+(* it follows the literal dealt in the dealer-dealt rule and would stay an    *)
+(* identifier for that rule alone, but it follows a slot in the two rules     *)
+(* added beside it. The tokens inputs, terminates, publish, conclude,         *)
+(* vm_compute, ExactIndependence and SpectralDecay follow a literal and stay  *)
+(* identifiers, which is what keeps the two port constructors and the         *)
 (* conclude terminal usable by name; at follows a literal too, the literal    *)
 (* leaks in one rule and SpectralDecay in the other, and was a keyword of     *)
 (* Rocq before this file. by follows the slot L of the encoded rule, the slot *)
@@ -381,14 +381,6 @@ Notation "s 'certify' 'ExactIndependence' w 'leaks' 'at' k 'by' H" :=
    only parsing).
 
 Notation "s 'certify' 'SpectralDecay' c" := (s ;;; certify_spectral of c)
-  (at level 90, left associativity, c at level 0).
-
-(* The proximity arm takes one certificate, as the spectral arm does, and the
-   certificate's own five components are not split into clauses here: four of
-   them are terms of the instance and the fifth is the number, so a builder
-   would display the plumbing and not the mathematics. *)
-Notation "s 'certify' 'IdealProximity' c" :=
-  (s ;;; certify_idealproximity of c)
   (at level 90, left associativity, c at level 0).
 
 (* The five clauses name the real field and the model index once, after at,
