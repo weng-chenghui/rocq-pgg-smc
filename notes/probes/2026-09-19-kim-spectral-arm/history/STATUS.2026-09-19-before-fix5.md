@@ -13,21 +13,18 @@ from `StaticExecutedOnly`.
 
 This file was rewritten on 2026-09-19 after two independent round-1 audits
 returned NO-GO on surface matters, revised again the same day after two
-round-2 audits returned NO-GO on text alone, a third time after two round-3
-audits, a fourth time after two round-4 audits and a fifth time after two
-round-5 audits, each of those on text alone. No audit in any round disputed
-the mathematics. See "Round 1 audits and what changed", "Round 2 audits and
-what changed", "Round 3 audits and what changed", "Round 4 audits and what
-changed" and "Round 5 audits and what changed".
+round-2 audits returned NO-GO on text alone, and revised a third time after
+two round-3 audits, again on text alone. No audit in any round disputed the
+mathematics. See "Round 1 audits and what changed", "Round 2 audits and what
+changed" and "Round 3 audits and what changed".
 
 **The standing of the landing account has changed with this revision.** S8's
 change list and S10's home prices are what has been found so far. They are
 not claimed complete and a landing plan must not be written from them alone.
-Of the five audit rounds run so far, rounds 2, 3 and 4 each added items the
-round before missed, always because the list was built by searching for names
-while the tree also states the same facts in sentences that carry no name;
-round 4 added four propositions the seven-proposition rebuild list did not
-reach. S8 now carries a subsection,
+Each of four audit rounds added items the round before missed, always
+because the list was built by searching for names while the tree also states
+the same facts in sentences that carry no name; round 4 added four
+propositions the seven-proposition rebuild list did not reach. S8 now carries a subsection,
 "How a landing batch must rebuild this list", saying how the rebuild is done:
 compile breakages mechanically, by compiling copies of the three files and
 their reverse-dependants against the changed rows, and false sentences by
@@ -532,17 +529,15 @@ declaration kept in their place, for the fact it does establish.
 ### What a landing changes: the items known so far
 
 **This list is not claimed to be complete, and a landing plan must not treat
-it as complete.** Of the five audit rounds run so far, rounds 2, 3 and 4 each
-added items the round before missed, and each time for the same reason: the
-list was built by
+it as complete.** Three rounds of audit have each added items the round
+before missed, and each time for the same reason: the list was built by
 searching for names, and the tree also states these facts in sentences that
 carry no name. Round 2 added three `erefl` row pins and two header tables;
 the search after it added two more pins and the whole of the facade's section
 7; round 3 added three manifest passages about the development rather than
 about a row, the header index and file-title line of `five_card_rows.v`, and
 the facade's own file header; round 4 added four propositions of the Row 4
-and Row 5 tables that the rebuild list did not reach; round 5 added no item
-here. The list below is
+and Row 5 tables that the rebuild list did not reach. The list below is
 what has been found, every line of it read in the source at this revision. It
 is the seed for the rebuild described under "How a landing batch must rebuild
 this list", not a substitute for it.
@@ -754,9 +749,8 @@ declarations and alias table in `five_card_analysis.v:45-47` and `:202-222`,
 their names in the manifest's Row 4 and Row 5 header tables at `:293`, `:315`,
 `:322`, `:340-341` and `:370` and in the row definitions at `:768` and `:778`,
 three bare `Check`s in `manifest/pgg_analysis_client.v:41,43,44`, one
-spelled-type `Check` at `five_card_analysis.v:402`, three spelled-type sampler
-`Check`s in `manifest/pgg_analysis_manifest.v` at `:1177`, `:1182` and
-`:1187`, and seven
+spelled-type `Check` at `five_card_analysis.v:402`, three sampler `Check`s in
+`manifest/pgg_analysis_manifest.v` at `:1177`, `:1182` and `:1187`, and seven
 more occurrences inside five spelled-type `Check`s in the same file, opened at
 `:1207`, `:1214`, `:1221`, `:1233` and `:1245`, with the names at `:1210`,
 `:1217`, `:1225`, `:1229`, `:1235`, `:1248` and `:1253`. Of those, the two row
@@ -808,9 +802,8 @@ The four certified programs are copied from the probe as they stand, each a
 full chain from `five_card_committed` (`kim_spectral_rows_probe.v:100-104`,
 `:110-114`, `:284-289`, `:360-366`), which is how every certified program in
 the tree is written: from its own instance's prefix, at a level below
-`Sampled`. `pgl27_row_exact_tableau`, `pgl27_row_word_tableau` and
-`pgl27_row_word39` chain from `pgl27_dealt`
-(`instances/pgl27/pgl27_rows.v:270`, `:295`, `:378`),
+`Sampled`. `pgl27_row_exact_tableau` and `pgl27_row_word_tableau` chain from
+`pgl27_dealt` (`instances/pgl27/pgl27_rows.v:270`, `:295`),
 `s5_row_rand_tableau` from `s5_supplied` (`instances/s5/s5_rows.v:275`),
 `psl211_row_alldecks_tableau` from `psl211_alldecks_prefix`
 (`instances/psl211/psl211_rows.v:175`), and `five_card_row_uniform_tableau`
@@ -854,7 +847,7 @@ value. Nothing in the tree does that today and this landing does not start.
    no security payload follows it", becomes false. Two clauses in that range
    go false, for two reasons. The closing clause goes false because the
    certified proposition is a statement about what a set of seats reads. The
-   opening clause at `:384-385`, "The program stops at Sampled, the level the
+   opening clause at `:384`, "The program stops at Sampled, the level the
    manifest records for this row", goes false because the manifest's level for
    the repeated row moves to `AnalysisBridged` while the program keeps
    `Sampled`; the program's own level is unchanged and it is the agreement
@@ -945,7 +938,7 @@ the manifest's own header at `:67-72` says a failing `Check` is a hard error
 in that file.
 
 **Sentences that become false are found by searching for the proposition, not
-for the row names.** This is where rounds 2, 3 and 4 each found what the
+for the row names.** This is where all four audit rounds found what the
 previous list missed. Search for each proposition in every spelling it might
 take, over the twelve production directories:
 
@@ -978,9 +971,8 @@ take, over the twelve production directories:
 
 Those eleven propositions are the ones found so far. The list of propositions
 is no more complete than the list of places, and it is open. The last four
-were added in round 4 from this document's own Row 4 and Row 5 cells for
-`manifest/pgg_analysis_manifest.v:301-302`, `:351-354`, `:355` and
-`:374-380`, each of which already records the proposition as falsified; the
+were added in round 4 from this document's own cells, `:589`, `:605`, `:606`
+and `:611`, each of which already records the proposition as falsified; the
 seven before them reached none of the four. A landing batch extends this list
 with every further proposition it meets while reading the Row 3, Row 4 and
 Row 5 tables and the facade's section 7 in full, and does that before it
@@ -1197,12 +1189,10 @@ the two Kim supports, and `five_card_static_obs_const` from
 closes at `fc_sigma_pow5_eq1` and `fc_kim_word_eval_powE`. Under option 2 all
 of those, and `kim_biased_marginal_bound`, which a mixing statement names, go
 in the new file too. Twenty-nine declarations stay above, enumerated under
-option 2 below. They are the four certificates with the tying field and the
-two form-2 marginal bounds, the four row programs, the eight lemmas that read
-off the certificates' numbers and the rows' published fields, the two
-repricing identities and the three repricing definitions and bounds, the two
-bundle-number lemmas, the one-cut per-card-position bound and the two form-2
-mixing statements.
+option 2 below. They are the certificates, the row programs, the lemmas that
+read off their published fields, the repricing definitions and identities,
+the two bundle-number lemmas, the one-cut per-card-position bound and the
+two form-2 mixing statements.
 The whole cone is computed below under "The dependency cone of the three
 theorems", declaration by declaration, rather than read off the statements:
 a home argument that asks only what the three statements mention describes an
@@ -1258,17 +1248,15 @@ What the new file holds is the whole cone, not the three theorems:
 `five_card_static_obs_const`: sixteen declarations, the fourteen dagger rows
 of the table above. Of the probe's remaining thirty-five declarations,
 `instances/kim2025/five_card_rows.v` keeps twenty-nine, the other six being
-the generic lemmas of `var_dist_injective_probe.v`, four of them named below
-and the other two under the span cut. The
+the generic lemmas of `var_dist_injective_probe.v` named below. The
 twenty-nine, enumerated from the sources rather than described: the four
 certificates `kim_centi_cert`, `kim_biased_cert`, `kim_centi_cert40` and
 `kim_biased_cert_exact` with the tying field `kim_biased_sample_cut_witnessE`
 and the two form-2 marginal bounds `kim_centi_marginal_bound40` and
 `kim_biased_marginal_bound_exact`; the four row programs
 `five_card_row_repeated_spectral_tableau`, `five_card_row_biased_ideal_tableau`,
-`five_card_row_repeated39` and `five_card_row_biased_inv25`; the eight lemmas
-that read off the certificates' numbers and the rows' published fields,
-`kim_centi_cert_epsE`,
+`five_card_row_repeated39` and `five_card_row_biased_inv25`; their eight
+number and published-field lemmas `kim_centi_cert_epsE`,
 `kim_centi_cert_eps_lt`, `kim_biased_cert_epsE`, `kim_biased_cert_eps_lt2`,
 `kim_centi_cert40_epsE`, `five_card_row_repeated_spectral_publishedE`,
 `five_card_row_biased_ideal_publishedE` and
@@ -1285,16 +1273,15 @@ and `kim_biased_exact_le_eps`; the one-cut per-card-position bound
 `kim_one_cut_centi_le`; and the two form-2 mixing statements
 `kim_centi_cut_mixing40` and `kim_biased_cut_mixing_exact`.
 
-The two form-2 mixing statements stay above because the facade alias that
-names a landed row's base premise is the mixing field of the certificate that
-row publishes, which the manifest then names as that base premise. The two form-1 rows publish
+The two form-2 mixing statements stay above because what the facade aliases
+is the mixing field of the certificate a landed row publishes, which the
+manifest then names as that row's base premise. The two form-1 rows publish
 `kim_centi_cert` and `kim_biased_cert`, whose mixing fields are
 `kim_centi_cut_mixing` and `kim_biased_cut_mixing`
 (`kim_spectral_rows_probe.v:73`, `:87`), and those two are the ones that move.
 Should a landing publish a form-2 row instead, `five_card_row_repeated39`
-carrying `kim_centi_cert40` (mixing field at `:267`) or
-`five_card_row_biased_inv25` carrying `kim_biased_cert_exact` (mixing field at
-`:344`), that row's form-2 mixing statement takes the
+carrying `kim_centi_cert40` (`:267`) or `five_card_row_biased_inv25` carrying
+`kim_biased_cert_exact` (`:344`), that row's form-2 mixing statement takes the
 dagger and the form-1 one it replaces loses it, because a statement no
 published certificate carries is named nowhere above the facade. The form
 choice is open in S7 and is the user's, so this rule is stated rather than
@@ -1382,9 +1369,7 @@ same members and the same union of 17.
 import os, re
 from collections import OrderedDict
 
-# Run this script from the probe directory, the one holding the five .v files
-# and the .glob files written beside them by the compile.
-G = "."
+G = "<directory holding the five .v files and their .glob files>"
 FILES = ["var_dist_injective_probe", "five_card_rotation_probe",
          "kim_sc_close_probe", "five_card_sc_const_probe",
          "kim_spectral_rows_probe"]
@@ -1455,27 +1440,6 @@ def closure(root):
             if y not in seen:
                 seen.add(y); stack.append(y)
     return seen
-
-roots = ["kim_centi_cut_mixing", "kim_biased_cut_mixing",
-         "five_card_static_obs_const"]
-print("declarations found:", len(decls))
-union = set()
-for r in roots:
-    c = closure(r)
-    union |= c
-    print("\n=== cone of %s: %d probe-local declarations ===" % (r, len(c)))
-    for n in [n for f in FILES for (_a, _b, n) in spans[f] if n in c]:
-        print("    %-34s %s" % (n, decls[n][0] + ".v"))
-print("\n=== union of the three cones: %d ===" % len(union))
-for n in [n for f in FILES for (_a, _b, n) in spans[f] if n in union]:
-    print("    %-34s %s" % (n, decls[n][0] + ".v"))
-hits = set()
-for r in roots:
-    for n in closure(r) | {r}:
-        hits |= above_hits[n]
-print("\n=== references above the facade, inside the three theorems and "
-      "their cone ===")
-print("    " + ("none" if not hits else "\n    ".join(sorted(hits))))
 ```
 
 Output:
@@ -1932,7 +1896,7 @@ All five recompile, in `_CoqProject` order, with real exit status 0.
 | H2 | blocking | Applied first, as the one finding about the mathematics. `var_dist_fdistmap_transfer`'s hypotheses are `PQ_close` (`security/pgg_collusion_bound.v:980`) then `ideal_eq` (`:981`), and `spectral_tail` (`manifest/pgg_tableau.v:561-570`) fills them in that order, mixing at `:569` and constancy at `:570`. So the mixing field discharges the FIRST hypothesis and the constancy field IS the second, the ideal distribution equality. Both sentences that said otherwise are corrected, the Row 4 table cell and facade item 1, and S8 now states the order once with its line citations so a landing plan cannot re-derive it wrongly. Every "first hypothesis" and "second hypothesis" in this file was re-read against the source: the two quoted passages, the facade's section header and the manifest's Row 3 cell, are right as quoted and are left as they are. |
 | H1 | blocking | Applied. A new S8 subsection, "Three further manifest passages about the development, not about a row", carries `manifest/pgg_analysis_manifest.v:244-248`, `:753-755` and `:669-673` with their text quoted and each line re-read in the source. `:244-248` is named as the anchor Rows 4 and 5 point at with "as in row 3". The passage at `:669-673` is taken clause by clause rather than sentence by sentence, because its three clauses do not move together: "No transfer-layer result exists" and the absent-premise clause are false under either option, while "section 7 of its facade carries typed status aliases and no theorem" is false only under option 2. The same reading is applied to the facade's own section header at `:351-358`. |
 | H3 | blocking | Applied as item 9 of the `five_card_rows.v` list: the header index at `:78-86` and `:119-122` and the file-title line at `:4`, each read in the source. |
-| H4 | blocking | Decided, not merely recorded. The two `Tableau Sampled` programs are KEPT with their type and the certified programs are added beside them, on the owner's design principle that one row states one security claim. The decision is stated at the head of the `five_card_rows.v` list, with the reason the alternative is unavailable: `tableau_at` is a projection of `TableauAt` (`manifest/pgg_tableau.v:411-414`) and a published row is a `PublishedRowAt` (`:678-681`). Items 1, 7 and 8 and the closing "stays true" paragraph are each revisited against the decision. The list also records that no program in the tree continues from a named `Tableau Sampled` value today, which is row T0 of `notes/20260919-tableau-three-extensions-probe-design.md:169`; the four certified programs are full chains from `five_card_committed`, so the landing does not perform that construction and T0 is no obligation of it. |
+| H4 | blocking | Decided, not merely recorded. The two `Tableau Sampled` programs are KEPT with their type and the certified programs are added beside them, on the owner's design principle that one row states one security claim. The decision is stated at the head of the `five_card_rows.v` list, with the reason the alternative is unavailable: `tableau_at` is a projection of `TableauAt` (`manifest/pgg_tableau.v:411-414`) and a published row is a `PublishedRowAt` (`:678-681`). Items 1, 7 and 8 and the closing "stays true" paragraph are each revisited against the decision. The list also records that no program in the tree continues from a named `Tableau Sampled` value today, so the construction is unverified and is row T0 of `notes/20260919-tableau-three-extensions-probe-design.md:169`. |
 | H5 | should-fix | Applied as item 6 of the facade list: `instances/kim2025/five_card_analysis.v:16-17` and the phase-H1 check table at `:30-57`, with the manifest's pinning obligation at `:67-72` named. |
 | H10 | should-fix | Applied as a code change. `kim_sc_close_probe.v:21`, `From pgg_smc Require Import pgg_analysis_status pgg_analysis_manifest.`, is deleted. All five files then recompile with real exit status 0, which is the evidence that the import was dead. The same line in `kim_spectral_rows_probe.v:21` was tested the same way in a copy and is live: without it the file fails at `:49` with "The reference amf_sample was not found", `amf_sample` being a field of `AnalysisModelFamily` at `manifest/pgg_analysis_status.v:99-102`. The three remaining files carry no such Require. The option-2 paragraph records that the landed `five_card_mixing.v` must not carry the import back. |
 | H6 | note | Applied. The file has two `prefixE` lemmas, at `five_card_rows.v:418` and `:428`. Folded into B-4's rewrite. |
@@ -1983,17 +1947,16 @@ is S4-4, and I5 is S4-2. No audit in this round disputed a proof, a statement
 or a number the kernel checks. The five `.v` files and this file as the third
 fix pass left them are in `history/`, suffixed `.2026-09-19-before-fix4`.
 
-One `.v` comment changed in this pass, the statement comment of
-`fc_kim_rho_supp_pow`, five lines of `five_card_rotation_probe.v`. Comments
-stripped, the five files are byte-identical to their `before-fix4` copies, and
-all five recompile with return code 0.
+One `.v` character changed in this pass, the statement comment of
+`fc_kim_rho_supp_pow`. Comments stripped, the five files are byte-identical to
+their `before-fix4` copies, and all five recompile with return code 0.
 
 | ID | Severity | Disposition |
 |---|---|---|
-| I1 | blocking | Applied. The sentence saying the certified programs continue from the two `Tableau Sampled` values is gone; the four are full chains from `five_card_committed`, as S6 and S7 already print them. The reason the four `prefixE` and `modelE` lemmas survive is now that the two named values keep their type. The false universal about the tree is replaced by the true one, each instance chaining from its own `Tableau Observed` prefix, with the programs cited. T0 is recorded as no obligation of this landing. |
+| I1 | blocking | Applied. The sentence saying the certified programs continue from the two `Tableau Sampled` values is gone; the four are full chains from `five_card_committed`, as S6 and S7 already print them. The reason the four `prefixE` and `modelE` lemmas survive is now that the two named values keep their type. The false universal about the tree is replaced by the true one, each instance chaining from its own `Tableau Observed` prefix, with the five programs cited. T0 is recorded as no obligation of this landing. |
 | I2 | blocking | Applied. The seven-proposition list is reopened and extended by the four the Row 4 and Row 5 tables already record: no shuffle certificate on the biased path, the repeated path's bound list, its absent final bridge theorem, and the bundle that does not raise the level. The closing sentence now says the list is open and tells a landing batch to extend it from the Row 3, Row 4 and Row 5 tables and the facade's section 7 before searching. |
 | I3 = B4-1 | blocking / should-fix | Applied both ways. The five files were recompiled in place, in `_CoqProject` order, so the `.glob` files match the sources; the script as published then prints 12, 13, 6 and union 17 against them. A sentence above the script records that the two must come from the same compile, what the stale run printed, and that both auditors reproduced the cone by a text method reading no `.glob`. |
-| I4 = S4-4 | should-fix | Applied. "keeps only" is replaced by the twenty-nine declarations enumerated from the sources, and the S10 table gains four rows covering the eight that had none. The two form-2 mixing statements stay above, because the facade alias that names a landed row's base premise is the mixing field of the certificate that row publishes, and the two rows written above publish `kim_centi_cert` and `kim_biased_cert`. |
+| I4 = S4-4 | should-fix | Applied. "keeps only" is replaced by the twenty-nine declarations enumerated from the sources, and the S10 table gains four rows covering the eight that had none. The two form-2 mixing statements stay above, because what the facade aliases is the mixing field of the certificate a landed row publishes, and the two rows written above publish `kim_centi_cert` and `kim_biased_cert`. |
 | B4-2 | blocking | Applied. Section 7 has three theorems to alias, the two mixing theorems and the constancy theorem, which is what the aliases count says. |
 | B4-3 | blocking | Applied. Two of the twenty-six do mention a row's level and status, `five_card_row_uniform_tableau` through its `publish` step and `five_card_row_uniform_rowE` by conversion. Both are about the uniform row, which a spectral landing does not restatus, so the conclusion stands on that reason instead. |
 | B4-4 | blocking | Applied, the one `.v` edit. The covering quantifier is the one over the word length, not the one over the weighting: the two Kim cut laws derived here share the bias `1/100` and differ only at lengths 1 and 7. The defective sentence was round 3's own S-2 replacement text applied verbatim, so an audit's wording is checked against the lemma like any other text. |
@@ -2006,11 +1969,8 @@ all five recompile with return code 0.
 | vocabulary | owner's rule | Applied. The one place that named `var_dist` after the Lebesgue exponent now calls it the sum of absolute differences, twice the total variation distance, ceiling 2, which is `var_dist_le2`. In this project `L` is a word length, so that spelling reads as a word of length one. A whole-word grep for it now returns nothing in this file or in the five `.v` files. |
 
 Line numbers the audits cite that the source does not bear, corrected while
-applying: I2's citations of this file's Row 5 cells are to the rows for
-`manifest/pgg_analysis_manifest.v:351-354` and `:355`. Both this file's own
-line numbers for them and I2's have moved with the two lines this pass added
-above them, so the cells are named by their content and not by line.
-I4 names five declarations with no S10 row; the script
+applying: I2's citations of this file's Row 5 cells are `:605` and `:606`, not
+`:606` and `:607`. I4 names five declarations with no S10 row; the script
 finds eight, adding `kim_biased_epsE`, `kim_biased_exact_le_eps` and
 `five_card_reprice_inv25_lt2`. S4-4 names ten declarations outside the prose
 enumerations; there are eleven, the eleventh being
@@ -2027,80 +1987,3 @@ enumerations; there are eleven, the eleventh being
   (`five_card_sc_const_probe.v:46`) encloses the lemma of the same name. Open
   since round 2. It is a code change and this pass changed one comment only;
   it stays a one-line edit for whoever lands the file.
-
-## Round 5 audits and what changed
-
-The fourth fix pass was audited twice on 2026-09-19, for soundness
-(`soundness-audit-round5.md`, blocking J1, should-fix J2 to J8, notes J9-J12)
-and for names (`naming-audit-round5.md`, blocking B5-1 and B5-2, should-fix
-S5-1 to S5-3, notes a-f). Both returned NO-GO. Three of the findings are the
-same defect seen from two sides: B5-1 is J2 with J3, B5-2 is J4, and S5-2 is
-J7. No audit in this round disputed a proof, a statement or a number the
-kernel checks. The five `.v` files and this file as the fourth fix pass left
-them are in `history/`, suffixed `.2026-09-19-before-fix5`.
-
-One `.v` comment changed in this pass, the statement comment of
-`fc_kim_rho_supp_pow`, seven lines of `five_card_rotation_probe.v`. Comments
-stripped, the five files are byte-identical to their `before-fix5` copies, and
-all five recompile in `_CoqProject` order with real return code 0, in 5.0 s,
-4.9 s, 5.9 s, 4.7 s and 11.6 s.
-
-Two findings of this round, J2 and J3, were caused by the fourth pass citing
-this document's own cells by line number and then inserting lines above them.
-No citation of this document by its own line numbers survives this pass: the
-cells are named by the manifest line each is about.
-
-| ID | Severity | Disposition |
-|---|---|---|
-| J1 | blocking | Applied. The H4 disposition row no longer calls the construction unverified and no longer makes T0 an obligation. It now records that no program in the tree continues from a named `Tableau Sampled` value, that this is row T0, and that the four certified programs are full chains from `five_card_committed`, so the landing does not perform that construction. The row then agrees with the S8 paragraph and with the I1 disposition row. |
-| B5-1 = J2 + J3 | blocking / should-fix | Applied, by content rather than by line. The four back-references in the propositions paragraph now name the Row 4 and Row 5 cells for `manifest/pgg_analysis_manifest.v:301-302`, `:351-354`, `:355` and `:374-380`. The round-4 correction sentence now names the two Row 5 cells the same way and records that both its own numbers and I2's moved with the lines that pass added above them. |
-| B5-2 = J4 | blocking / should-fix | Applied by adding the driver, which is the fix the naming audit called the better one. The cone listing now sets `G` to the probe directory with a comment saying to run it there, calls `closure` on the three roots, and prints the declaration count, the three cones, their union and the references above the facade. Extracted from this file verbatim and run in the probe directory after the recompile, it reproduces the output printed below it line for line, so "the script as published reproduces the output below" now holds as written. |
-| S5-1 | should-fix | Applied, the one `.v` edit. The comment no longer attributes the covering to both quantifiers and no longer reads as deriving one cut law from the other. It now says what each quantifier is in Kim's model and that the two Kim cut laws share the bias one hundredth and differ only at word lengths one and seven. Checked against the lemma, both corollaries and `instances/kim2025/five_card_kim.v:640-641` before applying. |
-| J5 | should-fix | Applied. The file no longer carries a bare count of audit rounds that can drift. The three sentences that counted them now say five rounds have run and name rounds 2, 3 and 4 as the ones that added items to the landing list, which is what the enumeration in the same paragraph shows. |
-| J6 | should-fix | Applied. The provenance paragraph carries the fourth and fifth revisions and names all five "Round N audits and what changed" sections. |
-| J7 = S5-2 | should-fix | Applied. "One `.v` character changed" is a comment, and the round-4 sentence says so and gives its length. |
-| J8 | should-fix | Applied. The docstring clause quoted in item 5 runs to the next line in the source, and the citation is `:384-385`. Verified in `instances/kim2025/five_card_rows.v`. |
-| S5-3 | should-fix | Applied. The seven-category summary of the twenty-nine reached twenty-six. It now names the tying field and the two form-2 marginal bounds with the certificates, and the repricing identities and the repricing definitions and bounds separately, so the categories sum to twenty-nine. |
-| J9 | note | Applied. `pgl27_row_word39` (`instances/pgl27/pgl27_rows.v:378`) joins the enumeration of certified programs chaining from their instance's prefix, verified in the source. It adds no prefix, so "all four prefixes" is unchanged. |
-| J10 | note | Applied. The six generic lemmas are now described as four named below and two named under the span cut. |
-| J11 = naming note on the facade | note | Applied in both places the rule is stated. What carries the rule is the facade alias that names a landed row's base premise, not every alias the facade writes. |
-| J12 | note | Applied. The two certificate citations are marked as mixing-field lines, which is the parallel with the `:73` and `:87` citations above them. |
-| naming note b | note | Applied. The three sampler `Check`s are spelled-type like the other six, and the sentence says so. No count changes. |
-| naming note c | note | Applied. "their eight number and published-field lemmas" becomes the eight lemmas that read off the certificates' numbers and the rows' published fields, which is what the eight are. |
-| naming notes d and f | note | The compile times and the return codes could not be checked in a read-only round. This pass recompiled all five in place: 5.0 s, 4.9 s, 5.9 s, 4.7 s and 11.6 s, each with real return code 0, and the `.glob` files written by that compile are the ones the published script reads. |
-
-The round-5 soundness audit re-derived the three numbers the fourth pass
-corrected against the round-4 audits, and the fourth pass is right in all
-three: the Row 5 cells are where it said they were in the file round 4 read,
-eight of the twenty-nine had no S10 row where I4 named five, and eleven lie
-outside the prose enumerations where S4-4 named ten, the eleventh being
-`kim_biased_sample_cut_witnessE`.
-
-### Round 5 findings not applied
-
-- **naming note a**, that the manifest's sentence about the existing bundle is
-  quoted two ways, hyphenated as the source has it in the propositions list and
-  rejoined in the Row 5 cell. Round 4's note c accepted the rejoined reading
-  and it is left as it is.
-- **naming note e**, that `Section five_card_static_obs_const`
-  (`five_card_sc_const_probe.v:46`) encloses the lemma of the same name. Open
-  since round 2. It is a code change and this pass changed one comment only.
-
-## Closure, 2026-09-19
-
-Five soundness audits found every compiled statement true and disputed no
-proof, statement or number the kernel checks. Round 5 was NO-GO on one clause
-of this file for soundness and on two self-citations for names. The fifth fix
-pass applied all of them. Its result was verified by the main session and not
-by a sixth independent audit: all five files recompiled from source in a fresh
-directory with exit status 0; the code with comments stripped is identical to
-the version round 5 audited; no line exceeds 80 bytes; the corrected row reads
-as the audit asked; and the published dependency script, extracted from this
-file and run unchanged in this directory, prints the output this file prints.
-
-What stays open is a landing, which is the user's decision, and within it two
-choices: which form of each row to publish (the certificate's own number or the
-number written as a constant), and whether the mixing and constancy theorems
-live in `instances/kim2025/five_card_rows.v` or in a new file below the
-analysis facade. The list of landing items in S8 is a seed and not a complete
-list, and a landing batch rebuilds it as S8 says.

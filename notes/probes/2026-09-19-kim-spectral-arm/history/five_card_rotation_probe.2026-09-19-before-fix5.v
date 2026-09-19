@@ -88,11 +88,10 @@ by rewrite -(big_morph _ (expgD fc_sigma) (expg0 fc_sigma)).
 Qed.
 
 (* Every cut the weighted word shuffle gives mass to is a power of the
-   five-cycle, at every word length and every letter weighting. Both
-   quantifiers are Kim's: the bias fixes the letter weighting and the number
-   of cuts fixes the word length. The two Kim cut laws this development
-   carries share the bias one hundredth and differ only at word lengths one
-   and seven, so each of them and the uniform rotation law live on one group
+   five-cycle, at every word length and every letter weighting. The two
+   quantifiers together are what let one statement cover all of Kim's cut
+   laws, the length one reaching the seven-cut law from the one-cut law at
+   one bias, so each of them and the uniform rotation law live on one group
    and a variation distance between them is a distance on that group. *)
 Lemma fc_kim_rho_supp_pow (R : realType) (L : nat) (W : R.-fdist 'I_5)
     (g : {perm 'I_5}) :
