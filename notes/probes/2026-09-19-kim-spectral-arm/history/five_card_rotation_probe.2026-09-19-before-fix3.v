@@ -88,11 +88,10 @@ by rewrite -(big_morph _ (expgD fc_sigma) (expg0 fc_sigma)).
 Qed.
 
 (* Every cut the weighted word shuffle gives mass to is a power of the
-   five-cycle, at every word length and every letter weighting. The
-   quantifier over the weighting is what lets one statement cover all of
-   Kim's cut laws, so each of them and the uniform rotation law live on one
-   group and a variation distance between them is a distance on that
-   group. *)
+   five-cycle, at every word length and every letter weighting. It reads
+   fc_kim_word_eval_powE off the support of the pushforward that defines the
+   shuffle, and adds the quantifier over the weighting, which is what makes
+   every Kim cut law comparable with the uniform rotation law on one group. *)
 Lemma fc_kim_rho_supp_pow (R : realType) (L : nat) (W : R.-fdist 'I_5)
     (g : {perm 'I_5}) :
   @rho_from_words_weighted R 3 4 L fc_kim_gens W g != 0 ->

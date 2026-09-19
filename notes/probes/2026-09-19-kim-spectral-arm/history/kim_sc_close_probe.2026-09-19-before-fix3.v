@@ -18,6 +18,7 @@ From pgg_smc Require Import five_card_scheme_I5.
 From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import den_boer_encoding den_boer_profile.
 From pgg_smc Require Import five_card_exec five_card_models.
+From pgg_smc Require Import pgg_analysis_status pgg_analysis_manifest.
 From pgg_reconstruct Require Import algebraic_rigidity.
 From kim_spectral_arm_probe Require Import var_dist_injective_probe.
 From kim_spectral_arm_probe Require Import five_card_rotation_probe.
