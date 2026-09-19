@@ -14,6 +14,11 @@ and 4 each sit at the right phase but each rests on one statement about the
 infrastructure that is false. Every correction below is concrete enough to
 restart from.
 
+Section h answers a further question from the owner and reinforces the verdict:
+ledger row F2.3 asks for a second claim in the data slot of a row, and the
+Tableau's own header already says a row commits to one claim. That part of the
+spec is wrong rather than imprecise, and section e is revised by section h1.
+
 The single strongest fact the design does not know: **the proposition finding 1
 wants is already a landed theorem at PGL(2,7)**, `pgl27_view_mixing`
 (`instances/pgl27/pgl27_word_privacy.v:233-239`), already named in the
@@ -30,7 +35,7 @@ rows, and its ideal is not the exact row's model.
 | # | Finding | Verdict | Recommended change | Evidence |
 |---|---|---|---|---|
 | 1 | ideal/actual relation as a step consuming a finished exact row | **change** | Make it a third `SecurityPort` arm at `AnalysisBridged`, not a step between rows. Its certificate carries an ideal `SampleAdapter` over the same execution, that ideal's `ExactWitness`, the actual model's secret at the same `finType`, and one distance on the joint reading-and-secret carrier. Drop PGL(2,7)'s exact row as the ideal and build a prior-indexed ideal family instead. Drop the Kim half. | `manifest/pgg_tableau.v:149-152`, `:179-186`, `:377-381`; `instances/pgl27/pgl27_models.v:410-412` vs `:417-419`; `instances/pgl27/pgl27_word_privacy.v:233-239` |
-| 2 | leakage in bits at the full reveal, a second claim on one row | **change** | Phase is right. The stated reason is wrong: the leakage observer is not an observer the `Sampled` phase knows. Carry the second claim in the **proposition family** of `TableauAt`, not in the data slot of `StackAt AnalysisBridged`. Generalize `PublishedRowAt` by that family so a published row displays its claims in its type. | `manifest/pgg_tableau.v:286-296`, `:410-416`, `:638-645`, `:678-686`; `instances/kim2025/five_card_rows.v:516-529`; `instances/kim2025/five_card_models.v:284-288` |
+| 2 | leakage in bits at the full reveal, a second claim on one row | **change** | Phase is right. The stated reason is wrong: the leakage observer is not an observer the `Sampled` phase knows. **Drop the second-claim-per-row design entirely** and write the second claim as a second program branching from a shared `Tableau Sampled` value. See section h1, which supersedes the recommendation in section e. | `manifest/pgg_tableau.v:22-29`, `:179-186`, `:286-296`, `:713-722`; `instances/kim2025/five_card_rows.v:516-529`; `instances/kim2025/five_card_models.v:284-288` |
 | 3 | conclude with an inequality | **keep**, one correction | Needed, and for a reason the design states imprecisely. `restate` already publishes a weaker number as a proposition. What it cannot do is publish a **manifest row** at that number, because `RestatedTableau` holds no `AnalysisPathRow`. Say that. Also drop ledger row F3.2, whose evidence does not test what it claims. | `manifest/pgg_tableau.v:610-616`, `:652-672`, `:678-686`; `instances/pgl27/pgl27_rows.v:417-454`, `:389-394` |
 | 4 | refutations publishing `NegativeTransfer` | **change** | Phase `AnalysisBridged` is right and is backed verbatim by the status file. But `psl211_fixed_deal_view_dep` is not stated at any observed execution's observer, so no row can take it today and `NegativeTransfer` as documented does not describe it. The first deliverable is a fixed-deck `AnalysisModelFamily` over `psl211_alldecks_observed` and the bridge lemma. The port is the last step, not the first. | `manifest/pgg_analysis_status.v:14-17`, `:68-69`; `instances/psl211/psl211_models.v:1158-1166`; `instances/psl211/psl211_rows.v:17-18`, `:40-46`; `manifest/pgg_analysis_manifest.v:628-631` |
 
@@ -374,6 +379,13 @@ bridge".
 
 ## e. A second claim on one row
 
+**Superseded by section h1.** The option comparison below stands as an analysis
+of what the three data-level designs cost, and its conclusion that option 3 is
+the cheapest of the three is unchanged. But the owner's phase principle, which
+reached me after this section was written, rules out all three, and it is right
+on the real definitions. Read this section as the answer to "if a row must carry
+two claims, how", and section h1 as the answer to "must it".
+
 ### What the real types allow
 
 `StackAt AnalysisBridged` holds exactly one port per field and index
@@ -612,6 +624,223 @@ accumulated quantity.
 
 ---
 
+## h. The owner's phase principle: one claim per row
+
+The principle put to me: `AnalysisBridged` is one security claim together with
+its whole dependency chain from `Algebraic` upward, so different models each
+have their own claim and each is its own row, the tree branching at `Sampled`
+by model. I adjudicate it against the definitions and it wins, on the file's own
+words. Section e is revised accordingly.
+
+### h1. Can a `Tableau Sampled` value be shared, and does that settle F2.3
+
+**Yes, and yes.** Three facts decide it.
+
+**The file already says one claim per row.** "certify_exact and
+certify_spectral adjoin a security witness of one of the two arms. Both arms
+speak only of a coalition below the privacy threshold, and they are not
+comparable statements ... **A row commits to one of them and claims nothing
+about the other**" (`manifest/pgg_tableau.v:22-29`). The data slot holds one
+port (`:179-186`), `BridgedProp` has one `PortProp` conjunct (`:377-381`), and
+`view_secrecy_of` and `view_indist_of` are the *same* projection under two
+per-arm names (`:713-722`), which is only coherent if a row has one arm. So
+one claim per row is the design as written, not a reading of it.
+
+**Branching at `Sampled` is supported and costs nothing.** `certify_exact` and
+`certify_spectral` take the Sampled stack as an explicit argument and return a
+new value (`manifest/pgg_tableau.v:577-584`, `:592-599`), and the notations
+expand to `tableau_bind` with the Sampled tableau in the leftmost position
+(`manifest/pgg_tableau_syntax.v:369-390`). So
+
+```
+Definition five_card_uniform_sampled : Tableau Sampled :=
+  five_card_committed sample five_card_uniform_family.
+```
+
+followed by two independent continuations from that one name is the same
+construction that `five_card_committed` already supports at `Observed`, where
+three programs branch from one value (`instances/kim2025/five_card_rows.v:175`,
+`:338-342`, `:390-392`, `:401-403`). Each continuation's payload type is
+`ExactPayload x` or `SpectralPayload x` at the *shared* `x`
+(`manifest/pgg_tableau.v:518-528`), so both branches are typed at one family by
+construction and cannot drift.
+
+**It is supported but unexercised.** No program in the tree branches at
+`Sampled` today. `five_card_row_repeated_tableau` and
+`five_card_row_biased_tableau` are `Tableau Sampled` values that stop there
+(`instances/kim2025/five_card_rows.v:390`, `:401`), not shared prefixes. So the
+probe must demonstrate the branch, and there is one elaboration hazard to check
+first: the payload's type is `ExactPayload (tableau_at X)`, whose `sp_f` must
+reduce through the name `X` for the instance's witness to unify with it. `X` is
+a transparent `Definition` so `delta` and `iota` suffice, but the syntax file
+records that clauses at under-determined positions accept the wrong obligation
+(`manifest/pgg_tableau_syntax.v:18-23`), and this is the one step the whole
+design rests on.
+
+**Why the two recorded `Fail`s do not bear on this.** `pgl27_inline_reuse`
+(`instances/pgl27/pgl27_rows.v:362-363`) and `psl211_row_vm_reuse`
+(`instances/psl211/psl211_rows.v:293-294`) reject a family typed at one observed
+execution over a *different* observed execution. The forked prefix holds
+`ltac:(by vm_compute)` where the named prefix holds an opaque `Qed` lemma, and
+`instance_observed Ht He Hr` stores those proof terms, so the two prefixes build
+two different `OE.ObservedExecution` values and an opaque lemma is convertible
+with nothing. That is a statement about proof-term identity in the Observed
+data, not about whether a prefix value can be reused. It is in fact the
+guarantee that branching is safe: two branches from one *named* value share a
+prefix that is one term, so nothing can fork underneath them. The only thing the
+two `Fail`s add here is a rule for the probe, that a branch point must be a
+single name and not two spellings a reader believes are equal.
+
+**Revision to section e.** F2.3 as written asks for the wrong thing. The data
+slot of `AnalysisBridged` should keep exactly one claim, and Kim's biased model
+should carry two programs over one `Tableau Sampled` value, one certifying
+closeness and one certifying the leakage ceiling. This is strictly smaller than
+my earlier option 3: it changes nothing in `manifest/pgg_tableau.v` at all, where
+option 3 would have generalized `PublishedRowAt`, and it leaves every projection
+returning exactly one claim. It also makes soundness invariant 7 of the spec,
+that a refuted row has no projection reading as secrecy, hold by construction
+rather than by a new argument. The tree branches twice: at `Sampled` by model
+and at `AnalysisBridged` by claim.
+
+### h2. Does one claim per row force a field in `AnalysisPathRow`
+
+**No.** But the design must say out loud what the manifest is then silent about.
+
+The consequence is real. `publish` builds
+`@MkAnalysisPathRow (ab_obs q) AnalysisBridged (ab_f q) t a`
+(`manifest/pgg_tableau.v:691-695`). Two programs over one model with the same
+transfer and assumption statuses agree in all five fields, so they publish the
+**identical** `AnalysisPathRow` value, and both `rowE` lemmas hold by
+conversion. The Kim round-2 audit already established the analogous fact, that
+two certificates carrying two different published numbers publish one row, and
+concluded that an `erefl` between a program's row and a manifest row "compares
+descriptive metadata and settles nothing about either certificate".
+
+That is not a defect of the record. The manifest says so itself: "The record
+stores no theorem: theorems stay facade aliases and are pinned by spelled type
+in the checker at the end of this file"
+(`manifest/pgg_analysis_manifest.v:22-23`, restated at `:702-705`). An
+`AnalysisPathRow` describes a *path*, meaning a run, a model and three statuses.
+Two claims about one model are one path. The manifest is silent, by design, and
+silence is not a lie.
+
+**The smallest honest change, and it is not in the manifest.** Add to
+`manifest/pgg_tableau.v` a reflection of the arm and nothing else:
+
+```
+Variant SecurityArm := ExactArm | SpectralArm | <the new arms>.
+Definition port_arm ... (p : SecurityPort sa) : SecurityArm := match p with ... end.
+Definition row_arm (c : Reprice) (r : PublishedRowAt c) (R : realType) idx :=
+  port_arm (ab_port (published_at r) R idx).
+```
+
+Then one pin per program, in the rows file beside its existing `rowE` lemma, in
+exactly the style the manifest already uses for statuses:
+
+```
+Check (fun R idx => (erefl : row_arm pgl27_row_exact_tableau R idx = ExactArm)).
+```
+
+It holds by `iota`, because `certify_exact` builds `fun R idx =>
+ExactIndependence (p R idx)` (`manifest/pgg_tableau.v:583`). Three properties
+make this the right size. It is an addition, so no existing declaration changes.
+It lands in `pgg_tableau.v`, whose reverse closure the spec's D1 measures at
+five, and not in `pgg_analysis_manifest.v`, whose closure is seven. And the pin
+must live in the rows file anyway, because the manifest sits *below* the
+programs: all four rows files import `pgg_analysis_manifest`
+(`instances/pgl27/pgl27_rows.v:101`,
+`instances/kim2025/five_card_rows.v:152`, `instances/s5/s5_rows.v:115`,
+`instances/psl211/psl211_rows.v:93`), so the manifest's checker cannot see a
+program and could not pin an arm even if it had a field for one.
+
+**The paper's table column.** One column, headed by the claim and not by the
+model, with the closed vocabulary of the arms: exact independence, spectral
+decay, approximate independence against an ideal model, leakage ceiling,
+dependence. That column is the honest carrier of what the manifest deliberately
+does not store, and without it Kim's biased row reads as finished as the
+PGL(2,7) row. The manifest's own capability tables already carry a `notion`
+column of this kind (`manifest/pgg_analysis_manifest.v:127-135`), so the paper
+column is a promotion of an existing convention and not a new one.
+
+### h3. `sc_ideal` never went through the phases
+
+**The reading is fair, and the record is worse than the question suggests.**
+
+`SpectralCert`'s `sc_ideal` is an `R.-fdist (pgg_gT ...)`, a bare law on the cut
+group (`manifest/pgg_tableau.v:136`). There is no sample space, no `sa_arg`, no
+secret random variable, and therefore no adapter it could be the law of. There
+is no `Sampled`-level identification for it, because `sampled_viewE_prop`
+identifies the executed reader with the static one for the row's *own* family
+(`:286-296`) and nothing is sampled at `sc_ideal`. And nothing connects
+PGL(2,7)'s `sc_const`, which is `pgl27_word_view_const`
+(`instances/pgl27/pgl27_rows.v:224-236`), to `pgl27_row_exact_tableau`, whose
+witness is a different theorem. Three-transitivity is the common ancestor, in
+prose, not in any term.
+
+The sharper fact, which strengthens the point: **the spectral arm's conclusion
+never reaches an executed reader at all**. `ExactProp` is stated at
+`sa_coalition_view` (`manifest/pgg_tableau.v:309-324`) and `exact_tail` consumes
+the `Sampled` link lemma as its `Hview` argument (`:535-539`), which is why
+`certify_exact` passes `proj2 q` into it (`:584`). `SpectralPropAt` is stated at
+`fdistmap (static_coalition_obs C x) (sa_cut_dist sa)` (`:331-339`), and
+`spectral_tail` takes no `Hview` at all (`:561-563`), so `certify_spectral`
+discards it (`:599`). A spectral row therefore passes through `Sampled` without
+using what `Sampled` proves, and both ends of its claim, the ideal and the
+conclusion, are static. At PGL(2,7) the executed statements that a reader would
+expect the row to carry, `exec_view_indist` and `fixed_word_coalition_distE`,
+are carried outside it (`manifest/pgg_analysis_manifest.v:192-196`).
+
+**Does this strengthen the case for consuming a finished ideal row.** Yes, and
+it also says what "consuming" should mean. Under my recommended certificate the
+ideal enters as an adapter plus an `ExactWitness`, so the ideal's claim is
+`ExactProp`, which *is* at `sa_coalition_view` and *does* consume the `Sampled`
+link lemma. The ideal's claim would then have gone through every phase, which is
+exactly what `sc_ideal` does not do. So the owner's principle and my
+recommendation agree on the data and differ only on whether that data is named
+as a row.
+
+**Resolve the difference this way, and there is no DAG in any type.** The
+certificate's fields stay `(g, w)`, the ideal family and its witness, so no row
+value is a payload and no equation is transported. Beside the two programs the
+instance writes the ideal as its own published program, and one lemma says the
+two are one term:
+
+```
+Lemma pgl27_word_ideal_isE :
+  (g, w) of pgl27_row_word_close_tableau
+  = (sp_f (tableau_at ...), pgl27_exact_gen_witness).
+Proof. by []. Qed.
+```
+
+That is the pattern the repository already uses for exactly this purpose:
+`pgl27_row_word_certE` identifies five written clauses with one record by
+conversion (`instances/pgl27/pgl27_rows.v:309-314`), and
+`five_card_row_repeated_prefixE` identifies three coordinates of two programs by
+`split` (`instances/kim2025/five_card_rows.v:418-425`). The dependency is then a
+DAG in the *evidence*, recorded as a conversion lemma beside the programs, and a
+line in every type.
+
+**How the reader invariant survives.** "A reader who stops at any line knows
+exactly what has been proved there" (`manifest/pgg_tableau.v:13-15`) is a claim
+about what is proved, not about the proof being self-contained. `certify_exact`
+already rests on `exact_tail`, which rests on `leakage_of_view_indep` and
+`inde_RV_comp` from two other files (`:549-553`). What changes at the new arm is
+that one of its premises is a *row*, and naming a row in a payload puts the
+dependency in the program text where today `sc_ideal` hides an unphased ideal
+inside a record field. The invariant is not threatened by the new arm. It is
+already weakened by the existing spectral arm, and the new arm repairs the
+weakening rather than repeating it. The header sentence that has to change is
+not the reader invariant but the one at `:39-45`, which says the mathematics of
+an instance enters only as a witness or a certificate: after finding 1 it enters
+also as a named ideal row, and that should be written, not smuggled.
+
+**One recommendation follows.** Do not let the new arm carry a bare ideal law.
+If the probe finds the adapter-and-witness field too heavy and falls back to a
+law plus a constancy field, it has rebuilt `SpectralCert` under a new name and
+the batch has bought nothing.
+
+---
+
 ## Recommended shape for finding 1
 
 Make finding 1 a third `SecurityPort` arm at `AnalysisBridged`, not a step
@@ -662,6 +891,15 @@ probed.
    `psl211_alldecks_observed` and the bridge to `static_coalition_obs`, a row
    publishing `NegativeTransfer` would assert a status the status file does not
    support.
+
+Added after section h, and now the probe's first checkable step: **nothing in
+the tree branches at `Sampled` today**. The whole revised design for finding 2,
+and the tree shape the owner's principle describes, rest on a construction that
+is supported by the types but has never been elaborated. The single hazard is
+that the continuation's payload type is `ExactPayload (tableau_at X)` for a
+named `X`, so `sp_f` must reduce through that name for the instance's witness to
+unify. Probe it in one line before anything else is written, because every other
+recommendation in this file assumes it.
 
 Smaller, still worth carrying: `var_dist_le2`, cited by F1.5 and by soundness
 invariant 6, exists only inside the Kim probe directory and not in the
