@@ -145,37 +145,6 @@ and "ExactWitness (amf_sample (sp_f (tableau_at t0_s5_sampled)) R idx)"`. The
 mirror mutation, the S5 witness on the five-card branch point, is rejected the
 same way.
 
-**A hang shape, found by recompiling from source and removed.** The first
-version of `t0_sampled_branch_pgl27.v` stated each pair of coordinate
-equations as one conjunction closed by `by []`. One sentence, the `by [].` of
-`pgl27_row_word_branch_atE`, cost **683.103 secs (670.702u, 8.966s)**. The
-cause is not conversion. Measured on 2026-09-19 against the built `.vo`, so
-that only the proof sentences are timed:
-
-| goal | tactic | time |
-|---|---|---|
-| `published_at pgl27_row_word_branch = published_at pgl27_row_word_tableau` | `exact: erefl` | 0.133 s |
-| the same | `by []` | 0.087 s |
-| `published_at pgl27_row_word_branch = published_at pgl27_row_word_branch39` | `exact: erefl` | 0.133 s |
-| the same | `by []` | did not return in 130 s |
-| the conjunction of the two | `split; exact: erefl` | 0.145 s |
-| the conjunction of the two | `by split` | did not return in 200 s |
-
-So the slow equation is the second, the branch point against its own
-**concluded** continuation, and the slow tactic is `by []`. ssreflect's `done`
-spends its search before it reaches reflexivity, and on a goal whose two sides
-are `published_at` of a row without `conclude` and of a row with it that
-search does not return; the conversion the goal actually needs is a tenth of a
-second. Neither equation needs weakening: both are provable, and provable
-fast.
-
-Each conjunction is now two lemmas closed by `exact: erefl`:
-`pgl27_row_exact_branch_atE` and `pgl27_row_exact_branch_ideal_atE`,
-`pgl27_row_word_branch_atE` and `pgl27_row_word_branch39_atE`. The file's
-slowest sentence is now `exact: erefl` at 0.149 s, and its only sentences over
-one second are two `Require Import` lines. Scratch measurements:
-`scratchpad/t0b_eq1.v`, `t0b_conj.v`, `t0b_eq2done.v`.
-
 **Open for stage B.** Two shapes stage A does not exercise. One named
 `Sampled` value continued through two *different* arms is the first of them,
 and it is stage B's first ledger item. A mutation between two adapters that
@@ -477,40 +446,16 @@ rows a landing would cite: `port_reprice`, `port_arm`, `ab_arm`,
 `s5_row_rand_armE`, `psl211_row_alldecks_armE`,
 `pgl27_word_reprice41_false`, `pgl27_row_word39E`, `t0_row_uniform_rowE`,
 `t0_row_uniform_manifestE`, `t0_row_uniform_atE`, `t0_row_uniform_row_neq`,
-`pgl27_row_exact_branch_atE`, `pgl27_row_exact_branch_ideal_atE`,
-`pgl27_row_exact_branch_rowE`, `pgl27_row_word_branch_atE`,
-`pgl27_row_word_branch39_atE`, `pgl27_row_word_branch_armE`, and the rows
+`pgl27_row_exact_branch_atE`, `pgl27_row_exact_branch_rowE`,
+`pgl27_row_word_branch_atE`, `pgl27_row_word_branch_armE`, and the rows
 `pgl27_row_word39`, `t0_row_uniform`, `t0_row_uniform_transfer`,
 `pgl27_row_exact_branch`, `pgl27_row_word_branch39`.
 
-Thirty of the thirty-one print the same three constants and nothing
-else: `propositional_extensionality`, `functional_extensionality_dep`,
-`constructive_indefinite_description`. The floor is the documented boolp trio,
+All of them print the same three constants and nothing else:
+`propositional_extensionality`, `functional_extensionality_dep`,
+`constructive_indefinite_description`. No custom axiom, no `Admitted`, no
+`Abort`, no `Parameter`, no `admit`. The floor is the documented boolp trio,
 which reaches every statement whose type mentions an fdist record.
-
-**One target prints a fourth constant**, and it is production's.
-`Print Assumptions s5_row_rand_armE` also reports
-
-```
-rigidity_s5_instance.s5_group_order_eq :
-  #|pgg_G (Gen_PGGTypes (n:=3) (pgg_raag_path.path_gen_tuple 3))| = 120%R
-```
-
-declared as an `Axiom` at `instances/s5/rigidity_s5_instance.v:179`, which is
-in the tree today. It reaches the report through the S5 instance's own
-witness, not through anything the Tableau or this probe adds. Checked, not
-assumed: a scratch file requiring the **production** `s5_rows` reports the
-same axiom for `s5_row_rand_tableau`, `s5_rand_exact_witness` and
-`s5_row_rand_rowE` (`scratchpad/prod_s5_assum.v`, rc=0). So the probe
-introduces no axiom: it adds no `Admitted`, no `Abort`, no `Parameter`, no
-`admit` and no `Axiom`, and the one non-boolp constant in the report pre-dates
-it. A landing that cites `s5_row_rand_armE` inherits that axiom exactly as the
-production S5 row already does.
-
-An earlier version of this file claimed every block was within the boolp trio. The scan behind that claim matched axiom names with `\w+`, which
-does not match the dot of a module-qualified name, so a qualified `Axiom`
-passed it silently. Any future scan of `Print Assumptions` output must allow
-dots in the name.
 
 ### G3, the header sentences the changes made false or incomplete
 

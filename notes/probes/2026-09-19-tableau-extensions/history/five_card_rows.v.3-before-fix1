@@ -108,8 +108,6 @@
 (*                              names                                         *)
 (*   five_card_row_uniform_rowE                                               *)
 (*                           == the program publishes the manifest's row      *)
-(*   five_card_row_uniform_armE                                               *)
-(*                           == the row carries the exact arm                 *)
 (*   five_card_row_repeated_prefixE                                           *)
 (*   five_card_row_biased_prefixE                                             *)
 (*                           == each Kim row carries the prefix's algebra,    *)
@@ -351,15 +349,13 @@ Lemma five_card_row_uniform_rowE :
   published_row five_card_row_uniform_tableau = five_card_row_uniform.
 Proof. by []. Qed.
 
-(** The arm this row carries, at every real field and index: independence of
+(** The claim this row carries, at every real field and index: independence of
     the coalition's view from the conjunction of the committed bits, and not a
-    distance between two readings. This is the value a paper's table prints in
-    the arm column for this row, settled by the certify statement the program
-    wrote. *)
-Lemma five_card_row_uniform_armE (R : realType)
-    (idx : amf_index (ab_f (published_at five_card_row_uniform_tableau)) R) :
-  security_arm_of five_card_row_uniform_tableau R idx = ExactIndependenceArm.
-Proof. by []. Qed.
+    distance between two readings. Conversion decides it from the certify
+    statement the program wrote. *)
+Check (fun R idx =>
+  (erefl : security_claim_of five_card_row_uniform_tableau R idx
+           = ExactViewIndependence)).
 
 (******************************************************************************)
 (*     The exact arm's four conjuncts at this instance                        *)

@@ -51,9 +51,7 @@
 (*   pgl27_inline_dealt      == the prefix with the termination reduction     *)
 (*                              written inline                                *)
 (*   pgl27_reprice39         == the name 2^-39 for the word row's bound       *)
-(*   pgl27_row_word39        == the word row concluded at that number         *)
-(*   pgl27_row_word39_bind   == the same row written through the bind         *)
-(*   pgl27_reprice41         == the name 2^-41 for a bound                    *)
+(*   pgl27_row_word39        == the word row republished at that name         *)
 (*   pgl27_word_target       == the word row's published statement            *)
 (*   pgl27_exact_target      == the exact row's published statement           *)
 (*   pgl27_word_restated     == the word row through the restate terminal     *)
@@ -78,12 +76,6 @@
 (*   pgl27_row_word_rowE     == the word program publishes the manifest's row *)
 (*   pgl27_row_word_certE    == the five written clauses are pgl27_word_cert  *)
 (*   pgl27_inline_paramsE    == the inline prefix builds the same run         *)
-(*   pgl27_row_exact_armE    == the exact row carries the exact arm           *)
-(*   pgl27_row_word_armE     == the word row carries the spectral arm         *)
-(*   pgl27_row_word39_armE   == the concluded row carries that same arm       *)
-(*   pgl27_row_word39E       == the surface and the bind build one term       *)
-(*   pgl27_word_reprice41_false                                               *)
-(*                           == the terminal's obligation at 2^-41 is false   *)
 (*   pgl27_word_bridge       == the word row's proposition gives its          *)
 (*                              published statement                           *)
 (*   pgl27_exact_bridge      == the exact row's proposition gives its         *)
@@ -336,32 +328,25 @@ Lemma pgl27_row_word_rowE :
   published_row pgl27_row_word_tableau = pgl27_row_word.
 Proof. by []. Qed.
 
-(** The arm the exact row carries, at every real field and index:
-    independence of the coalition's view from the secret, and not a distance
-    between two readings. This is the value a paper's table prints in the arm
-    column for this row; certify_exact_armE and publish_armE are why the
-    value is settled by the row's certify statement. *)
-Lemma pgl27_row_exact_armE (R : realType)
-    (idx : amf_index (ab_f (published_at pgl27_row_exact_tableau)) R) :
-  security_arm_of pgl27_row_exact_tableau R idx = ExactIndependenceArm.
-Proof. by []. Qed.
+(** The claim each of the two rows carries, at every real field and index.
+    The two publish different manifest rows here, but a reader of the manifest
+    alone could not tell independence of the view from a distance between two
+    readings; these two pins say which is which, and conversion decides both
+    from the certify statement each program wrote. *)
+Check (fun R idx =>
+  (erefl : security_claim_of pgl27_row_exact_tableau R idx
+           = ExactViewIndependence)).
+Check (fun R idx =>
+  (erefl : security_claim_of pgl27_row_word_tableau R idx
+           = SpectralViewDecay)).
 
-(** The arm the word row carries. The two rows publish different manifest
-    rows here, but a reader of the manifest alone could not tell independence
-    of the view from a distance between two readings, and this pair of
-    equations is what separates them. *)
-Lemma pgl27_row_word_armE (R : realType)
-    (idx : amf_index (ab_f (published_at pgl27_row_word_tableau)) R) :
-  security_arm_of pgl27_row_word_tableau R idx = SpectralDecayArm.
-Proof. by []. Qed.
-
-(** Recording the word row at the exact arm is rejected by conversion, so the
-    table column holds the arm the row's certify statement wrote and no
-    other. *)
-Fail Definition pgl27_row_word_arm_exactE (R : realType)
+(** The reader discriminates. Naming the other claim of the word row is
+    rejected by conversion, so a pin cannot record a claim the row's certify
+    statement did not write. *)
+Fail Definition pgl27_word_claim_is_not_exact (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word_tableau)) R) :=
-  (erefl : security_arm_of pgl27_row_word_tableau R idx
-           = ExactIndependenceArm).
+  (erefl : security_claim_of pgl27_row_word_tableau R idx
+           = ExactViewIndependence).
 
 (******************************************************************************)
 (*     The same prefix through the literal reduction                          *)
@@ -399,19 +384,18 @@ Fail Definition pgl27_inline_reuse : Tableau Sampled :=
   pgl27_inline_dealt sample pgl27_exact_family.
 
 (******************************************************************************)
-(*     The word row concluded at 2^-39                                        *)
+(*     The word row republished at 2^-39                                      *)
 (******************************************************************************)
 
 (** The name 2^-39 for a bound, at every real field. A single real will not
     serve, because the security port quantifies over the field. *)
 Definition pgl27_reprice39 : Reprice := fun R => Some (2%:R^-39 : R).
 
-(** The word row concluded at the single constant 2^-39. The accumulated bound
+(** The word row published at the single constant 2^-39. The accumulated bound
     is 2^-40 twice, pow2_split adds the two copies, and eqW reads that identity
     as the inequality the terminal asks for; the data, the model and the
     certificate are untouched, so the published row asserts about a coalition
-    no more than pgl27_row_word_tableau, at the number a reader expects to
-    cite. *)
+    no more than the row above, at the number a reader expects to cite. *)
 Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     sample  pgl27_word_family
@@ -420,45 +404,42 @@ Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The same row written through the bind and its payloads. The two are one
-    term, so the conclude and publish surface adds no step and hides no
-    payload, as the five spectral clauses do not for the certify statement. *)
-Definition pgl27_row_word39_bind : PublishedRowAt pgl27_reprice39 :=
+    term, so the surface of the last two lines renames nothing and hides
+    nothing, as the five spectral clauses do not for the line above them. *)
+Definition pgl27_row_word39_raw : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_spectral of pgl27_word_cert
     ;;; conclude pgl27_reprice39 of (fun R _ => ssr_ext.eqW (pow2_split R))
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
-Lemma pgl27_row_word39E : pgl27_row_word39 = pgl27_row_word39_bind.
+Lemma pgl27_row_word39E : pgl27_row_word39 = pgl27_row_word39_raw.
 Proof. by []. Qed.
 
-(** The arm the concluded row carries. Concluding at an upper bound leaves the
-    port untouched, so the row at 2^-39 carries the arm the row at its own sum
-    carries, and the table column is the same for both. *)
-Lemma pgl27_row_word39_armE (R : realType)
-    (idx : amf_index (ab_f (published_at pgl27_row_word39)) R) :
-  security_arm_of pgl27_row_word39 R idx = SpectralDecayArm.
-Proof. by []. Qed.
+(** The claim the published row carries. Publishing an upper bound leaves the
+    port untouched, so the row at 2^-39 carries the claim the row at its own
+    sum carries. *)
+Check (fun R idx =>
+  (erefl : security_claim_of pgl27_row_word39 R idx = SpectralViewDecay)).
 
-(** The terminal's obligation is one inequality per real field and per index
-    of the family. A payload with the right relation but no index binder is
-    rejected, which is what keeps a row from publishing a bound that holds
-    only at the index a reader happened to pick. *)
-Fail Definition pgl27_row_word39_unindexed : PublishedRowAt pgl27_reprice39 :=
+(** The reprice obligation is one inequality per real field and per index of
+    the family, and pow2_split alone is an identity at one field. Supplying it
+    bare is rejected, which is what keeps a row from publishing a bound that
+    holds only at the field a reader happened to pick. *)
+Fail Definition pgl27_row_word39_bare : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     sample  pgl27_word_family
     certify SpectralDecay pgl27_word_cert
-    |> conclude pgl27_reprice39 by (fun R => ssr_ext.eqW (pow2_split R))
+    |> conclude pgl27_reprice39 by pow2_split
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The same rejection through the bind, so the surface is not what rejects
     it. *)
-Fail Definition pgl27_row_word39_unindexed_bind
-  : PublishedRowAt pgl27_reprice39 :=
+Fail Definition pgl27_row_word39_bare_raw : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_spectral of pgl27_word_cert
-    ;;; conclude pgl27_reprice39 of (fun R => ssr_ext.eqW (pow2_split R))
+    ;;; conclude pgl27_reprice39 of pow2_split
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
 (******************************************************************************)
@@ -471,8 +452,7 @@ Definition pgl27_reprice41 : Reprice := fun R => Some (2%:R^-41 : R).
 (** The word certificate's own bound is 2^-40 twice, and 2^-41 is strictly
     below that, so the terminal's obligation at 2^-41 is refutable and not
     merely unproved. It is what separates publishing an upper bound of the
-    distance a row proved from publishing a number the certificate does not
-    prove. *)
+    distance a row proved from publishing a smaller number beside it. *)
 Lemma pgl27_word_reprice41_false (R : realType) (secretP : R.-fdist bool) :
   ~~ (cert_eps (@pgl27_word_cert R secretP)
       <= odflt (cert_eps (@pgl27_word_cert R secretP)) (pgl27_reprice41 R)).
@@ -668,12 +648,12 @@ Definition pgl27_exact_same_statement (R : realType) :
            0 C) `x (fdistmap (pgl27_secret R) (pgl27P R)))%fdist) :=
   (@pgl27_exec_exact_view_indep R, @pgl27_exec_exact_view_indep_restated R).
 
-(** The two arms are different statements, and the difference is visible in
-    what a row's projection takes after the coalition. A row certifying decay
-    is asked here for a threshold proof in the position where it expects the
-    first of two dealt secrets, and is rejected: what the word row proves at a
-    coalition is a distance between the readings of two secrets, so the two
-    secrets come before the threshold proof. *)
+(** The two arms are different claims, and the difference is visible in what a
+    row's projection takes after the coalition. A row certifying decay is asked
+    here for a threshold proof in the position where it expects the first of two
+    dealt secrets, and is rejected: what the word row proves at a coalition is a
+    distance between the readings of two secrets, so the two secrets come before
+    the threshold proof. *)
 Fail Definition pgl27_word_arm_is_not_exact (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (HC : (#|C| < 4)%N) :=
   view_secrecy_of pgl27_row_word_tableau R secretP C HC.

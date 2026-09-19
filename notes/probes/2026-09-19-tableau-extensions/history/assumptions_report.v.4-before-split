@@ -8,13 +8,6 @@
 (* cite. The repository's floor is the three boolp classical constants, which *)
 (* reach every statement whose type mentions an fdist record; a statement     *)
 (* that closes by conversion alone is Closed.                                 *)
-(*                                                                            *)
-(* One target prints a fourth constant. s5_row_rand_armE rests also on        *)
-(* rigidity_s5_instance.s5_group_order_eq, the order of the five-seat group,  *)
-(* declared as an Axiom at instances/s5/rigidity_s5_instance.v:179. It        *)
-(* reaches this report through the S5 instance's own witness and not through  *)
-(* anything the Tableau or this probe adds: the production s5_row_rand_tableau*)
-(* and s5_rand_exact_witness rest on it already.                              *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
@@ -65,10 +58,8 @@ Print Assumptions t0_row_uniform_row_neq.
 
 (* The same branch shape at PGL(2,7), under a spectral payload. *)
 Print Assumptions pgl27_row_exact_branch_atE.
-Print Assumptions pgl27_row_exact_branch_ideal_atE.
 Print Assumptions pgl27_row_exact_branch_rowE.
 Print Assumptions pgl27_row_word_branch_atE.
-Print Assumptions pgl27_row_word_branch39_atE.
 Print Assumptions pgl27_row_word_branch_armE.
 
 (* The published rows a landing would cite, with the proof each carries. *)

@@ -36,6 +36,5 @@ five_card_rows.v
 s5_rows.v
 psl211_rows.v
 t0_sampled_branch.v
-t0_sampled_branch_pgl27.v
 g2_keyword_measure.v
 assumptions_report.v

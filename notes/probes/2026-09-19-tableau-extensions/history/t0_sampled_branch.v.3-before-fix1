@@ -1,17 +1,13 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* Probe T0: one named Tableau Sampled value continued twice                  *)
+(* Probe T0: two claims continue from one named Tableau Sampled value         *)
 (*                                                                            *)
 (* A row is one security claim with its whole chain, so two claims about one  *)
 (* probability model are two programs over one model. That shape needs a      *)
 (* Tableau Sampled value to be namable and continuable twice, and no program  *)
 (* of the tree branches at Sampled today. This file names the five-card       *)
 (* uniform model as such a value and runs two certify continuations from it.  *)
-(* Both continuations certify the exact arm with one witness, so what is      *)
-(* published twice is one security claim under two pairs of statuses; what    *)
-(* the pair exhibits is the branch point itself, whose payload type reduces   *)
-(* through the name.                                                          *)
 (*                                                                            *)
 (* The hazard the design audit records is that a continuation's payload type  *)
 (* is ExactPayload (tableau_at X) for the named X, so sp_f must reduce        *)
@@ -58,7 +54,7 @@ Local Open Scope ring_scope.
 (******************************************************************************)
 
 (** The five-card uniform model, named at the level where a row has fixed a
-    probability model and has not yet committed to an arm. Naming it is what
+    probability model and has not yet made a security claim. Naming it is what
     lets two claims about this one model be two rows that cannot drift apart
     in their algebra, their run or their law, since all three are read off
     this single term. *)
@@ -76,9 +72,8 @@ Definition t0_row_uniform : PublishedRow :=
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
 (** The second continuation from the same name, published at the transfer
-    status of a model comparison. Both continuations certify the exact arm
-    with one witness, so what this pair shows is that one named Sampled value
-    carries two finished rows, which is the shape a second arm will need. *)
+    status of a model comparison. Two published rows over one Sampled value
+    are what one model carrying two claims looks like. *)
 Definition t0_row_uniform_transfer : PublishedRow :=
   five_card_uniform_sampled
     certify ExactIndependence five_card_exact_witness
@@ -109,8 +104,8 @@ Lemma t0_row_uniform_atE :
     & published_at t0_row_uniform = published_at t0_row_uniform_transfer].
 Proof. by split. Qed.
 
-(** The two published rows differ, in the one coordinate their two publish
-    statements differ in: what the manifest records of the transfer. *)
+(** The two published rows differ, and differ only where the two claims about
+    one model are meant to differ: in what the manifest records of the path. *)
 Lemma t0_row_uniform_row_neq :
   published_row t0_row_uniform <> published_row t0_row_uniform_transfer.
 Proof. by move=> H; move: (congr1 apr_transfer H). Qed.

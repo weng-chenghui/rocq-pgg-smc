@@ -67,13 +67,9 @@
 (* added beside it. The tokens inputs, terminates, publish, conclude,         *)
 (* vm_compute, ExactIndependence and SpectralDecay follow a literal and stay  *)
 (* identifiers, which is what keeps the two port constructors and the         *)
-(* conclude terminal usable by name; at follows a literal too, the literal    *)
-(* leaks in one rule and SpectralDecay in the other, and was a keyword of     *)
-(* Rocq before this file. by follows the slot L of the encoded rule, the slot *)
-(* k of the leaks rule and the slot c of the conclude rule, so it would be a  *)
-(* twentieth, and it is not one only because ssreflect already spends it,     *)
-(* measured on 2026-09-19 by binding it in a file that requires nothing but   *)
-(* ssreflect.                                                                 *)
+(* reprice terminal usable by name; at and by follow a slot in some rule but  *)
+(* were keywords of Rocq and of ssreflect before this file, measured on       *)
+(* 2026-09-19 by binding each in a file that requires nothing but ssreflect.  *)
 (*                                                                            *)
 (* One of the nineteen shadows a framework definition: endpoints is also the  *)
 (* verifier's endpoint tuple in pgg_interface.v. A file requiring this        *)
@@ -397,7 +393,7 @@ Notation "s 'certify' 'SpectralDecay' 'at' R idx b 'tied' 'by' Hd 'ideal' u 'mix
 
 (* The number a row publishes, and the proof that the row's own bound is at
    most that number. The terminal is written in the same surface as the
-   statements of a row, so a row that publishes a constant a paper cites is
+   statements above it, so a row that publishes a constant a paper cites is
    one program in one language and not a program that falls back to the bind
    at its last two lines. *)
 Notation "s |> 'conclude' c 'by' p" := (s ;;; conclude c of p)

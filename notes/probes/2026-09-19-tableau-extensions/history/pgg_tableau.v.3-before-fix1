@@ -26,7 +26,7 @@
 (* from the secret, unconditionally and at every real field, while the        *)
 (* spectral arm concludes a variation distance between the readings of two    *)
 (* run arguments, bounded by the certificate's mixing epsilon. A row commits  *)
-(* to one of them and claims nothing about the other, and security_arm_of     *)
+(* to one of them and claims nothing about the other, and security_claim_of   *)
 (* names which of the two a finished row committed to.                        *)
 (*                                                                            *)
 (* Each arm has one composition law, and the two laws are where the           *)
@@ -38,10 +38,9 @@
 (* distance and its ideal constancy to var_dist_fdistmap_transfer.            *)
 (*                                                                            *)
 (* Two things stay outside the program. The mathematics of a particular       *)
-(* instance never appears as a line: it enters as the witness or the          *)
-(* certificate a certify statement takes, and once more as the payload of     *)
-(* conclude, an inequality between the number the row's own certificate       *)
-(* proved and the number the row publishes. And of the three terminals only   *)
+(* instance never appears as a line: it enters only as the witness or the     *)
+(* certificate a certify statement takes, so an instance owes one record per  *)
+(* arm and no proof about the framework. And of the three terminals only      *)
 (* conclude returns a tableau and only it has a step's shape, but it too is   *)
 (* outside: it leaves the data and the arms untouched and moves the real the  *)
 (* spectral arm's proposition mentions to any upper bound of it.              *)
@@ -50,8 +49,8 @@
 (*   ExactWitness           == the exact arm's security witness               *)
 (*   SpectralCert           == the spectral arm's security certificate        *)
 (*   SecurityPort           == the arm an instance certifies                  *)
-(*   SecurityArm            == which arm, with no witness or certificate      *)
-(*   port_arm               == the arm a port commits to                      *)
+(*   SecurityClaim          == the name of a claim, with no witness attached  *)
+(*   port_claim             == the claim a port carries                       *)
 (*   StackAt                == the data a row holds at one completion level   *)
 (*   StackProp              == the proposition a row holds at one level       *)
 (*   TableauAt              == data at a level with a proof about it          *)
@@ -61,6 +60,8 @@
 (*   sample_step            == the statement adjoining an analysis family     *)
 (*   certify_exact          == the statement adjoining an exact witness       *)
 (*   certify_spectral       == the statement adjoining a spectral certificate *)
+(*   stack_claim            == the claim a row's data carries, at one field   *)
+(*                             and one index                                  *)
 (*   conclude               == the terminal publishing an upper bound of the  *)
 (*                             accumulated bound                              *)
 (*   restate                == the terminal handing over a chosen proposition *)
@@ -71,18 +72,15 @@
 (*                             direct computation                             *)
 (*   view_secrecy_of        == its security statement, exact-arm name         *)
 (*   view_indist_of         == the same statement, spectral-arm name          *)
-(*   security_arm_of        == which of the two arms a published row carries  *)
+(*   security_claim_of      == which of the two claims a published row        *)
+(*                             carries                                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   tableau_left_unit      == sequencing onto a built tableau is application *)
 (*   exact_tail             == the exact arm's composition law                *)
 (*   spectral_tail          == the spectral arm's composition law             *)
-(*   port_reprice           == a port's proposition at a number above its own *)
-(*                             bound                                          *)
-(*   certify_exact_armE     == the exact statement writes the exact arm       *)
-(*   certify_spectral_armE  == the spectral statement writes the spectral arm *)
-(*   conclude_armE          == concluding a row leaves its arm alone          *)
-(*   publish_armE           == publishing a row leaves its arm alone          *)
+(*   port_reprice           == a port's proposition at an upper bound of its  *)
+(*                             own                                            *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -155,32 +153,32 @@ Record SpectralCert (R : realType) (A : PGGAlgebraic)
 (* Which of the two arms an instance certifies, at one real field and one
    index of its analysis family. A row commits to an arm here, and the
    proposition it carries from that line on is that arm's own; the two are
-   different statements about a coalition, so a row certifying decay asserts
+   different claims about a coalition, so a row certifying decay asserts
    nothing about mutual information. *)
 Variant SecurityPort (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E)) : Type :=
   | ExactIndependence of ExactWitness sa
   | SpectralDecay of SpectralCert sa.
 
-(* Which of the two arms a row commits to, with the witness and the
-   certificate forgotten. A published row's manifest row records the path the
-   row ran and no theorem, so two rows over one model and one pair of statuses
-   are one manifest row; the arm is where they differ, and a reader asking
-   what a finished row proved about a coalition reads this and not the
-   manifest. *)
-Variant SecurityArm := ExactIndependenceArm | SpectralDecayArm.
+(* The names of the claims a row can carry, with no witness and no
+   certificate attached to either. A published row's manifest row describes
+   the path it ran and stores no theorem, so two rows over one model publish
+   the same manifest row; this is the vocabulary in which they differ, and a
+   reader asking which of the two claims a finished row carries reads this
+   and not the manifest. *)
+Variant SecurityClaim := ExactViewIndependence | SpectralViewDecay.
 
-(* The arm a port commits to, with its witness or its certificate forgotten.
-   The constructor alone decides the answer, so a row's arm is fixed by the
-   certify statement that wrote the port and needs no proof about the model. *)
-Definition port_arm (R : realType) (A : PGGAlgebraic)
+(* The claim a port carries, with the witness or the certificate forgotten.
+   The port determines the claim by its constructor, so the answer is decided
+   by conversion at every program that writes one. *)
+Definition port_claim (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
-    (p : SecurityPort sa) : SecurityArm :=
+    (p : SecurityPort sa) : SecurityClaim :=
   match p with
-  | ExactIndependence _ => ExactIndependenceArm
-  | SpectralDecay _ => SpectralDecayArm
+  | ExactIndependence _ => ExactViewIndependence
+  | SpectralDecay _ => SpectralViewDecay
   end.
-Arguments port_arm {R A E sa} p.
+Arguments port_claim {R A E sa} p.
 
 (******************************************************************************)
 (*     The completion-level stack                                             *)
@@ -275,16 +273,15 @@ Definition ab_port (q : StackAt AnalysisBridged) :
   projT2 (projT2 (projT2 (projT2 (projT2 (projT2 q))))).
 Arguments ab_port : clear implicits.
 
-(* The arm the data at this level carries, at one real field and one index.
-   The port is a function of both, so the arm is read at the arguments the
-   port is written at rather than at one chosen field. The two certify
-   statements build a port whose constructor is the same at every field and
-   index, so for a row written in the surface the answer does not depend on
-   either argument. *)
-Definition ab_arm (q : StackAt AnalysisBridged) (R : realType)
-    (idx : amf_index (ab_f q) R) : SecurityArm :=
-  port_arm (ab_port q R idx).
-Arguments ab_arm : clear implicits.
+(* The claim the data at this level carries, at one real field and one index.
+   The port is a function of both, so the claim is read at the same two
+   arguments the port is written at rather than at one chosen field; a row
+   whose two arguments give two different claims is not expressible, because
+   one port function answers for all of them. *)
+Definition stack_claim (q : StackAt AnalysisBridged) (R : realType)
+    (idx : amf_index (ab_f q) R) : SecurityClaim :=
+  port_claim (ab_port q R idx).
+Arguments stack_claim : clear implicits.
 
 (******************************************************************************)
 (*     The proposition family                                                 *)
@@ -426,7 +423,7 @@ Arguments BridgedProp c q : assert.
    coalition below Observed, run correctness at Observed, that with the view
    identification at Sampled, and the bridged conjunction at the program's own
    bound above it. This is the default proposition family of the carrier
-   below, and the family a terminal leaves when it concludes a row.
+   below, and the family a terminal leaves when it republishes a row.
 
    The match needs no return annotation: the expected type
    StackAt b -> Prop determines the motive. *)
@@ -447,8 +444,8 @@ Arguments StackProp : clear implicits.
 
 (* A completion level's data together with a proof of a proposition about it.
    The carrier is indexed by the proposition family and not only by the level,
-   because a terminal that concludes a row at a chosen number hands back a
-   record at the same level whose proposition is no longer StackProp. *)
+   because a terminal that republishes the bound hands back a record at the
+   same level whose proposition is no longer StackProp. *)
 #[projections(primitive)]
 Record TableauAt (b : CompletionLevel) (Q : StackAt b -> Prop) :=
   MkTableau {
@@ -630,8 +627,7 @@ Arguments certify_exact x q p : assert.
 (* Adjoins the spectral arm's certificate at every real field and index,
    reaching AnalysisBridged with the arm's proposition proved by
    spectral_tail. The two certify statements are the only lines through which
-   an instance's own mathematics enters a row; the payload of conclude is the
-   one place outside a line where it enters. *)
+   an instance's own mathematics enters a row. *)
 Definition certify_spectral (x : StackAt Sampled) (q : StackProp Sampled x)
     (p : SpectralPayload x) : Tableau AnalysisBridged :=
   @MkTableau AnalysisBridged (StackProp AnalysisBridged)
@@ -648,14 +644,11 @@ Arguments certify_spectral x q p : assert.
 (******************************************************************************)
 
 (* The obligation of conclude: at every real field and index, the number a
-   spectral port is concluded at is at least that port's own, and nothing for
-   an exact port. A row may therefore publish the constant a paper cites
+   spectral port is republished at is at least that port's own, and nothing
+   for an exact port. A row may therefore publish the constant a paper cites
    whenever that constant is an upper bound of the distance the row proved,
-   and may not publish a number below the one its certificate proved. The
-   exact arm carries no number, so a reprice leaves it untouched. An upper
-   bound is the right obligation because the spectral arm's proposition is
-   monotone in its number; an arm whose proposition is not monotone in the
-   number it carries owes a different obligation here. *)
+   and may not publish a number the row's own certificate does not reach.
+   The exact arm carries no number, so a reprice leaves it untouched. *)
 Definition RepricePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
   forall (R : realType) (idx : amf_index (ab_f q) R),
     match ab_port q R idx with
@@ -664,13 +657,11 @@ Definition RepricePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
     end.
 Arguments RepricePayload c q : assert.
 
-(* A port's proposition at the program's own bound, and a proof that a chosen
-   number is at least that bound, give the port's proposition at the chosen
-   number. The step is sound because the spectral arm's proposition is
-   monotone in its number, which is the condition any future arm carrying a
-   number owes as well; it is what lets a row state the constant a paper
-   cites while asserting about the coalition no more than the certificate
-   proved. *)
+(* A port's proposition at the program's own bound, together with an upper
+   bound of that bound, is the port's proposition at the upper bound. The
+   spectral arm's proposition is monotone in its number, and publishing an
+   upper bound is what lets a row state the constant a paper cites while
+   claiming about the coalition no more than the certificate proved. *)
 Lemma port_reprice (c : Reprice) (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (p : SecurityPort sa) :
@@ -686,11 +677,10 @@ exact: Order.POrderTheory.le_trans (H1 C x x' HC) H2.
 Qed.
 Arguments port_reprice c {R A E sa} p.
 
-(* The terminal concluding a row at a chosen number, against a proof that the
-   number is at least the row's accumulated bound. Post-processing of the
-   published constant rather than a step: the data and the arms are
-   unchanged, only the real the spectral arm's proposition mentions moves,
-   and it moves only upward. *)
+(* The terminal publishing a row's accumulated bound as an upper bound of it.
+   Post-processing of the published constant rather than a step: the data and
+   the arms are unchanged, only the real the spectral arm's proposition
+   mentions moves, and it moves only upward. *)
 Definition conclude (c : Reprice) (q : StackAt AnalysisBridged)
     (pf : StackProp AnalysisBridged q) (p : RepricePayload c q)
     : TableauAt AnalysisBridged (BridgedProp c) :=
@@ -777,59 +767,13 @@ Definition view_indist_of (c : Reprice) (r : PublishedRowAt c) :=
   proj2 (published_thm r).
 Arguments view_indist_of {c} r.
 
-(* Which of the two arms a published row carries, at one real field and one
+(* The name of the claim a published row carries, at one real field and one
    index of its family. The manifest row of a published row records the path
-   and not the arm, so two rows over one model and one pair of statuses are
+   and not the claim, so two rows over one model and one pair of statuses are
    one manifest row; this reader is where they differ, and it is decided by
    the port the row's certify statement wrote. *)
-Definition security_arm_of (c : Reprice) (r : PublishedRowAt c)
+Definition security_claim_of (c : Reprice) (r : PublishedRowAt c)
     (R : realType) (idx : amf_index (ab_f (published_at r)) R)
-  : SecurityArm :=
-  ab_arm (published_at r) R idx.
-Arguments security_arm_of {c} r R idx.
-
-(******************************************************************************)
-(*     Where a row's arm is decided                                           *)
-(******************************************************************************)
-
-(* A row built by the exact statement carries the exact arm at every real
-   field and index of its family. The arm of a row written in the surface is
-   therefore settled by one line of it, and a reader needs no argument about
-   the instance's probability model to know which statement the row proved. *)
-Lemma certify_exact_armE (x : StackAt Sampled) (q : StackProp Sampled x)
-    (p : ExactPayload x) (R : realType)
-    (idx : amf_index (ab_f (tableau_at (@certify_exact x q p))) R) :
-  ab_arm (tableau_at (@certify_exact x q p)) R idx = ExactIndependenceArm.
-Proof. by []. Qed.
-
-(* The same for the spectral statement. Together with the previous lemma this
-   is what makes the arm a property of the program's text: the two statements
-   are the only ones that build a port, and each writes one constructor at
-   every field and index. *)
-Lemma certify_spectral_armE (x : StackAt Sampled) (q : StackProp Sampled x)
-    (p : SpectralPayload x) (R : realType)
-    (idx : amf_index (ab_f (tableau_at (@certify_spectral x q p))) R) :
-  ab_arm (tableau_at (@certify_spectral x q p)) R idx = SpectralDecayArm.
-Proof. by []. Qed.
-
-(* Concluding a row at a chosen number leaves its arm where the certify
-   statement put it. The terminal moves a real and not the alternative the
-   row committed to, so a row at the constant a paper cites states the same
-   kind of fact about a coalition as the row at its own bound. *)
-Lemma conclude_armE (c : Reprice) (q : StackAt AnalysisBridged)
-    (pf : StackProp AnalysisBridged q) (p : RepricePayload c q)
-    (R : realType)
-    (idx : amf_index (ab_f (tableau_at (conclude c q pf p))) R) :
-  ab_arm (tableau_at (conclude c q pf p)) R idx = ab_arm q R idx.
-Proof. by []. Qed.
-
-(* Publishing attaches the manifest row and leaves the arm alone, so the arm
-   a finished row reports is the arm its data carried before the last line.
-   This is the step that carries the two lemmas above out to a published row,
-   where a paper's table reads them. *)
-Lemma publish_armE (a : AssumptionStatus) (c : Reprice)
-    (q : StackAt AnalysisBridged) (pf : BridgedProp c q) (t : TransferStatus)
-    (R : realType)
-    (idx : amf_index (ab_f (published_at (publish a q pf t))) R) :
-  security_arm_of (publish a q pf t) R idx = ab_arm q R idx.
-Proof. by []. Qed.
+  : SecurityClaim :=
+  stack_claim (published_at r) R idx.
+Arguments security_claim_of {c} r R idx.
