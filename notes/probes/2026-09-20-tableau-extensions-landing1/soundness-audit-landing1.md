@@ -249,8 +249,8 @@ staged file is missing from that list. The two Sampled-only programs
 
 ### 5. Vacuity and type honesty in the comments the landing wrote or changed
 
-No occurrence of the banned words in any staged file, and none of "L1" as a
-name for the sum of absolute differences. `var_dist` is glossed as the sum of
+No occurrence of the banned words in any staged file, and the sum of absolute
+differences is never given its barred short name. `var_dist` is glossed as the sum of
 absolute differences and as twice the literature's total variation at
 `pgg_tableau.v:474-477` and again at
 `psl211_reading_constancy.v:59-61`; `landing_fidelity.v:60-64` repeats it and
