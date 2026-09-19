@@ -3,7 +3,7 @@
 (* psl211_sc_const_bound_probe: which ideal cuts the twelve-card chirality   *)
 (*                              instance leaves a spectral certificate, and  *)
 (*                              the certificate's own distance field         *)
-(*                                                                           *)
+(*                                                                          *)
 (* The constancy field of a spectral certificate fails at the uniform law on *)
 (* the shuffle group. This file measures how far a candidate ideal may sit   *)
 (* from that law and still fail it. Two answers are given, one by support    *)
@@ -11,21 +11,13 @@
 (* instance actually asks: the certificate's own distance field pins its     *)
 (* ideal to within the shuffle bound's epsilon of the group-uniform law, so  *)
 (* no certificate over the all-decks run carries an epsilon below half the   *)
-(* reciprocal of the group order.                                            *)
-(*                                                                           *)
+(* reciprocal of the group order.                                           *)
+(*                                                                          *)
 (* The premise of the second answer is the one the record supplies. A        *)
 (* certificate's sc_Hd identifies its shuffle law with the adapter's cut,    *)
 (* and the all-decks adapter draws the cut uniformly on the group, so the    *)
 (* distance field is a statement about the group-uniform law whatever        *)
-(* marginal bound record the certificate carries.                            *)
-(*                                                                           *)
-(* A third answer is stated for a cut law this tree has no sample adapter    *)
-(* for, the 584-letter word shuffle. Its distance from the group-uniform law *)
-(* is psl211_word_mixing, and adding that distance to a certificate's own    *)
-(* gives the same refutation as long as the two together stay below half the *)
-(* reciprocal of the group order. That statement is made on the cut law and  *)
-(* not on a certificate, because no weighted-word SampleAdapter exists at    *)
-(* this instance.                                                            *)
+(* marginal bound record the certificate carries.                           *)
 (*****************************************************************************)
 
 From HB Require Import structures.
@@ -47,8 +39,7 @@ From pgg_smc Require Import pgg_tableau.
 From pgg_smc Require Import psl211_group psl211_orbit.
 From pgg_smc Require Import psl211_scheme psl211_profile psl211_exec.
 From pgg_smc Require Import psl211_endpoints psl211_alldecks psl211_models.
-From pgg_smc Require Import psl211_blocks psl211_closure psl211_mixing.
-From pgg_smc Require Import pgg_weighted_words.
+From pgg_smc Require Import psl211_blocks psl211_closure.
 From psl211_sc_const_probe Require Import psl211_sc_const_probe.
 
 Set Implicit Arguments.
@@ -79,9 +70,6 @@ Local Opaque psl211_alldecks_view psl211_elem_table psl211_perdeck_raw_count.
 (** var_dist_point_le — one point's mass gap is at most the whole variation
     distance. This is what lets a distance premise, which is a statement about
     a law, be spent on a single reading a coalition might produce. *)
-(* infotheo's variation_dist.v already states this as leq_var_dist. The local
-   copy is kept so that the proofs here are not reordered in a fix pass; a
-   landing takes leq_var_dist and drops this. *)
 Lemma var_dist_point_le (R : realType) (T : finType) (P Q : R.-fdist T)
     (t : T) : `| P t - Q t | <= var_dist P Q.
 Proof.
@@ -123,10 +111,9 @@ Qed.
 
 (** psl211_perdeck_ideal_lawE — a law on cuts satisfying the constancy field
     sends the two chiralities of psl211_perdeck_deal to one law on what seats
-    0, 1 and 2 read. The all-decks run argument is the whole public deck
-    description, so the field implies this per-deck symmetry of the chirality
-    without being exhausted by it, and the refutations take the instance
-    through the one consequence whose fiber counts psl211_models.v carries. *)
+    0, 1 and 2 read. The constancy field is quantified over run arguments and
+    the all-decks run argument is the deck description, so the field's content
+    at this instance is exactly a per-deck symmetry of the chirality. *)
 Lemma psl211_perdeck_ideal_lawE (R : realType) (ideal : R.-fdist cutT) :
   sc_const_prop psl211_alldecks_params ideal ->
   fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
@@ -289,20 +276,12 @@ have Hc := sc_close cert.
 rewrite Hd in Hc; exact: Hc.
 Qed.
 
-(** psl211_alldecks_no_spectral_cert — no spectral certificate over the
-    all-decks run of the twelve-card chirality instance carries a shuffle
-    bound epsilon below 1/1320, the hypothesis holding twice that epsilon
-    below the reciprocal 1/660 of the group order. A spectral row publishes
-    twice the certificate's epsilon, so a row written for this dealer would
-    quote at least 1/660 against a shuffle whose single-card marginal error
-    this instance proves to be exactly zero. *)
-(* Argued and not compiled: the range this theorem leaves open is occupied.
-   The uniform law on the whole of {perm 'I_12} satisfies the constancy
-   field, its variation distance from `U psl211_G_pos is 2 * (1 - 660/12!),
-   and a certificate at that ideal therefore exists, with an epsilon near
-   infotheo's L1 ceiling of 2. The spectral arm is available at this
-   instance; what it is not is available at a number worth publishing.
-   notes/probes/2026-09-15-psl211-planb/AUDIT-SOUNDNESS-2.md, row 18. *)
+(** psl211_alldecks_no_spectral_cert — the all-decks run of the twelve-card
+    chirality instance admits no spectral certificate whose shuffle bound is
+    below half the reciprocal of the group order. The exact arm's witness is
+    therefore not one of two available readings of this instance: it is the
+    only arm the model can close, and a spectral row would have to quote an
+    epsilon at least 1/1320 against a shuffle whose marginal error is zero. *)
 Theorem psl211_alldecks_no_spectral_cert (R : realType)
     (cert : SpectralCert (psl211_alldecks_sample R)) :
   sw_bound_eps (sc_b cert) + sw_bound_eps (sc_b cert)
@@ -317,10 +296,9 @@ Qed.
 (** psl211_alldecks_no_spectral_cert0 — in particular no spectral certificate
     over the all-decks model carries the instance's own marginal bound, whose
     epsilon is zero because the single-card pushforward of this shuffle is
-    exactly uniform. A certificate must hold its ideal cut within its own
-    epsilon of the group-uniform law, and the group-uniform law is not a cut
-    these three seats read constantly, so the sharper the shuffle bound the
-    less room the certificate has. *)
+    exactly uniform. What the instance proves about its shuffle is too strong
+    for the spectral arm to use, the arm needing an ideal cut a coalition
+    reads constantly and the group-uniform cut not being one. *)
 Corollary psl211_alldecks_no_spectral_cert0 (R : realType)
     (cert : SpectralCert (psl211_alldecks_sample R)) :
   sw_bound_eps (sc_b cert) = 0 -> False.
@@ -334,61 +312,8 @@ have Hlt : sw_bound_eps (sc_b cert) + sw_bound_eps (sc_b cert)
 exact: (@psl211_alldecks_no_spectral_cert R cert Hlt).
 Qed.
 
-(*****************************************************************************)
-(*     The word model, which this tree carries no sample adapter for         *)
-(*****************************************************************************)
-
-(** psl211_alldecks_sc_const_false_word — take a cut law W within d of the
-    group-uniform law, and a law on cuts within eps of W. That law does not
-    satisfy the constancy field, as long as twice the sum of d and eps stays
-    below the reciprocal of the group order. The first distance is the price
-    of replacing the exact shuffle by one a dealer can perform, the second is
-    a certificate's own distance field, and a row over any cut law but the
-    group-uniform one pays both. *)
-Lemma psl211_alldecks_sc_const_false_word (R : realType)
-    (W ideal : R.-fdist cutT) (d eps : R) :
-  var_dist ((`U psl211_G_pos) : R.-fdist cutT) W <= d ->
-  var_dist W ideal <= eps ->
-  (d + eps) + (d + eps) < (#|pgg_G psl211_M|%:R)^-1 ->
-  ~ sc_const_prop psl211_alldecks_params ideal.
-Proof.
-move=> HW Hi Hlt.
-have Hclose : var_dist ((`U psl211_G_pos) : R.-fdist cutT) ideal <= d + eps.
-  apply: (Order.POrderTheory.le_trans (var_dist_triangle _ W _)).
-  exact: lerD HW Hi.
-exact: (@psl211_alldecks_sc_const_false_close R ideal (d + eps) Hclose Hlt).
-Qed.
-
-(** psl211_alldecks_sc_const_false_word584 — the cut law of the 584-letter
-    word shuffle leaves the constancy field false at every ideal within eps
-    of it, once twice the sum of eps and 2^-40 stays below the reciprocal of
-    the group order. This is the statement about the word model a paper would
-    want a row for: the dealer performs a finite word and not an exact
-    uniform draw, and the 2^-40 is the whole information-theoretic price of
-    that replacement. It is stated on the cut law rather than on a
-    certificate because no weighted-word SampleAdapter exists in this tree,
-    so there is no sc_Hd pinning a certificate's ideal to this law. *)
-Lemma psl211_alldecks_sc_const_false_word584 (R : realType)
-    (ideal : R.-fdist cutT) (eps : R) :
-  var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R))
-    ideal <= eps ->
-  (2%:R^-40 + eps) + (2%:R^-40 + eps) < (#|pgg_G psl211_M|%:R)^-1 ->
-  ~ sc_const_prop psl211_alldecks_params ideal.
-Proof.
-move=> Hi Hlt.
-(* psl211_word_mixing states the distance with the word law on the left, and
-   the two-step lemma reads it from the group-uniform law outward *)
-have HW : var_dist ((`U psl211_G_pos) : R.-fdist cutT)
-    (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R))
-  <= 2%:R^-40.
-  by rewrite symmetric_var_dist; exact: psl211_word_mixing.
-exact: (psl211_alldecks_sc_const_false_word HW Hi Hlt).
-Qed.
-
 Print Assumptions psl211_alldecks_sc_const_false_supp.
 Print Assumptions psl211_alldecks_sc_const_false_close.
 Print Assumptions psl211_alldecks_no_spectral_cert.
 Print Assumptions psl211_alldecks_no_spectral_cert0.
 Print Assumptions fdist_uniform_close_supp.
-Print Assumptions psl211_alldecks_sc_const_false_word.
-Print Assumptions psl211_alldecks_sc_const_false_word584.

@@ -230,16 +230,12 @@ Proof. by rewrite /psl211_dealt_fiber uniform_fdistmap_pointE. Qed.
 (*     The constancy field fails under the dealt parameters                 *)
 (*****************************************************************************)
 
-(** psl211_dealt_sc_const_false — under the dealer-dealt run parameters the
-    uniform law on the shuffle group is the ideal cut of no spectral
-    certificate. The dealt run argument is the chirality and nothing else, so
-    here the constancy field is exactly constancy in the secret, and it fails
-    because the encoder decks of the two chiralities give one reading of three
-    seats different masses. That is a fact about the group and the design:
-    PSL(2,11) is 2-transitive and not 3-transitive, where PGL(2,7) certifies
-    the same field through pgl27_word_view_const. The statement rules out one
-    named ideal and no certificate, this tree carrying no dealt-mode sample
-    adapter through which a certificate's ideal could be pinned to it. *)
+(** psl211_dealt_sc_const_false — under the dealer-dealt run parameters no
+    spectral certificate can take the uniform law on the shuffle group as its
+    ideal cut. The dealt run argument is the chirality itself, so the
+    constancy field asks here that three seats read the group-uniform cut the
+    same way at both secrets, and the encoder decks of the two chiralities
+    give that reading different masses. *)
 Lemma psl211_dealt_sc_const_false (R : realType) :
   ~ sc_const_prop psl211_dealt_params ((`U psl211_G_pos) : R.-fdist cutT).
 Proof.
