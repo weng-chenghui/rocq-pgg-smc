@@ -50,7 +50,15 @@ the owner edits the `.tex` files from it. No paper file is edited by this campai
 
 ## Step 2. Per-instance `tableau/` directory (proposal: `notes/2026-09-19-124500-instance-tableau-directory-proposal.md`)
 
-Open. One file per phase, per instance. Needs its own plan after step 1.
+Design with the decisions: `notes/2026-09-20-060000-instance-tableau-directory-design.md` (one directory per instance, one file per phase, `<inst>_tableau_<phase>.v`, plus a checks file; the mathematics does not move; no `-R` line). Template for the provers: `notes/probes/2026-09-20-tableau-directories-s5/staged/TEMPLATE.md`.
+
+| # | Instance | State |
+|---|---|---|
+| 2.1 | S5 (pilot) | DONE: `instances/s5/tableau/`, six files, `s5_rows.v` retired; staged build, audit, fix pass audited by the main session, `cp`, as-built fidelity rc=0 |
+| 2.2 | PSL(2,11) | staged build running in `notes/probes/2026-09-20-tableau-directories-psl211/` |
+| 2.3 | PGL(2,7) | open |
+| 2.4 | five-card | open |
+| 2.5 | Manifest header and the dated note of retired file names for the owner's paper edits | open |
 
 ## Step 3. Recorded small items
 

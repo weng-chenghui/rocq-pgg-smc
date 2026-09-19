@@ -143,7 +143,7 @@ From pgg_smc Require Import five_card_mixing.
 From pgg_smc Require Import s5_exec s5_models.
 From pgg_smc Require Import pgg_analysis_manifest.
 From pgg_smc Require Import pgg_tableau pgg_tableau_syntax.
-From pgg_smc Require Import five_card_rows s5_rows.
+From pgg_smc Require Import five_card_rows s5_tableau_analysis_bridged.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

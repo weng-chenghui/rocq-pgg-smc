@@ -472,3 +472,25 @@ global context` appears once on each side, for `s5_F_thresholdE`.
 Scans: no line over 80 bytes, every non-banner box line exactly 80 columns and
 none ending in a stray asterisk, no banned vocabulary, no abbreviation of
 "indistinguishability".
+
+## As built (2026-09-20)
+
+Fix pass 1 was audited by the main session: `verify.py` green (20 of 21 moved
+declarations token-identical, the one intended difference being the checks
+file's `Check`, 18 of 18 docstrings word-identical, nine new declarations),
+the final texts of F1 to F6 read against the declarations they cite.
+
+The six staged files were copied with `cp` to `instances/s5/tableau/` (`cmp`:
+byte-identical), `instances/kim2025/five_card_proximity.v` received its one
+repointed `Require`, `_CoqProject` lists the six files in place of
+`instances/s5/s5_rows.v` and gains no `-R` line, and the seven files compiled
+single-file, all rc=0. `instances/s5/s5_rows.v` was then removed with `git rm`
+together with its build outputs, and `fidelity.v`, unchanged, was compiled from
+a scratch directory against production's load path alone: rc=0, 22 `Axioms:`
+blocks and one closed, the three classical axioms and
+`rigidity_s5_instance.s5_group_order_eq` as before. Every name `s5_rows.v`
+declared is therefore found at its production statement in the new files.
+
+The comment of `instances/kim2025/five_card_rows.v` that cited the retired
+file now cites `instances/s5/tableau/s5_tableau_sampled.v` (an Opus
+rocq-prover; code tokens identical, two files recompiled).
