@@ -13,10 +13,10 @@ and D2. The IdealProximity arm and the instance programs are later stages.
 | Row | Verdict | Where |
 |---|---|---|
 | T0 | GO, no framework change needed | `t0_sampled_branch.v`, `t0_sampled_branch_pgl27.v` |
-| C1 | GO | `pgg_tableau.v`, `ConcludePayload` and `port_conclude` |
-| C2 | GO, one payload changed in the whole tree | `pgl27_rows.v`, the `conclude` line of `pgl27_row_word39` |
-| C3 | GO | `pgl27_rows.v`, `pgl27_reprice41` and `pgl27_word_reprice41_false`, with the `Fail pgl27_row_word41` beside them |
-| G2 | GO, `conclude` costs no keyword | `pgg_tableau_syntax.v`, the `conclude` notation rule before the `publish` one |
+| C1 | GO | `pgg_tableau.v:607-651` |
+| C2 | GO, one payload changed in the whole tree | `pgl27_rows.v:382` |
+| C3 | GO | `pgl27_rows.v:455-465`, `:467-472` |
+| G2 | GO, `conclude` costs no keyword | `pgg_tableau_syntax.v:396-402` |
 | K1 | GO | `pgg_tableau.v`, four rows copies |
 | G1 | GO at baseline, after C, and after K | compile table below |
 | G3 | eight sentences rewritten | list below |
@@ -73,8 +73,8 @@ Both continuations write `certify ExactIndependence five_card_exact_witness`,
 so they certify the same arm with the same witness: this is one security claim
 published under two pairs of statuses, together with a branch point whose
 payload type reduces through the name. It is not two claims over one model,
-and `five_card_row_uniform_branch_atE` proves it is not, since the two
-continuations hold one `AnalysisBridged` coordinate.
+and `t0_row_uniform_atE` proves it is not, since the two continuations hold
+one `AnalysisBridged` coordinate.
 
 `t0_sampled_branch_pgl27.v` runs the same shape at PGL(2,7), where the exact
 family's index is `unit` and the word family's is `R.-fdist bool`, and where
@@ -92,32 +92,35 @@ Definition five_card_uniform_sampled : Tableau Sampled :=
   five_card_committed
     sample five_card_uniform_family.
 
-Definition five_card_row_uniform_branch : PublishedRow :=
+Definition t0_row_uniform : PublishedRow :=
   five_card_uniform_sampled
     certify ExactIndependence five_card_exact_witness
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
-Definition five_card_row_uniform_branch_ideal : PublishedRow :=
+Definition t0_row_uniform_transfer : PublishedRow :=
   five_card_uniform_sampled
     certify ExactIndependence five_card_exact_witness
     |> publish IdealFinite BaselineClassicalOnly.
 
-Lemma five_card_row_uniform_branch_rowE :
-  published_row five_card_row_uniform_branch = five_card_row_uniform.
+Lemma t0_row_uniform_rowE :
+  published_row t0_row_uniform
+  = published_row five_card_row_uniform_tableau.
 Proof. by []. Qed.
 
-Lemma five_card_row_uniform_branch_atE :
-  [/\ published_at five_card_row_uniform_branch
-      = published_at five_card_row_uniform_tableau,
-      published_at five_card_row_uniform_branch_ideal
-      = published_at five_card_row_uniform_tableau
-    & published_at five_card_row_uniform_branch
-      = published_at five_card_row_uniform_branch_ideal].
-Proof. split; exact: erefl. Qed.
+Lemma t0_row_uniform_manifestE :
+  published_row t0_row_uniform = five_card_row_uniform.
+Proof. by []. Qed.
 
-Lemma five_card_row_uniform_branch_transfer_neq :
-  published_row five_card_row_uniform_branch
-  <> published_row five_card_row_uniform_branch_ideal.
+Lemma t0_row_uniform_atE :
+  [/\ published_at t0_row_uniform
+      = published_at five_card_row_uniform_tableau,
+      published_at t0_row_uniform_transfer
+      = published_at five_card_row_uniform_tableau
+    & published_at t0_row_uniform = published_at t0_row_uniform_transfer].
+Proof. by split. Qed.
+
+Lemma t0_row_uniform_row_neq :
+  published_row t0_row_uniform <> published_row t0_row_uniform_transfer.
 Proof. by move=> H; move: (congr1 apr_transfer H). Qed.
 ```
 
@@ -127,23 +130,20 @@ never`, no extra transparent definition, no type ascription on the payload.
 `five_card_uniform_family` by delta and iota alone, so
 `five_card_exact_witness` unifies with
 `ExactPayload (tableau_at five_card_uniform_sampled)` where the clause is
-written, and `five_card_row_uniform_branch_rowE` holds by `erefl` at the first
-attempt.
+written, and `t0_row_uniform_rowE` holds by `erefl` at the first attempt.
 
 Mutation, recorded `Fail`, first message line:
 
 ```
-Fail Definition s5_cross_instance : Tableau AnalysisBridged :=
-  s5_rand_sampled certify ExactIndependence five_card_exact_witness.
+Fail Definition t0_cross_instance : Tableau AnalysisBridged :=
+  t0_s5_sampled certify ExactIndependence five_card_exact_witness.
 -> The term "five_card_exact_witness" has type
 ```
 
 with `cannot unify "ExactWitness (amf_sample five_card_uniform_family R idx)"
-and "ExactWitness (amf_sample (sp_f (tableau_at s5_rand_sampled)) R idx)"`. The
+and "ExactWitness (amf_sample (sp_f (tableau_at t0_s5_sampled)) R idx)"`. The
 mirror mutation, the S5 witness on the five-card branch point, is rejected the
-same way. Both families are indexed by `unit`, so `idx` unifies and the two
-sample adapters are what the message compares; the PGL(2,7) file's two
-mutations stop one binder earlier, at the index type itself.
+same way.
 
 **A hang shape, found by recompiling from source and removed.** The first
 version of `t0_sampled_branch_pgl27.v` stated each pair of coordinate
@@ -188,18 +188,18 @@ stage B's ideal and actual families over one instance will share one.
 
 ### C1, the framework
 
-`pgg_tableau.v`, `ConcludePayload` and `port_conclude`, equality weakened to
+`pgg_tableau.v`, `RepricePayload` and `port_reprice`, equality weakened to
 `<=`:
 
 ```coq
-Definition ConcludePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
+Definition RepricePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
   forall (R : realType) (idx : amf_index (ab_f q) R),
     match ab_port q R idx with
     | ExactIndependence _ => unit
     | SpectralDecay cert => cert_eps cert <= odflt (cert_eps cert) (c R)
     end.
 
-Lemma port_conclude (c : Reprice) (R : realType) (A : PGGAlgebraic)
+Lemma port_reprice (c : Reprice) (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (p : SecurityPort sa) :
   PortProp no_reprice p ->
@@ -241,13 +241,21 @@ Searched first: mathcomp has no bare `x = y -> x <= y` in `Order` or
 so a name was not guessed.
 
 `pgl27_word_bridge` and the two `restate` uses are not affected: `restate`
-takes a `RestatePayload` and never a `ConcludePayload`.
+takes a `RestatePayload` and never a `RepricePayload`.
 
-The baseline's recorded `Fail`, `pgl27_row_word39_bare` on a bare
-`pow2_split`, still failed after C, but for two reasons at once instead of
-one, so fix pass 1 replaced it rather than keeping it. What the copy records
-is `pgl27_row_word39_unindexed` and `pgl27_row_word39_unindexed_bind`; the
-payload, the message and the reason are in the D8 entry below.
+The recorded `Fail` `pgl27_row_word39_bare` still fails, first message line:
+
+```
+The term "pow2_split" has type
+```
+
+full: `"forall R : realType, 2 ^- 40 + 2 ^- 40 = 2 ^- 39"` against
+`RepricePayload pgl27_reprice39 (tableau_at (pgl27_dealt sample
+pgl27_word_family certify SpectralDecay pgl27_word_cert))`. Its reason is
+unchanged, the payload is not quantified over the field and the index; only
+the expected type's relation symbol moved from `=` to `<=`. The same `Fail`
+is kept in both surfaces (`pgl27_row_word39_bare`,
+`pgl27_row_word39_bare_bind`).
 
 ### C3, a number below the proved one is refutable
 
@@ -281,7 +289,7 @@ application is read as `pgl27_word_cert secretP`.
 
 ### The three comments rewritten
 
-`ConcludePayload`, `port_conclude` and `conclude` each said the terminal renames
+`RepricePayload`, `port_reprice` and `conclude` each said the terminal renames
 a number. Rewritten so that each says it publishes an upper bound, and that a
 row may not publish a number its certificate does not reach.
 
@@ -314,12 +322,12 @@ Definition pgl27_row_word39_bind : PublishedRowAt pgl27_reprice39 :=
     ;;; conclude pgl27_reprice39 of (fun R _ => ssr_ext.eqW (pow2_split R))
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
-Lemma pgl27_row_word39_bindE : pgl27_row_word39 = pgl27_row_word39_bind.
+Lemma pgl27_row_word39E : pgl27_row_word39 = pgl27_row_word39_bind.
 Proof. by []. Qed.
 ```
 
-`pgl27_row_word39_unindexed`, in the new surface, fails, and the bind
-spelling of the same rejection is kept beside it.
+`pgl27_row_word39_bare`, rewritten in the new surface, still fails, and the
+raw spelling of the same rejection is kept beside it.
 
 ### The keyword measurement
 
@@ -347,8 +355,8 @@ Two words are written in the rule, `conclude` and `by`. Measured on
   needs no alternative word, and `at ... with` and `of` were not needed.
 - A parse error is raised before `Fail` can see the command, so the two
   negative measurements are recorded here and not as `Fail`s in the file.
-- No existing program broke: all six copies compile, and
-  `pgl27_row_word39_bindE` says the two surfaces build one term.
+- No existing program broke: all six copies compile, and `pgl27_row_word39E`
+  says the two surfaces build one term.
 
 ## Step 5. K1, the arm a finished row carries
 
@@ -423,16 +431,15 @@ the manifest, the facades or the paper to cite, and `Print Assumptions` cannot
 reach one. Isolating counter-probe, in `pgl27_rows.v`:
 
 ```
-Fail Definition pgl27_row_word_arm_neq ... :=
+Fail Definition pgl27_row_word_arm_exactE ... :=
   (erefl : security_arm_of pgl27_row_word_tableau R idx
            = ExactIndependenceArm).
 -> cannot unify "security_arm_of pgl27_row_word_tableau R idx" and
    "ExactIndependenceArm"
 ```
 
-The existing `Fail pgl27_word_arm_is_not_exact`, in the section of
-`pgl27_rows.v` that reads the two arms off the manifest, still fails,
-unchanged.
+The existing `Fail pgl27_word_arm_is_not_exact` (`pgl27_rows.v:580`) still
+fails, unchanged.
 
 ## Step 6. G1, G3, D2
 
@@ -463,22 +470,20 @@ an idle lock is 12.7 s.
 ### Print Assumptions
 
 Every new or reproved statement, plus the three arm readers and the published
-rows a landing would cite: `port_conclude`, `port_arm`, `ab_arm`,
+rows a landing would cite: `port_reprice`, `port_arm`, `ab_arm`,
 `security_arm_of`, `certify_exact_armE`, `certify_spectral_armE`,
 `conclude_armE`, `publish_armE`, `pgl27_row_exact_armE`,
 `pgl27_row_word_armE`, `pgl27_row_word39_armE`, `five_card_row_uniform_armE`,
 `s5_row_rand_armE`, `psl211_row_alldecks_armE`,
-`pgl27_word_reprice41_false`, `pgl27_row_word39_bindE`,
-`five_card_row_uniform_branch_rowE`, `five_card_row_uniform_branch_atE`,
-`five_card_row_uniform_branch_transfer_neq`,
+`pgl27_word_reprice41_false`, `pgl27_row_word39E`, `t0_row_uniform_rowE`,
+`t0_row_uniform_manifestE`, `t0_row_uniform_atE`, `t0_row_uniform_row_neq`,
 `pgl27_row_exact_branch_atE`, `pgl27_row_exact_branch_ideal_atE`,
 `pgl27_row_exact_branch_rowE`, `pgl27_row_word_branch_atE`,
 `pgl27_row_word_branch39_atE`, `pgl27_row_word_branch_armE`, and the rows
-`pgl27_row_word39`, `five_card_row_uniform_branch`,
-`five_card_row_uniform_branch_ideal`, `pgl27_row_exact_branch`,
-`pgl27_row_word_branch39`.
+`pgl27_row_word39`, `t0_row_uniform`, `t0_row_uniform_transfer`,
+`pgl27_row_exact_branch`, `pgl27_row_word_branch39`.
 
-Twenty-nine of the thirty print the same three constants and nothing
+Thirty of the thirty-one print the same three constants and nothing
 else: `propositional_extensionality`, `functional_extensionality_dep`,
 `constructive_indefinite_description`. The floor is the documented boolp trio,
 which reaches every statement whose type mentions an fdist record.
@@ -583,7 +588,7 @@ the four rows files)
 | `:378-383` | `pgl27_row_word39`, raw form | rewritten in the `\|> conclude ... by ... \|> publish` surface; the raw spelling kept as `pgl27_row_word39_bind` with an `erefl` lemma |
 | `:382` | `;;; conclude pgl27_reprice39 of (fun R _ => pow2_split R)` | `\|> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))` |
 | `:385-388` | "The reprice obligation is one identity per real field" | "one inequality per real field" |
-| `:389-394` | `Fail pgl27_row_word39_bare` | replaced: after C a bare `pow2_split` is wrong twice over, so the recorded rejection becomes the indexed-payload one of D8, in the conclude surface and in the bind form |
+| `:389-394` | `Fail pgl27_row_word39_bare` | rewritten in the new surface; its reason is unchanged, its message's relation symbol changes |
 | `:320-330` | the two `rowE` lemmas | three claim pins added beside them |
 | `:574-582` | the comment and `Fail pgl27_word_arm_is_not_exact` | still true and still failing; its comment becomes incomplete, since the difference between the arms is now also readable through `security_arm_of` |
 
@@ -644,7 +649,7 @@ times in `pgg_tableau.v` before stage A. One word per concept:
 | `port_claim` | `port_arm` |
 | `stack_claim` | `ab_arm` |
 | `security_claim_of` | `security_arm_of` |
-| `pgl27_word_claim_is_not_exact` | `pgl27_row_word_arm_neq` (fix pass 2) |
+| `pgl27_word_claim_is_not_exact` | `pgl27_row_word_arm_exactE` |
 
 The constructors are the surface literal plus `Arm`, so later stages form
 `IdealProximityArm`, `LeakageCeilingArm` and `DependenceArm` by the same rule,
@@ -659,14 +664,6 @@ phrasing.
 The soundness audit's objection that "View" names the executed reader in one
 constructor and the static reading in the other is answered by the rename: the
 tag now mirrors the surface literal and adds no word of its own.
-
-What a new arm costs, so that stage B can price it: a constructor in
-`SecurityPort`, a constructor in `SecurityArm`, a branch in `port_arm`, a
-branch in `PortProp`, a branch in `ConcludePayload` and a case in
-`port_conclude`. `SecurityArm` is a second variant and not a projection of the
-first because `SecurityPort` is indexed by the real field, the algebra, the run
-parameters and the sample adapter, and a tag the manifest's table prints must
-be closed in none of them.
 
 ### D2. The pins become named lemmas, over four general ones
 
@@ -701,8 +698,7 @@ probe adds.
 ### D5. The `SecurityArm` comment
 
 "two rows over one model publish the same manifest row" gains the qualifier
-"and one pair of statuses", which is what
-`five_card_row_uniform_branch_transfer_neq` proves and
+"and one pair of statuses", which is what `t0_row_uniform_row_neq` proves and
 what the `security_arm_of` comment already said. The two comments now agree.
 
 ### D6. The `ab_arm` comment
@@ -762,7 +758,7 @@ The paragraph of `pgg_tableau.v` that said an instance's mathematics enters
 only through a certify payload now names `conclude`'s payload as the second
 entry and says what it carries: an inequality between the number the row's own
 certificate proved and the number the row publishes. The sentence on
-`certify_spectral` gains the same clause. `port_conclude` and `ConcludePayload`
+`certify_spectral` gains the same clause. `port_reprice` and `RepricePayload`
 now state the condition the `<=` obligation rests on, that the spectral arm's
 proposition is monotone in its number, and that an arm whose proposition is
 not monotone in the number it carries owes a different obligation. Every
@@ -791,23 +787,12 @@ under the weakened obligation, at `:288` and `:365`. Each supplies an equality
 payload where `<=` is now asked for, and each needs `ssr_ext.eqW`, the same
 one-token fix `pgl27_rows.v` took. The recorded `Fail` at `:299` still fails.
 
-The same two rows stand in the probe that would carry them to production,
-`notes/probes/2026-09-19-kim-spectral-landing/five_card_rows.v`, at `:745` and
-`:788`, with a recorded `Fail` at `:751-757` and a third equality payload in
-that directory's `pgl27_rows.v:382`. That `Fail` is
-`five_card_row_repeated39_bare`, the same shape and the same defect stage A
-renamed `pgl27_row_word39_unindexed` for, so the two probes owe one word
-between them. A Kim landing edits that copy and not the arm probe, so the
-landing's own status note owes the four sites.
-
 **The better end state for the Kim landing.** Rather than wrapping both
 payloads, the repeated row can publish `2^-39` from `kim_centi_cert` itself,
 by `Order.POrderTheory.ltW (kim_centi_cert_eps_lt R idx)`. That makes
 `kim_centi_cert40` and its two supporting declarations unnecessary and makes
-the two rows' `published_at` coordinates one term by `erefl`, where the
-equality obligation had forced two certificates and two coordinates. The rows
-themselves are at two `Reprice` indices and so are of two types, and no
-equation between them is well formed. Compiled by the
+the two published rows equal by `erefl`, where the equality obligation had
+forced two certificates and two `AnalysisBridged` coordinates. Compiled by the
 soundness auditor as `scratchpad/extA_audit/a3_kim_reprice.v`, rc=0, with
 `Print Assumptions` giving the three boolp constants and nothing else. **Not
 copied into this probe:** that file Requires `kim_spectral_rows_probe`, a file
@@ -818,7 +803,7 @@ couple the two probes. The path above is the record.
 
 - An exact row may be typed at any `Reprice` with a `tt` payload, so a
   published *type* may name a number no conjunct of the row mentions. The
-  exact branch of `ConcludePayload` is `unit` at the baseline and after C
+  exact branch of `RepricePayload` is `unit` at the baseline and after C
   alike, so this is pre-existing; it is newly relevant because a paper's table
   now has a column for the number, and that column must be read through
   `security_arm_of`. Evidence: `scratchpad/extA_audit/a4_exact_reprice.v`,
@@ -847,239 +832,25 @@ move together, and the surface literal of the spectral rule moves with them.
 ### D12. Naming SHOULD items, applied and not applied
 
 Applied: the `port_arm` comment (fact and position, not how a pin closes); the
-`ConcludePayload`, `conclude` and `port_conclude` comments; the positional
+`RepricePayload`, `conclude` and `port_reprice` comments; the positional
 pointers "the row above" and "the line above them" replaced by the names
 `pgl27_row_word_tableau` and "the certify statement", and
 `pgg_tableau_syntax.v`'s "the statements above it" by "the statements of a
 row"; "publishing a smaller number beside it" by "publishing a number the
 certificate does not prove"; "the reprice terminal" by "the conclude terminal"
 in the syntax header and in `assumptions_report.v`; the index gloss of
-`SecurityArm`, `port_arm`, `security_arm_of` and `port_conclude`; the four
+`SecurityArm`, `port_arm`, `security_arm_of` and `port_reprice`; the four
 missing `pgl27_rows.v` index entries plus the six `_armE` ones, and an `_armE`
 entry in each of the other three rows files.
 
 Not applied, with reasons:
 
-- The landing names for the ledger-prefixed declarations of
-  `t0_sampled_branch.v`. They are a landing decision, not a probe one, and the
-  probe files keep their ledger prefixes, which the naming audit itself calls
-  correct there. The table stands in the audit. **Reversed in fix pass 2**:
-  the second naming audit showed that `t0_sampled_branch_pgl27.v`, written in
-  the same pass, carries no ledger prefix on any of its declarations, so one
-  of the two files had to move and the five-card one took the landing names.
-- `pgl27_word_reprice41_false` keeps `_false` and `pgl27_row_word41` keeps its
-  name: both are the audit's own verdict. `pgl27_row_word39E` kept its name
-  here on the same ground and is renamed in fix pass 2, where the second
-  naming audit found the nearer precedent in the same file.
+- The landing names for the `t0_` declarations. They are a landing decision,
+  not a probe one, and the probe files keep their ledger prefixes, which the
+  naming audit itself calls correct there. The table stands in the audit.
+- `pgl27_word_reprice41_false` keeps `_false`, `pgl27_row_word41` keeps its
+  name, and `pgl27_row_word39E` keeps its: all three are the audit's own
+  verdict.
 - The three inherited notation lines of `pgg_tableau_syntax.v` stay over 80
   bytes. They are copied verbatim from production and shortening them here
   would put the copy out of step with the file it is a copy of.
-
-## Fix pass 2, after the second naming and soundness audits
-
-Both second-round audits returned NO-GO, the naming one on a suffix that meant
-two different statements in the two T0 files and on a recorded failure that
-took the `E` suffix, the soundness one on a comment naming a mechanism the
-compiler did not use and on this note's own account of a replaced `Fail`. Both
-again found the Rocq content sound. Snapshots of every file touched are under
-`history/` with the suffix `.5-before-fix2`.
-
-### E1. The renames
-
-| old | new | ground |
-|---|---|---|
-| `pgl27_row_word_arm_exactE` | `pgl27_row_word_arm_neq` | no recorded failure in the tree ends in `E`; `pgl27_inline_neq` is the same shape |
-| `pgl27_row_word39E` | `pgl27_row_word39_bindE` | `pgl27_row_word_certE` is the file's precedent for a surface-against-bind equation and carries the coordinate word |
-| `t0_row_uniform` | `five_card_row_uniform_branch` | matches `pgl27_row_exact_branch` in the sibling file |
-| `t0_row_uniform_transfer` | `five_card_row_uniform_branch_ideal` | matches `pgl27_row_exact_branch_ideal`, and the status published is `IdealFinite` |
-| `t0_row_uniform_atE` | `five_card_row_uniform_branch_atE` | same |
-| `t0_row_uniform_manifestE` | `five_card_row_uniform_branch_rowE` | `_rowE` means `published_row <program> = <manifest constant>` in production and in the sibling file |
-| `t0_row_uniform_rowE` | withdrawn | see below |
-| `t0_row_uniform_row_neq` | `five_card_row_uniform_branch_transfer_neq` | the difference recorded is the transfer, and the name now says so |
-| `t0_s5_sampled` | `s5_rand_sampled` | the family is `s5_rand_family`; instance, model, level, as in `five_card_uniform_sampled` |
-| `t0_cross_instance` | `s5_cross_instance` | matches `pgl27_cross_model`, whose prefix is the branch point's |
-| `t0_cross_instance_back` | `five_card_cross_instance_back` | matches `pgl27_cross_model_back` |
-| `RepricePayload` | `ConcludePayload` | see E2 |
-| `port_reprice` | `port_conclude` | see E2 |
-
-`five_card_uniform_sampled` keeps its name: it already reads instance, model,
-level.
-
-**Collisions: zero.** Every new name was scanned with Python `re` and `\b`
-over 252 `.v` files, being production, the Kim landing probe and the PSL
-landing probe, with this probe excluded. The scanner was control-tested first:
-`view_indist_of` returns 3 files, `SecurityPort` 2, `pgl27_reprice39` 2.
-
-**The two file names stay.** `t0_sampled_branch.v` and
-`t0_sampled_branch_pgl27.v` are probe files named after the ledger row a
-reader looks them up by; only the declarations inside them take landing names.
-
-**One lemma withdrawn rather than renamed.** `t0_row_uniform_rowE` stated
-`published_row t0_row_uniform = published_row five_card_row_uniform_tableau`.
-It follows from `five_card_row_uniform_branch_rowE` and the production
-`five_card_row_uniform_rowE` by transitivity, nothing in the probe cited it,
-and `t0_sampled_branch_pgl27.v` does without it. Its text is in
-`history/t0_sampled_branch.v.5-before-fix2`. The report prints thirty
-assumption blocks in place of thirty-one.
-
-### E2. `Reprice` as a word for the operation
-
-The obligation type and the composition lemma named the operation, which the
-first naming audit's ruling reserves for `conclude`. In the copy they are now
-`ConcludePayload` and `port_conclude`. `Reprice`, `no_reprice`,
-`pgl27_reprice39` and `pgl27_reprice41` keep their names, since each names the
-number a row is concluded at, and the four rows files print those names.
-
-D2 seed items, measured over
-`manifest protocol instances security smc lib reconstruct groups legacy`:
-
-| carrier | occurrences | where |
-|---|---|---|
-| `RepricePayload` | 3 | `manifest/pgg_tableau.v`, and nowhere else |
-| `port_reprice` | 4 | `manifest/pgg_tableau.v`, and nowhere else |
-
-The Kim landing probe's copy of `pgg_tableau.v` holds the same 3 and 4 and
-moves with them. The PSL landing probe has no `.v` occurrence; its prose
-mentions `RepricePayload` twice in `audit-2.md` and `RepricePayload` twice
-with `port_reprice` twice in `soundness-audit.md`. Searched only: no file
-outside this probe was edited.
-
-### E3. Why the two cross-model rejections hold
-
-The comment above `pgl27_cross_model` said the two sample adapters are
-compared where the clause is written. They are not. Compiled without `Fail`,
-from a scratch copy of each mutation:
-
-```
-pgl27_word_sampled certify ExactIndependence pgl27_exact_witness
--> The term "pgl27_exact_witness" has type
-   "forall (R : realType) (idx : unit),
-    ExactWitness (amf_sample pgl27_exact_family R idx)"
-   while it is expected to have type
-   "ExactPayload (tableau_at pgl27_word_sampled)"
-   (cannot unify "amf_index (sp_f (tableau_at pgl27_word_sampled)) R" and
-   "unit").
-
-pgl27_exact_sampled certify SpectralDecay pgl27_word_cert
--> The term "pgl27_word_cert" has type
-   "forall (R : realType) (secretP : {fdist bool}%fdist),
-    SpectralCert (amf_sample pgl27_word_family R secretP)"
-   while it is expected to have type
-   "SpectralPayload (tableau_at pgl27_exact_sampled)"
-   (cannot unify "amf_index (sp_f (tableau_at pgl27_exact_sampled)) R" and
-   "{fdist bool}%fdist").
-```
-
-Unification stops at the index type of the family, one binder before any
-adapter is compared, so the comment now says that and draws the consequence
-for stage B, whose ideal and actual families over one instance will share an
-index type.
-
-The same sentence in `t0_sampled_branch.v` was checked the same way and is
-true there, so it stays. Both five-card and S5 families are indexed by `unit`,
-so `idx` unifies and the adapters are what the message compares:
-
-```
-s5_rand_sampled certify ExactIndependence five_card_exact_witness
--> cannot unify "ExactWitness (amf_sample five_card_uniform_family R idx)" and
-   "ExactWitness (amf_sample (sp_f (tableau_at s5_rand_sampled)) R idx)"
-```
-
-### E4. The hang shape, second pass
-
-No `published_at` equation anywhere in the probe is closed by `done` any more.
-`five_card_row_uniform_branch_atE` was `Proof. by split. Qed.`, instant today
-because no side of any conjunct is concluded, and one added conjunct away from
-the shape that did not return. It is `Proof. split; exact: erefl. Qed.`, the
-spelling measured at 0.145 s on the PGL(2,7) conjunction. The non-rendered
-note of `t0_sampled_branch_pgl27.v` said `done` "does not return" and now says
-it did not return inside the time bound, which is what was measured.
-
-### E5. The SHOULD items
-
-Applied: the four verdict-table citations, which are citations by content
-rather than by line, since the probe's line numbers moved under fix pass 1 and
-will move again; the Kim code site, which now names the landing probe's
-`five_card_rows.v` at `:745`, `:788` and `:751-757`, its `pgl27_rows.v:382`,
-and the recorded failure `five_card_row_repeated39_bare` there; the
-type-honest statement of what the better Kim end state makes equal, which is
-the two rows' `published_at` coordinates and not the rows; the cost of a new
-arm, in six places, under D1; the header sentence on `conclude`'s payload,
-which now says the payload is an inequality at the spectral arm and nothing at
-the exact one; the comment of `certify_exact_armE`, which no longer credits
-one lemma with what needs `conclude_armE` and `publish_armE` as well; the two
-positional pointers of `certify_spectral_armE` and `publish_armE`, which now
-name the lemmas they mean; the comment of `security_arm_of`, which gives its
-own position instead of restating `SecurityArm`'s; a comment for
-`pgl27_row_word39_bindE`, moved off the `_bind` definition; the position
-sentence on `five_card_row_uniform_branch_rowE`; the axiom citation of
-`assumptions_report.v`, which drops the line number; and four alignment
-defects, a 79-column divider, an index continuation one column short in
-`g2_keyword_measure.v`, and the two `==` columns of `t0_sampled_branch.v`,
-which now sit at 30 in both blocks as the sibling file's do.
-
-Not applied:
-
-- Swapping the two sides of `pgl27_row_exact_branch_ideal_atE` and
-  `pgl27_row_word_branch39_atE` so the named subject is on the left. It
-  changes a statement and not a comment, an index or an alignment, which is
-  outside what this pass was given. The finding stands in the audit for the
-  landing.
-- Renaming the Kim landing probe's `five_card_row_repeated39_bare`. That file
-  belongs to another probe, which this pass may not edit. It is recorded in
-  the D10 and D11 seed list instead.
-- Wrapping the equality payload of that probe's `five_card_row_repeated39`,
-  for the same reason. Recorded, relayed.
-- `psl211_rows.v`'s file-local docstring convention, which opens eleven
-  baseline comments with the identifier and an em-dash. The one comment stage
-  A adds there does not use it, and the convention is the owner's to keep or
-  drop, not this probe's to propagate.
-- A composite lemma in `pgg_tableau.v` chaining the four general ones. The
-  comment fix closes the finding on its own, and adding a declaration to the
-  framework copy is a statement change, outside this pass.
-- The two notes on the shape of this document, the `:63` row of the G3 table
-  and the two off-by-one starts of the D2 tables. Both are NOTE and not
-  SHOULD.
-
-### E6. Names that no longer exist
-
-Every back-quoted name in this note that is not one of these exists as a whole
-word in a `.v` file of the probe or of production, checked mechanically.
-
-| name | what it was |
-|---|---|
-| `port_claim`, `stack_claim`, `security_claim_of` | the arm readers before fix pass 1 |
-| `pgl27_word_claim_is_not_exact` | that pass's name for the recorded failure beside them |
-| `pgl27_row_word39_raw`, `pgl27_row_word39_bare_raw` | the bind spellings before fix pass 1 |
-| `pgl27_row_word39E`, `pgl27_row_word_arm_exactE` | renamed in fix pass 2, see E1 |
-| `t0_row_uniform`, `t0_row_uniform_transfer`, `t0_row_uniform_rowE`, `t0_row_uniform_manifestE`, `t0_row_uniform_atE`, `t0_row_uniform_row_neq`, `t0_s5_sampled`, `t0_cross_instance`, `t0_cross_instance_back` | the five-card T0 declarations before fix pass 2, see E1 |
-| `eq_le` | a lemma the brief named and MathComp does not have |
-| `kw_sample`, `kw_by` | binders written in a scratch file for the keyword measurement, never in a probe file, since a parse error is raised before `Fail` can see the command |
-| `closed_binder` | a token of the parse error quoted above, not a declaration |
-| `five_card_row_repeated39`, `five_card_row_repeated39_bare`, `kim_centi_cert`, `kim_centi_cert40`, `kim_centi_cert_eps_lt` | declarations of the Kim probes, cited here as seed items |
-| `kim_spectral_rows_probe` | the Kim arm probe's module, cited as a code site |
-| `var_dist_le2` | a lemma of the Kim arm probe, cited for a landing |
-
-### E7. The compile table after fix pass 2
-
-All ten files of the probe's `_CoqProject`, in its order, one at a time through
-the machine-wide lock, `rocq compile -time`, return codes from a Python driver.
-
-| file | rc | wall | slowest sentence |
-|---|---|---|---|
-| `pgg_tableau.v` | 0 | 14.2 s | 4.230 s, `Definition ab_port` |
-| `pgg_tableau_syntax.v` | 0 | 5.0 s | 1.545 s, a `Require Import` line |
-| `pgl27_rows.v` | 0 | 6.9 s | 2.110 s, a `Require Import` line |
-| `five_card_rows.v` | 0 | 4.5 s | 1.885 s, a `Require Import` line |
-| `s5_rows.v` | 0 | 4.4 s | 1.932 s, a `Require Import` line |
-| `psl211_rows.v` | 0 | 6.0 s | 1.531 s, a `Require Import` line |
-| `t0_sampled_branch.v` | 0 | 4.3 s | 1.884 s, a `Require Import` line |
-| `t0_sampled_branch_pgl27.v` | 0 | 4.8 s | 2.305 s, a `Require Import` line |
-| `g2_keyword_measure.v` | 0 | 4.2 s | 2.033 s, a `Require Import` line |
-| `assumptions_report.v` | 0 | 48.6 s | 20.953 s, `Print Assumptions psl211_row_alldecks_armE` |
-
-No sentence outside a `Print Assumptions` command reaches 5 s. The report
-prints thirty assumption blocks. Twenty-nine hold the three boolp constants
-alone; the thirteenth, `s5_row_rand_armE`, holds those three and
-`rigidity_s5_instance.s5_group_order_eq`, which is production's and reaches
-the report through the S5 instance's own witness.

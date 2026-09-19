@@ -11,7 +11,7 @@
 (*                                                                            *)
 (* One target prints a fourth constant. s5_row_rand_armE rests also on        *)
 (* rigidity_s5_instance.s5_group_order_eq, the order of the five-seat group,  *)
-(* declared as an Axiom in instances/s5/rigidity_s5_instance.v. It            *)
+(* declared as an Axiom at instances/s5/rigidity_s5_instance.v:179. It        *)
 (* reaches this report through the S5 instance's own witness and not through  *)
 (* anything the Tableau or this probe adds: the production s5_row_rand_tableau*)
 (* and s5_rand_exact_witness rest on it already.                              *)
@@ -29,7 +29,7 @@ From tableau_ext_probe Require Import t0_sampled_branch.
 From tableau_ext_probe Require Import t0_sampled_branch_pgl27.
 
 (* The composition law of the conclude terminal, reproved at an inequality. *)
-Print Assumptions port_conclude.
+Print Assumptions port_reprice.
 
 (* The arm readers, which are definitions and carry no proof. *)
 Print Assumptions port_arm.
@@ -55,12 +55,13 @@ Print Assumptions psl211_row_alldecks_armE.
 Print Assumptions pgl27_word_reprice41_false.
 
 (* The surface and the bind build one term. *)
-Print Assumptions pgl27_row_word39_bindE.
+Print Assumptions pgl27_row_word39E.
 
-(* The three statements about the branch at Sampled. *)
-Print Assumptions five_card_row_uniform_branch_rowE.
-Print Assumptions five_card_row_uniform_branch_atE.
-Print Assumptions five_card_row_uniform_branch_transfer_neq.
+(* The four statements about the branch at Sampled. *)
+Print Assumptions t0_row_uniform_rowE.
+Print Assumptions t0_row_uniform_manifestE.
+Print Assumptions t0_row_uniform_atE.
+Print Assumptions t0_row_uniform_row_neq.
 
 (* The same branch shape at PGL(2,7), under a spectral payload. *)
 Print Assumptions pgl27_row_exact_branch_atE.
@@ -72,7 +73,7 @@ Print Assumptions pgl27_row_word_branch_armE.
 
 (* The published rows a landing would cite, with the proof each carries. *)
 Print Assumptions pgl27_row_word39.
-Print Assumptions five_card_row_uniform_branch.
-Print Assumptions five_card_row_uniform_branch_ideal.
+Print Assumptions t0_row_uniform.
+Print Assumptions t0_row_uniform_transfer.
 Print Assumptions pgl27_row_exact_branch.
 Print Assumptions pgl27_row_word_branch39.

@@ -18,22 +18,17 @@
 (* through the name X before the instance's witness can unify with it.        *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   five_card_uniform_sampled                                                *)
-(*                           == the five-card uniform model, named at Sampled *)
-(*                              and continued twice                           *)
-(*   five_card_row_uniform_branch                                             *)
-(*                           == the first continuation, published             *)
-(*   five_card_row_uniform_branch_ideal                                       *)
-(*                           == the second, published at another status       *)
-(*   s5_rand_sampled         == another instance's model, named at Sampled    *)
+(*   five_card_uniform_sampled == the five-card uniform model, named at       *)
+(*                                Sampled and continued twice                 *)
+(*   t0_row_uniform            == the first continuation, published           *)
+(*   t0_row_uniform_transfer   == the second, published at another status     *)
+(*   t0_s5_sampled             == another instance's model, named at Sampled  *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   five_card_row_uniform_branch_rowE                                        *)
-(*                           == the branch publishes the manifest's own       *)
-(*                              uniform row                                   *)
-(*   five_card_row_uniform_branch_atE                                         *)
-(*                           == the two continuations and the unbranched      *)
-(*                              program hold one AnalysisBridged coordinate   *)
+(*   t0_row_uniform_rowE   == the branch publishes the manifest row the       *)
+(*                            unbranched five-card uniform program publishes  *)
+(*   t0_row_uniform_atE    == the two continuations and the unbranched        *)
+(*                            program hold one AnalysisBridged coordinate     *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
@@ -75,7 +70,7 @@ Definition five_card_uniform_sampled : Tableau Sampled :=
     conjunction of the committed bits, published at the status the unbranched
     five-card uniform program publishes. The branch point enters as a name,
     so the witness clause is elaborated against sp_f of that name. *)
-Definition five_card_row_uniform_branch : PublishedRow :=
+Definition t0_row_uniform : PublishedRow :=
   five_card_uniform_sampled
     certify ExactIndependence five_card_exact_witness
     |> publish StaticExecutedOnly BaselineClassicalOnly.
@@ -84,42 +79,40 @@ Definition five_card_row_uniform_branch : PublishedRow :=
     status of a model comparison. Both continuations certify the exact arm
     with one witness, so what this pair shows is that one named Sampled value
     carries two finished rows, which is the shape a second arm will need. *)
-Definition five_card_row_uniform_branch_ideal : PublishedRow :=
+Definition t0_row_uniform_transfer : PublishedRow :=
   five_card_uniform_sampled
     certify ExactIndependence five_card_exact_witness
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The branch publishes the manifest's own uniform row. Conversion decides
-    it, so the descriptive row and the theorem proved about it cannot drift
-    apart. *)
-Lemma five_card_row_uniform_branch_rowE :
-  published_row five_card_row_uniform_branch = five_card_row_uniform.
+(** The branch publishes the manifest row of the program that reaches the
+    same claim without a branch point. Conversion decides it, so naming the
+    Sampled value costs the row nothing it would otherwise have. *)
+Lemma t0_row_uniform_rowE :
+  published_row t0_row_uniform
+  = published_row five_card_row_uniform_tableau.
 Proof. by []. Qed.
 
-(* The coordinate equations below close by exact: erefl and not by [],
-   following t0_sampled_branch_pgl27.v, where done did not return inside the
-   time bound on a goal of this shape whose right side is a concluded row.
-   The numbers are in STATUS.md, under the T0 step. *)
+(** The manifest row is also the one the manifest writes for this path. *)
+Lemma t0_row_uniform_manifestE :
+  published_row t0_row_uniform = five_card_row_uniform.
+Proof. by []. Qed.
 
 (** The two continuations and the unbranched program hold one and the same
     AnalysisBridged coordinate: the algebra, the run, the three run facts, the
-    model and the port are one term in all three, so naming the Sampled value
-    costs the row nothing it would otherwise have. What separates the two
+    model and the port are one term in all three. What separates the two
     published rows is the transfer status alone. *)
-Lemma five_card_row_uniform_branch_atE :
-  [/\ published_at five_card_row_uniform_branch
+Lemma t0_row_uniform_atE :
+  [/\ published_at t0_row_uniform
       = published_at five_card_row_uniform_tableau,
-      published_at five_card_row_uniform_branch_ideal
+      published_at t0_row_uniform_transfer
       = published_at five_card_row_uniform_tableau
-    & published_at five_card_row_uniform_branch
-      = published_at five_card_row_uniform_branch_ideal].
-Proof. split; exact: erefl. Qed.
+    & published_at t0_row_uniform = published_at t0_row_uniform_transfer].
+Proof. by split. Qed.
 
 (** The two published rows differ, in the one coordinate their two publish
     statements differ in: what the manifest records of the transfer. *)
-Lemma five_card_row_uniform_branch_transfer_neq :
-  published_row five_card_row_uniform_branch
-  <> published_row five_card_row_uniform_branch_ideal.
+Lemma t0_row_uniform_row_neq :
+  published_row t0_row_uniform <> published_row t0_row_uniform_transfer.
 Proof. by move=> H; move: (congr1 apr_transfer H). Qed.
 
 (******************************************************************************)
@@ -127,20 +120,19 @@ Proof. by move=> H; move: (congr1 apr_transfer H). Qed.
 (******************************************************************************)
 
 (** Another instance's model, named at the same level. *)
-Definition s5_rand_sampled : Tableau Sampled :=
+Definition t0_s5_sampled : Tableau Sampled :=
   s5_supplied
     sample s5_rand_family.
 
 (** A witness of the five-card instance does not continue another instance's
     named Sampled value. The payload type is ExactPayload at the coordinate
-    the name holds, and the two families carry the same index type, so the
-    sample adapter the witness is stated over and the one the branch point
-    reached are compared where the clause is written. *)
-Fail Definition s5_cross_instance : Tableau AnalysisBridged :=
-  s5_rand_sampled
+    the name holds, so the sample adapter the witness is stated over and the
+    one the branch point reached are compared where the clause is written. *)
+Fail Definition t0_cross_instance : Tableau AnalysisBridged :=
+  t0_s5_sampled
     certify ExactIndependence five_card_exact_witness.
 
 (** The same in the other direction. *)
-Fail Definition five_card_cross_instance_back : Tableau AnalysisBridged :=
+Fail Definition t0_cross_instance_back : Tableau AnalysisBridged :=
   five_card_uniform_sampled
     certify ExactIndependence s5_rand_exact_witness.

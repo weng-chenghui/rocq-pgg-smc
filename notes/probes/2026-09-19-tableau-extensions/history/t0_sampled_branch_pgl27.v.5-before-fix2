@@ -22,13 +22,11 @@
 (* Definitions:                                                               *)
 (*   pgl27_exact_sampled     == the exact model, named at Sampled             *)
 (*   pgl27_word_sampled      == the word model, named at Sampled              *)
-(*   pgl27_row_exact_branch  == the first continuation of the exact branch    *)
-(*                              point, published                              *)
+(*   pgl27_row_exact_branch  == the exact branch point published              *)
 (*   pgl27_row_exact_branch_ideal                                             *)
 (*                           == the same, at the transfer status of a model   *)
 (*                              comparison                                    *)
-(*   pgl27_row_word_branch   == the first continuation of the word branch     *)
-(*                              point, published                              *)
+(*   pgl27_row_word_branch   == the word branch point published               *)
 (*   pgl27_row_word_branch39 == the same, concluded at 2^-39 first            *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -44,7 +42,6 @@
 (*                              spectral payload                              *)
 (*   pgl27_row_word_branch39_atE                                              *)
 (*                           == concluding at 2^-39 leaves that coordinate    *)
-(*                              alone                                         *)
 (*   pgl27_row_word_branch_armE                                               *)
 (*                           == the word branch point's rows carry the        *)
 (*                              spectral arm                                  *)
@@ -97,10 +94,9 @@ Definition pgl27_row_exact_branch_ideal : PublishedRow :=
 (* Every coordinate equation of this file closes by exact: erefl and not by
    [], because ssreflect's done does not reach reflexivity on a goal whose
    two sides are published_at of a branch point and of a continuation: it
-   spends its search first, and on the concluded row below that search did
-   not return inside the time bound. The conversion itself is a tenth of a
-   second. Measured on 2026-09-19; the bound and the numbers are in
-   STATUS.md, under the T0 step. *)
+   spends its search first, and on the concluded row below that search does
+   not return. The conversion itself is a tenth of a second. Measured on
+   2026-09-19; the numbers are in STATUS.md, under the T0 step. *)
 
 (** The branch point and the unbranched exact program hold one and the same
     AnalysisBridged coordinate, so naming the Sampled value costs the row
@@ -123,7 +119,7 @@ Lemma pgl27_row_exact_branch_rowE :
 Proof. by []. Qed.
 
 (******************************************************************************)
-(*     The word model as a branch point, under a spectral payload             *)
+(*     The word model as a branch point, under a spectral payload            *)
 (******************************************************************************)
 
 (** The word model of PGL(2,7), named at Sampled. Its family is indexed by a
@@ -176,12 +172,10 @@ Proof. by []. Qed.
 
 (** The exact model's witness does not continue the word model's branch
     point. The payload type is ExactPayload at the coordinate the name holds,
-    so the clause is checked first against the index type that coordinate's
-    family carries, unit against a distribution on the booleans, and the two
-    sample adapters are never reached. Two models of one instance are
-    separated here, and separated by their index types alone, so an ideal
-    family and an actual family that share one index will need a different
-    mutation. *)
+    so the sample adapter the witness is stated over and the one the branch
+    point reached are compared where the clause is written. Two models of one
+    instance are separated here, which is finer than the separation of two
+    instances. *)
 Fail Definition pgl27_cross_model : Tableau AnalysisBridged :=
   pgl27_word_sampled certify ExactIndependence pgl27_exact_witness.
 

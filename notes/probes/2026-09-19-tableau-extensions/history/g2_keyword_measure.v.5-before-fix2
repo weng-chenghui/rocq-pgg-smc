@@ -12,7 +12,7 @@
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   conclude_stays_bindable == a binder named conclude, in a file that       *)
-(*                              requires the surface                          *)
+(*                             requires the surface                           *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
@@ -29,7 +29,7 @@ Unset Strict Implicit.
 Check conclude.
 
 (* And so is the type of the obligation the rule's last slot carries. *)
-Check ConcludePayload.
+Check RepricePayload.
 
 (* The word conclude is still an identifier: it binds, and the bound
    occurrence is read back as the binder and not as a notation token. *)

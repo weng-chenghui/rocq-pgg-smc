@@ -81,7 +81,7 @@
 (*   pgl27_row_exact_armE    == the exact row carries the exact arm           *)
 (*   pgl27_row_word_armE     == the word row carries the spectral arm         *)
 (*   pgl27_row_word39_armE   == the concluded row carries that same arm       *)
-(*   pgl27_row_word39_bindE  == the surface and the bind build one term       *)
+(*   pgl27_row_word39E       == the surface and the bind build one term       *)
 (*   pgl27_word_reprice41_false                                               *)
 (*                           == the terminal's obligation at 2^-41 is false   *)
 (*   pgl27_word_bridge       == the word row's proposition gives its          *)
@@ -358,7 +358,7 @@ Proof. by []. Qed.
 (** Recording the word row at the exact arm is rejected by conversion, so the
     table column holds the arm the row's certify statement wrote and no
     other. *)
-Fail Definition pgl27_row_word_arm_neq (R : realType)
+Fail Definition pgl27_row_word_arm_exactE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word_tableau)) R) :=
   (erefl : security_arm_of pgl27_row_word_tableau R idx
            = ExactIndependenceArm).
@@ -419,8 +419,9 @@ Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
     |> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The same row written through the bind and its payloads, with no surface
-    notation between the statements. *)
+(** The same row written through the bind and its payloads. The two are one
+    term, so the conclude and publish surface adds no step and hides no
+    payload, as the five spectral clauses do not for the certify statement. *)
 Definition pgl27_row_word39_bind : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
@@ -428,10 +429,7 @@ Definition pgl27_row_word39_bind : PublishedRowAt pgl27_reprice39 :=
     ;;; conclude pgl27_reprice39 of (fun R _ => ssr_ext.eqW (pow2_split R))
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
-(** The two spellings are one term, so the conclude and publish surface adds
-    no step and hides no payload, as the five spectral clauses do not for the
-    certify statement. *)
-Lemma pgl27_row_word39_bindE : pgl27_row_word39 = pgl27_row_word39_bind.
+Lemma pgl27_row_word39E : pgl27_row_word39 = pgl27_row_word39_bind.
 Proof. by []. Qed.
 
 (** The arm the concluded row carries. Concluding at an upper bound leaves the

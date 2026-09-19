@@ -1,0 +1,394 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
+(******************************************************************************)
+(* s5_rows: the five-seat instance's two sharing-family runs, as programs     *)
+(*                                                                            *)
+(* The security argument a five-seat row makes is the one a five-of-five      *)
+(* additive sharing makes: a secret in 'I_5 is split into five shares summing *)
+(* to it modulo five, one share per seat, the deck is shuffled by adjacent    *)
+(* transpositions, and each seat reads the card at its own position. Five is  *)
+(* the threshold of the sum-mod scheme, so every statement below is about a   *)
+(* coalition of at most four of the five seats, and what such a coalition     *)
+(* learns is decided by how the shares were drawn rather than by how the deck *)
+(* was shuffled.                                                              *)
+(*                                                                            *)
+(* That is what separates the instance's two sharing-family runs. The         *)
+(* supplied run deals the additive layout of a uniform tape, where four       *)
+(* shares are four independent uniform values and carry nothing about the     *)
+(* secret; the model it is analysed in draws the identity cut, so no shuffle  *)
+(* enters the privacy claim at all. The dealt run deals the scheme's own      *)
+(* canonical encoding, the tuple that is zero everywhere but the last         *)
+(* coordinate, and any coalition the cut sends that coordinate into reads     *)
+(* the secret off it; such a run has no privacy claim, and its manifest row   *)
+(* s5_row_det stops at run correctness with no model and no security          *)
+(* payload.                                                                   *)
+(*                                                                            *)
+(* Each run has one program, written in the statement surface of              *)
+(* pgg_tableau_syntax.v over the statements of pgg_tableau.v. The two         *)
+(* programs share no prefix: they differ at their second statement, where one *)
+(* writes dealt and the other supplied, and from there on they drive          *)
+(* different runs over one algebra. The supplied program continues with the   *)
+(* tape model, the exact witness and the manifest row; the dealt program      *)
+(* stops at the third statement, because publish reaches level                *)
+(* AnalysisBridged with a model and s5_row_det has neither.                   *)
+(*                                                                            *)
+(* No statement of a program is a theorem about this instance. What the       *)
+(* instance supplies it supplies inside a clause. The algebra, the input      *)
+(* carrier, the layout, the recovered value and the budget are the clause     *)
+(* arguments of the first two statements; the three run facts are the         *)
+(* obligations the third asks for; the probability model is the argument of   *)
+(* the fourth statement and one security record the payload of the fifth. The *)
+(* security mathematics reaches the randomized row through that last payload  *)
+(* alone, and through two named facts: s5_rand_static_obsE,                   *)
+(* the link lemma identifying the framework's direct computation of a         *)
+(* coalition's view with the additive sharing's own coalition view, and       *)
+(* s5_exec_coalition_secrecy, where that view is shown to carry zero mutual   *)
+(* information about the tape secret below five seats.                        *)
+(*                                                                            *)
+(* Identifiers follow the instance rather than the framework wherever the     *)
+(* instance already named the object: what the framework calls the supplied   *)
+(* mode this instance spells rand in s5_rand_exec_plug, s5_rand_family,       *)
+(* s5_rand_observed and the manifest's s5_row_rand, so every name below from  *)
+(* the model onward carries rand and the two programs carry the mode word.    *)
+(*                                                                            *)
+(* The manifest carries a third five-seat row, s5_row_word, whose cut is a    *)
+(* finite word over the four adjacent transpositions. It is not written as a  *)
+(* program here, because two of the five parts of a SpectralDecay certificate *)
+(* are out of reach at this instance. Three are available: the walk's         *)
+(* marginal bound, which is the bound the certificate                         *)
+(* s5_security_witness_schreier carries; the identification of that bound's   *)
+(* law with the law the word model draws its cut from, which is               *)
+(* s5_word_cut_distE; and an ideal cut, which is a free choice. Missing is    *)
+(* the distance from the walk to that ideal, a variation distance on the      *)
+(* shuffle group, where s5_word_base_premise names it as a premise nothing in *)
+(* the tree proves and the instance's spectral theorem bounds one seat's      *)
+(* endpoint marginal on 'I_5 instead. Missing too, and for a reason no proof  *)
+(* can remove, is the constancy of a coalition's reading of the ideal cut in  *)
+(* the secret, which the field asks for at every coalition below the          *)
+(* threshold and so at every singleton: under every cut exactly one seat      *)
+(* holds the card carrying the whole secret, so that seat's reading law moves *)
+(* with the secret, and no choice of ideal avoids it, the seat in question    *)
+(* varying with the cut while the ideal is fixed before any coalition is      *)
+(* named. What the manifest publishes for this path is an endpoint marginal   *)
+(* bound against the encoder-image ideal, and no claim about a coalition.     *)
+(*                                                                            *)
+(* Definitions:                                                               *)
+(*   s5_dealt             == the dealer-dealt run as a program                *)
+(*   s5_supplied          == the supplied run as a program                    *)
+(*   s5_rand_exact_witness                                                    *)
+(*                        == the exact arm's witness at every field and index *)
+(*   s5_row_rand_tableau  == the randomized row as a program                  *)
+(*   s5_F                 == the specification the dealer-dealt run realises  *)
+(*   s5_rand_F            == the specification the supplied run realises      *)
+(*                                                                            *)
+(* Key results:                                                               *)
+(*   s5_dealt_row_observedE                                                   *)
+(*                        == the dealt program reaches the observed execution *)
+(*                           the manifest's deterministic row describes       *)
+(*   s5_supplied_paramsE  == the supplied program drives the run              *)
+(*                           s5_supplied_params names                         *)
+(*   s5_rand_static_obsE  == the framework's direct computation of a          *)
+(*                           coalition's view is the additive sharing's view  *)
+(*   s5_rand_static_obs_indep                                                 *)
+(*                        == below five seats that computation is independent *)
+(*                           of the tape secret                               *)
+(*   s5_row_rand_rowE     == the randomized program publishes the manifest's  *)
+(*                           row                                              *)
+(*   s5_row_rand_armE     == the row carries the exact arm                    *)
+(*   s5_FE, s5_rand_FE    == the two specifications, written out              *)
+(*   s5_F_thresholdE      == the coalition size the dealer-dealt run          *)
+(*                           tolerates                                        *)
+(*   s5_realises_expected, s5_rand_realises_expected                          *)
+(*                        == each run recovers its specification's value      *)
+(*   s5_rand_view_secrecy == the exact arm's four conjuncts at this instance  *)
+(******************************************************************************)
+
+From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+From mathcomp Require Import fintype finfun finset.
+From mathcomp Require Import matrix zmodp reals.
+From infotheo Require Import fdist proba entropy.
+From pgg_reconstruct Require Import pgg_sharing_framework.
+From pgg_smc Require Import pgg_analysis_status.
+From pgg_smc Require Import pgg_instance pgg_functionality.
+From pgg_smc Require Import pgg_sample_adapter.
+From pgg_smc Require Import pgg_randomized_sharing pgg_canonical_sharing.
+From pgg_smc Require Import s5_profile s5_exec s5_models.
+From pgg_smc Require Import pgg_analysis_manifest.
+From tableau_ext_probe Require Import pgg_tableau.
+From tableau_ext_probe Require Import pgg_tableau_syntax.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+Import GRing.Theory Num.Theory.
+
+Local Open Scope fdist_scope.
+Local Open Scope proba_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+
+(******************************************************************************)
+(*     The dealer-dealt run                                                   *)
+(******************************************************************************)
+
+(** The dealer-dealt run of the five-seat instance: the algebra, the secret
+    position dealt at fuel 150, and the three run facts. What has been proved
+    at this point is run correctness, that the interpreter finishes, collects
+    one endpoint per seat and decodes them to the dealt position, and nothing
+    about a coalition. This run has no privacy claim at any coalition size:
+    the canonical encoding it deals puts the whole secret on one card, so the
+    single seat the cut sends that card to reads the secret, and every
+    coalition containing that seat does. *)
+Definition s5_dealt : Tableau Observed :=
+  s5_algebra
+    dealt   fuel 150
+    execute terminates by s5_dealt_terminates
+            endpoints by s5_dealt_endpoints
+            recon by s5_dealt_recon.
+
+(** The observed execution this program reaches is the one the manifest's
+    deterministic row describes. Conversion decides it, so the row's
+    description of the run and the proof of run correctness for it are one
+    term, which is the whole of what this path publishes. *)
+Lemma s5_dealt_row_observedE :
+  ob_obs (tableau_at s5_dealt) = apr_observed s5_row_det.
+Proof. by []. Qed.
+
+(******************************************************************************)
+(*     The supplied run                                                       *)
+(******************************************************************************)
+
+(** The supplied run of the five-seat instance: the algebra, the
+    additive layout of a sampler tape at fuel 150, the value the run recovers
+    written beside it, and the three run facts. The layout is supplied with
+    the run argument and no party commits, so the value recovered is a
+    reading of that argument rather than an ideal function of anyone's input;
+    what has been proved at this point is run correctness and nothing about a
+    coalition. *)
+Definition s5_supplied : Tableau Observed :=
+  s5_algebra
+  supplied inputs 'rV['Z_5]_5
+           layout s5_rfree_layout
+           expecting (fun u => s5_codec (s5_tape_secret u))
+           fuel 150
+  execute terminates by s5_supplied_terminates
+          endpoints by s5_supplied_endpoints
+          recon by s5_supplied_recon.
+
+(** The run the program builds is the one s5_supplied_params names. The
+    clauses above spell the parameter record out a second time, and this
+    equation is what keeps the two spellings from parting: every statement
+    below is made at s5_supplied_params, and the row is made at the
+    clauses. *)
+Lemma s5_supplied_paramsE :
+  projT1 (projT2 (tableau_at s5_supplied)) = s5_supplied_params.
+Proof. by []. Qed.
+
+(* A model built over one run of the sharing family does not sample the
+   other. The tape model is typed over this run's observed execution, so the
+   positive holds; the dealt run's observed execution is a different value
+   and the same statement at it is rejected. The two modes of the sharing
+   family therefore share no probability model, and no evidence stated in
+   one reaches the other. *)
+Check (s5_supplied sample s5_rand_family : Tableau Sampled).
+Fail Definition s5_dealt_rand : Tableau Sampled :=
+  s5_dealt sample s5_rand_family.
+
+(******************************************************************************)
+(*     The instance-side reading of a coalition                               *)
+(******************************************************************************)
+
+(** The framework's direct computation of a coalition's view, as a random
+    variable on the tape space, is the additive sharing's own coalition view.
+    The two are not the same term: the framework reads the layout at the cut
+    image of each seat's start, and the sharing reads the share at the seat's
+    index, and they agree because this model draws the identity cut. Every
+    security statement of a row is made about the left-hand side and every
+    secrecy theorem of this instance about the right, so this equation is the
+    whole of what carries one to the other. *)
+Lemma s5_rand_static_obsE (R : realType) (idx : unit)
+    (C : {set 'I_(pi_T' (mp_PI (instance_profile s5_algebra))).+1}) :
+  (fun u => @static_coalition_obs s5_algebra s5_supplied_params C
+              ((amf_sample s5_rand_family R idx).(sa_arg) u)
+              ((amf_sample s5_rand_family R idx).(sa_cut) u))
+  = rsh_view (@unif_randomized_sharing R 3 4) C.
+Proof.
+rewrite -s5_sample_coalition_viewE.
+exact: esym (@sa_coalition_viewE R (instance_profile s5_algebra)
+  (instance_exec s5_supplied_params) (amf_sample s5_rand_family R idx) 0
+  (ex_content_obs s5_supplied_params) (fun _ => s5_supplied_endpoints _ _) C).
+Qed.
+
+(** Below five seats, the framework's direct computation of a coalition's
+    view is independent of the tape secret. It is s5_exec_coalition_secrecy,
+    the additive sharing's privacy at a uniform tape, carried along the
+    identification above and read from zero mutual information back to
+    independence. This is the whole of the mathematics the supplied row's
+    security payload rests on. *)
+Lemma s5_rand_static_obs_indep (R : realType) (idx : unit)
+    (C : {set 'I_(pi_T' (mp_PI (instance_profile s5_algebra))).+1}) :
+  (#|C| < profile_k (instance_profile s5_algebra))%N ->
+  sa_sampleP (amf_sample s5_rand_family R idx)
+  |= (fun u => @static_coalition_obs s5_algebra s5_supplied_params C
+                 ((amf_sample s5_rand_family R idx).(sa_arg) u)
+                 ((amf_sample s5_rand_family R idx).(sa_cut) u))
+     _|_ (rsh_secret (@unif_randomized_sharing R 3 4)).
+Proof.
+rewrite profile_k_s5_algebra => HC.
+rewrite (s5_rand_static_obsE R idx C).
+apply/inde_RV_sym; apply: mutual_info_RV0_indep.
+rewrite -s5_sample_coalition_viewE.
+exact: (proj1 (@s5_exec_coalition_secrecy R C HC)).
+Qed.
+
+(******************************************************************************)
+(*     The tape model's witness                                               *)
+(******************************************************************************)
+
+(** The exact arm's witness: the tape secret as a random variable on the tape
+    space, and, at every coalition of fewer than five seats, the independence
+    of that coalition's reading from it. The independence is exact, four
+    additive shares of a uniform tape carrying no information about the
+    secret at all rather than a small amount, and it is exact for a reason no
+    shuffle takes part in. The framework derives the zero mutual information,
+    the unchanged conditional entropy and the closure under post-processing
+    from this one field, so the witness is the whole of what this instance
+    owes the exact arm. *)
+Definition s5_rand_exact_witness (R : realType) (idx : unit)
+  : ExactWitness (amf_sample s5_rand_family R idx) :=
+  @MkExactWitness R s5_algebra s5_supplied_params
+    (amf_sample s5_rand_family R idx) 'Z_5
+    (rsh_secret (@unif_randomized_sharing R 3 4))
+    (@s5_rand_static_obs_indep R idx).
+
+(******************************************************************************)
+(*     The randomized row                                                     *)
+(******************************************************************************)
+
+(** The randomized row: the supplied run above, the uniform tape
+    model, the witness above, and the manifest row. Its last statement
+    publishes a row whose transfer status is StaticExecutedOnly, because the
+    model's cut is the identity and no idealized shuffle is being compared
+    with a real one, and whose assumption status names the instance's
+    group-order fact, which enters through the reconstruction plug the
+    algebra's profile carries. What the finished row carries about a
+    coalition of fewer than five seats is independence of the tape secret, at
+    every real field, with no numeric bound anywhere in it. *)
+Definition s5_row_rand_tableau : PublishedRow :=
+  s5_supplied
+    sample  s5_rand_family
+    certify ExactIndependence s5_rand_exact_witness
+    |> publish StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder]).
+
+(** The row the program publishes is the manifest's own row for this instance
+    under the uniform tape. Conversion decides it, so the descriptive row and
+    the theorem proved about it cannot drift apart. *)
+Lemma s5_row_rand_rowE :
+  published_row s5_row_rand_tableau = s5_row_rand.
+Proof. by []. Qed.
+
+(** The arm this row carries, at every real field and index: independence of
+    the coalition's view from the tape secret, and not a distance between two
+    readings. This is the value a paper's table prints in the arm column for
+    this row, settled by the certify statement the program wrote. *)
+Lemma s5_row_rand_armE (R : realType)
+    (idx : amf_index (ab_f (published_at s5_row_rand_tableau)) R) :
+  security_arm_of s5_row_rand_tableau R idx = ExactIndependenceArm.
+Proof. by []. Qed.
+
+(******************************************************************************)
+(*     The exact arm's four conjuncts at this instance                        *)
+(******************************************************************************)
+
+(** The randomized row's view secrecy at this instance: at fewer than five
+    colluding seats the executed coalition view is independent of the tape
+    secret, carries zero mutual information with it, leaves its entropy
+    unchanged under conditioning, and stays independent of it under every
+    deterministic function of the seat-to-card map. The four conjuncts are
+    the whole content of the exact arm at this instance; the proof is the
+    row's security projection applied, so a reader who wants the
+    information-theoretic reading of the row needs no further derivation. *)
+Theorem s5_rand_view_secrecy (R : realType) (C : {set 'I_5})
+    (HC : (#|C| < 5)%N) :
+  [/\ s5_rand_sampleP R
+      |= (@sa_coalition_view R s5_profile s5_rand_exec_plug
+            (s5_rand_sample R) 0 C)
+         _|_ (rsh_secret (@unif_randomized_sharing R 3 4)),
+      `I( rsh_secret (@unif_randomized_sharing R 3 4) ;
+          @sa_coalition_view R s5_profile s5_rand_exec_plug
+            (s5_rand_sample R) 0 C ) = 0,
+      `H( rsh_secret (@unif_randomized_sharing R 3 4) |
+          @sa_coalition_view R s5_profile s5_rand_exec_plug
+            (s5_rand_sample R) 0 C )
+      = `H `p_ (rsh_secret (@unif_randomized_sharing R 3 4))
+    & forall (W : finType) (h : {ffun 'I_5 -> 'I_5} -> W),
+        s5_rand_sampleP R
+        |= (h `o (@sa_coalition_view R s5_profile s5_rand_exec_plug
+                    (s5_rand_sample R) 0 C))
+           _|_ (rsh_secret (@unif_randomized_sharing R 3 4))].
+Proof. exact: (view_secrecy_of s5_row_rand_tableau R tt C HC). Qed.
+
+(******************************************************************************)
+(*     The two specifications                                                 *)
+(******************************************************************************)
+
+(** The specification the dealer-dealt run realises: the identity on the
+    dealt position, tolerating coalitions of up to four seats. Neither
+    component is chosen here. Both are read off the algebra by
+    algebra_functionality, which is what makes the specification a
+    consequence of the instance rather than a second description of it that
+    could disagree with the first. *)
+Definition s5_F : Functionality (oe_inputT s5_observed) (oe_outT s5_observed)
+  := algebra_functionality s5_algebra.
+
+(** The ideal function and the tolerated coalition size of the dealer-dealt
+    run, written out. Both are read off the algebra, so this equation is
+    where a reader of s5_F learns which two values the algebra yields. *)
+Lemma s5_FE : s5_F = MkFunctionality id 4.
+Proof. by []. Qed.
+
+(** The tolerated size alone, as the scheme's own threshold less one. Four is
+    the largest coalition the sum-mod scheme guarantees anything about, and
+    no part of the execution narrows or widens it. *)
+Lemma s5_F_thresholdE : fn_threshold s5_F = 4.
+Proof. by []. Qed.
+
+(* Writing five where the scheme tolerates four is rejected, so the number a
+   specification carries is decided by the kernel rather than by the
+   reader. *)
+Fail Definition s5_F_k5 : s5_F = MkFunctionality id 5 := erefl.
+
+(** The value the dealer-dealt run is built to recover is that
+    specification's function, as terms. Conversion decides it, so this
+    correspondence needs no funext and carries no extensionality axiom of its
+    own; a specification agreeing with the recovered value only pointwise
+    would close through funext instead, and the difference would be visible
+    in Print Assumptions. *)
+Lemma s5_realises_expected : realises_expected s5_observed s5_F.
+Proof. by []. Qed.
+
+(** The specification the supplied run realises: the tape's secret coordinate
+    carried through the codec, tolerating coalitions of up to four seats. The
+    record is written out rather than taken from a functionality statement,
+    because a sharing family names no ideal function: the value recovered is
+    a reading of the run's own argument and not a function of any committer's
+    input, so there is nothing here a run could fail to meet. Only the
+    tolerated size is read off the algebra. *)
+Definition s5_rand_F
+  : Functionality (oe_inputT s5_rand_observed) (oe_outT s5_rand_observed) :=
+  MkFunctionality (fun u => s5_codec (s5_tape_secret u))
+    (ts_k' (pga_scheme s5_algebra)).
+
+(** That specification's two components, written out: coordinate zero of the
+    tape carried through the codec, and the same four seats the dealer-dealt
+    specification tolerates. *)
+Lemma s5_rand_FE :
+  s5_rand_F = MkFunctionality (fun u => s5_codec (s5_tape_secret u)) 4.
+Proof. by []. Qed.
+
+(** The value the supplied run is built to recover is that specification's
+    function, as terms, on the same reading of conversion as the
+    dealer-dealt case. *)
+Lemma s5_rand_realises_expected :
+  realises_expected s5_rand_observed s5_rand_F.
+Proof. by []. Qed.
