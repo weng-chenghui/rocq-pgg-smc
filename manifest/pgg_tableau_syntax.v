@@ -19,14 +19,14 @@
 (* data is passed explicitly, because a clause elaborated at an evar-typed    *)
 (* position accepts an obligation for the wrong proposition, and an ltac:     *)
 (* clause at such a position is closed by done with a term that proves        *)
-(* nothing. mk_spectral takes the five components of a certificate            *)
-(* separately, each quantified over the real field and the model index, so a  *)
-(* statement displays the marginal bound, the equation between that bound's   *)
-(* law and the model's cut law, the ideal cut, the mixing distance and the    *)
-(* ideal's secret-independence as five named things rather than one record.   *)
-(* The statement binds those two variables once, after at, and abstracts      *)
-(* every clause over them, so a clause is a term in R and idx rather than a   *)
-(* function of them.                                                          *)
+(* nothing. mk_indistinguishability takes the five components of a            *)
+(* certificate separately, each quantified over the real field and the model  *)
+(* index, so a statement displays the marginal bound, the equation between    *)
+(* that bound's law and the model's cut law, the ideal cut, the mixing        *)
+(* distance and the ideal's secret-independence as five named things rather   *)
+(* than one record. The statement binds those two variables once, after at,   *)
+(* and abstracts every clause over them, so a clause is a term in R and idx   *)
+(* rather than a function of them.                                            *)
 (*                                                                            *)
 (* The termination statement comes in two forms. One names a lemma; the other *)
 (* writes the literal vm_compute and builds the obligation in place. The two  *)
@@ -65,7 +65,7 @@
 (* it follows the literal dealt in the dealer-dealt rule and would stay an    *)
 (* identifier for that rule alone, but it follows a slot in the two rules     *)
 (* added beside it. The tokens inputs, terminates, publish, vm_compute,       *)
-(* ExactIndependence and SpectralDecay follow a literal and stay              *)
+(* ExactIndependence and InputIndistinguishability follow a literal and stay  *)
 (* identifiers, which is what keeps the two port constructors usable by       *)
 (* name; at follows a literal too and was a keyword of Rocq before this       *)
 (* file.                                                                      *)
@@ -80,7 +80,8 @@
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   obs_payload  == the three run facts in the shape execute_step wants      *)
-(*   mk_spectral  == a certificate at every field and index, from its five    *)
+(*   mk_indistinguishability                                                  *)
+(*                == a certificate at every field and index, from its five    *)
 (*                   components                                               *)
 (*   Targeted     == an algebra with the ideal function a run of it computes  *)
 (*   targeted_F   == the Functionality a Targeted names                       *)
@@ -141,7 +142,7 @@ Arguments obs_payload : clear implicits.
    of a coalition's view of the ideal cut in the run argument. The split is
    what makes the two currencies of the port visible where it is written: the
    fourth component is the only inexact one, and the fifth is exact. *)
-Definition mk_spectral (x : StackAt Sampled)
+Definition mk_indistinguishability (x : StackAt Sampled)
     (b : forall (R : realType) (idx : amf_index (sp_f x) R),
            ShuffleMarginalBound R (instance_M (projT1 x)))
     (Hd : forall (R : realType) (idx : amf_index (sp_f x) R),
@@ -157,11 +158,11 @@ Definition mk_spectral (x : StackAt Sampled)
             forall y y' : ex_inputT (projT1 (projT2 x)),
               fdistmap (static_coalition_obs C y) (u R idx)
               = fdistmap (static_coalition_obs C y') (u R idx))
-    : SpectralPayload x :=
-  fun R idx => @MkSpectralCert R (projT1 x) (projT1 (projT2 x))
+    : IndistinguishabilityPayload x :=
+  fun R idx => @MkIndistinguishabilityCert R (projT1 x) (projT1 (projT2 x))
     (amf_sample (sp_f x) R idx)
     (b R idx) (Hd R idx) (u R idx) (Hc R idx) (Hk R idx).
-Arguments mk_spectral : clear implicits.
+Arguments mk_indistinguishability : clear implicits.
 
 (******************************************************************************)
 (*     The ideal function a run computes                                      *)
@@ -255,8 +256,8 @@ Proof. by []. Qed.
    proof reached. It is an annotation on the guarantee and not part of it: k
    occurs in the type, so the kernel checks the number against the proof, and
    the annotated program is convertible with the unannotated one. It attaches
-   to the exact arm alone, so a program certifying decay carries no such
-   claim. *)
+   to the exact arm alone, so a program certifying input indistinguishability
+   carries no such claim. *)
 Definition ExactLeakAt (k : nat) (x : StackAt Sampled) (p : ExactPayload x)
     : Prop :=
   forall (R : realType) (idx : amf_index (sp_f x) R),
@@ -374,15 +375,16 @@ Notation "s 'certify' 'ExactIndependence' w 'leaks' 'at' k 'by' H" :=
   (at level 90, left associativity, w at level 0, k at level 0, H at level 0,
    only parsing).
 
-Notation "s 'certify' 'SpectralDecay' c" := (s ;;; certify_spectral of c)
+Notation "s 'certify' 'InputIndistinguishability' c" :=
+  (s ;;; certify_indistinguishability of c)
   (at level 90, left associativity, c at level 0).
 
 (* The five clauses name the real field and the model index once, after at,
    and the statement abstracts every clause over them. Each component is a
    term in those two variables rather than a function of them, so what a
    clause displays is the component and not the plumbing that quantifies it. *)
-Notation "s 'certify' 'SpectralDecay' 'at' R idx b 'tied' 'by' Hd 'ideal' u 'mixing' 'by' Hc 'invariant' 'by' Hk" :=
-  (s ;;; certify_spectral of (mk_spectral (tableau_at s)
+Notation "s 'certify' 'InputIndistinguishability' 'at' R idx b 'tied' 'by' Hd 'ideal' u 'mixing' 'by' Hc 'invariant' 'by' Hk" :=
+  (s ;;; certify_indistinguishability of (mk_indistinguishability (tableau_at s)
      (fun R idx => b) (fun R idx => Hd) (fun R idx => u)
      (fun R idx => Hc) (fun R idx => Hk)))
   (at level 90, left associativity, R ident, idx ident,

@@ -28,19 +28,20 @@
 (* about this instance and the proof of it are one term. The manifest's two   *)
 (* further five-card rows are each written twice. One program per row stops   *)
 (* at Sampled and names its model and nothing else. Beside it a certified     *)
-(* program publishes that manifest row through the spectral arm, and what     *)
-(* the arm certifies is this: for each real field, for every coalition of at  *)
-(* most one of the five seats and for every two committed pairs, the law of   *)
-(* that coalition's static endpoint reading under the row's own cut law is    *)
-(* within the row's published number of the same law at the other pair, the   *)
-(* ideal cut being the uniform rotation law on the cut group. That is not     *)
-(* independence of the reading from the secret, which the exact arm states    *)
-(* and which the uniform row alone carries. It is conditional on a coalition  *)
-(* of fewer than two seats. And it says nothing about the full reveal. Each   *)
-(* certified row is written in both of the forms the tree uses, once at the   *)
-(* certificate's own spectral number and once repriced to the constant a      *)
-(* text quotes, two to the minus thirty-ninth for the repeated row and one    *)
-(* twenty-fifth for the one-cut row.                                          *)
+(* program publishes that manifest row through the                            *)
+(* input-indistinguishability arm, and what the arm certifies is this: for    *)
+(* each real field, for every coalition of at most one of the five seats and  *)
+(* for every two committed pairs, the law of that coalition's static endpoint *)
+(* reading under the row's own cut law is within the row's published number   *)
+(* of the same law at the other pair, the ideal cut being the uniform         *)
+(* rotation law on the cut group. That is not independence of the reading     *)
+(* from the secret, which the exact arm states and which the uniform row      *)
+(* alone carries. It is conditional on a coalition of fewer than two seats.   *)
+(* And it says nothing about the full reveal. Each certified row is written   *)
+(* in both of the forms the tree uses, once at the certificate's own          *)
+(* spectral number and once repriced to the constant a text quotes, two to    *)
+(* the minus thirty-ninth for the repeated row and one twenty-fifth for the   *)
+(* one-cut row.                                                               *)
 (*                                                                            *)
 (* The two Sampled programs stay as the programs that stop before a claim.    *)
 (* What is proved beside them is of another kind: the endpoint marginal of    *)
@@ -58,7 +59,8 @@
 (* level and which a leakage bound meets. A program reaches it only through   *)
 (* one of the two arms of certify. Both criteria are met at both Kim rows.    *)
 (* instances/s5/s5_rows.v records for s5_row_word the gap this file no longer *)
-(* has: there the constancy a spectral certificate asks for is false.         *)
+(* has: there the constancy an input-indistinguishability certificate asks    *)
+(* for is false.                                                              *)
 (*                                                                            *)
 (* No statement of a program is a theorem about this instance. What the       *)
 (* instance supplies it supplies inside a clause. In the uniform row the      *)
@@ -98,8 +100,8 @@
 (*   kim_centi_cert40, kim_biased_cert_exact                                  *)
 (*                           == the same two at the constants the rows        *)
 (*                              republish                                     *)
-(*   five_card_row_repeated_spectral_tableau                                  *)
-(*   five_card_row_biased_spectral_tableau                                    *)
+(*   five_card_row_repeated_indistinguishability_tableau                      *)
+(*   five_card_row_biased_indistinguishability_tableau                        *)
 (*                           == each Kim row certified against the uniform    *)
 (*                              rotation law and published                    *)
 (*   five_card_row_repeated39, five_card_row_biased_inv25                     *)
@@ -130,12 +132,12 @@
 (*                              names                                         *)
 (*   five_card_row_uniform_rowE                                               *)
 (*                           == the program publishes the manifest's row      *)
-(*   five_card_row_repeated_spectral_rowE                                     *)
-(*   five_card_row_biased_spectral_rowE                                       *)
+(*   five_card_row_repeated_indistinguishability_rowE                         *)
+(*   five_card_row_biased_indistinguishability_rowE                           *)
 (*                           == each certified program publishes its own      *)
 (*                              manifest row                                  *)
-(*   five_card_row_repeated_spectral_publishedE                               *)
-(*   five_card_row_biased_spectral_publishedE                                 *)
+(*   five_card_row_repeated_indistinguishability_publishedE                   *)
+(*   five_card_row_biased_indistinguishability_publishedE                     *)
 (*                           == the three coordinates each certified program  *)
 (*                              publishes                                     *)
 (*   five_card_row_biased_forms_publishedE                                    *)
@@ -438,8 +440,8 @@ Proof. exact: (view_secrecy_of five_card_row_uniform_tableau R tt C HC). Qed.
     of one starting position's endpoint under its cut, a statement about
     where a single starting position is sent and not about what any set of
     seats reads, so no security payload follows this program.
-    five_card_row_repeated_spectral_tableau is the certified program for the
-    same row. *)
+    five_card_row_repeated_indistinguishability_tableau is the certified
+    program for the same row. *)
 Definition five_card_row_repeated_tableau : Tableau Sampled :=
   five_card_committed
     sample kim_centi_family.
@@ -450,8 +452,8 @@ Definition five_card_row_repeated_tableau : Tableau Sampled :=
     five_card_colour_view_leak_bound bounds a conditional mutual information
     and neither arm of certify takes a bound of that kind. The manifest's
     level for this row rests on that theorem and on the certificate
-    five_card_row_biased_spectral_tableau carries, and on no payload of this
-    program. *)
+    five_card_row_biased_indistinguishability_tableau carries, and on no
+    payload of this program. *)
 Definition five_card_row_biased_tableau : Tableau Sampled :=
   five_card_committed
     sample kim_biased_family.
@@ -518,7 +520,8 @@ Proof. by []. Qed.
     AnalysisBridged for the row. The two levels differ, and the difference is
     rejected by the kernel here rather than asserted in prose. It is a fact
     about this one program and not about the biased path, which
-    five_card_row_biased_spectral_tableau carries to AnalysisBridged. *)
+    five_card_row_biased_indistinguishability_tableau carries to
+    AnalysisBridged. *)
 Fail Definition five_card_row_biased_at_manifest_level
   : Tableau (apr_completion five_card_row_biased) :=
   five_card_row_biased_tableau.
@@ -553,17 +556,17 @@ rewrite -!natrX -natrM ler_nat.
 by lia.
 Qed.
 
-(** The spectral certificate of the repeated row. Its five fields are the
-    seven-cut bundle's marginal bound; the identification of that bound's law
-    with the law the repeated adapter draws its cut from; the uniform rotation
-    law as the ideal cut; the distance of the seven-cut law from that ideal;
-    and the constancy, at every coalition of at most one seat, of the reading
-    of the ideal cut in the committed pair. The only inexact quantity in the
-    row is the bundle's spectral number; the ideal cut and the constancy
-    field are exact. *)
+(** The input-indistinguishability certificate of the repeated row. Its five
+    fields are the seven-cut bundle's marginal bound; the identification of
+    that bound's law with the law the repeated adapter draws its cut from;
+    the uniform rotation law as the ideal cut; the distance of the seven-cut
+    law from that ideal; and the constancy, at every coalition of at most one
+    seat, of the reading of the ideal cut in the committed pair. The only
+    inexact quantity in the row is the bundle's spectral number; the ideal
+    cut and the constancy field are exact. *)
 Definition kim_centi_cert (R : realType) (idx : unit)
-  : SpectralCert (amf_sample kim_centi_family R idx) :=
-  @MkSpectralCert R five_card_algebra five_card_params
+  : IndistinguishabilityCert (amf_sample kim_centi_family R idx) :=
+  @MkIndistinguishabilityCert R five_card_algebra five_card_params
     (amf_sample kim_centi_family R idx)
     (scb_bound (kim_security_bundle_centi R))
     (esym (kim_centi_cut_distE R))
@@ -571,14 +574,14 @@ Definition kim_centi_cert (R : realType) (idx : unit)
     (@kim_centi_cut_mixing R)
     (@five_card_static_obs_const R).
 
-(** The spectral certificate of the one-cut row, with the same five fields at
-    word length one. The ideal cut and the constancy, at every coalition of
-    at most one seat, of the reading of it are the same two terms as in the
-    repeated row's certificate, so the two rows differ only in the shuffle
-    and its number. *)
+(** The input-indistinguishability certificate of the one-cut row, with the
+    same five fields at word length one. The ideal cut and the constancy, at
+    every coalition of at most one seat, of the reading of it are the same
+    two terms as in the repeated row's certificate, so the two rows differ
+    only in the shuffle and its number. *)
 Definition kim_biased_cert (R : realType) (idx : unit)
-  : SpectralCert (amf_sample kim_biased_family R idx) :=
-  @MkSpectralCert R five_card_algebra five_card_params
+  : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
+  @MkIndistinguishabilityCert R five_card_algebra five_card_params
     (amf_sample kim_biased_family R idx)
     (kim_biased_marginal_bound R)
     (kim_biased_sample_cut_witnessE R)
@@ -586,26 +589,26 @@ Definition kim_biased_cert (R : realType) (idx : unit)
     (@kim_biased_cut_mixing R)
     (@five_card_static_obs_const R).
 
-(** Kim's repeated row certified by the spectral arm and published at
-    IdealFinite. The status is a parameter of publish and nothing checks it,
-    so it is claimed against the criterion pgg_analysis_status.v states for
-    IdealFinite: a cut-carrier transfer whose base premise is discharged,
-    which is what a certificate comparing a finite shuffle with a named
-    ideal cut supplies. *)
-Definition five_card_row_repeated_spectral_tableau : PublishedRow :=
+(** Kim's repeated row certified by the input-indistinguishability arm and
+    published at IdealFinite. The status is a parameter of publish and
+    nothing checks it, so it is claimed against the criterion
+    pgg_analysis_status.v states for IdealFinite: a cut-carrier transfer
+    whose base premise is discharged, which is what a certificate comparing
+    a finite shuffle with a named ideal cut supplies. *)
+Definition five_card_row_repeated_indistinguishability_tableau : PublishedRow :=
   five_card_committed
     sample kim_centi_family
-    certify SpectralDecay kim_centi_cert
+    certify InputIndistinguishability kim_centi_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** Kim's one-cut row certified by the same arm and published at the same
     transfer status. Its certificate has the shape the repeated row's has,
     over the same ideal cut and with the same constancy field, so the same
     status is the honest one for it. *)
-Definition five_card_row_biased_spectral_tableau : PublishedRow :=
+Definition five_card_row_biased_indistinguishability_tableau : PublishedRow :=
   five_card_committed
     sample kim_biased_family
-    certify SpectralDecay kim_biased_cert
+    certify InputIndistinguishability kim_biased_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The repeated row's certified program publishes the manifest's row for that
@@ -613,14 +616,15 @@ Definition five_card_row_biased_spectral_tableau : PublishedRow :=
     AnalysisPathRow stores descriptive metadata and no Prop, so this equation
     fixes which path the program is written for and asserts nothing about the
     certificate the program carries. *)
-Lemma five_card_row_repeated_spectral_rowE :
-  published_row five_card_row_repeated_spectral_tableau
+Lemma five_card_row_repeated_indistinguishability_rowE :
+  published_row five_card_row_repeated_indistinguishability_tableau
   = five_card_row_repeated.
 Proof. by []. Qed.
 
 (** The same for the one-cut row and the manifest's biased row. *)
-Lemma five_card_row_biased_spectral_rowE :
-  published_row five_card_row_biased_spectral_tableau = five_card_row_biased.
+Lemma five_card_row_biased_indistinguishability_rowE :
+  published_row five_card_row_biased_indistinguishability_tableau
+  = five_card_row_biased.
 Proof. by []. Qed.
 
 (** What a row equation does reject is a program written for another path.
@@ -628,36 +632,42 @@ Proof. by []. Qed.
     IdealFinite and the uniform row holds the uniform family at
     StaticExecutedOnly, so the two rows differ in two of their five fields
     and the equation is refused. *)
-Fail Definition five_card_row_repeated_spectral_uniform_rowE
-  : published_row five_card_row_repeated_spectral_tableau
+Fail Definition five_card_row_repeated_indistinguishability_uniform_rowE
+  : published_row five_card_row_repeated_indistinguishability_tableau
     = five_card_row_uniform
   := erefl.
 
 (** The three coordinates the repeated row's certified program publishes. *)
-Lemma five_card_row_repeated_spectral_publishedE :
-  apr_completion (published_row five_card_row_repeated_spectral_tableau)
+Lemma five_card_row_repeated_indistinguishability_publishedE :
+  apr_completion
+    (published_row five_card_row_repeated_indistinguishability_tableau)
     = AnalysisBridged
-  /\ apr_transfer (published_row five_card_row_repeated_spectral_tableau)
+  /\ apr_transfer
+       (published_row five_card_row_repeated_indistinguishability_tableau)
      = IdealFinite
-  /\ apr_assumptions (published_row five_card_row_repeated_spectral_tableau)
+  /\ apr_assumptions
+       (published_row five_card_row_repeated_indistinguishability_tableau)
      = BaselineClassicalOnly.
 Proof. by []. Qed.
 
 (** The three coordinates the one-cut row's certified program publishes. *)
-Lemma five_card_row_biased_spectral_publishedE :
-  apr_completion (published_row five_card_row_biased_spectral_tableau)
+Lemma five_card_row_biased_indistinguishability_publishedE :
+  apr_completion
+    (published_row five_card_row_biased_indistinguishability_tableau)
     = AnalysisBridged
-  /\ apr_transfer (published_row five_card_row_biased_spectral_tableau)
+  /\ apr_transfer
+       (published_row five_card_row_biased_indistinguishability_tableau)
      = IdealFinite
-  /\ apr_assumptions (published_row five_card_row_biased_spectral_tableau)
+  /\ apr_assumptions
+       (published_row five_card_row_biased_indistinguishability_tableau)
      = BaselineClassicalOnly.
 Proof. by []. Qed.
 
 (** Two copies of two to the minus fortieth make two to the minus
-    thirty-ninth. A spectral certificate publishes its marginal bound twice,
-    once for each of the two committed pairs, so a row at the constant bound
-    publishes a sum of two equal terms, and this identity is what names that
-    sum by a single constant. *)
+    thirty-ninth. An input-indistinguishability certificate publishes its
+    marginal bound twice, once for each of the two committed pairs, so a row
+    at the constant bound publishes a sum of two equal terms, and this
+    identity is what names that sum by a single constant. *)
 (* The mulr_natl and mulr_natr routes fail here because the ring numeral 2
    is itself a natmul and the rewrite fires inside it, yielding
    (2 * 1) ^- 40. *)
@@ -724,8 +734,8 @@ End kim_cert_numbers.
     in place of the spectral expression, and the mixing field is the same
     distance bounded by that constant. *)
 Definition kim_centi_cert40 (R : realType) (idx : unit)
-  : SpectralCert (amf_sample kim_centi_family R idx) :=
-  @MkSpectralCert R five_card_algebra five_card_params
+  : IndistinguishabilityCert (amf_sample kim_centi_family R idx) :=
+  @MkIndistinguishabilityCert R five_card_algebra five_card_params
     (amf_sample kim_centi_family R idx)
     (kim_centi_marginal_bound40 R)
     (esym (kim_centi_cut_distE R))
@@ -751,7 +761,7 @@ Definition five_card_reprice39 : Reprice := fun R => Some (2%:R ^- 39 : R).
 Definition five_card_row_repeated39 : PublishedRowAt five_card_reprice39 :=
   five_card_committed
     ;;; sample_step of kim_centi_family
-    ;;; certify_spectral of kim_centi_cert40
+    ;;; certify_indistinguishability of kim_centi_cert40
     ;;; conclude five_card_reprice39 of (fun R _ => five_card_pow2_39_split R)
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
@@ -762,14 +772,14 @@ Fail Definition five_card_row_repeated39_bare
   : PublishedRowAt five_card_reprice39 :=
   five_card_committed
     ;;; sample_step of kim_centi_family
-    ;;; certify_spectral of kim_centi_cert40
+    ;;; certify_indistinguishability of kim_centi_cert40
     ;;; conclude five_card_reprice39 of five_card_pow2_39_split
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
 (** The one-cut row's certificate at the exact number one fiftieth. *)
 Definition kim_biased_cert_exact (R : realType) (idx : unit)
-  : SpectralCert (amf_sample kim_biased_family R idx) :=
-  @MkSpectralCert R five_card_algebra five_card_params
+  : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
+  @MkIndistinguishabilityCert R five_card_algebra five_card_params
     (amf_sample kim_biased_family R idx)
     (kim_biased_marginal_bound_exact R)
     (kim_biased_sample_cut_witnessE R)
@@ -794,7 +804,7 @@ Definition five_card_row_biased_inv25
   : PublishedRowAt five_card_reprice_inv25 :=
   five_card_committed
     ;;; sample_step of kim_biased_family
-    ;;; certify_spectral of kim_biased_cert_exact
+    ;;; certify_indistinguishability of kim_biased_cert_exact
     ;;; conclude five_card_reprice_inv25 of (fun R _ => five_card_inv50_split R)
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
@@ -804,7 +814,7 @@ Definition five_card_row_biased_inv25
     between two published rows says nothing about either certificate, and in
     particular cannot say which transfer status is the honest one. *)
 Lemma five_card_row_biased_forms_publishedE :
-  published_row five_card_row_biased_spectral_tableau
+  published_row five_card_row_biased_indistinguishability_tableau
   = published_row five_card_row_biased_inv25.
 Proof. exact: erefl. Qed.
 

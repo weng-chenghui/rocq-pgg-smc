@@ -45,7 +45,8 @@
 (*   pgl27_dealt             == the prefix shared by both rows                *)
 (*   pgl27_exact_witness     == the exact arm's witness at every field and    *)
 (*                              index                                         *)
-(*   pgl27_word_cert         == the spectral arm's certificate                *)
+(*   pgl27_word_cert         == the input-indistinguishability arm's          *)
+(*                              certificate                                   *)
 (*   pgl27_row_exact_tableau == the exact row as a program                    *)
 (*   pgl27_row_word_tableau  == the word row as a program                     *)
 (*   pgl27_inline_dealt      == the prefix with the termination reduction     *)
@@ -150,9 +151,9 @@ by case: ifP => // _; rewrite tnth_ord_tuple.
 Qed.
 
 (** The same identification with the cut left free, as an equality of functions
-    of the cut. The spectral arm compares two laws obtained by pushing a reader
-    forward along a distribution on cuts, so it needs the reader as one
-    function and not as its values. *)
+    of the cut. The input-indistinguishability arm compares two laws obtained
+    by pushing a reader forward along a distribution on cuts, so it needs the
+    reader as one function and not as its values. *)
 Lemma pgl27_static_obs_funE (R : realType) (C : {set 'I_8}) (s : bool) :
   @static_coalition_obs pgl27_algebra pgl27_dealt_params C s
   = (fun g => pgl27_view R C (s, g)).
@@ -220,7 +221,8 @@ Qed.
     reading of the ideal uniform cut. It is pgl27_view_law_const, which is
     three-transitivity of PGL(2,7) read as a privacy statement, carried to the
     framework's reader at each of the two secrets; the statement is exact, and
-    it is the half of the spectral arm that spends no mixing bound. *)
+    it is the half of the input-indistinguishability arm that spends no mixing
+    bound. *)
 Lemma pgl27_word_view_const (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
@@ -235,19 +237,20 @@ rewrite (pgl27_static_obs_funE R C x) (pgl27_static_obs_funE R C x').
 exact: (pgl27_view_law_const R x x' HC).
 Qed.
 
-(** The spectral arm's certificate at each secret prior. Its five fields are
-    the two-hundred-letter walk's marginal bound; the identification of that
-    bound's law with the law the word adapter draws its cut from, which is
-    pgl27_word_cut_distE read backwards; the uniform distribution on the group
-    as the ideal cut; the distance pgl27_word_mixing of the walk from that
-    ideal, an unconditional theorem about the walk whose bound is 2^-40; and
-    the constancy of a coalition's reading of the ideal cut in the dealt secret,
-    which is pgl27_word_view_const and is exact. The two currencies are visible
-    in the fields: everything about the ideal cut is exact and three-transitive,
-    and the only inexact quantity anywhere in this row is the walk's 2^-40. *)
+(** The input-indistinguishability arm's certificate at each secret prior. Its
+    five fields are the two-hundred-letter walk's marginal bound; the
+    identification of that bound's law with the law the word adapter draws its
+    cut from, which is pgl27_word_cut_distE read backwards; the uniform
+    distribution on the group as the ideal cut; the distance pgl27_word_mixing
+    of the walk from that ideal, an unconditional theorem about the walk whose
+    bound is 2^-40; and the constancy of a coalition's reading of the ideal
+    cut in the dealt secret, which is pgl27_word_view_const and is exact. The
+    two currencies are visible in the fields: everything about the ideal cut
+    is exact and three-transitive, and the only inexact quantity anywhere in
+    this row is the walk's 2^-40. *)
 Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
-  : SpectralCert (amf_sample pgl27_word_family R secretP) :=
-  @MkSpectralCert R pgl27_algebra pgl27_dealt_params
+  : IndistinguishabilityCert (amf_sample pgl27_word_family R secretP) :=
+  @MkIndistinguishabilityCert R pgl27_algebra pgl27_dealt_params
     (amf_sample pgl27_word_family R secretP)
     (pgl27_word_marginal_bound R)
     (esym (pgl27_word_cut_distE secretP))
@@ -295,7 +298,7 @@ Fail Definition pgl27_row_exact_leak7 : PublishedRow :=
 Definition pgl27_row_word_tableau : PublishedRow :=
   pgl27_dealt
     sample  pgl27_word_family
-    certify SpectralDecay at R idx
+    certify InputIndistinguishability at R idx
             pgl27_word_marginal_bound R
             tied by esym (pgl27_word_cut_distE idx)
             ideal (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
@@ -309,7 +312,7 @@ Definition pgl27_row_word_tableau : PublishedRow :=
 Lemma pgl27_row_word_certE :
   pgl27_row_word_tableau
   = (pgl27_dealt ;;; sample_step of pgl27_word_family
-                 ;;; certify_spectral of pgl27_word_cert
+                 ;;; certify_indistinguishability of pgl27_word_cert
                  ;;; publish BaselineClassicalOnly of IdealFinite).
 Proof. by []. Qed.
 
@@ -378,7 +381,7 @@ Definition pgl27_reprice39 : Reprice := fun R => Some (2%:R^-39 : R).
 Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
-    ;;; certify_spectral of pgl27_word_cert
+    ;;; certify_indistinguishability of pgl27_word_cert
     ;;; conclude pgl27_reprice39 of (fun R _ => pow2_split R)
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
@@ -389,7 +392,7 @@ Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
 Fail Definition pgl27_row_word39_bare : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
-    ;;; certify_spectral of pgl27_word_cert
+    ;;; certify_indistinguishability of pgl27_word_cert
     ;;; conclude pgl27_reprice39 of pow2_split
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
@@ -418,7 +421,7 @@ Lemma pgl27_word_bridge (R : realType) (secretP : R.-fdist bool)
     (q : StackAt AnalysisBridged)
     (Hq : q = tableau_at (pgl27_dealt
                          ;;; sample_step of pgl27_word_family
-                         ;;; certify_spectral of pgl27_word_cert)) :
+                         ;;; certify_indistinguishability of pgl27_word_cert)) :
   StackProp AnalysisBridged q -> pgl27_word_target R.
 Proof.
 rewrite Hq => pf C s s' HC.
@@ -435,7 +438,7 @@ Definition pgl27_word_restated (R : realType) (secretP : R.-fdist bool)
     : RestatedTableau (pgl27_word_target R) :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
-    ;;; certify_spectral of pgl27_word_cert
+    ;;; certify_indistinguishability of pgl27_word_cert
     ;;; restate (pgl27_word_target R)
         of (pgl27_word_bridge secretP (q := _) erefl).
 
@@ -572,11 +575,11 @@ Definition pgl27_exact_same_statement (R : realType) :
   (@pgl27_exec_exact_view_indep R, @pgl27_exec_exact_view_indep_restated R).
 
 (** The two arms are different claims, and the difference is visible in what a
-    row's projection takes after the coalition. A row certifying decay is asked
-    here for a threshold proof in the position where it expects the first of two
-    dealt secrets, and is rejected: what the word row proves at a coalition is a
-    distance between the readings of two secrets, so the two secrets come before
-    the threshold proof. *)
+    row's projection takes after the coalition. A row certifying input
+    indistinguishability is asked here for a threshold proof in the position
+    where it expects the first of two dealt secrets, and is rejected: what the
+    word row proves at a coalition is a distance between the readings of two
+    secrets, so the two secrets come before the threshold proof. *)
 Fail Definition pgl27_word_arm_is_not_exact (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (HC : (#|C| < 4)%N) :=
   view_secrecy_of pgl27_row_word_tableau R secretP C HC.

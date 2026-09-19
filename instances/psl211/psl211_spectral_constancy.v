@@ -1,18 +1,19 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* psl211_spectral_constancy: the spectral certificate's constancy field at   *)
-(*                            the twelve-card chirality instance, refuted in  *)
+(* psl211_spectral_constancy: the input-indistinguishability                  *)
+(*                            certificate's constancy field at the            *)
+(*                            twelve-card chirality instance, refuted in      *)
 (*                            both run modes                                  *)
 (*                                                                            *)
-(* A spectral certificate of manifest/pgg_tableau.v carries five fields, and  *)
-(* the fifth, sc_const, asks that a coalition of fewer than profile_k seats   *)
-(* read the certificate's ideal cut the same way whatever the run argument.   *)
-(* This file restates that field as a standalone proposition, checks the      *)
-(* restatement against the record, and refutes it at PSL(2,11) in the two     *)
-(* run modes the instance carries. The instance publishes its all-decks row   *)
-(* through the exact arm, and this file is what the spectral arm would cost   *)
-(* it.                                                                        *)
+(* An input-indistinguishability certificate of manifest/pgg_tableau.v        *)
+(* carries five fields, and the fifth, ic_const, asks that a coalition of     *)
+(* fewer than profile_k seats read the certificate's ideal cut the same way   *)
+(* whatever the run argument. This file restates that field as a standalone   *)
+(* proposition, checks the restatement against the record, and refutes it at  *)
+(* PSL(2,11) in the two run modes the instance carries. The instance          *)
+(* publishes its all-decks row through the exact arm, and this file is what   *)
+(* the input-indistinguishability arm would cost it.                          *)
 (*                                                                            *)
 (* All-decks mode. The run argument is a whole deck description: one of the   *)
 (* two chiralities, one of the 132 block lines of that chirality's Steiner    *)
@@ -28,15 +29,15 @@
 (* instances/psl211/psl211_models.v, which says it reads nothing, exactly, at *)
 (* every real field, and that is the theorem the published row carries.       *)
 (*                                                                            *)
-(* The quantitative form fixes what a spectral row would have to publish. A   *)
-(* certificate over the all-decks model states its distance against the       *)
-(* group-uniform law, its identification field pinning its shuffle law to     *)
-(* the adapter's cut, so no certificate carries a shuffle bound epsilon       *)
-(* strictly below 1/1320. The obligation of conclude bounds the published     *)
-(* number below by cert_eps cert, which is that epsilon twice, so every       *)
-(* row over this model that publishes its certificate's own number publishes  *)
-(* at least 1/660. psl211_alldecks_no_zero_eps_cert states the same at        *)
-(* epsilon zero, which is the epsilon profile_eps_psl211 of                   *)
+(* The quantitative form fixes what an input-indistinguishability row would   *)
+(* have to publish. A certificate over the all-decks model states its         *)
+(* distance against the group-uniform law, its identification field pinning   *)
+(* its shuffle law to the adapter's cut, so no certificate carries a shuffle  *)
+(* bound epsilon strictly below 1/1320. The obligation of conclude bounds the *)
+(* published number below by cert_eps cert, which is that epsilon twice, so   *)
+(* every row over this model that publishes its certificate's own number      *)
+(* publishes at least 1/660. psl211_alldecks_no_zero_eps_cert states the same *)
+(* at epsilon zero, which is the epsilon profile_eps_psl211 of                *)
 (* instances/psl211/psl211_profile.v gives this instance's single-card        *)
 (* marginal bound.                                                            *)
 (*                                                                            *)
@@ -51,15 +52,15 @@
 (* named ideal and no certificate, this tree carrying no dealt-mode sample    *)
 (* adapter through which a certificate's ideal could be pinned to it.         *)
 (*                                                                            *)
-(* Not claimed. The spectral arm is not shown unavailable at this instance.   *)
-(* What is excluded is a range of epsilon, and the range of larger epsilon    *)
-(* is occupied: the uniform law on the whole of {perm 'I_12} reads the same   *)
-(* at every deck description, its variation distance from `U psl211_G_pos is  *)
-(* 2 * (1 - 660/12!), so a certificate at that ideal exists with an epsilon   *)
-(* near 2. Its cert_eps is that epsilon twice, near 4, while infotheo's       *)
-(* var_dist sums the absolute differences of two laws and so never exceeds    *)
-(* 2, and the row such a certificate gives publishes a number no pair of      *)
-(* laws can exceed and bounds nothing. That occupancy is argued and not       *)
+(* Not claimed. The input-indistinguishability arm is not shown unavailable   *)
+(* at this instance. What is excluded is a range of epsilon, and the range of *)
+(* larger epsilon is occupied: the uniform law on the whole of {perm 'I_12}   *)
+(* reads the same at every deck description, its variation distance from `U   *)
+(* psl211_G_pos is 2 * (1 - 660/12!), so a certificate at that ideal exists   *)
+(* with an epsilon near 2. Its cert_eps is that epsilon twice, near 4, while  *)
+(* infotheo's var_dist sums the absolute differences of two laws and so never *)
+(* exceeds 2, and the row such a certificate gives publishes a number no pair *)
+(* of laws can exceed and bounds nothing. That occupancy is argued and not    *)
 (* compiled. Its premise is compiled: every deck description lays a deck of   *)
 (* twelve distinct cards, psl211_alldecks_uniq of                             *)
 (* instances/psl211/psl211_alldecks.v. What is not compiled there is the      *)
@@ -72,11 +73,10 @@
 (*                                                                            *)
 (* Names. The first two declarations are framework-level: they are stated for *)
 (* any algebra and any execution parameters, and sit here rather than beside  *)
-(* SpectralCert in manifest/pgg_tableau.v. A deck description is a whole run  *)
-(* argument and a deal is its three coordinates other than the secret. The    *)
-(* psl211_blockline1_ prefix names block line one and the comparison with     *)
-(* block line zero at one chirality, as psl211_perdeck_ of                    *)
-(* instances/psl211/psl211_models.v names the comparison between the two      *)
+(* IndistinguishabilityCert in manifest/pgg_tableau.v. A deck description is  *)
+(* a whole run argument and a deal is its three coordinates other than the    *)
+(* secret. The psl211_blockline1_ prefix names block line one and the         *)
+(* comparison with block line zero at one chirality, as psl211_perdeck_ of    *)
 (* chiralities at one deal. In a proof script a leading C is a fiber          *)
 (* cardinality, U a mass at the group-uniform law, L a mass at the ideal, E a *)
 (* reader identification, T a step of an inequality chain and H every other   *)
@@ -92,7 +92,7 @@
 (*   psl211_blockline1_deal  == block line one, both labellings the identity  *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   spectral_cert_reading_constancy                                          *)
+(*   indistinguishability_cert_reading_constancy                              *)
 (*                           == the restatement is the record's fifth field   *)
 (*   psl211_alldecks_constancy_false                                          *)
 (*                           == the field is false at the group-uniform       *)
@@ -181,14 +181,14 @@ Local Notation viewT := ({ffun seatT -> cardT}).
 
 (** coalition_reading_constancy E ideal — a coalition of fewer than profile_k
     seats reads the law ideal on cuts the same way whatever the run argument.
-    This is what a spectral certificate asserts about its idealized cut, and
-    the certificate's variation-distance field is what transfers that
-    assertion from the ideal to the real cut. Where the run argument carries
-    the secret, as it does in both run modes of this instance, the field is
-    at least constancy in the secret; where the run argument carries data
-    outside the secret as well, as it does under the all-decks parameters,
-    the field asks for constancy in that data too and is stronger than the
-    privacy the instance claims. *)
+    This is what an input-indistinguishability certificate asserts about its
+    idealized cut, and the certificate's variation-distance field is what
+    transfers that assertion from the ideal to the real cut. Where the run
+    argument carries the secret, as it does in both run modes of this instance,
+    the field is at least constancy in the secret; where the run argument
+    carries data outside the secret as well, as it does under the all-decks
+    parameters, the field asks for constancy in that data too and is stronger
+    than the privacy the instance claims. *)
 Definition coalition_reading_constancy (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A)
     (ideal : R.-fdist (pgg_gT (mp_M (instance_profile A)))) : Prop :=
@@ -198,14 +198,16 @@ Definition coalition_reading_constancy (R : realType) (A : PGGAlgebraic)
       fdistmap (@static_coalition_obs A E C x) ideal
       = fdistmap (@static_coalition_obs A E C x') ideal.
 
-(** spectral_cert_reading_constancy — coalition_reading_constancy is the fifth
-    field of SpectralCert read at the certificate's own ideal, so refuting the
-    proposition at a law refutes every certificate whose ideal cut is that
-    law. *)
-Lemma spectral_cert_reading_constancy (R : realType) (A : PGGAlgebraic)
-    (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
-    (cert : SpectralCert sa) : coalition_reading_constancy E (sc_ideal cert).
-Proof. exact: sc_const cert. Qed.
+(** indistinguishability_cert_reading_constancy — coalition_reading_constancy
+    is the fifth field of IndistinguishabilityCert read at the certificate's
+    own ideal, so refuting the proposition at a law refutes every certificate
+    whose ideal cut is that law. *)
+Lemma indistinguishability_cert_reading_constancy (R : realType)
+    (A : PGGAlgebraic) (E : ExecutionParams A)
+    (sa : SampleAdapter R (instance_exec E))
+    (cert : IndistinguishabilityCert sa) :
+  coalition_reading_constancy E (ic_ideal cert).
+Proof. exact: ic_const cert. Qed.
 
 (******************************************************************************)
 (*     The three seats are below the privacy threshold                        *)
@@ -244,9 +246,10 @@ Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
 (******************************************************************************)
 
 (** psl211_alldecks_constancy_false — under the all-decks run parameters the
-    uniform law on the shuffle group is the ideal cut of no spectral
-    certificate: seats 0, 1 and 2 read that law differently at the two
-    chiralities of the deal psl211_perdeck_deal. The run argument of this
+    uniform law on the shuffle group is the ideal cut of no
+    input-indistinguishability certificate: seats 0, 1 and 2 read that law
+    differently at the two chiralities of the deal psl211_perdeck_deal. The run
+    argument of this
     mode is a whole deck description, whose first coordinate is the secret
     chirality and whose other three are not, and the field quantifies
     over every pair of them, so the equation it asserts is false at a pair
@@ -662,68 +665,70 @@ have Hbad := Order.POrderTheory.le_lt_trans
 by move: Hbad; rewrite Order.POrderTheory.ltxx.
 Qed.
 
-(** psl211_alldecks_cert_ideal_close — a spectral certificate over the
-    all-decks model states its distance against the group-uniform law. The
-    certificate's own identification field says its shuffle law is the
+(** psl211_alldecks_cert_ideal_close — an input-indistinguishability
+    certificate over the all-decks model states its distance against the
+    group-uniform law. The certificate's own identification field says its
+    shuffle law is the
     adapter's cut, and this adapter's cut is the uniform law on the shuffle
     group, so the epsilon a certificate quotes is an epsilon against that law
     however its marginal bound record was built. *)
 Lemma psl211_alldecks_cert_ideal_close (R : realType)
-    (cert : SpectralCert (psl211_alldecks_sample R)) :
-  var_dist ((`U psl211_G_pos) : R.-fdist cutT) (sc_ideal cert)
-  <= sw_bound_eps (sc_b cert).
+    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) :
+  var_dist ((`U psl211_G_pos) : R.-fdist cutT) (ic_ideal cert)
+  <= sw_bound_eps (ic_b cert).
 Proof.
-have Hd : sw_rho_dist (sc_b cert) = ((`U psl211_G_pos) : R.-fdist cutT)
-  := etrans (sc_Hd cert) (psl211_alldecks_cut_distE R).
-have Hc := sc_close cert.
+have Hd : sw_rho_dist (ic_b cert) = ((`U psl211_G_pos) : R.-fdist cutT)
+  := etrans (ic_Hd cert) (psl211_alldecks_cut_distE R).
+have Hc := ic_close cert.
 rewrite Hd in Hc; exact: Hc.
 Qed.
 
-(** psl211_alldecks_no_small_eps_cert — no spectral certificate over the
-    all-decks run of the twelve-card chirality instance has its shuffle bound
-    epsilon added to itself strictly below the reciprocal 1/660 of the group
-    order, so every such certificate has an epsilon of at least 1/1320, the
-    value 1/1320 itself not excluded. A row publishes
+(** psl211_alldecks_no_small_eps_cert — no input-indistinguishability
+    certificate over the all-decks run of the twelve-card chirality instance has
+    its shuffle bound epsilon added to itself strictly below the reciprocal
+    1/660 of the group order, so every such certificate has an epsilon of at
+    least 1/1320, the value 1/1320 itself not excluded. A row publishes
     odflt (cert_eps cert) (c R) at its own reprice coordinate c, and cert_eps
     cert is the shuffle bound epsilon twice, so a row over this model that
     publishes its certificate's own number publishes at least 1/660. The
     obligation of conclude bounds the published number below by cert_eps
-    cert, so no row over this model publishes less. This fixes from below
-    what the spectral arm can publish at this model. It says neither that the
-    arm is unavailable here nor anything about what a coalition of at most
-    five seats reads. *)
+    cert, so no row over this model publishes less. This fixes from below what
+    the input-indistinguishability arm can publish at this model. It says
+    neither that the arm is unavailable here nor anything about what a coalition
+    of at most five seats reads. *)
 (* Argued and not compiled: the proposition a row carries is
-   SpectralPropAt cert c, a variation distance bounded above by c, so an
-   obligation weakened from an equality to cert_eps cert <= odflt (cert_eps
-   cert) (c R) could only let a row publish a number no smaller than
+   IndistinguishabilityPropAt cert c, a variation distance bounded above by c,
+   so an obligation weakened from an equality to cert_eps cert <= odflt
+   (cert_eps cert) (c R) could only let a row publish a number no smaller than
    cert_eps. *)
 (* The excluded range of epsilon is bounded above. The header records why the
    larger range is occupied and that the occupancy is argued and not
    compiled. *)
 Theorem psl211_alldecks_no_small_eps_cert (R : realType)
-    (cert : SpectralCert (psl211_alldecks_sample R)) :
-  sw_bound_eps (sc_b cert) + sw_bound_eps (sc_b cert)
+    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) :
+  sw_bound_eps (ic_b cert) + sw_bound_eps (ic_b cert)
     < (#|pgg_G psl211_M|%:R)^-1 -> False.
 Proof.
 move=> Heps.
-apply: (@psl211_alldecks_constancy_false_close R (sc_ideal cert)
-  (sw_bound_eps (sc_b cert)) (psl211_alldecks_cert_ideal_close cert) Heps).
-exact: spectral_cert_reading_constancy cert.
+apply: (@psl211_alldecks_constancy_false_close R (ic_ideal cert)
+  (sw_bound_eps (ic_b cert)) (psl211_alldecks_cert_ideal_close cert) Heps).
+exact: indistinguishability_cert_reading_constancy cert.
 Qed.
 
-(** psl211_alldecks_no_zero_eps_cert — in particular no spectral certificate
-    over the all-decks model has a shuffle bound epsilon of zero, which is
-    the epsilon profile_eps_psl211 of instances/psl211/psl211_profile.v
+(** psl211_alldecks_no_zero_eps_cert — in particular no
+    input-indistinguishability certificate over the all-decks model has a
+    shuffle bound epsilon of zero, which is the epsilon profile_eps_psl211 of
+    instances/psl211/psl211_profile.v
     gives this instance's single-card marginal bound. A certificate must
     hold its ideal cut within its own epsilon of the group-uniform law, and
     the group-uniform law is not a cut these three seats read constantly, so
     the sharper the shuffle bound the less room the certificate has. *)
 Corollary psl211_alldecks_no_zero_eps_cert (R : realType)
-    (cert : SpectralCert (psl211_alldecks_sample R)) :
-  sw_bound_eps (sc_b cert) = 0 -> False.
+    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) :
+  sw_bound_eps (ic_b cert) = 0 -> False.
 Proof.
 move=> Heps.
-have Hlt : sw_bound_eps (sc_b cert) + sw_bound_eps (sc_b cert)
+have Hlt : sw_bound_eps (ic_b cert) + sw_bound_eps (ic_b cert)
     < (#|pgg_G psl211_M|%:R)^-1.
   by rewrite Heps addr0 invr_gt0 ltr0n; exact: psl211_G_pos.
 (* cert is an implicit argument of the theorem, occurring in the type of its
@@ -764,7 +769,7 @@ Qed.
     replacement, while the eps is a certificate's own distance field. It is
     stated on the cut law rather than on a certificate because no
     weighted-word SampleAdapter exists in this tree, so there is no adapter
-    whose cut is this law and no sc_Hd through which a certificate's ideal
+    whose cut is this law and no ic_Hd through which a certificate's ideal
     could be held near it. *)
 Lemma psl211_alldecks_constancy_false_word584 (R : realType)
     (ideal : R.-fdist cutT) (eps : R) :
@@ -940,8 +945,9 @@ Proof. by rewrite /psl211_dealt_fiber uniform_fdistmap_pointE. Qed.
 
 (** psl211_dealt_constancy_false — under the dealer-dealt run parameters the
     constancy field is false at the uniform law on the shuffle group, so no
-    spectral certificate over these parameters can take that law as its ideal
-    cut, while a certificate at some other ideal stays open. The dealt run
+    input-indistinguishability certificate over these parameters can take that
+    law as its ideal cut, while a certificate at some other ideal stays open.
+    The dealt run
     argument is the chirality and nothing else, so here the constancy field is
     exactly constancy in the secret, and it fails because the encoder decks of
     the two chiralities give one reading of three seats different masses. That
