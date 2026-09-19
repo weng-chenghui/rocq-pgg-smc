@@ -211,9 +211,8 @@ come near five seconds.
 Carried in the statement comment of `psl211_row_word_proximity` and in the
 statement comment of `psl211_word_proximity_close`. The claim is an average
 over the deck description and the cut. It is not a statement at a fixed deck
-description. That every coalition below the threshold reads an ideal cut by the
-same law at every run argument is false at each cut named below. The refuted
-proposition is
+description: a coalition below the threshold does not read an ideal cut the
+same way at every run argument. The refuted proposition is
 `coalition_reading_constancy` of
 `instances/psl211/psl211_spectral_constancy.v`, an equality of two pushforward
 laws of the reading of a named ideal cut at two run arguments, and three
@@ -319,14 +318,6 @@ directory:
 
 The report grew from 21 prints to 23 and from 244 s to 282 s, the two added
 prints being on declarations whose type reaches the observed execution.
-
-A later comment-only edit to the row's docstring, naming the refuted
-proposition positively, was followed by recompiling
-`p6_psl211_word_proximity.v` (rc=0, 4.8 s wall, 4.700 s) and `p6_mutations.v`
-(rc=0, 3.9 s wall, 3.808 s). A comment-stripped comparison against
-`history/p6_psl211_word_proximity.v.15-before-fixD1b` shows the code byte
-for byte unchanged, 4752 bytes, so the assumptions report was not rerun and
-its figures above still hold.
 
 The three source files are dominated by their `Require` lines, the three
 largest of which are the mathcomp algebra block, the infotheo block and

@@ -214,15 +214,15 @@ Qed.
     reading and the chirality are independent outright; a distinguisher's
     advantage is therefore at most half of it. The claim is an average over
     the deck description and the cut and is not a statement at a fixed deck
-    description. That every coalition below the threshold reads an ideal cut
-    by the same law at every run argument is false at each cut named here:
-    psl211_alldecks_constancy_false refutes it at the group-uniform cut under
-    the all-decks run, psl211_alldecks_constancy_false_word584 at every cut
-    within eps of the 584-letter word law this row's model draws, once twice
-    the sum of eps and 2^-40 stays below 1/660, and
-    psl211_dealt_constancy_false at the group-uniform cut under the
-    dealer-dealt run, a different execution. Each is witnessed at a coalition
-    of three seats, and all three stay true beside this row. Its transfer
+    description: a coalition below the threshold does not read an ideal cut
+    the same way at every run argument, which psl211_alldecks_constancy_false
+    refutes at the group-uniform cut under the all-decks run,
+    psl211_alldecks_constancy_false_word584 at every cut within eps of the
+    584-letter word law this row's model draws, once twice the sum of eps and
+    2^-40 stays below 1/660, and psl211_dealt_constancy_false at the
+    group-uniform cut under the dealer-dealt run, a different execution. Each
+    is witnessed at the coalition of three seats, and those refutations stay
+    true beside this row. Its transfer
     status is IdealFinite, an idealised shuffle being replaced here by a
     shuffle of 584 letters. *)
 Definition psl211_row_word_proximity : PublishedRow :=
