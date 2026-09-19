@@ -64,8 +64,9 @@
 (*   cut-law distance from the ideal cut      -> centi_cut_mixing,            *)
 (*                                               biased_cut_mixing            *)
 (*   ideal reading constancy                  -> static_obs_const             *)
-(*   coalition reading bound at two pairs     -> centi_static_obs_indist,     *)
-(*                                               biased_static_obs_indist     *)
+(*   coalition reading bound at two pairs                                     *)
+(*     -> centi_static_obs_indistinguishability,                              *)
+(*        biased_static_obs_indistinguishability                              *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -404,20 +405,22 @@ Definition biased_cut_mixing := @kim_biased_cut_mixing.
     generic transfer bound, and the two paths share it. *)
 Definition static_obs_const := @five_card_static_obs_const.
 
-(** centi_static_obs_indist — a coalition of at most one seat, reading the
-    static endpoint colours under the seven-cut law, sees laws within twice
-    the seven-cut bundle's spectral number of each other at any two committed
-    pairs. It is what the two premises above give when fed to the generic
-    transfer bound, and it is the security statement of the repeated-cut
-    path: the attacker is that coalition, and the number bounds every
-    advantage it has in telling the two pairs apart. *)
-Definition centi_static_obs_indist := @kim_centi_static_obs_indist.
+(** centi_static_obs_indistinguishability — a coalition of at most one seat,
+    reading the static endpoint colours under the seven-cut law, sees laws
+    within twice the seven-cut bundle's spectral number of each other at any two
+    committed pairs. It is what the two premises above give when fed to the
+    generic transfer bound, and it is the security statement of the repeated-cut
+    path: the attacker is that coalition, and the number bounds every advantage
+    it has in telling the two pairs apart. *)
+Definition centi_static_obs_indistinguishability :=
+  @kim_centi_static_obs_indistinguishability.
 
-(** biased_static_obs_indist — the same bound at word length one, at twice
-    the length-one bundle's spectral number. It is the security statement of
-    the single-biased path, at a number of hundredth scale rather than a
-    cryptographic one. *)
-Definition biased_static_obs_indist := @kim_biased_static_obs_indist.
+(** biased_static_obs_indistinguishability — the same bound at word length
+    one, at twice the length-one bundle's spectral number. It is the security
+    statement of the single-biased path, at a number of hundredth scale rather
+    than a cryptographic one. *)
+Definition biased_static_obs_indistinguishability :=
+  @kim_biased_static_obs_indistinguishability.
 
 (** uniform_transfer_status — the transfer status of the uniform exact-cut
     path: it carries its landed static results to its executed observers,

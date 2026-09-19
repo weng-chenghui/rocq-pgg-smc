@@ -27,8 +27,10 @@ Check PGL27Analysis.word_sample.                (* 4 Models *)
 Check PGL27Analysis.exact_family.               (* 4 Models, typed family *)
 Check PGL27Analysis.word_family.                (* 4 Models, typed family *)
 Check PGL27Analysis.observed_recovers.          (* 5 Correctness *)
-Check PGL27Analysis.exec_view_indist.           (* 6 Security *)
-Check PGL27Analysis.word_view_indist_via_transfer. (* 7 Transfer *)
+Check PGL27Analysis.exec_view_indistinguishability.
+                                                (* 6 Security *)
+Check PGL27Analysis.word_view_indistinguishability_via_transfer.
+                                                (* 7 Transfer *)
 Check PGL27Analysis.word_transfer_status.       (* 7 Transfer, typed status *)
 
 (* Five-card development, sections 1 to 6, the bound sub-block and section 7.
@@ -46,7 +48,8 @@ Check FiveCardAnalysis.centi_family.            (* 4 Models, typed family *)
 Check FiveCardAnalysis.observed_recovers.       (* 5 Correctness *)
 Check FiveCardAnalysis.exec_trace_secrecy.      (* 6 Security *)
 Check FiveCardAnalysis.deal_centi_lt.           (* bound, not security *)
-Check FiveCardAnalysis.centi_static_obs_indist. (* 7 Transfer *)
+Check FiveCardAnalysis.centi_static_obs_indistinguishability.
+                                                (* 7 Transfer *)
 Check FiveCardAnalysis.uniform_transfer_status. (* 7 Transfer, typed status *)
 Check FiveCardAnalysis.biased_transfer_status.
 Check FiveCardAnalysis.repeated_transfer_status.

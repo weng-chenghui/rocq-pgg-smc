@@ -172,13 +172,13 @@ Local Open Scope ring_scope.
 (*                        PGL27Analysis.word_sample_joint_distE |             *)
 (* | bound or certificate | PGL27Analysis.word_mixing, the 2^-40 distance of  *)
 (*                          the word shuffle from uniform |                   *)
-(* | final bridge theorem | PGL27Analysis.exec_view_indist,                   *)
-(*                          PGL27Analysis.exec_trace_indist,                  *)
-(*                          PGL27Analysis.word_view_indist_via_transfer |     *)
+(* | final bridge theorem | PGL27Analysis.exec_view_indistinguishability,     *)
+(*     PGL27Analysis.exec_trace_indistinguishability,                         *)
+(*     PGL27Analysis.word_view_indistinguishability_via_transfer |            *)
 (* | correctness theorem  | PGL27Analysis.observed_recovers |                 *)
 (* | model transfer       | PGL27Analysis.var_dist_transfer, discharged at    *)
-(*                          this instance by                                  *)
-(*                          PGL27Analysis.word_view_indist_via_transfer |     *)
+(*     this instance by                                                       *)
+(*     PGL27Analysis.word_view_indistinguishability_via_transfer |            *)
 (* | missing premise      | none: PGL27Analysis.word_mixing supplies the      *)
 (*                          base-distribution bound the generic transfer      *)
 (*                          inequality needs, on the cut carrier itself |     *)
@@ -189,19 +189,20 @@ Local Open Scope ring_scope.
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
-(* | exec_view_indist | rho_word, the cut distribution of fixed_word_sample   *)
-(*   by fixed_word_cut_distE | coalition_endpoints, executed, through         *)
-(*   fixed_word_coalition_distE | approximate privacy at 2^-39 |              *)
-(* | exec_trace_indist | rho_word | content_trace, executed, through          *)
-(*   fixed_word_content_trace_distE | approximate privacy at 2^-39 |          *)
-(* | word_view_indist | rho_word | static_view                                *)
+(* | exec_view_indistinguishability | rho_word, the cut distribution of       *)
+(*   fixed_word_sample by fixed_word_cut_distE | coalition_endpoints,         *)
+(*   executed, through fixed_word_coalition_distE | approximate privacy at    *)
+(*   2^-39 |                                                                  *)
+(* | exec_trace_indistinguishability | rho_word | content_trace, executed,    *)
+(*   through fixed_word_content_trace_distE | approximate privacy at 2^-39 |  *)
+(* | word_view_indistinguishability | rho_word | static_view                  *)
 (*   | approximate privacy at 2^-39 |                                         *)
-(* | word_trace_indist | rho_word | coalition_trace                           *)
+(* | word_trace_indistinguishability | rho_word | coalition_trace             *)
 (*   | approximate privacy at 2^-39 |                                         *)
 (* | view_mixing | pgl27P_word_gen secretP, the joint distribution of         *)
 (*   word_sample by word_sample_joint_distE | the pair of static_view and     *)
 (*   secret | approximate privacy at 2^-40 |                                  *)
-(* | word_view_indist_via_transfer | rho_word | static_view                   *)
+(* | word_view_indistinguishability_via_transfer | rho_word | static_view     *)
 (*   | approximate privacy at 2^-39, derived from var_dist_transfer and       *)
 (*     word_mixing |                                                          *)
 (*                                                                            *)
@@ -209,10 +210,10 @@ Local Open Scope ring_scope.
 (* three aliases as row 1. fixed_word_sample is a SampleAdapter over that     *)
 (* plug and fixed_word_coalition_distE identifies its executed coalition      *)
 (* distribution with the pushforward of rho_word along static_view, giving    *)
-(* Sampled. exec_view_indist and exec_trace_indist are stated directly at     *)
-(* that sample layer, at the executed coalition observation and at the        *)
-(* executed content reader, giving AnalysisBridged at both executed           *)
-(* observers rather than at the static layer alone.                           *)
+(* Sampled. exec_view_indistinguishability and exec_trace_indistinguishability*)
+(* are stated directly at that sample layer, at the executed coalition        *)
+(* observation and at the executed content reader, giving AnalysisBridged at  *)
+(* both executed observers rather than at the static layer alone.             *)
 (*                                                                            *)
 (*     Row 3: five-card development, uniform cut (den Boer)                   *)
 (*                                                                            *)
@@ -311,9 +312,8 @@ Local Open Scope ring_scope.
 (*                          is the numeric constant of the bridge theorem,    *)
 (*                          not a shuffle certificate |                       *)
 (* | final bridge theorem | FiveCardAnalysis.colour_view_leak_bound, and      *)
-(*                          FiveCardAnalysis.biased_static_obs_indist, the    *)
-(*                          coalition bound the cut-carrier transfer          *)
-(*                          concludes at this row |                           *)
+(*     FiveCardAnalysis.biased_static_obs_indistinguishability, the coalition *)
+(*     bound the cut-carrier transfer concludes at this row |                 *)
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
 (* | model transfer       | the cut-carrier transfer of                       *)
 (*                          var_dist_fdistmap_transfer: its first hypothesis  *)
@@ -333,16 +333,18 @@ Local Open Scope ring_scope.
 (* | colour_view_leak_bound | kim_input_dist eps_lt_inv5 eps_gt_neg4inv5,     *)
 (*   the distribution of single_biased_sample | colour_view A, executed       *)
 (*   | mutual information, at most kim_leak_bound eps |                       *)
-(* | biased_static_obs_indist | the cut distribution of single_biased_sample  *)
-(*   at bias one hundredth, by biased_sample_cut_witnessE | static_obs        *)
+(* | biased_static_obs_indistinguishability | the cut distribution of         *)
+(*   single_biased_sample at bias one hundredth, by biased_sample_cut_witnessE*)
+(*   | static_obs                                                             *)
 (*   | approximate privacy at twice the length-one bundle's number, derived   *)
 (*     from var_dist_fdistmap_transfer and biased_cut_mixing |                *)
 (*                                                                            *)
 (* Hypotheses of colour_view_leak_bound: eps_lt_inv5, eps_gt_neg4inv5 and     *)
 (* the small-bias hypothesis eps_small : 0 < 5^-1 - `|eps|. All three are     *)
 (* explicit arguments of the aliased theorem; none is discharged silently.    *)
-(* biased_static_obs_indist has one hypothesis, that the coalition holds at   *)
-(* most one of the five seats, and it is an explicit argument too.            *)
+(* biased_static_obs_indistinguishability has one hypothesis, that the        *)
+(* coalition holds at most one of the five seats, and it is an explicit       *)
+(* argument too.                                                              *)
 (*                                                                            *)
 (* Level justification. single_biased_sample is the sample adapter with the   *)
 (* same carrier and the same argument and cut maps as uniform_sample and with *)
@@ -356,13 +358,13 @@ Local Open Scope ring_scope.
 (* is the equality of two readings of that law, so both hypotheses of         *)
 (* var_dist_fdistmap_transfer are discharged and the transfer status is       *)
 (* IdealFinite rather than StaticExecutedOnly. The conclusion of that         *)
-(* transfer is biased_static_obs_indist, a bound on the variation distance    *)
-(* between the static readings of a coalition of at most one seat at two      *)
-(* committed pairs. Its distribution is this row's cut law at bias one        *)
-(* hundredth, by biased_sample_cut_witnessE, and its observer is static_obs,  *)
-(* the second observer this row declares, so it reaches AnalysisBridged       *)
-(* beside colour_view_leak_bound, which reaches it at the executed reader     *)
-(* colour_view.                                                               *)
+(* transfer is biased_static_obs_indistinguishability, a bound on the         *)
+(* variation distance between the static readings of a coalition of at most   *)
+(* one seat at two committed pairs. Its distribution is this row's cut law at *)
+(* bias one hundredth, by biased_sample_cut_witnessE, and its observer is     *)
+(* static_obs, the second observer this row declares, so it reaches           *)
+(* AnalysisBridged beside colour_view_leak_bound, which reaches it at the     *)
+(* executed reader colour_view.                                               *)
 (*                                                                            *)
 (*     Row 5: five-card development, repeated biased cuts and seven cuts      *)
 (*                                                                            *)
@@ -395,11 +397,11 @@ Local Open Scope ring_scope.
 (*                          FiveCardAnalysis.centi_bundle,                    *)
 (*                          FiveCardAnalysis.endpoint_bound,                  *)
 (*                          FiveCardAnalysis.deal_centi_lt |                  *)
-(* | final bridge theorem | FiveCardAnalysis.centi_static_obs_indist, the     *)
-(*                          coalition bound var_dist_fdistmap_transfer        *)
-(*                          concludes at this row from                        *)
-(*                          FiveCardAnalysis.centi_cut_mixing and             *)
-(*                          FiveCardAnalysis.static_obs_const |               *)
+(* | final bridge theorem |                                                   *)
+(*     FiveCardAnalysis.centi_static_obs_indistinguishability, the coalition  *)
+(*     bound var_dist_fdistmap_transfer concludes at this row from            *)
+(*     FiveCardAnalysis.centi_cut_mixing and FiveCardAnalysis.static_obs_const*)
+(*     |                                                                      *)
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
 (* | model transfer       | the cut-carrier transfer of                       *)
 (*                          var_dist_fdistmap_transfer: its first hypothesis  *)
@@ -420,26 +422,27 @@ Local Open Scope ring_scope.
 (* | deal_centi_lt | the cut distribution of centi_sample, by                 *)
 (*   centi_cut_distE | one seat's endpoint distribution                       *)
 (*   | endpoint marginal bound |                                              *)
-(* | centi_static_obs_indist | the cut distribution of centi_sample, by       *)
-(*   centi_cut_distE | static_obs | approximate privacy at twice the          *)
-(*   seven-cut bundle's number, derived from var_dist_fdistmap_transfer and   *)
-(*   centi_cut_mixing |                                                       *)
+(* | centi_static_obs_indistinguishability | the cut distribution of          *)
+(*   centi_sample, by centi_cut_distE | static_obs | approximate privacy at   *)
+(*   twice the seven-cut bundle's number, derived from                        *)
+(*   var_dist_fdistmap_transfer and centi_cut_mixing |                        *)
 (*                                                                            *)
 (* Level justification. Both models are sample adapters over the plug and     *)
 (* both cut distributions are named, giving Sampled. centi_cut_mixing         *)
 (* bounds the distance of the seven-cut distribution from the uniform         *)
 (* rotation law on the cut carrier itself, and with static_obs_const it       *)
 (* discharges both hypotheses of var_dist_fdistmap_transfer, giving           *)
-(* IdealFinite. The conclusion of that transfer, centi_static_obs_indist, is  *)
-(* a bound on the variation distance between the static readings of a         *)
-(* coalition of at most one seat at two committed pairs. Its distribution is  *)
-(* this row's cut law, by centi_cut_distE, and its observer is static_obs,    *)
-(* which the row declares, and that is what gives AnalysisBridged.            *)
-(* endpoint_bound and deal_centi_lt stay in the row for what they are: they   *)
-(* bound the distance from uniform of ONE seat's endpoint distribution,       *)
-(* neither quantifies over a coalition and neither mentions a second secret.  *)
-(* A ShuffleCertificateBundle exists for both models, and centi_cut_mixing is *)
-(* proved from the marginal bound that bundle carries.                        *)
+(* IdealFinite. The conclusion of that transfer,                              *)
+(* centi_static_obs_indistinguishability, is a bound on the variation distance*)
+(* between the static readings of a coalition of at most one seat at two      *)
+(* committed pairs. Its distribution is this row's cut law, by                *)
+(* centi_cut_distE, and its observer is static_obs, which the row declares,   *)
+(* and that is what gives AnalysisBridged. endpoint_bound and deal_centi_lt   *)
+(* stay in the row for what they are: they bound the distance from uniform of *)
+(* ONE seat's endpoint distribution, neither quantifies over a coalition and  *)
+(* neither mentions a second secret. A ShuffleCertificateBundle exists for    *)
+(* both models, and centi_cut_mixing is proved from the marginal bound that   *)
+(* bundle carries.                                                            *)
 (*                                                                            *)
 (*     Row 6: five-seat S_5 instance, deterministic dealt position            *)
 (*                                                                            *)
@@ -836,9 +839,10 @@ Definition five_card_row_uniform : AnalysisPathRow :=
     of this row's cut law from that ideal on the cut carrier itself, with
     FiveCardAnalysis.static_obs_const for the reading equality; those two
     give IdealFinite. Their transfer concludes
-    FiveCardAnalysis.biased_static_obs_indist, the bound a coalition of at
-    most one seat has on telling two committed pairs apart by what it reads,
-    which is a second theorem reaching AnalysisBridged at this row. *)
+    FiveCardAnalysis.biased_static_obs_indistinguishability, the bound a
+    coalition of at most one seat has on telling two committed pairs apart by
+    what it reads, which is a second theorem reaching AnalysisBridged at this
+    row. *)
 Definition five_card_row_biased : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.biased_family IdealFinite BaselineClassicalOnly.
@@ -852,12 +856,12 @@ Definition five_card_row_biased : AnalysisPathRow :=
     law from that ideal on the cut carrier itself, with
     FiveCardAnalysis.static_obs_const for the reading equality; those two
     give IdealFinite. Their transfer concludes
-    FiveCardAnalysis.centi_static_obs_indist, the bound a coalition of at
-    most one seat has on telling two committed pairs apart by what it reads,
-    and that conclusion is what reaches AnalysisBridged. endpoint_bound
-    and deal_centi_lt stay in the row as endpoint marginal bounds: each
-    bounds one seat's endpoint distribution and neither quantifies over a
-    coalition. *)
+    FiveCardAnalysis.centi_static_obs_indistinguishability, the bound a
+    coalition of at most one seat has on telling two committed pairs apart by
+    what it reads, and that conclusion is what reaches AnalysisBridged.
+    endpoint_bound and deal_centi_lt stay in the row as endpoint marginal
+    bounds: each bounds one seat's endpoint distribution and neither quantifies
+    over a coalition. *)
 Definition five_card_row_repeated : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.centi_family IdealFinite BaselineClassicalOnly.
@@ -1078,7 +1082,7 @@ Timeout 60 Check (PGL27Analysis.content_traceE :
     PGL27Analysis.content_trace C u.1 u.2
     = PGL27Analysis.coalition_trace R C u).
 
-Timeout 60 Check (PGL27Analysis.word_view_indist :
+Timeout 60 Check (PGL27Analysis.word_view_indistinguishability :
   forall (R : realType) (C : {set 'I_8}) (s s' : bool),
     (#|C| <= 3)%N ->
     var_dist
@@ -1088,7 +1092,7 @@ Timeout 60 Check (PGL27Analysis.word_view_indist :
          (pgl27_word_privacy.rho_word R))
     <= 2%:R^-39).
 
-Timeout 60 Check (PGL27Analysis.word_trace_indist :
+Timeout 60 Check (PGL27Analysis.word_trace_indistinguishability :
   forall (R : realType) (C : {set 'I_8}) (s s' : bool),
     (#|C| <= 3)%N ->
     var_dist
@@ -1098,14 +1102,14 @@ Timeout 60 Check (PGL27Analysis.word_trace_indist :
          (pgl27_word_privacy.rho_word R))
     <= 2%:R^-39).
 
-Timeout 60 Check (PGL27Analysis.exec_view_indist :
+Timeout 60 Check (PGL27Analysis.exec_view_indistinguishability :
   forall (R : realType) (C : {set 'I_8}) (s s' : bool),
     (#|C| <= 3)%N ->
     var_dist (sa_coalition_dist (PGL27Analysis.fixed_word_sample R s) 0 C)
              (sa_coalition_dist (PGL27Analysis.fixed_word_sample R s') 0 C)
     <= 2%:R^-39).
 
-Timeout 60 Check (PGL27Analysis.exec_trace_indist :
+Timeout 60 Check (PGL27Analysis.exec_trace_indistinguishability :
   forall (R : realType) (C : {set 'I_8}) (s s' : bool),
     (#|C| <= 3)%N ->
     var_dist
@@ -1169,7 +1173,7 @@ Timeout 60 Check (PGL27Analysis.var_dist_transfer :
     fdistmap fx Q = fdistmap fy Q ->
     var_dist (fdistmap fx P) (fdistmap fy P) <= delta + delta).
 
-Timeout 60 Check (PGL27Analysis.word_view_indist_via_transfer :
+Timeout 60 Check (PGL27Analysis.word_view_indistinguishability_via_transfer :
   forall (R : realType) (C : {set 'I_8}) (s s' : bool),
     (#|C| <= 3)%N ->
     var_dist
@@ -1510,7 +1514,7 @@ Timeout 60 Check (FiveCardAnalysis.static_obs_const :
                     five_card_exec.five_card_params C x')
                  (sa_cut_dist (FiveCardAnalysis.uniform_sample R))).
 
-Timeout 60 Check (FiveCardAnalysis.centi_static_obs_indist :
+Timeout 60 Check (FiveCardAnalysis.centi_static_obs_indistinguishability :
   forall (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile
                                   five_card_exec.five_card_algebra))).+1}),
@@ -1527,7 +1531,7 @@ Timeout 60 Check (FiveCardAnalysis.centi_static_obs_indist :
       <= sw_bound_eps (scb_bound (FiveCardAnalysis.centi_bundle R))
          + sw_bound_eps (scb_bound (FiveCardAnalysis.centi_bundle R))).
 
-Timeout 60 Check (FiveCardAnalysis.biased_static_obs_indist :
+Timeout 60 Check (FiveCardAnalysis.biased_static_obs_indistinguishability :
   forall (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile
                                   five_card_exec.five_card_algebra))).+1}),

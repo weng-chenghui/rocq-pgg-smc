@@ -40,7 +40,7 @@
 (* Not claimed. An input-indistinguishability row for this dealer. A          *)
 (* certificate's constancy field asks that a coalition below the privacy      *)
 (* threshold read the ideal cut the same way at every run argument, and       *)
-(* instances/psl211/psl211_spectral_constancy.v restates that field as        *)
+(* instances/psl211/psl211_reading_constancy.v restates that field as         *)
 (* coalition_reading_constancy and refutes it in both run modes. Under the    *)
 (* dealer-dealt parameters, where the run argument is the secret, it fails at *)
 (* three seats at the group-uniform ideal, psl211_dealt_constancy_false. Under*)

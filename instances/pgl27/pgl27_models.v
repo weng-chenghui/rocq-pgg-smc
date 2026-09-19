@@ -49,17 +49,20 @@
 (*   pgl27_word_joint_viewE     == the joint executed view-and-secret         *)
 (*                                 distribution over the arbitrary-prior word *)
 (*                                 sample is the static joint distribution    *)
-(*   pgl27_exec_view_indist     == two fixed secrets give executed coalition  *)
+(*   pgl27_exec_view_indistinguishability                                     *)
+(*                              == two fixed secrets give executed coalition  *)
 (*                                 distributions within 2^-39                 *)
-(*   pgl27_exec_trace_indist    == the same for the executed content trace    *)
+(*   pgl27_exec_trace_indistinguishability                                    *)
+(*                              == the same for the executed content trace    *)
 (*   pgl27_exact_coalition_distE == the exact model's executed coalition      *)
 (*                                 distribution is the pushforward of pgl27P  *)
 (*                                 along the static view                      *)
 (*   pgl27_exec_exact_view_indep == the executed coalition observation and    *)
 (*                                 the orbit secret have a product joint      *)
 (*                                 distribution at three cards                *)
-(*   pgl27_word_view_indist_via_transfer == the 2^-39 coalition-view bound as *)
-(*                                 an instance of var_dist_fdistmap_transfer  *)
+(*   pgl27_word_view_indistinguishability_via_transfer                        *)
+(*                              == the 2^-39 coalition-view bound as an       *)
+(*                                 instance of var_dist_fdistmap_transfer     *)
 (*                                                                            *)
 (* The import of pgl27_trace supplies content_of, pgl27_player_trace and      *)
 (* pgl27_coalition_trace; the import of pgg_collusion_bound supplies the      *)
@@ -310,11 +313,12 @@ Qed.
 (*     The executed 2^-39 bridges and the exact model's independence          *)
 (******************************************************************************)
 
-(** pgl27_exec_view_indist — two fixed secrets give executed coalition
-    distributions within 2^-39 in variation distance, at three cards. The
-    word-shuffle coalition-privacy bound stated over the executed sample
+(** pgl27_exec_view_indistinguishability — two fixed secrets give executed
+    coalition distributions within 2^-39 in variation distance, at three cards.
+    The word-shuffle coalition-privacy bound stated over the executed sample
     layer. *)
-Lemma pgl27_exec_view_indist (C : {set 'I_8}) (s s' : bool) : (#|C| <= 3)%N ->
+Lemma pgl27_exec_view_indistinguishability (C : {set 'I_8}) (s s' : bool) :
+  (#|C| <= 3)%N ->
   var_dist
     (@sa_coalition_dist R mpP pgl27_exec_plug
        (pgl27_fixed_word_sample s) 0 C)
@@ -325,14 +329,15 @@ Proof.
 move=> HC.
 rewrite (pgl27_fixed_word_coalition_distE C s)
         (pgl27_fixed_word_coalition_distE C s').
-exact: pgl27_word_view_indist.
+exact: pgl27_word_view_indistinguishability.
 Qed.
 
-(** pgl27_exec_trace_indist — two fixed secrets give executed content-trace
-    distributions within 2^-39 in variation distance, at three cards. The
-    word-shuffle trace-privacy bound stated over the executed content
+(** pgl27_exec_trace_indistinguishability — two fixed secrets give executed
+    content-trace distributions within 2^-39 in variation distance, at three
+    cards. The word-shuffle trace-privacy bound stated over the executed content
     reader. *)
-Lemma pgl27_exec_trace_indist (C : {set 'I_8}) (s s' : bool) : (#|C| <= 3)%N ->
+Lemma pgl27_exec_trace_indistinguishability (C : {set 'I_8}) (s s' : bool) :
+  (#|C| <= 3)%N ->
   var_dist
     (fdistmap (fun w : 200.-tuple 'I_5 =>
                  pgl27_exec_content_trace C s (@word_eval pgl27_Msym 200 w))
@@ -345,7 +350,7 @@ Proof.
 move=> HC.
 rewrite (pgl27_fixed_word_content_trace_distE C s)
         (pgl27_fixed_word_content_trace_distE C s').
-exact: pgl27_word_trace_indist.
+exact: pgl27_word_trace_indistinguishability.
 Qed.
 
 (** pgl27_exact_coalition_distE — the exact model's executed coalition
@@ -377,14 +382,16 @@ Qed.
 (*     The coalition bound as an instance of the generic transfer bound       *)
 (******************************************************************************)
 
-(** pgl27_word_view_indist_via_transfer — under the two-hundred-letter word
-    shuffle the coalition-view distributions of two secrets are within 2^-39
-    in variation distance, for every coalition of at most three positions.
-    Statistical coalition privacy under the realistic shuffle, obtained as an
-    instance of var_dist_fdistmap_transfer.  The statement is that of
-    pgl27_word_view_indist verbatim; only the route differs, which is what
-    exercises the generic transfer bound at a real instance. *)
-Corollary pgl27_word_view_indist_via_transfer (C : {set 'I_8}) (s s' : bool) :
+(** pgl27_word_view_indistinguishability_via_transfer — under the
+    two-hundred-letter word shuffle the coalition-view distributions of two
+    secrets are within 2^-39 in variation distance, for every coalition of at
+    most three positions. Statistical coalition privacy under the realistic
+    shuffle, obtained as an instance of var_dist_fdistmap_transfer. The
+    statement is that of pgl27_word_view_indistinguishability verbatim; only the
+    route differs, which is what exercises the generic transfer bound at a real
+    instance. *)
+Corollary pgl27_word_view_indistinguishability_via_transfer
+    (C : {set 'I_8}) (s s' : bool) :
   (#|C| <= 3)%N ->
   var_dist (fdistmap (fun g => pgl27_view R C (s, g)) (rho_word R))
            (fdistmap (fun g => pgl27_view R C (s', g)) (rho_word R))

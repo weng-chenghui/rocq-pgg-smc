@@ -81,7 +81,7 @@
 (*                              published statement                           *)
 (*   pgl27_exact_bridge      == the exact row's proposition gives its         *)
 (*                              published statement                           *)
-(*   pgl27_word_view_indist_restated                                          *)
+(*   pgl27_word_view_indistinguishability_restated                            *)
 (*                           == the word statement, from the word row alone   *)
 (*   pgl27_exec_exact_view_indep_restated                                     *)
 (*                           == the exact statement, from the exact row alone *)
@@ -444,11 +444,11 @@ Definition pgl27_word_restated (R : realType) (secretP : R.-fdist bool)
 
 (** Two dealt secrets give coalition-view laws within 2^-39 under the word
     shuffle, at fewer than four seats. The statement is that of
-    pgl27_word_view_indist, re-proved by reading the restated row's theorem
-    field and applying it, with no proof step of its own; the secret prior is
-    an argument because the word model is a family indexed by it, and any one
-    index witnesses a statement the prior does not appear in. *)
-Theorem pgl27_word_view_indist_restated (R : realType)
+    pgl27_word_view_indistinguishability, re-proved by reading the restated
+    row's theorem field and applying it, with no proof step of its own; the
+    secret prior is an argument because the word model is a family indexed by
+    it, and any one index witnesses a statement the prior does not appear in. *)
+Theorem pgl27_word_view_indistinguishability_restated (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (s s' : bool) :
   (#|C| <= 3)%N ->
   var_dist (fdistmap (fun g => pgl27_view R C (s, g)) (rho_word R))
@@ -559,7 +559,8 @@ Definition pgl27_word_same_statement (R : realType) (secretP : R.-fdist bool) :
      var_dist (fdistmap (fun g => pgl27_view R C (s, g)) (rho_word R))
               (fdistmap (fun g => pgl27_view R C (s', g)) (rho_word R))
      <= 2%:R^-39) :=
-  (@pgl27_word_view_indist R, @pgl27_word_view_indist_restated R secretP).
+  (@pgl27_word_view_indistinguishability R,
+   @pgl27_word_view_indistinguishability_restated R secretP).
 
 (** The same check for the exact published statement and the theorem the exact
     row restates. *)

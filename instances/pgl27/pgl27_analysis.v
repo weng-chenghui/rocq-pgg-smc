@@ -40,13 +40,14 @@
 (*   exact-security bridges                   -> exact_coalition_distE,       *)
 (*                                               exact_view_indep,            *)
 (*                                               coalition_trace_secrecy      *)
-(*   finite-word security bridges             -> exec_view_indist,            *)
-(*                                               exec_trace_indist,           *)
-(*                                               word_view_indist,            *)
-(*                                               word_trace_indist,           *)
-(*                                               view_mixing, word_mixing     *)
+(*   finite-word security bridges                                             *)
+(*     -> exec_view_indistinguishability,                                     *)
+(*        exec_trace_indistinguishability,                                    *)
+(*        word_view_indistinguishability,                                     *)
+(*        word_trace_indistinguishability,                                    *)
+(*        view_mixing, word_mixing                                            *)
 (*   PGL specialization of the transfer bound                                 *)
-(*                                            -> word_view_indist_via_transfer*)
+(*     -> word_view_indistinguishability_via_transfer                         *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -243,20 +244,26 @@ Definition observed_recovers := @pgl27_observed_recovers.
     observer. *)
 Definition content_traceE := @pgl27_content_traceE.
 
-(** word_view_indist — two secrets give static coalition views within 2^-39 in
-    variation distance under the word shuffle, at three cards. *)
-Definition word_view_indist := @pgl27_word_view_indist.
+(** word_view_indistinguishability — two secrets give static coalition views
+    within 2^-39 in variation distance under the word shuffle, at three cards.
+    *)
+Definition word_view_indistinguishability :=
+  @pgl27_word_view_indistinguishability.
 
-(** word_trace_indist — the same bound for the static coalition content
+(** word_trace_indistinguishability — the same bound for the static coalition
+    content trace. *)
+Definition word_trace_indistinguishability :=
+  @pgl27_word_trace_indistinguishability.
+
+(** exec_view_indistinguishability — two fixed secrets give executed coalition
+    distributions within 2^-39 in variation distance, at three cards. *)
+Definition exec_view_indistinguishability :=
+  @pgl27_exec_view_indistinguishability.
+
+(** exec_trace_indistinguishability — the same bound for the executed content
     trace. *)
-Definition word_trace_indist := @pgl27_word_trace_indist.
-
-(** exec_view_indist — two fixed secrets give executed coalition distributions
-    within 2^-39 in variation distance, at three cards. *)
-Definition exec_view_indist := @pgl27_exec_view_indist.
-
-(** exec_trace_indist — the same bound for the executed content trace. *)
-Definition exec_trace_indist := @pgl27_exec_trace_indist.
+Definition exec_trace_indistinguishability :=
+  @pgl27_exec_trace_indistinguishability.
 
 (** view_mixing — the joint view-and-secret distribution under the word
     shuffle is within 2^-40 of the product of its marginals. *)
@@ -289,10 +296,10 @@ Definition certificate_bundle := @pgl27_certificate_bundle.
 (** var_dist_transfer — the generic exact-to-finite transfer inequality. *)
 Definition var_dist_transfer := @var_dist_fdistmap_transfer.
 
-(** word_view_indist_via_transfer — the 2^-39 coalition-view bound obtained as
-    an instance of the generic transfer inequality. *)
-Definition word_view_indist_via_transfer :=
-  @pgl27_word_view_indist_via_transfer.
+(** word_view_indistinguishability_via_transfer — the 2^-39 coalition-view
+    bound obtained as an instance of the generic transfer inequality. *)
+Definition word_view_indistinguishability_via_transfer :=
+  @pgl27_word_view_indistinguishability_via_transfer.
 
 (** word_transfer_status — the word path's transfer status. IdealFinite, the
     path carrying a public model-transfer theorem whose base-distribution
@@ -343,18 +350,18 @@ Timeout 60 Check (PGL27Analysis.observed_recovers :
 
 (* 6 Security: the executed coalition bound keeps its cardinality hypothesis,
    its two sample-layer distributions and its 2^-39 constant. *)
-Timeout 60 Check (PGL27Analysis.exec_view_indist :
+Timeout 60 Check (PGL27Analysis.exec_view_indistinguishability :
   forall (R : realType) (C : {set 'I_8}) (s s' : bool),
     (#|C| <= 3)%N ->
     var_dist (sa_coalition_dist (PGL27Analysis.fixed_word_sample R s) 0 C)
              (sa_coalition_dist (PGL27Analysis.fixed_word_sample R s') 0 C)
     <= 2%:R^-39).
 
-(* 7 Transfer: the specialization has the statement of word_view_indist
-   verbatim, hypothesis for hypothesis and constant for constant, and the
-   typed status is pinned at its constructor. *)
+(* 7 Transfer: the specialization has the statement of
+   word_view_indistinguishability verbatim, hypothesis for hypothesis and
+   constant for constant, and the typed status is pinned at its constructor. *)
 Timeout 60 Check (erefl : PGL27Analysis.word_transfer_status = IdealFinite).
-Timeout 60 Check (PGL27Analysis.word_view_indist_via_transfer :
+Timeout 60 Check (PGL27Analysis.word_view_indistinguishability_via_transfer :
   forall (R : realType) (C : {set 'I_8}) (s s' : bool),
     (#|C| <= 3)%N ->
     var_dist

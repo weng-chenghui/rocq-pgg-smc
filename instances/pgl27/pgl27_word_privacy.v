@@ -20,9 +20,10 @@
 (*     dealt secret, for every two-hundred-letter generator word              *)
 (*   pgl27_view_law_classes == at most three positions see the same law of    *)
 (*     the uniformly shuffled deal in both orbit classes                      *)
-(*   pgl27_word_view_indist == two secrets give coalition-view laws within    *)
-(*     2^-39 in variation distance under the word shuffle                     *)
-(*   pgl27_word_trace_indist == the same for the executed coalition trace     *)
+(*   pgl27_word_view_indistinguishability == two secrets give coalition-view  *)
+(*     laws within 2^-39 in variation distance under the word shuffle         *)
+(*   pgl27_word_trace_indistinguishability == the same for the executed       *)
+(*     coalition trace                                                        *)
 (*   pgl27_view_mixing == the joint view-and-secret law under the word        *)
 (*     shuffle is within 2^-40 of the product of its exact-shuffle marginals, *)
 (*     for every Boolean prior                                                *)
@@ -180,11 +181,11 @@ Qed.
 Fact pow2_split : (2%:R : R)^-40 + 2%:R^-40 = 2%:R^-39.
 Proof. by rewrite [RHS]splitr exprSr invfM. Qed.
 
-(** pgl27_word_view_indist — under the two-hundred-letter word shuffle the
-    coalition-view laws of two secrets are within 2^-39 in variation distance,
-    for every coalition of at most three positions. Statistical coalition
-    privacy under the realistic shuffle. *)
-Theorem pgl27_word_view_indist (C : {set 'I_8}) (s s' : bool) :
+(** pgl27_word_view_indistinguishability — under the two-hundred-letter word
+    shuffle the coalition-view laws of two secrets are within 2^-39 in variation
+    distance, for every coalition of at most three positions. Statistical
+    coalition privacy under the realistic shuffle. *)
+Theorem pgl27_word_view_indistinguishability (C : {set 'I_8}) (s s' : bool) :
   (#|C| <= 3)%N ->
   var_dist (fdistmap (fun g => pgl27_view R C (s, g)) rho_word)
            (fdistmap (fun g => pgl27_view R C (s', g)) rho_word)
@@ -201,17 +202,18 @@ rewrite -pow2_split; apply: lerD.
   exact: pgl27_word_mixing.
 Qed.
 
-(** pgl27_word_trace_indist — under the two-hundred-letter word shuffle the
-    executed coalition traces of two secrets are within 2^-39 in variation
-    distance, for every coalition of at most three positions. The
+(** pgl27_word_trace_indistinguishability — under the two-hundred-letter word
+    shuffle the executed coalition traces of two secrets are within 2^-39 in
+    variation distance, for every coalition of at most three positions. The
     coalition-view bound transported to the executed interpreter trace. *)
-Theorem pgl27_word_trace_indist (C : {set 'I_8}) (s s' : bool) :
+Theorem pgl27_word_trace_indistinguishability (C : {set 'I_8}) (s s' : bool) :
   (#|C| <= 3)%N ->
   var_dist (fdistmap (fun g => pgl27_coalition_trace R C (s, g)) rho_word)
            (fdistmap (fun g => pgl27_coalition_trace R C (s', g)) rho_word)
   <= 2%:R^-39.
 Proof.
-by rewrite (pgl27_coalition_trace_E R C); exact: pgl27_word_view_indist.
+by rewrite (pgl27_coalition_trace_E R C);
+  exact: pgl27_word_view_indistinguishability.
 Qed.
 
 (** pgl27_view_indep_gen — at every Boolean prior, a coalition of at most
