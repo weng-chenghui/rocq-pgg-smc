@@ -1,0 +1,18 @@
+Warning:
+/Users/cheng-huiweng/Projects/coq/rocq-pgg-smc/notes/probes/2026-09-20-tableau-directories-s5/staged/instances/s5/tableau
+was previously bound to tableau_dirs_s5.staged.instances.s5.tableau; it is
+remapped to pgg_smc.tableau [overriding-logical-loadpath,filesystem,default]
+Warning:
+/Users/cheng-huiweng/Projects/coq/rocq-pgg-smc/notes/probes/2026-09-20-tableau-directories-s5/staged/instances/s5
+was previously bound to tableau_dirs_s5.staged.instances.s5; it is remapped
+to pgg_smc [overriding-logical-loadpath,filesystem,default]
+Warning:
+/Users/cheng-huiweng/Projects/coq/rocq-pgg-smc/notes/probes/2026-09-20-tableau-directories-s5/staged/instances/kim2025
+was previously bound to tableau_dirs_s5.staged.instances.kim2025; it is
+remapped to pgg_smc [overriding-logical-loadpath,filesystem,default]
+File "./baseline.v", line 12, characters 0-50:
+Warning: Notations "_ <| _ |> _" defined at level 49 with arguments constr
+at next level, constr at next level and "_ <| _" defined at level 70
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]

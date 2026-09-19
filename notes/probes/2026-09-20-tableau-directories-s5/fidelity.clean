@@ -1,0 +1,268 @@
+s5_dealt : Tableau Observed
+     : Tableau Observed
+s5_dealt_row_observedE
+:
+ob_obs (tableau_at s5_dealt) = apr_observed s5_row_det
+     : ob_obs (tableau_at s5_dealt) = apr_observed s5_row_det
+s5_supplied : Tableau Observed
+     : Tableau Observed
+s5_supplied_paramsE
+:
+projT1 (projT2 (tableau_at s5_supplied)) = s5_supplied_params
+     : projT1 (projT2 (tableau_at s5_supplied)) = s5_supplied_params
+s5_rand_static_obsE
+:
+forall (R : realType) (idx : unit)
+  (C : {set 'I_(pi_T' (mp_PI (instance_profile s5_algebra))).+1}),
+(fun u : sa_sampleT (amf_sample s5_rand_family R idx) =>
+ static_coalition_obs C (sa_arg u) (sa_cut u)) =
+rsh_view (unif_randomized_sharing R 3 4) C
+     : forall (R : realType) (idx : unit)
+         (C : {set 'I_(pi_T' (mp_PI (instance_profile s5_algebra))).+1}),
+       (fun u : sa_sampleT (amf_sample s5_rand_family R idx) =>
+        static_coalition_obs C (sa_arg u) (sa_cut u)) =
+       rsh_view (unif_randomized_sharing R 3 4) C
+s5_rand_static_obs_indep
+:
+forall (R : realType) (idx : unit)
+  (C : {set 'I_(pi_T' (mp_PI (instance_profile s5_algebra))).+1}),
+(#|C| < profile_k (instance_profile s5_algebra))%N ->
+sa_sampleP (amf_sample s5_rand_family R idx) |= (fun
+                                                 u : 
+                                                 sa_sampleT
+                                                 (amf_sample s5_rand_family R
+                                                 idx) =>
+                                                 static_coalition_obs C
+                                                 (sa_arg u) 
+                                                 (sa_cut u)) _|_ 
+rsh_secret (unif_randomized_sharing R 3 4)
+     : forall (R : realType) (idx : unit)
+         (C : {set 'I_(pi_T' (mp_PI (instance_profile s5_algebra))).+1}),
+       (#|C| < profile_k (instance_profile s5_algebra))%N ->
+       sa_sampleP (amf_sample s5_rand_family R idx) |= 
+       (fun u : sa_sampleT (amf_sample s5_rand_family R idx) =>
+        static_coalition_obs C (sa_arg u) (sa_cut u)) _|_ 
+       rsh_secret (unif_randomized_sharing R 3 4)
+s5_rand_exact_witness
+:
+forall (R : realType) (idx : unit),
+ExactWitness (amf_sample s5_rand_family R idx)
+     : forall (R : realType) (idx : unit),
+       ExactWitness (amf_sample s5_rand_family R idx)
+s5_row_rand_tableau : PublishedRow
+     : PublishedRow
+s5_row_rand_rowE : published_row s5_row_rand_tableau = s5_row_rand
+     : published_row s5_row_rand_tableau = s5_row_rand
+s5_row_rand_armE
+:
+forall (R : realType)
+  (idx : amf_index (ab_f (published_at s5_row_rand_tableau)) R),
+security_arm_of s5_row_rand_tableau R idx = ExactIndependenceArm
+     : forall (R : realType)
+         (idx : amf_index (ab_f (published_at s5_row_rand_tableau)) R),
+       security_arm_of s5_row_rand_tableau R idx = ExactIndependenceArm
+s5_rand_view_secrecy
+:
+forall (R : realType) (C : {set 'I_5}),
+(#|C| < 5)%N ->
+[/\ s5_rand_sampleP R |= sa_coalition_view 0 C _|_ 
+   rsh_secret (unif_randomized_sharing R 3 4),
+    `I(rsh_secret (unif_randomized_sharing R 3 4); sa_coalition_view 0 C) = 0,
+    `H( (rsh_secret (unif_randomized_sharing R 3 4))
+    | (sa_coalition_view 0 C)) =
+    `H `p_ (rsh_secret (unif_randomized_sharing R 3 4))
+  & forall (W : finType) (h : {ffun 'I_5 -> 'I_5} -> W),
+    s5_rand_sampleP R |= (h `o sa_coalition_view 0 C) _|_ 
+    rsh_secret (unif_randomized_sharing R 3 4)]
+     : forall (R : realType) (C : {set 'I_5}),
+       (#|C| < 5)%N ->
+       [/\ s5_rand_sampleP R |= sa_coalition_view 0 C _|_ 
+          rsh_secret (unif_randomized_sharing R 3 4),
+           `I(rsh_secret (unif_randomized_sharing R 3 4); 
+           sa_coalition_view 0 C) = 0,
+           `H( (rsh_secret (unif_randomized_sharing R 3 4))
+           | (sa_coalition_view 0 C)) =
+           `H `p_ (rsh_secret (unif_randomized_sharing R 3 4))
+         & forall (W : finType) (h : {ffun 'I_5 -> 'I_5} -> W),
+           s5_rand_sampleP R |= (h `o sa_coalition_view 0 C) _|_ 
+           rsh_secret (unif_randomized_sharing R 3 4)]
+s5_F : Functionality (oe_inputT s5_observed) (oe_outT s5_observed)
+     : Functionality (oe_inputT s5_observed) (oe_outT s5_observed)
+s5_FE : s5_F = {| fn_f := id; fn_threshold := 4 |}
+     : s5_F = {| fn_f := id; fn_threshold := 4 |}
+s5_F_thresholdE : fn_threshold s5_F = 4
+     : fn_threshold s5_F = 4
+s5_realises_expected : realises_expected s5_observed s5_F
+     : realises_expected s5_observed s5_F
+s5_rand_F
+:
+Functionality (oe_inputT s5_rand_observed) (oe_outT s5_rand_observed)
+     : Functionality (oe_inputT s5_rand_observed) (oe_outT s5_rand_observed)
+s5_rand_FE
+:
+s5_rand_F =
+{| fn_f := fun u : 'rV_5 => s5_codec (s5_tape_secret u); fn_threshold := 4 |}
+     : s5_rand_F =
+       {|
+         fn_f := fun u : 'rV_5 => s5_codec (s5_tape_secret u);
+         fn_threshold := 4
+       |}
+s5_rand_realises_expected : realises_expected s5_rand_observed s5_rand_F
+     : realises_expected s5_rand_observed s5_rand_F
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+Closed under the global context
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+s5_algebraic : Tableau Algebraic
+     : Tableau Algebraic
+s5_dealt_executable : Tableau Executable
+     : Tableau Executable
+s5_supplied_executable : Tableau Executable
+     : Tableau Executable
+s5_rand_sampled : Tableau Sampled
+     : Tableau Sampled
+s5_dealt_splitE
+:
+(s5_dealt_executable;;; execute_step
+ of obs_payload (tableau_at s5_dealt_executable) s5_dealt_terminates
+      s5_dealt_endpoints s5_dealt_recon) =
+s5_dealt
+     : (s5_dealt_executable;;; execute_step
+        of obs_payload (tableau_at s5_dealt_executable) s5_dealt_terminates
+             s5_dealt_endpoints s5_dealt_recon) =
+       s5_dealt
+s5_supplied_splitE
+:
+(s5_supplied_executable;;; execute_step
+ of obs_payload (tableau_at s5_supplied_executable) s5_supplied_terminates
+      s5_supplied_endpoints s5_supplied_recon) =
+s5_supplied
+     : (s5_supplied_executable;;; execute_step
+        of obs_payload (tableau_at s5_supplied_executable)
+             s5_supplied_terminates s5_supplied_endpoints s5_supplied_recon) =
+       s5_supplied
+s5_row_rand_splitE
+:
+(s5_rand_sampled certify ExactIndependence s5_rand_exact_witness
+ |> publish StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder])) =
+s5_row_rand_tableau
+     : (s5_rand_sampled certify ExactIndependence s5_rand_exact_witness
+        |> publish StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder])) =
+       s5_row_rand_tableau
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}

@@ -1,0 +1,50 @@
+-arg -w -arg -projection-no-head-constant
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -notation-overridden
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -notation-incompatible-format
+
+-R ../../../lib pgg_smc
+-R ../../../protocol pgg_smc
+-R ../../../groups pgg_smc
+-R ../../../security pgg_smc
+-R ../../../smc pgg_smc
+-R ../../../reconstruct pgg_reconstruct
+-R ../../../instances/denboer1989 pgg_smc
+-R ../../../instances/kim2025 pgg_smc
+-R ../../../instances/s5 pgg_smc
+-R ../../../instances/pgl27 pgg_smc
+-R ../../../instances/psl211 pgg_smc
+-R ../../../manifest pgg_smc
+-R ../../../legacy/groups pgg_smc
+-R ../../../legacy/instances/abelian pgg_smc
+-R ../../../legacy/instances/cyclic pgg_smc
+-R ../../../legacy/instances/monster pgg_smc
+-R ../../../legacy/instances/oc pgg_smc
+-R ../../../legacy/instances/s5x5 pgg_smc
+-R ../../../legacy/instances/star pgg_smc
+-R ../../../legacy/protocol pgg_smc
+-R ../../../legacy/reconstruct pgg_reconstruct
+-R ../../../legacy/security pgg_smc
+
+-Q . tableau_dirs_s5
+
+# The staged roots are mapped to pgg_smc AFTER production's AND after the
+# -Q . line, because Rocq 9.0.0 resolves a Require to the LAST matching -R or
+# -Q entry.  This is the order landing 1 of the extensions measured; any other
+# order loads production's objects instead of the staged copies.
+#
+# -R is recursive, so staged/instances/s5/tableau is bound by the line below
+# and needs no -R line of its own.  Step 0 of this probe measures what logical
+# name that gives a file in the subdirectory; see STATUS.md.
+-R staged/instances/s5 pgg_smc
+-R staged/instances/kim2025 pgg_smc
+
+staged/instances/s5/tableau/s5_tableau_algebraic.v
+staged/instances/s5/tableau/s5_tableau_executable.v
+staged/instances/s5/tableau/s5_tableau_observed.v
+staged/instances/s5/tableau/s5_tableau_sampled.v
+staged/instances/s5/tableau/s5_tableau_analysis_bridged.v
+staged/instances/s5/tableau/s5_tableau_checks.v
+staged/instances/kim2025/five_card_proximity.v
+fidelity.v
