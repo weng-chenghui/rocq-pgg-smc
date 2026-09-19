@@ -62,7 +62,7 @@ instances/kim2025/tableau/
 
 Each phase file imports the one before it. The terminals are not a phase of
 their own: `publish` and `conclude` are the last line of a row and stay with
-the row. `psl211_spectral_constancy.v` names `SpectralCert`, so it belongs in
+the row. `psl211_spectral_nogo.v` names `SpectralCert`, so it belongs in
 `instances/psl211/tableau/` and moves there in this batch.
 
 Three constraints, read off the code.

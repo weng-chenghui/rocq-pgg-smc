@@ -1,9 +1,9 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* psl211_spectral_constancy: the spectral certificate's constancy field at   *)
-(*                            the twelve-card chirality instance, refuted in  *)
-(*                            both run modes                                  *)
+(* psl211_spectral_nogo: the spectral certificate's constancy field at the    *)
+(*                       twelve-card chirality instance, refuted in both      *)
+(*                       run modes                                            *)
 (*                                                                            *)
 (* A spectral certificate of manifest/pgg_tableau.v carries five fields, and  *)
 (* the fifth, sc_const, asks that a coalition of fewer than profile_k seats   *)
@@ -19,11 +19,10 @@
 (* system, and two labellings. Only the chirality is secret, so the field     *)
 (* asks for constancy of the reading in three public coordinates as well.     *)
 (* The field fails between the two chiralities of one deck description, and   *)
-(* the equation it asserts is false again at a pair of run arguments of one   *)
-(* chirality differing in the block line alone, psl211_blockline1_law_neq.    *)
-(* The second failure moves no secret, so no reading of these refutations     *)
-(* gives leakage. What a coalition of at most five of the twelve seats reads  *)
-(* about the chirality under the all-decks law is                             *)
+(* it fails between two deck descriptions of one chirality that differ in     *)
+(* the block line alone. The second failure moves no secret, so no reading    *)
+(* of these refutations gives leakage. What a coalition of at most five of    *)
+(* the twelve seats reads about the chirality under the all-decks law is      *)
 (* psl211_alldecks_static_indep of instances/psl211/psl211_models.v, which    *)
 (* says it reads nothing, exactly, at every real field, and that is the       *)
 (* theorem the published row carries.                                         *)
@@ -32,13 +31,12 @@
 (* certificate over the all-decks model states its distance against the       *)
 (* group-uniform law, its identification field pinning its shuffle law to     *)
 (* the adapter's cut, so no certificate carries a shuffle bound epsilon       *)
-(* strictly below 1/1320. The obligation of conclude is cert_eps cert =       *)
-(* odflt (cert_eps cert) (c R), and cert_eps is that epsilon twice, so every  *)
-(* row over this model that publishes its certificate's own number publishes  *)
-(* at least 1/660. psl211_alldecks_no_zero_eps_cert states the same at        *)
-(* epsilon zero, which is the epsilon profile_eps_psl211 of                   *)
-(* instances/psl211/psl211_profile.v gives this instance's single-card        *)
-(* marginal bound.                                                            *)
+(* strictly below 1/1320, and a row publishing its certificate's own bound    *)
+(* publishes at least 1/660. That is against a shuffle whose single-card      *)
+(* marginal error this instance proves to be exactly zero, which is the       *)
+(* content of psl211_alldecks_no_spectral_cert0. The obligation of conclude   *)
+(* is cert_eps cert = odflt (cert_eps cert) (c R), so the excluded published  *)
+(* numbers are those equal to cert_eps.                                       *)
 (*                                                                            *)
 (* Dealt mode. The run argument is the chirality itself, so here the field    *)
 (* is exactly constancy in the secret, and it still fails: three seats see a  *)
@@ -55,32 +53,17 @@
 (* What is excluded is a range of epsilon, and the range of larger epsilon    *)
 (* is occupied: the uniform law on the whole of {perm 'I_12} reads the same   *)
 (* at every deck description, its variation distance from `U psl211_G_pos is  *)
-(* 2 * (1 - 660/12!), so a certificate at that ideal exists with an epsilon   *)
-(* near 2. Its cert_eps is that epsilon twice, near 4, while infotheo's       *)
-(* var_dist sums the absolute differences of two laws and so never exceeds    *)
-(* 2, and the row such a certificate gives publishes a number no pair of      *)
-(* laws can exceed and bounds nothing. That occupancy is argued and not       *)
-(* compiled. Its premise is compiled: every deck description lays a deck of   *)
-(* twelve distinct cards, psl211_alldecks_uniq of                             *)
-(* instances/psl211/psl211_alldecks.v. What is not compiled there is the      *)
-(* separate step that the parametrization enumerates the valid decks once     *)
-(* each. Nothing here says the word row is excluded outright:                 *)
+(* 2 * (1 - 660/12!), and a certificate at that ideal would sit near          *)
+(* infotheo's ceiling of 2 on the sum of absolute differences. That           *)
+(* occupancy is argued and not compiled. Its premise is compiled: every deck  *)
+(* description lays a deck of twelve distinct cards, psl211_alldecks_uniq at  *)
+(* instances/psl211/psl211_alldecks.v:421-429. What is not compiled there is  *)
+(* the separate step that the parametrization enumerates the valid decks      *)
+(* once each. Nothing here says the word row is excluded outright:            *)
 (* psl211_alldecks_constancy_false_word584 reaches eps < 1/1320 - 2^-40, and  *)
 (* no weighted-word sample adapter exists for this instance. How wide each    *)
 (* failure is stays measured and not proved; the reading multiplicity         *)
 (* diagnostics are recorded in notes/probes/2026-09-19-psl211-sc-const/.      *)
-(*                                                                            *)
-(* Names. The first two declarations are framework-level: they are stated for *)
-(* any algebra and any execution parameters, and sit here rather than beside  *)
-(* SpectralCert in manifest/pgg_tableau.v. The psl211_blockline1_ prefix      *)
-(* names the comparison between block line zero and block line one at one     *)
-(* chirality, as psl211_perdeck_ of instances/psl211/psl211_models.v names    *)
-(* the comparison between the two chiralities at one deck description. In a   *)
-(* proof script a leading C is a fiber cardinality, L a mass, U a mass at the *)
-(* group-uniform law, E a reader identification and H a hypothesis taken as   *)
-(* given; the suffix names the coordinate the quantity is taken at, t and f   *)
-(* the chirality and j0 and j1 the block line; and a trailing digit is an     *)
-(* index and never a value.                                                   *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   coalition_reading_constancy                                              *)
@@ -88,16 +71,63 @@
 (*                              reads a law on cuts the same way at every     *)
 (*                              run argument                                  *)
 (*   psl211_blockline1_deal  == block line one, both labellings the identity  *)
+(*   psl211_blockline1_view  == the reading giving cards 3, 2 and 4 to the    *)
+(*                              three seats                                   *)
+(*   psl211_blockline1_test  == that reading tested on raw codes              *)
+(*   psl211_blockline1_seq   == the deck laid at chirality true and block     *)
+(*                              line one, as raw codes by position            *)
+(*   psl211_blockline1_raw_count                                              *)
+(*                           == the cuts producing that reading, counted on   *)
+(*                              the tabulated cuts                            *)
+(*   psl211_blockline1_fiber == the same cuts as a set                        *)
+(*   psl211_dealt_decktbl    == the encoder deck of a chirality as a raw      *)
+(*                              position-to-code table                        *)
+(*   psl211_dealt_view       == the reading giving cards 0, 1 and 6 to the    *)
+(*                              three seats                                   *)
+(*   psl211_dealt_test       == that reading tested on raw codes              *)
+(*   psl211_dealt_raw_count  == the cuts producing it, counted on the         *)
+(*                              tabulated cuts                                *)
+(*   psl211_dealt_fiber      == the same cuts as a set                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   spectral_cert_reading_constancy                                          *)
 (*                           == the restatement is the record's fifth field   *)
+(*   psl211_perdeck_coalition_le3                                             *)
+(*                           == the witnessing coalition has at most three    *)
+(*                              seats                                         *)
+(*   psl211_perdeck_coalition_below_k                                         *)
+(*                           == and so meets the threshold premise            *)
 (*   psl211_alldecks_constancy_false                                          *)
 (*                           == the field is false at the group-uniform       *)
 (*                              ideal under the all-decks parameters          *)
+(*   psl211_blockline1_testE == the raw test decides the reading              *)
+(*   psl211_alldecks_raw_viewE                                                *)
+(*                           == the raw reading is the instance's reading,    *)
+(*                              at every deck description                     *)
+(*   psl211_blockline1_row_size, psl211_blockline1_corow_size                 *)
+(*                           == block line one splits the twelve positions    *)
+(*                              six and six                                   *)
+(*   psl211_blockline1_seqE  == the raw list is the deck the dealer lays      *)
+(*   psl211_blockline1_raw_countE                                             *)
+(*                           == that count is one at block line zero and      *)
+(*                              zero at block line one                        *)
+(*   psl211_blockline1_fiberE == the fiber has the raw count as its size      *)
+(*   psl211_blockline1_massE == the pushforward mass of the reading is that   *)
+(*                              size over the group order                     *)
 (*   psl211_blockline1_law_neq                                                *)
 (*                           == two deck descriptions of one chirality send   *)
 (*                              the group-uniform cut to two reading laws     *)
+(*   psl211_alldecks_constancy_false_blockline                                *)
+(*                           == the field refuted without moving the secret   *)
+(*   fdistmap_point_condE    == a pushforward's mass at a value is the mass   *)
+(*                              of its preimage                               *)
+(*   psl211_perdeck_ideal_lawE                                                *)
+(*                           == a law satisfying the field sends the two      *)
+(*                              chiralities of one deck description to one    *)
+(*                              reading law                                   *)
+(*   psl211_perdeck_fiber_true0                                               *)
+(*                           == no cut carries the chirality-true deck to     *)
+(*                              psl211_perdeck_view                           *)
 (*   psl211_alldecks_constancy_false_supp                                     *)
 (*                           == the field is false at every ideal supported   *)
 (*                              exactly on the shuffle group                  *)
@@ -107,22 +137,40 @@
 (*   psl211_alldecks_cert_ideal_close                                         *)
 (*                           == a certificate's distance field is stated      *)
 (*                              against the group-uniform law                 *)
-(*   psl211_alldecks_no_small_eps_cert                                        *)
+(*   psl211_alldecks_no_spectral_cert                                         *)
 (*                           == no certificate over the all-decks model       *)
 (*                              carries a shuffle bound epsilon under 1/1320  *)
-(*   psl211_alldecks_no_zero_eps_cert                                         *)
-(*                           == in particular none carries an epsilon of      *)
-(*                              zero, the epsilon of this instance's own      *)
-(*                              marginal bound                                *)
+(*   psl211_alldecks_no_spectral_cert0                                        *)
+(*                           == in particular none carries the instance's     *)
+(*                              own marginal bound, whose epsilon is zero     *)
+(*   psl211_alldecks_constancy_false_word                                     *)
+(*                           == a cut law d from the group-uniform law and    *)
+(*                              an ideal eps from it leave the field false    *)
 (*   psl211_alldecks_constancy_false_word584                                  *)
-(*                           == the field is false at every ideal within eps  *)
-(*                              of the 584-letter word shuffle's cut law      *)
+(*                           == the same at the 584-letter word shuffle,      *)
+(*                              whose d is 2^-40                              *)
+(*   psl211_dealt_decktblE, psl211_dealt_decktbl_mod                          *)
+(*                           == the encoder deals that table, whose entries   *)
+(*                              are already below twelve                      *)
+(*   psl211_dealt_testE      == the raw test decides the reading              *)
+(*   psl211_dealt_static_obsE                                                 *)
+(*                           == the framework's reading under the dealt       *)
+(*                              parameters, seat by seat                      *)
+(*   psl211_dealt_raw_viewE  == the raw reading is the framework's reading    *)
+(*   psl211_dealt_raw_countE == that count is zero at one chirality and one   *)
+(*                              at the other                                  *)
+(*   psl211_dealt_fiberE     == the fiber has the raw count as its size       *)
+(*   psl211_dealt_massE      == the pushforward mass of the reading is that   *)
+(*                              size over the group order                     *)
 (*   psl211_dealt_constancy_false                                             *)
 (*                           == the field is false at the group-uniform       *)
 (*                              ideal under the dealt parameters              *)
+(*   psl211_alldecks_static_obs_set0                                          *)
+(*                           == a coalition with no seats reads every cut as  *)
+(*                              the constant map to card zero                 *)
 (*   psl211_alldecks_constancy_set0                                           *)
-(*                           == the field holds at the empty coalition, for   *)
-(*                              every law on cuts                             *)
+(*                           == so the field holds at the empty coalition,    *)
+(*                              for every law on cuts                         *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -181,9 +229,8 @@ Local Notation viewT := ({ffun seatT -> cardT}).
     seats reads the law ideal on cuts the same way whatever the run argument.
     This is what a spectral certificate asserts about its idealized cut, and
     the certificate's variation-distance field is what transfers that
-    assertion from the ideal to the real cut. Where the run argument carries
-    the secret, as it does in both run modes of this instance, the field is
-    at least constancy in the secret; where the run
+    assertion from the ideal to the real cut. The run argument carries the
+    secret, so the field is at least constancy in the secret; where the run
     argument carries public data as well, as it does under the all-decks
     parameters, the field asks for constancy in that public data too and is
     stronger than the privacy the instance claims. *)
@@ -247,8 +294,8 @@ Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
     chiralities of the deck description psl211_perdeck_deal. The run argument
     of this mode is a whole deck description, whose first coordinate is the
     chirality and whose other three are public, and the field quantifies over
-    every pair of them, so the equation it asserts is false at a pair of one
-    chirality too, psl211_blockline1_law_neq. A change of secret is always
+    every pair of them, so it fails at a pair of one chirality too,
+    psl211_alldecks_constancy_false_blockline. A change of secret is always
     also a change of the laid deck here, the chirality selecting the table
     the block line indexes. Three seats learn nothing about the chirality
     under the all-decks law, which is psl211_alldecks_static_indep, and this
@@ -350,14 +397,13 @@ Definition psl211_blockline1_seq : seq nat :=
   let K := psl211_alldecks_corow (true, psl211_blockline1_deal) in
   [seq (if p \in H then index p H else 6 + index p K) | p <- iota 0 12].
 
-(** psl211_blockline1_row_size — block line one of the chirality-true table
-    has six positions. *)
+(** psl211_blockline1_row_size — block line one of the chirality's table has
+    six positions. *)
 Lemma psl211_blockline1_row_size :
   size (psl211_alldecks_row (true, psl211_blockline1_deal)) = 6.
 Proof. by vm_compute. Qed.
 
-(** psl211_blockline1_corow_size — the complement of that row has the other
-    six. *)
+(** psl211_blockline1_corow_size — its complement has the other six. *)
 Lemma psl211_blockline1_corow_size :
   size (psl211_alldecks_corow (true, psl211_blockline1_deal)) = 6.
 Proof. by vm_compute. Qed.
@@ -460,43 +506,60 @@ Lemma psl211_blockline1_law_neq (R : realType) :
       psl211_perdeck_coalition (true, psl211_blockline1_deal))
     ((`U psl211_G_pos) : R.-fdist cutT).
 Proof.
-have [Hj0 Hj1] := psl211_blockline1_raw_countE.
+have [Hb0 Hb1] := psl211_blockline1_raw_countE.
 (* each cardinality and each mass is pinned in a goal naming one deck
    description only, and the two are brought together in term mode *)
-have Cj0 : #|psl211_blockline1_fiber (true, psl211_perdeck_deal)| = 1.
-  rewrite psl211_blockline1_fiberE (psl211_perdeck_seqE true); exact: Hj0.
-have Cj1 : #|psl211_blockline1_fiber (true, psl211_blockline1_deal)| = 0.
-  rewrite psl211_blockline1_fiberE psl211_blockline1_seqE; exact: Hj1.
-have Ej0 : @static_coalition_obs psl211_algebra psl211_alldecks_params
+have Cb0 : #|psl211_blockline1_fiber (true, psl211_perdeck_deal)| = 1.
+  rewrite psl211_blockline1_fiberE (psl211_perdeck_seqE true); exact: Hb0.
+have Cb1 : #|psl211_blockline1_fiber (true, psl211_blockline1_deal)| = 0.
+  rewrite psl211_blockline1_fiberE psl211_blockline1_seqE; exact: Hb1.
+have Eb0 : @static_coalition_obs psl211_algebra psl211_alldecks_params
      psl211_perdeck_coalition (true, psl211_perdeck_deal)
    = (fun g => psl211_alldecks_view psl211_perdeck_coalition
         (true, psl211_perdeck_deal) g)
   := psl211_alldecks_static_obs_funE _ _.
-have Ej1 : @static_coalition_obs psl211_algebra psl211_alldecks_params
+have Eb1 : @static_coalition_obs psl211_algebra psl211_alldecks_params
      psl211_perdeck_coalition (true, psl211_blockline1_deal)
    = (fun g => psl211_alldecks_view psl211_perdeck_coalition
         (true, psl211_blockline1_deal) g)
   := psl211_alldecks_static_obs_funE _ _.
-have Lj0 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
+have Lb0 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
     (true, psl211_perdeck_deal) g) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_blockline1_view = (#|pgg_G psl211_M|%:R)^-1 :> R.
-  by rewrite psl211_blockline1_massE Cj0 mulr1n.
-have Lj1 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
+  by rewrite psl211_blockline1_massE Cb0 mulr1n.
+have Lb1 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
     (true, psl211_blockline1_deal) g) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_blockline1_view = 0 :> R.
-  by rewrite psl211_blockline1_massE Cj1 mulr0n.
+  by rewrite psl211_blockline1_massE Cb1 mulr0n.
 apply/negP => /eqP Heq.
 have Hv := etrans
-  (esym (congr1 (fun f => fdistmap f ((`U psl211_G_pos) : R.-fdist cutT)) Ej0))
+  (esym (congr1 (fun f => fdistmap f ((`U psl211_G_pos) : R.-fdist cutT)) Eb0))
   (etrans Heq
-    (congr1 (fun f => fdistmap f ((`U psl211_G_pos) : R.-fdist cutT)) Ej1)).
+    (congr1 (fun f => fdistmap f ((`U psl211_G_pos) : R.-fdist cutT)) Eb1)).
 have Hz : (#|pgg_G psl211_M|%:R)^-1 = 0 :> R :=
-  etrans (esym Lj0)
+  etrans (esym Lb0)
     (etrans (congr1 (fun q : R.-fdist viewT => q psl211_blockline1_view) Hv)
-      Lj1).
+      Lb1).
 have : (#|pgg_G psl211_M|%:R)^-1 == 0 :> R by rewrite Hz.
 rewrite invr_eq0 pnatr_eq0 => /eqP Hcard.
 by move: psl211_G_pos; rewrite Hcard.
+Qed.
+
+(** psl211_alldecks_constancy_false_blockline — the constancy field is false
+    at the group-uniform ideal under the all-decks parameters already at a
+    pair of run arguments carrying the same secret, the two deck descriptions
+    differing in the block line alone. It states what
+    psl211_alldecks_constancy_false states and spends a different pair, so a
+    claim that the failure does not need the secret to move is this one and
+    not that one. *)
+Corollary psl211_alldecks_constancy_false_blockline (R : realType) :
+  ~ coalition_reading_constancy psl211_alldecks_params
+      ((`U psl211_G_pos) : R.-fdist cutT).
+Proof.
+move=> Hconst.
+move/negP: (psl211_blockline1_law_neq R); apply; apply/eqP.
+exact: (Hconst psl211_perdeck_coalition psl211_perdeck_coalition_below_k
+  (true, psl211_perdeck_deal) (true, psl211_blockline1_deal)).
 Qed.
 
 (******************************************************************************)
@@ -552,14 +615,14 @@ Qed.
 (** psl211_perdeck_fiber_true0 — no cut of the shuffle group carries the
     chirality-true deck of psl211_perdeck_deal to the reading
     psl211_perdeck_view. The false chirality reaches that reading under
-    exactly one cut, so one reading already tells the two chiralities apart
-    at this fixed deck description, which is not the law the row is about. *)
+    exactly one cut, so one reading already separates the two chiralities at
+    this deck description. *)
 Lemma psl211_perdeck_fiber_true0 : psl211_perdeck_fiber true = set0.
 Proof.
 have [Ht _] := psl211_perdeck_raw_countE.
-have Ct : #|psl211_perdeck_fiber true| = 0 :=
+have Hcard0 : #|psl211_perdeck_fiber true| = 0 :=
   etrans (psl211_perdeck_fiberE true) Ht.
-by apply/eqP; rewrite -cards_eq0 Ct.
+by apply/eqP; rewrite -cards_eq0 Hcard0.
 Qed.
 
 (** psl211_alldecks_constancy_false_supp — no law on cuts whose support is
@@ -577,9 +640,9 @@ Proof.
 move=> Hout Hin Hconst.
 have Hlaw := psl211_perdeck_ideal_lawE Hconst.
 have [_ Hf] := psl211_perdeck_raw_countE.
-have Cf : #|psl211_perdeck_fiber false| = 1 :=
+have Hcard1 : #|psl211_perdeck_fiber false| = 1 :=
   etrans (psl211_perdeck_fiberE false) Hf.
-have /cards1P[g0 Hset] : #|psl211_perdeck_fiber false| == 1 by rewrite Cf.
+have /cards1P[g0 Hset] : #|psl211_perdeck_fiber false| == 1 by rewrite Hcard1.
 have Hg0 : g0 \in psl211_perdeck_fiber false by rewrite Hset inE.
 move: Hg0; rewrite inE => /andP[Hg0G Hg0v].
 (* the true mass vanishes term by term: a cut producing the reading is either
@@ -620,20 +683,20 @@ Proof.
 move=> Hclose Heps Hconst.
 have Hlaw := psl211_perdeck_ideal_lawE Hconst.
 have [Ht Hf] := psl211_perdeck_raw_countE.
-have Ct : #|psl211_perdeck_fiber true| = 0 :=
+have H0 : #|psl211_perdeck_fiber true| = 0 :=
   etrans (psl211_perdeck_fiberE true) Ht.
-have Cf : #|psl211_perdeck_fiber false| = 1 :=
+have H1 : #|psl211_perdeck_fiber false| = 1 :=
   etrans (psl211_perdeck_fiberE false) Hf.
 (* each chirality's uniform mass is pinned in a goal naming that chirality
    only, as psl211_perdeck_law_neq does *)
 have Ut : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
     (true, psl211_perdeck_deal) g) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_perdeck_view = 0 :> R.
-  by rewrite psl211_perdeck_massE Ct mulr0n.
+  by rewrite psl211_perdeck_massE H0 mulr0n.
 have Uf : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
     (false, psl211_perdeck_deal) g) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_perdeck_view = (#|pgg_G psl211_M|%:R)^-1 :> R.
-  by rewrite psl211_perdeck_massE Cf mulr1n.
+  by rewrite psl211_perdeck_massE H1 mulr1n.
 have Hgap : forall b : bool,
     `| (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
           (b, psl211_perdeck_deal) g) ((`U psl211_G_pos) : R.-fdist cutT))
@@ -677,27 +740,29 @@ have Hc := sc_close cert.
 rewrite Hd in Hc; exact: Hc.
 Qed.
 
-(** psl211_alldecks_no_small_eps_cert — no spectral certificate over the
-    all-decks run of the twelve-card chirality instance has its shuffle bound
-    epsilon added to itself strictly below the reciprocal 1/660 of the group
-    order, so every such certificate has an epsilon of at least 1/1320, the
-    value 1/1320 itself not excluded. A row publishes
-    odflt (cert_eps cert) (c R) at its own reprice coordinate c, the
-    obligation of conclude pins that number to cert_eps cert, and cert_eps
-    cert is the shuffle bound epsilon twice, so every row over this model
-    that publishes its certificate's own number publishes at least 1/660.
-    This fixes from below what the spectral arm can publish at this model.
-    It says neither that the arm is unavailable here nor anything about what
-    a coalition of at most five seats reads. *)
+(** psl211_alldecks_no_spectral_cert — no spectral certificate over the
+    all-decks run of the twelve-card chirality instance carries a shuffle
+    bound epsilon strictly below 1/1320, the hypothesis holding twice that
+    epsilon below the reciprocal 1/660 of the group order. A row publishes
+    odflt (cert_eps cert) (c R) at its own reprice coordinate c, and the
+    obligation of conclude is today the equality of cert_eps cert with that
+    published number, so what this excludes is every published number equal
+    to cert_eps: at least 1/660, against a shuffle whose single-card marginal
+    error this instance proves to be exactly zero. *)
 (* Argued and not compiled: the exclusion survives a weaker conclude. The
    proposition a row carries is SpectralPropAt cert c, a variation distance
    bounded above by c, so an obligation weakened from that equality to
    cert_eps cert <= odflt (cert_eps cert) (c R) could only let a row publish
    a number larger than cert_eps, never a smaller one. *)
-(* The excluded range of epsilon is bounded above. The header records why the
-   larger range is occupied and that the occupancy is argued and not
-   compiled. *)
-Theorem psl211_alldecks_no_small_eps_cert (R : realType)
+(* Argued and not compiled: the range of epsilon this theorem leaves open is
+   occupied. The uniform law on the whole of {perm 'I_12} satisfies the
+   constancy field, its variation distance from `U psl211_G_pos is
+   2 * (1 - 660/12!), and a certificate at that ideal therefore exists, with
+   an epsilon near infotheo's ceiling of 2 on the sum of absolute
+   differences. So the spectral arm is not unavailable at this instance, and
+   what this theorem excludes is a range of epsilon and not the arm.
+   notes/probes/2026-09-15-psl211-planb/AUDIT-SOUNDNESS-2.md, row 18. *)
+Theorem psl211_alldecks_no_spectral_cert (R : realType)
     (cert : SpectralCert (psl211_alldecks_sample R)) :
   sw_bound_eps (sc_b cert) + sw_bound_eps (sc_b cert)
     < (#|pgg_G psl211_M|%:R)^-1 -> False.
@@ -708,24 +773,24 @@ apply: (@psl211_alldecks_constancy_false_close R (sc_ideal cert)
 exact: spectral_cert_reading_constancy cert.
 Qed.
 
-(** psl211_alldecks_no_zero_eps_cert — in particular no spectral certificate
-    over the all-decks model has a shuffle bound epsilon of zero, which is
-    the epsilon profile_eps_psl211 of instances/psl211/psl211_profile.v gives
-    this instance's own marginal bound. A certificate must hold its ideal cut
-    within its own epsilon of the group-uniform law, and the group-uniform
-    law is not a cut these three seats read constantly, so the sharper the
-    shuffle bound the less room the certificate has. *)
-Corollary psl211_alldecks_no_zero_eps_cert (R : realType)
+(** psl211_alldecks_no_spectral_cert0 — in particular no spectral certificate
+    over the all-decks model carries the instance's own marginal bound, whose
+    epsilon is zero because the single-card pushforward of this shuffle is
+    exactly uniform. A certificate must hold its ideal cut within its own
+    epsilon of the group-uniform law, and the group-uniform law is not a cut
+    these three seats read constantly, so the sharper the shuffle bound the
+    less room the certificate has. *)
+Corollary psl211_alldecks_no_spectral_cert0 (R : realType)
     (cert : SpectralCert (psl211_alldecks_sample R)) :
   sw_bound_eps (sc_b cert) = 0 -> False.
 Proof.
-move=> Heps.
+move=> H0.
 have Hlt : sw_bound_eps (sc_b cert) + sw_bound_eps (sc_b cert)
     < (#|pgg_G psl211_M|%:R)^-1.
-  by rewrite Heps addr0 invr_gt0 ltr0n; exact: psl211_G_pos.
+  by rewrite H0 addr0 invr_gt0 ltr0n; exact: psl211_G_pos.
 (* cert is an implicit argument of the theorem, occurring in the type of its
    hypothesis, so the certificate is supplied at the @ form *)
-exact: (@psl211_alldecks_no_small_eps_cert R cert Hlt).
+exact: (@psl211_alldecks_no_spectral_cert R cert Hlt).
 Qed.
 
 (******************************************************************************)
@@ -760,9 +825,8 @@ Qed.
     draw, and the 2^-40 is the whole information-theoretic price of that
     replacement, while the eps is a certificate's own distance field. It is
     stated on the cut law rather than on a certificate because no
-    weighted-word SampleAdapter exists in this tree, so there is no adapter
-    whose cut is this law and no sc_Hd through which a certificate's ideal
-    could be held near it. *)
+    weighted-word SampleAdapter exists in this tree, so there is no sc_Hd
+    pinning a certificate's ideal to this law. *)
 Lemma psl211_alldecks_constancy_false_word584 (R : realType)
     (ideal : R.-fdist cutT) (eps : R) :
   var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R))
@@ -814,9 +878,8 @@ by case: b; case: k => [|[|[|[|[|[|[|[|[|[|[|[|k]]]]]]]]]]]] //=;
 Qed.
 
 (** psl211_dealt_view — the reading that gives cards 0, 1 and 6 to seats 0, 1
-    and 2, and card 0 to every seat outside the coalition. The encoder decks
-    of the two chiralities reach it under different numbers of cuts, which is
-    what refutes the constancy field in the dealt mode. *)
+    and 2, and card 0 to every seat outside the coalition. The first numeral
+    at which the two chiralities' reading multiplicities differ. *)
 Definition psl211_dealt_view : viewT :=
   [ffun i => psl211_code12 (nth 0 [:: 0; 1; 6] (val i))].
 
@@ -853,7 +916,8 @@ Definition psl211_dealt_raw_count (b : bool) : nat :=
     (unzip1 psl211_elem_table).
 
 (** psl211_dealt_raw_countE — that count is zero at one chirality and one at
-    the other. *)
+    the other. This is the count comparison of the Plan B probe read at one
+    numeral instead of over the whole multiplicity vector. *)
 (* vm_compute reads the closure table's body whatever the conversion oracle
    has been told, so this sentence is unaffected by the Local Opaque the
    block-line section leaves standing. *)
@@ -957,18 +1021,18 @@ have Heq := Hconst psl211_perdeck_coalition psl211_perdeck_coalition_below_k
 (* each mass is pinned to its value in a goal naming one chirality only, and
    the two are brought together in term mode *)
 have [Ht Hf] := psl211_dealt_raw_countE.
-have Ct : #|psl211_dealt_fiber true| = 0 :=
+have H0 : #|psl211_dealt_fiber true| = 0 :=
   etrans (psl211_dealt_fiberE true) Ht.
-have Cf : #|psl211_dealt_fiber false| = 1 :=
+have H1 : #|psl211_dealt_fiber false| = 1 :=
   etrans (psl211_dealt_fiberE false) Hf.
 have Lt : (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
     psl211_perdeck_coalition true) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_dealt_view = 0 :> R.
-  by rewrite psl211_dealt_massE Ct mulr0n.
+  by rewrite psl211_dealt_massE H0 mulr0n.
 have Lf : (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
     psl211_perdeck_coalition false) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_dealt_view = (#|pgg_G psl211_M|%:R)^-1 :> R.
-  by rewrite psl211_dealt_massE Cf mulr1n.
+  by rewrite psl211_dealt_massE H1 mulr1n.
 have Hz : (0 : R) = (#|pgg_G psl211_M|%:R)^-1 :=
   etrans (esym Lt)
     (etrans (congr1 (fun q : R.-fdist viewT => q psl211_dealt_view) Heq) Lf).

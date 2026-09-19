@@ -1,14 +1,4 @@
-# Landing probe: the PSL(2,11) spectral constancy file
-
-**Fix pass 1, 2026-09-19.** Two independent audits were run on the state this
-record originally described, `soundness-audit.md` (GO, SA1 to SA8 should-fix)
-and `naming-audit.md` (NO-GO, B1 blocking). The main session ruled on them as
-D1 to D12 and this pass applied those rulings. Every file touched has its
-pre-fix copy under `history/`, suffixed `.2026-09-19-before-fix1`. The changes
-are names, comments, the header index and this record; no proof body changed
-except where a renamed identifier or a renamed proof-local hypothesis occurs
-in it, and the mathematics is unchanged but for one withdrawn corollary,
-recorded under N3.
+# Landing probe: the PSL(2,11) spectral no-go file
 
 Probe, 2026-09-19, branch `feat/tableau-extensions-probe`. Logical path
 `psl211_nogo_landing`, directory `notes/probes/2026-09-19-psl211-nogo-landing/`.
@@ -18,8 +8,9 @@ soundness three times; the spec is
 `notes/20260919-psl211-spectral-nogo-landing-design.md`.
 
 **Verdict: GO on every ledger row.** The three SRC probe files merge into one
-landing copy of `instances/psl211/psl211_spectral_constancy.v` carrying 46
-declarations, every one ending in `Qed` or being a `Definition`.
+landing copy of `instances/psl211/psl211_spectral_nogo.v` that compiles in
+23.6 s with exit 0, carrying 47 declarations, every one ending in `Qed` or
+being a `Definition`. The new corollary the third audit asked for is in.
 No `lib/` file is proposed. The comment-only landing copy of
 `instances/psl211/psl211_rows.v` is identical to production once comments are
 stripped. One stale sentence exists in the production tree, and it is the one
@@ -29,43 +20,27 @@ the rows copy rewrites.
 
 | file | what it is |
 |---|---|
-| `psl211_spectral_constancy.v` | landing copy of the new `instances/psl211/psl211_spectral_constancy.v` |
+| `psl211_spectral_nogo.v` | landing copy of the new `instances/psl211/psl211_spectral_nogo.v` |
 | `psl211_rows.v` | landing copy of `instances/psl211/psl211_rows.v`, header comment only |
-| `psl211_nogo_fidelity.v` | `Print Assumptions` on all 46 landing declarations, plus the two refutations restated and closed by `exact:` |
-| `opaque_vm_test.v` | three `Eval` sentences behind the N6 finding that `vm_compute` ignores `Local Opaque`; not in `_CoqProject` |
-| `history/` | the pre-fix-pass copy of every file this pass touched |
+| `psl211_nogo_fidelity.v` | `Print Assumptions` on all 47 landing declarations, plus the three refutations restated and closed by `exact:` |
+| `opaque_vm_test.v` | the four-line measurement behind the N6 finding that `vm_compute` ignores `Local Opaque`; not in `_CoqProject` |
 | `_CoqProject` | production `-R` lines with `../../../` prefixes, then `-Q . psl211_nogo_landing` |
 
 ## Ledger
 
 | ID | Verdict | Evidence |
 |---|---|---|
-| N1 | GO | one file, production import paths, 46 declarations in the briefed order, exit 0 |
+| N1 | GO | one file, production import paths, 47 declarations in the briefed order, exit 0 |
 | N2 | GO | `spectral_cert_reading_constancy` by `exact: sc_const cert` |
-| N3 | GO, with the third refutation withdrawn | `psl211_alldecks_constancy_false` and `psl211_dealt_constancy_false`, both restated in the fidelity file; see the note below |
-| N4 | GO | `psl211_alldecks_no_small_eps_cert`, `psl211_alldecks_constancy_false_word584`, with infotheo's `leq_var_dist` in place of SRC's local copy |
+| N3 | GO | `psl211_alldecks_constancy_false`, `psl211_alldecks_constancy_false_blockline`, `psl211_dealt_constancy_false`, all three restated in the fidelity file |
+| N4 | GO | `psl211_alldecks_no_spectral_cert`, `psl211_alldecks_constancy_false_word584`, with infotheo's `leq_var_dist` in place of SRC's local copy |
 | N5 | GO | table below, all 48 SRC declarations dispositioned |
 | N6 | GO with two recorded deviations | table below; two sentences are 0.35 s and 0.41 s slower than SRC's rounded figures, both `perm_filter` steps |
 | N7 | GO | comment-stripped copy identical to production, 4485 characters, verified with a nesting- and string-aware stripper |
 | N8 | GO | exactly one stale passage in the production tree, `instances/psl211/psl211_rows.v:40-44`, which the rows copy rewrites; the manifest and the facade carry nothing this result touches |
-| N9 | GO | 48 `Print Assumptions`: 28 `Closed under the global context`, 19 the three `boolp` axioms, 1 two of them. No custom axiom |
+| N9 | GO | 50 `Print Assumptions`: 28 `Closed under the global context`, 21 the three `boolp` axioms, 1 two of them. No custom axiom |
 | N10 | GO | rename table below, zero whole-word collisions over 583 files |
 | N11 | GO | a landing compiles two production files, both with an empty reverse closure |
-
-### N3, the third refutation withdrawn
-
-`psl211_alldecks_constancy_false_blockline` had a statement character for
-character that of `psl211_alldecks_constancy_false`, so it stated no fact a
-reader could cite separately: the two differed only in the pair of run
-arguments their proofs spent, which is not visible in a statement. It is
-removed from the landing copy, with its `Print Assumptions` and its fidelity
-restatement, and its text is kept in `history/`. The proposition it was
-carried for, that the constancy field fails without the secret moving, is
-carried by `psl211_blockline1_law_neq`, whose statement does name the two run
-arguments `(true, psl211_perdeck_deal)` and `(true, psl211_blockline1_deal)`.
-The spec's soundness invariant 4 is therefore carried by
-`psl211_blockline1_law_neq`, and the rows header and the file header now cite
-that lemma where they cited the corollary.
 
 ## Compile table
 
@@ -75,59 +50,35 @@ files removed first.
 
 | file | wall | slowest sentence | exit |
 |---|---|---|---|
-| `psl211_spectral_constancy.v` | 24.3 s | 6.83 s | 0 |
-| `psl211_rows.v` | 6.2 s | 1.57 s (an import) | 0 |
-| `psl211_nogo_fidelity.v` | 8.5 s | 1.54 s (an import) | 0 |
-| `opaque_vm_test.v` | 0.2 s | 0.11 s (an import) | 0 |
-
-These are the fix-pass figures, in the order compiled. The main file has 363
-sentences and 24.04 s of sentence time.
+| `psl211_spectral_nogo.v` | 23.6 s | 6.53 s | 0 |
+| `psl211_rows.v` | 6.3 s | 1.53 s (an import) | 0 |
+| `psl211_nogo_fidelity.v` | 8.2 s | 1.54 s (an import) | 0 |
 
 SRC compiled the same mathematics as three files in 16.4 + 5.8 + 15.7 = 37.9 s,
-each paying its own 4 s of imports. No sentence is over 20 s.
-
-One warning is emitted, on the `From infotheo Require Import ...` line:
+each paying its own 4 s of imports. No sentence is over 20 s. One warning is
+emitted, on the `From infotheo Require Import ... variation_dist.` line:
 `notation-incompatible-prefix` on `_ <| _` against `_ <| _ |> _`. It is not in
-the project's suppressed list. It is not new. It follows the first infotheo
-`Require` beside mathcomp's `fingroup`, with or without `variation_dist`, and
-`instances/psl211/psl211_rows.v`, `instances/psl211/psl211_profile.v` and
-`instances/psl211/psl211_mixing.v` already emit it. Nothing is added to
-`_CoqProject`. The soundness audit established both halves with
-`audit-soundness/warn_with.v` and `audit-soundness/warn_without.v`; the
-sentence this record carried before the fix pass, that the warning follows the
-import of `variation_dist` and that no file of `instances/psl211/` imports it
-today, was false in both halves.
+the project's suppressed list and it appears in the fidelity file too, so it
+follows the import of `variation_dist` and not anything this file writes. A
+landing brings it into `instances/psl211/`, where no file imports
+`variation_dist` today.
 
 ### N6, per-sentence against SRC
 
 | sentence | SRC | here | delta |
 |---|---|---|---|
-| `perm_filter` step of `psl211_blockline1_fiberE` (SRC `psl211_samechir_fiberE`) | 6.1 s | 6.83 s | +0.73 s |
-| `perm_filter` step of `psl211_dealt_fiberE` | 6.1 s | 6.63 s | +0.53 s |
-| `vm_compute` of `psl211_blockline1_raw_countE` | 5.1 s | 5.21 s | +0.11 s |
+| `perm_filter` step of `psl211_blockline1_fiberE` (SRC `psl211_samechir_fiberE`) | 6.1 s | 6.53 s | +0.43 s |
+| `perm_filter` step of `psl211_dealt_fiberE` | 6.1 s | 6.47 s | +0.37 s |
+| `vm_compute` of `psl211_blockline1_raw_countE` | 5.1 s | 5.42 s | +0.32 s |
 | `vm_compute` of `psl211_dealt_raw_countE` | not reported | under 0.2 s | — |
 
-Provenance of the "here" column, which the fix pass corrected. The figures are
-read from the stdout of `rocq compile -time` on the fix-pass compile of
-`psl211_spectral_constancy.v`, matched to source lines through the character
-offsets the `-time` output carries. They are not read from a `.v.timelog`. The
-directory holds four `.v.timelog` files, for `psl211_rows.v`,
-`psl211_nogo_fidelity.v`, `opaque_vm_test.v` and the old file name
-`psl211_spectral_nogo.v`. All four were written before this fix pass and so
-describe pre-fix content; none is regenerated here, because `rocq compile
--time` writes its per-sentence figures to stdout and not to that file, and none
-is deleted, because nothing under `notes/probes/` is deleted. SRC holds no
-`.v.timelog` at all, so the per-sentence
-comparison this row asks for cannot be reproduced from SRC's artifacts either
-way, and SRC's figures below are the rounded ones of its own STATUS table,
-not re-measured, because re-running SRC would rewrite the `.vo` files of a
-closed probe.
-
 Both `perm_filter` steps and the one `vm_compute` exceed the tenth-of-a-second
-threshold. The deltas are 2 to 12 percent on sentences of 5 to 7 s and the
-merged file loads a strictly larger environment than any single SRC file
+threshold. SRC's figures are the rounded ones of its own STATUS table and were
+not re-measured here, because re-running SRC would rewrite the `.vo` files of a
+closed probe. The three deltas are 5 to 7 percent on sentences of 5 to 6.5 s and
+the merged file loads a strictly larger environment than any single SRC file
 (`variation_dist`, `pgg_collusion_bound`, `psl211_mixing`, `pgg_weighted_words`
-and `algebraic_rigidity` are now present while the block-line block
+and `algebraic_rigidity` are now present while the `psl211_samechir` block
 elaborates). Nothing was reordered that could account for them.
 
 ### N6, reduction hazards
@@ -141,19 +92,9 @@ as an ordinal object.
 Merging three files into one changes what is opaque where. Measured, not
 inferred: `vm_compute` ignores `Local Opaque`. `opaque_vm_test.v` in this
 directory declares a four-element `seq nat`, seals it with `Local Opaque` and
-evaluates `count (fun n => n == 3) tbl` three ways: `simpl` leaves the count
-unevaluated with `tbl` folded, `cbv` unfolds `count` and leaves `tbl` folded,
-and `vm_compute` prints `1`. That is what lets `psl211_dealt_raw_countE` keep
-its place at the end of the file while `psl211_elem_table` has been opaque
-since the block-line section.
-
-The earlier version of that file closed `count (fun n => n == 3) tbl = 1` by
-`vm_compute` and was replaced in the fix pass, its text kept in `history/`. A
-lemma does not isolate `vm_compute`: the soundness audit's
-`audit-soundness/opaque_mut.v` closes the same goal by `by []` under the same
-seal, because ssreflect's `done` reaches it through kernel conversion, which
-ignores the oracle as well. The three `Eval` sentences show what the sentence
-above claims; the lemma did not.
+closes `count (fun n => n == 3) tbl = 1` by `vm_compute`, exit 0. That is what
+lets `psl211_dealt_raw_countE` keep its place at the end of the file while
+`psl211_elem_table` has been opaque since the block-line section.
 
 Two deviations from SRC's placement, both deliberate:
 
@@ -227,45 +168,30 @@ Two families were renamed.
 | `psl211_samechir_fiberE` | `psl211_blockline1_fiberE` | same |
 | `psl211_samechir_massE` | `psl211_blockline1_massE` | same |
 | `psl211_samechir_law_neq` | `psl211_blockline1_law_neq` | same |
-| `psl211_alldecks_no_spectral_cert` | `psl211_alldecks_no_small_eps_cert` | the old name dropped the condition that makes it true, and `_eps_` is the tree's word for a certificate's number |
-| `psl211_alldecks_no_spectral_cert0` | `psl211_alldecks_no_zero_eps_cert` | same, and the trailing `0` read as a value on this file's own convention |
 | `var_dist_point_le` | infotheo's `leq_var_dist` | same statement, same arity, already in the library |
 
-Proof-local hypothesis names. SRC's `psl211_samechir_law_neq` named its eight
-proof-local hypotheses with bare capitals L, C, E and H suffixed by the digits
-0 and 1, and the L form with digit one spells a term this project bars for a
-distance, L being a word length here. The fix pass settled one scheme for the
-whole file, stated in the header: a leading C is a fiber cardinality, L a mass,
-U a mass at the group-uniform law, E a reader identification and H a hypothesis
-taken as given; the suffix names the coordinate the quantity is taken at, `t`
-and `f` the chirality and `j0` and `j1` the block line; and a trailing digit is
-an index and never a value. So `psl211_blockline1_law_neq` carries `Cj0`,
-`Cj1`, `Lj0`, `Lj1`, `Ej0`, `Ej1`, `Hj0` and `Hj1`; the fiber cardinalities of
-`psl211_alldecks_constancy_false_close`, `_supp` and
-`psl211_dealt_constancy_false` are `Ct` and `Cf` where they were `H0`, `H1` and
-`Hcard1`; and `psl211_alldecks_no_zero_eps_cert`'s hypothesis is `Heps` where
-it was `H0`, that digit having named a value. The digits surviving anywhere in
-a proof script are the three conjunct names of an `and3P` split, where they
-index the seat.
+Proof-local hypothesis names. SRC's `psl211_samechir_law_neq` used `L1` and
+`L0` for the two masses, and `L1` spells a term this project bars for a
+distance. The landed `psl211_perdeck_law_neq` of `psl211_models.v` uses `Lt`
+and `Lf` for the two chiralities' masses; the same scheme suffixed by the block
+line gives `Lb0` and `Lb1`, with `Cb0`, `Cb1` for the two fiber cardinalities,
+`Eb0`, `Eb1` for the two reader identifications and `Hb0`, `Hb1` for the two
+raw counts. No other occurrence of that term exists in any proof script here.
 
 Names kept unchanged, with the reason: `psl211_perdeck_coalition_le3`,
 `psl211_perdeck_coalition_below_k` (the `k` is `profile_k`),
 `psl211_perdeck_ideal_lawE`, `psl211_perdeck_fiber_true0`,
 `psl211_alldecks_raw_viewE`, `psl211_alldecks_static_obs_set0`,
-`psl211_alldecks_cert_ideal_close`, `fdistmap_point_condE` and the whole
-`psl211_dealt_*` block other than its main statement. Each is built from words
-the tree already uses, and each states its proposition.
+`psl211_alldecks_cert_ideal_close`, `psl211_alldecks_no_spectral_cert`,
+`psl211_alldecks_no_spectral_cert0`, `fdistmap_point_condE` and the whole
+`psl211_dealt_*` block other than its headline. Each is built from words the
+tree already uses, and each states its proposition.
 
-File name: `psl211_spectral_constancy`, with the instance prefix the
-`instances/psl211/` directory uses throughout and a subject noun, as every
-other file in that directory has. The pre-fix name was `psl211_spectral_nogo`,
-on the precedent of `reconstruct/s5_nogo.v`; the naming audit's B1 rejected it,
-because `s5_nogo.v` proves there is no scheme of the kind it is named after,
-while what is proved here is narrower than "no spectral arm" and the file's own
-header says so three times. The probe directory and this record keep `nogo`,
-and so does `psl211_nogo_fidelity.v`, because they record the work and not the
-result. The logical path `psl211_nogo_landing` in `_CoqProject` is probe-local
-and does not land.
+New name: `psl211_alldecks_constancy_false_blockline`, the corollary. The
+qualifier last says which pair of run arguments the proof spends.
+
+File name: `psl211_spectral_nogo`, on the precedent of `reconstruct/s5_nogo.v`
+and with the instance prefix the `instances/psl211/` directory uses throughout.
 
 Collision scan: the 47 landing names plus the file name, as whole words with
 Python `re` and `\b`, over 583 `.v` files, the production tree plus the
@@ -310,8 +236,8 @@ the probe.
 | `psl211_alldecks_sc_const_false_supp` | 2 | LR | `psl211_alldecks_constancy_false_supp` |
 | `psl211_alldecks_sc_const_false_close` | 2 | LR | `psl211_alldecks_constancy_false_close` |
 | `psl211_alldecks_cert_ideal_close` | 2 | L | reads the certificate's identification field |
-| `psl211_alldecks_no_spectral_cert` | 2 | LR | `psl211_alldecks_no_small_eps_cert`, the certificate theorem |
-| `psl211_alldecks_no_spectral_cert0` | 2 | LR | `psl211_alldecks_no_zero_eps_cert`, cited by a header sentence |
+| `psl211_alldecks_no_spectral_cert` | 2 | L | the certificate theorem |
+| `psl211_alldecks_no_spectral_cert0` | 2 | L | cited by a header sentence |
 | `psl211_alldecks_sc_const_false_word` | 2 | LR | `psl211_alldecks_constancy_false_word` |
 | `psl211_alldecks_sc_const_false_word584` | 2 | LR | `psl211_alldecks_constancy_false_word584` |
 | `psl211_dealt_decktbl` | 3 | L | |
@@ -330,10 +256,8 @@ the probe.
 | `psl211_dealt_sc_const_false` | 3 | LR | `psl211_dealt_constancy_false` |
 | six `Eval vm_compute in` | 4 | P | `psl211_deck_diag.v` is a diagnostic and declares nothing |
 
-New in the landing, in no SRC file: nothing. The corollary
-`psl211_alldecks_constancy_false_blockline`, which round 2's SF12 asked for and
-which this landing added, was withdrawn in the fix pass; see the note under the
-ledger.
+New in the landing, in no SRC file:
+`psl211_alldecks_constancy_false_blockline`, the corollary of round 2's SF12.
 
 ### Why `psl211_alldecks_constancy_false_supp` lands
 
@@ -425,9 +349,9 @@ directory rewrites the passage.
 Nothing in the manifest or the facade is edited here, per the brief.
 
 **Incidental, outside this result's scope.**
-`manifest/pgg_analysis_manifest.v` writes, of the S_5 word path, a distance
-named with the barred two-character token, followed by "distance one from group
-uniform". It is not made false by anything here and belongs to whoever owns
+`manifest/pgg_analysis_manifest.v:684` writes "full-L1 distance one from group
+uniform" about the S_5 word path. That spells, for a distance, the term this
+project bars. It is not made false by anything here and belongs to whoever owns
 that file this week.
 
 ## Header of the landing copy
@@ -442,42 +366,26 @@ separate theorem about the all-decks law. Dealt, the run argument is the secret
 and the field fails because the group is 2-transitive and not 3-transitive,
 where `pgl27_word_view_const` proves the same field at PGL(2,7).
 
-What is not claimed: the arm is not shown unavailable, a certificate exists at
-an epsilon near 2, and that occupancy is argued and not compiled. The fix pass
-added what that certificate would be worth: its `cert_eps` is that epsilon
-twice, near 4, while infotheo's `var_dist` sums the absolute differences of two
-laws and so never exceeds 2, so the row such a certificate gives publishes a
-number no pair of laws can exceed and bounds nothing. The occupancy's premise
-is compiled and cited by name, `psl211_alldecks_uniq` of
-`instances/psl211/psl211_alldecks.v`; the line range the header carried before
-the fix pass is gone, absolute line numbers being barred from a permanent
-comment and that range belonging to a file this one does not control.
+What is not claimed: the arm is not shown unavailable, a certificate exists near
+infotheo's ceiling of 2 on the sum of absolute differences, and that occupancy
+is argued and not compiled. Its premise is compiled and cited,
+`psl211_alldecks_uniq` at `instances/psl211/psl211_alldecks.v:421-429`.
 
 The computed diagnostics 360, 600 and 10/11 do not appear. One sentence sends a
 reader to `notes/probes/2026-09-19-psl211-sc-const/` for the reading
-multiplicity measurements. The one uncompiled measurement left in a statement
-comment, that `psl211_dealt_view` is the first numeral at which the two
-chiralities' reading multiplicities differ, is removed: what stays is the
-compiled part, that the two encoder decks reach that reading under different
-numbers of cuts. That matches what was already done at
-`psl211_blockline1_view`, whose SRC comment carried an uncompiled count of 660
-distinct readings and lost it in the merge.
+multiplicity measurements.
 
-The index is selective, as `instances/psl211/psl211_models.v` is. It names the
-two definitions a reader needs to parse the results and the eleven results the
-rows header or a paper would cite, and the occupancy argument is written once,
-in the header, rather than again above the certificate theorem. Before the fix
-pass it named all 47 declarations over 106 of the header's 174 lines.
+The index names every one of the 47 declarations and no other name.
 
 ## N9, assumptions
 
-48 `Print Assumptions` in `psl211_nogo_fidelity.v`, 46 landing declarations plus
-the two restatements. Counted mechanically from the compiler's output.
+50 `Print Assumptions` in `psl211_nogo_fidelity.v`, 47 landing declarations plus
+the three restatements.
 
 - 28 `Closed under the global context`: the two coalition-cardinal lemmas and
   every combinatorial declaration of the block-line and dealt blocks, including
   both `vm_compute` count lemmas and `psl211_perdeck_fiber_true0`.
-- 19 carry exactly `propositional_extensionality`,
+- 21 carry exactly `propositional_extensionality`,
   `functional_extensionality_dep` and `constructive_indefinite_description`.
 - 1, `psl211_alldecks_static_obs_set0`, carries
   `propositional_extensionality` and `functional_extensionality_dep` only.
@@ -491,18 +399,15 @@ From `.Makefile.rocq.d`, reverse closures over `.vo` nodes.
 
 | production file | change | reverse-dependants | `psl211_endpoints.vo` in closure |
 |---|---|---|---|
-| `instances/psl211/psl211_spectral_constancy.v` | new | 0 (nothing imports it) | no |
+| `instances/psl211/psl211_spectral_nogo.v` | new | 0 (nothing imports it) | no |
 | `instances/psl211/psl211_rows.v` | header comment | 0 | no |
 
 A landing therefore compiles exactly two files and one line is added to
 `_CoqProject`. `instances/psl211/psl211_endpoints.v` is loaded by the new file
 and never compiled: it was not touched, not compiled and not opened in this
 probe. No file whose reverse closure contains it is edited;
-`security/pgg_collusion_bound.v`, which has `psl211_endpoints` among its
-reverse-dependants, is imported and not edited. The parenthesis this record
-carried before the fix pass named the forward closure instead, and
-`security/pgg_collusion_bound.vo`'s forward closure is two nodes and does not
-contain `psl211_endpoints.vo`.
+`security/pgg_collusion_bound.v` (105 reverse-dependants, `psl211_endpoints` in
+closure) is imported and not edited.
 
 ## Proofs: what needed a fix
 
@@ -512,16 +417,27 @@ substitutions and no tactic reordering.
 1. `var_dist_point_le _ _ _` becomes `leq_var_dist _ _ _`, once, in
    `psl211_alldecks_constancy_false_close`. Same statement, same arity.
 2. Every renamed constant is renamed at its uses.
-3. Every proof-local hypothesis is renamed to the one file-wide scheme recorded
-   under N10. The numeral now names the block line rather than the value, which
-   is why the pairs of `psl211_blockline1_law_neq` are also swapped in reading
-   order.
+3. The proof-local `L1`, `L0`, `C1`, `C0`, `E1`, `E0`, `H1`, `H0` of
+   `psl211_samechir_law_neq` become `Lb0`, `Lb1`, `Cb0`, `Cb1`, `Eb0`, `Eb1`,
+   `Hb0`, `Hb1`, with the numeral now naming the block line rather than the
+   value, which is why the pairs are also swapped in reading order.
 
-One proof was new in this landing, the four-line corollary
-`psl211_alldecks_constancy_false_blockline`. The fix pass withdrew it, because
-its statement was that of `psl211_alldecks_constancy_false` character for
-character and so stated no fact a reader could cite separately. Its text is in
-`history/psl211_spectral_nogo.2026-09-19-before-fix1.v`.
+One proof is new, the four-line corollary:
+
+    Corollary psl211_alldecks_constancy_false_blockline (R : realType) :
+      ~ coalition_reading_constancy psl211_alldecks_params
+          ((`U psl211_G_pos) : R.-fdist cutT).
+    Proof.
+    move=> Hconst.
+    move/negP: (psl211_blockline1_law_neq R); apply; apply/eqP.
+    exact: (Hconst psl211_perdeck_coalition psl211_perdeck_coalition_below_k
+      (true, psl211_perdeck_deal) (true, psl211_blockline1_deal)).
+    Qed.
+
+Its statement is the same as `psl211_alldecks_constancy_false`'s. The two differ
+in the pair of run arguments their proofs spend, which is the whole content of
+the claim that the failure does not need the secret to move, and the statement
+comment says so in those words.
 
 ## What in the spec or in SRC turned out wrong
 
@@ -544,13 +460,10 @@ character and so stated no fact a reader could cite separately. Its text is in
 4. **`vm_compute` ignores `Local Opaque`.** This was not recorded anywhere and
    it is what makes the briefed file order possible at all: the dealt block's
    count is evaluated at the end of the file, long after `psl211_elem_table` was
-   sealed for the block-line block. Measured in `opaque_vm_test.v`, by three
-   `Eval` sentences and not by a lemma, for the reason under N6.
-5. **A warning follows the first infotheo `Require` beside `fingroup`**, not
-   the import of `variation_dist` and not anything written here, and three
-   files of `instances/psl211/` already emit it. Reported under the compile
-   table so that a landing is not surprised by it. This record's pre-fix
-   version of that sentence was wrong in both halves.
+   sealed for the block-line block. Measured in `opaque_vm_test.v`.
+5. **A warning follows the import of `variation_dist`**, not anything written
+   here. Reported under the compile table so that a landing is not surprised by
+   it.
 
 ## Reproduction
 
@@ -573,16 +486,6 @@ landing copy. Both files were recompiled from source afterwards and both exit
 time spent waiting for the machine-wide Rocq lock while a sibling prover held
 it; the compute figures in the compile table are the clean-rebuild ones.
 
-The fidelity file's 48 `Print Assumptions` cover all 46 declarations of the
-landing copy, in the file's own order, plus the two restatements. Checked
+The fidelity file's 50 `Print Assumptions` cover all 47 declarations of the
+landing copy, in the file's own order, plus the three restatements. Checked
 mechanically, not by eye.
-
-## Fix pass 1, what was compiled
-
-Four files, in this order, each through the machine-wide `rocq1` lock with
-`rocq compile -time`, real `subprocess.returncode`, nothing piped in between:
-`psl211_spectral_constancy.v`, `psl211_rows.v`, `psl211_nogo_fidelity.v`,
-`opaque_vm_test.v`. All four exit 0. The stale `.vo`, `.vos`, `.vok`, `.glob`
-and `.aux` of the old file name were removed after the new name compiled; they
-are ignored build products, not records. `make` was never invoked and
-`instances/psl211/psl211_endpoints.v` was never compiled.

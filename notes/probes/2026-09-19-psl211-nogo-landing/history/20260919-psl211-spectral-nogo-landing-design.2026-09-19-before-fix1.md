@@ -32,14 +32,12 @@ nothing about the chirality, which is the exact arm's theorem.
 
 ## Decisions, each with its reason
 
-1. **A new file `instances/psl211/psl211_spectral_constancy.v`.** Reason: the
+1. **A new file `instances/psl211/psl211_spectral_nogo.v`.** Reason: the
    refutation and its support are some forty declarations, the rows file is
    where programs are written, and the tree has the precedent
    `reconstruct/s5_nogo.v`. The file imports the Tableau for `SpectralCert`,
    sits above it, and has no importer, so a landing compiles it and nothing
-   else. One line in `_CoqProject`. Renamed from `psl211_spectral_nogo.v`
-   after the naming audit: the file refutes the constancy field and a range
-   of epsilon, and does not show the arm unavailable.
+   else. One line in `_CoqProject`.
 2. **`instances/psl211/psl211_models.v` is not edited.** The two lemmas SRC
    restated with the deck description free stay restated in the new file.
    Reason: that file has nine reverse-dependants, the manifest and every rows

@@ -1,10 +1,10 @@
 (* Landing probe, 2026-09-19. Not a production file.                          *)
 (******************************************************************************)
 (* psl211_nogo_fidelity: what the landing copy of                             *)
-(*                       instances/psl211/psl211_spectral_constancy.v carries *)
+(*                       instances/psl211/psl211_spectral_nogo.v carries      *)
 (*                                                                            *)
 (* Every declaration of the landing copy is put through Print Assumptions,    *)
-(* and the two refutations a paper would cite are restated here and closed    *)
+(* and the three refutations a paper would cite are restated here and closed  *)
 (* by exact:, so a statement that drifted in the move would fail to           *)
 (* typecheck at this file rather than at a reader.                            *)
 (*                                                                            *)
@@ -30,7 +30,7 @@ From pgg_smc Require Import pgg_tableau.
 From pgg_smc Require Import psl211_group psl211_orbit psl211_scheme.
 From pgg_smc Require Import psl211_profile psl211_exec psl211_alldecks.
 From pgg_smc Require Import psl211_models.
-From psl211_nogo_landing Require Import psl211_spectral_constancy.
+From psl211_nogo_landing Require Import psl211_spectral_nogo.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -43,7 +43,7 @@ Local Open Scope proba_scope.
 Local Open Scope ring_scope.
 
 (*****************************************************************************)
-(*     The two refutations restated                                          *)
+(*     The three refutations restated                                        *)
 (*****************************************************************************)
 
 (** fidelity_alldecks_constancy_false — the all-decks refutation at the
@@ -53,6 +53,13 @@ Lemma fidelity_alldecks_constancy_false (R : realType) :
   ~ coalition_reading_constancy psl211_alldecks_params
       ((`U psl211_G_pos) : R.-fdist (pgg_gT psl211_M)).
 Proof. exact: psl211_alldecks_constancy_false. Qed.
+
+(** fidelity_alldecks_constancy_false_blockline — the same refutation from
+    the pair of deck descriptions of one chirality. *)
+Lemma fidelity_alldecks_constancy_false_blockline (R : realType) :
+  ~ coalition_reading_constancy psl211_alldecks_params
+      ((`U psl211_G_pos) : R.-fdist (pgg_gT psl211_M)).
+Proof. exact: psl211_alldecks_constancy_false_blockline. Qed.
 
 (** fidelity_dealt_constancy_false — the dealt-mode refutation, where the run
     argument is the secret. *)
@@ -85,14 +92,15 @@ Print Assumptions psl211_blockline1_fiber.
 Print Assumptions psl211_blockline1_fiberE.
 Print Assumptions psl211_blockline1_massE.
 Print Assumptions psl211_blockline1_law_neq.
+Print Assumptions psl211_alldecks_constancy_false_blockline.
 Print Assumptions fdistmap_point_condE.
 Print Assumptions psl211_perdeck_ideal_lawE.
 Print Assumptions psl211_perdeck_fiber_true0.
 Print Assumptions psl211_alldecks_constancy_false_supp.
 Print Assumptions psl211_alldecks_constancy_false_close.
 Print Assumptions psl211_alldecks_cert_ideal_close.
-Print Assumptions psl211_alldecks_no_small_eps_cert.
-Print Assumptions psl211_alldecks_no_zero_eps_cert.
+Print Assumptions psl211_alldecks_no_spectral_cert.
+Print Assumptions psl211_alldecks_no_spectral_cert0.
 Print Assumptions psl211_alldecks_constancy_false_word.
 Print Assumptions psl211_alldecks_constancy_false_word584.
 Print Assumptions psl211_dealt_decktbl.
@@ -113,4 +121,5 @@ Print Assumptions psl211_alldecks_static_obs_set0.
 Print Assumptions psl211_alldecks_constancy_set0.
 
 Print Assumptions fidelity_alldecks_constancy_false.
+Print Assumptions fidelity_alldecks_constancy_false_blockline.
 Print Assumptions fidelity_dealt_constancy_false.
