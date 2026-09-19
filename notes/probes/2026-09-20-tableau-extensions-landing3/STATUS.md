@@ -745,6 +745,7 @@ chain compile recompiles the whole closure. Nothing outside it loads
 | N11 | "== the input-indistinguishability certificate's number is twice the proximity certificate's" | `pgl27_word_proximity_eps_halfE` |
 | N13 | "== the proximity row's security statement, at 2^-39" | `pgl27_word_view_proximity`, conclusion `<= 2%:R^-39` |
 | N14 | Header entry "== the certificate's number is 2^-40"; the docstring's "in closed form" also goes, to "The certificate's number is the two-hundred-letter walk's marginal number, 2^-40." | `pgl27_word_proximity_cert_epsE`, conclusion `= 2%:R^-40` |
+| N18 | "It differs from pgl27_row_exact in its model family, whose index is the law of the dealt secret where the other's is the unit type, and that index is what lets a row over the word model and a row over this one be read at one law of the secret." | `pgl27_row_exact` and `pgl27_row_prior_exact`, whose families carry `amf_index pgl27_exact_family R = unit` against `amf_index pgl27_prior_exact_family R = R.-fdist bool`. Added to this table by `F10` of `audit-landing3-fix1.md`: the text landed in fix pass 1 at `staged/manifest/pgg_analysis_manifest.v:985-988`, the row did not |
 | N19 | "It differs from pgl27_sample only in leaving the law of the dealt secret free, which is what a comparison with the word model at the same law requires." | `pgl27_prior_sample` against `pgl27_sample`; "coordinate" now has one sense in `pgl27_exec.v`, the coordinate law |
 | N20 | "The payload type is IdealProximityPayload at the model family the Sampled value names, so the clause is checked first against that family's index type, unit against a distribution on the booleans." | `pgl27_cross_model_proximity`; the Sampled value's family is `pgl27_exact_family`, index type `unit`, against the certificate's `{fdist bool}` |
 | N21 | Applied: the section banner becomes "What a certificate may name as its ideal, and what refutes one". The order of the section is unchanged, as the finding allows. | the section holds three `Fail` guards and one refutation lemma; "the proximity arm refuses" attributed to the arm what the kernel and one theorem do |
@@ -808,3 +809,76 @@ each). No other code token moved.
 
 The header of `pgl27_proximity.v` indexes 23 entries against 23 non-`Fail`
 declarations, total in both directions, and none of the three `Fail`s.
+
+
+## Fix pass 2 (comments only), against `audit-landing3-fix1.md`
+
+Applied: `F1` (MUST), `F2`, `F3`, `F4`, `F5`, `F6`, `F8`, `F9`, `F10`. `F7`
+changes nothing, its own entry deferring both of its sites to a later pass.
+Three files were edited, `staged/instances/pgl27/pgl27_proximity.v`,
+`staged/lib/var_dist_supp.v` and `landing_fidelity.v`, in their comments
+alone; the chain copies, the production tree, the extensions probe and the
+other landing directories were not touched.
+
+### Per finding
+
+| id | final text | declaration checked | deviation from the auditor's proposal |
+|---|---|---|---|
+| F1 (MUST) | Guard 3's closing: "The Fail rejects the one term written here, on that mismatch of index types, and rules out no other term. The index types separate pgl27_exact_family from pgl27_word_family. The certificate this file builds, pgl27_word_proximity_cert, reads its two models at one index, the member of pgl27_prior_exact_family at secretP and the member of pgl27_word_family at that same secretP." | `amf_index` is the first field of `Record AnalysisModelFamily` (`manifest/pgg_analysis_status.v:99-105`), and the three families of `staged/instances/pgl27/pgl27_models.v:417-434` are built with `(fun _ => unit)` for `pgl27_exact_family` and with `(fun R => R.-fdist bool)` for both `pgl27_word_family` and `pgl27_prior_exact_family`. The certificate's two models are `amf_sample (ab_f (published_at pgl27_row_prior_exact_tableau)) R secretP` and `amf_sample pgl27_word_family R secretP`, read at one `secretP` | The false clause is gone and the comment ends as guard 2 does. The positive clause is added, in a form that names the two families: three families are in play in this file, so "the two families" would have no referent. It is verified by reading `amf_index`, not taken from the audit. **Corrected within the pass.** The clause was first written "The two models a proximity certificate over this instance compares are read at the one index R.-fdist bool, which pgl27_prior_exact_family carries", a false universal: guard 2 directly above writes a proximity certificate over this instance whose ideal is `amf_sample pgl27_exact_family R tt`, read at `tt`, against an actual model read at `secretP`, and guard 1 records that this ideal is well typed. The clause now speaks of `pgl27_word_proximity_cert` alone, whose ideal and actual fields are `amf_sample pgl27_prior_exact_family R secretP` and `amf_sample pgl27_word_family R secretP` (`staged/instances/pgl27/pgl27_proximity.v:292-297`) |
+| F2, and the two numbers of the same docstring | `pgl27_row_word_proximity`'s docstring now reads: "The word model certified by the proximity arm and concluded at 2^-39, the constant the input-indistinguishability row of the same model publishes and the one the published reading statement pgl27_word_view_proximity carries. The certificate's own number is 2^-40, half of that. Below four seats its distance field, pgl27_word_proximity_close, puts the joint law of a coalition's reading with the dealt secret within that number of the same joint law under the prior-indexed exact execution, where the reading and the secret are independent outright, so the ideal side is the product of its two marginals. The number is spent once, against the input-indistinguishability certificate's twice. Its transfer status is IdealFinite, the same the input-indistinguishability row carries, and the two certificates compare against the same ideal cut." | `pgl27_word_proximity_cert_epsE : ipc_eps (pgl27_word_proximity_cert secretP) = 2%:R^-40`; `pgl27_word_proximity_eps_halfE`, which states `cert_eps (pgl27_word_cert secretP)` as `ipc_eps (…) + ipc_eps (…)`; `pgl27_word_proximity_le39 : ipc_eps (pgl27_word_proximity_cert secretP) <= 2%:R^-39`, the terminal's obligation; `pgl27_word_proximity_close`, the certificate's last field, concluding `<= 2%:R^-40` on the two joint laws of reading and secret under the premise `(#\|C\| < profile_k …)%N`; and `pgl27_word_view_proximity`, whose conclusion is `<= 2%:R^-39` against the product of the ideal's two marginals | The auditor's text for `F2` is "The certificate's number is spent once, against the input-indistinguishability certificate's twice." The whole docstring was reread instead of that one sentence, because "is within that number" two lines above still had 2^-39 as its antecedent, which is true but weaker than the 2^-40 the certificate's distance field proves. Each number is now named once: 2^-39 as the published constant, which `pgl27_word_view_proximity` is the statement of, and 2^-40 as the certificate's own, which `pgl27_word_proximity_close` bounds the two joint laws by. The verb `F7` raises is left as it stands |
+| F3 | `landing_fidelity.v`'s header: "Every declaration landing 3 adds is restated here at the statement the probe proved, modulo four name substitutions and one proof edit: the R7 rename of pow2_40_ge1 and pow2_40_gt0 to pgl27_pow2_40_ge1 and pgl27_pow2_40_gt0, the renames of pgl27_row_word_arms_sampledE to pgl27_row_word_families_sampledE and of pgl27_word_uniform_ideal_not_close to pgl27_word_uniform_ideal_close_false, and the replacement of the four-branch first [...] of var_dist_fdist1_uniform by the one branch that fires." | `verify.py`'s `RENAMED`, four entries (`verify.py:79-84`), and `EXPECTED["var_dist_fdist1_uniform"]`, "the four-branch first [...] replaced by the branch that fires" | The auditor's "the four edits the landing forces" counts the R7 pair as one edit. The header now counts what `verify.py` prints, four name substitutions, and separates the one proof edit, so the two cannot be read against each other |
+| F4 | `var_dist_supp.v`'s header: "Beside it sit the scale a published variation distance is read against, the invariance of a uniform law under an injective endomap, the fact that a pushforward charges only the image, and the distance between the point mass at true on the booleans and the uniform law there." | the file's four lemmas beside `var_dist_fdistmap_supp_inj`: `var_dist_le2`, `fdistmap_inj_uniform_id`, `fdistmap_neq0_codom`, `var_dist_fdist1_uniform` | The auditor's clause says "a point mass on the booleans". The lemma is stated at `fdist1 true`, so the enumeration says "the point mass at true", the form `N22` asked for at the index entry and `F9` applies to the banner |
+| F5, site 1 | header paragraph three: "which rests on pgl27_word_mixing, the bound by that same number on the distance between the word walk and the uniform cut on the group" | ``pgl27_word_mixing : var_dist (@rho_from_words_weighted R 6 4 200 pgl27_moves Wuni) (`U pgl27_G_pos) <= 2%:R^-40`` (`instances/pgl27/pgl27_mixing.v:1049-1052`), an upper bound and not a quantity | The auditor's text is "which bounds by that same number the distance between …", a second relative clause after "which rests on". The noun phrase "the bound on the distance" is used instead, so that one wording serves all three sites |
+| F5, site 2 | `pgl27_word_proximity_close`'s docstring: "pgl27_word_mixing, the bound on the cut group's own distance, carries no coalition premise, so the same bound is reachable at every coalition by a route this proof does not take." | the same statement | none beyond the shared wording |
+| F5, site 3 | `pgl27_word_proximity_eps_halfE`'s docstring: "Both are read off pgl27_word_mixing, the one bound on the cut group's distance; the input-indistinguishability arm spends it once for each of the two dealt secrets it compares and the proximity arm compares one law with one law." | the same statement | none beyond the shared wording |
+| F6 | header paragraph three: "so the two rows over this model conclude at one constant and the terminal's obligation is met strictly" | both rows are `PublishedRowAt pgl27_reprice39` and both reach it through `conclude pgl27_reprice39`, at `pgl27_proximity.v:390` and `instances/pgl27/pgl27_rows.v:496` | none |
+| F8, header | "pgl27_word_proximity_cert_idealE says that the model the proximity certificate calls ideal is the model that row publishes, and that the port built from its witness is the row's own port." | the second conjunct is `ExactIndependence (ipc_witness (pgl27_word_proximity_cert secretP)) = ab_port (published_at pgl27_row_prior_exact_tableau) R secretP`, a port equation | none; this is production `instances/kim2025/five_card_proximity.v:78-80`'s wording for the sibling lemma |
+| F8, index entry | "== the certificate's ideal is the ideal row's model, and the port built from its witness is that row's port" | the same conjunction | none |
+| F8, docstring | "The model the certificate calls ideal is the model the published ideal row carries, and the port built from the certificate's witness is that row's port. Conversion decides both, so the ideal a word row is measured against is the model pgl27_row_prior_exact_tableau publishes and not a second description of it." | the same conjunction | the sentence is recast so the witness's owner is named, "the certificate's witness", the docstring being the one site where "its" would attach to the row. Production's own docstring at `five_card_proximity.v:271-274` carries the slip this finding removes and was not followed there |
+| F9 | `var_dist_supp.v`'s section banner: "The point mass at true against the uniform law on the booleans" | `var_dist_fdist1_uniform`, stated at `fdist1 true`, the section's one lemma | none |
+| F10 | the `N18` row above, in the fix pass 1 table | `pgl27_row_exact` against `pgl27_row_prior_exact` | the row quotes the text as it landed in fix pass 1 and adds the two `amf_index` values it rests on |
+| F7 | no change | — | — |
+
+### Verification
+
+`python3` token check, comment-stripped and tokenized on both sides, against
+commit `538862a`: `pgl27_proximity.v` 2277 tokens before and after and
+identical, `var_dist_supp.v` 1321 and identical, `landing_fidelity.v` 1531 and
+identical. **Zero code-token differences in all three files.** A word-level
+diff of the comment text alone reports 19 changed passages in
+`pgl27_proximity.v`, 4 in `var_dist_supp.v` and 2 in `landing_fidelity.v`, and
+every one of them falls inside a passage this pass rewrote for `F1`, `F2`,
+`F3`, `F4`, `F5`, `F6`, `F8` or `F9`. No line of the three files exceeds 80
+bytes and every box line closes at column 80.
+
+`python3 compile.py` with no argument, the whole `_CoqProject` order, because
+a comment edit changes the `.vo` digest of `staged/lib/var_dist_supp.v` and
+that file is first in the order. All 20 files rc 0. The `-time` sentences over
+five seconds are the same four as before the pass and none of them is in an
+edited file: `by vm_compute` 8.7 s in `pgl27_exec.v`, the `Require Export`
+block 5.2 s in `pgg_analysis_manifest.v`, and three in
+`psl211_reading_constancy.v` at 5.1 s, 6.0 s and 6.0 s. The edited files
+themselves: `var_dist_supp.v` 3.9 s, `pgl27_proximity.v` 5.2 s,
+`landing_fidelity.v` 29.8 s, all with no slow sentence.
+
+Three paragraphs the rewrites lengthened were then re-wrapped to the width
+their files already use, which moved no word and left the comment word-diff
+above unchanged: header paragraph three and `pgl27_row_word_proximity`'s
+docstring in `pgl27_proximity.v`, and header paragraph one of
+`landing_fidelity.v`. Header paragraph three was wrapped twice, the first
+wrap leaving three lines whose text ran into the closing `*)` with no space;
+at width 74 every box line of both files closes at column 80 with at least
+one space before the `*)`. The two files the re-wraps touched were compiled
+again after each, last at `pgl27_proximity.v` rc 0 in 5.0 s and
+`landing_fidelity.v` rc 0 in 29.5 s, both with no sentence over five
+seconds. The token check above was re-run after the last re-wrap and is the
+run reported.
+
+Two sentences were then rewritten inside the pass, guard 3's last one and the
+docstring of `pgl27_row_word_proximity`, for the reasons the `F1` and `F2`
+rows record. The token check was re-run after them, `pgl27_proximity.v` 2277
+tokens before and after and identical, `var_dist_supp.v` 1321 and identical,
+`landing_fidelity.v` 1531 and identical, and the two files were compiled
+again, `pgl27_proximity.v` rc 0 in 4.9 s and `landing_fidelity.v` rc 0 in
+29.3 s, both with no sentence over five seconds. That is the state this
+record describes.

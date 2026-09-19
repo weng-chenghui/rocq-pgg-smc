@@ -21,19 +21,20 @@
 (* exact arm at every law of the dealt secret, and                            *)
 (* pgl27_word_proximity_cert_idealE says that the model the proximity         *)
 (* certificate calls ideal is the model that row publishes, and that the      *)
-(* witness it carries for that model is the row's own port.                   *)
+(* port built from its witness is the row's own port.                         *)
 (*                                                                            *)
 (* Both certificates over the word model are built from one number, the       *)
 (* walk's single-card marginal number 2^-40 of pgl27_word_marginal_bound,     *)
-(* which rests on pgl27_word_mixing, the distance between the word walk and   *)
-(* the uniform cut on the group. The proximity certificate carries that       *)
-(* number and the input-indistinguishability certificate carries it added to  *)
-(* itself, which pgl27_word_proximity_eps_halfE states. The proximity row     *)
-(* concludes at 2^-39, the constant pgl27_row_word_branch39 publishes for the *)
-(* other arm, so the two rows over this model are published at one constant   *)
-(* and the terminal's obligation is met strictly. Each of these numbers       *)
-(* bounds a sum of absolute differences, twice the total variation distance,  *)
-(* so a distinguisher's advantage against the published row is at most 2^-40. *)
+(* which rests on pgl27_word_mixing, the bound by that same number on the     *)
+(* distance between the word walk and the uniform cut on the group. The       *)
+(* proximity certificate carries that number and the                          *)
+(* input-indistinguishability certificate carries it added to itself, which   *)
+(* pgl27_word_proximity_eps_halfE states. The proximity row concludes at      *)
+(* 2^-39, the constant pgl27_row_word_branch39 publishes for the other arm,   *)
+(* so the two rows over this model conclude at one constant and the           *)
+(* terminal's obligation is met strictly. Each of these numbers bounds a sum  *)
+(* of absolute differences, twice the total variation distance, so a          *)
+(* distinguisher's advantage against the published row is at most 2^-40.      *)
 (*                                                                            *)
 (* What the row claims is an average over the run argument under the law of   *)
 (* the secret: both sides are pushforwards of whole sample laws and neither   *)
@@ -67,8 +68,9 @@
 (*                                models' joint laws of reading and secret    *)
 (*                                are within 2^-40                            *)
 (*   pgl27_word_proximity_cert_idealE                                         *)
-(*                             == the certificate's ideal and witness are the *)
-(*                                model and the port the ideal row publishes  *)
+(*                             == the certificate's ideal is the ideal row's  *)
+(*                                model, and the port built from its witness  *)
+(*                                is that row's port                          *)
 (*   pgl27_word_proximity_cert_epsE                                           *)
 (*                             == the certificate's number is 2^-40           *)
 (*   pgl27_word_proximity_eps_halfE                                           *)
@@ -217,10 +219,10 @@ Arguments pgl27_word_secret [R] secretP.
     cut alone, the secret is drawn from the same prior and independently of
     the cut in both, and the pair of a reading and the secret is a
     deterministic function of the pair of the secret and the cut. The premise
-    is the arm's threshold at this instance, four seats. The cut group's own
-    distance, pgl27_word_mixing, carries no coalition premise, so the same
-    bound is reachable at every coalition by a route this proof does not
-    take. *)
+    is the arm's threshold at this instance, four seats. pgl27_word_mixing,
+    the bound on the cut group's own distance, carries no coalition premise,
+    so the same bound is reachable at every coalition by a route this proof
+    does not take. *)
 Lemma pgl27_word_proximity_close (R : realType) (secretP : R.-fdist bool)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
@@ -297,11 +299,11 @@ Definition pgl27_word_proximity_cert (R : realType) (secretP : R.-fdist bool)
     (sw_bound_eps (pgl27_word_marginal_bound R))
     (fun C HC => pgl27_word_proximity_close secretP HC).
 
-(** The model the certificate calls ideal, and the witness it carries for it,
-    are the model and the witness of the published ideal row. Conversion
-    decides both, so the ideal a word row is measured against is the model
-    pgl27_row_prior_exact_tableau publishes and not a second description of
-    it. *)
+(** The model the certificate calls ideal is the model the published ideal
+    row carries, and the port built from the certificate's witness is that
+    row's port. Conversion decides both, so the ideal a word row is measured
+    against is the model pgl27_row_prior_exact_tableau publishes and not a
+    second description of it. *)
 Lemma pgl27_word_proximity_cert_idealE (R : realType)
     (secretP : R.-fdist bool) :
   ipc_ideal (pgl27_word_proximity_cert secretP)
@@ -322,8 +324,8 @@ Proof. exact: erefl. Qed.
 
 (** The number pgl27_word_cert carries at this model is twice the number
     pgl27_word_proximity_cert carries. Both are read off pgl27_word_mixing,
-    the one distance on the cut group; the input-indistinguishability arm
-    spends it once for each of the two dealt secrets it compares and the
+    the one bound on the cut group's distance; the input-indistinguishability
+    arm spends it once for each of the two dealt secrets it compares and the
     proximity arm compares one law with one law. The relation is between
     these two certificates and not between the two arms: cert_eps is by
     definition the walk's marginal number added to itself, and this proximity
@@ -376,14 +378,17 @@ Qed.
 (******************************************************************************)
 
 (** The word model certified by the proximity arm and concluded at 2^-39, the
-    constant the input-indistinguishability row of the same model publishes.
-    What a coalition of fewer than four seats is shown is that the joint law
-    of its reading with the dealt secret is within that number of the product
-    of the two marginals the prior-indexed exact execution has, where the
-    reading and the secret are independent outright. The number is spent
-    once, against the input-indistinguishability row's twice. Its transfer
-    status is IdealFinite, the same the input-indistinguishability row
-    carries, and the two certificates compare against the same ideal cut. *)
+    constant the input-indistinguishability row of the same model publishes and
+    the one the published reading statement pgl27_word_view_proximity carries.
+    The certificate's own number is 2^-40, half of that. Below four seats its
+    distance field, pgl27_word_proximity_close, puts the joint law of a
+    coalition's reading with the dealt secret within that number of the same
+    joint law under the prior-indexed exact execution, where the reading and
+    the secret are independent outright, so the ideal side is the product of
+    its two marginals. The number is spent once, against the
+    input-indistinguishability certificate's twice. Its transfer status is
+    IdealFinite, the same the input-indistinguishability row carries, and the
+    two certificates compare against the same ideal cut. *)
 Definition pgl27_row_word_proximity : PublishedRowAt pgl27_reprice39 :=
   pgl27_word_sampled
     certify IdealProximity pgl27_word_proximity_cert
@@ -604,13 +609,16 @@ Fail Definition pgl27_word_proximity_cert_uniform_ideal (R : realType)
     (sw_bound_eps (pgl27_word_marginal_bound R))
     (fun C HC => pgl27_word_proximity_close secretP HC).
 
-(** The word model's proximity certificate does not continue the exact
-    model's branch point. The payload type is IdealProximityPayload at the
-    model family the Sampled value names, so the clause is checked first
-    against that family's index type, unit against a distribution on the
-    booleans. The Fail rejects the one term written here, on that mismatch of
-    index types, and the mismatch is what separates the two models of this
-    instance. *)
+(** The word model's proximity certificate does not continue the exact model's
+    branch point. The payload type is IdealProximityPayload at the model family
+    the Sampled value names, so the clause is checked first against that
+    family's index type, unit against a distribution on the booleans. The Fail
+    rejects the one term written here, on that mismatch of index types, and
+    rules out no other term. The index types separate pgl27_exact_family from
+    pgl27_word_family. The certificate this file builds,
+    pgl27_word_proximity_cert, reads its two models at one index, the member of
+    pgl27_prior_exact_family at secretP and the member of pgl27_word_family at
+    that same secretP. *)
 Fail Definition pgl27_cross_model_proximity : Tableau AnalysisBridged :=
   pgl27_dealt sample pgl27_exact_family
     certify IdealProximity pgl27_word_proximity_cert.
