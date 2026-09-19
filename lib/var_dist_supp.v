@@ -3,17 +3,17 @@
 (******************************************************************************)
 (* var_dist_supp: variation distance under a reader separating the supports   *)
 (*                                                                            *)
-(* var_dist_fdistmap_inj, the equality case of the data processing            *)
-(* inequality var_dist_fdistmap, asks that the reader be injective on the     *)
-(* whole domain. A reader of the form sigma |-> sigma s on a permutation      *)
-(* group is not, so that case carries no distance between two laws on the     *)
-(* group back from a bound on the reading of one card position. Weakening     *)
-(* the hypothesis to the union of the two supports restores the transport,    *)
-(* and that is the form in which a per-position number becomes a number       *)
-(* about the group. Beside it sit the ceiling a published variation           *)
-(* distance is read against, the invariance of a uniform law under an         *)
-(* injective endomap, the fact that a pushforward charges only the image,     *)
-(* and the count of the tuple positions at which a predicate holds.           *)
+(* var_dist_fdistmap_inj, the equality case of the data processing inequality *)
+(* var_dist_fdistmap, asks that the reader be injective on the whole domain.  *)
+(* A reader of the form sigma |-> sigma s on a permutation group is not, so   *)
+(* that case carries no distance between two laws on the group back from a    *)
+(* bound on the reading of one card position. Weakening the hypothesis to the *)
+(* union of the two supports restores the transport, and that is the form in  *)
+(* which a per-position number becomes a number about the group. Beside it    *)
+(* sit the scale a published variation distance is read against, the          *)
+(* invariance of a uniform law under an injective endomap, and the fact that  *)
+(* a pushforward charges only the image. security/var_dist_joint_law.v        *)
+(* carries the distance between two joint laws of a reading and a secret.     *)
 (*                                                                            *)
 (* Lemmas:                                                                    *)
 (*   var_dist_le2               == a variation distance is at most two        *)
@@ -21,8 +21,6 @@
 (*                                 mass transports the distance exactly       *)
 (*   fdistmap_inj_uniform_id    == an injective endomap fixes the uniform law *)
 (*   fdistmap_neq0_codom        == a pushforward charges only the image       *)
-(*   card_tnth_count            == the tuple positions meeting a predicate    *)
-(*                                 are counted on the underlying sequence     *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -39,7 +37,7 @@ Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 
 (******************************************************************************)
-(*     The ceiling of a variation distance                                    *)
+(*     The bound two on a variation distance                                  *)
 (******************************************************************************)
 
 (** The variation distance between two laws on a finite carrier is at most
@@ -154,15 +152,3 @@ have Hsimp : \sum_(a in A | a \in f @^-1 b) P a = \sum_(a | f a == b) P a.
 rewrite fdistmapE Hsimp big1 // => a Ha.
 by move: (Hno a); rewrite Ha.
 Qed.
-
-(******************************************************************************)
-(*     Counting a tuple's entries through the positions                       *)
-(******************************************************************************)
-
-(** The positions of a tuple at which a predicate holds are counted by the
-    predicate on the underlying sequence. It is the bridge from a law on card
-    positions to the deck's colour census, which is the level at which den
-    Boer's encoding is constant in the committed bits. *)
-Lemma card_tnth_count (n : nat) (T : Type) (t : n.-tuple T) (p : pred T) :
-  #|[pred k : 'I_n | p (tnth t k)]| = count p t.
-Proof. by rewrite -sum1_card -sum1_count big_tuple. Qed.

@@ -1046,3 +1046,29 @@ Zero hits in the three files for `apex`, `gate`/`gates`/`gated`/`gating` and
 `posit`/`posits`/`posited`/`positing`. No abbreviation of
 "indistinguishability". The new prose says "reading", not "view", and carries
 no meta narration.
+## As built (2026-09-20)
+
+Fix pass 2 was audited by the main session: comment-stripped code tokens of
+the five landed files and of `landing_fidelity.v` are identical to da53033
+(script), and the nine changed passages were read against the findings F1 to
+F5 and F7 to F10 of `audit-landing2-fix1.md` (commit cb3adfc).
+
+The five staged files were copied with `cp` to `lib/var_dist_supp.v`,
+`security/var_dist_joint_law.v`, `instances/kim2025/five_card_mixing.v`,
+`manifest/pgg_tableau_arm_relations.v` and
+`instances/kim2025/five_card_proximity.v`; `cmp` reports each copy
+byte-identical to its staged source. `_CoqProject` gained three lines:
+`security/var_dist_joint_law.v` after `security/pgg_collusion_bound.v`,
+`manifest/pgg_tableau_arm_relations.v` after `manifest/pgg_tableau_syntax.v`,
+`instances/kim2025/five_card_proximity.v` after `instances/s5/s5_rows.v`.
+Production was recompiled single-file in dependency order, fifteen files: the
+eleven of `lib/var_dist_supp.v`'s reverse closure, that file, and the three new
+ones, all rc=0.
+
+As-built fidelity: `landing_fidelity.v`, unchanged, compiled from a scratch
+directory against production's load path only: rc=0, 33 `Axioms:` blocks at
+the three classical axioms and 2 closed under the global context, as in the
+staged run. Its provenance probes (`Check var_dist_supp.var_dist_le2`,
+`Fail Check var_dist_supp.card_tnth_count`,
+`Check five_card_mixing.card_tnth_count`, the `Fail Check`s of the four
+withdrawn `*40` names) now hold of production.

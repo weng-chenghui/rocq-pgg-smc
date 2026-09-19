@@ -17,8 +17,9 @@
 (* records for Kim's one-cut and seven-cut rows. The constancy is exact and   *)
 (* is quantified over every coalition below the privacy threshold and over    *)
 (* both committed pairs; the distance is where the two rows' published        *)
-(* numbers come from. Each law is given in the two forms the rows use, the    *)
-(* bundle's own spectral number and the constant a text quotes.               *)
+(* numbers come from. The seven-cut law is given at the bundle's own spectral *)
+(* number, the one-cut law at that number and at the exact one fiftieth its   *)
+(* row publishes.                                                             *)
 (*                                                                            *)
 (* Feeding those two premises to the generic transfer inequality gives, for   *)
 (* each of Kim's two cut laws, the statement the attack model asks for: a     *)
@@ -32,12 +33,12 @@
 (* Definitions:                                                               *)
 (*   kim_biased_marginal_bound == the one-cut law's marginal bound at the     *)
 (*                                bundle's spectral number                    *)
-(*   kim_centi_marginal_bound40 == the seven-cut law's marginal bound at the  *)
-(*                                 constant 2^-40                             *)
 (*   kim_biased_marginal_bound_exact == the one-cut law's marginal bound at   *)
 (*                                      the exact number one fiftieth         *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   card_tnth_count == the tuple positions meeting a predicate are counted   *)
+(*                      on the underlying sequence                            *)
 (*   fc_sigma_pow_point_inj == two rotations agreeing at one card position    *)
 (*                             are equal                                      *)
 (*   fc_kim_rho_supp_pow == every cut a Kim word shuffle charges is a         *)
@@ -62,7 +63,6 @@
 (*   five_card_static_obs_const == a coalition below the privacy threshold    *)
 (*                                 reads the ideal cut alike at both          *)
 (*                                 committed pairs                            *)
-(*   kim_centi_cut_mixing40 == the same distance at the constant 2^-40        *)
 (*   kim_biased_cut_mixing_exact == the same at the exact one fiftieth        *)
 (******************************************************************************)
 
@@ -244,6 +244,14 @@ Proof.
 by case: a; case: b; rewrite /fc_arrange /fc_negate /fc_encode /=;
    case: (p true); case: (p false).
 Qed.
+
+(** card_tnth_count — the positions of a tuple at which a predicate holds are
+    counted by the predicate on the underlying sequence. It is the bridge from
+    a law on card positions to the deck's colour census, which is the level at
+    which den Boer's encoding is constant in the committed bits. *)
+Lemma card_tnth_count (n : nat) (T : Type) (t : n.-tuple T) (p : pred T) :
+  #|[pred k : 'I_n | p (tnth t k)]| = count p t.
+Proof. by rewrite -sum1_card -sum1_count big_tuple. Qed.
 
 Section five_card_colour_census.
 Variable R : realType.
@@ -468,8 +476,8 @@ Qed.
     under the single biased cut sees laws within twice the length-one bundle's
     spectral number of each other at the two committed pairs. This is the
     security statement of Kim's one-cut analysis path. Its number is about three
-    percent of the ceiling var_dist_le2 gives, so it is a weak separation bound
-    and not a cryptographic one. *)
+    percent of the bound two that var_dist_le2 gives, so it is a weak
+    separation bound and not a cryptographic one. *)
 Lemma kim_biased_static_obs_indistinguishability
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   (#|C| < profile_k (instance_profile five_card_algebra))%N ->
@@ -495,32 +503,8 @@ Qed.
 End five_card_cut_mixing.
 
 (******************************************************************************)
-(*     The same two distances at the constants the two rows republish         *)
+(*     The one-cut distance at the constant the row publishes                 *)
 (******************************************************************************)
-
-(** kim_centi_marginal_bound40 — the seven-cut law's marginal bound with its
-    number written as the constant two to the minus fortieth rather than as
-    the spectral expression. The per-card-position proof is the tree's own
-    kim_deal_centi_lt weakened to a non-strict inequality, so the record
-    asserts nothing new. This is the shape PGL(2,7)'s word row carries, and
-    the shape a published constant needs. *)
-Definition kim_centi_marginal_bound40 (R : realType)
-  : ShuffleMarginalBound R (instance_M five_card_algebra) :=
-  @MkShuffleMarginalBound R FiveCardKim_M 7 (2%:R ^- 40)
-    (sw_rho_dist (scb_bound (kim_security_bundle_centi R)))
-    (fun s => Order.POrderTheory.ltW (kim_deal_centi_lt R s)).
-
-(** kim_centi_cut_mixing40 — the seven-cut law is within the constant two to
-    the minus fortieth of the uniform rotation law, in variation distance on
-    the cut group. It is the mixing field of the repeated row's certificate
-    at the constant bound. *)
-Lemma kim_centi_cut_mixing40 (R : realType) :
-  var_dist (sw_rho_dist (kim_centi_marginal_bound40 R))
-           (sa_cut_dist (five_card_sample R))
-  <= sw_bound_eps (kim_centi_marginal_bound40 R).
-Proof.
-by apply: five_card_cut_mixing_of_supp_pow; exact: kim_centi_cut_supp_pow.
-Qed.
 
 (** kim_one_cut_centi_le — one card position of Kim's one-cut law is within
     one fiftieth of the uniform law on card positions. kim_one_cut_centiE
