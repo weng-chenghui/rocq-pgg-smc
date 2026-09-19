@@ -14,45 +14,75 @@
 (* knows exactly what has been proved there, and the named projections at the *)
 (* bottom read those conjuncts back off a finished row.                       *)
 (*                                                                            *)
-(* There are five statements. dealt_step fixes the run argument to be the     *)
+(* There are six statements. dealt_step fixes the run argument to be the      *)
 (* dealer's secret and chooses a fuel. execute_step adjoins the three run     *)
 (* facts and reaches run correctness. sample_step adjoins an analysis model   *)
 (* family and proves that the executed coalition reader is the static one,    *)
 (* which is what moves the row from a claim about interpreter messages to a   *)
-(* claim about a group action. certify_exact and                              *)
-(* certify_indistinguishability adjoin a security witness of one of the two   *)
-(* arms. Both arms speak only of a coalition below the privacy threshold,     *)
-(* and they are not comparable statements: the exact arm concludes            *)
-(* independence of the coalition's view from the secret, unconditionally      *)
-(* and at every real field, while the input-indistinguishability arm          *)
-(* concludes a variation distance between the readings of two run             *)
-(* arguments, bounded by the certificate's marginal-bound epsilon twice,      *)
-(* one for each argument. A row commits to one of them and claims nothing     *)
-(* about the other.                                                           *)
+(* claim about a group action. certify_exact, certify_indistinguishability    *)
+(* and certify_idealproximity adjoin a security witness of one arm. Each arm  *)
+(* speaks only of a coalition below the privacy threshold, and the arms are   *)
+(* not comparable statements: the exact arm concludes independence of the     *)
+(* coalition's view from the secret, unconditionally and at every real field, *)
+(* the input-indistinguishability arm concludes a variation distance between  *)
+(* the readings of two run arguments, bounded by the certificate's            *)
+(* marginal-bound epsilon twice, one for each argument, and the proximity arm *)
+(* concludes a variation distance between the joint law of the coalition's    *)
+(* view with the secret and the product of the two marginals of an ideal      *)
+(* model whose own privacy is exact. A row commits to one arm and claims      *)
+(* nothing about the rest, and security_arm_of names which arm a finished row *)
+(* committed to.                                                              *)
 (*                                                                            *)
-(* Each arm has one composition law, and the two laws are where the           *)
-(* mathematics of the row sits. exact_tail transports a witness's             *)
-(* independence from the direct computation to the view along the previous    *)
-(* statement's link lemma, then derives the entropy forms by                  *)
-(* leakage_of_view_indep and the closure under deterministic                  *)
-(* post-processing by inde_RV_comp. indistinguishability_tail feeds the       *)
-(* certificate's cut-carrier distance and its ideal constancy to              *)
-(* var_dist_fdistmap_transfer.                                                *)
+(* The exact arm's and the proximity arm's propositions mention terms an      *)
+(* instance chooses, so a row of either says as much as those terms say.      *)
+(* ExactProp mentions the witness's ew_secret, and a constant ew_secret       *)
+(* satisfies ew_indep at every coalition. IdealProximityPropAt mentions       *)
+(* the certificate's ipc_secret and the two marginals of its ipc_ideal, and   *)
+(* at an ipc_ideal that is the row's own adapter, with ipc_secret that        *)
+(* adapter's witness's own secret, the two sides of ipc_close are one term at *)
+(* every coalition below the threshold and the field holds at an ipc_eps of   *)
+(* zero. The input-indistinguishability arm is different in kind:             *)
+(* IndistinguishabilityPropAt mentions neither ic_ideal nor a secret, only    *)
+(* the readings of the model's own cut law at two run arguments and the       *)
+(* number bounding their distance, so ic_ideal is a means of proving it.      *)
+(* ic_close holds ic_ideal within the marginal bound's epsilon of that        *)
+(* bound's own law, ic_Hd identifies that law with the model's own cut law,   *)
+(* and ic_const asks a coalition below the threshold to read ic_ideal the     *)
+(* same at every two run arguments. At some models these three fields leave   *)
+(* no certificate whose marginal bound's epsilon, taken twice, is below a     *)
+(* positive number.                                                           *)
+(*                                                                            *)
+(* Each arm has one composition law, and those laws are where the mathematics *)
+(* of the row sits. exact_tail transports a witness's independence from the   *)
+(* direct computation to the view along the previous statement's link lemma,  *)
+(* then derives the entropy forms by leakage_of_view_indep and the closure    *)
+(* under deterministic post-processing by inde_RV_comp.                       *)
+(* indistinguishability_tail feeds the certificate's cut-carrier distance and *)
+(* its ideal constancy to var_dist_fdistmap_transfer. idealproximity_tail     *)
+(* transports the certificate's distance between two joint laws to the        *)
+(* executed readers of both models, along that link lemma taken once for each *)
+(* model, and rewrites the ideal joint law as the product of its two          *)
+(* marginals through the ideal witness's independence.                        *)
 (*                                                                            *)
 (* Two things stay outside the program. The mathematics of a particular       *)
-(* instance never appears as a line: it enters only as the witness or the     *)
-(* certificate a certify statement takes, so an instance owes one record      *)
-(* per arm and no proof about the framework. And of the three terminals       *)
-(* only conclude returns a tableau and only it has a step's shape, but it     *)
-(* too is outside: it leaves the data and the arms untouched and moves only   *)
-(* the real the input-indistinguishability arm's proposition mentions.        *)
+(* instance never appears as a line: it enters as the witness or the          *)
+(* certificate a certify statement takes, and once more as the payload of     *)
+(* conclude, which for an input-indistinguishability or a proximity port is   *)
+(* an inequality between the number the row's own certificate proved and the  *)
+(* number the row publishes and for an exact port is nothing. And of the      *)
+(* three terminals only conclude returns a tableau and only it has a step's   *)
+(* shape, but it too is outside: it leaves the data and the arms untouched    *)
+(* and moves the real an arm's proposition mentions to any upper bound of it. *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   ExactWitness           == the exact arm's security witness               *)
 (*   IndistinguishabilityCert                                                 *)
 (*                          == the input-indistinguishability arm's           *)
 (*                             security certificate                           *)
+(*   IdealProximityCert     == the proximity arm's security certificate       *)
 (*   SecurityPort           == the arm an instance certifies                  *)
+(*   SecurityArm            == which arm, with no witness or certificate      *)
+(*   port_arm               == the arm a port commits to                      *)
 (*   StackAt                == the data a row holds at one completion level   *)
 (*   StackProp              == the proposition a row holds at one level       *)
 (*   TableauAt              == data at a level with a proof about it          *)
@@ -64,12 +94,13 @@
 (*   certify_indistinguishability                                             *)
 (*                          == the statement adjoining an                     *)
 (*                             input-indistinguishability certificate         *)
-(*   conclude               == the terminal republishing the bound            *)
-(*   restate                == the terminal handing over a chosen             *)
-(*                             proposition                                    *)
+(*   certify_idealproximity == the statement adjoining a proximity            *)
+(*                             certificate                                    *)
+(*   conclude               == the terminal publishing an upper bound of the  *)
+(*                             accumulated bound                              *)
+(*   restate                == the terminal handing over a chosen proposition *)
 (*   publish                == the terminal attaching the row's manifest row  *)
-(*   PublishedRowAt         == a row's data, its manifest row and its         *)
-(*                             theorem                                        *)
+(*   PublishedRowAt         == a row's data, its manifest row and its theorem *)
 (*   run_correct_of         == run correctness of a published row             *)
 (*   view_identification_of == its link lemma, the view as the                *)
 (*                             direct computation                             *)
@@ -77,15 +108,27 @@
 (*   view_indistinguishability_of                                             *)
 (*                          == the same statement, under the                  *)
 (*                             input-indistinguishability arm's name          *)
+(*   view_proximity_of      == the same statement, proximity-arm name         *)
+(*   security_arm_of        == which arm a published row carries              *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   tableau_left_unit      == sequencing onto a built tableau is             *)
-(*                             application                                    *)
+(*   tableau_left_unit      == sequencing onto a built tableau is application *)
 (*   exact_tail             == the exact arm's composition law                *)
 (*   indistinguishability_tail                                                *)
 (*                          == the input-indistinguishability arm's           *)
 (*                             composition law                                *)
-(*   port_reprice           == a port's proposition at a renamed bound        *)
+(*   idealproximity_tail    == the proximity arm's composition law            *)
+(*   port_conclude          == a port's proposition at a number above its own *)
+(*                             bound                                          *)
+(*   certify_exact_armE     == the exact statement writes the exact arm       *)
+(*   certify_indistinguishability_armE                                        *)
+(*                          == the input-indistinguishability statement       *)
+(*                             writes that arm                                *)
+(*   certify_idealproximity_armE                                              *)
+(*                          == the proximity statement writes the proximity   *)
+(*                             arm                                            *)
+(*   conclude_armE          == concluding a row leaves its arm alone          *)
+(*   publish_armE           == publishing a row leaves its arm alone          *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -116,7 +159,7 @@ Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 
 (******************************************************************************)
-(*     The two security witnesses                                             *)
+(*     The security witnesses of the arms                                     *)
 (******************************************************************************)
 
 (* The exact arm's witness: a secret random variable on the sampled space,
@@ -156,15 +199,70 @@ Record IndistinguishabilityCert (R : realType) (A : PGGAlgebraic)
           fdistmap (static_coalition_obs C x) ic_ideal
           = fdistmap (static_coalition_obs C x') ic_ideal }.
 
-(* Which of the two arms an instance certifies, at one real field and one
-   index of its analysis family. A row commits to an arm here, and the
-   proposition it carries from that line on is that arm's own; the two are
-   different claims about a coalition, so a row certifying input
+(* The proximity arm's certificate: a second sample adapter over the row's own
+   execution, standing for the ideal run; an exact witness for that ideal,
+   which is what makes the ideal a model whose own privacy is proved and not a
+   bare law; the actual model's secret, typed at the carrier the ideal's
+   witness names, so that the two models speak of one secret; a number; and,
+   at every coalition below the privacy threshold, that number as a bound on
+   the variation distance between the two models' joint laws of the
+   coalition's reading and the secret. The comparison is an average over the
+   run argument of each model and not a statement at a fixed run argument, and
+   the number is an upper bound the instance chooses on what the actual model
+   loses against an execution that leaks nothing, not a quantity the record
+   determines: any number at which ipc_close is provable is a legal field, so a
+   certificate says as much as its number is small and no more. *)
+Record IdealProximityCert (R : realType) (A : PGGAlgebraic)
+    (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E)) :=
+  MkIdealProximityCert {
+    ipc_ideal   : SampleAdapter R (instance_exec E) ;
+    ipc_witness : ExactWitness ipc_ideal ;
+    ipc_secret  : {RV (sa_sampleP sa) -> ew_secretT ipc_witness} ;
+    ipc_eps     : R ;
+    ipc_close   : forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
+      (#|C| < profile_k (instance_profile A))%N ->
+      var_dist
+        (fdistmap (fun u => (static_coalition_obs C (sa.(sa_arg) u)
+                               (sa.(sa_cut) u), ipc_secret u))
+           (sa_sampleP sa))
+        (fdistmap (fun u => (static_coalition_obs C (ipc_ideal.(sa_arg) u)
+                               (ipc_ideal.(sa_cut) u),
+                             ew_secret ipc_witness u))
+           (sa_sampleP ipc_ideal))
+      <= ipc_eps }.
+
+(* Which arm an instance certifies, at one real field and one index of its
+   analysis family. A row commits to an arm here, and the proposition it
+   carries from that line on is that arm's own; the arms are different
+   statements about a coalition, so a row certifying input
    indistinguishability asserts nothing about mutual information. *)
 Variant SecurityPort (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E)) : Type :=
   | ExactIndependence of ExactWitness sa
-  | InputIndistinguishability of IndistinguishabilityCert sa.
+  | InputIndistinguishability of IndistinguishabilityCert sa
+  | IdealProximity of IdealProximityCert sa.
+
+(* Which arm a row commits to, with the witness and the
+   certificate forgotten. A published row's manifest row records the path the
+   row ran and no theorem, so two rows over one model and one pair of statuses
+   are one manifest row; the arm is where they differ, and a reader asking
+   what a finished row proved about a coalition reads this and not the
+   manifest. *)
+Variant SecurityArm :=
+  ExactIndependenceArm | InputIndistinguishabilityArm | IdealProximityArm.
+
+(* The arm a port commits to, with its witness or its certificate forgotten.
+   The constructor alone decides the answer, so a row's arm is fixed by the
+   certify statement that wrote the port and needs no proof about the model. *)
+Definition port_arm (R : realType) (A : PGGAlgebraic)
+    (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
+    (p : SecurityPort sa) : SecurityArm :=
+  match p with
+  | ExactIndependence _ => ExactIndependenceArm
+  | InputIndistinguishability _ => InputIndistinguishabilityArm
+  | IdealProximity _ => IdealProximityArm
+  end.
+Arguments port_arm {R A E sa} p.
 
 (******************************************************************************)
 (*     The completion-level stack                                             *)
@@ -259,6 +357,17 @@ Definition ab_port (q : StackAt AnalysisBridged) :
   projT2 (projT2 (projT2 (projT2 (projT2 (projT2 q))))).
 Arguments ab_port : clear implicits.
 
+(* The arm the data at this level carries, at one real field and one index.
+   The port is a function of both, so the arm is read at the arguments the
+   port is written at rather than at one chosen field. The certify
+   statements build a port whose constructor is the same at every field and
+   index, so for a row written in the surface the answer does not depend on
+   either argument. *)
+Definition ab_arm (q : StackAt AnalysisBridged) (R : realType)
+    (idx : amf_index (ab_f q) R) : SecurityArm :=
+  port_arm (ab_port q R idx).
+Arguments ab_arm : clear implicits.
+
 (******************************************************************************)
 (*     The proposition family                                                 *)
 (******************************************************************************)
@@ -341,9 +450,9 @@ Arguments ExactProp {R A E sa} w.
 
 (* The input-indistinguishability arm's proposition: below the threshold, two
    run arguments give coalition readings of the cut within variation distance
-   c. The bound is a parameter rather than the certificate's own sum, so a
-   terminal can restate a finished row at the number a paper cites without
-   reproving the arm. *)
+   c. The bound is a parameter rather than the certificate's own sum, so
+   conclude can state a finished row at any number at or above that sum, the
+   constant a paper cites among them, without reproving the arm. *)
 Definition IndistinguishabilityPropAt (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (cert : IndistinguishabilityCert sa) (c : R) : Prop :=
@@ -357,26 +466,59 @@ Arguments IndistinguishabilityPropAt {R A E sa} cert c.
 
 (* A certificate's own bound: the marginal bound's epsilon twice, one for each
    of the two run arguments the arm compares. It is the number a row carries
-   when nothing restates it. *)
+   when its coordinate names none. *)
 Definition cert_eps (R : realType) (A : PGGAlgebraic) (E : ExecutionParams A)
     (sa : SampleAdapter R (instance_exec E))
     (cert : IndistinguishabilityCert sa) : R :=
   sw_bound_eps (ic_b cert) + sw_bound_eps (ic_b cert).
 Arguments cert_eps {R A E sa} cert.
 
+(* The proximity arm's proposition: below the threshold, the joint law of the
+   coalition's executed reading and the secret under the actual model is
+   within variation distance c of the product of the two marginals the ideal
+   model has, its own reading and its own secret. The right side is a product
+   because the ideal's witness makes those two independent there, so c bounds
+   the sum of the absolute differences between what a coalition below the
+   threshold sees jointly with the secret and two quantities drawn apart, and
+   a distinguisher's advantage is at most half of c, the sum of the absolute
+   differences being twice the total variation distance of the literature.
+   The attack model is a static coalition of fewer than k seats reading its
+   own endpoints, and the claim is an average over the run argument and not a
+   statement at a fixed run argument. The bound is a parameter, as it is for
+   the input-indistinguishability arm, so conclude can state a finished row
+   at any number at or above the certificate's ipc_eps, the one a paper
+   cites among them. *)
+Definition IdealProximityPropAt (R : realType) (A : PGGAlgebraic)
+    (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
+    (cert : IdealProximityCert sa) (c : R) : Prop :=
+  forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
+    (#|C| < profile_k (instance_profile A))%N ->
+    var_dist
+      (fdistmap (fun u => (@sa_coalition_view R (instance_profile A)
+                             (instance_exec E) sa 0 C u, ipc_secret cert u))
+         (sa_sampleP sa))
+      ((fdistmap (@sa_coalition_view R (instance_profile A) (instance_exec E)
+                    (ipc_ideal cert) 0 C) (sa_sampleP (ipc_ideal cert)))
+       `x (fdistmap (ew_secret (ipc_witness cert))
+             (sa_sampleP (ipc_ideal cert))))
+    <= c.
+Arguments IdealProximityPropAt {R A E sa} cert c.
+
 (* A bound named once per real field, with None meaning the program's own sum.
-   single real will not serve, because the security port quantifies over the
+   A single real will not serve, because the security port quantifies over the
    real field and the published number is therefore a function of it. *)
 Definition Reprice := forall R : realType, option R.
 
-(* The reprice that names nothing. It is the coordinate of every row that
-   publishes the bound it accumulated. *)
+(* The coordinate that names nothing. Every row that publishes the bound it
+   accumulated carries it. *)
 Definition no_reprice : Reprice := fun _ => None.
 
-(* The proposition a port carries at a given reprice: independence for the
+(* The proposition a port carries at a given coordinate: independence for the
    exact arm, the variation bound at the named number for the
-   input-indistinguishability arm. The arm selects the proposition, so a row
-   cannot state one arm's claim about the other's witness. *)
+   input-indistinguishability arm, the distance to the ideal model's product
+   law at the named number for the proximity arm. The arm selects the
+   proposition, so a row cannot state one arm's claim about another's
+   witness. *)
 Definition PortProp (c : Reprice) (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (p : SecurityPort sa) : Prop :=
@@ -384,6 +526,8 @@ Definition PortProp (c : Reprice) (R : realType) (A : PGGAlgebraic)
   | ExactIndependence w => ExactProp w
   | InputIndistinguishability cert =>
       IndistinguishabilityPropAt cert (odflt (cert_eps cert) (c R))
+  | IdealProximity cert =>
+      IdealProximityPropAt cert (odflt (ipc_eps cert) (c R))
   end.
 Arguments PortProp c {R A E sa} p.
 
@@ -402,7 +546,7 @@ Arguments BridgedProp c q : assert.
    coalition below Observed, run correctness at Observed, that with the view
    identification at Sampled, and the bridged conjunction at the program's own
    bound above it. This is the default proposition family of the carrier
-   below, and the family a terminal leaves when it republishes a row.
+   below, and the family a terminal leaves when it concludes a row.
 
    The match needs no return annotation: the expected type
    StackAt b -> Prop determines the motive. *)
@@ -423,8 +567,8 @@ Arguments StackProp : clear implicits.
 
 (* A completion level's data together with a proof of a proposition about it.
    The carrier is indexed by the proposition family and not only by the level,
-   because a terminal that republishes the bound hands back a record at the
-   same level whose proposition is no longer StackProp. *)
+   because a terminal that concludes a row at a chosen number hands back a
+   record at the same level whose proposition is no longer StackProp. *)
 #[projections(primitive)]
 Record TableauAt (b : CompletionLevel) (Q : StackAt b -> Prop) :=
   MkTableau {
@@ -537,14 +681,22 @@ Definition ExactPayload (x : StackAt Sampled) : Type :=
   forall (R : realType) (idx : amf_index (sp_f x) R),
     ExactWitness (amf_sample (sp_f x) R idx).
 
-(* The payload of certify_indistinguishability: one certificate of the
-   input-indistinguishability arm per real field and index of the accumulated
-   family. Uniform in the field for the same reason the exact payload is, so
-   the bound the arm publishes is a bound at every field rather than at one
-   chosen field. *)
+(* The payload of certify_indistinguishability: one
+   input-indistinguishability certificate per real field and index of the
+   accumulated family. Uniform in the field for the same reason the exact
+   payload is, so the bound the arm publishes is a bound at every field
+   rather than at one chosen field. *)
 Definition IndistinguishabilityPayload (x : StackAt Sampled) : Type :=
   forall (R : realType) (idx : amf_index (sp_f x) R),
     IndistinguishabilityCert (amf_sample (sp_f x) R idx).
+
+(* The payload of certify_idealproximity: one proximity certificate per real
+   field and index of the accumulated family. Uniform in the field for the
+   reason the other two payloads are, so the ideal a row compares itself with
+   and the number it loses against that ideal are fixed at every field. *)
+Definition IdealProximityPayload (x : StackAt Sampled) : Type :=
+  forall (R : realType) (idx : amf_index (sp_f x) R),
+    IdealProximityCert (amf_sample (sp_f x) R idx).
 
 (* The independence a witness states at the direct computation, transported
    to the view along the link lemma, with its entropy forms and
@@ -592,6 +744,33 @@ apply: (var_dist_fdistmap_transfer R _ _ (sa_cut_dist sa) (ic_ideal cert)
 Qed.
 Arguments indistinguishability_tail {R A E sa} cert.
 
+(* The certificate's distance between the two models' joint laws, stated at
+   the direct computation, carried to the executed readers of both models
+   along the link lemma taken once for each, with the ideal joint law
+   rewritten as the product of its two marginals by the ideal witness's
+   independence. The composition law of the proximity arm; the two link
+   hypotheses have the shape the previous statement proved, and the ideal's is
+   available because the ideal adapter runs the row's own execution. *)
+Lemma idealproximity_tail (R : realType) (A : PGGAlgebraic)
+    (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
+    (cert : IdealProximityCert sa)
+    (Hview : forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
+       @sa_coalition_view R (instance_profile A) (instance_exec E) sa 0 C
+       = (fun u => static_coalition_obs C (sa.(sa_arg) u) (sa.(sa_cut) u)))
+    (Hideal : forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
+       @sa_coalition_view R (instance_profile A) (instance_exec E)
+         (ipc_ideal cert) 0 C
+       = (fun u => static_coalition_obs C ((ipc_ideal cert).(sa_arg) u)
+                     ((ipc_ideal cert).(sa_cut) u))) :
+  IdealProximityPropAt cert (ipc_eps cert).
+Proof.
+move=> C HC.
+rewrite (Hview C) (Hideal C).
+rewrite -(inde_dist_of_RV2 (@ew_indep _ _ _ _ (ipc_witness cert) C HC)).
+exact: (@ipc_close _ _ _ _ cert C HC).
+Qed.
+Arguments idealproximity_tail {R A E sa} cert Hview Hideal.
+
 (* Adjoins the exact arm's witness at every real field and index, reaching
    AnalysisBridged with the arm's proposition proved by exact_tail from the
    previous line's identification. *)
@@ -608,8 +787,9 @@ Arguments certify_exact x q p : assert.
 
 (* Adjoins the input-indistinguishability arm's certificate at every real
    field and index, reaching AnalysisBridged with the arm's proposition
-   proved by indistinguishability_tail. The two certify statements are the
-   only lines through which an instance's own mathematics enters a row. *)
+   proved by indistinguishability_tail. The certify statements are the only
+   lines through which an instance's own mathematics enters a row; the
+   payload of conclude is the one place outside a line where it enters. *)
 Definition certify_indistinguishability (x : StackAt Sampled)
     (q : StackProp Sampled x)
     (p : IndistinguishabilityPayload x) : Tableau AnalysisBridged :=
@@ -622,50 +802,91 @@ Definition certify_indistinguishability (x : StackAt Sampled)
 
 Arguments certify_indistinguishability x q p : assert.
 
+(* Adjoins the proximity arm's certificate at every real field and index,
+   reaching AnalysisBridged with the arm's proposition proved by
+   idealproximity_tail. The link lemma the previous statement proved serves
+   the actual model, and the ideal model's is built here by the same lemma
+   sample_step used, which applies because the certificate's ideal adapter
+   runs this row's own execution and so meets this row's endpoint equation. *)
+Definition certify_idealproximity (x : StackAt Sampled)
+    (q : StackProp Sampled x) (p : IdealProximityPayload x)
+    : Tableau AnalysisBridged :=
+  @MkTableau AnalysisBridged (StackProp AnalysisBridged)
+    (existT _ (projT1 x) (existT _ (projT1 (projT2 x))
+       (existT _ (sp_Ht x) (existT _ (sp_He x) (existT _ (sp_Hr x)
+          (existT _ (sp_f x)
+             (fun R idx => IdealProximity (p R idx))))))))
+    (conj q (fun R idx =>
+       idealproximity_tail (p R idx) (proj2 q R idx)
+         (fun C => @sa_coalition_viewE R (instance_profile (projT1 x))
+                     (instance_exec (projT1 (projT2 x)))
+                     (ipc_ideal (p R idx)) 0
+                     (ex_content_obs (projT1 (projT2 x)))
+                     (fun u => sp_He x _ _) C))).
+
+Arguments certify_idealproximity x q p : assert.
+
 (******************************************************************************)
 (*     The terminals                                                          *)
 (******************************************************************************)
 
-(* The obligation of conclude: at every real field and index, one numeric
-   identity for an input-indistinguishability port and nothing for an exact
-   port. The exact arm carries no number, so renaming a bound leaves it
-   untouched. *)
-Definition RepricePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
+(* The obligation of conclude: at every real field and index, the number a
+   port carrying one is concluded at is at least that port's own, and nothing
+   for an exact port. A row may therefore publish the constant a paper cites
+   whenever that constant is an upper bound of the distance the row proved,
+   and may not publish a number below the one its certificate proved. The
+   exact arm carries no number, so concluding a row leaves it untouched. An
+   upper bound is the right obligation because the propositions of the two
+   arms that carry a number are monotone in it; an arm whose proposition is
+   not monotone in the number it carries owes a different obligation here. *)
+Definition ConcludePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
   forall (R : realType) (idx : amf_index (ab_f q) R),
     match ab_port q R idx with
     | ExactIndependence _ => unit
     | InputIndistinguishability cert =>
-        cert_eps cert = odflt (cert_eps cert) (c R)
+        cert_eps cert <= odflt (cert_eps cert) (c R)
+    | IdealProximity cert => ipc_eps cert <= odflt (ipc_eps cert) (c R)
     end.
-Arguments RepricePayload c q : assert.
+Arguments ConcludePayload c q : assert.
 
-(* A port's proposition at the program's own bound, with an identity naming
-   another number, is that port's proposition at the other number. Renaming
-   proves nothing new about the coalition, and it is what lets a row publish
-   the constant a paper cites. *)
-Lemma port_reprice (c : Reprice) (R : realType) (A : PGGAlgebraic)
+(* A port's proposition at the program's own bound, and a proof that a chosen
+   number is at least that bound, give the port's proposition at the chosen
+   number. The step is sound because the propositions of the arms that carry a
+   number are monotone in it, which is the condition any future arm carrying a
+   number owes as well; it is what lets a row state the constant a paper
+   cites while asserting about the coalition no more than the certificate
+   proved. *)
+Lemma port_conclude (c : Reprice) (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (p : SecurityPort sa) :
   PortProp no_reprice p ->
   (match p with
    | ExactIndependence _ => unit
    | InputIndistinguishability cert =>
-       cert_eps cert = odflt (cert_eps cert) (c R)
+       cert_eps cert <= odflt (cert_eps cert) (c R)
+   | IdealProximity cert => ipc_eps cert <= odflt (ipc_eps cert) (c R)
    end) ->
   PortProp c p.
-Proof. by case: p => [w|cert] //= H1 H2; rewrite -H2. Qed.
-Arguments port_reprice c {R A E sa} p.
+Proof.
+case: p => [w|cert|cert] //=.
+- move=> H1 H2 C x x' HC.
+  exact: Order.POrderTheory.le_trans (H1 C x x' HC) H2.
+- move=> H1 H2 C HC.
+  exact: Order.POrderTheory.le_trans (H1 C HC) H2.
+Qed.
+Arguments port_conclude c {R A E sa} p.
 
-(* The terminal republishing a row's accumulated bound at a chosen number.
-   Post-processing of the published constant rather than a step: the data and
-   the arms are unchanged, and only the real the input-indistinguishability
-   arm's proposition mentions moves. *)
+(* The terminal concluding a row at a chosen number, against a proof that the
+   number is at least the row's accumulated bound. Post-processing of the
+   published constant rather than a step: the data and the arms are
+   unchanged, only the real the input-indistinguishability arm's proposition
+   mentions moves, and it moves only upward. *)
 Definition conclude (c : Reprice) (q : StackAt AnalysisBridged)
-    (pf : StackProp AnalysisBridged q) (p : RepricePayload c q)
+    (pf : StackProp AnalysisBridged q) (p : ConcludePayload c q)
     : TableauAt AnalysisBridged (BridgedProp c) :=
   @MkTableau AnalysisBridged (BridgedProp c) q
     (conj (proj1 pf)
-       (fun R idx => port_reprice c (ab_port q R idx)
+       (fun R idx => port_conclude c (ab_port q R idx)
                        (proj2 pf R idx) (p R idx))).
 Arguments conclude : clear implicits.
 
@@ -688,8 +909,8 @@ Record RestatedTableau (Q : Prop) := MkRestatedTableau {
 Arguments RestatedTableau : clear implicits.
 
 (* The terminal handing a row over as a proposition its caller writes out.
-   conclude is not an instance of it: conclude's target is computed by the
-   framework from the reprice, this one's is supplied. *)
+   conclude is not an instance of it: conclude's target is BridgedProp of the
+   Reprice it is given, where this terminal's target Q is a parameter. *)
 Definition restate (Q : Prop) (q : StackAt AnalysisBridged)
     (pf : StackProp AnalysisBridged q) (p : RestatePayload Q q)
     : RestatedTableau Q :=
@@ -706,8 +927,8 @@ Record PublishedRowAt (c : Reprice) := MkPublishedRow {
   published_thm : BridgedProp c published_at }.
 Arguments PublishedRowAt : clear implicits.
 
-(* A published row at the program's own bound: what a row that never restates
-   its number publishes. *)
+(* A published row at the program's own bound: what a row whose coordinate
+   names no number publishes. *)
 Notation PublishedRow := (PublishedRowAt no_reprice).
 
 (* The terminal pairing the accumulated proposition with the manifest row for
@@ -746,3 +967,82 @@ Arguments view_secrecy_of {c} r.
 Definition view_indistinguishability_of (c : Reprice) (r : PublishedRowAt c) :=
   proj2 (published_thm r).
 Arguments view_indistinguishability_of {c} r.
+
+(* The same projection under the name a reader of the proximity arm expects.
+   The three names are one term and differ in what a reader is told to expect
+   of it, which is the arm's own proposition and is selected only when the
+   result is applied. *)
+Definition view_proximity_of (c : Reprice) (r : PublishedRowAt c) :=
+  proj2 (published_thm r).
+Arguments view_proximity_of {c} r.
+
+(* Which arm a published row carries, at one real field and one index of its
+   family. It reads ab_arm past the publish statement, so it is the reader a
+   paper's arm column is taken from, and publish_armE is why the publish
+   statement does not change the answer. *)
+Definition security_arm_of (c : Reprice) (r : PublishedRowAt c)
+    (R : realType) (idx : amf_index (ab_f (published_at r)) R)
+  : SecurityArm :=
+  ab_arm (published_at r) R idx.
+Arguments security_arm_of {c} r R idx.
+
+(******************************************************************************)
+(*     Where a row's arm is decided                                           *)
+(******************************************************************************)
+
+(* A row built by the exact statement carries the exact arm at every real
+   field and index of its family. With conclude_armE and publish_armE below
+   it settles the arm of a finished row by one line of the row's text, so a
+   reader needs no argument about the instance's probability model to know
+   which statement the row proved. *)
+Lemma certify_exact_armE (x : StackAt Sampled) (q : StackProp Sampled x)
+    (p : ExactPayload x) (R : realType)
+    (idx : amf_index (ab_f (tableau_at (@certify_exact x q p))) R) :
+  ab_arm (tableau_at (@certify_exact x q p)) R idx = ExactIndependenceArm.
+Proof. by []. Qed.
+
+(* The same for the input-indistinguishability statement. With
+   certify_exact_armE this is what makes the arm a property of the program's
+   text: the certify statements are the only ones that build a port, and each
+   writes one constructor at every field and index. *)
+Lemma certify_indistinguishability_armE (x : StackAt Sampled)
+    (q : StackProp Sampled x) (p : IndistinguishabilityPayload x)
+    (R : realType)
+    (idx : amf_index
+             (ab_f (tableau_at (@certify_indistinguishability x q p))) R) :
+  ab_arm (tableau_at (@certify_indistinguishability x q p)) R idx
+  = InputIndistinguishabilityArm.
+Proof. by []. Qed.
+
+(* The same for the proximity statement. The three statements are the only
+   ones that build a port, and each writes one constructor at every field and
+   index, so a reader of a program's text knows which of the three claims the
+   row will publish. *)
+Lemma certify_idealproximity_armE (x : StackAt Sampled)
+    (q : StackProp Sampled x) (p : IdealProximityPayload x) (R : realType)
+    (idx : amf_index (ab_f (tableau_at (@certify_idealproximity x q p))) R) :
+  ab_arm (tableau_at (@certify_idealproximity x q p)) R idx
+  = IdealProximityArm.
+Proof. by []. Qed.
+
+(* Concluding a row at a chosen number leaves its arm where the certify
+   statement put it. The terminal moves a real and not the alternative the
+   row committed to, so a row at the constant a paper cites states the same
+   kind of fact about a coalition as the row at its own bound. *)
+Lemma conclude_armE (c : Reprice) (q : StackAt AnalysisBridged)
+    (pf : StackProp AnalysisBridged q) (p : ConcludePayload c q)
+    (R : realType)
+    (idx : amf_index (ab_f (tableau_at (conclude c q pf p))) R) :
+  ab_arm (tableau_at (conclude c q pf p)) R idx = ab_arm q R idx.
+Proof. by []. Qed.
+
+(* Publishing attaches the manifest row and leaves the arm alone, so the arm
+   a finished row reports is the arm its data carried before the last line.
+   This is the step that carries the three certify statements' arm equations
+   out to a published row, where a paper's table reads them. *)
+Lemma publish_armE (a : AssumptionStatus) (c : Reprice)
+    (q : StackAt AnalysisBridged) (pf : BridgedProp c q) (t : TransferStatus)
+    (R : realType)
+    (idx : amf_index (ab_f (published_at (publish a q pf t))) R) :
+  security_arm_of (publish a q pf t) R idx = ab_arm q R idx.
+Proof. by []. Qed.

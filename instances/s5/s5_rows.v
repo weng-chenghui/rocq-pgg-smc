@@ -94,6 +94,7 @@
 (*                           of the tape secret                               *)
 (*   s5_row_rand_rowE     == the randomized program publishes the manifest's  *)
 (*                           row                                              *)
+(*   s5_row_rand_armE     == the row carries the exact arm                    *)
 (*   s5_FE, s5_rand_FE    == the two specifications, written out              *)
 (*   s5_F_thresholdE      == the coalition size the dealer-dealt run          *)
 (*                           tolerates                                        *)
@@ -112,7 +113,8 @@ From pgg_smc Require Import pgg_instance pgg_functionality.
 From pgg_smc Require Import pgg_sample_adapter.
 From pgg_smc Require Import pgg_randomized_sharing pgg_canonical_sharing.
 From pgg_smc Require Import s5_profile s5_exec s5_models.
-From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
+From pgg_smc Require Import pgg_analysis_manifest.
+From pgg_smc Require Import pgg_tableau.
 From pgg_smc Require Import pgg_tableau_syntax.
 
 Set Implicit Arguments.
@@ -283,6 +285,15 @@ Definition s5_row_rand_tableau : PublishedRow :=
     the theorem proved about it cannot drift apart. *)
 Lemma s5_row_rand_rowE :
   published_row s5_row_rand_tableau = s5_row_rand.
+Proof. by []. Qed.
+
+(** The arm this row carries, at every real field and index: independence of
+    the coalition's view from the tape secret, and not a distance between two
+    readings. This is the value a paper's table prints in the arm column for
+    this row, settled by the certify statement the program wrote. *)
+Lemma s5_row_rand_armE (R : realType)
+    (idx : amf_index (ab_f (published_at s5_row_rand_tableau)) R) :
+  security_arm_of s5_row_rand_tableau R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
 (******************************************************************************)

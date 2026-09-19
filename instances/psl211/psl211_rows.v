@@ -90,6 +90,7 @@
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_row_alldecks_rowE == the program publishes the manifest's row     *)
+(*   psl211_row_alldecks_armE == the row carries the exact arm                *)
 (*   psl211_alldecks_view_secrecy                                             *)
 (*                           == the exact arm's four conjuncts at this        *)
 (*                              instance                                      *)
@@ -203,6 +204,15 @@ Definition psl211_row_alldecks_tableau : PublishedRow :=
     descriptive row and the theorem proved about it cannot drift apart. *)
 Lemma psl211_row_alldecks_rowE :
   published_row psl211_row_alldecks_tableau = psl211_row_alldecks.
+Proof. by []. Qed.
+
+(** The arm this row carries, at every real field and index: independence of
+    the coalition's view from the chirality, and not a distance between two
+    readings. This is the value a paper's table prints in the arm column for
+    this row, settled by the certify statement the program wrote. *)
+Lemma psl211_row_alldecks_armE (R : realType)
+    (idx : amf_index (ab_f (published_at psl211_row_alldecks_tableau)) R) :
+  security_arm_of psl211_row_alldecks_tableau R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
 (******************************************************************************)

@@ -27,16 +27,20 @@
 (* run argument as five named things rather than one record. The statement    *)
 (* binds those two variables once, after at, and abstracts every clause over  *)
 (* them, so a clause is a term in R and idx rather than a function of them.   *)
+(* The proximity rule takes its certificate whole and has no builder, because *)
+(* four of that record's five fields are terms of the instance and the fifth  *)
+(* is the number, so a builder would display the plumbing and not the         *)
+(* mathematics.                                                               *)
 (*                                                                            *)
 (* The termination statement comes in two forms. One names a lemma; the other *)
 (* writes the literal vm_compute and builds the obligation in place. The two  *)
 (* are not the same term, so a program through the literal is a different     *)
 (* program from one through the lemma, proving the same proposition.          *)
 (*                                                                            *)
-(* The publish separator is |>. Measured on 2026-09-14, |> occurs as a        *)
-(* standalone notation token nowhere in the kept tree, MathComp with          *)
-(* analysis, infotheo or Stdlib: every occurrence is inside infotheo's convex *)
-(* notation x <| p |> y, in fdist_scope and fsdist_scope, and in              *)
+(* The separator of the two terminal rules is |>. Measured on 2026-09-14, |>  *)
+(* occurs as a standalone notation token nowhere in the kept tree, MathComp   *)
+(* with analysis, infotheo or Stdlib: every occurrence is inside infotheo's   *)
+(* convex notation x <| p |> y, in fdist_scope and fsdist_scope, and in       *)
 (* mathcomp-analysis convex.v, with which it was checked to coexist in one    *)
 (* file.                                                                      *)
 (*                                                                            *)
@@ -59,16 +63,21 @@
 (*                                                                            *)
 (* The surface spends nineteen identifiers as global keywords in every file   *)
 (* that requires this one: dealt, functionality, execute, endpoints, recon,   *)
-(* sample, certify, leaks, tied, ideal, mixing, invariant, encoded,           *)
-(* supplied, layout, decoded_by, committed_by, expecting and fuel. Each       *)
-(* follows a slot in some rule. Measured on 2026-09-14, fuel is among them:   *)
-(* it follows the literal dealt in the dealer-dealt rule and would stay an    *)
-(* identifier for that rule alone, but it follows a slot in the two rules     *)
-(* added beside it. The tokens inputs, terminates, publish, vm_compute,       *)
-(* ExactIndependence and InputIndistinguishability follow a literal and stay  *)
-(* identifiers, which is what keeps the two port constructors usable by       *)
-(* name; at follows a literal too and was a keyword of Rocq before this       *)
-(* file.                                                                      *)
+(* sample, certify, leaks, tied, ideal, mixing, invariant, encoded, supplied, *)
+(* layout, decoded_by, committed_by, expecting and fuel. Each follows a slot  *)
+(* in some rule. Measured on 2026-09-14, fuel is among them: it follows the   *)
+(* literal dealt in the dealer-dealt rule and would stay an identifier for    *)
+(* that rule alone, but it follows a slot in the two rules added beside it.   *)
+(* The tokens inputs, terminates, publish, conclude, vm_compute,              *)
+(* ExactIndependence, InputIndistinguishability and IdealProximity follow a   *)
+(* literal and stay identifiers, which is what keeps the three port           *)
+(* constructors and the conclude terminal usable by name; at follows a        *)
+(* literal too, the literal leaks in one rule and InputIndistinguishability   *)
+(* in the other, and was a keyword of Rocq before this file. by follows the   *)
+(* slot L of the encoded rule, the slot k of the leaks rule and the slot c of *)
+(* the conclude rule, so it would be a twentieth, and it is not one only      *)
+(* because ssreflect already spends it, measured on 2026-09-19 by binding it  *)
+(* in a file that requires nothing but ssreflect.                             *)
 (*                                                                            *)
 (* One of the nineteen shadows a framework definition: endpoints is also the  *)
 (* verifier's endpoint tuple in pgg_interface.v. A file requiring this        *)
@@ -108,7 +117,8 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist entropy.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_smc Require Import pgg_instance pgg_functionality.
-From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
+From pgg_smc Require Import pgg_analysis_manifest.
+From pgg_smc Require Import pgg_tableau.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -379,6 +389,13 @@ Notation "s 'certify' 'InputIndistinguishability' c" :=
   (s ;;; certify_indistinguishability of c)
   (at level 90, left associativity, c at level 0).
 
+(* The proximity rule takes its certificate whole and has no builder. The
+   input-indistinguishability rule has both that form, above, and the
+   five-clause builder mk_indistinguishability below. *)
+Notation "s 'certify' 'IdealProximity' c" :=
+  (s ;;; certify_idealproximity of c)
+  (at level 90, left associativity, c at level 0).
+
 (* The five clauses name the real field and the model index once, after at,
    and the statement abstracts every clause over them. Each component is a
    term in those two variables rather than a function of them, so what a
@@ -390,6 +407,14 @@ Notation "s 'certify' 'InputIndistinguishability' 'at' R idx b 'tied' 'by' Hd 'i
   (at level 90, left associativity, R ident, idx ident,
    b at level 10, Hd at level 10, u at level 10, Hc at level 10,
    Hk at level 10, only parsing).
+
+(* The number a row publishes, and the proof that the row's own bound is at
+   most that number. The terminal is written in the same surface as the
+   statements of a row, so a row that publishes a constant a paper cites is
+   one program in one language and not a program that falls back to the bind
+   at its last two lines. *)
+Notation "s |> 'conclude' c 'by' p" := (s ;;; conclude c of p)
+  (at level 90, left associativity, c at level 0, p at level 0).
 
 (* The two statuses are written transfer first, against the argument order of
    publish itself, so that a row's last statement reads in the order the

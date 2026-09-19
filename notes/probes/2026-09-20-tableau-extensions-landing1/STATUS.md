@@ -1052,3 +1052,33 @@ writes, "indistinguishability" is never abbreviated, no meta narration
 entered the staged text, and the one piece of proof strategy the pass could
 have written, why `exact: erefl` rather than `by []`, is in this file and not
 in a docstring.
+
+## As built (2026-09-20)
+
+Fix pass 2 was audited by the main session: the code-token diff against
+d737a46 is the one lemma `pgl27_row_word_branch39_armE` and its two fidelity
+lines, the comment word diff maps passage by passage to F1 to F6, F9 and F10
+of `audit-landing1-fix1.md`, and the eight files recompiled from source with
+rc=0 (commit 19a76d8).
+
+The seven staged files were then copied with `cp` over
+`manifest/pgg_tableau.v`, `manifest/pgg_tableau_syntax.v`,
+`instances/pgl27/pgl27_rows.v`, `instances/kim2025/five_card_rows.v`,
+`instances/s5/s5_rows.v`, `instances/psl211/psl211_rows.v` and
+`instances/psl211/psl211_reading_constancy.v`; `cmp` reports each copy
+byte-identical to its staged source. The seven production files were
+recompiled single-file in dependency order, all rc=0 (13.3, 4.4, 4.0, 6.3,
+4.6, 22.3, 5.4 s). `_CoqProject` is unchanged, because landing 1 adds no file.
+
+As-built fidelity: `landing_fidelity.v` itself, unchanged, was compiled from a
+scratch directory against production's load path only, with no staged `-R`
+line: rc=0 in 93 s, 40 `Axioms:` blocks, none closed, the three classical
+axioms everywhere and `rigidity_s5_instance.s5_group_order_eq` at the three S5
+declarations only. Its four `Fail Check`s on `RepricePayload`, `port_reprice`,
+`kim_centi_cert40` and `kim_centi_cert40_epsE` and its references to
+`certify_idealproximity` and `ipc_ideal` now hold of production, so production
+is the text the two audits and the two fix-pass audits read.
+
+Left for landing 2: `kim_centi_marginal_bound40` and `kim_centi_cut_mixing40`
+of `instances/kim2025/five_card_mixing.v` have no user in the tree from this
+commit on.

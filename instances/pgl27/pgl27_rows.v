@@ -36,10 +36,10 @@
 (* pgl27_static_obs_funE and pgl27_exact_viewE; pgl27_word_cut_distE, which   *)
 (* identifies the word adapter's cut law with rho_word; and                   *)
 (* pgl27_word_marginal_bound, the walk's marginal bound. Two further          *)
-(* things stay outside the programs: the reprice of the word row's bound from *)
-(* 2^-40 + 2^-40 to 2^-39, which moves a number and proves nothing new about  *)
-(* a coalition, and the two bridge lemmas that carry a row's accumulated      *)
-(* proposition to the statement a paper cites.                                *)
+(* things stay outside the two programs that publish the manifest's rows: the *)
+(* word row's conclusion at 2^-39, which moves a number and proves nothing    *)
+(* new about a coalition, and the two bridge lemmas that carry a row's        *)
+(* accumulated proposition to the statement a paper cites.                    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_dealt             == the prefix shared by both rows                *)
@@ -52,7 +52,13 @@
 (*   pgl27_inline_dealt      == the prefix with the termination reduction     *)
 (*                              written inline                                *)
 (*   pgl27_reprice39         == the name 2^-39 for the word row's bound       *)
-(*   pgl27_row_word39        == the word row republished at that name         *)
+(*   pgl27_row_word39        == the word row concluded at that number         *)
+(*   pgl27_row_word39_bind   == the same row written through the bind         *)
+(*   pgl27_word_sampled      == the word model named at Sampled, before any   *)
+(*                              arm is chosen                                 *)
+(*   pgl27_row_word_branch39 == the continuation of that name concluded at    *)
+(*                              2^-39                                         *)
+(*   pgl27_reprice41         == the name 2^-41 for a bound                    *)
 (*   pgl27_word_target       == the word row's published statement            *)
 (*   pgl27_exact_target      == the exact row's published statement           *)
 (*   pgl27_word_restated     == the word row through the restate terminal     *)
@@ -77,6 +83,15 @@
 (*   pgl27_row_word_rowE     == the word program publishes the manifest's row *)
 (*   pgl27_row_word_certE    == the five written clauses are pgl27_word_cert  *)
 (*   pgl27_inline_paramsE    == the inline prefix builds the same run         *)
+(*   pgl27_row_exact_armE    == the exact row carries the exact arm           *)
+(*   pgl27_row_word_armE     == the word row carries the                      *)
+(*                              input-indistinguishability arm                *)
+(*   pgl27_row_word39_armE   == the concluded row carries that same arm       *)
+(*   pgl27_row_word_branch39_armE                                             *)
+(*                           == the branch row carries that arm as well       *)
+(*   pgl27_row_word39_bindE  == the surface and the bind build one term       *)
+(*   pgl27_word_reprice41_false                                               *)
+(*                           == the terminal's obligation at 2^-41 is false   *)
 (*   pgl27_word_bridge       == the word row's proposition gives its          *)
 (*                              published statement                           *)
 (*   pgl27_exact_bridge      == the exact row's proposition gives its         *)
@@ -99,7 +114,8 @@ From pgg_smc Require Import pgg_instance pgg_functionality.
 From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
 From pgg_smc Require Import pgl27_exec pgl27_models.
-From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
+From pgg_smc Require Import pgg_analysis_manifest.
+From pgg_smc Require Import pgg_tableau.
 From pgg_smc Require Import pgg_tableau_syntax.
 
 Set Implicit Arguments.
@@ -150,10 +166,10 @@ rewrite /static_coalition_obs /pgl27_view [LHS]ffunE [RHS]ffunE.
 by case: ifP => // _; rewrite tnth_ord_tuple.
 Qed.
 
-(** The same identification with the cut left free, as an equality of functions
-    of the cut. The input-indistinguishability arm compares two laws obtained
-    by pushing a reader forward along a distribution on cuts, so it needs the
-    reader as one function and not as its values. *)
+(** The same identification with the cut left free, as an equality of
+    functions of the cut. The input-indistinguishability arm compares two
+    laws obtained by pushing a reader forward along a distribution on cuts,
+    so it needs the reader as one function and not as its values. *)
 Lemma pgl27_static_obs_funE (R : realType) (C : {set 'I_8}) (s : bool) :
   @static_coalition_obs pgl27_algebra pgl27_dealt_params C s
   = (fun g => pgl27_view R C (s, g)).
@@ -219,10 +235,10 @@ Qed.
 
 (** Two dealt secrets give a coalition of fewer than four seats the same
     reading of the ideal uniform cut. It is pgl27_view_law_const, which is
-    three-transitivity of PGL(2,7) read as a privacy statement, carried to the
-    framework's reader at each of the two secrets; the statement is exact, and
-    it is the half of the input-indistinguishability arm that spends no mixing
-    bound. *)
+    three-transitivity of PGL(2,7) read as a privacy statement, carried to
+    the framework's reader at each of the two secrets; the statement is
+    exact, and it is the half of the input-indistinguishability arm that
+    spends no mixing bound. *)
 Lemma pgl27_word_view_const (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
@@ -237,17 +253,17 @@ rewrite (pgl27_static_obs_funE R C x) (pgl27_static_obs_funE R C x').
 exact: (pgl27_view_law_const R x x' HC).
 Qed.
 
-(** The input-indistinguishability arm's certificate at each secret prior. Its
-    five fields are the two-hundred-letter walk's marginal bound; the
-    identification of that bound's law with the law the word adapter draws its
-    cut from, which is pgl27_word_cut_distE read backwards; the uniform
-    distribution on the group as the ideal cut; the distance pgl27_word_mixing
-    of the walk from that ideal, an unconditional theorem about the walk whose
-    bound is 2^-40; and the constancy of a coalition's reading of the ideal
-    cut in the dealt secret, which is pgl27_word_view_const and is exact. The
-    two currencies are visible in the fields: everything about the ideal cut
-    is exact and three-transitive, and the only inexact quantity anywhere in
-    this row is the walk's 2^-40. *)
+(** The input-indistinguishability arm's certificate at each secret prior.
+    Its five fields are the two-hundred-letter walk's marginal bound; the
+    identification of that bound's law with the law the word adapter draws
+    its cut from, which is pgl27_word_cut_distE read backwards; the uniform
+    distribution on the group as the ideal cut; the distance
+    pgl27_word_mixing of the walk from that ideal, an unconditional theorem
+    about the walk whose bound is 2^-40; and the constancy of a coalition's
+    reading of the ideal cut in the dealt secret, which is
+    pgl27_word_view_const and is exact. The two currencies are visible in the
+    fields: everything about the ideal cut is exact and three-transitive, and
+    the only inexact quantity anywhere in this row is the walk's 2^-40. *)
 Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
   : IndistinguishabilityCert (amf_sample pgl27_word_family R secretP) :=
   @MkIndistinguishabilityCert R pgl27_algebra pgl27_dealt_params
@@ -330,6 +346,33 @@ Lemma pgl27_row_word_rowE :
   published_row pgl27_row_word_tableau = pgl27_row_word.
 Proof. by []. Qed.
 
+(** The arm the exact row carries, at every real field and index:
+    independence of the coalition's view from the secret, and not a distance
+    between two readings. This is the value a paper's table prints in the arm
+    column for this row; certify_exact_armE and publish_armE are why the
+    value is settled by the row's certify statement. *)
+Lemma pgl27_row_exact_armE (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_exact_tableau)) R) :
+  security_arm_of pgl27_row_exact_tableau R idx = ExactIndependenceArm.
+Proof. by []. Qed.
+
+(** The arm the word row carries. The two rows publish different manifest
+    rows here, but a reader of the manifest alone could not tell independence
+    of the view from a distance between two readings, and this pair of
+    equations is what separates them. *)
+Lemma pgl27_row_word_armE (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_word_tableau)) R) :
+  security_arm_of pgl27_row_word_tableau R idx = InputIndistinguishabilityArm.
+Proof. by []. Qed.
+
+(** Recording the word row at the exact arm is rejected by conversion, so the
+    table column holds the arm the row's certify statement wrote and no
+    other. *)
+Fail Definition pgl27_row_word_arm_neq (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_word_tableau)) R) :=
+  (erefl : security_arm_of pgl27_row_word_tableau R idx
+           = ExactIndependenceArm).
+
 (******************************************************************************)
 (*     The same prefix through the literal reduction                          *)
 (******************************************************************************)
@@ -366,35 +409,129 @@ Fail Definition pgl27_inline_reuse : Tableau Sampled :=
   pgl27_inline_dealt sample pgl27_exact_family.
 
 (******************************************************************************)
-(*     The word row republished at 2^-39                                      *)
+(*     The word row concluded at 2^-39                                        *)
 (******************************************************************************)
 
 (** The name 2^-39 for a bound, at every real field. A single real will not
     serve, because the security port quantifies over the field. *)
 Definition pgl27_reprice39 : Reprice := fun R => Some (2%:R^-39 : R).
 
-(** The word row with its bound republished as the single constant 2^-39. The
-    accumulated bound is 2^-40 twice, and the identity that adds the two copies
-    is pow2_split; the data, the model and the certificate are untouched, so the
-    republished row asserts exactly what the row above asserts, at the number a
-    reader expects to cite. *)
+(** The word row concluded at the single constant 2^-39. The data, the model
+    and the certificate are untouched, so the published row asserts about a
+    coalition no more than pgl27_row_word_tableau, at the number a reader
+    expects to cite. *)
+(* The accumulated bound is 2^-40 twice; pow2_split adds the two copies and
+   eqW reads that identity as the inequality the terminal's obligation asks
+   for. *)
 Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
-    ;;; sample_step of pgl27_word_family
-    ;;; certify_indistinguishability of pgl27_word_cert
-    ;;; conclude pgl27_reprice39 of (fun R _ => pow2_split R)
-    ;;; publish BaselineClassicalOnly of IdealFinite.
+    sample  pgl27_word_family
+    certify InputIndistinguishability pgl27_word_cert
+    |> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))
+    |> publish IdealFinite BaselineClassicalOnly.
 
-(** The reprice obligation is one identity per real field and per index of the
-    family, and pow2_split alone is an identity at one field. Supplying it bare
-    is rejected, which is what keeps a row from republishing a bound that holds
-    only at the field a reader happened to pick. *)
-Fail Definition pgl27_row_word39_bare : PublishedRowAt pgl27_reprice39 :=
+(** The same row written through the bind and its payloads, with no surface
+    notation between the statements. *)
+Definition pgl27_row_word39_bind : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_indistinguishability of pgl27_word_cert
-    ;;; conclude pgl27_reprice39 of pow2_split
+    ;;; conclude pgl27_reprice39 of (fun R _ => ssr_ext.eqW (pow2_split R))
     ;;; publish BaselineClassicalOnly of IdealFinite.
+
+(** The two spellings are one term, so the conclude and publish surface adds
+    no step and hides no payload, as the five input-indistinguishability
+    clauses do not for the certify statement. *)
+Lemma pgl27_row_word39_bindE : pgl27_row_word39 = pgl27_row_word39_bind.
+Proof. by []. Qed.
+
+(** The arm the concluded row carries. Concluding at an upper bound leaves the
+    port untouched, so the row at 2^-39 carries the arm the row at its own sum
+    carries, and the table column is the same for both. *)
+Lemma pgl27_row_word39_armE (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_word39)) R) :
+  security_arm_of pgl27_row_word39 R idx = InputIndistinguishabilityArm.
+Proof. by []. Qed.
+
+(** The terminal's obligation is one inequality per real field and per index
+    of the family. A payload with the right relation but no index binder is
+    rejected, which is what keeps a row from publishing a bound that holds
+    only at the index a reader happened to pick. *)
+Fail Definition pgl27_row_word39_unindexed : PublishedRowAt pgl27_reprice39 :=
+  pgl27_dealt
+    sample  pgl27_word_family
+    certify InputIndistinguishability pgl27_word_cert
+    |> conclude pgl27_reprice39 by (fun R => ssr_ext.eqW (pow2_split R))
+    |> publish IdealFinite BaselineClassicalOnly.
+
+(** The same rejection through the bind, so the surface is not what rejects
+    it. *)
+Fail Definition pgl27_row_word39_unindexed_bind
+  : PublishedRowAt pgl27_reprice39 :=
+  pgl27_dealt
+    ;;; sample_step of pgl27_word_family
+    ;;; certify_indistinguishability of pgl27_word_cert
+    ;;; conclude pgl27_reprice39 of (fun R => ssr_ext.eqW (pow2_split R))
+    ;;; publish BaselineClassicalOnly of IdealFinite.
+
+(******************************************************************************)
+(* The word model as a branch point, under an input-indistinguishability      *)
+(* payload                                                                    *)
+(******************************************************************************)
+
+(** The word model of PGL(2,7), named at Sampled. Its family is indexed by a
+    distribution on the booleans, so a continuation here unifies a payload
+    whose type mentions both the real field and that index. *)
+Definition pgl27_word_sampled : Tableau Sampled :=
+  pgl27_dealt sample pgl27_word_family.
+
+(** The word row built from the named value pgl27_word_sampled rather than
+    from the dealt prefix: the same certificate, the same terminal at 2^-39
+    and the same two statuses as pgl27_row_word39. Naming the Sampled value
+    is what lets a further row over this model be written without repeating
+    the prefix. *)
+Definition pgl27_row_word_branch39 : PublishedRowAt pgl27_reprice39 :=
+  pgl27_word_sampled
+    certify InputIndistinguishability pgl27_word_cert
+    |> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))
+    |> publish IdealFinite BaselineClassicalOnly.
+
+(** The arm the branch row carries. Naming the Sampled value before the
+    certify statement leaves the port where that statement put it, so the
+    branch row's table column is the one pgl27_row_word39 has. *)
+Lemma pgl27_row_word_branch39_armE (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_word_branch39)) R) :
+  security_arm_of pgl27_row_word_branch39 R idx = InputIndistinguishabilityArm.
+Proof. exact: erefl. Qed.
+
+(******************************************************************************)
+(*     A number below the proved one                                          *)
+(******************************************************************************)
+
+(** The name 2^-41 for a bound, at every real field. *)
+Definition pgl27_reprice41 : Reprice := fun R => Some (2%:R^-41 : R).
+
+(** The word certificate's own bound is 2^-40 twice, and 2^-41 is strictly
+    below that, so the terminal's obligation at 2^-41 is refutable and not
+    merely unproved. It is what separates publishing an upper bound of the
+    distance a row proved from publishing a number the certificate does not
+    prove. *)
+Lemma pgl27_word_reprice41_false (R : realType) (secretP : R.-fdist bool) :
+  ~~ (cert_eps (@pgl27_word_cert R secretP)
+      <= odflt (cert_eps (@pgl27_word_cert R secretP)) (pgl27_reprice41 R)).
+Proof.
+rewrite /cert_eps /= pow2_split -Order.TotalTheory.ltNge.
+rewrite ltf_pV2 ?posrE ?exprn_gt0 //.
+by rewrite ltr_eXn2l ?ltr1n.
+Qed.
+
+(** The row at that number is rejected where its terminal is written. *)
+Fail Definition pgl27_row_word41 : PublishedRowAt pgl27_reprice41 :=
+  pgl27_dealt
+    sample  pgl27_word_family
+    certify InputIndistinguishability pgl27_word_cert
+    |> conclude pgl27_reprice41 by (fun R _ => ssr_ext.eqW (pow2_split R))
+    |> publish IdealFinite BaselineClassicalOnly.
 
 (******************************************************************************)
 (*     The word statement, from the word row                                  *)
@@ -503,10 +640,10 @@ Definition pgl27_exact_restated (R : realType)
     ;;; restate (pgl27_exact_target R)
         of (@pgl27_exact_bridge R _ erefl).
 
-(** At fewer than four seats the executed coalition reading of the exact model
-    and the dealt secret have a product joint law. The statement is that of
-    pgl27_exec_exact_view_indep, re-proved by reading the restated row's
-    theorem field and applying it. *)
+(** At fewer than four seats the executed coalition reading of the exact
+    model and the dealt secret have a product joint law. The statement is
+    that of pgl27_exec_exact_view_indep, re-proved by reading the restated
+    row's theorem field and applying it. *)
 Theorem pgl27_exec_exact_view_indep_restated (R : realType)
     (C : {set 'I_8}) (HC : (#|C| <= 3)%N) :
   fdistmap (fun u => (pgl27_view R C u, pgl27_secret R u)) (pgl27P R)
@@ -575,12 +712,12 @@ Definition pgl27_exact_same_statement (R : realType) :
            0 C) `x (fdistmap (pgl27_secret R) (pgl27P R)))%fdist) :=
   (@pgl27_exec_exact_view_indep R, @pgl27_exec_exact_view_indep_restated R).
 
-(** The two arms are different claims, and the difference is visible in what a
-    row's projection takes after the coalition. A row certifying input
+(** The arms are different statements, and the difference is visible in what
+    a row's projection takes after the coalition. A row certifying input
     indistinguishability is asked here for a threshold proof in the position
-    where it expects the first of two dealt secrets, and is rejected: what the
-    word row proves at a coalition is a distance between the readings of two
-    secrets, so the two secrets come before the threshold proof. *)
+    where it expects the first of two dealt secrets, and is rejected: what
+    the word row proves at a coalition is a distance between the readings of
+    two secrets, so the two secrets come before the threshold proof. *)
 Fail Definition pgl27_word_arm_is_not_exact (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (HC : (#|C| < 4)%N) :=
   view_secrecy_of pgl27_row_word_tableau R secretP C HC.
