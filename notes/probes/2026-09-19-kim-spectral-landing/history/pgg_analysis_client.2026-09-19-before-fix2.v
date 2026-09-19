@@ -47,7 +47,7 @@ Check FiveCardAnalysis.observed_recovers.       (* 5 Correctness *)
 Check FiveCardAnalysis.exec_trace_secrecy.      (* 6 Security *)
 Check FiveCardAnalysis.deal_centi_lt.           (* bound, not security *)
 Check FiveCardAnalysis.centi_static_obs_indist. (* 7 Transfer *)
-Check FiveCardAnalysis.uniform_transfer_status. (* 7 Transfer, typed status *)
+Check FiveCardAnalysis.exec_transfer_status.    (* 7 Transfer, typed status *)
 Check FiveCardAnalysis.biased_transfer_status.
 Check FiveCardAnalysis.repeated_transfer_status.
 

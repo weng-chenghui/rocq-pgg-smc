@@ -6,7 +6,8 @@
  Check PGL27Analysis.profile.
 @@ -21,3 +21,5 @@
  Check FiveCardAnalysis.deal_centi_lt.
+-Check FiveCardAnalysis.exec_transfer_status.
 +Check FiveCardAnalysis.centi_static_obs_indist.
- Check FiveCardAnalysis.exec_transfer_status.
++Check FiveCardAnalysis.uniform_transfer_status.
 +Check FiveCardAnalysis.biased_transfer_status.
  Check FiveCardAnalysis.repeated_transfer_status.

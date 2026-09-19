@@ -297,11 +297,7 @@ Local Open Scope ring_scope.
 (* | observers          | FiveCardAnalysis.colour_view                        *)
 (*                          : (size A).-tuple bool, the decoded colour        *)
 (*                            sequence at a list A of seat indices into the   *)
-(*                            endpoint list;                                  *)
-(*                        FiveCardAnalysis.static_obs                         *)
-(*                          : {ffun 'I_5 -> 'I_5}, a coalition's reading of   *)
-(*                            the endpoint cards at one committed pair and    *)
-(*                            one shuffle, with no execution |                *)
+(*                            endpoint list |                                 *)
 (* | distribution-to-observer bridges | FiveCardAnalysis.single_cut_distE,    *)
 (*                        FiveCardAnalysis.biased_sample_cut_witnessE,        *)
 (*                        FiveCardAnalysis.colour_viewE,                      *)
@@ -333,10 +329,6 @@ Local Open Scope ring_scope.
 (* | colour_view_leak_bound | kim_input_dist eps_lt_inv5 eps_gt_neg4inv5,     *)
 (*   the distribution of single_biased_sample | colour_view A, executed       *)
 (*   | mutual information, at most kim_leak_bound eps |                       *)
-(* | biased_static_obs_indist | the cut distribution of                       *)
-(*   single_biased_sample, by biased_sample_cut_witnessE | static_obs         *)
-(*   | approximate privacy at twice the length-one bundle's number, derived   *)
-(*     from var_dist_fdistmap_transfer and biased_cut_mixing |                *)
 (*                                                                            *)
 (* Hypotheses of that capability: eps_lt_inv5, eps_gt_neg4inv5 and the        *)
 (* small-bias hypothesis eps_small : 0 < 5^-1 - `|eps|. All three are         *)
@@ -356,11 +348,9 @@ Local Open Scope ring_scope.
 (* IdealFinite rather than StaticExecutedOnly. The conclusion of that         *)
 (* transfer is biased_static_obs_indist, a bound on the variation distance    *)
 (* between the static readings of a coalition of at most one seat at two      *)
-(* committed pairs. Its distribution is this row's cut law, by                *)
-(* biased_sample_cut_witnessE, and its observer is static_obs, the second     *)
-(* observer this row declares, so it reaches AnalysisBridged beside           *)
-(* colour_view_leak_bound, which reaches it at the executed reader            *)
-(* colour_view.                                                               *)
+(* committed pairs; it is a second theorem at this row's own distribution     *)
+(* and observer, and it reaches AnalysisBridged as colour_view_leak_bound     *)
+(* does.                                                                      *)
 (*                                                                            *)
 (*     Row 5: five-card development, repeated biased cuts and seven cuts      *)
 (*                                                                            *)
@@ -377,10 +367,6 @@ Local Open Scope ring_scope.
 (* | observers          | one seat's endpoint distribution, reached through   *)
 (*                        FiveCardAnalysis.repeated_seat_distE and            *)
 (*                        FiveCardAnalysis.centi_repeated_seat_distE;         *)
-(*                        FiveCardAnalysis.static_obs                         *)
-(*                          : {ffun 'I_5 -> 'I_5}, a coalition's reading of   *)
-(*                            the endpoint cards at one committed pair and    *)
-(*                            one shuffle, with no execution;                 *)
 (*                        FiveCardAnalysis.verifier_endpoints : seq 'I_5 |    *)
 (* | distribution-to-observer bridges | FiveCardAnalysis.repeated_cut_distE,  *)
 (*                        FiveCardAnalysis.centi_cut_distE,                   *)
@@ -401,10 +387,8 @@ Local Open Scope ring_scope.
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
 (* | model transfer       | the cut-carrier transfer of                       *)
 (*                          var_dist_fdistmap_transfer: its first hypothesis  *)
-(*                          is FiveCardAnalysis.centi_cut_mixing, whose law   *)
-(*                          is the cut distribution of centi_sample by        *)
-(*                          FiveCardAnalysis.centi_cut_distE, and its second  *)
-(*                          is FiveCardAnalysis.static_obs_const |            *)
+(*                          is FiveCardAnalysis.centi_cut_mixing and its      *)
+(*                          second is FiveCardAnalysis.static_obs_const |     *)
 (* | missing premise      | none |                                            *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
@@ -418,10 +402,6 @@ Local Open Scope ring_scope.
 (* | deal_centi_lt | the cut distribution of centi_sample, by                 *)
 (*   centi_cut_distE | one seat's endpoint distribution                       *)
 (*   | endpoint marginal bound |                                              *)
-(* | centi_static_obs_indist | the cut distribution of centi_sample, by       *)
-(*   centi_cut_distE | static_obs | approximate privacy at twice the          *)
-(*   seven-cut bundle's number, derived from var_dist_fdistmap_transfer and   *)
-(*   centi_cut_mixing |                                                       *)
 (*                                                                            *)
 (* Level justification. Both models are sample adapters over the plug and     *)
 (* both cut distributions are named, giving Sampled. centi_cut_mixing         *)
@@ -430,10 +410,8 @@ Local Open Scope ring_scope.
 (* discharges both hypotheses of var_dist_fdistmap_transfer, giving           *)
 (* IdealFinite. The conclusion of that transfer, centi_static_obs_indist, is  *)
 (* a bound on the variation distance between the static readings of a         *)
-(* coalition of at most one seat at two committed pairs. Its distribution is  *)
-(* this row's cut law, by centi_cut_distE, and its observer is static_obs,    *)
-(* which the row declares, and that is what gives AnalysisBridged.            *)
-(* endpoint_bound and deal_centi_lt stay in the row                           *)
+(* coalition of at most one seat at two committed pairs, and that is what     *)
+(* gives AnalysisBridged. endpoint_bound and deal_centi_lt stay in the row    *)
 (* for what they are: they bound the distance from uniform of ONE seat's      *)
 (* endpoint distribution, neither quantifies over a coalition and neither     *)
 (* mentions a second secret. A ShuffleCertificateBundle exists for both       *)
@@ -1243,16 +1221,6 @@ Timeout 60 Check (FiveCardAnalysis.colour_view :
     bool * bool -> pgg_gT (mp_M FiveCardAnalysis.profile) ->
     (size A).-tuple bool).
 
-Timeout 60 Check (FiveCardAnalysis.static_obs :
-  {set 'I_(pi_T' (mp_PI (instance_profile
-                           five_card_exec.five_card_algebra))).+1} ->
-  ex_inputT five_card_exec.five_card_params ->
-  pgg_gT (mp_M (instance_profile five_card_exec.five_card_algebra)) ->
-  {ffun 'I_(pi_T' (mp_PI (instance_profile
-                            five_card_exec.five_card_algebra))).+1 ->
-        'I_(pgg_N' (mp_M (instance_profile
-                            five_card_exec.five_card_algebra))).+1}).
-
 Timeout 60 Check (FiveCardAnalysis.secret :
   forall R : realType, {RV (FiveCardAnalysis.prior R) -> bool}).
 
@@ -1544,7 +1512,7 @@ Timeout 60 Check (FiveCardAnalysis.biased_static_obs_indist :
          + sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)).
 
 Timeout 60 Check
-  (erefl : FiveCardAnalysis.uniform_transfer_status = StaticExecutedOnly).
+  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
 
 Timeout 60 Check
   (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).

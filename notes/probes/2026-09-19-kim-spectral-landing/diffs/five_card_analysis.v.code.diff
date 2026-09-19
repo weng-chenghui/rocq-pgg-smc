@@ -4,23 +4,29 @@
  From pgg_smc Require Import five_card_exec kim_input_privacy five_card_models.
 +From kim_landing_probe Require Import five_card_mixing.
  Set Implicit Arguments.
-@@ -65,2 +66,3 @@
+@@ -47,2 +48,4 @@
+ Definition colour_view := @five_card_exec_colour_view.
++Definition static_obs :=
++  @pgg_instance.static_coalition_obs five_card_algebra five_card_params.
+ Definition secret := @five_card_leakage.Secret.
+@@ -65,2 +68,3 @@
  Definition centi_cut_distE := @kim_centi_cut_distE.
 +Definition biased_sample_cut_witnessE := @kim_biased_sample_cut_witnessE.
  Definition centi_witness_rhoE := @kim_centi_witness_rhoE.
-@@ -84,4 +86,10 @@
+@@ -84,4 +88,10 @@
  Definition deal_centi_lt := @kim_deal_centi_lt.
+-Definition exec_transfer_status : TransferStatus := StaticExecutedOnly.
+-Definition repeated_transfer_status : TransferStatus := NoModelComparison.
 +Definition centi_cut_mixing := @kim_centi_cut_mixing.
 +Definition biased_cut_mixing := @kim_biased_cut_mixing.
 +Definition static_obs_const := @five_card_static_obs_const.
 +Definition centi_static_obs_indist := @kim_centi_static_obs_indist.
 +Definition biased_static_obs_indist := @kim_biased_static_obs_indist.
- Definition exec_transfer_status : TransferStatus := StaticExecutedOnly.
--Definition repeated_transfer_status : TransferStatus := NoModelComparison.
++Definition uniform_transfer_status : TransferStatus := StaticExecutedOnly.
 +Definition biased_transfer_status : TransferStatus := IdealFinite.
 +Definition repeated_transfer_status : TransferStatus := IdealFinite.
  End FiveCardAnalysis.
-@@ -117,2 +125,7 @@
+@@ -117,5 +127,12 @@
        <= Num.Def.sqrtr 5%:R * kim_lambda2 eps ^+ L).
 +Timeout 60 Check (FiveCardAnalysis.centi_cut_mixing :
 +  forall R : realType,
@@ -28,7 +34,8 @@
 +             (sa_cut_dist (five_card_sample R))
 +    <= sw_bound_eps (scb_bound (kim_security_bundle_centi R))).
  Timeout 60 Check
-@@ -120,2 +133,4 @@
+-  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
++  (erefl : FiveCardAnalysis.uniform_transfer_status = StaticExecutedOnly).
  Timeout 60 Check
 -  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).
 +  (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).

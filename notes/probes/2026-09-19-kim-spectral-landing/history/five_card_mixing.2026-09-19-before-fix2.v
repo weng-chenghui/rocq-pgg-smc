@@ -25,9 +25,8 @@
 (* coalition of at most one seat, reading static endpoint colours at two      *)
 (* committed pairs, sees laws within twice the bundle's number of each        *)
 (* other. That is the conclusion the analysis manifest's two Kim rows are     *)
-(* bridged by. The manifest sits below the file that certifies those rows     *)
-(* and holds no theorem of its own, so the theorem it names for a row's       *)
-(* level has to be a facade alias, and the facade sits above this file.       *)
+(* bridged by, and it is stated here rather than there because the manifest   *)
+(* is imported by the file that certifies those rows.                         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   kim_biased_marginal_bound == the one-cut law's marginal bound at the     *)
@@ -49,9 +48,9 @@
 (*                                       bound of the ideal cut               *)
 (*   kim_centi_cut_mixing == the seven-cut law is within the bundle's         *)
 (*                           spectral number of the ideal cut                 *)
-(*   kim_centi_static_obs_indist == the two readings of the seven-cut law at  *)
-(*                                  two committed pairs are within twice      *)
-(*                                  that number of each other                 *)
+(*   kim_centi_static_obs_indist == a coalition below the privacy threshold   *)
+(*                                  reads the seven-cut law within twice      *)
+(*                                  that number at both committed pairs       *)
 (*   kim_biased_sample_cut_witnessE == the one-cut adapter draws from the     *)
 (*                                     law the length-one bundle bounds       *)
 (*   kim_biased_cut_mixing == the one-cut law likewise at word length one     *)
@@ -388,14 +387,13 @@ Qed.
 
 (** kim_centi_static_obs_indist — at every coalition of at most one seat and
     every two committed pairs, the law of what that coalition reads off the
-    static endpoints under the seven-cut law, which kim_centi_cut_distE
-    identifies with the cut the seven-cut adapter draws, is within twice the
-    bundle's spectral number of the same law at the other pair, in variation
-    distance. This is the security statement of Kim's seven-cut analysis
-    path, and it is what the two premises above are for: the attacker is that
-    coalition, seeing only static endpoint colours, and the number bounds
-    every advantage it has in telling the two pairs apart. The number is the
-    bundle's spectral one spent once for each pair, so the only inexact
+    static endpoints under the seven-cut cut is within twice the bundle's
+    spectral number of the same law at the other pair, in variation distance.
+    This is the security statement of Kim's seven-cut analysis path, and it
+    is what the two premises above are for: the attacker is a coalition below
+    the privacy threshold that sees only static endpoint colours, and the
+    bound says how far it can be from telling the two pairs apart. The number
+    is the bundle's spectral one spent once for each pair, so the only inexact
     quantity is that mixing distance; the constancy of the ideal reading is
     exact and costs nothing. *)
 Lemma kim_centi_static_obs_indist
@@ -435,9 +433,8 @@ Definition kim_biased_marginal_bound
                (kim_centi_lt R) (kim_centi_gt R) (kim_centi_spec R) 1).
 
 (** kim_biased_sample_cut_witnessE — the cut law the one-cut adapter draws
-    from is the law the length-one bundle bounds. It is the identification
-    field of the spectral certificate: without it the bundle's number would
-    be a bound
+    from is the law the length-one bundle bounds. It is the tying field of
+    the spectral certificate: without it the bundle's number would be a bound
     on some other shuffle than the one the row executes, and the seven-cut
     row's counterpart kim_centi_cut_distE would have no analogue here. *)
 Lemma kim_biased_sample_cut_witnessE :
@@ -467,9 +464,9 @@ Qed.
     coalition of at most one seat reading the static endpoints under the
     single biased cut sees laws within twice the length-one bundle's spectral
     number of each other at the two committed pairs. This is the security
-    statement of Kim's one-cut analysis path. Its number is about three
-    percent of the ceiling var_dist_le2 gives, so it is a weak separation
-    bound and not a cryptographic one. *)
+    statement of Kim's one-cut analysis path. Its number is of hundredth
+    scale rather than cryptographic, so it rules out a coalition separating
+    the pairs with certainty and no more. *)
 Lemma kim_biased_static_obs_indist
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   (#|C| < profile_k (instance_profile five_card_algebra))%N ->

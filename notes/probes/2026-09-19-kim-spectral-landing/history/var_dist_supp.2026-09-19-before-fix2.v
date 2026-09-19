@@ -43,11 +43,11 @@ Local Open Scope fdist_scope.
 (******************************************************************************)
 
 (** The variation distance between two laws on a finite carrier is at most
-    two, since it is the sum of the absolute differences and each law sums to
-    one. It is the scale a published number is read against: a certificate
-    says something about a coalition's two readings exactly in so far as its
-    number is below two, and the total variation distance of the literature
-    is half of this quantity. *)
+    two, since it is the sum of the absolute differences
+    and each law sums to one. It is the scale a published number is read
+    against: a certificate says something about a coalition's two readings
+    exactly in so far as its number is below two, and the total variation
+    distance of the literature is half of this quantity. *)
 Lemma var_dist_le2 (R : realType) (A : finType) (P Q : R.-fdist A) :
   var_dist P Q <= 2%:R.
 Proof.
@@ -73,9 +73,9 @@ Variable R : realType.
     variation distance exactly. It is var_dist_fdistmap_inj, the equality
     case of the data processing inequality var_dist_fdistmap, with
     injectivity weakened from the whole domain to the union of the two
-    supports. The weakening is what a cut law needs: the inequality runs from
-    the group to the reading, and a certificate states its bound on the
-    reading and owes it on the group. *)
+    supports. The weakening is what a
+    cut law needs: the inequality runs from the group to the reading, and a
+    certificate states its bound on the reading and owes it on the group. *)
 Lemma var_dist_fdistmap_supp_inj (A B : finType) (f : A -> B)
     (P Q : R.-fdist A) :
   (forall a b : A, (P a != 0) || (Q a != 0) ->
@@ -118,13 +118,13 @@ End var_dist_supp_inj.
 (*     A bijective reader on one finite type keeps a law uniform              *)
 (******************************************************************************)
 
-(** An injective endomap of a finite type leaves the uniform law fixed. It is
-    the endomap case of fdistmap_inj_uniform, whose conclusion is uniform on
-    the image and which does not simplify back to the uniform law when the
-    two types differ. The ideal cut of the five-card instance is uniform on
-    the rotations, and one card position of it is read by such an endomap, so
-    the ideal cut read at a position is the uniform law a marginal bound is
-    stated against. *)
+(** An injective endomap of a finite type leaves the uniform law fixed. It
+    is the endomap case of fdistmap_inj_uniform,
+    whose conclusion is uniform on the image and which does not simplify back
+    to the uniform law when the two types differ. The ideal cut of the
+    five-card instance is uniform on the rotations, and one card position of
+    it is read by such an endomap, so the ideal cut read at a position is the
+    uniform law a marginal bound is stated against. *)
 Lemma fdistmap_inj_uniform_id (R : realType) (A : finType) (n : nat)
     (cA : #|A| = n.+1) (f : A -> A) :
   injective f ->
@@ -139,9 +139,9 @@ rewrite big1; last first.
 by rewrite addr0 !fdist_uniformE.
 Qed.
 
-(** A pushforward gives mass only to points in the image of the map. It is how
-    the support of a cut law defined as a word-shuffle pushforward is read off
-    the word evaluation. *)
+(** A pushforward gives mass only to points in the image of the map. It
+    is how the support of a cut law defined as a
+    word-shuffle pushforward is read off the word evaluation. *)
 Lemma fdistmap_neq0_codom (R : realType) (A B : finType) (f : A -> B)
     (P : R.-fdist A) (b : B) :
   fdistmap f P b != 0 -> exists a : A, f a = b.
@@ -160,9 +160,9 @@ Qed.
 (******************************************************************************)
 
 (** The positions of a tuple at which a predicate holds are counted by the
-    predicate on the underlying sequence. It is the bridge from a law on card
-    positions to the deck's colour census, which is the level at which den
-    Boer's encoding is constant in the committed bits. *)
+    predicate on the underlying sequence. It is the bridge
+    from a law on card positions to the deck's colour census, which is the
+    level at which den Boer's encoding is constant in the committed bits. *)
 Lemma card_tnth_count (n : nat) (T : Type) (t : n.-tuple T) (p : pred T) :
   #|[pred k : 'I_n | p (tnth t k)]| = count p t.
 Proof. by rewrite -sum1_card -sum1_count big_tuple. Qed.

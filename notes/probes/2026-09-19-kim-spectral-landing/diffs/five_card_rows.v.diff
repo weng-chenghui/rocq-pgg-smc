@@ -60,8 +60,8 @@
 +(* conditional mutual information is not a variation distance.                *)
 +(* AnalysisBridged is one constructor with two admission criteria. The        *)
 +(* manifest admits a row to it on any theorem about the sampled distribution  *)
-+(* and the observer, which is how manifest/pgg_analysis_status.v:55-59        *)
-+(* defines the level and which a leakage bound meets. A program reaches it    *)
++(* and the observer, which is how manifest/pgg_analysis_status.v defines the  *)
++(* level and which a leakage bound meets. A program reaches it                *)
 +(* only through one of the two arms of certify. Both criteria are met at      *)
 +(* both Kim rows. instances/s5/s5_rows.v records for s5_row_word the gap      *)
 +(* this file no longer has: there the constancy a spectral certificate asks   *)
@@ -179,7 +179,7 @@
 +    program. *)
  Definition five_card_row_biased_tableau : Tableau Sampled :=
    five_card_committed
-@@ -450,28 +493,311 @@
+@@ -450,28 +493,314 @@
  Proof. by []. Qed.
  
 -(** The repeated row's program, read at the completion level the manifest
@@ -252,9 +252,10 @@
 +    seven-cut bundle's marginal bound; the identification of that bound's law
 +    with the law the repeated adapter draws its cut from; the uniform rotation
 +    law as the ideal cut; the distance of the seven-cut law from that ideal;
-+    and the constancy of a coalition's reading of the ideal cut in the
-+    committed pair. The only inexact quantity in the row is the bundle's
-+    spectral number; the ideal cut and the constancy field are exact. *)
++    and the constancy, at every coalition of at most one seat, of the reading
++    of the ideal cut in the committed pair. The only inexact quantity in the
++    row is the bundle's spectral number; the ideal cut and the constancy
++    field are exact. *)
 +Definition kim_centi_cert (R : realType) (idx : unit)
 +  : SpectralCert (amf_sample kim_centi_family R idx) :=
 +  @MkSpectralCert R five_card_algebra five_card_params
@@ -266,9 +267,10 @@
 +    (@five_card_static_obs_const R).
 +
 +(** The spectral certificate of the one-cut row, with the same five fields at
-+    word length one. The ideal cut and the constancy of a coalition's
-+    reading of it are the same two terms as in the repeated row's
-+    certificate, so the two rows differ only in the shuffle and its number. *)
++    word length one. The ideal cut and the constancy, at every coalition of
++    at most one seat, of the reading of it are the same two terms as in the
++    repeated row's certificate, so the two rows differ only in the shuffle
++    and its number. *)
 +Definition kim_biased_cert (R : realType) (idx : unit)
 +  : SpectralCert (amf_sample kim_biased_family R idx) :=
 +  @MkSpectralCert R five_card_algebra five_card_params
@@ -411,7 +413,8 @@
 +(******************************************************************************)
 +
 +(** The repeated row's certificate with the constant in the marginal-bound
-+    field. The ideal cut, the tying equation and the constancy of the reading
++    field. The ideal cut, the identification equation and the constancy of
++    the reading
 +    at every coalition of at most one seat are the same terms as in
 +    kim_centi_cert; the marginal bound carries two to the minus fortieth in
 +    place of the spectral expression, and the mixing field is the same

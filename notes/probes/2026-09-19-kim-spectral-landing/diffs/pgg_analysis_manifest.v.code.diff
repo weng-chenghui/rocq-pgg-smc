@@ -16,7 +16,19 @@
 +  @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
 +    FiveCardAnalysis.centi_family IdealFinite BaselineClassicalOnly.
  Definition s5_row_det : AnalysisPathRow :=
-@@ -353,2 +353,8 @@
+@@ -298,2 +298,11 @@
+     (size A).-tuple bool).
++Timeout 60 Check (FiveCardAnalysis.static_obs :
++  {set 'I_(pi_T' (mp_PI (instance_profile
++                           five_card_exec.five_card_algebra))).+1} ->
++  ex_inputT five_card_exec.five_card_params ->
++  pgg_gT (mp_M (instance_profile five_card_exec.five_card_algebra)) ->
++  {ffun 'I_(pi_T' (mp_PI (instance_profile
++                            five_card_exec.five_card_algebra))).+1 ->
++        'I_(pgg_N' (mp_M (instance_profile
++                            five_card_exec.five_card_algebra))).+1}).
+ Timeout 60 Check (FiveCardAnalysis.secret :
+@@ -353,2 +362,8 @@
          (@five_card_models.kim_repeated_dist R eps Hlt Hgt L)).
 +Timeout 60 Check (FiveCardAnalysis.biased_sample_cut_witnessE :
 +  forall R : realType,
@@ -25,8 +37,12 @@
 +                     (five_card_kim.kim_centi_lt R)
 +                     (five_card_kim.kim_centi_gt R))).
  Timeout 60 Check (FiveCardAnalysis.centi_cut_distE :
-@@ -475,2 +481,57 @@
+@@ -475,6 +490,63 @@
      < 2%:R^-40).
+-Timeout 60 Check
+-  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
+-Timeout 60 Check
+-  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).
 +Timeout 60 Check (FiveCardAnalysis.centi_cut_mixing :
 +  forall R : realType,
 +    var_dist (sw_rho_dist (scb_bound (FiveCardAnalysis.centi_bundle R)))
@@ -82,20 +98,19 @@
 +           (sw_rho_dist (five_card_mixing.kim_biased_marginal_bound R)))
 +      <= sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)
 +         + sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)).
- Timeout 60 Check
-@@ -478,3 +539,5 @@
- Timeout 60 Check
--  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).
++Timeout 60 Check
++  (erefl : FiveCardAnalysis.uniform_transfer_status = StaticExecutedOnly).
++Timeout 60 Check
 +  (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).
 +Timeout 60 Check
 +  (erefl : FiveCardAnalysis.repeated_transfer_status = IdealFinite).
  Timeout 60 Check (S5Analysis.profile : MonodromyProfile).
-@@ -755,3 +818,3 @@
+@@ -755,3 +827,3 @@
  Timeout 60 Check
 -  (erefl : apr_transfer five_card_row_biased = StaticExecutedOnly).
 +  (erefl : apr_transfer five_card_row_biased = IdealFinite).
  Timeout 60 Check
-@@ -761,5 +824,6 @@
+@@ -761,5 +833,6 @@
    : AnalysisModelFamily FiveCardAnalysis.observed).
 -Timeout 60 Check (erefl : apr_completion five_card_row_repeated = Sampled).
 -Timeout 60 Check

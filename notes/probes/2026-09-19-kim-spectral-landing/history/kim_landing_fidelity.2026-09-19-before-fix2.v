@@ -2,12 +2,12 @@
 (* kim_landing_fidelity.v                                                     *)
 (* Ledger row L10 of notes/20260919-kim-spectral-landing-design.md.           *)
 (*                                                                            *)
-(* This file imports the landing copies, restates the two row equations the   *)
-(* landing makes hold, checks the manifest's bridge corollary against the     *)
-(* proposition each certified program delivers in both directions, and        *)
-(* prints the assumptions of every declaration the landing adds or moves.     *)
-(* The production vocabulary the restatements are written in is imported      *)
-(* beside the copies.                                                         *)
+(* This file imports the landing copies, restates the two row equations the  *)
+(* landing makes hold, shows that each certified program's own proposition    *)
+(* and the corollary the manifest's bridge cell names are interderivable,     *)
+(* and prints the assumptions of every declaration the landing adds or        *)
+(* moves. The production vocabulary the restatements are written in is        *)
+(* imported beside the copies.                                                *)
 
 From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
@@ -46,20 +46,23 @@ Proof. exact: five_card_row_biased_spectral_rowE. Qed.
 (*     The certified proposition and the manifest's bridge corollary          *)
 (*                                                                            *)
 (* Each certified program carries SpectralPropAt at its own certificate and   *)
-(* its own accumulated number, and the manifest's bridge cell names the       *)
+(* its own accumulated number. The manifest's bridge cell names the           *)
 (* corollary of five_card_mixing.v instead, because the manifest cannot name  *)
-(* the program. For each row one lemma reads the corollary's statement off    *)
-(* the published row through view_indist_of, naming no corollary, and one     *)
-(* derives the certificate's own SpectralPropAt from the corollary. Both      *)
-(* directions use the certificate's identification equation and nothing       *)
-(* else, so the two propositions differ by that equation alone.               *)
+(* the program. The four lemmas below derive each from the other, so the two  *)
+(* are the same proposition up to the certificate's tying equation.           *)
 (******************************************************************************)
 
-(** The repeated row's corollary statement, read off the proposition the
-    published certified program delivers. The premises are the program's, so
-    a reader who trusts the Tableau reaches the manifest's bridge cell
-    without the corollary. *)
-Lemma landing_centi_indist_of_program (R : realType)
+Lemma landing_centi_prop_of_indist (R : realType) (idx : unit) :
+  SpectralPropAt (kim_centi_cert R idx) (cert_eps (kim_centi_cert R idx)).
+Proof.
+move=> C x x' HC.
+have Hd : sa_cut_dist (amf_sample kim_centi_family R idx)
+        = sw_rho_dist (scb_bound (kim_security_bundle_centi R)).
+  exact: (kim_centi_cut_distE R).
+rewrite Hd; exact (@kim_centi_static_obs_indist R C HC x x').
+Qed.
+
+Lemma landing_centi_indist_of_prop (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   (#|C| < profile_k (instance_profile five_card_algebra))%N ->
   forall x x' : ex_inputT five_card_params,
@@ -76,25 +79,20 @@ have Hd : sa_cut_dist (amf_sample kim_centi_family R tt)
         = sw_rho_dist (scb_bound (kim_security_bundle_centi R)).
   exact: (kim_centi_cut_distE R).
 rewrite -Hd.
-by apply: (view_indist_of five_card_row_repeated_spectral_tableau R tt).
+by apply: (landing_centi_prop_of_indist R tt).
 Qed.
 
-(** The repeated certificate's own proposition, derived from the corollary.
-    With the lemma above it makes the manifest's bridge cell and the
-    program's payload the same claim about the same coalition. *)
-Lemma landing_centi_prop_of_indist (R : realType) (idx : unit) :
-  SpectralPropAt (kim_centi_cert R idx) (cert_eps (kim_centi_cert R idx)).
+Lemma landing_biased_prop_of_indist (R : realType) (idx : unit) :
+  SpectralPropAt (kim_biased_cert R idx) (cert_eps (kim_biased_cert R idx)).
 Proof.
 move=> C x x' HC.
-have Hd : sa_cut_dist (amf_sample kim_centi_family R idx)
-        = sw_rho_dist (scb_bound (kim_security_bundle_centi R)).
-  exact: (kim_centi_cut_distE R).
-rewrite Hd; exact (@kim_centi_static_obs_indist R C HC x x').
+have Hd : sa_cut_dist (amf_sample kim_biased_family R idx)
+        = sw_rho_dist (kim_biased_marginal_bound R).
+  exact: (esym (kim_biased_sample_cut_witnessE R)).
+rewrite Hd; exact (@kim_biased_static_obs_indist R C HC x x').
 Qed.
 
-(** The one-cut row's corollary statement, read off its published certified
-    program in the same way and at that row's own number. *)
-Lemma landing_biased_indist_of_program (R : realType)
+Lemma landing_biased_indist_of_prop (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   (#|C| < profile_k (instance_profile five_card_algebra))%N ->
   forall x x' : ex_inputT five_card_params,
@@ -111,19 +109,7 @@ have Hd : sa_cut_dist (amf_sample kim_biased_family R tt)
         = sw_rho_dist (kim_biased_marginal_bound R).
   exact: (esym (kim_biased_sample_cut_witnessE R)).
 rewrite -Hd.
-by apply: (view_indist_of five_card_row_biased_spectral_tableau R tt).
-Qed.
-
-(** The one-cut certificate's own proposition, derived from the corollary at
-    word length one. *)
-Lemma landing_biased_prop_of_indist (R : realType) (idx : unit) :
-  SpectralPropAt (kim_biased_cert R idx) (cert_eps (kim_biased_cert R idx)).
-Proof.
-move=> C x x' HC.
-have Hd : sa_cut_dist (amf_sample kim_biased_family R idx)
-        = sw_rho_dist (kim_biased_marginal_bound R).
-  exact: (esym (kim_biased_sample_cut_witnessE R)).
-rewrite Hd; exact (@kim_biased_static_obs_indist R C HC x x').
+by apply: (landing_biased_prop_of_indist R tt).
 Qed.
 
 (******************************************************************************)
@@ -175,7 +161,7 @@ Print Assumptions FiveCardAnalysis.biased_cut_mixing.
 Print Assumptions FiveCardAnalysis.static_obs_const.
 Print Assumptions FiveCardAnalysis.centi_static_obs_indist.
 Print Assumptions FiveCardAnalysis.biased_static_obs_indist.
-Print Assumptions FiveCardAnalysis.uniform_transfer_status.
+Print Assumptions FiveCardAnalysis.exec_transfer_status.
 Print Assumptions FiveCardAnalysis.biased_transfer_status.
 Print Assumptions FiveCardAnalysis.repeated_transfer_status.
 
@@ -222,8 +208,7 @@ Print Assumptions five_card_reprice_inv25_lt2.
 
 Print Assumptions landing_repeated_rowE.
 Print Assumptions landing_biased_rowE.
-Print Assumptions landing_centi_indist_of_program.
 Print Assumptions landing_centi_prop_of_indist.
-Print Assumptions landing_biased_indist_of_program.
+Print Assumptions landing_centi_indist_of_prop.
 Print Assumptions landing_biased_prop_of_indist.
-Print Assumptions FiveCardAnalysis.static_obs.
+Print Assumptions landing_biased_indist_of_prop.

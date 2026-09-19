@@ -16,9 +16,9 @@
 (* Section 7 carries the base premises Kim's one-cut and seven-cut rows rest  *)
 (* on, the distance of each cut law from the uniform rotation law and the     *)
 (* constancy, at every coalition of at most one of the five seats, of that    *)
-(* coalition's reading of the uniform rotation law. Beside them it carries    *)
-(* the coalition bound each pair of premises gives, and one typed transfer    *)
-(* status per analysis path.                                                  *)
+(* coalition's reading of the uniform rotation law. Beside them it carries the*)
+(* coalition bound each pair of premises gives, and one typed transfer status *)
+(* per analysis path.                                                         *)
 (*                                                                            *)
 (* The facade contract:                                                       *)
 (*                                                                            *)
@@ -45,12 +45,10 @@
 (*   verifier observer                        -> verifier_trace,              *)
 (*                                               verifier_endpoints           *)
 (*   decoded sequence observer (Kim bridge)   -> colour_view                  *)
-(*   static coalition observer                -> static_obs                   *)
 (*   uniform sample model                     -> uniform_sample               *)
 (*   single-biased sample model               -> single_biased_sample         *)
 (*   repeated-biased sample model             -> repeated_sample              *)
 (*   seven-cut sample model                   -> centi_sample                 *)
-(*   one-cut identification equation          -> biased_sample_cut_witnessE   *)
 (*   execution correctness and recovery       -> exec_correct, exec_recovers, *)
 (*                                               observed_recovers            *)
 (*   exact-security bridge                    -> marginal_bound, perfect      *)
@@ -66,6 +64,7 @@
 (*   ideal reading constancy                  -> static_obs_const             *)
 (*   coalition reading bound at two pairs     -> centi_static_obs_indist,     *)
 (*                                               biased_static_obs_indist     *)
+(*   one-cut tying equation                   -> biased_sample_cut_witnessE   *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -141,12 +140,11 @@ Definition verifier_trace :=
 (******************************************************************************)
 (* ===== 3. Observers ===== *)
 (*                                                                            *)
-(* Seven carriers, kept distinct: a message list for the raw traces, the card *)
+(* Six carriers, kept distinct: a message list for the raw traces, the card   *)
 (* position 'I_5 for the participant and input-party content readers,         *)
 (* bool * bool for the dealer content reader, a list of card positions for    *)
 (* the verifier endpoints, (size A).-tuple bool for the decoded colour        *)
-(* sequence, {ffun 'I_5 -> 'I_5} for a coalition's static reading of the      *)
-(* endpoint cards, and bool for the evaluated secret.                         *)
+(* sequence, and bool for the evaluated secret.                               *)
 (******************************************************************************)
 
 (** player_raw_trace — one seat's raw executed trace, a message list. *)
@@ -184,15 +182,6 @@ Definition content_trace := @five_card_exec_trace.
     the endpoint list, carrier (size A).-tuple bool: the observer of the Kim
     input-privacy bridge. *)
 Definition colour_view := @five_card_exec_colour_view.
-
-(** static_obs — what a coalition reads of the endpoint cards at one run
-    argument and one shuffle, before any execution is observed: the
-    coalition's own seats read their own card and every other seat reads
-    ord0, carrier {ffun 'I_5 -> 'I_5}. It is the reader the two cut-carrier
-    transfers of section 7 compare at two committed pairs, and the reader
-    Kim's two certified rows state their bound at. *)
-Definition static_obs :=
-  @pgg_instance.static_coalition_obs five_card_algebra five_card_params.
 
 (** secret — the evaluated secret a AND b read as a random variable. *)
 Definition secret := @five_card_leakage.Secret.
@@ -408,8 +397,8 @@ Definition static_obs_const := @five_card_static_obs_const.
     the seven-cut bundle's spectral number of each other at any two committed
     pairs. It is what the two premises above give when fed to the generic
     transfer bound, and it is the security statement of the repeated-cut
-    path: the attacker is that coalition, and the number bounds every
-    advantage it has in telling the two pairs apart. *)
+    path: the attacker is that coalition, and the number is how far it can be
+    from telling the two pairs apart. *)
 Definition centi_static_obs_indist := @kim_centi_static_obs_indist.
 
 (** biased_static_obs_indist — the same bound at word length one, at twice
@@ -418,11 +407,11 @@ Definition centi_static_obs_indist := @kim_centi_static_obs_indist.
     cryptographic one. *)
 Definition biased_static_obs_indist := @kim_biased_static_obs_indist.
 
-(** uniform_transfer_status — the transfer status of the uniform exact-cut
-    path: it carries its landed static results to its executed observers,
-    and its security statement is an exact independence rather than a
-    comparison with an ideal law. *)
-Definition uniform_transfer_status : TransferStatus := StaticExecutedOnly.
+(** exec_transfer_status — the transfer status of the uniform exact-cut path:
+    it carries its landed static results to its executed observers, and its
+    security statement is an exact independence rather than a comparison with
+    an ideal law. *)
+Definition exec_transfer_status : TransferStatus := StaticExecutedOnly.
 
 (** biased_transfer_status — the transfer status of the single-biased path:
     biased_cut_mixing and static_obs_const discharge the two hypotheses of the
@@ -503,7 +492,7 @@ Timeout 60 Check (FiveCardAnalysis.centi_cut_mixing :
              (sa_cut_dist (five_card_sample R))
     <= sw_bound_eps (scb_bound (kim_security_bundle_centi R))).
 Timeout 60 Check
-  (erefl : FiveCardAnalysis.uniform_transfer_status = StaticExecutedOnly).
+  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
 Timeout 60 Check
   (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).
 Timeout 60 Check
