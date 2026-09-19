@@ -1,0 +1,574 @@
+=== five_card_analysis.v ===
+--- history/five_card_analysis.2026-09-19-before-fix2.v	2026-09-19 12:01:01
++++ five_card_analysis.v	2026-09-19 13:01:03
+@@ -16,9 +16,9 @@
+ (* Section 7 carries the base premises Kim's one-cut and seven-cut rows rest  *)
+ (* on, the distance of each cut law from the uniform rotation law and the     *)
+ (* constancy, at every coalition of at most one of the five seats, of that    *)
+-(* coalition's reading of the uniform rotation law. Beside them it carries the*)
+-(* coalition bound each pair of premises gives, and one typed transfer status *)
+-(* per analysis path.                                                         *)
++(* coalition's reading of the uniform rotation law. Beside them it carries    *)
++(* the coalition bound each pair of premises gives, and one typed transfer    *)
++(* status per analysis path.                                                  *)
+ (*                                                                            *)
+ (* The facade contract:                                                       *)
+ (*                                                                            *)
+@@ -45,10 +45,12 @@
+ (*   verifier observer                        -> verifier_trace,              *)
+ (*                                               verifier_endpoints           *)
+ (*   decoded sequence observer (Kim bridge)   -> colour_view                  *)
++(*   static coalition observer                -> static_obs                   *)
+ (*   uniform sample model                     -> uniform_sample               *)
+ (*   single-biased sample model               -> single_biased_sample         *)
+ (*   repeated-biased sample model             -> repeated_sample              *)
+ (*   seven-cut sample model                   -> centi_sample                 *)
++(*   one-cut identification equation          -> biased_sample_cut_witnessE   *)
+ (*   execution correctness and recovery       -> exec_correct, exec_recovers, *)
+ (*                                               observed_recovers            *)
+ (*   exact-security bridge                    -> marginal_bound, perfect      *)
+@@ -64,7 +66,6 @@
+ (*   ideal reading constancy                  -> static_obs_const             *)
+ (*   coalition reading bound at two pairs     -> centi_static_obs_indist,     *)
+ (*                                               biased_static_obs_indist     *)
+-(*   one-cut tying equation                   -> biased_sample_cut_witnessE   *)
+ (******************************************************************************)
+ 
+ From HB Require Import structures.
+@@ -140,11 +141,12 @@
+ (******************************************************************************)
+ (* ===== 3. Observers ===== *)
+ (*                                                                            *)
+-(* Six carriers, kept distinct: a message list for the raw traces, the card   *)
++(* Seven carriers, kept distinct: a message list for the raw traces, the card *)
+ (* position 'I_5 for the participant and input-party content readers,         *)
+ (* bool * bool for the dealer content reader, a list of card positions for    *)
+ (* the verifier endpoints, (size A).-tuple bool for the decoded colour        *)
+-(* sequence, and bool for the evaluated secret.                               *)
++(* sequence, {ffun 'I_5 -> 'I_5} for a coalition's static reading of the      *)
++(* endpoint cards, and bool for the evaluated secret.                         *)
+ (******************************************************************************)
+ 
+ (** player_raw_trace — one seat's raw executed trace, a message list. *)
+@@ -183,6 +185,15 @@
+     input-privacy bridge. *)
+ Definition colour_view := @five_card_exec_colour_view.
+ 
++(** static_obs — what a coalition reads of the endpoint cards at one run
++    argument and one shuffle, before any execution is observed: the
++    coalition's own seats read their own card and every other seat reads
++    ord0, carrier {ffun 'I_5 -> 'I_5}. It is the reader the two cut-carrier
++    transfers of section 7 compare at two committed pairs, and the reader
++    Kim's two certified rows state their bound at. *)
++Definition static_obs :=
++  @pgg_instance.static_coalition_obs five_card_algebra five_card_params.
++
+ (** secret — the evaluated secret a AND b read as a random variable. *)
+ Definition secret := @five_card_leakage.Secret.
+ 
+@@ -397,8 +408,8 @@
+     the seven-cut bundle's spectral number of each other at any two committed
+     pairs. It is what the two premises above give when fed to the generic
+     transfer bound, and it is the security statement of the repeated-cut
+-    path: the attacker is that coalition, and the number is how far it can be
+-    from telling the two pairs apart. *)
++    path: the attacker is that coalition, and the number bounds every
++    advantage it has in telling the two pairs apart. *)
+ Definition centi_static_obs_indist := @kim_centi_static_obs_indist.
+ 
+ (** biased_static_obs_indist — the same bound at word length one, at twice
+@@ -407,11 +418,11 @@
+     cryptographic one. *)
+ Definition biased_static_obs_indist := @kim_biased_static_obs_indist.
+ 
+-(** exec_transfer_status — the transfer status of the uniform exact-cut path:
+-    it carries its landed static results to its executed observers, and its
+-    security statement is an exact independence rather than a comparison with
+-    an ideal law. *)
+-Definition exec_transfer_status : TransferStatus := StaticExecutedOnly.
++(** uniform_transfer_status — the transfer status of the uniform exact-cut
++    path: it carries its landed static results to its executed observers,
++    and its security statement is an exact independence rather than a
++    comparison with an ideal law. *)
++Definition uniform_transfer_status : TransferStatus := StaticExecutedOnly.
+ 
+ (** biased_transfer_status — the transfer status of the single-biased path:
+     biased_cut_mixing and static_obs_const discharge the two hypotheses of the
+@@ -492,7 +503,7 @@
+              (sa_cut_dist (five_card_sample R))
+     <= sw_bound_eps (scb_bound (kim_security_bundle_centi R))).
+ Timeout 60 Check
+-  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
++  (erefl : FiveCardAnalysis.uniform_transfer_status = StaticExecutedOnly).
+ Timeout 60 Check
+   (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).
+ Timeout 60 Check
+=== five_card_mixing.v ===
+--- history/five_card_mixing.2026-09-19-before-fix2.v	2026-09-19 11:59:25
++++ five_card_mixing.v	2026-09-19 13:00:14
+@@ -25,8 +25,9 @@
+ (* coalition of at most one seat, reading static endpoint colours at two      *)
+ (* committed pairs, sees laws within twice the bundle's number of each        *)
+ (* other. That is the conclusion the analysis manifest's two Kim rows are     *)
+-(* bridged by, and it is stated here rather than there because the manifest   *)
+-(* is imported by the file that certifies those rows.                         *)
++(* bridged by. The manifest sits below the file that certifies those rows     *)
++(* and holds no theorem of its own, so the theorem it names for a row's       *)
++(* level has to be a facade alias, and the facade sits above this file.       *)
+ (*                                                                            *)
+ (* Definitions:                                                               *)
+ (*   kim_biased_marginal_bound == the one-cut law's marginal bound at the     *)
+@@ -48,9 +49,9 @@
+ (*                                       bound of the ideal cut               *)
+ (*   kim_centi_cut_mixing == the seven-cut law is within the bundle's         *)
+ (*                           spectral number of the ideal cut                 *)
+-(*   kim_centi_static_obs_indist == a coalition below the privacy threshold   *)
+-(*                                  reads the seven-cut law within twice      *)
+-(*                                  that number at both committed pairs       *)
++(*   kim_centi_static_obs_indist == the two readings of the seven-cut law at  *)
++(*                                  two committed pairs are within twice      *)
++(*                                  that number of each other                 *)
+ (*   kim_biased_sample_cut_witnessE == the one-cut adapter draws from the     *)
+ (*                                     law the length-one bundle bounds       *)
+ (*   kim_biased_cut_mixing == the one-cut law likewise at word length one     *)
+@@ -387,13 +388,14 @@
+ 
+ (** kim_centi_static_obs_indist — at every coalition of at most one seat and
+     every two committed pairs, the law of what that coalition reads off the
+-    static endpoints under the seven-cut cut is within twice the bundle's
+-    spectral number of the same law at the other pair, in variation distance.
+-    This is the security statement of Kim's seven-cut analysis path, and it
+-    is what the two premises above are for: the attacker is a coalition below
+-    the privacy threshold that sees only static endpoint colours, and the
+-    bound says how far it can be from telling the two pairs apart. The number
+-    is the bundle's spectral one spent once for each pair, so the only inexact
++    static endpoints under the seven-cut law, which kim_centi_cut_distE
++    identifies with the cut the seven-cut adapter draws, is within twice the
++    bundle's spectral number of the same law at the other pair, in variation
++    distance. This is the security statement of Kim's seven-cut analysis
++    path, and it is what the two premises above are for: the attacker is that
++    coalition, seeing only static endpoint colours, and the number bounds
++    every advantage it has in telling the two pairs apart. The number is the
++    bundle's spectral one spent once for each pair, so the only inexact
+     quantity is that mixing distance; the constancy of the ideal reading is
+     exact and costs nothing. *)
+ Lemma kim_centi_static_obs_indist
+@@ -433,8 +435,9 @@
+                (kim_centi_lt R) (kim_centi_gt R) (kim_centi_spec R) 1).
+ 
+ (** kim_biased_sample_cut_witnessE — the cut law the one-cut adapter draws
+-    from is the law the length-one bundle bounds. It is the tying field of
+-    the spectral certificate: without it the bundle's number would be a bound
++    from is the law the length-one bundle bounds. It is the identification
++    field of the spectral certificate: without it the bundle's number would
++    be a bound
+     on some other shuffle than the one the row executes, and the seven-cut
+     row's counterpart kim_centi_cut_distE would have no analogue here. *)
+ Lemma kim_biased_sample_cut_witnessE :
+@@ -464,9 +467,9 @@
+     coalition of at most one seat reading the static endpoints under the
+     single biased cut sees laws within twice the length-one bundle's spectral
+     number of each other at the two committed pairs. This is the security
+-    statement of Kim's one-cut analysis path. Its number is of hundredth
+-    scale rather than cryptographic, so it rules out a coalition separating
+-    the pairs with certainty and no more. *)
++    statement of Kim's one-cut analysis path. Its number is about three
++    percent of the ceiling var_dist_le2 gives, so it is a weak separation
++    bound and not a cryptographic one. *)
+ Lemma kim_biased_static_obs_indist
+     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
+   (#|C| < profile_k (instance_profile five_card_algebra))%N ->
+=== five_card_rows.v ===
+--- history/five_card_rows.2026-09-19-before-fix2.v	2026-09-19 12:19:52
++++ five_card_rows.v	2026-09-19 13:02:43
+@@ -54,8 +54,8 @@
+ (* conditional mutual information is not a variation distance.                *)
+ (* AnalysisBridged is one constructor with two admission criteria. The        *)
+ (* manifest admits a row to it on any theorem about the sampled distribution  *)
+-(* and the observer, which is how manifest/pgg_analysis_status.v:55-59        *)
+-(* defines the level and which a leakage bound meets. A program reaches it    *)
++(* and the observer, which is how manifest/pgg_analysis_status.v defines the  *)
++(* level and which a leakage bound meets. A program reaches it                *)
+ (* only through one of the two arms of certify. Both criteria are met at      *)
+ (* both Kim rows. instances/s5/s5_rows.v records for s5_row_word the gap      *)
+ (* this file no longer has: there the constancy a spectral certificate asks   *)
+@@ -546,9 +546,10 @@
+     seven-cut bundle's marginal bound; the identification of that bound's law
+     with the law the repeated adapter draws its cut from; the uniform rotation
+     law as the ideal cut; the distance of the seven-cut law from that ideal;
+-    and the constancy of a coalition's reading of the ideal cut in the
+-    committed pair. The only inexact quantity in the row is the bundle's
+-    spectral number; the ideal cut and the constancy field are exact. *)
++    and the constancy, at every coalition of at most one seat, of the reading
++    of the ideal cut in the committed pair. The only inexact quantity in the
++    row is the bundle's spectral number; the ideal cut and the constancy
++    field are exact. *)
+ Definition kim_centi_cert (R : realType) (idx : unit)
+   : SpectralCert (amf_sample kim_centi_family R idx) :=
+   @MkSpectralCert R five_card_algebra five_card_params
+@@ -560,9 +561,10 @@
+     (@five_card_static_obs_const R).
+ 
+ (** The spectral certificate of the one-cut row, with the same five fields at
+-    word length one. The ideal cut and the constancy of a coalition's
+-    reading of it are the same two terms as in the repeated row's
+-    certificate, so the two rows differ only in the shuffle and its number. *)
++    word length one. The ideal cut and the constancy, at every coalition of
++    at most one seat, of the reading of it are the same two terms as in the
++    repeated row's certificate, so the two rows differ only in the shuffle
++    and its number. *)
+ Definition kim_biased_cert (R : realType) (idx : unit)
+   : SpectralCert (amf_sample kim_biased_family R idx) :=
+   @MkSpectralCert R five_card_algebra five_card_params
+@@ -705,7 +707,8 @@
+ (******************************************************************************)
+ 
+ (** The repeated row's certificate with the constant in the marginal-bound
+-    field. The ideal cut, the tying equation and the constancy of the reading
++    field. The ideal cut, the identification equation and the constancy of
++    the reading
+     at every coalition of at most one seat are the same terms as in
+     kim_centi_cert; the marginal bound carries two to the minus fortieth in
+     place of the spectral expression, and the mixing field is the same
+=== kim_landing_fidelity.v ===
+--- history/kim_landing_fidelity.2026-09-19-before-fix2.v	2026-09-19 12:10:44
++++ kim_landing_fidelity.v	2026-09-19 13:05:06
+@@ -2,12 +2,12 @@
+ (* kim_landing_fidelity.v                                                     *)
+ (* Ledger row L10 of notes/20260919-kim-spectral-landing-design.md.           *)
+ (*                                                                            *)
+-(* This file imports the landing copies, restates the two row equations the  *)
+-(* landing makes hold, shows that each certified program's own proposition    *)
+-(* and the corollary the manifest's bridge cell names are interderivable,     *)
+-(* and prints the assumptions of every declaration the landing adds or        *)
+-(* moves. The production vocabulary the restatements are written in is        *)
+-(* imported beside the copies.                                                *)
++(* This file imports the landing copies, restates the two row equations the   *)
++(* landing makes hold, checks the manifest's bridge corollary against the     *)
++(* proposition each certified program delivers in both directions, and        *)
++(* prints the assumptions of every declaration the landing adds or moves.     *)
++(* The production vocabulary the restatements are written in is imported      *)
++(* beside the copies.                                                         *)
+ 
+ From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+ From mathcomp Require Import fintype tuple finfun finset fingroup perm.
+@@ -46,23 +46,20 @@
+ (*     The certified proposition and the manifest's bridge corollary          *)
+ (*                                                                            *)
+ (* Each certified program carries SpectralPropAt at its own certificate and   *)
+-(* its own accumulated number. The manifest's bridge cell names the           *)
++(* its own accumulated number, and the manifest's bridge cell names the       *)
+ (* corollary of five_card_mixing.v instead, because the manifest cannot name  *)
+-(* the program. The four lemmas below derive each from the other, so the two  *)
+-(* are the same proposition up to the certificate's tying equation.           *)
++(* the program. For each row one lemma reads the corollary's statement off    *)
++(* the published row through view_indist_of, naming no corollary, and one     *)
++(* derives the certificate's own SpectralPropAt from the corollary. Both      *)
++(* directions use the certificate's identification equation and nothing       *)
++(* else, so the two propositions differ by that equation alone.               *)
+ (******************************************************************************)
+ 
+-Lemma landing_centi_prop_of_indist (R : realType) (idx : unit) :
+-  SpectralPropAt (kim_centi_cert R idx) (cert_eps (kim_centi_cert R idx)).
+-Proof.
+-move=> C x x' HC.
+-have Hd : sa_cut_dist (amf_sample kim_centi_family R idx)
+-        = sw_rho_dist (scb_bound (kim_security_bundle_centi R)).
+-  exact: (kim_centi_cut_distE R).
+-rewrite Hd; exact (@kim_centi_static_obs_indist R C HC x x').
+-Qed.
+-
+-Lemma landing_centi_indist_of_prop (R : realType)
++(** The repeated row's corollary statement, read off the proposition the
++    published certified program delivers. The premises are the program's, so
++    a reader who trusts the Tableau reaches the manifest's bridge cell
++    without the corollary. *)
++Lemma landing_centi_indist_of_program (R : realType)
+     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
+   (#|C| < profile_k (instance_profile five_card_algebra))%N ->
+   forall x x' : ex_inputT five_card_params,
+@@ -79,20 +76,25 @@
+         = sw_rho_dist (scb_bound (kim_security_bundle_centi R)).
+   exact: (kim_centi_cut_distE R).
+ rewrite -Hd.
+-by apply: (landing_centi_prop_of_indist R tt).
++by apply: (view_indist_of five_card_row_repeated_spectral_tableau R tt).
+ Qed.
+ 
+-Lemma landing_biased_prop_of_indist (R : realType) (idx : unit) :
+-  SpectralPropAt (kim_biased_cert R idx) (cert_eps (kim_biased_cert R idx)).
++(** The repeated certificate's own proposition, derived from the corollary.
++    With the lemma above it makes the manifest's bridge cell and the
++    program's payload the same claim about the same coalition. *)
++Lemma landing_centi_prop_of_indist (R : realType) (idx : unit) :
++  SpectralPropAt (kim_centi_cert R idx) (cert_eps (kim_centi_cert R idx)).
+ Proof.
+ move=> C x x' HC.
+-have Hd : sa_cut_dist (amf_sample kim_biased_family R idx)
+-        = sw_rho_dist (kim_biased_marginal_bound R).
+-  exact: (esym (kim_biased_sample_cut_witnessE R)).
+-rewrite Hd; exact (@kim_biased_static_obs_indist R C HC x x').
++have Hd : sa_cut_dist (amf_sample kim_centi_family R idx)
++        = sw_rho_dist (scb_bound (kim_security_bundle_centi R)).
++  exact: (kim_centi_cut_distE R).
++rewrite Hd; exact (@kim_centi_static_obs_indist R C HC x x').
+ Qed.
+ 
+-Lemma landing_biased_indist_of_prop (R : realType)
++(** The one-cut row's corollary statement, read off its published certified
++    program in the same way and at that row's own number. *)
++Lemma landing_biased_indist_of_program (R : realType)
+     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
+   (#|C| < profile_k (instance_profile five_card_algebra))%N ->
+   forall x x' : ex_inputT five_card_params,
+@@ -109,9 +111,21 @@
+         = sw_rho_dist (kim_biased_marginal_bound R).
+   exact: (esym (kim_biased_sample_cut_witnessE R)).
+ rewrite -Hd.
+-by apply: (landing_biased_prop_of_indist R tt).
++by apply: (view_indist_of five_card_row_biased_spectral_tableau R tt).
+ Qed.
+ 
++(** The one-cut certificate's own proposition, derived from the corollary at
++    word length one. *)
++Lemma landing_biased_prop_of_indist (R : realType) (idx : unit) :
++  SpectralPropAt (kim_biased_cert R idx) (cert_eps (kim_biased_cert R idx)).
++Proof.
++move=> C x x' HC.
++have Hd : sa_cut_dist (amf_sample kim_biased_family R idx)
++        = sw_rho_dist (kim_biased_marginal_bound R).
++  exact: (esym (kim_biased_sample_cut_witnessE R)).
++rewrite Hd; exact (@kim_biased_static_obs_indist R C HC x x').
++Qed.
++
+ (******************************************************************************)
+ (*     lib/var_dist_supp.v                                                    *)
+ (******************************************************************************)
+@@ -161,7 +175,7 @@
+ Print Assumptions FiveCardAnalysis.static_obs_const.
+ Print Assumptions FiveCardAnalysis.centi_static_obs_indist.
+ Print Assumptions FiveCardAnalysis.biased_static_obs_indist.
+-Print Assumptions FiveCardAnalysis.exec_transfer_status.
++Print Assumptions FiveCardAnalysis.uniform_transfer_status.
+ Print Assumptions FiveCardAnalysis.biased_transfer_status.
+ Print Assumptions FiveCardAnalysis.repeated_transfer_status.
+ 
+@@ -208,7 +222,8 @@
+ 
+ Print Assumptions landing_repeated_rowE.
+ Print Assumptions landing_biased_rowE.
++Print Assumptions landing_centi_indist_of_program.
+ Print Assumptions landing_centi_prop_of_indist.
+-Print Assumptions landing_centi_indist_of_prop.
++Print Assumptions landing_biased_indist_of_program.
+ Print Assumptions landing_biased_prop_of_indist.
+-Print Assumptions landing_biased_indist_of_prop.
++Print Assumptions FiveCardAnalysis.static_obs.
+=== pgg_analysis_client.v ===
+--- history/pgg_analysis_client.2026-09-19-before-fix2.v	2026-09-19 12:04:26
++++ pgg_analysis_client.v	2026-09-19 13:01:05
+@@ -47,7 +47,7 @@
+ Check FiveCardAnalysis.exec_trace_secrecy.      (* 6 Security *)
+ Check FiveCardAnalysis.deal_centi_lt.           (* bound, not security *)
+ Check FiveCardAnalysis.centi_static_obs_indist. (* 7 Transfer *)
+-Check FiveCardAnalysis.exec_transfer_status.    (* 7 Transfer, typed status *)
++Check FiveCardAnalysis.uniform_transfer_status. (* 7 Transfer, typed status *)
+ Check FiveCardAnalysis.biased_transfer_status.
+ Check FiveCardAnalysis.repeated_transfer_status.
+ 
+=== pgg_analysis_manifest.v ===
+--- history/pgg_analysis_manifest.2026-09-19-before-fix2.v	2026-09-19 12:06:46
++++ pgg_analysis_manifest.v	2026-09-19 13:02:11
+@@ -297,7 +297,11 @@
+ (* | observers          | FiveCardAnalysis.colour_view                        *)
+ (*                          : (size A).-tuple bool, the decoded colour        *)
+ (*                            sequence at a list A of seat indices into the   *)
+-(*                            endpoint list |                                 *)
++(*                            endpoint list;                                  *)
++(*                        FiveCardAnalysis.static_obs                         *)
++(*                          : {ffun 'I_5 -> 'I_5}, a coalition's reading of   *)
++(*                            the endpoint cards at one committed pair and    *)
++(*                            one shuffle, with no execution |                *)
+ (* | distribution-to-observer bridges | FiveCardAnalysis.single_cut_distE,    *)
+ (*                        FiveCardAnalysis.biased_sample_cut_witnessE,        *)
+ (*                        FiveCardAnalysis.colour_viewE,                      *)
+@@ -329,6 +333,10 @@
+ (* | colour_view_leak_bound | kim_input_dist eps_lt_inv5 eps_gt_neg4inv5,     *)
+ (*   the distribution of single_biased_sample | colour_view A, executed       *)
+ (*   | mutual information, at most kim_leak_bound eps |                       *)
++(* | biased_static_obs_indist | the cut distribution of                       *)
++(*   single_biased_sample, by biased_sample_cut_witnessE | static_obs         *)
++(*   | approximate privacy at twice the length-one bundle's number, derived   *)
++(*     from var_dist_fdistmap_transfer and biased_cut_mixing |                *)
+ (*                                                                            *)
+ (* Hypotheses of that capability: eps_lt_inv5, eps_gt_neg4inv5 and the        *)
+ (* small-bias hypothesis eps_small : 0 < 5^-1 - `|eps|. All three are         *)
+@@ -348,9 +356,11 @@
+ (* IdealFinite rather than StaticExecutedOnly. The conclusion of that         *)
+ (* transfer is biased_static_obs_indist, a bound on the variation distance    *)
+ (* between the static readings of a coalition of at most one seat at two      *)
+-(* committed pairs; it is a second theorem at this row's own distribution     *)
+-(* and observer, and it reaches AnalysisBridged as colour_view_leak_bound     *)
+-(* does.                                                                      *)
++(* committed pairs. Its distribution is this row's cut law, by                *)
++(* biased_sample_cut_witnessE, and its observer is static_obs, the second     *)
++(* observer this row declares, so it reaches AnalysisBridged beside           *)
++(* colour_view_leak_bound, which reaches it at the executed reader            *)
++(* colour_view.                                                               *)
+ (*                                                                            *)
+ (*     Row 5: five-card development, repeated biased cuts and seven cuts      *)
+ (*                                                                            *)
+@@ -367,6 +377,10 @@
+ (* | observers          | one seat's endpoint distribution, reached through   *)
+ (*                        FiveCardAnalysis.repeated_seat_distE and            *)
+ (*                        FiveCardAnalysis.centi_repeated_seat_distE;         *)
++(*                        FiveCardAnalysis.static_obs                         *)
++(*                          : {ffun 'I_5 -> 'I_5}, a coalition's reading of   *)
++(*                            the endpoint cards at one committed pair and    *)
++(*                            one shuffle, with no execution;                 *)
+ (*                        FiveCardAnalysis.verifier_endpoints : seq 'I_5 |    *)
+ (* | distribution-to-observer bridges | FiveCardAnalysis.repeated_cut_distE,  *)
+ (*                        FiveCardAnalysis.centi_cut_distE,                   *)
+@@ -387,8 +401,10 @@
+ (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
+ (* | model transfer       | the cut-carrier transfer of                       *)
+ (*                          var_dist_fdistmap_transfer: its first hypothesis  *)
+-(*                          is FiveCardAnalysis.centi_cut_mixing and its      *)
+-(*                          second is FiveCardAnalysis.static_obs_const |     *)
++(*                          is FiveCardAnalysis.centi_cut_mixing, whose law   *)
++(*                          is the cut distribution of centi_sample by        *)
++(*                          FiveCardAnalysis.centi_cut_distE, and its second  *)
++(*                          is FiveCardAnalysis.static_obs_const |            *)
+ (* | missing premise      | none |                                            *)
+ (* | completion level     | AnalysisBridged |                                 *)
+ (* | transfer status      | IdealFinite |                                     *)
+@@ -402,6 +418,10 @@
+ (* | deal_centi_lt | the cut distribution of centi_sample, by                 *)
+ (*   centi_cut_distE | one seat's endpoint distribution                       *)
+ (*   | endpoint marginal bound |                                              *)
++(* | centi_static_obs_indist | the cut distribution of centi_sample, by       *)
++(*   centi_cut_distE | static_obs | approximate privacy at twice the          *)
++(*   seven-cut bundle's number, derived from var_dist_fdistmap_transfer and   *)
++(*   centi_cut_mixing |                                                       *)
+ (*                                                                            *)
+ (* Level justification. Both models are sample adapters over the plug and     *)
+ (* both cut distributions are named, giving Sampled. centi_cut_mixing         *)
+@@ -410,8 +430,10 @@
+ (* discharges both hypotheses of var_dist_fdistmap_transfer, giving           *)
+ (* IdealFinite. The conclusion of that transfer, centi_static_obs_indist, is  *)
+ (* a bound on the variation distance between the static readings of a         *)
+-(* coalition of at most one seat at two committed pairs, and that is what     *)
+-(* gives AnalysisBridged. endpoint_bound and deal_centi_lt stay in the row    *)
++(* coalition of at most one seat at two committed pairs. Its distribution is  *)
++(* this row's cut law, by centi_cut_distE, and its observer is static_obs,    *)
++(* which the row declares, and that is what gives AnalysisBridged.            *)
++(* endpoint_bound and deal_centi_lt stay in the row                           *)
+ (* for what they are: they bound the distance from uniform of ONE seat's      *)
+ (* endpoint distribution, neither quantifies over a coalition and neither     *)
+ (* mentions a second secret. A ShuffleCertificateBundle exists for both       *)
+@@ -1220,6 +1242,16 @@
+   forall A : seq nat,
+     bool * bool -> pgg_gT (mp_M FiveCardAnalysis.profile) ->
+     (size A).-tuple bool).
++
++Timeout 60 Check (FiveCardAnalysis.static_obs :
++  {set 'I_(pi_T' (mp_PI (instance_profile
++                           five_card_exec.five_card_algebra))).+1} ->
++  ex_inputT five_card_exec.five_card_params ->
++  pgg_gT (mp_M (instance_profile five_card_exec.five_card_algebra)) ->
++  {ffun 'I_(pi_T' (mp_PI (instance_profile
++                            five_card_exec.five_card_algebra))).+1 ->
++        'I_(pgg_N' (mp_M (instance_profile
++                            five_card_exec.five_card_algebra))).+1}).
+ 
+ Timeout 60 Check (FiveCardAnalysis.secret :
+   forall R : realType, {RV (FiveCardAnalysis.prior R) -> bool}).
+@@ -1512,7 +1544,7 @@
+          + sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)).
+ 
+ Timeout 60 Check
+-  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
++  (erefl : FiveCardAnalysis.uniform_transfer_status = StaticExecutedOnly).
+ 
+ Timeout 60 Check
+   (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).
+=== var_dist_supp.v ===
+--- history/var_dist_supp.2026-09-19-before-fix2.v	2026-09-19 12:04:15
++++ var_dist_supp.v	2026-09-19 13:03:59
+@@ -43,11 +43,11 @@
+ (******************************************************************************)
+ 
+ (** The variation distance between two laws on a finite carrier is at most
+-    two, since it is the sum of the absolute differences
+-    and each law sums to one. It is the scale a published number is read
+-    against: a certificate says something about a coalition's two readings
+-    exactly in so far as its number is below two, and the total variation
+-    distance of the literature is half of this quantity. *)
++    two, since it is the sum of the absolute differences and each law sums to
++    one. It is the scale a published number is read against: a certificate
++    says something about a coalition's two readings exactly in so far as its
++    number is below two, and the total variation distance of the literature
++    is half of this quantity. *)
+ Lemma var_dist_le2 (R : realType) (A : finType) (P Q : R.-fdist A) :
+   var_dist P Q <= 2%:R.
+ Proof.
+@@ -73,9 +73,9 @@
+     variation distance exactly. It is var_dist_fdistmap_inj, the equality
+     case of the data processing inequality var_dist_fdistmap, with
+     injectivity weakened from the whole domain to the union of the two
+-    supports. The weakening is what a
+-    cut law needs: the inequality runs from the group to the reading, and a
+-    certificate states its bound on the reading and owes it on the group. *)
++    supports. The weakening is what a cut law needs: the inequality runs from
++    the group to the reading, and a certificate states its bound on the
++    reading and owes it on the group. *)
+ Lemma var_dist_fdistmap_supp_inj (A B : finType) (f : A -> B)
+     (P Q : R.-fdist A) :
+   (forall a b : A, (P a != 0) || (Q a != 0) ->
+@@ -118,13 +118,13 @@
+ (*     A bijective reader on one finite type keeps a law uniform              *)
+ (******************************************************************************)
+ 
+-(** An injective endomap of a finite type leaves the uniform law fixed. It
+-    is the endomap case of fdistmap_inj_uniform,
+-    whose conclusion is uniform on the image and which does not simplify back
+-    to the uniform law when the two types differ. The ideal cut of the
+-    five-card instance is uniform on the rotations, and one card position of
+-    it is read by such an endomap, so the ideal cut read at a position is the
+-    uniform law a marginal bound is stated against. *)
++(** An injective endomap of a finite type leaves the uniform law fixed. It is
++    the endomap case of fdistmap_inj_uniform, whose conclusion is uniform on
++    the image and which does not simplify back to the uniform law when the
++    two types differ. The ideal cut of the five-card instance is uniform on
++    the rotations, and one card position of it is read by such an endomap, so
++    the ideal cut read at a position is the uniform law a marginal bound is
++    stated against. *)
+ Lemma fdistmap_inj_uniform_id (R : realType) (A : finType) (n : nat)
+     (cA : #|A| = n.+1) (f : A -> A) :
+   injective f ->
+@@ -139,9 +139,9 @@
+ by rewrite addr0 !fdist_uniformE.
+ Qed.
+ 
+-(** A pushforward gives mass only to points in the image of the map. It
+-    is how the support of a cut law defined as a
+-    word-shuffle pushforward is read off the word evaluation. *)
++(** A pushforward gives mass only to points in the image of the map. It is how
++    the support of a cut law defined as a word-shuffle pushforward is read off
++    the word evaluation. *)
+ Lemma fdistmap_neq0_codom (R : realType) (A B : finType) (f : A -> B)
+     (P : R.-fdist A) (b : B) :
+   fdistmap f P b != 0 -> exists a : A, f a = b.
+@@ -160,9 +160,9 @@
+ (******************************************************************************)
+ 
+ (** The positions of a tuple at which a predicate holds are counted by the
+-    predicate on the underlying sequence. It is the bridge
+-    from a law on card positions to the deck's colour census, which is the
+-    level at which den Boer's encoding is constant in the committed bits. *)
++    predicate on the underlying sequence. It is the bridge from a law on card
++    positions to the deck's colour census, which is the level at which den
++    Boer's encoding is constant in the committed bits. *)
+ Lemma card_tnth_count (n : nat) (T : Type) (t : n.-tuple T) (p : pred T) :
+   #|[pred k : 'I_n | p (tnth t k)]| = count p t.
+ Proof. by rewrite -sum1_card -sum1_count big_tuple. Qed.
