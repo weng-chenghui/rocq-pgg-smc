@@ -55,10 +55,11 @@
 (* AnalysisBridged is one constructor with two admission criteria. The        *)
 (* manifest admits a row to it on any theorem about the sampled distribution  *)
 (* and the observer, which is how manifest/pgg_analysis_status.v defines the  *)
-(* level and which a leakage bound meets. A program reaches it only through   *)
-(* one of the two arms of certify. Both criteria are met at both Kim rows.    *)
-(* instances/s5/s5_rows.v records for s5_row_word the gap this file no longer *)
-(* has: there the constancy a spectral certificate asks for is false.         *)
+(* level and which a leakage bound meets. A program reaches it                *)
+(* only through one of the two arms of certify. Both criteria are met at      *)
+(* both Kim rows. instances/s5/s5_rows.v records for s5_row_word the gap      *)
+(* this file no longer has: there the constancy a spectral certificate asks   *)
+(* for is false.                                                              *)
 (*                                                                            *)
 (* No statement of a program is a theorem about this instance. What the       *)
 (* instance supplies it supplies inside a clause. In the uniform row the      *)
@@ -134,20 +135,8 @@
 (*   five_card_row_biased_spectral_rowE                                       *)
 (*                           == each certified program publishes its own      *)
 (*                              manifest row                                  *)
-(*   five_card_row_repeated_spectral_publishedE                               *)
-(*   five_card_row_biased_spectral_publishedE                                 *)
-(*                           == the three coordinates each certified program  *)
-(*                              publishes                                     *)
-(*   five_card_row_biased_forms_publishedE                                    *)
-(*                           == the two one-cut programs publish one row      *)
-(*   kim_biased_epsE         == the one-cut bundle's marginal bound in closed *)
-(*                              form                                          *)
-(*   kim_biased_exact_le_eps == the exact one-cut distance is under that      *)
-(*                              bound                                         *)
 (*   kim_centi_cert_epsE, kim_biased_cert_epsE                                *)
 (*                           == the number each certificate publishes         *)
-(*   kim_centi_cert40_epsE   == the number the constant repeated certificate  *)
-(*                              publishes                                     *)
 (*   kim_centi_cert_eps_lt   == the repeated row's number is under the        *)
 (*                              constant PGL(2,7)'s word row publishes        *)
 (*   kim_biased_cert_eps_lt2 == the one-cut row's number is under the         *)
@@ -719,9 +708,10 @@ End kim_cert_numbers.
 
 (** The repeated row's certificate with the constant in the marginal-bound
     field. The ideal cut, the identification equation and the constancy of
-    the reading at every coalition of at most one seat are the same terms as
-    in kim_centi_cert; the marginal bound carries two to the minus fortieth
-    in place of the spectral expression, and the mixing field is the same
+    the reading
+    at every coalition of at most one seat are the same terms as in
+    kim_centi_cert; the marginal bound carries two to the minus fortieth in
+    place of the spectral expression, and the mixing field is the same
     distance bounded by that constant. *)
 Definition kim_centi_cert40 (R : realType) (idx : unit)
   : SpectralCert (amf_sample kim_centi_family R idx) :=
@@ -806,7 +796,7 @@ Definition five_card_row_biased_inv25
 Lemma five_card_row_biased_forms_publishedE :
   published_row five_card_row_biased_spectral_tableau
   = published_row five_card_row_biased_inv25.
-Proof. exact: erefl. Qed.
+Proof. by []. Qed.
 
 (** One twenty-fifth is under two, the ceiling var_dist_le2 gives for a
     variation distance, so the repriced one-cut row is not vacuous. *)

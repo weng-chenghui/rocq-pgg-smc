@@ -146,7 +146,7 @@ Definition verifier_trace :=
 (* bool * bool for the dealer content reader, a list of card positions for    *)
 (* the verifier endpoints, (size A).-tuple bool for the decoded colour        *)
 (* sequence, {ffun 'I_5 -> 'I_5} for a coalition's static reading of the      *)
-(* endpoint card positions, and bool for the evaluated secret.                *)
+(* endpoint cards, and bool for the evaluated secret.                         *)
 (******************************************************************************)
 
 (** player_raw_trace — one seat's raw executed trace, a message list. *)
@@ -185,13 +185,12 @@ Definition content_trace := @five_card_exec_trace.
     input-privacy bridge. *)
 Definition colour_view := @five_card_exec_colour_view.
 
-(** static_obs — what a coalition reads of the endpoint card positions at
-    one run argument and one shuffle, before any execution is observed: the
-    coalition's own seats read the card position at their own start and
-    every other seat reads ord0, carrier {ffun 'I_5 -> 'I_5}. It is the
-    reader the two cut-carrier transfers of section 7 compare at two
-    committed pairs, and the reader Kim's two certified rows state their
-    bound at. *)
+(** static_obs — what a coalition reads of the endpoint cards at one run
+    argument and one shuffle, before any execution is observed: the
+    coalition's own seats read their own card and every other seat reads
+    ord0, carrier {ffun 'I_5 -> 'I_5}. It is the reader the two cut-carrier
+    transfers of section 7 compare at two committed pairs, and the reader
+    Kim's two certified rows state their bound at. *)
 Definition static_obs :=
   @pgg_instance.static_coalition_obs five_card_algebra five_card_params.
 

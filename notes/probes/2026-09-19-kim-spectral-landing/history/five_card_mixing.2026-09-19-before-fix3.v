@@ -437,9 +437,9 @@ Definition kim_biased_marginal_bound
 (** kim_biased_sample_cut_witnessE — the cut law the one-cut adapter draws
     from is the law the length-one bundle bounds. It is the identification
     field of the spectral certificate: without it the bundle's number would
-    be a bound on some other shuffle than the one the row executes, and the
-    seven-cut row's counterpart kim_centi_cut_distE would have no analogue
-    here. *)
+    be a bound
+    on some other shuffle than the one the row executes, and the seven-cut
+    row's counterpart kim_centi_cut_distE would have no analogue here. *)
 Lemma kim_biased_sample_cut_witnessE :
   sw_rho_dist kim_biased_marginal_bound
   = sa_cut_dist (@kim_single_sample R (1 / 100)

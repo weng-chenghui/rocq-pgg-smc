@@ -176,7 +176,7 @@
 +Lemma five_card_row_biased_forms_publishedE :
 +  published_row five_card_row_biased_spectral_tableau
 +  = published_row five_card_row_biased_inv25.
-+Proof. by []. Qed.
++Proof. exact: erefl. Qed.
 +Lemma five_card_reprice_inv25_lt2 (R : realType) : (1 / 25 : R) < 2%:R.
 +Proof. by lra. Qed.
  Lemma five_card_row_repeated_endpoint_lt (R : realType) (s : 'I_5) :

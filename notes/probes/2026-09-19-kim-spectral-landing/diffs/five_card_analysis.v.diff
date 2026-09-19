@@ -50,24 +50,25 @@
  (* the verifier endpoints, (size A).-tuple bool for the decoded colour        *)
 -(* sequence, and bool for the evaluated secret.                               *)
 +(* sequence, {ffun 'I_5 -> 'I_5} for a coalition's static reading of the      *)
-+(* endpoint cards, and bool for the evaluated secret.                         *)
++(* endpoint card positions, and bool for the evaluated secret.                *)
  (******************************************************************************)
  
-@@ -173,4 +186,13 @@
+@@ -173,4 +186,14 @@
  Definition colour_view := @five_card_exec_colour_view.
  
-+(** static_obs — what a coalition reads of the endpoint cards at one run
-+    argument and one shuffle, before any execution is observed: the
-+    coalition's own seats read their own card and every other seat reads
-+    ord0, carrier {ffun 'I_5 -> 'I_5}. It is the reader the two cut-carrier
-+    transfers of section 7 compare at two committed pairs, and the reader
-+    Kim's two certified rows state their bound at. *)
++(** static_obs — what a coalition reads of the endpoint card positions at
++    one run argument and one shuffle, before any execution is observed: the
++    coalition's own seats read the card position at their own start and
++    every other seat reads ord0, carrier {ffun 'I_5 -> 'I_5}. It is the
++    reader the two cut-carrier transfers of section 7 compare at two
++    committed pairs, and the reader Kim's two certified rows state their
++    bound at. *)
 +Definition static_obs :=
 +  @pgg_instance.static_coalition_obs five_card_algebra five_card_params.
 +
  (** secret — the evaluated secret a AND b read as a random variable. *)
  Definition secret := @five_card_leakage.Secret.
-@@ -249,4 +271,9 @@
+@@ -249,4 +272,9 @@
      bound of the seven-cut certificate bundle. *)
  Definition centi_cut_distE := @kim_centi_cut_distE.
 +
@@ -77,7 +78,7 @@
 +Definition biased_sample_cut_witnessE := @kim_biased_sample_cut_witnessE.
  
  (** centi_witness_rhoE — the seven-cut certificate bundle's marginal bound
-@@ -349,22 +376,62 @@
+@@ -349,22 +377,62 @@
  (* ===== 7. Transfer ===== *)
  (*                                                                            *)
 -(* This section carries NO transfer theorem. No transfer-layer result exists  *)
@@ -156,7 +157,7 @@
 +Definition repeated_transfer_status : TransferStatus := IdealFinite.
  
  End FiveCardAnalysis.
-@@ -429,9 +496,16 @@
+@@ -429,9 +497,16 @@
        <= Num.Def.sqrtr 5%:R * kim_lambda2 eps ^+ L).
  
 -(* 7 Transfer: no theorem to check, by construction; the two typed statuses
