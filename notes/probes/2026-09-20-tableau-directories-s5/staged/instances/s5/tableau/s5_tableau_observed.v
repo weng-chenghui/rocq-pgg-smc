@@ -11,18 +11,20 @@
 (* any coalition size, under either run mode.                                 *)
 (*                                                                            *)
 (* Both sharing-family runs of the instance reach this level, and each is     *)
-(* named once. The dealer-dealt run stops here for good: the manifest row     *)
-(* s5_row_det it answers has no model and no security payload, because the    *)
-(* canonical encoding it deals puts the whole secret on one card, so the      *)
+(* named once. The dealer-dealt run's program stops here: the manifest row    *)
+(* s5_row_det it answers carries no model and no security payload, because    *)
+(* the canonical encoding it deals puts the whole secret on one card, so the  *)
 (* single seat the cut sends that card to reads the secret, as does every     *)
-(* coalition containing that seat. The supplied run continues, through the    *)
-(* tape model of the level above.                                             *)
+(* coalition containing that seat. The manifest carries a second row over     *)
+(* this run, s5_row_word, under a finite-word model; the Sampled file records *)
+(* why no program of this instance continues from that model. The supplied    *)
+(* run continues, through the tape model of the level above.                  *)
 (*                                                                            *)
 (* Each run's specification sits here too. A specification is an ideal        *)
 (* function with a tolerated coalition size, and realising one is a statement *)
 (* about the observed execution: the value the run recovers is that           *)
-(* function's, as terms. Both are therefore statements of this level and of   *)
-(* no level above it, and neither depends on a probability model.             *)
+(* function's, as terms. Each realisation lemma is therefore a statement of   *)
+(* this level, and neither depends on a probability model.                    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   s5_dealt             == the dealer-dealt run as a program                *)
@@ -34,11 +36,12 @@
 (*   s5_dealt_row_observedE                                                   *)
 (*                        == the dealt program reaches the observed execution *)
 (*                           the manifest's deterministic row describes       *)
-(*   s5_dealt_splitE      == the dealt program is its Executable value with   *)
+(*   s5_dealt_executableE == the dealt program is its Executable value with   *)
 (*                           the three run facts adjoined                     *)
 (*   s5_supplied_paramsE  == the supplied program drives the run              *)
 (*                           s5_supplied_params names                         *)
-(*   s5_supplied_splitE   == the supplied program is its Executable value     *)
+(*   s5_supplied_executableE                                                  *)
+(*                        == the supplied program is its Executable value     *)
 (*                           with the three run facts adjoined                *)
 (*   s5_FE, s5_rand_FE    == the two specifications, written out              *)
 (*   s5_F_thresholdE      == the coalition size the dealer-dealt run          *)
@@ -47,7 +50,7 @@
 (*                        == each run recovers its specification's value      *)
 (******************************************************************************)
 
-From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
 From mathcomp Require Import fintype finfun finset.
 From mathcomp Require Import matrix zmodp ssralg ssrnum reals.
 From pgg_reconstruct Require Import pgg_sharing_framework.
@@ -97,8 +100,8 @@ Proof. by []. Qed.
     facts adjoined. The program above writes the algebra and the fuel in one
     line, the Executable file names the parameters they build, and this
     equation is what keeps a reader from having to decide which of the two
-    readings a statement below is made at. *)
-Lemma s5_dealt_splitE :
+    spellings a statement below is made at. *)
+Lemma s5_dealt_executableE :
   (s5_dealt_executable
      execute terminates by s5_dealt_terminates
              endpoints by s5_dealt_endpoints
@@ -135,9 +138,9 @@ Lemma s5_supplied_paramsE :
   projT1 (projT2 (tableau_at s5_supplied)) = s5_supplied_params.
 Proof. by []. Qed.
 
-(** The supplied program is its own Executable value with the three run facts
-    adjoined, on the same reading as the dealer-dealt case. *)
-Lemma s5_supplied_splitE :
+(** The supplied program is its own Executable value with the three run
+    facts adjoined, in the same sense as the dealer-dealt case. *)
+Lemma s5_supplied_executableE :
   (s5_supplied_executable
      execute terminates by s5_supplied_terminates
              endpoints by s5_supplied_endpoints

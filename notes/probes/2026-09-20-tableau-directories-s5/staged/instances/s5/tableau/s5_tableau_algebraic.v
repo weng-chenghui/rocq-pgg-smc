@@ -12,16 +12,16 @@
 (*                                                                            *)
 (* The algebra is s5_algebra of s5_exec.v and is not restated here: the four  *)
 (* adjacent transpositions of five card positions generate the shuffle group, *)
-(* the sum-mod-5 scheme carries its own encoding, reconstruction and privacy  *)
+(* the sum-mod scheme carries its own encoding, reconstruction and privacy    *)
 (* obligation, and the seats start at the deck positions in order. What this  *)
 (* file adds is that algebra read as the first line of a program, which is    *)
 (* what lets each level above it be named on its own.                         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   s5_algebraic         == the five-seat algebra as a program at Algebraic  *)
+(*   s5_algebraic_start   == the five-seat algebra as a program at Algebraic  *)
 (******************************************************************************)
 
-From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
 From mathcomp Require Import fintype finfun finset.
 From mathcomp Require Import matrix zmodp ssralg ssrnum reals.
 From pgg_smc Require Import pgg_analysis_status.
@@ -41,9 +41,9 @@ Local Open Scope ring_scope.
 (******************************************************************************)
 
 (** The five-seat instance at the Algebraic level: the algebra alone, under
-    the empty proposition that level carries. Both sharing-family runs
+    True, the proposition that level carries. Both sharing-family runs
     continue from this one value, the dealer-dealt run through the scheme's
     canonical encoding and the supplied run through an additive layout of a
     sampler tape, so what separates the two modes is the level above and not
     this one. *)
-Definition s5_algebraic : Tableau Algebraic := tableau_start s5_algebra.
+Definition s5_algebraic_start : Tableau Algebraic := tableau_start s5_algebra.

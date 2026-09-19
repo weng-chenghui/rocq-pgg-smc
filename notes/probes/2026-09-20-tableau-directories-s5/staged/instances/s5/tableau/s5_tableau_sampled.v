@@ -17,17 +17,20 @@
 (* uniform values.                                                            *)
 (*                                                                            *)
 (* The instance's other model, the finite word over the four adjacent         *)
-(* transpositions, is not named at this level, because no row of the          *)
-(* instance continues from it. Two of the five parts of an                    *)
-(* input-indistinguishability certificate are out of reach over that model.   *)
-(* Missing is the distance from the walk to an ideal cut, a variation         *)
-(* distance on the shuffle group that s5_word_base_premise names as a         *)
-(* premise nothing in the tree proves, the instance's spectral theorem        *)
+(* transpositions, is not named at this level. It is a model of the           *)
+(* dealer-dealt run, and the manifest's row over it, s5_row_word, is          *)
+(* published from a mixing theorem rather than from a program: two of the     *)
+(* five parts of an input-indistinguishability certificate over that model    *)
+(* are out of reach. Missing is the distance from the walk to an ideal cut, a *)
+(* variation distance on the shuffle group that s5_word_base_premise names as *)
+(* a premise nothing in the tree proves, the instance's spectral theorem      *)
 (* bounding one seat's endpoint marginal on 'I_5 instead. Missing too, and    *)
 (* for a reason no proof can remove, is the constancy of a coalition's        *)
-(* reading of the ideal cut in the secret: under every cut exactly one seat   *)
-(* holds the card carrying the whole secret, so that seat's reading law       *)
-(* moves with the secret, and the seat in question varies with the cut while  *)
+(* reading of the ideal cut in the secret, which the certificate's constancy  *)
+(* field asks for at every coalition below the threshold and so at every      *)
+(* singleton: under every cut exactly one seat holds the card carrying the    *)
+(* whole secret, so that seat's reading law moves with the secret, and no     *)
+(* choice of ideal avoids it, the seat in question varying with the cut while *)
 (* the ideal is fixed before any coalition is named. What the manifest        *)
 (* publishes for that path is an endpoint marginal bound against the          *)
 (* encoder-image ideal, with no claim about a coalition.                      *)
@@ -36,7 +39,7 @@
 (*   s5_rand_sampled      == the supplied run under the uniform tape model    *)
 (******************************************************************************)
 
-From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
 From mathcomp Require Import fintype finfun finset.
 From mathcomp Require Import matrix zmodp ssralg ssrnum reals.
 From infotheo Require Import fdist proba.
@@ -62,8 +65,8 @@ Local Open Scope ring_scope.
 (** The supplied run under the uniform tape model, named at Sampled. The
     family is indexed by the unit type, so one member at each real field, and
     its cut is the identity: what a coalition reads is decided by how the
-    shares were drawn and not by how the deck was shuffled. Naming the value
-    is what lets a further row over this model be written without repeating
-    the run. *)
+    shares were drawn and not by how the deck was shuffled. The value is what
+    s5_row_rand_sampledE continues, so the row and the model are named
+    apart. *)
 Definition s5_rand_sampled : Tableau Sampled :=
   s5_supplied sample s5_rand_family.

@@ -145,35 +145,50 @@ Print Assumptions s5_rand_realises_expected.
 
 # Only the staged tree has these; they have no production counterpart.
 NEW = r"""
-(* The seven declarations the phase files add, with the three conversion
-   lemmas that tie each re-cut to the value production already had.          *)
+(* The nine declarations the phase files add.  The four new Definitions are
+   ascribed at their type, which a wrong body would still satisfy; what pins
+   their bodies is the five equations below, each of which holds by
+   conversion and so fails if any body drifts.  Their assumptions are printed
+   too, so a body that acquired an axiom would show up here.               *)
 
-Check (s5_algebraic : Tableau Algebraic).
+Check (s5_algebraic_start : Tableau Algebraic).
 Check (s5_dealt_executable : Tableau Executable).
 Check (s5_supplied_executable : Tableau Executable).
 Check (s5_rand_sampled : Tableau Sampled).
 
-Check (s5_dealt_splitE :
+Check (s5_dealt_executable_paramsE :
+  projT2 (tableau_at s5_dealt_executable) = s5_dealt_params).
+
+Check (s5_supplied_executable_paramsE :
+  projT2 (tableau_at s5_supplied_executable) = s5_supplied_params).
+
+Check (s5_dealt_executableE :
   (s5_dealt_executable
      execute terminates by s5_dealt_terminates
              endpoints by s5_dealt_endpoints
              recon by s5_dealt_recon) = s5_dealt).
 
-Check (s5_supplied_splitE :
+Check (s5_supplied_executableE :
   (s5_supplied_executable
      execute terminates by s5_supplied_terminates
              endpoints by s5_supplied_endpoints
              recon by s5_supplied_recon) = s5_supplied).
 
-Check (s5_row_rand_splitE :
+Check (s5_row_rand_sampledE :
   (s5_rand_sampled
      certify ExactIndependence s5_rand_exact_witness
      |> publish StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder]))
   = s5_row_rand_tableau).
 
-Print Assumptions s5_dealt_splitE.
-Print Assumptions s5_supplied_splitE.
-Print Assumptions s5_row_rand_splitE.
+Print Assumptions s5_algebraic_start.
+Print Assumptions s5_dealt_executable.
+Print Assumptions s5_supplied_executable.
+Print Assumptions s5_rand_sampled.
+Print Assumptions s5_dealt_executable_paramsE.
+Print Assumptions s5_supplied_executable_paramsE.
+Print Assumptions s5_dealt_executableE.
+Print Assumptions s5_supplied_executableE.
+Print Assumptions s5_row_rand_sampledE.
 """
 
 def write(name, require, extra):

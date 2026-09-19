@@ -36,9 +36,23 @@ LOCK = ("/private/tmp/claude-501/-Users-cheng-huiweng-Projects-coq-rocq-pgg-smc"
 SCRATCH = ("/private/tmp/claude-501/-Users-cheng-huiweng-Projects-coq-rocq-pgg-smc"
            "/493d5ea4-6d9f-45fd-89c2-07339e63cb36/scratchpad")
 
-NEW_NAMES = {"s5_algebraic", "s5_dealt_executable", "s5_supplied_executable",
-             "s5_dealt_splitE", "s5_supplied_splitE", "s5_rand_sampled",
-             "s5_row_rand_splitE"}
+NEW_NAMES = {"s5_algebraic_start", "s5_dealt_executable",
+             "s5_supplied_executable", "s5_dealt_executable_paramsE",
+             "s5_supplied_executable_paramsE", "s5_dealt_executableE",
+             "s5_supplied_executableE", "s5_rand_sampled",
+             "s5_row_rand_sampledE"}
+
+# The one intended token difference from production's 21 items, ruled by the
+# orchestrator after audit finding F16.  Production's bare Check restates the
+# body of a definition that now exists one file down and is imported here, so
+# it records no boundary; checking the named value instead keeps the contrast
+# with the Fail beneath it, which then differs from it in exactly the run.
+INTENDED_TOKEN_DIFF = {
+    ("Check", "<anonymous Check>"): (
+        "F16: the bare Check now checks the named Sampled value "
+        "s5_rand_sampled instead of restating its body "
+        "(s5_supplied sample s5_rand_family)"),
+}
 
 BANNED = [r"\bapex\b", r"\bgat(e|es|ed|ing)\b", r"\bposit(|s|ed|ing)\b",
           r"\bL1\b", r"\bindisting\.", r"\bindist\b", r"\bIND\b"]
@@ -149,6 +163,12 @@ def main():
     # 2. token identity
     bad = 0
     for k in sorted(set(prod) & set(staged)):
+        if k in INTENDED_TOKEN_DIFF:
+            print("token stream differs BY DESIGN: %s %s (in %s)\n      %s"
+                  % (k[0], k[1], where[k], INTENDED_TOKEN_DIFF[k]))
+            print("      production: %s" % prod[k].strip())
+            print("      staged    : %s" % staged[k].strip())
+            continue
         if toks(prod[k]) != toks(staged[k]):
             bad += 1
             fail("token stream differs: %s %s (in %s)" % (k[0], k[1], where[k]))
@@ -160,8 +180,11 @@ def main():
                     break
             else:
                 print("      lengths %d vs %d" % (len(a), len(b)))
-    print("token identity: %d of %d moved declarations identical"
-          % (len(set(prod) & set(staged)) - bad, len(set(prod) & set(staged))))
+    n_shared = len(set(prod) & set(staged))
+    n_int = len(INTENDED_TOKEN_DIFF)
+    print("token identity: %d of %d moved declarations identical, "
+          "%d intended difference(s)"
+          % (n_shared - bad - n_int, n_shared, n_int))
 
     # 3. docstring word identity
     pd = docstrings(PROD)
@@ -199,6 +222,18 @@ def main():
                          % (base, i, pat, line.strip()))
         if "indistinguishability" in open(path).read().lower():
             pass
+    lasts = {}
+    for path in STAGED:
+        opens = [l.strip() for l in open(path).read().splitlines()
+                 if l.startswith("Local Open Scope")]
+        assert opens, os.path.basename(path)
+        lasts[os.path.basename(path)] = opens[-1]
+    if len(set(lasts.values())) != 1:
+        fail("the innermost Local Open Scope differs across the phase files: %s"
+             % lasts)
+    else:
+        print("innermost scope, all six files: %s"
+              % sorted(set(lasts.values()))[0])
     print("scans done")
 
     # 4. recorded failures

@@ -11,12 +11,12 @@
 (*                                                                            *)
 (* Two boundaries are recorded. The first is that a probability model belongs *)
 (* to one run: a model is typed over the observed execution it was built      *)
-(* over, so the tape model samples the supplied run and the same statement    *)
-(* at the dealer-dealt run is refused. The two modes of the sharing family    *)
-(* therefore share no model, and no evidence stated in one reaches the other. *)
-(* The second is that the coalition size a specification carries is decided   *)
-(* by the kernel and not by whoever writes it: five where the sum-mod scheme  *)
-(* tolerates four is refused.                                                 *)
+(* over, so the tape model samples the supplied run and the same statement at *)
+(* the dealer-dealt run is refused. The two modes of the sharing family       *)
+(* therefore share no model, and no statement made at one run's model is a    *)
+(* statement about the other's. The second is that the tolerated coalition    *)
+(* size of s5_F is read off the algebra: the equation asserting it is five,   *)
+(* where the sum-mod scheme tolerates four, is refused.                       *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
@@ -52,12 +52,12 @@ Local Open Scope ring_scope.
    and the same statement at it is rejected. The two modes of the sharing
    family therefore share no probability model, and no evidence stated in
    one reaches the other. *)
-Check (s5_supplied sample s5_rand_family : Tableau Sampled).
+Check (s5_rand_sampled : Tableau Sampled).
 Fail Definition s5_dealt_rand : Tableau Sampled :=
   s5_dealt sample s5_rand_family.
 
 (******************************************************************************)
-(*     The tolerated coalition size is not a free choice                      *)
+(*     The tolerated coalition size is read off the algebra                   *)
 (******************************************************************************)
 
 (* Writing five where the scheme tolerates four is rejected, so the number a

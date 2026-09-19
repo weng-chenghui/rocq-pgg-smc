@@ -90,7 +90,7 @@ instances/s5/tableau/s5_tableau_analysis_bridged.v
 instances/s5/tableau/s5_tableau_checks.v
 ```
 
-Line to remove: `instances/s5/s5_rows.v` (production `_CoqProject:198` at this
+Line to remove: `instances/s5/s5_rows.v` (production `_CoqProject:226` at this
 HEAD; it sits between `instances/kim2025/five_card_rows.v` and
 `instances/kim2025/five_card_proximity.v`).
 
@@ -101,6 +101,10 @@ material, so the six lines go before it. Placing them where
 `instances/s5/s5_rows.v` stands satisfies that.
 
 ## Files staged, and what is in each
+
+The names and counts in this section and in the three that follow are the
+first pass's. Fix pass 1, at the end of this file, renames four
+declarations, adds two more and supersedes them.
 
 | File | Items | New | Moved | Names |
 |---|---|---|---|---|
@@ -322,3 +326,149 @@ as the row they relate, and no axiom the staged text introduces.
 4. **`instances/kim2025/five_card_rows.v:59`** cites the retired file in a
    comment and needs a one-line edit the main session makes; see
    `staged/RETIRED.md`. No staged copy of that file is in this directory.
+
+# Fix pass 1, after `audit-s5-pilot.md`
+
+This section supersedes the counts and names above. The pattern as ruled is
+written out separately in `staged/TEMPLATE.md`, for the next instance.
+
+## Final counts
+
+| File | Items | New | Moved |
+|---|---|---|---|
+| `s5_tableau_algebraic.v` | 1 | `s5_algebraic_start` | — |
+| `s5_tableau_executable.v` | 4 | `s5_dealt_executable`, `s5_supplied_executable`, `s5_dealt_executable_paramsE`, `s5_supplied_executable_paramsE` | — |
+| `s5_tableau_observed.v` | 13 | `s5_dealt_executableE`, `s5_supplied_executableE` | 11 |
+| `s5_tableau_sampled.v` | 1 | `s5_rand_sampled` | — |
+| `s5_tableau_analysis_bridged.v` | 8 | `s5_row_rand_sampledE` | 7 |
+| `s5_tableau_checks.v` | 3 | — | 3 |
+
+21 moved items, 9 new declarations.
+
+## Renames
+
+| Before | After | Why |
+|---|---|---|
+| `s5_algebraic` | `s5_algebraic_start` | one letter from `s5_algebra` in the same file; `_start` names `tableau_start`, the statement that builds it, and the phase is still carried by the file name |
+| `s5_dealt_splitE` | `s5_dealt_executableE` | "split" names the edit, not the relation; the tree names such an equation after its non-canonical side (`pgl27_inline_paramsE`, `pgl27_row_word39_bindE`, `s5_supplied_paramsE`) |
+| `s5_supplied_splitE` | `s5_supplied_executableE` | same |
+| `s5_row_rand_splitE` | `s5_row_rand_sampledE` | same |
+
+## F17: one Executable-phase statement per run mode
+
+Both close by `exact: erefl`. Read from `-time`:
+
+```
+Chars 4765 - 4861 [Lemma~s5_dealt_executable_para...] 0.   secs
+Chars 4869 - 4882 [exact~:~erefl~.]                     0.001 secs
+Chars 5992 - 6097 [Lemma~s5_supplied_executable_p...] 0.   secs
+Chars 6105 - 6118 [exact~:~erefl~.]                     0.   secs
+```
+
+```coq
+Lemma s5_dealt_executable_paramsE :
+  projT2 (tableau_at s5_dealt_executable) = s5_dealt_params.
+Proof. exact: erefl. Qed.
+
+Lemma s5_supplied_executable_paramsE :
+  projT2 (tableau_at s5_supplied_executable) = s5_supplied_params.
+Proof. exact: erefl. Qed.
+```
+
+The dealt analogue does typecheck: `dealt_step` builds
+`dealt_secret_params x fuel` and `s5_dealt_params` is
+`dealt_secret_params s5_algebra 150` (`instances/s5/s5_exec.v:366`), so the two
+are one term. `projT2` is the right projection because
+`StackAt Executable = {A : PGGAlgebraic & ExecutionParams A}`
+(`manifest/pgg_tableau.v:281`).
+
+## Per finding
+
+| id | declaration or header checked | final text, and deviations |
+|---|---|---|
+| F1 | `manifest/pgg_analysis_manifest.v:1034` `s5_row_det` = `@MkAnalysisPathRow S5Analysis.observed Observed None NoModelComparison …`, and `:1056` `s5_row_word` = `@MkAnalysisPathRow S5Analysis.observed AnalysisBridged S5Analysis.word_family IdealFinite …`, pinned `apr_completion = AnalysisBridged` at `:2168`. Both are over the dealer-dealt observed execution. | Applied as proposed: "The dealer-dealt run's program stops here: the manifest row s5_row_det it answers carries no model and no security payload, because the canonical encoding it deals puts the whole secret on one card, so the single seat the cut sends that card to reads the secret, as does every coalition containing that seat. The manifest carries a second row over this run, s5_row_word, under a finite-word model; the Sampled file records why no program of this instance continues from that model." Checked "second": over the dealer-dealt run the manifest carries exactly `s5_row_det` and `s5_row_word`. No deviation. |
+| F2 | `instances/s5/s5_models.v:455`, `s5_word_family : AnalysisModelFamily s5_observed`, so it is a model of the dealer-dealt run and could not be adjoined to `s5_supplied` in any case. The manifest's own docstring for `s5_row_word` says `exec_endpoint_bound` is a mixing theorem resting on the Rayleigh certificate of `s5_mixing.v`. | Applied as proposed: "The instance's other model, the finite word over the four adjacent transpositions, is not named at this level. It is a model of the dealer-dealt run, and the manifest's row over it, s5_row_word, is published from a mixing theorem rather than from a program: two of the five parts of an input-indistinguishability certificate over that model are out of reach." No deviation. |
+| F3 | `manifest/pgg_tableau.v:196-200`: `ic_const : forall C : {set …}, (#\|C\| < profile_k (instance_profile A))%N -> forall x x', fdistmap (static_coalition_obs C x) ic_ideal = fdistmap (static_coalition_obs C x') ic_ideal`. Quantified over every coalition below the threshold, so every singleton is one of them. | Restored from `instances/s5/s5_rows.v:66-72`: "…is the constancy of a coalition's reading of the ideal cut in the secret, which the certificate's constancy field asks for at every coalition below the threshold and so at every singleton: … and no choice of ideal avoids it, the seat in question varying with the cut while the ideal is fixed before any coalition is named." Deviation from production's wording: "the field" is written out as "the certificate's constancy field", because in a file that no longer sits beside the certificate the bare word reads as the research field. |
+| F4 | `protocol/pgg_instance.v:281-306`, the six fields of `ExecutionParams`; `ex_expected` is commented "the value the run is meant to recover". | "The proposition is still True, so a reader shown this file has been shown which run is about to be made, and no proof that it terminates or that it recovers the value its parameters name." No deviation. |
+| F5 | The two proofs in `s5_tableau_analysis_bridged.v` use `s5_sample_coalition_viewE`, `s5_supplied_endpoints` and `profile_k_s5_algebra` besides `s5_exec_coalition_secrecy`. None of those three is a statement about what a coalition learns. | "No other security statement of the instance enters the row." No deviation. |
+| F6 | Same evidence as F4; `s5_supplied_recon` is adjoined one level up. | "the value the run is meant to recover is the tape's secret coordinate carried through the codec". No deviation. |
+| F7 | `s5_supplied_paramsE`'s own docstring already uses "spellings" for this concept. | `s5_dealt_executableE`: "which of the two spellings a statement below is made at". `s5_supplied_executableE`: "adjoined, in the same sense as the dealer-dealt case". No deviation. |
+| F8 | All six `ExecutionParams` fields. | "what the run argument is, who commits, what the dealer lays, what a seat observes after a shuffle, what value the run is meant to recover and how much interpreter fuel it is allowed". No deviation. |
+| F9 | `StackProp Algebraic = fun _ => True` (`manifest/pgg_tableau.v:555`). | "under True, the proposition that level carries". No deviation. |
+| F10 | The paragraph is about `s5_realises_expected` and `s5_rand_realises_expected`. | "Each realisation lemma is therefore a statement of this level, and neither depends on a probability model." No deviation. |
+| F11 | The index entry for `s5_rand_static_obsE`. | Deviation: the proposed "the additive sharing's own" fills the 80-column field with no space before `*)`. Reworded over three lines instead, which supplies the missing head noun outright: "the framework's direct computation of a / coalition's reading is the one the additive / sharing makes". |
+| F12 | `Fail Definition s5_F_k5 : s5_F = MkFunctionality id 5 := erefl` rejects with a unification failure on `erefl`; `s5_F := algebra_functionality s5_algebra`. | "The second is that the tolerated coalition size of s5_F is read off the algebra: the equation asserting it is five, where the sum-mod scheme tolerates four, is refused." The section banner above the `Fail` was also changed from "The tolerated coalition size is not a free choice", the same universal, to "The tolerated coalition size is read off the algebra". Deviation: the banner change is not in the finding, and is the same defect one line away. |
+| F13 | New header text only; the moved comment below keeps production's wording under the pure-move rule. | "and no statement made at one run's model is a statement about the other's". No deviation. |
+| F14 | No second row over `s5_rand_family` exists at this instance. | Kept on `s5_rand_sampled`, restated: "The value is what s5_row_rand_sampledE continues, so the row and the model are named apart." On `s5_row_rand_sampledE` the forward-looking clause is replaced by "so this equation is what keeps the two spellings of the row's prefix from parting", which is the same relation `s5_supplied_paramsE` states. Deviation: the auditor said only "drop the clause"; a replacement clause was needed or the docstring would end mid-thought. |
+| F15 | `s5_tableau_algebraic.v` was the only file writing "sum-mod-5". | Fixed to "sum-mod". "view" left untouched in the moved docstrings and in `s5_rand_view_secrecy`, per the instruction. |
+| F16 | `s5_rand_sampled`'s body is character for character the checked term, and the checks file imports that module. | `Check (s5_rand_sampled : Tableau Sampled).` Recorded in `verify.py` as `INTENDED_TOKEN_DIFF`, printed on every run with its reason and both texts, so the one difference from production's 21 items cannot become invisible. |
+| F18 | `_CoqProject:226`. | Corrected; `STATUS.md` and `staged/RETIRED.md` now agree. |
+| F19 | The four new `Definition`s were ascribed at their type only. | `gen_fidelity.py` now prints the assumptions of all nine new declarations and carries one comment saying that what pins the four bodies is the five equations, each holding by conversion. |
+| F24 | `manifest/pgg_tableau_syntax.v:294` `dealt` and `:351` `supplied` both start `tableau_start A`; `:334` `encoded` starts `tableau_start (tg_algebra t)`. | "The rules dealt and supplied begin at a PGGAlgebraic and encoded at a Targeted over one, so the keyword surface has no form that continues a named value at Algebraic." No deviation. |
+
+## Pattern rulings applied
+
+- **Ruling 3, no `Require Export`.** The header of `s5_tableau_analysis_bridged.v`
+  now states, as a fact about the files: "The phase files are required and
+  imported one by one and export nothing of each other, so a file outside this
+  directory names the phase that declares the name it wants: this file for a
+  payload, a published row or a row equation, s5_tableau_sampled for a named
+  model, s5_tableau_observed for a run or a specification, and
+  s5_tableau_executable for a parameter record. An importer that wants only
+  s5_rand_exact_witness names this file alone."
+- **Ruling 4, the scope line.** `verify.py` now asserts that the last
+  `Local Open Scope` line of all six phase files is the same. It already was:
+  `Local Open Scope ring_scope.`, printed on every run.
+- **Ruling 5, the `Fail` check.** Unchanged, and now stated as a rule of the
+  template: every recorded `Fail` is compiled un-`Fail`ed in the preamble of
+  the file it sits in, on both sides, and neither message may contain
+  `was not found in the current environment`. The pass proved the rule again:
+  `s5_tableau_executable.v` could not compile `exact: erefl` at all until
+  `ssrfun` was added, which is the same missing import that had made
+  `Fail s5_F_k5` pass for the wrong reason in the checks file. `ssrfun` is now
+  on the first mathcomp line of all six files.
+
+## Rebuild, verify and fidelity after the fix pass
+
+Chain rebuilt in phase order through the lock; `make` not run.
+
+| File | rc | wall |
+|---|---|---|
+| `s5_tableau_algebraic.v` | 0 | 4.3 s |
+| `s5_tableau_executable.v` | 0 | 3.8 s |
+| `s5_tableau_observed.v` | 0 | 5.0 s |
+| `s5_tableau_sampled.v` | 0 | 3.9 s |
+| `s5_tableau_analysis_bridged.v` | 0 | 4.6 s |
+| `s5_tableau_checks.v` | 0 | 4.1 s |
+| `staged/…/five_card_proximity.v` | 0 | 6.3 s |
+
+No sentence over 5 s anywhere.
+
+```
+production items: 21
+moved 21, new 9, lost 0
+token stream differs BY DESIGN: Check <anonymous Check> (in s5_tableau_checks.v)
+      F16: the bare Check now checks the named Sampled value s5_rand_sampled
+           instead of restating its body (s5_supplied sample s5_rand_family)
+      production: Check (s5_supplied sample s5_rand_family : Tableau Sampled).
+      staged    : Check (s5_rand_sampled : Tableau Sampled).
+token identity: 20 of 21 moved declarations identical, 1 intended difference(s)
+docstrings: 18 of 18 word-identical
+innermost scope, all six files: Local Open Scope ring_scope.
+scans done
+Fail s5_F_k5: same rejection
+Fail s5_dealt_rand: same rejection
+ALL CHECKS PASSED
+```
+
+`fidelity.v` and `baseline.v` both `rc=0`. The 94 assumption lines of the
+moved names are **byte-identical**; the staged side carries 9 further blocks,
+one per new declaration. The set of axiom identifiers in the two outputs is
+equal: `rigidity_s5_instance.s5_group_order_eq`,
+`propositional_extensionality`, `functional_extensionality_dep`,
+`constructive_indefinite_description`. No new axiom, and `Closed under the
+global context` appears once on each side, for `s5_F_thresholdE`.
+
+Scans: no line over 80 bytes, every non-banner box line exactly 80 columns and
+none ending in a stray asterisk, no banned vocabulary, no abbreviation of
+"indistinguishability".

@@ -24,14 +24,21 @@
 (* direct computation of a coalition's reading with the additive sharing's    *)
 (* own, which holds because this model draws the identity cut. The second is  *)
 (* s5_exec_coalition_secrecy, the sharing's privacy at a uniform tape, read   *)
-(* from zero mutual information back to independence. Nothing else of the     *)
-(* instance enters.                                                           *)
+(* from zero mutual information back to independence. No other security       *)
+(* statement of the instance enters the row.                                  *)
 (*                                                                            *)
 (* Identifiers follow the instance rather than the framework wherever the     *)
 (* instance already named the object: what the framework calls the supplied   *)
 (* mode this instance spells rand in s5_rand_exec_plug, s5_rand_family,       *)
 (* s5_rand_observed and the manifest's s5_row_rand, so every name here from   *)
 (* the model onward carries rand.                                             *)
+(*                                                                            *)
+(* The phase files are required and imported one by one and export nothing of *)
+(* each other, so a file outside this directory names the phase that declares *)
+(* the name it wants: this file for a payload, a published row or a row       *)
+(* equation, s5_tableau_sampled for a named model, s5_tableau_observed for a  *)
+(* run or a specification, and s5_tableau_executable for a parameter record.  *)
+(* An importer that wants only s5_rand_exact_witness names this file alone.   *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   s5_rand_exact_witness                                                    *)
@@ -40,19 +47,20 @@
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   s5_rand_static_obsE  == the framework's direct computation of a          *)
-(*                           coalition's reading is the additive sharing's    *)
+(*                           coalition's reading is the one the additive      *)
+(*                           sharing makes                                    *)
 (*   s5_rand_static_obs_indep                                                 *)
 (*                        == below five seats that computation is independent *)
 (*                           of the tape secret                               *)
 (*   s5_row_rand_rowE     == the randomized program publishes the manifest's  *)
 (*                           row                                              *)
 (*   s5_row_rand_armE     == the row carries the exact arm                    *)
-(*   s5_row_rand_splitE   == the row is the named Sampled value with the      *)
+(*   s5_row_rand_sampledE == the row is the named Sampled value with the      *)
 (*                           payload and the terminal adjoined                *)
 (*   s5_rand_view_secrecy == the exact arm's four conjuncts at this instance  *)
 (******************************************************************************)
 
-From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
 From mathcomp Require Import fintype finfun finset.
 From mathcomp Require Import matrix zmodp reals.
 From infotheo Require Import fdist proba entropy.
@@ -180,11 +188,10 @@ Lemma s5_row_rand_armE (R : realType)
 Proof. by []. Qed.
 
 (** The row is the named Sampled value with the payload and the terminal
-    adjoined. The program above writes the run and the model in one chain,
-    the Sampled file names the value they build, and this equation is what
-    lets a second row over that model be written from the name rather than
-    from the chain. *)
-Lemma s5_row_rand_splitE :
+    adjoined. The program above writes the run and the model in one chain and
+    the Sampled file names the value they build, so this equation is what
+    keeps the two spellings of the row's prefix from parting. *)
+Lemma s5_row_rand_sampledE :
   (s5_rand_sampled
      certify ExactIndependence s5_rand_exact_witness
      |> publish StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder]))
