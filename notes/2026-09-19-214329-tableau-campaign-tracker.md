@@ -55,9 +55,9 @@ Design with the decisions: `notes/2026-09-20-060000-instance-tableau-directory-d
 | # | Instance | State |
 |---|---|---|
 | 2.1 | S5 (pilot) | DONE: `instances/s5/tableau/`, six files, `s5_rows.v` retired; staged build, audit, fix pass audited by the main session, `cp`, as-built fidelity rc=0 |
-| 2.2 | PSL(2,11) | staged build running in `notes/probes/2026-09-20-tableau-directories-psl211/` |
-| 2.3 | PGL(2,7) | open |
-| 2.4 | five-card | open |
+| 2.2 | PSL(2,11) | DONE: `instances/psl211/tableau/`, six files, `psl211_rows.v` retired, `psl211_word_proximity.v` reduced to the distance mathematics; staged build, audit, fix pass audited by the main session, `cp`, as-built fidelity rc=0. Two comment repoints deferred to 2.5 |
+| 2.3 | PGL(2,7) | staged (`notes/probes/2026-09-20-tableau-directories-pgl27/`), in audit |
+| 2.4 | five-card | staged build running |
 | 2.5 | Manifest header and the dated note of retired file names for the owner's paper edits | open |
 
 ## Step 3. Recorded small items

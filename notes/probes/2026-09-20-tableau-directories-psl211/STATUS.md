@@ -529,3 +529,28 @@ total sentence reads 29 and 24, and the paragraph says the numbers are the
 script's rather than hand counts. F18: the scope-pin paragraph is rewritten
 around `baseline.v`, with why `fidelity.v` cannot settle that question and
 the one-line rule for the next instance.
+
+## As built (2026-09-20)
+
+Fix pass 1 was audited by the main session: `verify.py` green (29 of 29
+declarations token-identical, 28 of 29 docstrings word-identical with the one
+intended difference, five recorded rejections equal to production's), the
+final texts of F1 to F4 read against the declarations they cite, and the
+staged repoint of `instances/psl211/psl211_reading_constancy.v` confirmed
+comment-only by script.
+
+The six staged files were copied with `cp` to `instances/psl211/tableau/`
+(`cmp`: byte-identical), `instances/psl211/psl211_word_proximity.v` was
+replaced by its reduced text (140 lines), `psl211_reading_constancy.v` received
+its comment repoint, and `_CoqProject` lists the six files after
+`instances/psl211/psl211_word_proximity.v` in place of
+`instances/psl211/psl211_rows.v`, with no `-R` line. The eight files compiled
+single-file, all rc=0. `instances/psl211/psl211_rows.v` was then removed with
+`git rm` together with its build outputs, and `fidelity.v`, unchanged, was
+compiled from a scratch directory against production's load path alone: rc=0,
+27 `Axioms:` blocks, each the three classical axioms, none closed, as in the
+staged run. `instances/psl211/psl211_endpoints.v` was not compiled.
+
+Deferred to one pass after the four instances: the comment repoints of
+`manifest/pgg_analysis_manifest.v` and `instances/psl211/psl211_models.v`,
+which still cite `instances/psl211/psl211_rows.v`.

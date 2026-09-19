@@ -12,8 +12,9 @@
 (* proposition, checks the restatement against the record, and refutes it at  *)
 (* PSL(2,11) in the two run modes the instance carries. The instance          *)
 (* publishes its all-decks row through the exact arm and its word row through *)
-(* the proximity arm, in instances/psl211/psl211_word_proximity.v, and this   *)
-(* file is what the input-indistinguishability arm would cost it.             *)
+(* the proximity arm, in                                                      *)
+(* instances/psl211/tableau/psl211_tableau_analysis_bridged.v, and this file  *)
+(* is what the input-indistinguishability arm would cost it.                  *)
 (*                                                                            *)
 (* All-decks mode. The run argument is a whole deck description: one of the   *)
 (* two chiralities, one of the 132 block lines of that chirality's Steiner    *)
@@ -41,7 +42,8 @@
 (* instances/psl211/psl211_profile.v gives this instance's single-card        *)
 (* marginal bound. The exclusion covers the input-indistinguishability arm    *)
 (* alone: a proximity certificate carries no shuffle bound and no constancy   *)
-(* field, and the row of instances/psl211/psl211_word_proximity.v publishes   *)
+(* field, and the row of                                                      *)
+(* instances/psl211/tableau/psl211_tableau_analysis_bridged.v publishes       *)
 (* 2^-40 over the word model through the proximity arm.                       *)
 (*                                                                            *)
 (* Dealt mode. The run argument is the chirality itself, so here the field    *)
@@ -71,7 +73,8 @@
 (* each. Nothing here says the word row is excluded outright:                 *)
 (* psl211_alldecks_constancy_false_word584 reaches eps < 1/1320 - 2^-40, and  *)
 (* the row published over the weighted-word adapter psl211_word_sample in     *)
-(* instances/psl211/psl211_word_proximity.v carries a proximity certificate,  *)
+(* instances/psl211/tableau/psl211_tableau_analysis_bridged.v carries a       *)
+(* proximity certificate,                                                     *)
 (* which has no constancy field to refute. How wide each                      *)
 (* failure is stays measured and not proved; the reading multiplicity         *)
 (* diagnostics are recorded in notes/probes/2026-09-19-psl211-sc-const/.      *)
@@ -777,7 +780,8 @@ Qed.
     ic_Hd, and no adapter has to be named here. The weighted-word adapter
     psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut,
     and the row published over it in
-    instances/psl211/psl211_word_proximity.v carries a proximity certificate,
+    instances/psl211/tableau/psl211_tableau_analysis_bridged.v carries a
+    proximity certificate,
     and IdealProximityCert has no constancy field, so this refutation denies
     no field of that row's certificate. *)
 Lemma psl211_alldecks_constancy_false_word584 (R : realType)
