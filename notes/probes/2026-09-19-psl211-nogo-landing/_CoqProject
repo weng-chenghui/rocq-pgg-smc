@@ -32,3 +32,4 @@
 psl211_spectral_constancy.v
 psl211_rows.v
 psl211_nogo_fidelity.v
+psl211_asbuilt_fidelity.v

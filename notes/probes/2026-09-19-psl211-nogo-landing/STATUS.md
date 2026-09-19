@@ -816,3 +816,40 @@ compiled. Recompiling all three is the guard against an unclosed comment, which
 is the one way a comment-only pass can break a file. The rows copy is still
 character-identical to `instances/psl211/psl211_rows.v` once comments and
 whitespace are stripped, and in this pass it was not edited at all.
+
+## As built, 2026-09-19
+
+Two commits carry the landing into production. `50ea761` adds
+`instances/psl211/psl211_spectral_constancy.v` and its `_CoqProject` line.
+`b93aa16` rewrites the header of `instances/psl211/psl211_rows.v`. The plan
+they land is
+`docs/superpowers/plans/2026-09-19-psl211-spectral-constancy-landing.md`.
+
+The main session compiled the two production files in place, each alone through
+the machine-wide `rocq1` lock. The new file exits 0 at 23.3 s of wall time, its
+two slowest sentences at 6.6 s and 6.3 s. The rows file exits 0 at 5.7 s.
+`instances/psl211/psl211_endpoints.vo` was loaded from disk and not rebuilt: its
+date is still 17 September, so the landing read that file's results and never
+recompiled the file itself.
+
+`psl211_asbuilt_fidelity.v` in this directory reports the permanent module the
+way `psl211_nogo_fidelity.v` reports the landing copy. It Requires
+`psl211_spectral_constancy` through the `pgg_smc` root and nothing through
+`psl211_nogo_landing`, which matters because the module name now exists under
+both roots. Three `Locate` sentences record which root answered: each prints
+`pgg_smc.psl211_spectral_constancy` as the constant's full name, for
+`psl211_alldecks_no_small_eps_cert`, `psl211_blockline1_law_neq` and
+`coalition_reading_constancy`. Two `Check` sentences hold
+`psl211_alldecks_no_small_eps_cert` and `psl211_blockline1_law_neq` against the
+types production gives them, and the two refutations are restated and closed by
+`exact:` as in the landing-copy file.
+
+The file exits 0 at 7.5 s of wall time, again through the `rocq1` lock, with the
+production `_CoqProject` flags and a `-Q` on this directory added. Its 48
+`Print Assumptions` results split 28 to "Closed under the global context" and 20
+to an axiom block. Every name in those blocks is one of
+`propositional_extensionality`, `functional_extensionality_dep` and
+`constructive_indefinite_description`, and no other constant appears. The first
+two occur in all 20, the third in 19, `psl211_alldecks_static_obs_set0` resting
+on the first two alone. These are the three the landing copy reports, so the
+move into production changed nothing a reader would check.

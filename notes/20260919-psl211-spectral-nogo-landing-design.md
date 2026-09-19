@@ -2,12 +2,17 @@
 
 Date: 2026-09-19
 
-Status: spec written, on the user's decision of 2026-09-19 to land. Landing
-probe and audits not yet run. The verbatim source is the closed probe
-`notes/probes/2026-09-19-psl211-sc-const/` (SRC below), audited for soundness
-three times. Summary: [[2026-09-19-112500-spectral-arm-at-kim-and-psl211-summary]].
-Runs beside [[20260919-kim-spectral-landing-design]] and touches none of its
-files.
+Status: LANDED on 2026-09-19. Production commits `50ea761` (the new file
+`instances/psl211/psl211_spectral_constancy.v` and its `_CoqProject` line) and
+`b93aa16` (the header of `instances/psl211/psl211_rows.v`). Three audit rounds
+on the landing probe, the third GO; what the audits changed is the section
+"Changes after the audits" below. Plan:
+`docs/superpowers/plans/2026-09-19-psl211-spectral-constancy-landing.md`.
+As-built record: the last section of
+`notes/probes/2026-09-19-psl211-nogo-landing/STATUS.md`. The verbatim source was
+the closed probe `notes/probes/2026-09-19-psl211-sc-const/` (SRC below).
+Summary: [[2026-09-19-112500-spectral-arm-at-kim-and-psl211-summary]]. Runs
+beside [[20260919-kim-spectral-landing-design]] and touches none of its files.
 
 ## Problem
 
