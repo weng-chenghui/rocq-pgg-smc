@@ -93,10 +93,7 @@ Qed.
 (** fdist_uniform_close_supp — a law closer than one atom of the uniform law
     to the uniform law gives every point positive mass. The hypothesis is the
     infotheo variation distance, which is the full L1 sum and not half of it,
-    so the threshold is the atom itself and not half of it. Nothing here
-    spends it: the ideal that matters at this instance is close to the
-    uniform law on the shuffle group and not to the uniform law on the
-    ambient carrier. *)
+    so the threshold is the atom itself and not half of it. *)
 Lemma fdist_uniform_close_supp (R : realType) (T : finType) (n : nat)
     (HT : #|T| = n.+1) (Q : R.-fdist T) :
   var_dist (fdist_uniform HT) Q < (#|T|%:R)^-1 -> forall t, Q t != 0.
@@ -126,13 +123,10 @@ Qed.
 
 (** psl211_perdeck_ideal_lawE — a law on cuts satisfying the constancy field
     sends the two chiralities of psl211_perdeck_deal to one law on what seats
-    0, 1 and 2 read. The all-decks run argument is a whole deck description,
-    whose first coordinate is the chirality and whose other three are public,
-    so the field implies this per-deck symmetry of the chirality without
-    being exhausted by it. *)
-(* This is the one consequence of the field whose fiber counts
-   psl211_models.v already carries, which is why both refutations below go
-   through it. *)
+    0, 1 and 2 read. The all-decks run argument is the whole public deck
+    description, so the field implies this per-deck symmetry of the chirality
+    without being exhausted by it, and the refutations take the instance
+    through the one consequence whose fiber counts psl211_models.v carries. *)
 Lemma psl211_perdeck_ideal_lawE (R : realType) (ideal : R.-fdist cutT) :
   sc_const_prop psl211_alldecks_params ideal ->
   fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
@@ -163,9 +157,8 @@ Qed.
 
 (** psl211_perdeck_fiber_true0 — no cut of the shuffle group carries the
     chirality-true deck of psl211_perdeck_deal to the reading
-    psl211_perdeck_view. The false chirality reaches that reading under
-    exactly one cut, so one reading already separates the two
-    chiralities at this deck description. *)
+    psl211_perdeck_view. The reading is one the false chirality produces and
+    the true one cannot, which is the whole of the per-deck asymmetry. *)
 Lemma psl211_perdeck_fiber_true0 : psl211_perdeck_fiber true = set0.
 Proof.
 have [Ht _] := psl211_perdeck_raw_countE.
@@ -174,12 +167,11 @@ have Hcard0 : #|psl211_perdeck_fiber true| = 0 :=
 by apply/eqP; rewrite -cards_eq0 Hcard0.
 Qed.
 
-(** psl211_alldecks_sc_const_false_supp — no law on cuts whose support is
-    exactly the shuffle group satisfies the constancy field. The reading
-    psl211_perdeck_view is reached by one cut of the group at the false
-    chirality and by none at the true one, so such a law gives that
-    reading positive mass at one chirality of psl211_perdeck_deal and
-    zero at the other. *)
+(** psl211_alldecks_sc_const_false_supp — no law on cuts carried by the
+    shuffle group and positive on all of it satisfies the constancy field.
+    The reading psl211_perdeck_view is unreachable at the true chirality and
+    reachable at the false one, so any law that sees the group at all
+    separates the two. *)
 Lemma psl211_alldecks_sc_const_false_supp (R : realType)
     (ideal : R.-fdist cutT) :
   (forall g : cutT, g \notin pgg_G psl211_M -> ideal g = 0) ->
@@ -300,24 +292,16 @@ Qed.
 (** psl211_alldecks_no_spectral_cert — no spectral certificate over the
     all-decks run of the twelve-card chirality instance carries a shuffle
     bound epsilon below 1/1320, the hypothesis holding twice that epsilon
-    below the reciprocal 1/660 of the group order. A row publishes
-    odflt (cert_eps cert) (c R) at its own reprice coordinate c, and the
-    obligation of conclude is today the equality cert_eps cert = c R, so
-    what this excludes is every published number equal to cert_eps: at
-    least 1/660, against a shuffle whose single-card marginal error this
-    instance proves to be exactly zero. *)
-(* Argued and not compiled: the exclusion survives a weaker conclude. The
-   proposition a row carries is SpectralPropAt cert c, a variation distance
-   bounded above by c, so an obligation weakened from cert_eps cert = c R to
-   cert_eps cert <= c R could only let a row publish a number larger than
-   cert_eps, never a smaller one. *)
+    below the reciprocal 1/660 of the group order. A spectral row publishes
+    twice the certificate's epsilon, so a row written for this dealer would
+    quote at least 1/660 against a shuffle whose single-card marginal error
+    this instance proves to be exactly zero. *)
 (* Argued and not compiled: the range this theorem leaves open is occupied.
    The uniform law on the whole of {perm 'I_12} satisfies the constancy
    field, its variation distance from `U psl211_G_pos is 2 * (1 - 660/12!),
    and a certificate at that ideal therefore exists, with an epsilon near
-   infotheo's L1 ceiling of 2. So the spectral arm is not unavailable at
-   this instance, and what this theorem excludes is a range of epsilon and
-   not the arm.
+   infotheo's L1 ceiling of 2. The spectral arm is available at this
+   instance; what it is not is available at a number worth publishing.
    notes/probes/2026-09-15-psl211-planb/AUDIT-SOUNDNESS-2.md, row 18. *)
 Theorem psl211_alldecks_no_spectral_cert (R : realType)
     (cert : SpectralCert (psl211_alldecks_sample R)) :
@@ -378,12 +362,12 @@ Qed.
 (** psl211_alldecks_sc_const_false_word584 — the cut law of the 584-letter
     word shuffle leaves the constancy field false at every ideal within eps
     of it, once twice the sum of eps and 2^-40 stays below the reciprocal of
-    the group order. The dealer performs a finite word and not an exact
+    the group order. This is the statement about the word model a paper would
+    want a row for: the dealer performs a finite word and not an exact
     uniform draw, and the 2^-40 is the whole information-theoretic price of
-    that replacement, while the eps is a certificate's own distance field.
-    It is stated on the cut law rather than on a certificate because no
-    weighted-word SampleAdapter exists in this tree, so there is no sc_Hd
-    pinning a certificate's ideal to this law. *)
+    that replacement. It is stated on the cut law rather than on a
+    certificate because no weighted-word SampleAdapter exists in this tree,
+    so there is no sc_Hd pinning a certificate's ideal to this law. *)
 Lemma psl211_alldecks_sc_const_false_word584 (R : realType)
     (ideal : R.-fdist cutT) (eps : R) :
   var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R))

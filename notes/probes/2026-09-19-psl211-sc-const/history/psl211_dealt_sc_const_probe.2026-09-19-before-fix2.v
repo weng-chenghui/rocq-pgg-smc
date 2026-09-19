@@ -20,7 +20,7 @@
 (* at the encoder deck instead of at a dealt deck description.                *)
 (*                                                                          *)
 (* The encoder deck of a chirality is NOT the deck the all-decks dealer lays  *)
-(* at psl211_perdeck_deal: block line zero of either chirality's table is     *)
+(* at psl211_perdeck_deal: block index zero of either chirality's table is    *)
 (* [0;1;2;3;4;10] and [0;1;2;3;4;11], while the encoder puts its heart codes  *)
 (* on the representative rows [2;3;5;7;8;9] and [0;1;3;7;10;11]. The all-decks*)
 (* refutation therefore does not transport, and the count is redone here.     *)
@@ -231,10 +231,8 @@ Proof. by rewrite /psl211_dealt_fiber uniform_fdistmap_pointE. Qed.
 (*****************************************************************************)
 
 (** psl211_dealt_sc_const_false — under the dealer-dealt run parameters the
-    constancy field is false at the uniform law on the shuffle group, so no
-    spectral certificate over these parameters can take that law as its
-    ideal cut, while a certificate at some other ideal stays open. The
-    dealt run argument is the chirality and nothing else, so
+    uniform law on the shuffle group is the ideal cut of no spectral
+    certificate. The dealt run argument is the chirality and nothing else, so
     here the constancy field is exactly constancy in the secret, and it fails
     because the encoder decks of the two chiralities give one reading of three
     seats different masses. That is a fact about the group and the design:

@@ -13,22 +13,20 @@
 (* field, and the three seats 0, 1 and 2 at the deck description             *)
 (* psl211_perdeck_deal witness it.                                           *)
 (*                                                                           *)
-(* Under the all-decks parameters the run argument is a whole deck           *)
-(* description, whose first coordinate is the chirality and whose other three*)
-(* are public, so the field asks for constancy of the reading in the block   *)
-(* line and in the two labellings as well as in the chirality. It already    *)
-(* fails between two deck descriptions of one chirality, so its failure does *)
-(* not need the secret to move. A change of secret is always also a change of*)
-(* the laid deck here, the chirality selecting the table the block line      *)
-(* indexes. What three seats read about the chirality under the all-decks law*)
-(* is psl211_alldecks_static_indep, which says they read nothing, and this   *)
-(* refutation of the field states no leakage.                                *)
+(* Under the all-decks parameters the run argument is the whole public deck  *)
+(* description, of which the chirality is one coordinate of four, so the     *)
+(* field asks for constancy of the reading in the block line and in the two  *)
+(* labellings as well as in the chirality. It already fails between two deck *)
+(* descriptions of one chirality, by a wider margin than between the two     *)
+(* chiralities of one deck description, so the refutation in this file is    *)
+(* not a statement about the secret and is not a statement of leakage. What  *)
+(* three seats read about the chirality under the all-decks law is           *)
+(* psl211_alldecks_static_indep, which says they read nothing.               *)
 (*                                                                           *)
-(* The counting bridges are those of instances/psl211/psl211_models.v.       *)
+(* Everything mathematical is already in instances/psl211/psl211_models.v.   *)
 (* What is added here is the discharge of the threshold premise for those    *)
-(* three seats, the transport of the framework's seat reader to the          *)
-(* instance's, and a second count, at a reading and a deck description that  *)
-(* file does not name.                                                       *)
+(* three seats and the transport of the framework's seat reader to the       *)
+(* instance's, which is one congr1 and no rewrite through the tables.        *)
 (*****************************************************************************)
 
 From HB Require Import structures.
@@ -100,10 +98,9 @@ Definition sc_const_prop (R : realType) (A : PGGAlgebraic)
       fdistmap (@static_coalition_obs A E C x) ideal
       = fdistmap (@static_coalition_obs A E C x') ideal.
 
-(** sc_const_prop_field — sc_const_prop is the fifth field of
-    SpectralCert read at the certificate's own ideal, so refuting the
-    proposition at a law refutes every certificate whose ideal cut is
-    that law. *)
+(** sc_const_prop_field — the proposition above is the certificate's fourth
+    field read at the certificate's own ideal. Nothing below depends on the
+    spelling of the field, so a change to the record surfaces here. *)
 Lemma sc_const_prop_field (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (cert : SpectralCert sa) : sc_const_prop E (sc_ideal cert).
@@ -113,12 +110,10 @@ Proof. exact: sc_const cert. Qed.
 (*     The three seats are below the privacy threshold                       *)
 (*****************************************************************************)
 
-(** psl211_perdeck_coalition_le3 — the coalition witnessing the refutation
-    has at most three seats, so it is one of the coalitions the instance's
-    privacy claim covers and not an oversized one. *)
-(* The bound is read off a three-point superset and never off an enumeration
-   of the twelve seats, the ordinal enumeration going through an opaque
-   decision that does not reduce. *)
+(** psl211_perdeck_coalition_le3 — the counterexample coalition has at most
+    three seats. The bound is read off a three-point superset and never off an
+    enumeration of the twelve seats, the ordinal enumeration going through an
+    opaque decision that does not reduce. *)
 Lemma psl211_perdeck_coalition_le3 : (#|psl211_perdeck_coalition| <= 3)%N.
 Proof.
 have Hsub : psl211_perdeck_coalition \subset
@@ -145,26 +140,23 @@ Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
 (*     The constancy field fails at the group-uniform ideal                  *)
 (*****************************************************************************)
 
-(** psl211_alldecks_sc_const_false — under the all-decks run parameters
-    the uniform law on the shuffle group is the ideal cut of no spectral
+(** psl211_alldecks_sc_const_false — under the all-decks run parameters the
+    uniform law on the shuffle group is the ideal cut of no spectral
     certificate: seats 0, 1 and 2 read that law differently at the two
-    chiralities of the deck description psl211_perdeck_deal. The run
-    argument of this mode is a whole deck description, whose first
-    coordinate is the chirality and whose other three are public, and
-    the field quantifies over every pair of them, so it fails at a pair
-    of one chirality too, psl211_samechir_law_neq. A change of secret is
-    always also a change of the laid deck here, the chirality selecting
-    the table the block line indexes. Three seats learn nothing about
-    the chirality under the all-decks law, which is
-    psl211_alldecks_static_indep, and this refutation states no
-    leakage. *)
-(* psl211_samechir_law_neq refutes the field's own equation at one pair of
-   run arguments of chirality true, at the reading that gives cards 3, 2 and
-   4 to the three seats. How wide that failure is remains measured and not
-   proved: at chirality true the L1 gap of the two reading multiplicity
-   vectors is 600 of 660 cuts between block line 0 and block line 1, against
-   360 of 660 between the two chiralities at block line 0. Those numbers are
-   a vm_compute diagnostic of audit-soundness/audit_diag.v, recorded in
+    chiralities of the deck description psl211_perdeck_deal. The run argument
+    of this mode is the public deck description, the field quantifies over
+    every pair of deck descriptions, and the reading depends on the deck
+    description already at a fixed chirality, so what fails here is constancy
+    in a public coordinate and not constancy in the secret. Three seats learn
+    nothing about the chirality under the all-decks law, which is
+    psl211_alldecks_static_indep, and this refutation states no leakage. *)
+(* psl211_samechir_law_neq proves the same-chirality failure at the field
+   type, at the reading that gives cards 3, 2 and 4 to the three seats. How
+   wide that failure is remains measured and not proved: at chirality true
+   the L1 gap of the two reading multiplicity vectors is 600 of 660 cuts
+   between block index 0 and block index 1, against 360 of 660 between the
+   two chiralities at block index 0. Those numbers are a vm_compute
+   diagnostic of audit-soundness/audit_diag.v, recorded in
    audit-soundness/audit_diag.log.txt, and not Rocq theorems. *)
 Lemma psl211_alldecks_sc_const_false (R : realType) :
   ~ sc_const_prop psl211_alldecks_params
@@ -230,21 +222,18 @@ Qed.
 (*     Two deck descriptions of one chirality                                *)
 (*****************************************************************************)
 
-(** psl211_samechir_deal — block line one, both labellings the identity. It
-    differs from psl211_perdeck_deal in the block line alone, a public
-    coordinate of the run argument that carries no secret. *)
+(** psl211_samechir_deal — block index one of the chirality's table, both
+    labellings the identity. It differs from psl211_perdeck_deal in the block
+    line alone, a public coordinate of the run argument that carries no
+    secret. *)
 Definition psl211_samechir_deal : psl211_deal :=
   (@Ordinal 132 1 isT, 1%g, 1%g).
 
-(** psl211_samechir_view — the reading that gives cards 3, 2 and 4 to
-    seats 0, 1 and 2, and card 0 to every seat outside the coalition. The
-    deck laid at (true, psl211_perdeck_deal) reaches it under exactly one
-    cut and the deck laid at (true, psl211_samechir_deal) under none. *)
-(* Measured once and not proved: at the deck description
-   (true, psl211_perdeck_deal) the 660 cuts give these three seats 660
-   distinct readings. That is a vm_compute diagnostic of
-   audit-soundness/audit_diag.v, line 62, recorded in
-   audit-soundness/audit_diag.log.txt, and not a Rocq theorem. *)
+(** psl211_samechir_view — the reading that gives cards 3, 2 and 4 to seats 0,
+    1 and 2, and card 0 to every seat outside the coalition. Under the
+    all-decks law the 660 cuts give these three seats 660 distinct readings at
+    any one deck description, and this is one the deck of psl211_perdeck_deal
+    reaches and the deck of psl211_samechir_deal does not. *)
 Definition psl211_samechir_view : viewT :=
   [ffun i => psl211_code12 (nth 0 [:: 3; 2; 4] (val i))].
 
@@ -391,12 +380,12 @@ Lemma psl211_samechir_massE (R : realType) (x : psl211_inputT) :
 Proof. by rewrite /psl211_samechir_fiber uniform_fdistmap_pointE. Qed.
 
 (** psl211_samechir_law_neq — at chirality true the deck descriptions
-    psl211_perdeck_deal and psl211_samechir_deal send the group-uniform
-    cut law to two different laws on what seats 0, 1 and 2 read. This is
-    the equation the constancy field asserts, at a pair of run arguments
-    carrying the same secret, and it is false, so the field's failure at
-    the all-decks parameters does not need the chirality to move: it is
-    already a failure of constancy in the public block line. *)
+    psl211_perdeck_deal and psl211_samechir_deal send the group-uniform cut
+    law to two different laws on what seats 0, 1 and 2 read. This is the
+    equation the constancy field asserts, at a pair of run arguments carrying
+    the same secret, and it is false, so the field's failure at the all-decks
+    parameters is a failure of constancy in the public block line and not of
+    constancy in the chirality. *)
 Lemma psl211_samechir_law_neq (R : realType) :
   fdistmap (@static_coalition_obs psl211_algebra psl211_alldecks_params
       psl211_perdeck_coalition (true, psl211_perdeck_deal))
