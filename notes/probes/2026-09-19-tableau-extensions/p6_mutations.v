@@ -1,0 +1,104 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
+(******************************************************************************)
+(* Probe P6, the rejections: what carries the PSL(2,11) word row's number     *)
+(*                                                                            *)
+(* A proximity certificate says as much as its number is small and no more,   *)
+(* and it names the model it calls ideal. This file records where the word    *)
+(* row's number comes from and which ideal the arm refuses.                   *)
+(*                                                                            *)
+(* The first pair is about the number. Every pair of laws on one finite       *)
+(* sample space is within two of each other in the sum of absolute            *)
+(* differences, so a certificate at two is a certificate about nothing. The   *)
+(* ceiling alone proves the distance lemma at two and is rejected at 2^-40,   *)
+(* which places the whole content of psl211_word_lawE in psl211_word_mixing.  *)
+(* A rejection is of one written term and is no proof that no term exists.    *)
+(*                                                                            *)
+(* The second is about the ideal. An ideal model runs the row's own           *)
+(* execution, so a family belonging to another instance is rejected at the    *)
+(* field's type before any distance is looked at.                             *)
+(*                                                                            *)
+(* Key results:                                                               *)
+(*   psl211_word_law_le2 == the two models' laws are within the ceiling every *)
+(*                          pair of laws on one sample space meets            *)
+(******************************************************************************)
+
+From HB Require Import structures.
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import morphism action bigop order ssrnum ssralg.
+From mathcomp Require Import boolp reals.
+From infotheo Require Import realType_ext fdist proba variation_dist.
+From pgg_smc Require Import var_dist_supp.
+From pgg_smc Require Import pgg_interface pgg_monodromy_profile.
+From pgg_smc Require Import pgg_execution_plug pgg_observed_execution.
+From pgg_smc Require Import pgg_sample_adapter pgg_weighted_words.
+From pgg_smc Require Import pgg_instance pgg_analysis_status.
+From pgg_smc Require Import psl211_group psl211_closure psl211_profile.
+From pgg_smc Require Import psl211_mixing.
+From pgg_smc Require Import psl211_exec psl211_alldecks psl211_models.
+From pgg_smc Require Import pgl27_models.
+From tableau_ext_probe Require Import pgg_tableau pgg_tableau_syntax.
+From tableau_ext_probe Require Import psl211_rows.
+From tableau_ext_probe Require Import p6_psl211_word_model.
+From tableau_ext_probe Require Import p6_psl211_word_proximity.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+Import GRing.Theory Num.Theory.
+
+Local Open Scope ring_scope.
+Local Open Scope fdist_scope.
+Local Open Scope proba_scope.
+
+(******************************************************************************)
+(*     Where the number comes from                                            *)
+(******************************************************************************)
+
+(** The two models' laws are within two of each other by the ceiling every
+    pair of laws on one finite sample space meets, with no fact about the
+    twelve-card instance and no fact about the 584-letter walk. A proximity
+    certificate carrying two would be a certificate about nothing, which is
+    why the number a row publishes is what a reader of the arm must read. *)
+Definition psl211_word_law_le2 (R : realType) :
+  var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R := var_dist_le2 _ _.
+
+(** The same ceiling does not reach 2^-40. The rejection is a failure to unify
+    the two numbers:
+
+      The term "var_dist_le2 ?P ?Q" has type "is_true (var_dist ?P ?Q <= 2)"
+      while it is expected to have type
+       "is_true (var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2 ^- 40)".
+
+    So the number psl211_word_lawE proves is carried by psl211_word_mixing and
+    by nothing that holds of an arbitrary pair of laws. *)
+Fail Definition psl211_word_law_tauto (R : realType) :
+  var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R^-40
+  := var_dist_le2 _ _.
+
+(******************************************************************************)
+(*     Which ideal the arm refuses                                            *)
+(******************************************************************************)
+
+(** The eight-card orbit instance's exact family cannot be the ideal of a
+    twelve-card word row. A certificate's ideal is a sample adapter over the
+    row's own execution, and the two instances run different executions, so
+    the field is rejected at its type and no distance is reached. The
+    rejection is a failure to unify the two executions:
+
+      The term "amf_sample pgl27_exact_family R tt" has type
+       "SampleAdapter R (OE.oe_execution pgl27_exec.pgl27_observed)"
+      while it is expected to have type
+       "SampleAdapter R (instance_exec psl211_alldecks_params)".
+*)
+Fail Definition psl211_word_proximity_cert_pgl27_ideal (R : realType)
+    (idx : unit)
+  : IdealProximityCert (amf_sample psl211_word_family R idx) :=
+  @MkIdealProximityCert R psl211_algebra psl211_alldecks_params
+    (amf_sample psl211_word_family R idx)
+    (amf_sample pgl27_exact_family R tt)
+    (psl211_exact_witness R idx)
+    (psl211_alldecks_secret R)
+    (2%:R^-40)
+    (fun C HC => @psl211_word_proximity_close R C HC).

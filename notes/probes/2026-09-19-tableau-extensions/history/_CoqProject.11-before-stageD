@@ -49,7 +49,3 @@ p5_pgl27_prior_ideal.v
 p5_pgl27_word_proximity.v
 p5_mutations.v
 assumptions_report_stageC.v
-p6_psl211_word_model.v
-p6_psl211_word_proximity.v
-p6_mutations.v
-assumptions_report_stageD.v
