@@ -20,23 +20,11 @@
 (* that one name.                                                             *)
 (*                                                                            *)
 (* Both numbers come from one distance, pgl27_word_mixing on the cut group.   *)
-(* The number pgl27_word_cert carries at this model is twice the number       *)
-(* pgl27_word_proximity_cert carries: the spectral arm spends the distance    *)
-(* once for each of the two dealt secrets it compares and the proximity arm   *)
-(* compares one law with one law. The relation is between these two           *)
-(* certificates and not between the two arms, since the number of a           *)
-(* proximity certificate is a field the instance chooses. The row is          *)
-(* concluded at 2^-39, the number pgl27_row_word39 publishes for the          *)
-(* spectral arm, so the two rows are read in one column.                      *)
-(*                                                                            *)
-(* What the row claims is an average over the run argument under the prior:   *)
-(* both laws are pushforwards of whole sample laws and neither is a           *)
-(* statement about one dealt arrangement. At the fixed deck pair              *)
-(* orbit_encode and above the threshold the reading does depend on the dealt  *)
-(* secret: pgl27_view_dep_k4 exhibits a four-seat coalition whose view is     *)
-(* not independent of the orbit secret under the                              *)
-(* uniform prior, and pgl27_view_leak_k4 gives that coalition strictly        *)
-(* positive mutual information with it.                                       *)
+(* The spectral arm spends it once for each of the two dealt secrets it       *)
+(* compares and the proximity arm spends it once, so the proximity number is  *)
+(* half the spectral one at this model. The row is concluded at 2^-39, the    *)
+(* number pgl27_row_word39 publishes for the spectral arm, so the two rows    *)
+(* are read in one column.                                                    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_word_secret         == the dealt secret on the word sample space   *)
@@ -49,28 +37,8 @@
 (*                                secret are within 2^-40                     *)
 (*   pgl27_word_proximity_cert_idealE                                         *)
 (*                             == the certificate's ideal is the ideal row    *)
-(*   pgl27_word_proximity_cert_epsE                                           *)
-(*                             == the certificate's number in closed form     *)
 (*   pgl27_word_proximity_eps_halfE                                           *)
-(*                             == pgl27_word_cert's number is twice it        *)
-(*   pow2_40_ge1               == two to the fortieth is at least one         *)
-(*   pow2_40_gt0               == two to the fortieth is positive             *)
-(*   pgl27_word_proximity_le39 == the certificate's number is under 2^-39     *)
-(*   pgl27_word_proximity_cert_eps_lt2                                        *)
-(*                             == that number is under the ceiling two        *)
-(*   pgl27_row_word_proximity_rowE                                            *)
-(*                             == the proximity row publishes pgl27_row_word  *)
-(*   pgl27_row_word_proximity_armE                                            *)
-(*                             == that row carries the proximity arm          *)
-(*   pgl27_row_word_branch39_armE                                             *)
-(*                             == the spectral row carries the spectral arm   *)
-(*   pgl27_row_word_arms_sampledE                                             *)
-(*                             == both rows read their model family off the   *)
-(*                                one named Sampled value                     *)
-(*   pgl27_row_word_obs_sampledE                                              *)
-(*                             == both rows read their observed execution     *)
-(*                                off that same value                         *)
-(*   pgl27_row_word_arm_neq    == the two rows carry different arms           *)
+(*                             == the spectral number is twice this one       *)
 (*   pgl27_word_view_proximity == what the row states at this instance        *)
 (******************************************************************************)
 
@@ -118,12 +86,9 @@ Arguments pgl27_word_secret [R] secretP.
     proximity arm at this instance: the two models differ in the law of the
     cut alone, the secret is drawn from the same prior and independently of
     the cut in both, and the pair of a reading and the secret is a
-    deterministic function of the pair of the secret and the cut. The premise
-    is the arm's threshold at this instance, four seats, and the proof spends
-    it twice, on the ideal model's own independence and on pgl27_view_mixing.
-    The cut group's own distance, pgl27_word_mixing, carries no coalition
-    premise, so the same bound is reachable at every coalition by a route
-    this proof does not take. *)
+    deterministic function of the pair of the secret and the cut. The bound
+    holds at every coalition and not only below the threshold; the threshold
+    enters the arm's proposition and not this distance. *)
 Lemma pgl27_word_proximity_close (R : realType) (secretP : R.-fdist bool)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
@@ -199,9 +164,8 @@ Definition pgl27_word_proximity_cert (R : realType) (secretP : R.-fdist bool)
 
 (** The model the certificate calls ideal, and the witness it carries for it,
     are the model and the witness of the published ideal row. Conversion
-    decides both, so the ideal a word row is measured against is the model
-    pgl27_row_prior_exact_tableau publishes and not a second description of
-    it. *)
+    decides both, so the ideal a word row is measured against is the row
+    p5_pgl27_prior_ideal.v publishes and not a second description of it. *)
 Lemma pgl27_word_proximity_cert_idealE (R : realType)
     (secretP : R.-fdist bool) :
   ipc_ideal (pgl27_word_proximity_cert secretP)
@@ -220,27 +184,22 @@ Lemma pgl27_word_proximity_cert_epsE (R : realType) (secretP : R.-fdist bool) :
   ipc_eps (pgl27_word_proximity_cert secretP) = 2%:R^-40 :> R.
 Proof. exact: erefl. Qed.
 
-(** The number pgl27_word_cert carries at this model is twice the number
-    pgl27_word_proximity_cert carries. Both are read off pgl27_word_mixing,
-    the one distance on the cut group; the spectral arm spends it once for
-    each of the two dealt secrets it compares and the proximity arm compares
-    one law with one law. The relation is between these two certificates and
-    not between the two arms: cert_eps is by definition the walk's marginal
-    number added to itself, and this proximity certificate chooses that same
-    marginal number as its own field, which a proximity certificate over the
-    same model and the same ideal is free not to do. *)
+(** The spectral arm's number at this model is twice the proximity arm's. Both
+    are read off pgl27_word_mixing, the one distance on the cut group; the
+    spectral arm spends it once for each of the two dealt secrets it compares
+    and the proximity arm compares one law with one law. *)
 Lemma pgl27_word_proximity_eps_halfE (R : realType) (secretP : R.-fdist bool) :
   cert_eps (pgl27_word_cert secretP)
   = ipc_eps (pgl27_word_proximity_cert secretP)
     + ipc_eps (pgl27_word_proximity_cert secretP).
 Proof. by []. Qed.
 
-(** Two to the fortieth is at least one, at every real field.                 *)
-Fact pow2_40_ge1 (R : realType) : (1:R) <= 2%:R^+40.
+(** Two to the fortieth is at least one, at every real field. *)
+Fact pgl27_pow2_40_ge1 (R : realType) : (1:R) <= 2%:R^+40.
 Proof. by apply: exprn_ege1; rewrite ler1n. Qed.
 
-(** Two to the fortieth is positive, at every real field.                     *)
-Fact pow2_40_gt0 (R : realType) : (0:R) < 2%:R^+40.
+(** Two to the fortieth is positive, at every real field. *)
+Fact pgl27_pow2_40_gt0 (R : realType) : (0:R) < 2%:R^+40.
 Proof. by rewrite exprn_gt0 // ltr0n. Qed.
 
 (** The certificate's number is under 2^-39, the constant the word row
@@ -249,7 +208,7 @@ Proof. by rewrite exprn_gt0 // ltr0n. Qed.
 Lemma pgl27_word_proximity_le39 (R : realType) (secretP : R.-fdist bool) :
   ipc_eps (pgl27_word_proximity_cert secretP) <= 2%:R^-39 :> R.
 Proof.
-have H0 : (0:R) < 2%:R^-40 by rewrite invr_gt0 pow2_40_gt0.
+have H0 : (0:R) < 2%:R^-40 by rewrite invr_gt0 pgl27_pow2_40_gt0.
 have He := pow2_split R.
 rewrite pgl27_word_proximity_cert_epsE; lra.
 Qed.
@@ -263,7 +222,7 @@ Lemma pgl27_word_proximity_cert_eps_lt2 (R : realType)
   ipc_eps (pgl27_word_proximity_cert secretP) < 2%:R :> R.
 Proof.
 have H1 : 2%:R^-40 <= (1:R)
-  by rewrite invf_le1 ?pow2_40_gt0 ?pow2_40_ge1.
+  by rewrite invf_le1 ?pgl27_pow2_40_gt0 ?pgl27_pow2_40_ge1.
 rewrite pgl27_word_proximity_cert_epsE; lra.
 Qed.
 
@@ -285,8 +244,8 @@ Definition pgl27_row_word_proximity : PublishedRowAt pgl27_reprice39 :=
     |> conclude pgl27_reprice39 by (fun R idx => pgl27_word_proximity_le39 idx)
     |> publish IdealFinite BaselineClassicalOnly.
 
-(* exact: erefl and not by []: done does not return on an equation between
-   two rows' coordinates. *)
+(* exact: erefl and not by [], following the hang shape recorded in STATUS.md:
+   done does not return on an equation between two rows' coordinates. *)
 
 (** The proximity row publishes the manifest's row for the word path, as its
     spectral sibling does. An AnalysisPathRow holds descriptive metadata and
@@ -305,7 +264,7 @@ Lemma pgl27_row_word_proximity_armE (R : realType)
   security_arm_of pgl27_row_word_proximity R idx = IdealProximityArm.
 Proof. by []. Qed.
 
-(** The arm the spectral continuation of the same named value carries.        *)
+(** The arm the spectral continuation of the same named value carries. *)
 Lemma pgl27_row_word_branch39_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word_branch39)) R) :
   security_arm_of pgl27_row_word_branch39 R idx = SpectralDecayArm.
@@ -313,31 +272,17 @@ Proof. by []. Qed.
 
 (** Both rows over the word model read their analysis model family off the one
     named Tableau Sampled value, so the pair differs in the arm and in nothing
-    about the algebra, the run or the law. The family is what a continuation
-    of a named value reads off the name. *)
+    about the algebra, the run or the law. The statement is on the family and
+    not on the whole observed execution: an equation between the two rows'
+    observed executions is decided by conversion in 48 seconds, against four
+    milliseconds for the family, and the family is what a continuation reads
+    off the name. *)
 Lemma pgl27_row_word_arms_sampledE :
   ab_f (published_at pgl27_row_word_proximity)
   = sp_f (tableau_at pgl27_word_sampled)
   /\ ab_f (published_at pgl27_row_word_branch39)
      = sp_f (tableau_at pgl27_word_sampled).
 Proof. split; exact: erefl. Qed.
-
-(** Both rows read their observed execution off that same named value, so the
-    two claims are made about one run and one static observation of it and
-    not about two executions that happen to agree. Together with the family
-    equation above, everything the two rows hold in common comes from the one
-    name. *)
-Lemma pgl27_row_word_obs_sampledE :
-  ab_obs (published_at pgl27_row_word_proximity)
-  = sp_obs (tableau_at pgl27_word_sampled)
-  /\ ab_obs (published_at pgl27_row_word_branch39)
-     = sp_obs (tableau_at pgl27_word_sampled).
-Proof.
-(* Each row against the named value was measured on 2026-09-19 at under
-   0.01 s by exact: erefl. The row-against-row form is the expensive one,
-   96.0 s by exact: erefl and 48.1 s by reflexivity, and is not stated. *)
-split; exact: erefl.
-Qed.
 
 (** The two rows over the one model carry different arms, so the pair is two
     statements about one probability model and not one statement published

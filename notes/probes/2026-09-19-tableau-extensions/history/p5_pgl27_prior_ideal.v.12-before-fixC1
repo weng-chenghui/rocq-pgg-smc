@@ -35,9 +35,6 @@
 (*                                the instance's coalition view               *)
 (*   pgl27_row_prior_exact_armE                                               *)
 (*                             == the ideal row carries the exact arm         *)
-(*   pgl27_row_prior_exact_rowE                                               *)
-(*                             == the manifest row the ideal program          *)
-(*                                publishes, in full                          *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -137,25 +134,24 @@ Definition pgl27_row_prior_exact_tableau : PublishedRow :=
     certify ExactIndependence pgl27_prior_exact_witness
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
-(** The arm the ideal row carries, at every real field and prior:
-    independence of the dealt secret, and not a distance to some other model.
-    This is the value a paper's table prints in the arm column for the ideal
-    row. *)
+(** The arm the ideal row carries, at every real field and prior. This is the
+    value a paper's table prints in the arm column for the ideal row, and it
+    is what makes the model a proximity certificate calls ideal a model whose
+    own privacy is a theorem rather than a bare law. *)
 Lemma pgl27_row_prior_exact_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_prior_exact_tableau)) R) :
   security_arm_of pgl27_row_prior_exact_tableau R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
-(** The whole manifest row the ideal program publishes. It agrees with
-    pgl27_row_exact on the completion level, the transfer status and the
-    assumption status, and differs from it in the fourth coordinate, the
-    model family an AnalysisPathRow records: pgl27_row_exact carries the
-    unit-indexed exact family and this row carries the prior-indexed one. The
-    equation published_row pgl27_row_prior_exact_tableau = pgl27_row_exact
-    typechecks and is not provable by conversion, so the manifest of the tree
-    holds no row at this model. *)
-Lemma pgl27_row_prior_exact_rowE :
-  published_row pgl27_row_prior_exact_tableau
-  = @MkAnalysisPathRow pgl27_observed AnalysisBridged
-      pgl27_prior_exact_family StaticExecutedOnly BaselineClassicalOnly.
-Proof. exact: erefl. Qed.
+(** The three coordinates the ideal row publishes. The manifest of the tree
+    carries no row at this model, because an AnalysisPathRow records the model
+    family and this family is new, so the row below is the ideal's own and not
+    pgl27_row_exact under another name. *)
+Lemma pgl27_row_prior_exact_publishedE :
+  apr_completion (published_row pgl27_row_prior_exact_tableau)
+    = AnalysisBridged
+  /\ apr_transfer (published_row pgl27_row_prior_exact_tableau)
+     = StaticExecutedOnly
+  /\ apr_assumptions (published_row pgl27_row_prior_exact_tableau)
+     = BaselineClassicalOnly.
+Proof. by []. Qed.

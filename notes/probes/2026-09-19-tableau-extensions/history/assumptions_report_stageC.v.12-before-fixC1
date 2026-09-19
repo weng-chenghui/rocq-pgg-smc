@@ -27,24 +27,24 @@ From tableau_ext_probe Require Import p5_pgl27_prior_ideal.
 From tableau_ext_probe Require Import p5_pgl27_word_proximity.
 From tableau_ext_probe Require Import p5_mutations.
 
-(* The prior-indexed ideal execution.                                         *)
+(* The prior-indexed ideal execution. *)
 Print Assumptions pgl27_prior_sample.
 Print Assumptions pgl27_prior_exact_family.
 Print Assumptions pgl27_prior_viewE.
 Print Assumptions pgl27_prior_exact_witness.
 Print Assumptions pgl27_row_prior_exact_tableau.
 Print Assumptions pgl27_row_prior_exact_armE.
-Print Assumptions pgl27_row_prior_exact_rowE.
+Print Assumptions pgl27_row_prior_exact_publishedE.
 
-(* The word model's proximity certificate and its row.                        *)
+(* The word model's proximity certificate and its row. *)
 Print Assumptions pgl27_word_secret.
 Print Assumptions pgl27_word_proximity_close.
 Print Assumptions pgl27_word_proximity_cert.
 Print Assumptions pgl27_word_proximity_cert_idealE.
 Print Assumptions pgl27_word_proximity_cert_epsE.
 Print Assumptions pgl27_word_proximity_eps_halfE.
-Print Assumptions pow2_40_ge1.
-Print Assumptions pow2_40_gt0.
+Print Assumptions pgl27_pow2_40_ge1.
+Print Assumptions pgl27_pow2_40_gt0.
 Print Assumptions pgl27_word_proximity_le39.
 Print Assumptions pgl27_word_proximity_cert_eps_lt2.
 Print Assumptions pgl27_row_word_proximity.
@@ -52,10 +52,5 @@ Print Assumptions pgl27_row_word_proximity_rowE.
 Print Assumptions pgl27_row_word_proximity_armE.
 Print Assumptions pgl27_row_word_branch39_armE.
 Print Assumptions pgl27_row_word_arms_sampledE.
-Print Assumptions pgl27_row_word_obs_sampledE.
 Print Assumptions pgl27_row_word_arm_neq.
 Print Assumptions pgl27_word_view_proximity.
-
-(* The two rejections about the prior, refuted at a point-mass prior.         *)
-Print Assumptions var_dist_fdist1_uniform.
-Print Assumptions pgl27_word_uniform_ideal_not_close.

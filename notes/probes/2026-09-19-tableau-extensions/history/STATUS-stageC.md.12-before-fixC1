@@ -15,19 +15,18 @@ The `_CoqProject` snapshot before this stage is
 |---|---|
 | 1. the prior-indexed ideal | GO |
 | 2. the certificate and the row | GO |
-| 3. P3, the two `_armE`, the shared `Sampled` data, `_arm_neq` | GO |
-| 4. P7: the ceiling, the recorded rejections | GO; the wrong-prior refutation is compiled beside the rejection it explains |
+| 3. P3, the two `_armE`, the shared `Sampled` data, `_arm_neq` | GO, with one weakening |
+| 4. P7: the ceiling, the recorded rejections | GO; the wrong-prior refutation is recorded as a rejection and argued |
 | 5. G1 | GO |
 | 6. D1/D2 | reported below |
 
-Item 3 carries no weakening. The shared `Sampled` data is stated on both
-projections, each row against the named value itself:
-`pgl27_row_word_arms_sampledE` on `ab_f` and `pgl27_row_word_obs_sampledE` on
-`ab_obs`, four equations, all by `exact: erefl` and each under 0.01 s. What is
-expensive is the row-against-row form of the `ab_obs` equation, 96.0 s by
-`exact: erefl` and 48.1 s by `reflexivity`. That form follows from the two
-equations against the name by transitivity, so nothing needs it and it is not
-stated.
+The one weakening in item 3: the equation saying the two arms' rows over the
+word model share their `Sampled` data is stated on the model family and not on
+the whole observed execution. An equation between the two rows' `ab_obs` is
+decided by conversion, but takes 48.1 s by `reflexivity` and 96.0 s by
+`exact: erefl`, both far above the 5 s bound, so it is not in the file. The
+family equation, which is what a continuation of a named `Sampled` value
+actually reads off the name, takes 0.004 s.
 
 ## The two numbers
 
@@ -38,18 +37,12 @@ stated.
 | what `pgl27_row_word39` publishes, spectral arm | `2^-39` | 0.0000000000018189894035458565 |
 | `cert_eps (pgl27_word_cert secretP)`, spectral, accumulated | `2^-40 + 2^-40` | 0.0000000000018189894035458565 |
 
-The proximity row and the spectral row publish the same number. The doubling
-holds between the two certificates written here and not between the two arms:
-`cert_eps` is by definition the walk's marginal number added to itself, and
-`pgl27_word_proximity_cert` chooses that same marginal number as its `ipc_eps`
-field. Each certificate reads that number off `pgl27_word_mixing` because the
+The proximity row and the spectral row publish the same number. The proximity
+certificate proves half of what the spectral certificate accumulates: the
 spectral arm crosses from the word walk to the uniform cut and back, spending
-the distance once for each of the two dealt secrets it compares, while the
-proximity arm compares one joint law with one product law and spends it once.
-`pgl27_word_proximity_eps_halfE` is that identity between the two chosen
-numbers, closed by conversion. `ipc_eps` is a free field, so a second
-proximity certificate over the same model and the same ideal at another number
-would not satisfy it.
+`pgl27_word_mixing` once for each of the two dealt secrets it compares, and
+the proximity arm compares one joint law with one product law and spends it
+once. `pgl27_word_proximity_eps_halfE` is that identity, closed by conversion.
 The certificate's number is `2^-40` against the ceiling `2` that
 `var_dist_le2` gives for a variation distance, so at about
 0.00000000000045 of the ceiling the separation is a cryptographic one.
@@ -85,11 +78,6 @@ Definition pgl27_row_prior_exact_tableau : PublishedRow :=
     sample  pgl27_prior_exact_family
     certify ExactIndependence pgl27_prior_exact_witness
     |> publish StaticExecutedOnly BaselineClassicalOnly.
-
-Lemma pgl27_row_prior_exact_rowE :
-  published_row pgl27_row_prior_exact_tableau
-  = @MkAnalysisPathRow pgl27_observed AnalysisBridged
-      pgl27_prior_exact_family StaticExecutedOnly BaselineClassicalOnly.
 ```
 
 The certificate and the row, in `p5_pgl27_word_proximity.v`:
@@ -156,41 +144,9 @@ Lemma pgl27_row_word_arms_sampledE :
   /\ ab_f (published_at pgl27_row_word_branch39)
      = sp_f (tableau_at pgl27_word_sampled).
 
-Lemma pgl27_row_word_obs_sampledE :
-  ab_obs (published_at pgl27_row_word_proximity)
-  = sp_obs (tableau_at pgl27_word_sampled)
-  /\ ab_obs (published_at pgl27_row_word_branch39)
-     = sp_obs (tableau_at pgl27_word_sampled).
-
 Lemma pgl27_row_word_arm_neq (R : realType) (secretP : R.-fdist bool) :
   security_arm_of pgl27_row_word_proximity R secretP
   <> security_arm_of pgl27_row_word_branch39 R secretP.
-```
-
-The two lemmas that refute the wrong-prior ideal, in `p5_mutations.v`, the
-second inside a section binding `R : realType` with `P1 := fdist1 true`:
-
-```
-Lemma var_dist_fdist1_uniform (R : realType) :
-  var_dist (fdist1 true : R.-fdist bool) (fdist_uniform (R := R) card_bool)
-  = 1.
-
-Lemma pgl27_word_uniform_ideal_not_close
-    (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
-  ~ (var_dist
-       (fdistmap (fun u => (@static_coalition_obs pgl27_algebra
-                              pgl27_dealt_params C
-                              ((pgl27_word_sample P1).(sa_arg) u)
-                              ((pgl27_word_sample P1).(sa_cut) u),
-                            pgl27_word_secret P1 u))
-          (sa_sampleP (pgl27_word_sample P1)))
-       (fdistmap (fun u => (@static_coalition_obs pgl27_algebra
-                              pgl27_dealt_params C
-                              ((pgl27_sample R).(sa_arg) u)
-                              ((pgl27_sample R).(sa_cut) u),
-                            pgl27_secret R u))
-          (sa_sampleP (pgl27_sample R)))
-     <= 2%:R^-40).
 ```
 
 ## Item 1: how far the ideal's independence was from the tree
@@ -267,21 +223,13 @@ goal, so rewriting one row's arm in a goal that also mentions the other row
 converts the two rows against each other. Assuming the equation between the
 two arms first leaves each rewrite on a goal that mentions one row.
 
-`exact: erefl` closes `pgl27_row_prior_exact_rowE`,
-`pgl27_word_proximity_cert_epsE`, `pgl27_row_word_proximity_rowE` and both
-branches of each of `pgl27_row_word_arms_sampledE` and
-`pgl27_row_word_obs_sampledE`. `by []` closes `pgl27_row_prior_exact_armE`,
-`pgl27_word_proximity_eps_halfE`, `pgl27_row_word_proximity_armE` and
-`pgl27_row_word_branch39_armE`, and `by split` closes
-`pgl27_word_proximity_cert_idealE`; each of those five uses the tactic its
-counterpart in `p4_kim_biased_proximity.v` uses and none of them hangs. No
-statement in stage C places one row's coordinate against another row's, which
-is the hang shape recorded in `STATUS.md`; the one equation of that shape that
-was tried is the `ab_obs` row of the table above.
+Every row equation in the two program files closes by `exact: erefl` and never
+by `by []`, `done` or `by split`, following the hang shape recorded in
+`STATUS.md`.
 
 ## Assumptions
 
-`assumptions_report_stageC.v` prints `Print Assumptions` for all 27
+`assumptions_report_stageC.v` prints `Print Assumptions` for all 24
 declarations stage C writes. Scanning the output with `[\w.]+` before a colon
 gives exactly three constant names and no fourth:
 
@@ -289,7 +237,7 @@ gives exactly three constant names and no fourth:
 - `functional_extensionality_dep`
 - `constructive_indefinite_description`
 
-All 27 blocks are `Axioms:` blocks carrying those three and nothing else; none
+All 24 blocks are `Axioms:` blocks carrying those three and nothing else; none
 is `Closed under the global context`. The three come from `boolp`, through the
 section context of the `fdist` record, which is the floor every statement
 about a PGL(2,7) probability model sits on. No new axiom, assumed constant,
@@ -323,20 +271,17 @@ while it is expected to have type
     pgl27_exact_family R tt))) <= sw_bound_eps (pgl27_word_marginal_bound R))".
 ```
 
-The `Fail` rejects the one term written under it, on the type of the distance
-field and on no other ground. What refutes that field is compiled beside it in
-the same file: `pgl27_word_uniform_ideal_not_close` proves it false at the
-point-mass prior `fdist1 true`, and `var_dist_fdist1_uniform` is the number it
-rests on. Pushing both joint laws forward along the secret coordinate leaves
-the word model's prior on one side and the uniform law on the other, and
-`var_dist_fdistmap`, which the tree carries at
-`security/pgg_collusion_bound.v:126`, says the distance between the two joint
-laws is at least the distance between those two pushforwards. At the point
-mass that distance is one, above `2^-40` by a factor of about 1.1e12. At a
-prior within `2^-40` of the uniform one the same lower bound is small and
-nothing is refuted there. What the two lemmas refute is the definition as
-written, which quantifies over every prior, and the point mass in
-particular.
+The semantic half of this rejection is argued and not compiled, and is marked
+as argued here. Pushing both joint laws forward along the secret coordinate
+leaves the word model's prior on one side and the uniform law on the other,
+and `var_dist_fdistmap` says that the distance between the two joint laws is
+at least the distance between those two pushforwards. At a point-mass prior
+that distance is one, which is above `2^-40` by a factor of about
+1.1e12, so no proof of the distance field could exist at a
+non-uniform prior. Compiling that argument needs a lower bound on `var_dist`
+by one of its terms and an evaluation of `var_dist (fdist1 true)
+(fdist_uniform card_bool)`, neither of which the tree carries; it was judged
+not cheap against the turn budget and left as an argument.
 
 **3. The word model's proximity certificate over the exact model's branch
 point.** The cross-arm rejection, the proximity counterpart of the two
@@ -354,8 +299,7 @@ while it is expected to have type
 
 ## G1
 
-Stage C edits no source file that stage A or stage B produced, and appends
-four entries to `_CoqProject`. `pgg_tableau.v`,
+Stage C edits no file that stage A or stage B produced. `pgg_tableau.v`,
 `pgg_tableau_syntax.v`, `pgl27_rows.v`, `t0_sampled_branch_pgl27.v`, the
 five-card and S5 and PSL(2,11) row files, and both earlier assumptions
 reports are byte-identical to their state at the start of this stage. The
@@ -396,24 +340,12 @@ Searched, not assumed.
 1. **The manifest gains a row, or the ideal program cannot publish one.** An
    `AnalysisPathRow` records the analysis model family, so a row over
    `pgl27_prior_exact_family` is not `pgl27_row_exact`. The statement
-   `published_row pgl27_row_prior_exact_tableau = pgl27_row_exact` typechecks
-   and is not provable by conversion; it was withdrawn. What the file states
-   instead is `pgl27_row_prior_exact_rowE`, the whole row the ideal program
-   publishes, by `exact: erefl`:
-
-   ```
-   published_row pgl27_row_prior_exact_tableau
-   = @MkAnalysisPathRow pgl27_observed AnalysisBridged
-       pgl27_prior_exact_family StaticExecutedOnly BaselineClassicalOnly
-   ```
-
-   A landing has to add exactly that row to
-   `manifest/pgg_analysis_manifest.v`: the prior-indexed exact model over
-   `pgl27_prior_exact_family` at `AnalysisBridged`, `StaticExecutedOnly`,
-   `BaselineClassicalOnly`. The three-coordinate lemma
-   `pgl27_row_prior_exact_publishedE` is withdrawn, each of its conjuncts
-   being a projection of this equation; its record is
-   `history/p5_pgl27_prior_ideal.v.12-before-fixC1`.
+   `published_row pgl27_row_prior_exact_tableau = pgl27_row_exact` does not
+   typecheck by conversion and was withdrawn; what the file states instead is
+   `pgl27_row_prior_exact_publishedE`, the three coordinates the ideal row
+   publishes. A landing has to add one manifest row for the prior-indexed
+   exact model at `AnalysisBridged`, `StaticExecutedOnly`,
+   `BaselineClassicalOnly`, in `manifest/pgg_analysis_manifest.v`.
 
 2. **The word row needs no manifest change.**
    `pgl27_row_word_proximity_rowE` closes by conversion against
@@ -442,14 +374,13 @@ Searched, not assumed.
    family. The file states the row's three coordinates instead of an equality
    with a manifest row, and D2 records the manifest row a landing owes.
 
-2. **Nothing: the equation on the two rows' `Sampled` data is stated on both
-   projections.** Item 3 asks for "the equation saying the two arms' rows over
-   the word model share their `Sampled` data". Both halves are in the file,
-   each row against the named value rather than against the sibling row:
-   `pgl27_row_word_arms_sampledE` on `ab_f` and `pgl27_row_word_obs_sampledE`
-   on `ab_obs`, all four equations by `exact: erefl` and each under 0.01 s.
-   Only the row-against-row form is expensive, at 96.0 s by `exact: erefl` and
-   48.1 s by `reflexivity`, and it is the transitive consequence of the four.
+2. **The equation on the two rows' `Sampled` data cannot be stated on the
+   observed execution.** Item 3 asks for "the equation saying the two arms'
+   rows over the word model share their `Sampled` data". At PGL(2,7) the
+   `ab_obs` half of that costs 48.1 s by `reflexivity` and 96.0 s by
+   `exact: erefl`, so the file states the `ab_f` half, against the named
+   `Sampled` value itself rather than against the sibling row. That is the
+   half a continuation reads off the name, and it costs 0.004 s.
 
 3. **`_arm_neq` at this instance is not p4's one-liner.** At the five-card
    instance the family index is `unit` and `by []` closes the inequation. At
@@ -462,181 +393,3 @@ Searched, not assumed.
 4. **Nothing in the spec's "Pinned carriers" section for PGL(2,7) was wrong.**
    `pgl27P_gen` is the law the ideal is built on, `pgl27_view_mixing` is the
    distance, and both are where the spec says they are.
-
-## Fix pass 1, after the soundness and the naming audits
-
-Snapshots of every file touched are in `history/` under the suffix
-`.12-before-fixC1`. Five files changed: `p5_pgl27_prior_ideal.v`,
-`p5_pgl27_word_proximity.v`, `p5_mutations.v`, `assumptions_report_stageC.v`
-and this note. Nothing outside the probe directory was touched, `_CoqProject`
-was not edited, no `p6_*` or stage A or stage B file was opened for writing,
-no `make` was run, and `instances/psl211/psl211_endpoints.v` was never opened
-and never compiled.
-
-### The wrong-prior rejection is compiled (soundness C2, C3, C4; naming C1)
-
-`p5_mutations.v` gains two lemmas and the requires they need,
-`pgg_collusion_bound` and mathcomp's `lra`.
-
-- `var_dist_fdist1_uniform (R : realType) :
-  var_dist (fdist1 true : R.-fdist bool) (fdist_uniform (R := R) card_bool)
-  = 1`.
-- `pgl27_word_uniform_ideal_not_close`, inside a section binding
-  `R : realType` and `P1 := fdist1 true`: the distance field of a proximity
-  certificate is false when the ideal is the uniform-secret member of
-  `pgl27_exact_family` and the actual model is the word walk at `P1`.
-
-Both are the auditor's `aud_var_dist_point_uniform` and
-`aud_wrong_prior_distance_false` under project names. The comment above the
-second recorded `Fail` and the file header now say three things and no more:
-the `Fail` rejects the one term written under it and on the type of the
-distance field alone; `pgl27_word_uniform_ideal_not_close` refutes that field
-at the point-mass prior; at a prior within `2^-40` of the uniform one the same
-lower bound is small and nothing is claimed. Every variant of "no proof could
-exist at a non-uniform prior" is gone from the file and from this note. The
-two sentences of the "Recorded rejections" paragraph saying the tree carries
-neither ingredient were false and are replaced: `var_dist_fdistmap` is at
-`security/pgg_collusion_bound.v:126`.
-
-### The ideal program's whole manifest row (soundness C5, C8)
-
-`pgl27_row_prior_exact_publishedE` is withdrawn and
-`pgl27_row_prior_exact_rowE` replaces it, stating the whole row by
-`exact: erefl`, measured under 0.01 s. Its comment says what differs from
-`pgl27_row_exact`, which is the model family an `AnalysisPathRow` records, and
-that `published_row pgl27_row_prior_exact_tableau = pgl27_row_exact`
-typechecks and is not provable by conversion. D2 item 1 now carries the exact
-text of the row a landing owes.
-
-### Deviation 2 is undone (soundness C6)
-
-`pgl27_row_word_obs_sampledE` states the `ab_obs` half, each row against
-`sp_obs (tableau_at pgl27_word_sampled)`, by `exact: erefl` and under 0.01 s,
-beside the `ab_f` half `pgl27_row_word_arms_sampledE` already stated. The
-48 s and 96 s text is out of the rendered docstring; the figures stay in the
-measurement table above and in a non-rendered comment inside the new lemma's
-proof, attributed to the row-against-row form with the right column: 96.0 s is
-`exact: erefl`, 48.1 s is `reflexivity`.
-
-### The doubling is between two certificates (soundness C1)
-
-`pgl27_word_proximity_eps_halfE`'s comment and the file header now follow p4's
-wording for `kim_biased_proximity_eps_halfE`: `cert_eps` is by definition the
-walk's marginal number added to itself, this proximity certificate chooses
-that same marginal number as its own field, and a proximity certificate over
-the same model and the same ideal is free not to. The auditor's second
-certificate at `1`, which breaks the relation, is not landed; it would add a
-declaration whose only role is to exhibit the freedom the sentence now states.
-
-### The close lemma keeps its premise (soundness C7)
-
-Decision: keep the premise on `pgl27_word_proximity_close` and correct the
-comment. The premise-free route the auditor compiled, `aud_close_no_threshold`,
-goes through `var_dist_fdistmap_pair` and `var_dist_prodR` of
-`p1_joint_law_distance.v` and closes on `pgl27_word_mixing`, not on
-`pgl27_view_mixing`; it is not one step from the theorem the spec named, and
-it would add a require to the file. The certificate's route stays the
-`pgl27_view_mixing` one. The comment now says the premise is the arm's
-threshold at this instance, that the proof spends it twice, and that
-`pgl27_word_mixing` carries no coalition premise so the same bound is
-reachable at every coalition by a route this proof does not take. That second
-route is recorded here and not taken.
-
-### Invariant 3's citation
-
-`instances/pgl27/pgl27_secrecy.v` carries two compiled statements at the fixed
-deck pair `orbit_encode` and above the threshold: `pgl27_view_dep_k4`, a
-four-seat coalition whose view is not independent of the orbit secret under
-the uniform prior, and `pgl27_view_leak_k4`, the same coalition with strictly
-positive mutual information with it. Both are named in the header paragraph of
-`p5_pgl27_word_proximity.v` beside the sentence saying the row's claim is an
-average over the run argument. Below the threshold the citation half is empty
-at this instance: a Python scan of every `Lemma`, `Theorem`, `Corollary`,
-`Fact`, `Definition` and `Fail` line of `instances/pgl27/*.v` for the tokens
-`pgl27_leakage`, `pgl27_recovery`, `constancy`, `fixed_deck`,
-`above_threshold`, `_k4`, `not_constant` and `depends` returns
-`pgl27_r5_view_mutual_info_k4_lt1`, `pgl27_enc_view_mutual_info_k4E`,
-`pgl27_view_dep_k4` and `pgl27_view_leak_k4`, all at four seats, and the
-`pgl27_fixed_*` declarations of `pgl27_models.v` are sample adapters and
-distribution equations rather than dependence statements.
-
-### Naming
-
-- The record's sentence "Every row equation ... closes by `exact: erefl`" was
-  false and is replaced above by the per-declaration list; the comment in
-  `p5_pgl27_word_proximity.v` that generalised it now states only the
-  mechanism, that `done` does not return on an equation between two rows'
-  coordinates.
-- The three comments that pointed at probe files now name declarations:
-  `pgl27_row_prior_exact_tableau` for the ideal row,
-  `pgl27_exact_sampled` for the separated payloads, and `STATUS.md` is gone
-  from the source.
-- The comment on `pgl27_row_prior_exact_armE` no longer says a label makes the
-  ideal's privacy a theorem; it stops where p4's parallel comment stops.
-- Both header indexes now list every declaration of their file, eighteen in
-  `p5_pgl27_word_proximity.v` and seven in `p5_pgl27_prior_ideal.v`, and
-  `p5_mutations.v` gains a `Lemmas:` block for its two.
-- `pgl27_pow2_40_ge1` and `pgl27_pow2_40_gt0` are renamed `pow2_40_ge1` and
-  `pow2_40_gt0`, five token occurrences across the two files, on the precedent
-  of `Fact pow2_split` in `instances/pgl27/pgl27_word_privacy.v`.
-- `p4_kim_biased_proximity.v` was not touched: naming S4 and
-  `five_card_sqrt5_le3` belong to stage B.
-
-### Not applied
-
-- The auditor's second proximity certificate at `1` and its
-  `aud_half_not_arm_level`, as said above.
-- `aud_close_no_threshold` as a landed lemma, as said above.
-- Naming N1, N2, N3 and N4's optional half: N1 offers no rename, N2 finds no
-  divergence, N3 says neither side has to move, and `p5_mutations.v` now has
-  an index block for its lemmas but still describes its three recorded
-  failures in prose.
-- The assumptions report's header sentence "nothing at all for the lemmas that
-  speak of a bare real field" is untouched and remains inaccurate: every block
-  in every run of this file, before and after the pass, is an `Axioms:` block.
-  It is outside the items of this pass and is left for a later one.
-
-### Auditor sentences that were altered, and why
-
-1. Soundness C3's replacement wording "so no proof of the distance field could
-   exist at a prior further than `2^-40` from the uniform one" is not used.
-   Neither lemma proves anything at an intermediate prior, so the file and the
-   note say only that the refutation is at the point mass and that nothing is
-   claimed near the uniform prior.
-2. Naming C1's replacement kept the phrase "argued and not compiled". With the
-   two lemmas landed the phrase is false, so the comment cites them instead.
-3. Naming S3's replacement is used with one word changed: "at every real field
-   and prior" is kept from the original comment, since the lemma is stated at
-   both.
-4. Soundness C5's `pgl27_row_prior_exact_publishedE` is used as the name of
-   the withdrawn lemma, not of the new one; the new one is
-   `pgl27_row_prior_exact_rowE`, which is the shape `pgl27_row_word_proximity_rowE`
-   already uses in the same probe.
-5. Soundness C7's offered comment "the distance is bounded at every coalition
-   by the cut-group distance alone, which this proof does not use" is used
-   with its reason spelled out, that `pgl27_word_mixing` carries no coalition
-   premise, so the sentence is checkable against a statement in the tree
-   rather than against an experiment that is not in the file.
-
-### Compile table for the pass
-
-Per-sentence times from `rocq compile -time`, one Rocq process at a time under
-the shared lock, the four stage C files in `_CoqProject` order, in place,
-against the probe's current `.vo` for stages A and B.
-
-| file | rc | wall | sentences above 3 s |
-|---|---|---|---|
-| `p5_pgl27_prior_ideal.v` | 0 | 4.6 s | none |
-| `p5_pgl27_word_proximity.v` | 0 | 5.4 s | none |
-| `p5_mutations.v` | 0 | 5.0 s | none |
-| `assumptions_report_stageC.v` | 0 | 29.1 s | none |
-
-All three recorded `Fail`s still fail, since `p5_mutations.v` compiles.
-
-`assumptions_report_stageC.v` prints 27 `Axioms:` blocks for the 27
-declarations, zero `Closed under the global context`, and a scan of the output
-for a name before a colon with dots allowed gives exactly
-`propositional_extensionality`, `functional_extensionality_dep` and
-`constructive_indefinite_description` and no fourth name. No `Axiom`,
-`Parameter`, `Hypothesis`, `Admitted`, `Abort` or `admit` occurs in any stage
-C source.
