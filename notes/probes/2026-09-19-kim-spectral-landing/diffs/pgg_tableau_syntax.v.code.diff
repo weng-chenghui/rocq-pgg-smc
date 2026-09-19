@@ -1,0 +1,7 @@
+--- prod-nocomment
++++ probe-nocomment
+@@ -7,3 +7,3 @@
+ From pgg_smc Require Import pgg_instance pgg_functionality.
+-From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
++From kim_landing_probe Require Import pgg_analysis_manifest pgg_tableau.
+ Set Implicit Arguments.

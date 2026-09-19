@@ -1,0 +1,9 @@
+--- production/manifest/pgg_analysis_client.v
++++ probe/pgg_analysis_client.v
+@@ -14,5 +14,5 @@
+ (******************************************************************************)
+ 
+-From pgg_smc Require Import pgg_analysis_manifest.
++From kim_landing_probe Require Import pgg_analysis_manifest.
+ 
+ (******************************************************************************)

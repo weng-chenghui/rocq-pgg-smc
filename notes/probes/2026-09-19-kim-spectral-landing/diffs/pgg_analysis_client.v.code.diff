@@ -1,0 +1,6 @@
+--- prod-nocomment
++++ probe-nocomment
+@@ -1,2 +1,2 @@
+-From pgg_smc Require Import pgg_analysis_manifest.
++From kim_landing_probe Require Import pgg_analysis_manifest.
+ Check PGL27Analysis.profile.

@@ -1,0 +1,10 @@
+--- prod-nocomment
++++ probe-nocomment
+@@ -11,4 +11,5 @@
+ From pgg_smc Require Import pgg_instance.
+-From pgg_smc Require Import pgg_analysis_status pgg_analysis_manifest.
+-From pgg_smc Require Import pgg_tableau pgg_tableau_syntax.
++From pgg_smc Require Import pgg_analysis_status.
++From kim_landing_probe Require Import pgg_analysis_manifest.
++From kim_landing_probe Require Import pgg_tableau pgg_tableau_syntax.
+ From pgg_smc Require Import psl211_group psl211_orbit.

@@ -1,0 +1,10 @@
+--- production/manifest/pgg_tableau.v
++++ probe/pgg_tableau.v
+@@ -90,5 +90,6 @@
+ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
+                                     algebraic_rigidity input_encoding.
+-From pgg_smc Require Import pgg_instance pgg_analysis_manifest.
++From pgg_smc Require Import pgg_instance.
++From kim_landing_probe Require Import pgg_analysis_manifest.
+ 
+ Set Implicit Arguments.

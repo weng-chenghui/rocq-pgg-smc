@@ -1,0 +1,188 @@
+--- prod-nocomment
++++ probe-nocomment
+@@ -1,4 +1,6 @@
++Require Import Lia.
++From mathcomp Require Import zify.
+ From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
+ From mathcomp Require Import fintype tuple finfun finset fingroup perm.
+-From mathcomp Require Import reals boolp.
++From mathcomp Require Import reals boolp lra.
+ From infotheo Require Import fdist proba entropy.
+@@ -12,4 +14,5 @@
+ From pgg_smc Require Import kim_input_privacy.
+-From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
+-From pgg_smc Require Import pgg_tableau_syntax.
++From kim_landing_probe Require Import five_card_mixing.
++From kim_landing_probe Require Import pgg_analysis_manifest pgg_tableau.
++From kim_landing_probe Require Import pgg_tableau_syntax.
+ Set Implicit Arguments.
+@@ -164,5 +167,2 @@
+ Proof. by []. Qed.
+-Definition five_card_row_repeated_at_manifest_level
+-  : Tableau (apr_completion five_card_row_repeated) :=
+-  five_card_row_repeated_tableau.
+ Lemma five_card_row_biased_levelE :
+@@ -173,2 +173,163 @@
+   five_card_row_biased_tableau.
++Lemma kim_biased_epsE (R : realType) :
++  sw_bound_eps (kim_biased_marginal_bound R) = Num.sqrt 5%:R * (1 / 80).
++Proof. by rewrite /kim_biased_marginal_bound /= kim_lambda2_at_centi expr1. Qed.
++Lemma kim_biased_exact_le_eps (R : realType) :
++  1 / 50 <= sw_bound_eps (kim_biased_marginal_bound R) :> R.
++Proof.
++rewrite kim_biased_epsE -(@ler_pXn2r R 2 isT).
++2: by rewrite nnegrE divr_ge0.
++2: by rewrite nnegrE mulr_ge0 ?sqrtr_ge0 ?divr_ge0.
++rewrite [X in _ <= X]exprMn sqr_sqrtr ?ler0n //.
++rewrite !expr_div_n !expr1n [X in _ <= X]mulrA mulr1.
++rewrite ler_pdivrMr ?exprn_gt0 ?ltr0n // mulrAC.
++rewrite ler_pdivlMr ?exprn_gt0 ?ltr0n // mul1r.
++rewrite -!natrX -natrM ler_nat.
++by lia.
++Qed.
++Definition kim_biased_sample_cut_witnessE (R : realType)
++  : sw_rho_dist (kim_biased_marginal_bound R)
++  = sa_cut_dist (amf_sample kim_biased_family R tt) :=
++  ltac:(rewrite /kim_biased_marginal_bound /= rho_from_words_weighted1
++                kim_single_cut_distE;
++        congr fdistmap; apply: funext => k; exact: fc_kim_gensE).
++Definition kim_centi_cert (R : realType) (idx : unit)
++  : SpectralCert (amf_sample kim_centi_family R idx) :=
++  @MkSpectralCert R five_card_algebra five_card_params
++    (amf_sample kim_centi_family R idx)
++    (scb_bound (kim_security_bundle_centi R))
++    (esym (kim_centi_cut_distE R))
++    (sa_cut_dist (five_card_sample R))
++    (@kim_centi_cut_mixing R)
++    (@five_card_static_obs_const R).
++Definition kim_biased_cert (R : realType) (idx : unit)
++  : SpectralCert (amf_sample kim_biased_family R idx) :=
++  @MkSpectralCert R five_card_algebra five_card_params
++    (amf_sample kim_biased_family R idx)
++    (kim_biased_marginal_bound R)
++    (kim_biased_sample_cut_witnessE R)
++    (sa_cut_dist (five_card_sample R))
++    (@kim_biased_cut_mixing R)
++    (@five_card_static_obs_const R).
++Definition five_card_row_repeated_spectral_tableau : PublishedRow :=
++  five_card_committed
++    sample kim_centi_family
++    certify SpectralDecay kim_centi_cert
++    |> publish IdealFinite BaselineClassicalOnly.
++Definition five_card_row_biased_ideal_tableau : PublishedRow :=
++  five_card_committed
++    sample kim_biased_family
++    certify SpectralDecay kim_biased_cert
++    |> publish IdealFinite BaselineClassicalOnly.
++Lemma five_card_row_repeated_spectral_rowE :
++  published_row five_card_row_repeated_spectral_tableau
++  = five_card_row_repeated.
++Proof. by []. Qed.
++Lemma five_card_row_biased_ideal_rowE :
++  published_row five_card_row_biased_ideal_tableau = five_card_row_biased.
++Proof. by []. Qed.
++Fail Definition five_card_row_repeated_spectral_uniform_rowE
++  : published_row five_card_row_repeated_spectral_tableau
++    = five_card_row_uniform
++  := erefl.
++Lemma five_card_row_repeated_spectral_publishedE :
++  apr_completion (published_row five_card_row_repeated_spectral_tableau)
++    = AnalysisBridged
++  /\ apr_transfer (published_row five_card_row_repeated_spectral_tableau)
++     = IdealFinite
++  /\ apr_assumptions (published_row five_card_row_repeated_spectral_tableau)
++     = BaselineClassicalOnly.
++Proof. by []. Qed.
++Lemma five_card_row_biased_ideal_publishedE :
++  apr_completion (published_row five_card_row_biased_ideal_tableau)
++    = AnalysisBridged
++  /\ apr_transfer (published_row five_card_row_biased_ideal_tableau)
++     = IdealFinite
++  /\ apr_assumptions (published_row five_card_row_biased_ideal_tableau)
++     = BaselineClassicalOnly.
++Proof. by []. Qed.
++Fact five_card_pow2_39_split (R : realType) :
++  (2%:R : R)^-40 + 2%:R^-40 = 2%:R^-39.
++Proof. by rewrite [RHS]splitr exprSr invfM. Qed.
++Section kim_cert_numbers.
++Variable R : realType.
++Lemma kim_centi_cert_epsE (idx : unit) :
++  cert_eps (kim_centi_cert R idx)
++  = Num.sqrt 5%:R * (1 / 80) ^+ 7 + Num.sqrt 5%:R * (1 / 80) ^+ 7.
++Proof. by rewrite /cert_eps /= kim_lambda2_at_centi. Qed.
++Lemma kim_centi_cert_eps_lt (idx : unit) :
++  cert_eps (kim_centi_cert R idx) < 2%:R ^- 39.
++Proof.
++rewrite /cert_eps.
++have -> : (2%:R : R) ^- 39 = 2%:R ^- 40 + 2%:R ^- 40.
++  by rewrite five_card_pow2_39_split.
++by apply: ltrD; exact: kim_bound_centi.
++Qed.
++Lemma kim_biased_cert_epsE (idx : unit) :
++  cert_eps (kim_biased_cert R idx)
++  = Num.sqrt 5%:R * (1 / 80) + Num.sqrt 5%:R * (1 / 80).
++Proof. by rewrite /cert_eps !kim_biased_epsE. Qed.
++Lemma kim_biased_cert_eps_lt2 (idx : unit) :
++  cert_eps (kim_biased_cert R idx) < 2%:R.
++Proof.
++have Hs0 : 0 <= Num.sqrt 5%:R :> R by exact: sqrtr_ge0.
++have Hs : Num.sqrt 5%:R <= 3%:R :> R.
++  rewrite -(@ler_pXn2r R 2 isT).
++  2: by rewrite nnegrE sqrtr_ge0.
++  2: by rewrite nnegrE ler0n.
++  by rewrite sqr_sqrtr ?ler0n // -natrX ler_nat.
++by rewrite kim_biased_cert_epsE; lra.
++Qed.
++End kim_cert_numbers.
++Definition kim_centi_cert40 (R : realType) (idx : unit)
++  : SpectralCert (amf_sample kim_centi_family R idx) :=
++  @MkSpectralCert R five_card_algebra five_card_params
++    (amf_sample kim_centi_family R idx)
++    (kim_centi_marginal_bound40 R)
++    (esym (kim_centi_cut_distE R))
++    (sa_cut_dist (five_card_sample R))
++    (@kim_centi_cut_mixing40 R)
++    (@five_card_static_obs_const R).
++Lemma kim_centi_cert40_epsE (R : realType) (idx : unit) :
++  cert_eps (kim_centi_cert40 R idx) = 2%:R ^- 40 + 2%:R ^- 40 :> R.
++Proof. by []. Qed.
++Definition five_card_reprice39 : Reprice := fun R => Some (2%:R ^- 39 : R).
++Definition five_card_row_repeated39 : PublishedRowAt five_card_reprice39 :=
++  five_card_committed
++    ;;; sample_step of kim_centi_family
++    ;;; certify_spectral of kim_centi_cert40
++    ;;; conclude five_card_reprice39 of (fun R _ => five_card_pow2_39_split R)
++    ;;; publish BaselineClassicalOnly of IdealFinite.
++Fail Definition five_card_row_repeated39_bare
++  : PublishedRowAt five_card_reprice39 :=
++  five_card_committed
++    ;;; sample_step of kim_centi_family
++    ;;; certify_spectral of kim_centi_cert40
++    ;;; conclude five_card_reprice39 of five_card_pow2_39_split
++    ;;; publish BaselineClassicalOnly of IdealFinite.
++Definition kim_biased_cert_exact (R : realType) (idx : unit)
++  : SpectralCert (amf_sample kim_biased_family R idx) :=
++  @MkSpectralCert R five_card_algebra five_card_params
++    (amf_sample kim_biased_family R idx)
++    (kim_biased_marginal_bound_exact R)
++    (kim_biased_sample_cut_witnessE R)
++    (sa_cut_dist (five_card_sample R))
++    (@kim_biased_cut_mixing_exact R)
++    (@five_card_static_obs_const R).
++Fact five_card_inv50_split (R : realType) : (1 / 50 : R) + 1 / 50 = 1 / 25.
++Proof. by lra. Qed.
++Definition five_card_reprice_inv25 : Reprice := fun R => Some (1 / 25 : R).
++Definition five_card_row_biased_inv25
++  : PublishedRowAt five_card_reprice_inv25 :=
++  five_card_committed
++    ;;; sample_step of kim_biased_family
++    ;;; certify_spectral of kim_biased_cert_exact
++    ;;; conclude five_card_reprice_inv25 of (fun R _ => five_card_inv50_split R)
++    ;;; publish BaselineClassicalOnly of IdealFinite.
++Lemma five_card_row_biased_forms_publishedE :
++  published_row five_card_row_biased_ideal_tableau
++  = published_row five_card_row_biased_inv25.
++Proof. by []. Qed.
++Lemma five_card_reprice_inv25_lt2 (R : realType) : (1 / 25 : R) < 2%:R.
++Proof. by lra. Qed.
+ Lemma five_card_row_repeated_endpoint_lt (R : realType) (s : 'I_5) :

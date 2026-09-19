@@ -1,0 +1,9 @@
+--- production/manifest/pgg_tableau_syntax.v
++++ probe/pgg_tableau_syntax.v
+@@ -108,5 +108,5 @@
+ From pgg_reconstruct Require Import pgg_sharing_framework.
+ From pgg_smc Require Import pgg_instance pgg_functionality.
+-From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
++From kim_landing_probe Require Import pgg_analysis_manifest pgg_tableau.
+ 
+ Set Implicit Arguments.

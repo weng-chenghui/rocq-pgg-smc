@@ -1,0 +1,8 @@
+--- prod-nocomment
++++ probe-nocomment
+@@ -15,3 +15,4 @@
+                                     algebraic_rigidity input_encoding.
+-From pgg_smc Require Import pgg_instance pgg_analysis_manifest.
++From pgg_smc Require Import pgg_instance.
++From kim_landing_probe Require Import pgg_analysis_manifest.
+ Set Implicit Arguments.

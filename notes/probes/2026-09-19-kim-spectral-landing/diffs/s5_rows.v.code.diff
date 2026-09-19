@@ -1,0 +1,9 @@
+--- prod-nocomment
++++ probe-nocomment
+@@ -10,4 +10,4 @@
+ From pgg_smc Require Import s5_profile s5_exec s5_models.
+-From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
+-From pgg_smc Require Import pgg_tableau_syntax.
++From kim_landing_probe Require Import pgg_analysis_manifest pgg_tableau.
++From kim_landing_probe Require Import pgg_tableau_syntax.
+ Set Implicit Arguments.

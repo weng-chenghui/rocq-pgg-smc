@@ -1,0 +1,30 @@
+--- prod-nocomment
++++ probe-nocomment
+@@ -23,2 +23,3 @@
+ From pgg_smc Require Import five_card_exec kim_input_privacy five_card_models.
++From kim_landing_probe Require Import five_card_mixing.
+ Set Implicit Arguments.
+@@ -84,4 +85,8 @@
+ Definition deal_centi_lt := @kim_deal_centi_lt.
++Definition centi_cut_mixing := @kim_centi_cut_mixing.
++Definition biased_cut_mixing := @kim_biased_cut_mixing.
++Definition static_obs_const := @five_card_static_obs_const.
+ Definition exec_transfer_status : TransferStatus := StaticExecutedOnly.
+-Definition repeated_transfer_status : TransferStatus := NoModelComparison.
++Definition biased_transfer_status : TransferStatus := IdealFinite.
++Definition repeated_transfer_status : TransferStatus := IdealFinite.
+ End FiveCardAnalysis.
+@@ -117,2 +122,7 @@
+       <= Num.Def.sqrtr 5%:R * kim_lambda2 eps ^+ L).
++Timeout 60 Check (FiveCardAnalysis.centi_cut_mixing :
++  forall R : realType,
++    var_dist (sw_rho_dist (scb_bound (kim_security_bundle_centi R)))
++             (sa_cut_dist (five_card_sample R))
++    <= sw_bound_eps (scb_bound (kim_security_bundle_centi R))).
+ Timeout 60 Check
+@@ -120,2 +130,4 @@
+ Timeout 60 Check
+-  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).
++  (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).
++Timeout 60 Check
++  (erefl : FiveCardAnalysis.repeated_transfer_status = IdealFinite).

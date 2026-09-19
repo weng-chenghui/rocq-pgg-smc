@@ -1,0 +1,11 @@
+--- production/instances/pgl27/pgl27_rows.v
++++ probe/pgl27_rows.v
+@@ -99,6 +99,6 @@
+ From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
+ From pgg_smc Require Import pgl27_exec pgl27_models.
+-From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
+-From pgg_smc Require Import pgg_tableau_syntax.
++From kim_landing_probe Require Import pgg_analysis_manifest pgg_tableau.
++From kim_landing_probe Require Import pgg_tableau_syntax.
+ 
+ Set Implicit Arguments.
