@@ -424,3 +424,11 @@ Definition pgl27_exact_family : AnalysisModelFamily pgl27_observed :=
 Definition pgl27_word_family : AnalysisModelFamily pgl27_observed :=
   @MkAnalysisModelFamily pgl27_observed (fun R => R.-fdist bool)
     (fun R p => @pgl27_word_sample R p).
+
+(** pgl27_prior_exact_family — the exact shuffle as an analysis model family
+    indexed by the prior. Its index type is the one pgl27_word_family carries,
+    so a row over the word model and a row over this one are read at one
+    index. *)
+Definition pgl27_prior_exact_family : AnalysisModelFamily pgl27_observed :=
+  @MkAnalysisModelFamily pgl27_observed (fun R => R.-fdist bool)
+    (fun R p => @pgl27_prior_sample R p).

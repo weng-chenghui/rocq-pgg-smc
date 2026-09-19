@@ -696,6 +696,69 @@ Local Open Scope ring_scope.
 (* colour results of the same instance are about a different dealer and a     *)
 (* different observer and are no part of this row.                            *)
 (*                                                                            *)
+(*     Row 10: eight-card orbit instance, exact uniform cut at a free prior   *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol family and model | PGL(2,7) orbit deck, exact uniform cut, the  *)
+(*                               law of the dealt secret left free |          *)
+(* | profile alias      | PGL27Analysis.profile |                             *)
+(* | execution alias    | PGL27Analysis.exec_plug |                           *)
+(* | observed alias     | PGL27Analysis.observed |                            *)
+(* | sample alias       | PGL27Analysis.prior_sample; the row's typed model   *)
+(*                        witness is PGL27Analysis.prior_exact_family, the    *)
+(*                        family indexed by the secret prior |                *)
+(* | observers          | PGL27Analysis.static_view                           *)
+(*                          : {ffun 'I_8 -> 'I_8}, random variable on the     *)
+(*                            law of prior_sample at the row's index;         *)
+(*                        PGL27Analysis.secret : bool, on the same law |      *)
+(* | distribution-to-observer bridges | pgl27_prior_viewE of                  *)
+(*                        instances/pgl27/pgl27_proximity.v, which identifies *)
+(*                        the framework's reading of a coalition at this      *)
+(*                        model with PGL27Analysis.static_view |              *)
+(* | bound or certificate | none: this row is published through the exact     *)
+(*                          arm, whose witness carries independence and no    *)
+(*                          number |                                          *)
+(* | final bridge theorem | pgl27_prior_exact_witness of                      *)
+(*                          instances/pgl27/pgl27_proximity.v, whose          *)
+(*                          independence field is pgl27_view_indep_gen |      *)
+(* | correctness theorem  | PGL27Analysis.observed_recovers |                 *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | none: this model draws the cut uniformly from the *)
+(*                          group already, so it compares no idealized model. *)
+(*                          It is the model a proximity certificate over the  *)
+(*                          word path names as its ideal |                    *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | StaticExecutedOnly |                              *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
+(* | typed row            | pgl27_row_prior_exact |                           *)
+(*                                                                            *)
+(* Capabilities, one line per (theorem, distribution, observer, notion):      *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | pgl27_view_indep_gen | the law of prior_sample at the row's index        *)
+(*   | static_view, through pgl27_prior_viewE | exact privacy |               *)
+(* | observed_recovers | none, the statement is distribution-free             *)
+(*   | the executed endpoint list | correctness |                             *)
+(*                                                                            *)
+(* Level justification. profile gives Algebraic; exec_plug is indexed by      *)
+(* profile, giving Executable; observed is the ObservedExecution over that    *)
+(* profile and plug, giving Observed; prior_sample is a SampleAdapter over    *)
+(* that plug and pgl27_prior_viewE identifies the framework's reading of a    *)
+(* coalition at its sample points with static_view, so the pushforward of     *)
+(* this model's law along the framework's reader is the pushforward along     *)
+(* static_view, giving Sampled; pgl27_view_indep_gen is a security theorem    *)
+(* stated at this model's own law and at static_view, giving AnalysisBridged. *)
+(* The privacy line quantifies over coalitions of at most three of the eight  *)
+(* seats, the profile's own privacy threshold being four, and it holds at     *)
+(* every law of the dealt secret, three-transitivity of the group saying      *)
+(* nothing about how that secret is drawn. Row 1 records the same instance    *)
+(* and the same cut at the uniform secret alone, its family being indexed by  *)
+(* the unit type. The two rows agree in their other four coordinates and      *)
+(* differ in the model family, and the member of this row's family at the     *)
+(* uniform prior is the member of Row 1's at tt.                              *)
+(*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
 (* These are public observers and correctness statements of the four facades  *)
@@ -911,6 +974,21 @@ Definition s5_row_word : AnalysisPathRow :=
 Definition psl211_row_alldecks : AnalysisPathRow :=
   @MkAnalysisPathRow PSL211Analysis.observed AnalysisBridged
     PSL211Analysis.exact_family StaticExecutedOnly BaselineClassicalOnly.
+
+(** The AnalysisPathRow for the eight-card orbit instance under its exact
+    uniform shuffle at a law of the dealt secret left free:
+    PGL27Analysis.observed paired with the prior-indexed exact family,
+    AnalysisBridged, StaticExecutedOnly, BaselineClassicalOnly.
+    pgl27_view_indep_gen is proved at this row's own sample distribution and
+    observer, which is what reaches AnalysisBridged; the shuffle is already
+    the exact uniform distribution on the group, so no idealized model is
+    compared. It differs from pgl27_row_exact in its model family, whose
+    index is the law of the dealt secret where the other's is the unit type,
+    and that index is what lets a row over the word model and a row over this
+    one be read at one law of the secret. *)
+Definition pgl27_row_prior_exact : AnalysisPathRow :=
+  @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
+    PGL27Analysis.prior_exact_family StaticExecutedOnly BaselineClassicalOnly.
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -1906,7 +1984,7 @@ Timeout 60 Check
   (erefl : PSL211Analysis.exact_transfer_status = StaticExecutedOnly).
 
 (******************************************************************************)
-(*     The deterministic checker: the nine typed rows                         *)
+(*     The deterministic checker: the ten typed rows                          *)
 (*                                                                            *)
 (* One Check per row against AnalysisPathRow, one erefl pin per status       *)
 (* field, and one typed check on the model slot: a mandatory family at        *)
@@ -1993,6 +2071,16 @@ Timeout 60 Check
 Timeout 60 Check
   (erefl : apr_assumptions psl211_row_alldecks = BaselineClassicalOnly).
 
+Timeout 60 Check (pgl27_row_prior_exact : AnalysisPathRow).
+Timeout 60 Check (apr_model pgl27_row_prior_exact
+  : AnalysisModelFamily PGL27Analysis.observed).
+Timeout 60 Check
+  (erefl : apr_completion pgl27_row_prior_exact = AnalysisBridged).
+Timeout 60 Check
+  (erefl : apr_transfer pgl27_row_prior_exact = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions pgl27_row_prior_exact = BaselineClassicalOnly).
+
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)
 (*                                                                            *)
@@ -2006,6 +2094,9 @@ Timeout 60 Check
 
 Timeout 60 Check (fun (R : realType) (p : R.-fdist bool) =>
   amf_sample (apr_model pgl27_row_word) R p).
+
+Timeout 60 Check (fun (R : realType) (p : R.-fdist bool) =>
+  amf_sample (apr_model pgl27_row_prior_exact) R p).
 
 Timeout 60 Check (fun (R : realType) (secretP : R.-fdist 'I_5) (L : nat) =>
   amf_sample (apr_model s5_row_word) R (secretP, L)).

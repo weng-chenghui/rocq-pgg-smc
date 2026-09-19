@@ -173,12 +173,19 @@ Definition fixed_exact_sample := @pgl27_fixed_sample.
 (** fixed_word_sample — the word model at a fixed secret. *)
 Definition fixed_word_sample := @pgl27_fixed_word_sample.
 
+(** prior_sample — the exact-uniform model at an arbitrary secret prior. *)
+Definition prior_sample := @pgl27_prior_sample.
+
 (** exact_family — the exact-shuffle model as a unit-indexed typed family. *)
 Definition exact_family := pgl27_exact_family.
 
 (** word_family — the two-hundred-letter word model family, indexed by the
     secret prior. *)
 Definition word_family := pgl27_word_family.
+
+(** prior_exact_family — the exact-shuffle model family indexed by the secret
+    prior, carrying the index type word_family carries. *)
+Definition prior_exact_family := pgl27_prior_exact_family.
 
 (** sample_cut_distE — the exact model's cut distribution is the marginal
     bound's shuffle. *)

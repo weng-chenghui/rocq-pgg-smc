@@ -882,3 +882,34 @@ tokens before and after and identical, `var_dist_supp.v` 1321 and identical,
 again, `pgl27_proximity.v` rc 0 in 4.9 s and `landing_fidelity.v` rc 0 in
 29.3 s, both with no sentence over five seconds. That is the state this
 record describes.
+
+## As built (2026-09-20)
+
+Fix pass 2 was audited by the main session: comment-stripped code tokens of
+`pgl27_proximity.v`, `lib/var_dist_supp.v` and `landing_fidelity.v` are
+identical to 538862a (script), and the changed passages were read against
+F1 to F6, F8 and F9 of `audit-landing3-fix1.md`. The main session found the
+last sentence that pass first wrote for the third guard to be a false universal
+(it spoke of every proximity certificate over the instance, and the second
+guard writes one that reads its two models at two indices); the prover
+rewrote it to speak of `pgl27_word_proximity_cert` alone (commit deec9a5).
+
+The seven staged files were copied with `cp` to `lib/var_dist_supp.v`,
+`instances/pgl27/pgl27_exec.v`, `instances/pgl27/pgl27_models.v`,
+`instances/pgl27/pgl27_analysis.v`, `manifest/pgg_analysis_manifest.v`,
+`manifest/pgg_analysis_client.v` and `instances/pgl27/pgl27_proximity.v`;
+`cmp` reports each copy byte-identical to its staged source. `_CoqProject`
+gained `instances/pgl27/pgl27_proximity.v` after
+`instances/kim2025/five_card_proximity.v`. Production was recompiled
+single-file in dependency order, nineteen files, all rc=0.
+
+As-built fidelity: `landing_fidelity.v`, unchanged, compiled from a scratch
+directory against production's load path only: rc=0 in 30 s, 29 `Axioms:`
+blocks, each the three classical axioms, none closed, as in the staged run.
+Its seven module-qualified provenance `Check`s now hold of production.
+
+Left for a later pass over production comments, recorded by the audits and not
+changed here: the docstring of `kim_biased_proximity_cert_idealE` in
+`instances/kim2025/five_card_proximity.v` calls the witness the row's port
+where the lemma equates the port built from the witness; the verb "spend" for
+the number of times an arm uses a bound is the owner's open question.
