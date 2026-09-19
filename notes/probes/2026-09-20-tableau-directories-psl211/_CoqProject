@@ -1,0 +1,49 @@
+-arg -w -arg -projection-no-head-constant
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -notation-overridden
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -notation-incompatible-format
+
+-R ../../../lib pgg_smc
+-R ../../../protocol pgg_smc
+-R ../../../groups pgg_smc
+-R ../../../security pgg_smc
+-R ../../../smc pgg_smc
+-R ../../../reconstruct pgg_reconstruct
+-R ../../../instances/denboer1989 pgg_smc
+-R ../../../instances/kim2025 pgg_smc
+-R ../../../instances/s5 pgg_smc
+-R ../../../instances/pgl27 pgg_smc
+-R ../../../instances/psl211 pgg_smc
+-R ../../../manifest pgg_smc
+-R ../../../legacy/groups pgg_smc
+-R ../../../legacy/instances/abelian pgg_smc
+-R ../../../legacy/instances/cyclic pgg_smc
+-R ../../../legacy/instances/monster pgg_smc
+-R ../../../legacy/instances/oc pgg_smc
+-R ../../../legacy/instances/s5x5 pgg_smc
+-R ../../../legacy/instances/star pgg_smc
+-R ../../../legacy/protocol pgg_smc
+-R ../../../legacy/reconstruct pgg_reconstruct
+-R ../../../legacy/security pgg_smc
+
+-Q . tableau_dirs_psl211
+
+# The staged root is mapped to pgg_smc AFTER production's AND after the -Q .
+# line, because Rocq 9.0.0 resolves a Require to the LAST matching -R or -Q
+# entry.  Any other order loads production's psl211_word_proximity instead of
+# the staged reduced copy.
+#
+# -R is recursive, so staged/instances/psl211/tableau is bound by the line
+# below and needs no -R line of its own; the S5 pilot measured that a file
+# there is pgg_smc.tableau.<name> and that a short Require resolves it.
+-R staged/instances/psl211 pgg_smc
+
+staged/instances/psl211/psl211_word_proximity.v
+staged/instances/psl211/tableau/psl211_tableau_algebraic.v
+staged/instances/psl211/tableau/psl211_tableau_executable.v
+staged/instances/psl211/tableau/psl211_tableau_observed.v
+staged/instances/psl211/tableau/psl211_tableau_sampled.v
+staged/instances/psl211/tableau/psl211_tableau_analysis_bridged.v
+staged/instances/psl211/tableau/psl211_tableau_checks.v
+fidelity.v

@@ -181,3 +181,31 @@ continues from; AnalysisBridged, with one `_sampledE` per re-cut row; the
 checks file; the importer's `Require`; then `verify.py`, the fidelity and
 baseline compile, the assumption diff and the scans. Never `make`, one Rocq
 process at a time, nothing written into a production directory.
+
+## Addendum after PSL(2,11) (2026-09-20)
+
+Rules added by the second instance; its scripts are the ones to copy:
+`notes/probes/2026-09-20-tableau-directories-psl211/` (`verify.py`,
+`gen_fidelity.py`, `stage_edits.py`, `compile.py`).
+
+1. The pilot's docstring regex ran past a `Local Notation`, which is not in its
+   declaration alternation, and attached that notation's docstring to the next
+   declaration. Use the PSL(2,11) `verify.py`, whose pattern stops at the first
+   `*)`. PGL(2,7) and five-card have `Local Notation` blocks.
+2. When an instance has a second source file that imports the rows file (a
+   proximity file), that file is CUT: certificate values, published rows and
+   statements about them go to `<inst>_tableau_analysis_bridged.v`, recorded
+   failures about them to the checks file; lemmas about laws and distances
+   stay, and the reduced file loses its `Require` of the rows file, so the
+   surviving arrow runs from the mathematics up into the tableau. The reduced
+   file is staged under `staged/` in its production position.
+3. Comment-only repoints of OTHER production files that cite a retired file
+   name are staged under `staged-comments/`, never under `staged/`: `staged/`
+   is an `-R` root and a copy there shadows the module it copies.
+4. Declarations that move from a file whose last `Local Open Scope` differs
+   from the phase files' are re-read under another scope block. Pin it: the
+   baseline file ascribes each of them at its production statement under the
+   phase files' block.
+5. A phase header names separately what the manifest publishes and what this
+   development's programs do; check which manifest rows belong to the instance
+   by reading the manifest, not by the row's number.
