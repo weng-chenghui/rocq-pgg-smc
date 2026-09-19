@@ -196,7 +196,7 @@ secret. The distance field is stated on the last.
 | `pgl27_exact_family`, `pgl27_word_family`, `pgl27_row_word_certE` | `instances/pgl27/pgl27_models.v:410`, `:417`, `pgl27_rows.v:309` | The two families with different indices, and the `erefl` pattern. |
 | `five_card_exact_witness`, `five_card_row_uniform_tableau`, `kim_biased_family`, `kim_centi_family` | `instances/kim2025/five_card_rows.v:321`, `:338`, `five_card_models.v` | The first carrier. |
 | `psl211_exact_family`, `psl211_exact_witness`, `psl211_alldecksP`, `psl211_word_mixing` | `instances/psl211/psl211_models.v:516`, `psl211_rows.v:151`, `psl211_models.v:200`, `psl211_mixing.v:545` | The ideal of PSL(2,11) and the distance of its word cut. |
-| `var_dist_fdistmap`, `var_dist_le2`, the triangle inequality | `security/pgg_collusion_bound.v:126`, the Kim probe, the PSL(2,11) probe's audit | Data processing, the ceiling, and a lemma infotheo lacks. |
+| `var_dist_fdistmap`, `var_dist_triangle`, `leq_var_dist`, `var_dist_le2` | `security/pgg_collusion_bound.v:126`, `:43`, infotheo `probability/variation_dist.v:51`, the Kim probe | Data processing, the triangle inequality, the pointwise bound, and the ceiling, which alone is not yet in the tree. |
 
 ## Soundness invariants
 
