@@ -214,6 +214,7 @@ instances/psl211/psl211_exec.v
 instances/psl211/psl211_endpoints.v
 instances/psl211/psl211_alldecks.v
 instances/psl211/psl211_models.v
+instances/psl211/psl211_word_model.v
 instances/psl211/psl211_recovery.v
 instances/psl211/psl211_analysis.v
 manifest/pgg_analysis_manifest.v
@@ -227,4 +228,5 @@ instances/kim2025/five_card_proximity.v
 instances/pgl27/pgl27_proximity.v
 instances/psl211/psl211_reading_constancy.v
 instances/psl211/psl211_rows.v
+instances/psl211/psl211_word_proximity.v
 manifest/pgg_analysis_client.v

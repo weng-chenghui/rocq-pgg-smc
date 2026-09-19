@@ -1073,3 +1073,33 @@ No sentence of a landed file is over 5 s, and the timings are within noise of
 fix pass 1's, which is what a comment-only pass should give.
 
 Nothing was committed.
+
+## As built (2026-09-20)
+
+Fix pass 2 was audited by the main session: comment-stripped code tokens of
+the six landed files and of `landing_fidelity.v` are identical to a3095fc
+(script), the sixteen chain copies are byte-identical to production, and the
+changed passages were read against F1 to F6 and F8 of
+`audit-landing4-fix1.md` (commit f9fc300).
+
+The six staged files were copied with `cp` to
+`instances/psl211/psl211_word_model.v`,
+`instances/psl211/psl211_word_proximity.v`,
+`instances/psl211/psl211_analysis.v`, `manifest/pgg_analysis_manifest.v`,
+`manifest/pgg_analysis_client.v` and
+`instances/psl211/psl211_reading_constancy.v`; `cmp` reports each copy
+byte-identical to its staged source. `_CoqProject` gained
+`instances/psl211/psl211_word_model.v` after `instances/psl211/psl211_models.v`
+and `instances/psl211/psl211_word_proximity.v` after
+`instances/psl211/psl211_rows.v`. Production was recompiled single-file in
+dependency order, fifteen files, all rc=0. `psl211_endpoints.v` was not
+compiled by any step of the four landings.
+
+As-built fidelity: `landing_fidelity.v`, unchanged, compiled from a scratch
+directory against production's load path only: rc=0 in 273 s, 24 `Axioms:`
+blocks, each the three classical axioms, none closed, as in the staged run.
+
+Left for a later pass over production comments: the header sentence of
+`psl211_word_proximity.v` that speaks of reading a row "in one column" with a
+sibling (a table outside the development), and the five inherited sentences of
+`psl211_reading_constancy.v` that use an economic word for a relation.

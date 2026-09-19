@@ -40,6 +40,7 @@
 (*   deck-level coalition observer            -> static_view                  *)
 (*   exact-uniform sample model               -> exact_sample,                *)
 (*                                               exact_family                 *)
+(*   584-letter word sample model             -> word_sample, word_family     *)
 (*   distribution-to-observer bridges         -> cut_distE,                   *)
 (*                                               exact_coalition_distE,       *)
 (*                                               content_traceE               *)
@@ -74,7 +75,7 @@ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     input_encoding design_privacy.
 From pgg_smc Require Import psl211_group psl211_orbit psl211_scheme.
 From pgg_smc Require Import psl211_profile psl211_exec psl211_endpoints.
-From pgg_smc Require Import psl211_alldecks psl211_models.
+From pgg_smc Require Import psl211_alldecks psl211_models psl211_word_model.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -152,9 +153,12 @@ Definition secret := @psl211_alldecks_secret.
 (******************************************************************************)
 (* ===== 4. Models ===== *)
 (*                                                                            *)
-(* The model is followed by the equations that identify its cut and its       *)
-(* coalition distributions, so that a security statement about a named        *)
-(* distribution can be attached to a named executed observer.                 *)
+(* The all-decks model is followed by the equations that identify its cut and *)
+(* its coalition distributions, so that a security statement about a named    *)
+(* distribution can be attached to a named executed observer. The word model  *)
+(* carries its own cut equation psl211_word_cut_distE at                      *)
+(* instances/psl211/psl211_word_model.v, and is aliased here for the sample   *)
+(* and model slots of its own manifest row.                                   *)
 (******************************************************************************)
 
 (** exact_sample — the all-decks model as a sample adapter: one sample point
@@ -162,9 +166,19 @@ Definition secret := @psl211_alldecks_secret.
     description and the cut the group element the run is dealt at. *)
 Definition exact_sample := @psl211_alldecks_sample.
 
+(** word_sample — the 584-letter word model as a sample adapter: the sample
+    space and the law of the deck description of exact_sample, with the cut
+    drawn by evaluating a word in the three generators. *)
+Definition word_sample := @psl211_word_sample.
+
 (** exact_family — that model as a unit-indexed typed family, one member at
     every real field, the model having no parameter to range over. *)
 Definition exact_family := psl211_exact_family.
+
+(** word_family — the word model as a unit-indexed typed family, carrying the
+    index type exact_family carries, so a row over each of the two models is
+    read at one index. *)
+Definition word_family := psl211_word_family.
 
 (** cut_distE — the model's cut distribution is the uniform law on the
     shuffle group. *)

@@ -11,8 +11,9 @@
 (* whatever the run argument. This file restates that field as a standalone   *)
 (* proposition, checks the restatement against the record, and refutes it at  *)
 (* PSL(2,11) in the two run modes the instance carries. The instance          *)
-(* publishes its all-decks row through the exact arm, and this file is what   *)
-(* the input-indistinguishability arm would cost it.                          *)
+(* publishes its all-decks row through the exact arm and its word row through *)
+(* the proximity arm, in instances/psl211/psl211_word_proximity.v, and this   *)
+(* file is what the input-indistinguishability arm would cost it.             *)
 (*                                                                            *)
 (* All-decks mode. The run argument is a whole deck description: one of the   *)
 (* two chiralities, one of the 132 block lines of that chirality's Steiner    *)
@@ -38,7 +39,10 @@
 (* publishes at least 1/660. psl211_alldecks_no_zero_eps_cert states the same *)
 (* at epsilon zero, which is the epsilon profile_eps_psl211 of                *)
 (* instances/psl211/psl211_profile.v gives this instance's single-card        *)
-(* marginal bound.                                                            *)
+(* marginal bound. The exclusion covers the input-indistinguishability arm    *)
+(* alone: a proximity certificate carries no shuffle bound and no constancy   *)
+(* field, and the row of instances/psl211/psl211_word_proximity.v publishes   *)
+(* 2^-40 over the word model through the proximity arm.                       *)
 (*                                                                            *)
 (* Dealt mode. The run argument is the chirality itself, so here the field    *)
 (* is exactly constancy in the secret, and it still fails: three seats see a  *)
@@ -66,7 +70,9 @@
 (* separate step that the parametrization enumerates the valid decks once     *)
 (* each. Nothing here says the word row is excluded outright:                 *)
 (* psl211_alldecks_constancy_false_word584 reaches eps < 1/1320 - 2^-40, and  *)
-(* no weighted-word sample adapter exists for this instance. How wide each    *)
+(* the row published over the weighted-word adapter psl211_word_sample in     *)
+(* instances/psl211/psl211_word_proximity.v carries a proximity certificate,  *)
+(* which has no constancy field to refute. How wide each                      *)
 (* failure is stays measured and not proved; the reading multiplicity         *)
 (* diagnostics are recorded in notes/probes/2026-09-19-psl211-sc-const/.      *)
 (*                                                                            *)
@@ -118,7 +124,9 @@
 (*                              single-card marginal bound                    *)
 (*   psl211_alldecks_constancy_false_word584                                  *)
 (*                           == the field is false at every ideal within eps  *)
-(*                              of the 584-letter word shuffle's cut law      *)
+(*                              of the 584-letter word shuffle's cut law,     *)
+(*                              once twice the sum of eps and 2^-40 stays     *)
+(*                              below 1/660                                   *)
 (*   psl211_dealt_constancy_false                                             *)
 (*                           == the field is false at the group-uniform       *)
 (*                              ideal under the dealt parameters              *)
@@ -733,7 +741,7 @@ exact: (@psl211_alldecks_no_small_eps_cert R cert Hlt).
 Qed.
 
 (******************************************************************************)
-(*     The word model, which this tree carries no sample adapter for          *)
+(*     The word model, whose sample adapter is psl211_word_sample             *)
 (******************************************************************************)
 
 (** psl211_alldecks_constancy_false_word — take a cut law W within d of the
@@ -763,10 +771,15 @@ Qed.
     group order. The dealer performs a finite word and not an exact uniform
     draw, and the 2^-40 is the whole information-theoretic price of that
     replacement, while the eps is a certificate's own distance field. It is
-    stated on the cut law rather than on a certificate because no
-    weighted-word SampleAdapter exists in this tree, so there is no adapter
-    whose cut is this law and no ic_Hd through which a certificate's ideal
-    could be held near it. *)
+    stated on the cut law rather than on a certificate because it quantifies
+    over every law within eps of that cut: a certificate whose adapter draws
+    this cut is reached at its own shuffle bound, through ic_close read with
+    ic_Hd, and no adapter has to be named here. The weighted-word adapter
+    psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut,
+    and the row published over it in
+    instances/psl211/psl211_word_proximity.v carries a proximity certificate,
+    and IdealProximityCert has no constancy field, so this refutation denies
+    no field of that row's certificate. *)
 Lemma psl211_alldecks_constancy_false_word584 (R : realType)
     (ideal : R.-fdist cutT) (eps : R) :
   var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R))

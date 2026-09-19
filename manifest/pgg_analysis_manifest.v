@@ -15,6 +15,11 @@
 (* claimed, its exact capability, its completion level and its assumption     *)
 (* status.                                                                    *)
 (*                                                                            *)
+(* A row records no security arm. Which arm a published program carries is    *)
+(* read off that program by security_arm_of of manifest/pgg_tableau.v, so     *)
+(* which arm a path carries is told from the certificate its table names and  *)
+(* not from a field of the record.                                            *)
+(*                                                                            *)
 (* Each row is also a typed value of AnalysisPathRow below, carrying the      *)
 (* observed execution of the path, its typed model slot apr_model, an         *)
 (* AnalysisModelFamily witness mandatory at Sampled and AnalysisBridged and   *)
@@ -662,7 +667,9 @@ Local Open Scope ring_scope.
 (* | model transfer       | none claimed |                                    *)
 (* | missing premise      | none: the cut this model draws is the uniform     *)
 (*                          distribution on the group already, so the path    *)
-(*                          compares no idealized model |                     *)
+(*                          compares no idealized model. It is the model the  *)
+(*                          proximity certificate of Row 11 names as its      *)
+(*                          ideal |                                           *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
@@ -758,6 +765,95 @@ Local Open Scope ring_scope.
 (* the unit type. The two rows agree in their other four coordinates and      *)
 (* differ in the model family, and the member of this row's family at the     *)
 (* uniform prior is the member of Row 1's at tt.                              *)
+(*                                                                            *)
+(*     Row 11: twelve-card chirality instance, 584-letter word dealer         *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol family and model | PSL(2,11) twelve-card chirality deck; the    *)
+(*                               deck description drawn uniformly over all of *)
+(*                               them and the cut drawn by evaluating a word  *)
+(*                               of 584 letters, each letter uniform over the *)
+(*                               three generators, the two independent |      *)
+(* | profile alias      | PSL211Analysis.profile |                            *)
+(* | execution alias    | PSL211Analysis.exec_plug |                          *)
+(* | observed alias     | PSL211Analysis.observed |                           *)
+(* | sample alias       | PSL211Analysis.word_sample; the row's typed model   *)
+(*                        witness is PSL211Analysis.word_family, the family   *)
+(*                        indexed by unit |                                   *)
+(* | observers          | sa_coalition_view of                                *)
+(*                        security/pgg_sample_adapter.v at word_sample        *)
+(*                          : {ffun 'I_12 -> 'I_12}, executed;                *)
+(*                        static_coalition_obs of protocol/pgg_instance.v     *)
+(*                          : {ffun 'I_12 -> 'I_12}, the reading the          *)
+(*                            certificate's distance field is stated at;      *)
+(*                        PSL211Analysis.secret : bool, a random variable on  *)
+(*                          the law of word_sample |                          *)
+(* | distribution-to-observer bridges | psl211_word_sampleP_E and             *)
+(*                        psl211_word_cut_distE of                            *)
+(*                        instances/psl211/psl211_word_model.v, which name    *)
+(*                        the adapter's own law and its cut law; the row's    *)
+(*                        reading is the framework's own sa_coalition_view at *)
+(*                        word_sample, which the adapter's projections make   *)
+(*                        the all-decks reading, so no facade-level reading   *)
+(*                        bridge is named |                                   *)
+(* | bound or certificate | psl211_word_proximity_cert of                     *)
+(*                          instances/psl211/psl211_word_proximity.v, whose   *)
+(*                          number is 2^-40 and whose distance field is       *)
+(*                          psl211_word_proximity_close |                     *)
+(* | final bridge theorem | psl211_word_view_proximity of                     *)
+(*                          instances/psl211/psl211_word_proximity.v |        *)
+(* | correctness theorem  | PSL211Analysis.observed_recovers,                 *)
+(*                          PSL211Analysis.secret_expectedE |                 *)
+(* | model transfer       | an idealized uniform shuffle replaced by a word   *)
+(*                          of 584 letters: psl211_word_law_le40 bounds the   *)
+(*                          two models' laws at 2^-40 and                     *)
+(*                          psl211_word_proximity_close carries that number   *)
+(*                          to the joint law of a coalition's reading with    *)
+(*                          the chirality, in the sum of absolute             *)
+(*                          differences |                                     *)
+(* | missing premise      | none: the row's certificate carries its own       *)
+(*                          distance field |                                  *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | IdealFinite |                                     *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
+(* | typed row            | psl211_row_word |                                 *)
+(*                                                                            *)
+(* Capabilities, one line per (theorem, distribution, observer, notion):      *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | psl211_word_view_proximity | the law of word_sample                      *)
+(*   | sa_coalition_view at a coalition of at most five of the twelve seats   *)
+(*   | proximity to a private ideal model |                                   *)
+(* | observed_recovers | none, the statement is distribution-free             *)
+(*   | the executed endpoint list | correctness |                             *)
+(* | secret_expectedE | none, the statement is distribution-free              *)
+(*   | the value the run recovers | correctness |                             *)
+(*                                                                            *)
+(* Level justification. profile gives Algebraic; exec_plug is indexed by      *)
+(* profile, giving Executable; observed is the ObservedExecution over that    *)
+(* profile and plug, giving Observed; word_sample is a SampleAdapter over     *)
+(* that plug and psl211_word_cut_distE identifies its cut distribution with   *)
+(* the 584-letter word law, giving Sampled; psl211_word_view_proximity is a   *)
+(* security theorem stated at this model's own law and at that model's        *)
+(* coalition reader, giving AnalysisBridged. The proximity line quantifies    *)
+(* over coalitions of at most five of the twelve seats, the profile's own     *)
+(* privacy threshold being six. Its number bounds a sum of absolute           *)
+(* differences, which is twice the total variation distance of the            *)
+(* literature, so a distinguisher's advantage against this row is at most     *)
+(* 2^-41. Row 9 records the same instance and the same execution at the       *)
+(* uniform cut, and the model of Row 9 is the ideal this row's certificate    *)
+(* is measured against. The two models differ in the law of the cut alone.    *)
+(* The two rows differ in the model family and in the transfer status, and    *)
+(* they carry different statements, Row 9 exact independence and this row a   *)
+(* bound on the distance to that independent model. The propositions refuted  *)
+(* in instances/psl211/psl211_reading_constancy.v are instances of            *)
+(* coalition_reading_constancy, which                                         *)
+(* indistinguishability_cert_reading_constancy reads as ic_const, the fifth   *)
+(* field of an input-indistinguishability certificate and a field a proximity *)
+(* certificate has no counterpart of. Those refutations stay true beside this *)
+(* row.                                                                       *)
 (*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
@@ -989,6 +1085,21 @@ Definition psl211_row_alldecks : AnalysisPathRow :=
 Definition pgl27_row_prior_exact : AnalysisPathRow :=
   @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
     PGL27Analysis.prior_exact_family StaticExecutedOnly BaselineClassicalOnly.
+
+(** The AnalysisPathRow for the twelve-card chirality instance under a
+    shuffle of 584 letters: PSL211Analysis.observed paired with the
+    unit-indexed word family, AnalysisBridged, IdealFinite,
+    BaselineClassicalOnly.  psl211_word_view_proximity is proved at this
+    row's own sample distribution and at that distribution's coalition
+    reader, which is what reaches AnalysisBridged; the cut is a word a dealer
+    can perform where the model of psl211_row_alldecks draws it uniformly
+    from the group, so an idealized shuffle is replaced by a finite one,
+    which is the IdealFinite status. It differs from psl211_row_alldecks in
+    the model family and in the transfer status, and the model of that row is
+    the ideal the certificate behind this one is measured against. *)
+Definition psl211_row_word : AnalysisPathRow :=
+  @MkAnalysisPathRow PSL211Analysis.observed AnalysisBridged
+    PSL211Analysis.word_family IdealFinite BaselineClassicalOnly.
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -1984,7 +2095,7 @@ Timeout 60 Check
   (erefl : PSL211Analysis.exact_transfer_status = StaticExecutedOnly).
 
 (******************************************************************************)
-(*     The deterministic checker: the ten typed rows                          *)
+(*     The deterministic checker: the eleven typed rows                       *)
 (*                                                                            *)
 (* One Check per row against AnalysisPathRow, one erefl pin per status       *)
 (* field, and one typed check on the model slot: a mandatory family at        *)
@@ -2081,6 +2192,14 @@ Timeout 60 Check
 Timeout 60 Check
   (erefl : apr_assumptions pgl27_row_prior_exact = BaselineClassicalOnly).
 
+Timeout 60 Check (psl211_row_word : AnalysisPathRow).
+Timeout 60 Check (apr_model psl211_row_word
+  : AnalysisModelFamily PSL211Analysis.observed).
+Timeout 60 Check (erefl : apr_completion psl211_row_word = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer psl211_row_word = IdealFinite).
+Timeout 60 Check
+  (erefl : apr_assumptions psl211_row_word = BaselineClassicalOnly).
+
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)
 (*                                                                            *)
@@ -2106,6 +2225,9 @@ Timeout 60 Check (fun R : realType =>
 
 Timeout 60 Check (fun R : realType =>
   amf_sample (apr_model psl211_row_alldecks) R tt).
+
+Timeout 60 Check (fun R : realType =>
+  amf_sample (apr_model psl211_row_word) R tt).
 
 Timeout 60 Check (fun (row : AnalysisPathRow)
     (fam : AnalysisModelFamily (apr_observed row)) (R : realType)
