@@ -222,7 +222,10 @@ Directory `notes/probes/2026-09-19-tableau-extensions/`, logical path
 `manifest/pgg_tableau_syntax.v` and the four rows files, with their imports of
 one another pointed at the copies. One file of generic lemmas. One file per new
 model and per new program. `_CoqProject`, `STATUS.md`, the audit reports. Order:
-T0, then C, K, P2, P4, P5, P6. The Tableau copy is saved under `history/` after
+T0, then C, K, P2, P4, P5, P6, run as four stages so that no prover run has to
+hold them all: stage A is the copies, T0, C, K and the surface syntax; stage B
+is P1 to P4 and P7 to P9 at the five-card instance; stage C is P5; stage D is
+P6. The Tableau copy is saved under `history/` after
 each change to it.
 
 ## Acceptance condition
