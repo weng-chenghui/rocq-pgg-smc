@@ -241,11 +241,14 @@ Local Open Scope ring_scope.
 (* | final bridge theorem | FiveCardAnalysis.exec_trace_secrecy |             *)
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
 (* | model transfer       | none claimed |                                    *)
-(* | missing premise      | the ideal distribution equality: the second       *)
-(*                          hypothesis of var_dist_fdistmap_transfer, an      *)
-(*                          equality of two reader pushforwards under an      *)
-(*                          ideal distribution, which the five-card           *)
-(*                          development does not supply |                     *)
+(* | missing premise      | no premise is absent: the second hypothesis       *)
+(*                          of var_dist_fdistmap_transfer, an equality of     *)
+(*                          two reader pushforwards under an ideal            *)
+(*                          distribution, is                                  *)
+(*                          FiveCardAnalysis.static_obs_const. What this row  *)
+(*                          lacks is a second model: its cut law is the       *)
+(*                          uniform rotation itself, so it has no             *)
+(*                          finite model to compare with an ideal one |       *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
@@ -294,18 +297,34 @@ Local Open Scope ring_scope.
 (* | observers          | FiveCardAnalysis.colour_view                        *)
 (*                          : (size A).-tuple bool, the decoded colour        *)
 (*                            sequence at a list A of seat indices into the   *)
-(*                            endpoint list |                                 *)
+(*                            endpoint list;                                  *)
+(*                        FiveCardAnalysis.static_obs                         *)
+(*                          : {ffun 'I_5 -> 'I_5}, a coalition's reading of   *)
+(*                            the endpoint card positions at one committed    *)
+(*                            pair and one shuffle, with no execution |       *)
 (* | distribution-to-observer bridges | FiveCardAnalysis.single_cut_distE,    *)
+(*                        FiveCardAnalysis.biased_sample_cut_witnessE,        *)
 (*                        FiveCardAnalysis.colour_viewE,                      *)
 (*                        FiveCardAnalysis.colour_view_RV_E |                 *)
-(* | bound or certificate | none; kim_leak_bound is the numeric constant of   *)
-(*                          the bridge theorem, not a shuffle certificate |   *)
-(* | final bridge theorem | FiveCardAnalysis.colour_view_leak_bound |         *)
+(* | bound or certificate | FiveCardAnalysis.biased_cut_mixing,               *)
+(*                          FiveCardAnalysis.static_obs_const; kim_leak_bound *)
+(*                          is the numeric constant of the bridge theorem,    *)
+(*                          not a shuffle certificate |                       *)
+(* | final bridge theorem | FiveCardAnalysis.colour_view_leak_bound, and      *)
+(*                          FiveCardAnalysis.biased_static_obs_indist, the    *)
+(*                          coalition bound the cut-carrier transfer          *)
+(*                          concludes at this row |                           *)
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
-(* | model transfer       | none claimed |                                    *)
-(* | missing premise      | the ideal distribution equality, as in row 3 |    *)
+(* | model transfer       | the cut-carrier transfer of                       *)
+(*                          var_dist_fdistmap_transfer: its first hypothesis  *)
+(*                          is FiveCardAnalysis.biased_cut_mixing, whose law  *)
+(*                          is the cut distribution of single_biased_sample   *)
+(*                          by FiveCardAnalysis.biased_sample_cut_witnessE,   *)
+(*                          and its second is                                 *)
+(*                          FiveCardAnalysis.static_obs_const |               *)
+(* | missing premise      | none |                                            *)
 (* | completion level     | AnalysisBridged |                                 *)
-(* | transfer status      | StaticExecutedOnly |                              *)
+(* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | five_card_row_biased |                            *)
 (*                                                                            *)
@@ -314,10 +333,16 @@ Local Open Scope ring_scope.
 (* | colour_view_leak_bound | kim_input_dist eps_lt_inv5 eps_gt_neg4inv5,     *)
 (*   the distribution of single_biased_sample | colour_view A, executed       *)
 (*   | mutual information, at most kim_leak_bound eps |                       *)
+(* | biased_static_obs_indist | the cut distribution of single_biased_sample  *)
+(*   at bias one hundredth, by biased_sample_cut_witnessE | static_obs        *)
+(*   | approximate privacy at twice the length-one bundle's number, derived   *)
+(*     from var_dist_fdistmap_transfer and biased_cut_mixing |                *)
 (*                                                                            *)
-(* Hypotheses of that capability: eps_lt_inv5, eps_gt_neg4inv5 and the        *)
-(* small-bias hypothesis eps_small : 0 < 5^-1 - `|eps|. All three are         *)
+(* Hypotheses of colour_view_leak_bound: eps_lt_inv5, eps_gt_neg4inv5 and     *)
+(* the small-bias hypothesis eps_small : 0 < 5^-1 - `|eps|. All three are     *)
 (* explicit arguments of the aliased theorem; none is discharged silently.    *)
+(* biased_static_obs_indist has one hypothesis, that the coalition holds at   *)
+(* most one of the five seats, and it is an explicit argument too.            *)
 (*                                                                            *)
 (* Level justification. single_biased_sample is the sample adapter with the   *)
 (* same carrier and the same argument and cut maps as uniform_sample and with *)
@@ -326,6 +351,18 @@ Local Open Scope ring_scope.
 (* colour_view_leak_bound bounds a conditional mutual information of a joint  *)
 (* distribution whose middle component is the executed reader colour_view     *)
 (* itself, over that same biased distribution, giving AnalysisBridged.        *)
+(* biased_cut_mixing bounds the distance of that cut distribution from        *)
+(* the uniform rotation law on the cut carrier itself, and static_obs_const   *)
+(* is the equality of two readings of that law, so both hypotheses of         *)
+(* var_dist_fdistmap_transfer are discharged and the transfer status is       *)
+(* IdealFinite rather than StaticExecutedOnly. The conclusion of that         *)
+(* transfer is biased_static_obs_indist, a bound on the variation distance    *)
+(* between the static readings of a coalition of at most one seat at two      *)
+(* committed pairs. Its distribution is this row's cut law at bias one        *)
+(* hundredth, by biased_sample_cut_witnessE, and its observer is static_obs,  *)
+(* the second observer this row declares, so it reaches AnalysisBridged       *)
+(* beside colour_view_leak_bound, which reaches it at the executed reader     *)
+(* colour_view.                                                               *)
 (*                                                                            *)
 (*     Row 5: five-card development, repeated biased cuts and seven cuts      *)
 (*                                                                            *)
@@ -342,24 +379,37 @@ Local Open Scope ring_scope.
 (* | observers          | one seat's endpoint distribution, reached through   *)
 (*                        FiveCardAnalysis.repeated_seat_distE and            *)
 (*                        FiveCardAnalysis.centi_repeated_seat_distE;         *)
+(*                        FiveCardAnalysis.static_obs                         *)
+(*                          : {ffun 'I_5 -> 'I_5}, a coalition's reading of   *)
+(*                            the endpoint card positions at one committed    *)
+(*                            pair and one shuffle, with no execution;        *)
 (*                        FiveCardAnalysis.verifier_endpoints : seq 'I_5 |    *)
 (* | distribution-to-observer bridges | FiveCardAnalysis.repeated_cut_distE,  *)
 (*                        FiveCardAnalysis.centi_cut_distE,                   *)
 (*                        FiveCardAnalysis.centi_witness_rhoE,                *)
 (*                        FiveCardAnalysis.repeated_seat_distE,               *)
 (*                        FiveCardAnalysis.centi_repeated_seat_distE |        *)
-(* | bound or certificate | FiveCardAnalysis.kim_bundle,                      *)
+(* | bound or certificate | FiveCardAnalysis.centi_cut_mixing,                *)
+(*                          FiveCardAnalysis.static_obs_const,                *)
+(*                          FiveCardAnalysis.kim_bundle,                      *)
 (*                          FiveCardAnalysis.centi_bundle,                    *)
 (*                          FiveCardAnalysis.endpoint_bound,                  *)
 (*                          FiveCardAnalysis.deal_centi_lt |                  *)
-(* | final bridge theorem | NONE |                                            *)
+(* | final bridge theorem | FiveCardAnalysis.centi_static_obs_indist, the     *)
+(*                          coalition bound var_dist_fdistmap_transfer        *)
+(*                          concludes at this row from                        *)
+(*                          FiveCardAnalysis.centi_cut_mixing and             *)
+(*                          FiveCardAnalysis.static_obs_const |               *)
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
-(* | model transfer       | none claimed |                                    *)
-(* | missing premise      | the ideal distribution equality, as in row 3, and *)
-(*                          in addition no security statement is attached to  *)
-(*                          either model |                                    *)
-(* | completion level     | Sampled |                                         *)
-(* | transfer status      | NoModelComparison |                               *)
+(* | model transfer       | the cut-carrier transfer of                       *)
+(*                          var_dist_fdistmap_transfer: its first hypothesis  *)
+(*                          is FiveCardAnalysis.centi_cut_mixing, whose law   *)
+(*                          is the cut distribution of centi_sample by        *)
+(*                          FiveCardAnalysis.centi_cut_distE, and its second  *)
+(*                          is FiveCardAnalysis.static_obs_const |            *)
+(* | missing premise      | none |                                            *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | five_card_row_repeated |                          *)
 (*                                                                            *)
@@ -370,14 +420,26 @@ Local Open Scope ring_scope.
 (* | deal_centi_lt | the cut distribution of centi_sample, by                 *)
 (*   centi_cut_distE | one seat's endpoint distribution                       *)
 (*   | endpoint marginal bound |                                              *)
+(* | centi_static_obs_indist | the cut distribution of centi_sample, by       *)
+(*   centi_cut_distE | static_obs | approximate privacy at twice the          *)
+(*   seven-cut bundle's number, derived from var_dist_fdistmap_transfer and   *)
+(*   centi_cut_mixing |                                                       *)
 (*                                                                            *)
 (* Level justification. Both models are sample adapters over the plug and     *)
-(* both cut distributions are named, giving Sampled. The row is NOT           *)
-(* AnalysisBridged. endpoint_bound and deal_centi_lt bound the distance       *)
-(* from uniform of ONE seat's endpoint distribution: neither quantifies over  *)
-(* a coalition, neither mentions a second secret, and neither has the shape   *)
-(* of an indistinguishability or leakage statement. A ShuffleCertificate-     *)
-(* Bundle exists for both models and does not raise the level.                *)
+(* both cut distributions are named, giving Sampled. centi_cut_mixing         *)
+(* bounds the distance of the seven-cut distribution from the uniform         *)
+(* rotation law on the cut carrier itself, and with static_obs_const it       *)
+(* discharges both hypotheses of var_dist_fdistmap_transfer, giving           *)
+(* IdealFinite. The conclusion of that transfer, centi_static_obs_indist, is  *)
+(* a bound on the variation distance between the static readings of a         *)
+(* coalition of at most one seat at two committed pairs. Its distribution is  *)
+(* this row's cut law, by centi_cut_distE, and its observer is static_obs,    *)
+(* which the row declares, and that is what gives AnalysisBridged.            *)
+(* endpoint_bound and deal_centi_lt stay in the row for what they are: they   *)
+(* bound the distance from uniform of ONE seat's endpoint distribution,       *)
+(* neither quantifies over a coalition and neither mentions a second secret.  *)
+(* A ShuffleCertificateBundle exists for both models, and centi_cut_mixing is *)
+(* proved from the marginal bound that bundle carries.                        *)
 (*                                                                            *)
 (*     Row 6: five-seat S_5 instance, deterministic dealt position            *)
 (*                                                                            *)
@@ -662,15 +724,18 @@ Local Open Scope ring_scope.
 (* No row is filled with a dummy theorem, an option-valued proof, an axiom or *)
 (* a placeholder, no endpoint marginal bound is recorded as a privacy or      *)
 (* security capability, and every path whose transfer status is               *)
-(* NoModelComparison or StaticExecutedOnly names the premise it lacks. The    *)
+(* NoModelComparison or StaticExecutedOnly states in its missing-premise      *)
+(* cell either the premise it lacks or why none is absent. The                *)
 (* IdealFinite word row 8 also keeps naming the absent cut-carrier premise    *)
 (* below: its transfer is observer-level and never discharges it.             *)
 (*                                                                            *)
-(* Five-card development. No transfer-layer result exists: section 7 of its   *)
-(* facade carries typed status aliases and no theorem. The absent premise is  *)
-(* the second hypothesis of var_dist_fdistmap_transfer, an equality of two    *)
-(* reader pushforwards under an ideal distribution, which the development     *)
-(* does not supply.                                                           *)
+(* Five-card development. Section 7 of its facade carries the distance        *)
+(* of each of Kim's two cut laws from the uniform rotation law on the cut     *)
+(* carrier and the constancy of the reading of that law at every coalition    *)
+(* of at most one of the five seats, so rows 4 and 5 claim a cut-carrier      *)
+(* transfer and name no absent premise. Row 3's own cut law is the uniform    *)
+(* rotation, so that row has no finite model to compare with an ideal one     *)
+(* and claims no transfer.                                                    *)
 (*                                                                            *)
 (* S_5 finite-word path (row 8). The absent premise is                        *)
 (* S5Analysis.word_missing_premise, that is                                   *)
@@ -681,13 +746,14 @@ Local Open Scope ring_scope.
 (* the executed reading with the encoder-image ideal, the content one seat    *)
 (* reads when the dealt position is exactly uniform mixed over the secret     *)
 (* prior, on the carrier 'I_5; neither discharges it. That ideal is not the   *)
-(* group-uniform ideal. For Q the uniform distribution on the*)
-(* generated group the premise is moreover UNSATISFIABLE at every delta below *)
-(* one: every generator of this instance is a transposition, so a word of     *)
-(* length L evaluates into the coset of the alternating subgroup determined   *)
-(* by the parity of L, and the cut distribution has full-L1 distance one from *)
-(* group uniform. That sign-coset confinement is not formalized at S_5, and   *)
-(* no theorem of this repository asserts it there.                            *)
+(* group-uniform ideal. For Q the uniform distribution on the generated       *)
+(* group the premise is moreover UNSATISFIABLE at every delta below one:      *)
+(* every generator of this instance is a transposition, so a word of length   *)
+(* L evaluates into the coset of the alternating subgroup determined by the   *)
+(* parity of L, and the sum of the absolute differences between the cut       *)
+(* distribution and group uniform is at least one. That sign-coset            *)
+(* confinement is not formalized at S_5, and no theorem of this repository    *)
+(* asserts it there.                                                          *)
 (******************************************************************************)
 
 (******************************************************************************)
@@ -751,8 +817,10 @@ Definition pgl27_row_word : AnalysisPathRow :=
     family, AnalysisBridged, StaticExecutedOnly, BaselineClassicalOnly.
     exec_trace_secrecy is stated at this row's own random variable
     content_trace R ord0 over its own sample distribution, reaching
-    AnalysisBridged; the development supplies no ideal-distribution
-    equality, so no model transfer is claimed. *)
+    AnalysisBridged. The equality of two reader pushforwards under an
+    ideal distribution is FiveCardAnalysis.static_obs_const, so no premise
+    is absent; this row's cut law is the uniform rotation itself, so it has
+    no finite model to compare with an ideal one and claims no transfer. *)
 Definition five_card_row_uniform : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.uniform_family StaticExecutedOnly BaselineClassicalOnly.
@@ -760,22 +828,39 @@ Definition five_card_row_uniform : AnalysisPathRow :=
 (** The AnalysisPathRow for the same development under one biased cut at
     Kim's input distribution: FiveCardAnalysis.observed paired with the
     single-biased model family at bias one hundredth, AnalysisBridged,
-    StaticExecutedOnly, BaselineClassicalOnly. colour_view_leak_bound bounds
+    IdealFinite, BaselineClassicalOnly. colour_view_leak_bound bounds
     a conditional mutual information over that same biased distribution at
-    the row's own executed reader colour_view, reaching AnalysisBridged. *)
+    the row's own executed reader colour_view, reaching AnalysisBridged. The
+    ideal the transfer names is the uniform rotation law on the cut group,
+    and its base premise is FiveCardAnalysis.biased_cut_mixing, the distance
+    of this row's cut law from that ideal on the cut carrier itself, with
+    FiveCardAnalysis.static_obs_const for the reading equality; those two
+    give IdealFinite. Their transfer concludes
+    FiveCardAnalysis.biased_static_obs_indist, the bound a coalition of at
+    most one seat has on telling two committed pairs apart by what it reads,
+    which is a second theorem reaching AnalysisBridged at this row. *)
 Definition five_card_row_biased : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
-    FiveCardAnalysis.biased_family StaticExecutedOnly BaselineClassicalOnly.
+    FiveCardAnalysis.biased_family IdealFinite BaselineClassicalOnly.
 
 (** The AnalysisPathRow for the same development under repeated biased
     cuts: FiveCardAnalysis.observed paired with the seven-cut model family
-    at bias one hundredth, Sampled, NoModelComparison,
-    BaselineClassicalOnly. endpoint_bound and deal_centi_lt bound one
-    seat's endpoint distribution, not a coalition or a second secret, so
-    the row stops at Sampled rather than reaching AnalysisBridged. *)
+    at bias one hundredth, AnalysisBridged, IdealFinite,
+    BaselineClassicalOnly. The ideal the transfer names is the uniform
+    rotation law on the cut group, and its base premise is
+    FiveCardAnalysis.centi_cut_mixing, the distance of this row's seven-cut
+    law from that ideal on the cut carrier itself, with
+    FiveCardAnalysis.static_obs_const for the reading equality; those two
+    give IdealFinite. Their transfer concludes
+    FiveCardAnalysis.centi_static_obs_indist, the bound a coalition of at
+    most one seat has on telling two committed pairs apart by what it reads,
+    and that conclusion is what reaches AnalysisBridged. endpoint_bound
+    and deal_centi_lt stay in the row as endpoint marginal bounds: each
+    bounds one seat's endpoint distribution and neither quantifies over a
+    coalition. *)
 Definition five_card_row_repeated : AnalysisPathRow :=
-  @MkAnalysisPathRow FiveCardAnalysis.observed Sampled
-    FiveCardAnalysis.centi_family NoModelComparison BaselineClassicalOnly.
+  @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
+    FiveCardAnalysis.centi_family IdealFinite BaselineClassicalOnly.
 
 (** The AnalysisPathRow for the five-seat S_5 instance dealing a position
     deterministically: S5Analysis.observed, Observed, no model witness,
@@ -1159,6 +1244,16 @@ Timeout 60 Check (FiveCardAnalysis.colour_view :
     bool * bool -> pgg_gT (mp_M FiveCardAnalysis.profile) ->
     (size A).-tuple bool).
 
+Timeout 60 Check (FiveCardAnalysis.static_obs :
+  {set 'I_(pi_T' (mp_PI (instance_profile
+                           five_card_exec.five_card_algebra))).+1} ->
+  ex_inputT five_card_exec.five_card_params ->
+  pgg_gT (mp_M (instance_profile five_card_exec.five_card_algebra)) ->
+  {ffun 'I_(pi_T' (mp_PI (instance_profile
+                            five_card_exec.five_card_algebra))).+1 ->
+        'I_(pgg_N' (mp_M (instance_profile
+                            five_card_exec.five_card_algebra))).+1}).
+
 Timeout 60 Check (FiveCardAnalysis.secret :
   forall R : realType, {RV (FiveCardAnalysis.prior R) -> bool}).
 
@@ -1229,6 +1324,13 @@ Timeout 60 Check (FiveCardAnalysis.repeated_seat_distE :
            (@FiveCardAnalysis.repeated_sample R eps Hlt Hgt L)
            five_card_exec.five_card_content_obs i)
         (@five_card_models.kim_repeated_dist R eps Hlt Hgt L)).
+
+Timeout 60 Check (FiveCardAnalysis.biased_sample_cut_witnessE :
+  forall R : realType,
+    sw_rho_dist (five_card_mixing.kim_biased_marginal_bound R)
+    = sa_cut_dist (@FiveCardAnalysis.single_biased_sample R (1 / 100)
+                     (five_card_kim.kim_centi_lt R)
+                     (five_card_kim.kim_centi_gt R))).
 
 Timeout 60 Check (FiveCardAnalysis.centi_cut_distE :
   forall R : realType,
@@ -1378,15 +1480,78 @@ Timeout 60 Check (FiveCardAnalysis.deal_centi_lt :
       (fdist_uniform (card_ord 5))
     < 2%:R^-40).
 
-(* --- 7 Transfer: the five-card facade carries no transfer theorem, so the
-   two typed statuses are all there is to check; the PGL transfer aliases are
-   checked above. --- *)
+(* --- 7 Transfer: the base premises of rows 4 and 5 by spelled type, then
+   the coalition bound each pair of them concludes, then the three typed
+   statuses at their constructors. --- *)
+
+Timeout 60 Check (FiveCardAnalysis.centi_cut_mixing :
+  forall R : realType,
+    var_dist (sw_rho_dist (scb_bound (FiveCardAnalysis.centi_bundle R)))
+             (sa_cut_dist (FiveCardAnalysis.uniform_sample R))
+    <= sw_bound_eps (scb_bound (FiveCardAnalysis.centi_bundle R))).
+
+Timeout 60 Check (FiveCardAnalysis.biased_cut_mixing :
+  forall R : realType,
+    var_dist (sw_rho_dist (five_card_mixing.kim_biased_marginal_bound R))
+             (sa_cut_dist (FiveCardAnalysis.uniform_sample R))
+    <= sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)).
+
+Timeout 60 Check (FiveCardAnalysis.static_obs_const :
+  forall (R : realType)
+    (C : {set 'I_(pi_T' (mp_PI (instance_profile
+                                  five_card_exec.five_card_algebra))).+1}),
+    (#|C| < profile_k (instance_profile
+                         five_card_exec.five_card_algebra))%N ->
+    forall x x' : ex_inputT five_card_exec.five_card_params,
+      fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
+                  five_card_exec.five_card_params C x)
+               (sa_cut_dist (FiveCardAnalysis.uniform_sample R))
+      = fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
+                    five_card_exec.five_card_params C x')
+                 (sa_cut_dist (FiveCardAnalysis.uniform_sample R))).
+
+Timeout 60 Check (FiveCardAnalysis.centi_static_obs_indist :
+  forall (R : realType)
+    (C : {set 'I_(pi_T' (mp_PI (instance_profile
+                                  five_card_exec.five_card_algebra))).+1}),
+    (#|C| < profile_k (instance_profile
+                         five_card_exec.five_card_algebra))%N ->
+    forall x x' : ex_inputT five_card_exec.five_card_params,
+      var_dist
+        (fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
+                     five_card_exec.five_card_params C x)
+           (sw_rho_dist (scb_bound (FiveCardAnalysis.centi_bundle R))))
+        (fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
+                     five_card_exec.five_card_params C x')
+           (sw_rho_dist (scb_bound (FiveCardAnalysis.centi_bundle R))))
+      <= sw_bound_eps (scb_bound (FiveCardAnalysis.centi_bundle R))
+         + sw_bound_eps (scb_bound (FiveCardAnalysis.centi_bundle R))).
+
+Timeout 60 Check (FiveCardAnalysis.biased_static_obs_indist :
+  forall (R : realType)
+    (C : {set 'I_(pi_T' (mp_PI (instance_profile
+                                  five_card_exec.five_card_algebra))).+1}),
+    (#|C| < profile_k (instance_profile
+                         five_card_exec.five_card_algebra))%N ->
+    forall x x' : ex_inputT five_card_exec.five_card_params,
+      var_dist
+        (fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
+                     five_card_exec.five_card_params C x)
+           (sw_rho_dist (five_card_mixing.kim_biased_marginal_bound R)))
+        (fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
+                     five_card_exec.five_card_params C x')
+           (sw_rho_dist (five_card_mixing.kim_biased_marginal_bound R)))
+      <= sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)
+         + sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)).
 
 Timeout 60 Check
-  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
+  (erefl : FiveCardAnalysis.uniform_transfer_status = StaticExecutedOnly).
 
 Timeout 60 Check
-  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).
+  (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).
+
+Timeout 60 Check
+  (erefl : FiveCardAnalysis.repeated_transfer_status = IdealFinite).
 
 (******************************************************************************)
 (*     The deterministic checker: five-seat S_5 instance                      *)
@@ -1777,16 +1942,17 @@ Timeout 60 Check (apr_model five_card_row_biased
 Timeout 60 Check
   (erefl : apr_completion five_card_row_biased = AnalysisBridged).
 Timeout 60 Check
-  (erefl : apr_transfer five_card_row_biased = StaticExecutedOnly).
+  (erefl : apr_transfer five_card_row_biased = IdealFinite).
 Timeout 60 Check
   (erefl : apr_assumptions five_card_row_biased = BaselineClassicalOnly).
 
 Timeout 60 Check (five_card_row_repeated : AnalysisPathRow).
 Timeout 60 Check (apr_model five_card_row_repeated
   : AnalysisModelFamily FiveCardAnalysis.observed).
-Timeout 60 Check (erefl : apr_completion five_card_row_repeated = Sampled).
 Timeout 60 Check
-  (erefl : apr_transfer five_card_row_repeated = NoModelComparison).
+  (erefl : apr_completion five_card_row_repeated = AnalysisBridged).
+Timeout 60 Check
+  (erefl : apr_transfer five_card_row_repeated = IdealFinite).
 Timeout 60 Check
   (erefl : apr_assumptions five_card_row_repeated = BaselineClassicalOnly).
 

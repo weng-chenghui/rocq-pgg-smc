@@ -13,8 +13,12 @@
 (* A bound sub-block sits beside section 6 and carries the endpoint marginal  *)
 (* bounds of the repeated and seven-cut models. Those are not privacy or      *)
 (* security statements and are not aliased under the security heading.        *)
-(* Section 7 is empty for this development and is documented as empty rather  *)
-(* than omitted.                                                              *)
+(* Section 7 carries the base premises Kim's one-cut and seven-cut rows rest  *)
+(* on, the distance of each cut law from the uniform rotation law and the     *)
+(* constancy, at every coalition of at most one of the five seats, of that    *)
+(* coalition's reading of the uniform rotation law. Beside them it carries    *)
+(* the coalition bound each pair of premises gives, and one typed transfer    *)
+(* status per analysis path.                                                  *)
 (*                                                                            *)
 (* The facade contract:                                                       *)
 (*                                                                            *)
@@ -41,10 +45,12 @@
 (*   verifier observer                        -> verifier_trace,              *)
 (*                                               verifier_endpoints           *)
 (*   decoded sequence observer (Kim bridge)   -> colour_view                  *)
+(*   static coalition observer                -> static_obs                   *)
 (*   uniform sample model                     -> uniform_sample               *)
 (*   single-biased sample model               -> single_biased_sample         *)
 (*   repeated-biased sample model             -> repeated_sample              *)
 (*   seven-cut sample model                   -> centi_sample                 *)
+(*   one-cut identification equation          -> biased_sample_cut_witnessE   *)
 (*   execution correctness and recovery       -> exec_correct, exec_recovers, *)
 (*                                               observed_recovers            *)
 (*   exact-security bridge                    -> marginal_bound, perfect      *)
@@ -55,6 +61,11 @@
 (*   input-privacy bridge                     -> colour_view_leak_bound       *)
 (*   repeated and seven-cut endpoint bounds   -> endpoint_bound,              *)
 (*                                               deal_centi_lt (bound block)  *)
+(*   cut-law distance from the ideal cut      -> centi_cut_mixing,            *)
+(*                                               biased_cut_mixing            *)
+(*   ideal reading constancy                  -> static_obs_const             *)
+(*   coalition reading bound at two pairs     -> centi_static_obs_indist,     *)
+(*                                               biased_static_obs_indist     *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -84,6 +95,7 @@ From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import den_boer_profile den_boer_encoding den_boer_run.
 From pgg_smc Require Import five_card_leakage denboer_trace.
 From pgg_smc Require Import five_card_exec kim_input_privacy five_card_models.
+From pgg_smc Require Import five_card_mixing.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -129,11 +141,12 @@ Definition verifier_trace :=
 (******************************************************************************)
 (* ===== 3. Observers ===== *)
 (*                                                                            *)
-(* Six carriers, kept distinct: a message list for the raw traces, the card   *)
+(* Seven carriers, kept distinct: a message list for the raw traces, the card *)
 (* position 'I_5 for the participant and input-party content readers,         *)
 (* bool * bool for the dealer content reader, a list of card positions for    *)
 (* the verifier endpoints, (size A).-tuple bool for the decoded colour        *)
-(* sequence, and bool for the evaluated secret.                               *)
+(* sequence, {ffun 'I_5 -> 'I_5} for a coalition's static reading of the      *)
+(* endpoint card positions, and bool for the evaluated secret.                *)
 (******************************************************************************)
 
 (** player_raw_trace — one seat's raw executed trace, a message list. *)
@@ -171,6 +184,16 @@ Definition content_trace := @five_card_exec_trace.
     the endpoint list, carrier (size A).-tuple bool: the observer of the Kim
     input-privacy bridge. *)
 Definition colour_view := @five_card_exec_colour_view.
+
+(** static_obs — what a coalition reads of the endpoint card positions at
+    one run argument and one shuffle, before any execution is observed: the
+    coalition's own seats read the card position at their own start and
+    every other seat reads ord0, carrier {ffun 'I_5 -> 'I_5}. It is the
+    reader the two cut-carrier transfers of section 7 compare at two
+    committed pairs, and the reader Kim's two certified rows state their
+    bound at. *)
+Definition static_obs :=
+  @pgg_instance.static_coalition_obs five_card_algebra five_card_params.
 
 (** secret — the evaluated secret a AND b read as a random variable. *)
 Definition secret := @five_card_leakage.Secret.
@@ -248,6 +271,11 @@ Definition repeated_seat_distE := @kim_repeated_seat_distE.
 (** centi_cut_distE — the seven-cut model's cut distribution is the marginal
     bound of the seven-cut certificate bundle. *)
 Definition centi_cut_distE := @kim_centi_cut_distE.
+
+(** biased_sample_cut_witnessE — the single-biased model's cut distribution
+    is the marginal bound of the length-one certificate bundle. It is what
+    centi_cut_distE is for the seven-cut model. *)
+Definition biased_sample_cut_witnessE := @kim_biased_sample_cut_witnessE.
 
 (** centi_witness_rhoE — the seven-cut certificate bundle's marginal bound
     carries the weighted word shuffle at word length seven. *)
@@ -348,24 +376,64 @@ Definition deal_centi_lt := @kim_deal_centi_lt.
 (******************************************************************************)
 (* ===== 7. Transfer ===== *)
 (*                                                                            *)
-(* This section carries NO transfer theorem. No transfer-layer result exists  *)
-(* for the five-card development: the generic bound                           *)
-(* var_dist_fdistmap_transfer applies to any pair of readers, but the         *)
-(* five-card development has no ideal distribution equality to discharge its  *)
-(* second hypothesis, so there is nothing to alias and nothing is             *)
-(* manufactured to fill the section. What the section does carry is a typed   *)
-(* transfer status for each analysis path, one alias for the two exact-cut    *)
-(* paths, which share their status, and one for the repeated-cut path.        *)
+(* The generic bound var_dist_fdistmap_transfer runs from a distance between  *)
+(* two laws on the cut carrier to a distance between two readings of them,    *)
+(* and asks for that distance and for an equality of the two readings under   *)
+(* an ideal law. Both hold at this development. Each of Kim's two cut laws    *)
+(* is within its own number of the uniform rotation law on the cut group,     *)
+(* and a coalition of at most one seat reads that ideal law alike at both     *)
+(* committed pairs. The three theorems are aliased here. The section also     *)
+(* carries one typed transfer status per analysis path: the uniform           *)
+(* exact-cut path, the single-biased path and the repeated-cut path.          *)
 (******************************************************************************)
 
-(** exec_transfer_status — the transfer status of the two exact-cut paths, the
-    uniform one and the single-biased one: they carry their landed static
-    results to their executed observers, with no ideal-to-finite theorem. *)
-Definition exec_transfer_status : TransferStatus := StaticExecutedOnly.
+(** centi_cut_mixing — the seven-cut law is within the seven-cut bundle's own
+    spectral number of the uniform rotation law, in variation distance on the
+    cut group. It is the base premise of the repeated-cut path: the distance
+    the generic transfer bound asks for on the cut carrier itself. *)
+Definition centi_cut_mixing := @kim_centi_cut_mixing.
+
+(** biased_cut_mixing — the single biased cut law is within the length-one
+    bundle's spectral number of the same uniform rotation law, on the same
+    carrier. It is the base premise of the single-biased path. *)
+Definition biased_cut_mixing := @kim_biased_cut_mixing.
+
+(** static_obs_const — a coalition of at most one seat reads the uniform
+    rotation law alike at both committed pairs. It is the equality of the two
+    reader pushforwards under the ideal cut, the second hypothesis of the
+    generic transfer bound, and the two paths share it. *)
+Definition static_obs_const := @five_card_static_obs_const.
+
+(** centi_static_obs_indist — a coalition of at most one seat, reading the
+    static endpoint colours under the seven-cut law, sees laws within twice
+    the seven-cut bundle's spectral number of each other at any two committed
+    pairs. It is what the two premises above give when fed to the generic
+    transfer bound, and it is the security statement of the repeated-cut
+    path: the attacker is that coalition, and the number bounds every
+    advantage it has in telling the two pairs apart. *)
+Definition centi_static_obs_indist := @kim_centi_static_obs_indist.
+
+(** biased_static_obs_indist — the same bound at word length one, at twice
+    the length-one bundle's spectral number. It is the security statement of
+    the single-biased path, at a number of hundredth scale rather than a
+    cryptographic one. *)
+Definition biased_static_obs_indist := @kim_biased_static_obs_indist.
+
+(** uniform_transfer_status — the transfer status of the uniform exact-cut
+    path: it carries its landed static results to its executed observers,
+    and its security statement is an exact independence rather than a
+    comparison with an ideal law. *)
+Definition uniform_transfer_status : TransferStatus := StaticExecutedOnly.
+
+(** biased_transfer_status — the transfer status of the single-biased path:
+    biased_cut_mixing and static_obs_const discharge the two hypotheses of the
+    generic transfer bound on the cut carrier, at word length one. *)
+Definition biased_transfer_status : TransferStatus := IdealFinite.
 
 (** repeated_transfer_status — the transfer status of the repeated-cut path:
-    it carries endpoint marginal bounds only. *)
-Definition repeated_transfer_status : TransferStatus := NoModelComparison.
+    centi_cut_mixing and static_obs_const discharge the same two hypotheses at
+    word length seven. *)
+Definition repeated_transfer_status : TransferStatus := IdealFinite.
 
 End FiveCardAnalysis.
 
@@ -428,9 +496,16 @@ Timeout 60 Check (FiveCardAnalysis.endpoint_bound :
         (fdist_uniform (card_ord 5))
       <= Num.Def.sqrtr 5%:R * kim_lambda2 eps ^+ L).
 
-(* 7 Transfer: no theorem to check, by construction; the two typed statuses
-   are pinned at their constructors. *)
+(* 7 Transfer: the repeated path's cut-law distance is the representative, and
+   the three typed statuses are pinned at their constructors. *)
+Timeout 60 Check (FiveCardAnalysis.centi_cut_mixing :
+  forall R : realType,
+    var_dist (sw_rho_dist (scb_bound (kim_security_bundle_centi R)))
+             (sa_cut_dist (five_card_sample R))
+    <= sw_bound_eps (scb_bound (kim_security_bundle_centi R))).
 Timeout 60 Check
-  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
+  (erefl : FiveCardAnalysis.uniform_transfer_status = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).
+  (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).
+Timeout 60 Check
+  (erefl : FiveCardAnalysis.repeated_transfer_status = IdealFinite).

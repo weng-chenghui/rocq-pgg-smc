@@ -32,6 +32,7 @@ lib/perm_exchange.v
 lib/proba_entropy_ext.v
 lib/support_posterior.v
 lib/mutual_info_recoding.v
+lib/var_dist_supp.v
 smc/graded_resource.v
 smc/smc_interpreter.v
 smc/smc_session_types.v
@@ -73,6 +74,7 @@ instances/kim2025/kim_trace.v
 instances/kim2025/kim_input_privacy.v
 instances/kim2025/five_card_exec.v
 instances/kim2025/five_card_models.v
+instances/kim2025/five_card_mixing.v
 instances/kim2025/five_card_analysis.v
 legacy/protocol/card_protocol.v
 protocol/card_protocol_posterior.v

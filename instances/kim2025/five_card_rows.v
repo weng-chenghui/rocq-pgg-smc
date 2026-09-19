@@ -1,7 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* five_card_rows: the five-card instance's three rows, written as programs   *)
+(* five_card_rows: the five-card instance's three rows, as seven programs     *)
 (*                                                                            *)
 (* The security argument a five-card row makes is the threshold-sharing half  *)
 (* of den Boer's trick: two parties commit one bit each, the dealer assembles *)
@@ -26,28 +26,39 @@
 (* manifest row. The published row is the manifest's five_card_row_uniform,   *)
 (* and the rowE lemma below holds by conversion, so the manifest's claim      *)
 (* about this instance and the proof of it are one term. The manifest's two   *)
-(* further five-card rows are written as programs below, and both stop at     *)
-(* Sampled. The repeated row stops there because the manifest does: what is   *)
-(* proved of the seven-cut model is the endpoint marginal of one starting     *)
-(* position under its cut law, which five_card_row_repeated_endpoint_lt       *)
-(* carries beside the program rather than inside it. The biased row stops     *)
-(* there although the manifest places it at AnalysisBridged, because the      *)
-(* theorem that carries it to that level, five_card_colour_view_leak_bound,   *)
-(* bounds a conditional mutual information, and neither arm of certify        *)
-(* carries a bound of that kind: the exact arm asks for independence of the   *)
-(* static coalition observation from a secret, which the development states   *)
-(* under the uniform cut and not under the biased one, and the spectral arm   *)
-(* asks for a variation distance to an ideal cut on the shuffle group         *)
-(* together with the constancy of a coalition's reading of that ideal, and    *)
-(* neither of those is proved at this instance. AnalysisBridged is one        *)
-(* constructor with two admission criteria. The manifest admits a row to it   *)
-(* on any theorem about the sampled distribution and the observer, which is   *)
-(* how manifest/pgg_analysis_status.v:55-59 defines the level and which a     *)
-(* leakage bound meets. A program reaches it only through one of the two arms *)
-(* of certify, each of which produces a theorem of that same kind, so the     *)
-(* Tableau's criterion is the stricter of the two and the gap at this row is  *)
-(* the manifest's criterion met by a theorem no arm takes. This is the        *)
-(* situation instances/s5/s5_rows.v already records for s5_row_word.          *)
+(* further five-card rows are each written twice. One program per row stops   *)
+(* at Sampled and names its model and nothing else. Beside it a certified     *)
+(* program publishes that manifest row through the spectral arm, and what     *)
+(* the arm certifies is this: for each real field, for every coalition of at  *)
+(* most one of the five seats and for every two committed pairs, the law of   *)
+(* that coalition's static endpoint reading under the row's own cut law is    *)
+(* within the row's published number of the same law at the other pair, the   *)
+(* ideal cut being the uniform rotation law on the cut group. That is not     *)
+(* independence of the reading from the secret, which the exact arm states    *)
+(* and which the uniform row alone carries. It is conditional on a coalition  *)
+(* of fewer than two seats. And it says nothing about the full reveal. Each   *)
+(* certified row is written in both of the forms the tree uses, once at the   *)
+(* certificate's own spectral number and once repriced to the constant a      *)
+(* text quotes, two to the minus thirty-ninth for the repeated row and one    *)
+(* twenty-fifth for the one-cut row.                                          *)
+(*                                                                            *)
+(* The two Sampled programs stay as the programs that stop before a claim.    *)
+(* What is proved beside them is of another kind: the endpoint marginal of    *)
+(* one starting position under the seven-cut law, which                       *)
+(* five_card_row_repeated_endpoint_lt carries, and Kim's ceiling on the       *)
+(* information a reveal of any list of card positions gives about the two     *)
+(* inputs, which five_card_row_biased_leak_bound carries. Neither arm of      *)
+(* certify takes a bound of either kind: the exact arm asks for independence  *)
+(* of the static coalition observation from a secret, which the development   *)
+(* states under the uniform cut and not under the biased one, and a           *)
+(* conditional mutual information is not a variation distance.                *)
+(* AnalysisBridged is one constructor with two admission criteria. The        *)
+(* manifest admits a row to it on any theorem about the sampled distribution  *)
+(* and the observer, which is how manifest/pgg_analysis_status.v defines the  *)
+(* level and which a leakage bound meets. A program reaches it only through   *)
+(* one of the two arms of certify. Both criteria are met at both Kim rows.    *)
+(* instances/s5/s5_rows.v records for s5_row_word the gap this file no longer *)
+(* has: there the constancy a spectral certificate asks for is false.         *)
 (*                                                                            *)
 (* No statement of a program is a theorem about this instance. What the       *)
 (* instance supplies it supplies inside a clause. In the uniform row the      *)
@@ -81,9 +92,20 @@
 (*   five_card_row_biased_tableau                                             *)
 (*                           == the biased row as a program, stopping at      *)
 (*                              Sampled                                       *)
-(*   five_card_row_repeated_at_manifest_level                                 *)
-(*                           == the repeated row's program read at the        *)
-(*                              manifest row's own completion level           *)
+(*   kim_centi_cert, kim_biased_cert                                          *)
+(*                           == each Kim row's certificate at its own         *)
+(*                              bundle's spectral number                      *)
+(*   kim_centi_cert40, kim_biased_cert_exact                                  *)
+(*                           == the same two at the constants the rows        *)
+(*                              republish                                     *)
+(*   five_card_row_repeated_spectral_tableau                                  *)
+(*   five_card_row_biased_spectral_tableau                                    *)
+(*                           == each Kim row certified against the uniform    *)
+(*                              rotation law and published                    *)
+(*   five_card_row_repeated39, five_card_row_biased_inv25                     *)
+(*                           == the same two repriced to 2^-39 and 1/25       *)
+(*   five_card_reprice39, five_card_reprice_inv25                             *)
+(*                           == the names 2^-39 and 1/25 for a bound          *)
 (*   five_card_target        == the algebra with the ideal function a run of  *)
 (*                              it computes                                   *)
 (*   five_card_F             == the ideal functionality the run realises      *)
@@ -108,6 +130,32 @@
 (*                              names                                         *)
 (*   five_card_row_uniform_rowE                                               *)
 (*                           == the program publishes the manifest's row      *)
+(*   five_card_row_repeated_spectral_rowE                                     *)
+(*   five_card_row_biased_spectral_rowE                                       *)
+(*                           == each certified program publishes its own      *)
+(*                              manifest row                                  *)
+(*   five_card_row_repeated_spectral_publishedE                               *)
+(*   five_card_row_biased_spectral_publishedE                                 *)
+(*                           == the three coordinates each certified program  *)
+(*                              publishes                                     *)
+(*   five_card_row_biased_forms_publishedE                                    *)
+(*                           == the two one-cut programs publish one row      *)
+(*   kim_biased_epsE         == the one-cut bundle's marginal bound in closed *)
+(*                              form                                          *)
+(*   kim_biased_exact_le_eps == the exact one-cut distance is under that      *)
+(*                              bound                                         *)
+(*   kim_centi_cert_epsE, kim_biased_cert_epsE                                *)
+(*                           == the number each certificate publishes         *)
+(*   kim_centi_cert40_epsE   == the number the constant repeated certificate  *)
+(*                              publishes                                     *)
+(*   kim_centi_cert_eps_lt   == the repeated row's number is under the        *)
+(*                              constant PGL(2,7)'s word row publishes        *)
+(*   kim_biased_cert_eps_lt2 == the one-cut row's number is under the         *)
+(*                              ceiling a variation distance has              *)
+(*   five_card_pow2_39_split, five_card_inv50_split                           *)
+(*                           == the identity each reprice discharges          *)
+(*   five_card_reprice_inv25_lt2                                              *)
+(*                           == the repriced one-cut number under the ceiling *)
 (*   five_card_row_repeated_prefixE                                           *)
 (*   five_card_row_biased_prefixE                                             *)
 (*                           == each Kim row carries the prefix's algebra,    *)
@@ -118,8 +166,8 @@
 (*                              model                                         *)
 (*   five_card_row_biased_levelE                                              *)
 (*                           == the manifest's completion level for the       *)
-(*                              biased row, which its program does not        *)
-(*                              reach                                         *)
+(*                              biased row, which its Sampled program does    *)
+(*                              not reach                                     *)
 (*   five_card_row_repeated_endpoint_lt                                       *)
 (*                           == one starting position's endpoint marginal     *)
 (*                              under the repeated row's cut law              *)
@@ -137,9 +185,11 @@
 (*                              instance                                      *)
 (******************************************************************************)
 
+Require Import Lia.
+From mathcomp Require Import zify.
 From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import reals boolp.
+From mathcomp Require Import reals boolp lra.
 From infotheo Require Import fdist proba entropy.
 From pgg_smc Require Import pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_functionality.
@@ -149,6 +199,7 @@ From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import den_boer_encoding den_boer_run.
 From pgg_smc Require Import five_card_leakage five_card_exec five_card_models.
 From pgg_smc Require Import kim_input_privacy.
+From pgg_smc Require Import five_card_mixing.
 From pgg_smc Require Import pgg_analysis_manifest pgg_tableau.
 From pgg_smc Require Import pgg_tableau_syntax.
 
@@ -380,24 +431,27 @@ Proof. exact: (view_secrecy_of five_card_row_uniform_tableau R tt C HC). Qed.
 (*     Kim's two rows                                                         *)
 (******************************************************************************)
 
-(** The repeated row: the prefix above and the seven-cut model at bias one
-    hundredth. The program stops at Sampled, the level the manifest records
-    for this row. What is proved of this model is the law of one starting
-    position's endpoint under its cut, stated below beside the program, and
-    that is a statement about where a single starting position is sent and
-    not about what any set of seats reads, so no security payload follows
-    it. *)
+(** The repeated row sampled and not certified: the prefix above and the
+    seven-cut model at bias one hundredth. The program stops at Sampled, one
+    level under the AnalysisBridged the manifest records for this row. It
+    names its model and nothing else, and what is proved beside it is the law
+    of one starting position's endpoint under its cut, a statement about
+    where a single starting position is sent and not about what any set of
+    seats reads, so no security payload follows this program.
+    five_card_row_repeated_spectral_tableau is the certified program for the
+    same row. *)
 Definition five_card_row_repeated_tableau : Tableau Sampled :=
   five_card_committed
     sample kim_centi_family.
 
-(** The biased row: the same prefix and the single cut at the same bias. The
-    program stops at Sampled, one level below the AnalysisBridged the
-    manifest records for this row, because the theorem that carries the
-    manifest's level bounds a conditional mutual information and neither arm
-    of certify takes a bound of that kind. The header says which request of
-    each arm the development does not meet. The manifest's higher level for
-    this row rests on that theorem and not on any payload of the program. *)
+(** The biased row sampled and not certified: the same prefix and the single
+    cut at the same bias. The program stops at Sampled, one level under the
+    AnalysisBridged the manifest records for this row, because
+    five_card_colour_view_leak_bound bounds a conditional mutual information
+    and neither arm of certify takes a bound of that kind. The manifest's
+    level for this row rests on that theorem and on the certificate
+    five_card_row_biased_spectral_tableau carries, and on no payload of this
+    program. *)
 Definition five_card_row_biased_tableau : Tableau Sampled :=
   five_card_committed
     sample kim_biased_family.
@@ -449,30 +503,315 @@ Lemma five_card_row_biased_modelE :
   = apr_model five_card_row_biased.
 Proof. by []. Qed.
 
-(** The repeated row's program, read at the completion level the manifest
-    records for that row. A level is a type index and not a value the
-    program carries, so this ascription is the one place where the
-    manifest's level and the program's level meet the kernel. *)
-Definition five_card_row_repeated_at_manifest_level
-  : Tableau (apr_completion five_card_row_repeated) :=
-  five_card_row_repeated_tableau.
-
 (** The manifest's completion level for the biased row is AnalysisBridged.
-    The program above reaches Sampled, so this equation and the rejected
-    ascription below are the two halves of the level gap: the equation is a
-    fact about the manifest's row and not about anything the program
-    proves. *)
+    five_card_row_biased_tableau reaches Sampled, so this equation and the
+    rejected ascription that follows are the two halves of that one
+    program's level gap. The equation is a fact about the manifest's row and
+    not about anything any program proves, and the biased path also carries a
+    program that does reach AnalysisBridged. *)
 Lemma five_card_row_biased_levelE :
   apr_completion five_card_row_biased = AnalysisBridged.
 Proof. by []. Qed.
 
-(** The biased row admits no ascription of the shape above: its program
-    reaches Sampled and the manifest records AnalysisBridged for it. The
-    two levels differ, and the difference is rejected by the kernel here
-    rather than asserted in prose. *)
+(** five_card_row_biased_tableau admits no ascription at the manifest's
+    level: that program reaches Sampled and the manifest records
+    AnalysisBridged for the row. The two levels differ, and the difference is
+    rejected by the kernel here rather than asserted in prose. It is a fact
+    about this one program and not about the biased path, which
+    five_card_row_biased_spectral_tableau carries to AnalysisBridged. *)
 Fail Definition five_card_row_biased_at_manifest_level
   : Tableau (apr_completion five_card_row_biased) :=
   five_card_row_biased_tableau.
+
+(******************************************************************************)
+(*     Kim's two rows, certified against the uniform rotation law             *)
+(******************************************************************************)
+
+(** The one-cut bundle's marginal bound is sqrt 5 over eighty. A row built on
+    it publishes twice that, because the comparison through the ideal cut
+    spends the number once for each of the two committed pairs. *)
+Lemma kim_biased_epsE (R : realType) :
+  sw_bound_eps (kim_biased_marginal_bound R) = Num.sqrt 5%:R * (1 / 80).
+Proof. by rewrite /kim_biased_marginal_bound /= kim_lambda2_at_centi expr1. Qed.
+
+(** The exact one-cut distance of kim_one_cut_centiE, one fiftieth, is under
+    the spectral bound the certificate publishes, sqrt 5 over eighty. The
+    certificate therefore overstates the distance it certifies by about two
+    fifths, and the gap is the price of quoting the bundle's number rather
+    than the exact one. *)
+Lemma kim_biased_exact_le_eps (R : realType) :
+  1 / 50 <= sw_bound_eps (kim_biased_marginal_bound R) :> R.
+Proof.
+rewrite kim_biased_epsE -(@ler_pXn2r R 2 isT).
+2: by rewrite nnegrE divr_ge0.
+2: by rewrite nnegrE mulr_ge0 ?sqrtr_ge0 ?divr_ge0.
+rewrite [X in _ <= X]exprMn sqr_sqrtr ?ler0n //.
+rewrite !expr_div_n !expr1n [X in _ <= X]mulrA mulr1.
+rewrite ler_pdivrMr ?exprn_gt0 ?ltr0n // mulrAC.
+rewrite ler_pdivlMr ?exprn_gt0 ?ltr0n // mul1r.
+rewrite -!natrX -natrM ler_nat.
+by lia.
+Qed.
+
+(** The spectral certificate of the repeated row. Its five fields are the
+    seven-cut bundle's marginal bound; the identification of that bound's law
+    with the law the repeated adapter draws its cut from; the uniform rotation
+    law as the ideal cut; the distance of the seven-cut law from that ideal;
+    and the constancy, at every coalition of at most one seat, of the reading
+    of the ideal cut in the committed pair. The only inexact quantity in the
+    row is the bundle's spectral number; the ideal cut and the constancy
+    field are exact. *)
+Definition kim_centi_cert (R : realType) (idx : unit)
+  : SpectralCert (amf_sample kim_centi_family R idx) :=
+  @MkSpectralCert R five_card_algebra five_card_params
+    (amf_sample kim_centi_family R idx)
+    (scb_bound (kim_security_bundle_centi R))
+    (esym (kim_centi_cut_distE R))
+    (sa_cut_dist (five_card_sample R))
+    (@kim_centi_cut_mixing R)
+    (@five_card_static_obs_const R).
+
+(** The spectral certificate of the one-cut row, with the same five fields at
+    word length one. The ideal cut and the constancy, at every coalition of
+    at most one seat, of the reading of it are the same two terms as in the
+    repeated row's certificate, so the two rows differ only in the shuffle
+    and its number. *)
+Definition kim_biased_cert (R : realType) (idx : unit)
+  : SpectralCert (amf_sample kim_biased_family R idx) :=
+  @MkSpectralCert R five_card_algebra five_card_params
+    (amf_sample kim_biased_family R idx)
+    (kim_biased_marginal_bound R)
+    (kim_biased_sample_cut_witnessE R)
+    (sa_cut_dist (five_card_sample R))
+    (@kim_biased_cut_mixing R)
+    (@five_card_static_obs_const R).
+
+(** Kim's repeated row certified by the spectral arm and published at
+    IdealFinite. The status is a parameter of publish and nothing checks it,
+    so it is claimed against the criterion pgg_analysis_status.v states for
+    IdealFinite: a cut-carrier transfer whose base premise is discharged,
+    which is what a certificate comparing a finite shuffle with a named
+    ideal cut supplies. *)
+Definition five_card_row_repeated_spectral_tableau : PublishedRow :=
+  five_card_committed
+    sample kim_centi_family
+    certify SpectralDecay kim_centi_cert
+    |> publish IdealFinite BaselineClassicalOnly.
+
+(** Kim's one-cut row certified by the same arm and published at the same
+    transfer status. Its certificate has the shape the repeated row's has,
+    over the same ideal cut and with the same constancy field, so the same
+    status is the honest one for it. *)
+Definition five_card_row_biased_spectral_tableau : PublishedRow :=
+  five_card_committed
+    sample kim_biased_family
+    certify SpectralDecay kim_biased_cert
+    |> publish IdealFinite BaselineClassicalOnly.
+
+(** The repeated row's certified program publishes the manifest's row for that
+    path. Conversion decides it, as it does for the uniform row. An
+    AnalysisPathRow stores descriptive metadata and no Prop, so this equation
+    fixes which path the program is written for and asserts nothing about the
+    certificate the program carries. *)
+Lemma five_card_row_repeated_spectral_rowE :
+  published_row five_card_row_repeated_spectral_tableau
+  = five_card_row_repeated.
+Proof. by []. Qed.
+
+(** The same for the one-cut row and the manifest's biased row. *)
+Lemma five_card_row_biased_spectral_rowE :
+  published_row five_card_row_biased_spectral_tableau = five_card_row_biased.
+Proof. by []. Qed.
+
+(** What a row equation does reject is a program written for another path.
+    The repeated row's certified program publishes the seven-cut model at
+    IdealFinite and the uniform row holds the uniform family at
+    StaticExecutedOnly, so the two rows differ in two of their five fields
+    and the equation is refused. *)
+Fail Definition five_card_row_repeated_spectral_uniform_rowE
+  : published_row five_card_row_repeated_spectral_tableau
+    = five_card_row_uniform
+  := erefl.
+
+(** The three coordinates the repeated row's certified program publishes. *)
+Lemma five_card_row_repeated_spectral_publishedE :
+  apr_completion (published_row five_card_row_repeated_spectral_tableau)
+    = AnalysisBridged
+  /\ apr_transfer (published_row five_card_row_repeated_spectral_tableau)
+     = IdealFinite
+  /\ apr_assumptions (published_row five_card_row_repeated_spectral_tableau)
+     = BaselineClassicalOnly.
+Proof. by []. Qed.
+
+(** The three coordinates the one-cut row's certified program publishes. *)
+Lemma five_card_row_biased_spectral_publishedE :
+  apr_completion (published_row five_card_row_biased_spectral_tableau)
+    = AnalysisBridged
+  /\ apr_transfer (published_row five_card_row_biased_spectral_tableau)
+     = IdealFinite
+  /\ apr_assumptions (published_row five_card_row_biased_spectral_tableau)
+     = BaselineClassicalOnly.
+Proof. by []. Qed.
+
+(** Two copies of two to the minus fortieth make two to the minus
+    thirty-ninth. A spectral certificate publishes its marginal bound twice,
+    once for each of the two committed pairs, so a row at the constant bound
+    publishes a sum of two equal terms, and this identity is what names that
+    sum by a single constant. *)
+(* The mulr_natl and mulr_natr routes fail here because the ring numeral 2
+   is itself a natmul and the rewrite fires inside it, yielding
+   (2 * 1) ^- 40. *)
+Fact five_card_pow2_39_split (R : realType) :
+  (2%:R : R)^-40 + 2%:R^-40 = 2%:R^-39.
+Proof. by rewrite [RHS]splitr exprSr invfM. Qed.
+
+Section kim_cert_numbers.
+Variable R : realType.
+
+(** The repeated row's published bound in closed form: twice the bundle's
+    spectral number at word length seven. It is the quantity a reader of the
+    row sees, before any reprice names it by a constant. *)
+Lemma kim_centi_cert_epsE (idx : unit) :
+  cert_eps (kim_centi_cert R idx)
+  = Num.sqrt 5%:R * (1 / 80) ^+ 7 + Num.sqrt 5%:R * (1 / 80) ^+ 7.
+Proof. by rewrite /cert_eps /= kim_lambda2_at_centi. Qed.
+
+(** That bound is under two to the minus thirty-ninth, which is the number
+    PGL(2,7)'s word row publishes. *)
+Lemma kim_centi_cert_eps_lt (idx : unit) :
+  cert_eps (kim_centi_cert R idx) < 2%:R ^- 39.
+Proof.
+rewrite /cert_eps.
+have -> : (2%:R : R) ^- 39 = 2%:R ^- 40 + 2%:R ^- 40.
+  by rewrite five_card_pow2_39_split.
+by apply: ltrD; exact: kim_bound_centi.
+Qed.
+
+(** The one-cut row's published bound in closed form: twice the bundle's
+    spectral number at word length one, sqrt 5 over forty. *)
+Lemma kim_biased_cert_epsE (idx : unit) :
+  cert_eps (kim_biased_cert R idx)
+  = Num.sqrt 5%:R * (1 / 80) + Num.sqrt 5%:R * (1 / 80).
+Proof. by rewrite /cert_eps !kim_biased_epsE. Qed.
+
+(** The one-cut row's bound is under two, the ceiling var_dist_le2 gives for
+    a variation distance. The row therefore rules out a coalition of at most
+    one seat telling the two committed pairs apart with certainty, which a
+    bound at the ceiling would not. At about three percent of the ceiling it
+    is not a strong statement. *)
+Lemma kim_biased_cert_eps_lt2 (idx : unit) :
+  cert_eps (kim_biased_cert R idx) < 2%:R.
+Proof.
+have Hs0 : 0 <= Num.sqrt 5%:R :> R by exact: sqrtr_ge0.
+have Hs : Num.sqrt 5%:R <= 3%:R :> R.
+  rewrite -(@ler_pXn2r R 2 isT).
+  2: by rewrite nnegrE sqrtr_ge0.
+  2: by rewrite nnegrE ler0n.
+  by rewrite sqr_sqrtr ?ler0n // -natrX ler_nat.
+by rewrite kim_biased_cert_epsE; lra.
+Qed.
+
+End kim_cert_numbers.
+
+(******************************************************************************)
+(*     The same two rows at the constants they republish                      *)
+(******************************************************************************)
+
+(** The repeated row's certificate with the constant in the marginal-bound
+    field. The ideal cut, the identification equation and the constancy of
+    the reading at every coalition of at most one seat are the same terms as
+    in kim_centi_cert; the marginal bound carries two to the minus fortieth
+    in place of the spectral expression, and the mixing field is the same
+    distance bounded by that constant. *)
+Definition kim_centi_cert40 (R : realType) (idx : unit)
+  : SpectralCert (amf_sample kim_centi_family R idx) :=
+  @MkSpectralCert R five_card_algebra five_card_params
+    (amf_sample kim_centi_family R idx)
+    (kim_centi_marginal_bound40 R)
+    (esym (kim_centi_cut_distE R))
+    (sa_cut_dist (five_card_sample R))
+    (@kim_centi_cut_mixing40 R)
+    (@five_card_static_obs_const R).
+
+(** The certificate's own bound is then two copies of two to the minus
+    fortieth, by conversion and with no arithmetic. *)
+Lemma kim_centi_cert40_epsE (R : realType) (idx : unit) :
+  cert_eps (kim_centi_cert40 R idx) = 2%:R ^- 40 + 2%:R ^- 40 :> R.
+Proof. by []. Qed.
+
+(** The name two to the minus thirty-ninth for a bound, at every real
+    field. *)
+Definition five_card_reprice39 : Reprice := fun R => Some (2%:R ^- 39 : R).
+
+(** The repeated row republished at that constant. The reprice supplies the
+    identity five_card_pow2_39_split and changes nothing else: the data, the
+    model and the certificate are the same terms, so what a coalition of at
+    most one seat is shown is the same statement under a different name for
+    the number. *)
+Definition five_card_row_repeated39 : PublishedRowAt five_card_reprice39 :=
+  five_card_committed
+    ;;; sample_step of kim_centi_family
+    ;;; certify_spectral of kim_centi_cert40
+    ;;; conclude five_card_reprice39 of (fun R _ => five_card_pow2_39_split R)
+    ;;; publish BaselineClassicalOnly of IdealFinite.
+
+(** The reprice obligation is one identity per real field and per index.
+    five_card_pow2_39_split is quantified over every real field but not over
+    the family index, so it does not have the shape conclude asks for. *)
+Fail Definition five_card_row_repeated39_bare
+  : PublishedRowAt five_card_reprice39 :=
+  five_card_committed
+    ;;; sample_step of kim_centi_family
+    ;;; certify_spectral of kim_centi_cert40
+    ;;; conclude five_card_reprice39 of five_card_pow2_39_split
+    ;;; publish BaselineClassicalOnly of IdealFinite.
+
+(** The one-cut row's certificate at the exact number one fiftieth. *)
+Definition kim_biased_cert_exact (R : realType) (idx : unit)
+  : SpectralCert (amf_sample kim_biased_family R idx) :=
+  @MkSpectralCert R five_card_algebra five_card_params
+    (amf_sample kim_biased_family R idx)
+    (kim_biased_marginal_bound_exact R)
+    (kim_biased_sample_cut_witnessE R)
+    (sa_cut_dist (five_card_sample R))
+    (@kim_biased_cut_mixing_exact R)
+    (@five_card_static_obs_const R).
+
+(** Two copies of one fiftieth make one twenty-fifth. It is the identity
+    that names the sum of the one-cut row's two exact per-card-position
+    numbers by the single constant that row publishes. *)
+Fact five_card_inv50_split (R : realType) : (1 / 50 : R) + 1 / 50 = 1 / 25.
+Proof. by lra. Qed.
+
+(** The name one twenty-fifth for a bound, at every real field. *)
+Definition five_card_reprice_inv25 : Reprice := fun R => Some (1 / 25 : R).
+
+(** The one-cut row republished at the exact constant, at the same transfer
+    status as the row at the spectral number. The certificate it carries
+    compares the same cut with the same ideal, so the number it publishes
+    changes and the status it earns does not. *)
+Definition five_card_row_biased_inv25
+  : PublishedRowAt five_card_reprice_inv25 :=
+  five_card_committed
+    ;;; sample_step of kim_biased_family
+    ;;; certify_spectral of kim_biased_cert_exact
+    ;;; conclude five_card_reprice_inv25 of (fun R _ => five_card_inv50_split R)
+    ;;; publish BaselineClassicalOnly of IdealFinite.
+
+(** The two one-cut programs publish one row, although their certificates
+    carry different numbers, sqrt 5 over forty against one twenty-fifth. An
+    AnalysisPathRow holds descriptive metadata and no Prop, so an equation
+    between two published rows says nothing about either certificate, and in
+    particular cannot say which transfer status is the honest one. *)
+Lemma five_card_row_biased_forms_publishedE :
+  published_row five_card_row_biased_spectral_tableau
+  = published_row five_card_row_biased_inv25.
+Proof. exact: erefl. Qed.
+
+(** One twenty-fifth is under two, the ceiling var_dist_le2 gives for a
+    variation distance, so the repriced one-cut row is not vacuous. *)
+Lemma five_card_reprice_inv25_lt2 (R : realType) : (1 / 25 : R) < 2%:R.
+Proof. by lra. Qed.
 
 (******************************************************************************)
 (*     What the two rows carry beside their programs                          *)
