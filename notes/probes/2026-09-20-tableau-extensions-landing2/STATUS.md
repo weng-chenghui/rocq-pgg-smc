@@ -844,3 +844,205 @@ No line over 80 bytes in any landed file and no box-comment row whose closing
 any abbreviation of "indistinguishability", and the meta words `renamed`,
 `formerly`, `no longer`, `predate`, `probe`, `stage`, `landing`, `audit`,
 `spec`. "percent" is spelled one way in both files that use it.
+
+---
+
+# Fix pass 2
+
+Date: 2026-09-20, after `audit-landing2-fix1.md` (verdict GO, two SHOULD and
+nine NOTE). Comments only. Edited: `staged/instances/kim2025/
+five_card_proximity.v`, `staged/manifest/pgg_tableau_arm_relations.v`,
+`staged/security/var_dist_joint_law.v` and this file. The chain copies,
+production, landing 1 and landing 3 were not touched.
+
+**Code-token check against `da53033`**, comments stripped by a nesting- and
+string-aware splitter, whitespace tokens compared: identical in all three
+files, 466 tokens in `var_dist_joint_law.v`, 492 in
+`pgg_tableau_arm_relations.v`, 1131 in `five_card_proximity.v`. A comment
+word diff against `da53033` maps every changed passage to F1, F2, F3, F4, F5,
+F7, F8, F9 or F10, and to nothing else.
+
+**Compiles**, `python3 compile.py`, the `_CoqProject` order, through the
+`rocq1` lock, `rocq compile` and never `make`,
+`instances/psl211/psl211_endpoints.v` never compiled:
+
+| File | rc | wall |
+|---|---|---|
+| `staged/security/var_dist_joint_law.v` | 0 | 32.1 s |
+| `staged/manifest/pgg_tableau_arm_relations.v` | 0 | 3.6 s |
+| `staged/instances/kim2025/five_card_proximity.v` | 0 | 5.6 s |
+| `landing_fidelity.v` | 0 | 27.9 s |
+
+No sentence over 5 s in any of the four.
+
+## F1 (SHOULD), `five_card_proximity.v:22-27`
+
+Final text:
+
+> Both numbers come from one bound on the cut group's distance, the one
+> fiftieth of kim_biased_cut_mixing_exact. The input-indistinguishability arm
+> doubles whatever marginal bound its certificate carries and the proximity
+> certificate carries that bound once, so the proximity row publishes one
+> fiftieth where the row built on kim_biased_cert_exact,
+> five_card_row_biased_inv25 of five_card_rows.v, publishes one twenty-fifth.
+
+Declarations read: `kim_biased_cut_mixing_exact`
+(`staged/instances/kim2025/five_card_mixing.v:529-535`) concludes `var_dist
+(sw_rho_dist (kim_biased_marginal_bound_exact R)) (sa_cut_dist
+(five_card_sample R)) <= sw_bound_eps (kim_biased_marginal_bound_exact R)`,
+a `<=`, and `kim_biased_marginal_bound_exact` (`:521-527`) is
+`@MkShuffleMarginalBound R FiveCardKim_M 1 (1 / 50) …`, so one fiftieth
+bounds the cut-group distance and is not that distance. `cert_eps`
+(`staged/manifest/pgg_tableau.v:470-474`) is `sw_bound_eps (ic_b cert) +
+sw_bound_eps (ic_b cert)`, so the doubling half stands.
+
+Deviation: the pass also changed the sentence the finding did not quote,
+"one distance on the cut group" to "one bound on the cut group's distance",
+because that apposition made one fiftieth the distance too, and a following
+"that bound" needs an antecedent that is a bound. Both sentences are F1. The
+rest of the paragraph is unchanged in words and rewrapped.
+
+## F2 (SHOULD), `five_card_proximity.v:272-274`
+
+Final text:
+
+> The model the certificate calls ideal, and the witness it carries for it,
+> are the model and the witness of the published uniform row. Conversion
+> decides both, so the ideal a biased row is measured against is the model
+> the published uniform row carries and not a second description of it.
+
+Declarations read: `five_card_row_uniform : AnalysisPathRow`
+(`staged/manifest/pgg_analysis_manifest.v:827`) publishes no model;
+`five_card_row_uniform_tableau : PublishedRow`
+(`staged/instances/kim2025/five_card_rows.v:400`) is what the lemma at
+`:275-279` names, through `amf_sample (ab_f (published_at
+five_card_row_uniform_tableau)) R idx`. The file's own phrase at `:255` is
+"the terms the published uniform row carries", so one wording now serves both
+places. Deviation: none.
+
+## F3 (NOTE), `pgg_tableau_arm_relations.v:117-119`
+
+Final text:
+
+> An implication from this proposition to the proximity proposition does hold
+> for all that, its premise discarded: idealproximity_prop_at2 gives the
+> proximity proposition at two whatever the premise.
+
+Declaration read: `idealproximity_prop_at2` (`:93-98`) is proved `by move=> C
+_; exact: var_dist_le2`, so the premise is discarded and the implication
+holds. "not empty" is gone. Deviation: none.
+
+## F4 (NOTE), `pgg_tableau_arm_relations.v:33-36`
+
+Final text:
+
+> The arm's mathematics is spent on the ideal witness's independence: it
+> turns the ideal joint law into the product of its marginals, and the arm's
+> proposition compares the actual joint law with exactly that product. One
+> recorded failure below is a written term that omits that independence.
+
+Declarations read: `IdealProximityPropAt`
+(`staged/manifest/pgg_tableau.v:491-506`) has `(fdistmap (sa_coalition_view …)
+…) `x (fdistmap (ew_secret (ipc_witness cert)) …)` on its right, a product,
+while `ipc_close` (`:220-232`) compares with the ideal's joint law; the
+failure is `idealproximity_tail_without_independence` (`:194-…`), the
+composition law with the independence deleted from its proof. The sentence no
+longer makes the failure the source of the fact and claims no necessity.
+
+Deviation: "omits that independence" where the audit proposed "omits it", so
+the pronoun has a written antecedent across the line break.
+
+## F5 (NOTE), `pgg_tableau_arm_relations.v:40-43`
+
+Final text:
+
+> Refuting it needs a model whose coalition readings at any two run arguments
+> stay within the constant the input-indistinguishability proposition names,
+> and whose distance to the ideal exceeds the constant the proximity
+> conclusion is stated at.
+
+Declaration read: `IndistinguishabilityPropAt cert c`
+(`staged/manifest/pgg_tableau.v:456-465`) asks `var_dist (fdistmap
+(static_coalition_obs C x) (sa_cut_dist sa)) (fdistmap (static_coalition_obs
+C x') (sa_cut_dist sa)) <= c` for every coalition below the threshold, which
+is sameness only at `c = 0`. The sentence now says "stay within the
+constant", not "is the same".
+
+Deviation: the sentence does not repeat the coalition-size premise. It
+describes what a countermodel must satisfy and names the proposition for the
+constant, so no scope condition is asserted away.
+
+## F7 (NOTE), `five_card_proximity.v:561-563`
+
+Final text:
+
+> The proximity arm and the input-indistinguishability arm are rejected at the
+> same argument, the sample adapter each certificate type is indexed by, so a
+> certificate of either arm is rejected where the other model's is required.
+
+Declarations read: the two `Fail`s, `kim_centi_proximity_from_biased`
+(`:548-551`) and `kim_biased_indistinguishability_from_centi` (`:564-568`),
+each a written term the elaborator rejects. The quantification over "ways" is
+gone. Deviation: none.
+
+## F8 (NOTE), `five_card_proximity.v:72-74`
+
+Final text:
+
+> five_card_arg_cut_prodE == at a product law on the sample space, that pair's
+> joint law is the uniform pair tensored with the model's cut law
+
+Declaration read: `five_card_arg_cut_prodE` (`:198-203`) is stated at
+`(fdist_uniform five_card_card_bool2) `x W`, so the hypothesis the entry
+dropped is now in it.
+
+Deviation: "at a product law on the sample space" where the audit proposed
+"at a sample law written as a product", because the declaration comment at
+`:193-196` already says "a law on the sample space written as a product" and
+one concept keeps one word. Same three lines.
+
+## F9 (NOTE), `five_card_proximity.v:78-80`
+
+Final text:
+
+> kim_biased_proximity_cert_idealE == the certificate's ideal is the uniform
+> row's model, and the port built from its witness is that row's port
+
+Declarations read: the second conjunct of the lemma (`:278-279`) is
+`ExactIndependence (ipc_witness (kim_biased_proximity_cert R idx)) = ab_port
+(published_at five_card_row_uniform_tableau) R idx`, and `ExactIndependence`
+is a `SecurityPort` constructor taking an `ExactWitness`
+(`staged/manifest/pgg_tableau.v:239-243`), so a witness is not a port.
+Deviation: none.
+
+## F10 (NOTE), `var_dist_joint_law.v:26-29`
+
+Final text:
+
+> The two variation-distance lemmas this file takes from the tree,
+> var_dist_fdistmap and var_dist_triangle, are stated in
+> security/pgg_collusion_bound.v, so the file sits above that one and not in
+> lib/, which carries no dependency on security/.
+
+Declarations read: `var_dist_triangle` (`security/pgg_collusion_bound.v:43`)
+and `var_dist_fdistmap` (`:126`); infotheo's `symmetric_var_dist` is applied
+at `staged/security/var_dist_joint_law.v:157` and `:160`, which is why the
+count is stated of the lemmas taken from this tree. Deviation: none.
+
+## F6 and F11
+
+No change, as instructed. F6 records a reading the naming pass made
+deliberately. F11 would replace a `_` in an ascription in
+`landing_fidelity.v`, which is a code change and out of scope for a
+comment-only pass.
+
+## Scans after the pass
+
+All three files compile rc 0. No line over 80 bytes. Every box-comment row
+closes at column 80; the four rows a width scan flags are the one-line
+docstrings at `five_card_proximity.v:345`, `:374` and `:492` and the in-proof
+comment at `var_dist_joint_law.v:77`, all four byte-identical to `da53033`.
+Zero hits in the three files for `apex`, `gate`/`gates`/`gated`/`gating` and
+`posit`/`posits`/`posited`/`positing`. No abbreviation of
+"indistinguishability". The new prose says "reading", not "view", and carries
+no meta narration.

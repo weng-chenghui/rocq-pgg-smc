@@ -30,23 +30,23 @@
 (* against. The number bounds a sum of absolute differences, twice the total  *)
 (* variation distance, so a distinguisher's advantage is at most half of it.  *)
 (*                                                                            *)
-(* One recorded failure below says where the arm's mathematics is spent: the  *)
-(* ideal witness's independence is what turns the ideal joint law into the    *)
-(* product of its marginals, and the arm's proposition compares the actual    *)
-(* joint law with exactly that product.                                       *)
+(* The arm's mathematics is spent on the ideal witness's independence: it     *)
+(* turns the ideal joint law into the product of its marginals, and the arm's *)
+(* proposition compares the actual joint law with exactly that product. One   *)
+(* recorded failure below is a written term that omits that independence.     *)
 (*                                                                            *)
 (* Not claimed. An implication from the input-indistinguishability            *)
 (* proposition to the proximity proposition at a constant below two, uniform  *)
-(* in the proximity certificate. Refuting it needs a model whose reading law  *)
-(* is the same at every run argument, which is what the                       *)
-(* input-indistinguishability proposition asks, and far from the ideal's,     *)
-(* which is what the proximity conclusion forbids. No such model is built     *)
-(* here, and no proof of the implication is given either. Nor is the          *)
-(* proximity proposition derived from an input-indistinguishability           *)
+(* in the proximity certificate. Refuting it needs a model whose coalition    *)
+(* readings at any two run arguments stay within the constant the             *)
+(* input-indistinguishability proposition names, and whose distance to the    *)
+(* ideal exceeds the constant the proximity conclusion is stated at. No such  *)
+(* model is built here, and no proof of the implication is given either. Nor  *)
+(* is the proximity proposition derived from an input-indistinguishability    *)
 (* certificate's own fields at a stated constant. The implication that does   *)
 (* hold at the five-card one-cut model, in                                    *)
-(* instances/kim2025/five_card_proximity.v, holds because its conclusion is a *)
-(* theorem there and its premise is discarded.                                *)
+(* instances/kim2025/five_card_proximity.v, holds because its conclusion is   *)
+(* a theorem there and its premise is discarded.                              *)
 (*                                                                            *)
 (* Lemmas:                                                                    *)
 (*   idealproximity_prop_at2    == every proximity certificate satisfies the  *)
@@ -114,9 +114,9 @@ Variable sa : SampleAdapter R (instance_exec E).
     the claim. An ideal a proximity certificate names can therefore not be
     recovered from an input-indistinguishability premise, and a bound on the
     distance to that ideal has to be proved from something else. An
-    implication from this proposition to the proximity proposition is not
-    empty for all that: idealproximity_prop_at2 gives the proximity
-    proposition at two whatever the premise. *)
+    implication from this proposition to the proximity proposition does hold
+    for all that, its premise discarded: idealproximity_prop_at2 gives the
+    proximity proposition at two whatever the premise. *)
 Lemma indistinguishability_prop_cert_free
     (cert cert' : IndistinguishabilityCert sa) (c : R) :
   IndistinguishabilityPropAt cert c = IndistinguishabilityPropAt cert' c.

@@ -19,19 +19,19 @@
 (* below say that the input-indistinguishability branch and the unbranched    *)
 (* input-indistinguishability program hold one coordinate.                    *)
 (*                                                                            *)
-(* Both numbers come from one distance on the cut group, the one fiftieth of  *)
-(* kim_biased_cut_mixing_exact. The input-indistinguishability arm doubles    *)
-(* whatever marginal bound its certificate carries and the proximity arm      *)
-(* spends the distance once, so the proximity row publishes one fiftieth      *)
-(* where the row built on kim_biased_cert_exact, five_card_row_biased_inv25   *)
-(* of five_card_rows.v, publishes one twenty-fifth. The                       *)
-(* input-indistinguishability row continued below carries kim_biased_cert     *)
-(* instead, whose marginal bound is the one-cut bundle's spectral number, and *)
-(* publishes sqrt 5 over forty. The proximity row publishes its certificate's *)
-(* own number, with no terminal between the certificate and the reader. That  *)
-(* number bounds a sum of absolute differences, twice the total variation     *)
-(* distance, so a distinguisher's advantage against this row is at most one   *)
-(* hundredth.                                                                 *)
+(* Both numbers come from one bound on the cut group's distance, the one      *)
+(* fiftieth of kim_biased_cut_mixing_exact. The input-indistinguishability    *)
+(* arm doubles whatever marginal bound its certificate carries and the        *)
+(* proximity certificate carries that bound once, so the proximity row        *)
+(* publishes one fiftieth where the row built on kim_biased_cert_exact,       *)
+(* five_card_row_biased_inv25 of five_card_rows.v, publishes one              *)
+(* twenty-fifth. The input-indistinguishability row continued below carries   *)
+(* kim_biased_cert instead, whose marginal bound is the one-cut bundle's      *)
+(* spectral number, and publishes sqrt 5 over forty. The proximity row        *)
+(* publishes its certificate's own number, with no terminal between the       *)
+(* certificate and the reader. That number bounds a sum of absolute           *)
+(* differences, twice the total variation distance, so a distinguisher's      *)
+(* advantage against this row is at most one hundredth.                       *)
 (*                                                                            *)
 (* Three readings of the published number follow the row. Against the bound   *)
 (* two that var_dist_le2 gives it is one percent of what a pair of laws on a  *)
@@ -69,13 +69,15 @@
 (*   five_card_reading_secretE  == a coalition's reading and the secret       *)
 (*                                 factor through the pair of the committed   *)
 (*                                 bits and the cut                           *)
-(*   five_card_arg_cut_prodE    == that pair's joint law is the uniform pair  *)
+(*   five_card_arg_cut_prodE    == at a product law on the sample space, that *)
+(*                                 pair's joint law is the uniform pair       *)
 (*                                 tensored with the model's cut law          *)
 (*   kim_biased_proximity_close == the two models' joint laws of reading and  *)
 (*                                 secret are within one fiftieth             *)
 (*   kim_biased_proximity_cert_idealE                                         *)
-(*                              == the certificate's ideal and witness are    *)
-(*                                 the uniform row's model and port           *)
+(*                              == the certificate's ideal is the uniform     *)
+(*                                 row's model, and the port built from its   *)
+(*                                 witness is that row's port                 *)
 (*   kim_biased_proximity_cert_epsE                                           *)
 (*                              == the certificate's number is one fiftieth   *)
 (*   kim_biased_proximity_eps_halfE                                           *)
@@ -269,8 +271,7 @@ Definition kim_biased_proximity_cert (R : realType) (idx : unit)
 (** The model the certificate calls ideal, and the witness it carries for it,
     are the model and the witness of the published uniform row. Conversion
     decides both, so the ideal a biased row is measured against is the model
-    the manifest's uniform row publishes and not a second description of
-    it. *)
+    the published uniform row carries and not a second description of it. *)
 Lemma kim_biased_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (kim_biased_proximity_cert R idx)
   = amf_sample (ab_f (published_at five_card_row_uniform_tableau)) R idx
@@ -560,8 +561,8 @@ Fail Definition five_card_row_repeated_proximity : Tableau AnalysisBridged :=
     seven-cut model's input-indistinguishability certificate is rejected
     where the one-cut model's is required. The proximity arm and the
     input-indistinguishability arm are rejected at the same argument, the
-    sample adapter each certificate type is indexed by, so the proximity arm
-    adds no new way for two models of one instance to be confused. *)
+    sample adapter each certificate type is indexed by, so a certificate of
+    either arm is rejected where the other model's is required. *)
 Fail Definition kim_biased_indistinguishability_from_centi
   (R : realType) (idx : unit)
   : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
