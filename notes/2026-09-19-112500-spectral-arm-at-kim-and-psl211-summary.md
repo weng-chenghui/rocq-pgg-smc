@@ -144,3 +144,48 @@ notation for `conclude`.
 4. The main checkout still has files out of date by modification time since
    commit 1654fde. Nothing was compiled against the `.vo` files that commit
    will produce. The rule in force is to compile only related files.
+
+## Afterwards: both results landed the same day
+
+Added on 2026-09-19. The body above records the two feasibility probes as they
+closed and is left as written. The user then decided to land both.
+
+**Kim**, main `b5dd33d`, production commits `3b9e463` and `871a4c3`.
+`lib/var_dist_supp.v` holds the generic lemmas.
+`instances/kim2025/five_card_mixing.v` sits below the analysis facade and holds
+the two mixing theorems, the constancy theorem, and what the first landing
+audit showed was missing: the conclusion of the transfer as a theorem,
+`kim_centi_static_obs_indist` and `kim_biased_static_obs_indist`, a bound on
+the variation distance between the static readings of a coalition of at most
+one seat at two committed pairs. A mixing bound on the cut carrier names no
+observer, so the manifest could not give it as a row's bridge theorem; PGL(2,7)
+already worked this way. `five_card_row_repeated` is at `AnalysisBridged`, both
+Kim rows are `IdealFinite`, and `instances/kim2025/five_card_rows.v` holds four
+certified programs. Spec with what the audits changed:
+[[20260919-kim-spectral-landing-design]].
+
+**PSL(2,11)**, production commits `50ea761` and `b93aa16`.
+`instances/psl211/psl211_spectral_constancy.v`. The file's first name said
+"nogo" and the naming audit refused it: what is excluded is a range of epsilon,
+not the arm. The rows header now says the field's failure is no proof of
+leakage and names the independence theorem `psl211_alldecks_view_secrecy`.
+Spec: [[20260919-psl211-spectral-nogo-landing-design]].
+
+**What the landings taught.** A landing is mechanical when the probe holds the
+permanent text: stage the files with only their `Require` sentences changed,
+prove that by script, compile them in a scratch directory that shadows the
+production root, then copy. `Require` resolves a logical name to the last
+matching load-path entry, and `Locate Library` does not show what was loaded,
+so an as-built fidelity file is compiled with the production flags alone. A
+proof by `done` of an equation between a row that passes through `conclude`
+and one that does not cost 683 s where `exact: erefl` takes a tenth of a
+second. Auditors' replacement sentences were wrong seven times and were always
+checked against the statement before use.
+
+**Still open.** Stage A of [[20260919-tableau-three-extensions-probe-design]]
+weakens the obligation of `conclude`; under it the repeated row publishes
+`2^-39` from its own certificate and `kim_centi_cert40` becomes unnecessary.
+Eighteen sentences of `instances/psl211/psl211_models.v` use "deck description"
+for the deal. The per-instance Tableau directory of
+[[2026-09-19-124500-instance-tableau-directory-proposal]] comes after the
+extensions probe.
