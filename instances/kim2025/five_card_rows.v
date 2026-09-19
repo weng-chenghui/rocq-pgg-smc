@@ -537,11 +537,12 @@ Lemma kim_biased_epsE (R : realType) :
   sw_bound_eps (kim_biased_marginal_bound R) = Num.sqrt 5%:R * (1 / 80).
 Proof. by rewrite /kim_biased_marginal_bound /= kim_lambda2_at_centi expr1. Qed.
 
-(** The exact one-cut distance of kim_one_cut_centiE, one fiftieth, is under
-    the spectral bound the certificate publishes, sqrt 5 over eighty. The
-    certificate therefore overstates the distance it certifies by about two
-    fifths, and the gap is the price of quoting the bundle's number rather
-    than the exact one. *)
+(** The exact one-cut distance of kim_one_cut_centiE, one fiftieth, is at
+    most the one-cut bundle's spectral number sqrt 5 over eighty, the epsilon
+    of the marginal bound the certificate carries and half the number a row
+    built on it publishes. The certificate therefore overstates the distance
+    it certifies by about two fifths, and the gap is the price of quoting the
+    bundle's number rather than the exact one. *)
 Lemma kim_biased_exact_le_eps (R : realType) :
   1 / 50 <= sw_bound_eps (kim_biased_marginal_bound R) :> R.
 Proof.

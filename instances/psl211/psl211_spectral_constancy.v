@@ -77,6 +77,7 @@
 (* a whole run argument and a deal is its three coordinates other than the    *)
 (* secret. The psl211_blockline1_ prefix names block line one and the         *)
 (* comparison with block line zero at one chirality, as psl211_perdeck_ of    *)
+(* instances/psl211/psl211_models.v names the comparison between the two      *)
 (* chiralities at one deal. In a proof script a leading C is a fiber          *)
 (* cardinality, U a mass at the group-uniform law, L a mass at the ideal, E a *)
 (* reader identification, T a step of an inequality chain and H every other   *)
@@ -248,15 +249,14 @@ Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
 (** psl211_alldecks_constancy_false — under the all-decks run parameters the
     uniform law on the shuffle group is the ideal cut of no
     input-indistinguishability certificate: seats 0, 1 and 2 read that law
-    differently at the two chiralities of the deal psl211_perdeck_deal. The run
-    argument of this
-    mode is a whole deck description, whose first coordinate is the secret
-    chirality and whose other three are not, and the field quantifies
-    over every pair of them, so the equation it asserts is false at a pair
-    of one chirality too, psl211_blockline1_law_neq. A change of secret is
-    always also a change of the laid deck here, the chirality selecting the
-    table the block line indexes. Three seats learn nothing about the
-    chirality under the all-decks law, which is
+    differently at the two chiralities of the deal psl211_perdeck_deal. The
+    run argument of this mode is a whole deck description, whose first
+    coordinate is the secret chirality and whose other three are not, and the
+    field quantifies over every pair of them, so the equation it asserts is
+    false at a pair of one chirality too, psl211_blockline1_law_neq. A change
+    of secret is always also a change of the laid deck here, the chirality
+    selecting the table the block line indexes. Three seats learn nothing
+    about the chirality under the all-decks law, which is
     psl211_alldecks_static_indep, and this refutation states no leakage. *)
 Lemma psl211_alldecks_constancy_false (R : realType) :
   ~ coalition_reading_constancy psl211_alldecks_params
@@ -668,10 +668,9 @@ Qed.
 (** psl211_alldecks_cert_ideal_close — an input-indistinguishability
     certificate over the all-decks model states its distance against the
     group-uniform law. The certificate's own identification field says its
-    shuffle law is the
-    adapter's cut, and this adapter's cut is the uniform law on the shuffle
-    group, so the epsilon a certificate quotes is an epsilon against that law
-    however its marginal bound record was built. *)
+    shuffle law is the adapter's cut, and this adapter's cut is the uniform
+    law on the shuffle group, so the epsilon a certificate quotes is an
+    epsilon against that law however its marginal bound record was built. *)
 Lemma psl211_alldecks_cert_ideal_close (R : realType)
     (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) :
   var_dist ((`U psl211_G_pos) : R.-fdist cutT) (ic_ideal cert)
@@ -718,11 +717,11 @@ Qed.
 (** psl211_alldecks_no_zero_eps_cert — in particular no
     input-indistinguishability certificate over the all-decks model has a
     shuffle bound epsilon of zero, which is the epsilon profile_eps_psl211 of
-    instances/psl211/psl211_profile.v
-    gives this instance's single-card marginal bound. A certificate must
-    hold its ideal cut within its own epsilon of the group-uniform law, and
-    the group-uniform law is not a cut these three seats read constantly, so
-    the sharper the shuffle bound the less room the certificate has. *)
+    instances/psl211/psl211_profile.v gives this instance's single-card
+    marginal bound. A certificate must hold its ideal cut within its own
+    epsilon of the group-uniform law, and the group-uniform law is not a cut
+    these three seats read constantly, so the sharper the shuffle bound the
+    less room the certificate has. *)
 Corollary psl211_alldecks_no_zero_eps_cert (R : realType)
     (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) :
   sw_bound_eps (ic_b cert) = 0 -> False.
@@ -947,15 +946,14 @@ Proof. by rewrite /psl211_dealt_fiber uniform_fdistmap_pointE. Qed.
     constancy field is false at the uniform law on the shuffle group, so no
     input-indistinguishability certificate over these parameters can take that
     law as its ideal cut, while a certificate at some other ideal stays open.
-    The dealt run
-    argument is the chirality and nothing else, so here the constancy field is
-    exactly constancy in the secret, and it fails because the encoder decks of
-    the two chiralities give one reading of three seats different masses. That
-    is a fact about the group and the design: PSL(2,11) is 2-transitive and
-    not 3-transitive, where PGL(2,7) proves the same field through
-    pgl27_word_view_const. The statement rules out one named ideal and no
-    certificate, this tree carrying no dealt-mode sample adapter through which
-    a certificate's ideal could be pinned to it. *)
+    The dealt run argument is the chirality and nothing else, so here the
+    constancy field is exactly constancy in the secret, and it fails because
+    the encoder decks of the two chiralities give one reading of three seats
+    different masses. That is a fact about the group and the design: PSL(2,11)
+    is 2-transitive and not 3-transitive, where PGL(2,7) proves the same field
+    through pgl27_word_view_const. The statement rules out one named ideal and
+    no certificate, this tree carrying no dealt-mode sample adapter through
+    which a certificate's ideal could be pinned to it. *)
 Lemma psl211_dealt_constancy_false (R : realType) :
   ~ coalition_reading_constancy psl211_dealt_params
       ((`U psl211_G_pos) : R.-fdist cutT).

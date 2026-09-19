@@ -26,8 +26,9 @@
 (* independence of the coalition's view from the secret, unconditionally      *)
 (* and at every real field, while the input-indistinguishability arm          *)
 (* concludes a variation distance between the readings of two run             *)
-(* arguments, bounded by the certificate's mixing epsilon. A row commits to   *)
-(* one of them and claims nothing about the other.                            *)
+(* arguments, bounded by the certificate's marginal-bound epsilon twice,      *)
+(* one for each argument. A row commits to one of them and claims nothing     *)
+(* about the other.                                                           *)
 (*                                                                            *)
 (* Each arm has one composition law, and the two laws are where the           *)
 (* mathematics of the row sits. exact_tail transports a witness's             *)
@@ -137,11 +138,11 @@ Record ExactWitness (R : realType) (A : PGGAlgebraic)
 (* The input-indistinguishability arm's certificate: a marginal bound on the
    instance's shuffle, the identification of the bound's law with the
    adapter's cut, an ideal cut law within that bound in variation distance,
-   and the constancy of a coalition's reading of the ideal cut in the run
-   argument. Five fields and not the two of a marginal bound alone: the
-   transfer inequality is stated on the cut carrier, where it needs both a
-   distance and the ideal constancy, and a per-position marginal bound holds
-   neither. *)
+   and the constancy, at every coalition below the privacy threshold, of the
+   reading of the ideal cut in the run argument. Five fields and not the two
+   of a marginal bound alone: the transfer inequality is stated on the cut
+   carrier, where it needs both a distance and the ideal constancy, and a
+   per-position marginal bound holds neither. *)
 Record IndistinguishabilityCert (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E)) :=
   MkIndistinguishabilityCert {
@@ -573,8 +574,8 @@ Qed.
 Arguments exact_tail {R A E sa} w Hview.
 
 (* The certificate's cut-carrier distance and its ideal constancy, fed to the
-   transfer inequality, give the two-argument variation bound at the
-   certificate's own epsilon. The composition law of the
+   transfer inequality, give the two-argument variation bound at cert_eps,
+   the certificate's marginal-bound epsilon twice. The composition law of the
    input-indistinguishability arm, and the only place the mixing bound is
    used. *)
 Lemma indistinguishability_tail (R : realType) (A : PGGAlgebraic)
