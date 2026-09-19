@@ -6,25 +6,22 @@
 (* The word model psl211_word_family names and the all-decks model of         *)
 (* psl211_models.v run one execution over one sample space and differ in the  *)
 (* law of the cut alone. That is the shape the proximity arm compares, and    *)
-(* the twelve-card chirality instance is the third carrier of that arm,       *)
-(* beside Kim's one-cut five-card model and the eight-card orbit instance.    *)
-(* The ideal is an execution whose own privacy is a theorem:                  *)
+(* the twelve-card chirality instance is the third to publish through that    *)
+(* arm, beside Kim's one-cut five-card model and the eight-card orbit         *)
+(* instance. The ideal is an execution whose own privacy is a theorem:        *)
 (* psl211_row_alldecks_tableau publishes it with the exact arm, and           *)
 (* psl211_word_proximity_cert_idealE says that the model the certificate      *)
 (* calls ideal and the model that row publishes are one term.                 *)
 (*                                                                            *)
-(* Word gloss of this instance. A deck description is the whole run argument, *)
-(* a chirality bit together with a deal. A deal is the block line of that     *)
-(* chirality's Steiner system, the labelling of the heart codes and the       *)
-(* labelling of the club codes, the three coordinates other than the secret.  *)
-(* The secret is the chirality bit. The two models share the sample space, so *)
-(* psl211_alldecks_secret is the secret of both and the certificate needs no  *)
-(* second reading of the bit.                                                 *)
+(* The word gloss of this instance is in                                      *)
+(* instances/psl211/psl211_word_model.v. The two models share the sample      *)
+(* space, so psl211_alldecks_secret is the secret of both and the certificate *)
+(* needs no second reading of the bit.                                        *)
 (*                                                                            *)
 (* Six is the privacy threshold the derived profile declares, so every        *)
-(* statement below is about a static coalition of at most five of the twelve  *)
-(* seats reading its own endpoints. The row publishes the number the          *)
-(* certificate proves and names no constant: this instance has no row         *)
+(* security statement below is about a static coalition of at most five of    *)
+(* the twelve seats reading its own endpoints. The row publishes the number   *)
+(* the certificate proves and names no constant: this instance has no row     *)
 (* carrying a constant for this model to be read in one column with. The      *)
 (* constancy field an input-indistinguishability certificate would need is    *)
 (* refuted at the group-uniform ideal cut and at the 584-letter word cut law, *)
@@ -36,7 +33,7 @@
 (*                                                                            *)
 (* Every number below bounds a sum of absolute differences, which is twice    *)
 (* the total variation distance of the literature, so a distinguisher's       *)
-(* advantage against the published row is at most half of 2^-40.              *)
+(* advantage against the published row is at most 2^-41.                      *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_word_proximity_cert == the word model's proximity certificate     *)
@@ -44,31 +41,34 @@
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_word_proximity_close                                              *)
-(*                              == the two models' joint laws of reading and  *)
-(*                                 chirality are within 2^-40                 *)
+(*                              == below the six-seat threshold, the two      *)
+(*                                 models' joint laws of a coalition's        *)
+(*                                 reading and the chirality are within 2^-40 *)
 (*   psl211_word_proximity_cert_idealE                                        *)
 (*                              == the certificate's ideal is the all-decks   *)
-(*                                 row's model and witness                    *)
+(*                                 row's model, and the port built from its   *)
+(*                                 witness is that row's port                 *)
 (*   psl211_word_proximity_cert_secretE                                       *)
 (*                              == the certificate's secret and the secret    *)
 (*                                 its witness carries are one term           *)
 (*   psl211_word_proximity_cert_secretTE                                      *)
 (*                              == the carrier of that secret is bool         *)
 (*   psl211_word_proximity_cert_epsE                                          *)
-(*                              == the certificate's number in closed form    *)
+(*                              == the certificate's number is 2^-40          *)
 (*   psl211_pow2_40_ge1         == two to the fortieth is at least one        *)
 (*   psl211_pow2_40_gt0         == two to the fortieth is positive            *)
-(*   psl211_word_law_le2        == the two models' laws are within the bound  *)
-(*                                 every pair of laws on one sample space     *)
-(*                                 meets                                      *)
+(*   psl211_word_law_le2        == the two models' laws are within two, the   *)
+(*                                 bound var_dist_le2 gives for any pair of   *)
+(*                                 laws on one finite sample space            *)
 (*   psl211_word_proximity_cert_eps_lt2                                       *)
-(*                              == the certificate's number is below that     *)
-(*                                 bound                                      *)
+(*                              == the certificate's number is below the      *)
+(*                                 bound two var_dist_le2 gives               *)
 (*   psl211_row_word_proximity_armE                                           *)
 (*                              == the row carries the proximity arm          *)
 (*   psl211_row_word_proximity_rowE                                           *)
 (*                              == the row publishes psl211_row_word          *)
-(*   psl211_word_view_proximity == what the row states at this instance       *)
+(*   psl211_word_view_proximity == the proximity row's security statement,    *)
+(*                                 at 2^-40                                   *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -111,7 +111,7 @@ Local Notation seatT :=
 (** At every coalition of the twelve seats, the joint law of
     that coalition's reading with the chirality under the 584-letter word
     shuffle is within 2^-40 of the same joint law under the uniform shuffle.
-    It is the certificate field of the proximity arm at this instance: the two
+    It is the distance field of this instance's proximity certificate: the two
     models differ in the law of the cut alone, and the pair of a reading and
     the chirality is a deterministic function of the sample point, so the
     distance between the two cuts carries down to that pair unchanged. The
@@ -141,7 +141,7 @@ Proof.
 move=> _.
 apply: var_dist_fdistmap_pair.
 rewrite psl211_word_sampleP_E psl211_alldecks_sampleP_E.
-exact: psl211_word_lawE.
+exact: psl211_word_law_le40.
 Qed.
 
 (******************************************************************************)
@@ -152,9 +152,12 @@ Qed.
     the all-decks model as the ideal; that model's exact witness, which is
     what makes the ideal an execution whose coalitions of at most five seats
     learn nothing at all; the chirality, which is the secret of the two models
-    as one term; the word walk's number 2^-40; and the distance above. The
-    only inexact quantity is that number: the ideal, its witness and the
-    secret are the terms the all-decks row already publishes. *)
+    as one term; the word walk's number 2^-40; and
+    psl211_word_proximity_close as the distance field, which bounds by that
+    number the distance between the two models' joint laws of a coalition's
+    reading with the chirality. The ideal, its witness and the secret are
+    terms the all-decks row publishes, and the number is this certificate's
+    own. *)
 Definition psl211_word_proximity_cert (R : realType) (idx : unit)
   : IdealProximityCert (amf_sample psl211_word_family R idx) :=
   @MkIdealProximityCert R psl211_algebra psl211_alldecks_params
@@ -165,19 +168,21 @@ Definition psl211_word_proximity_cert (R : realType) (idx : unit)
     (2%:R^-40)
     (fun C HC => @psl211_word_proximity_close R C HC).
 
-(** The model the certificate calls ideal, and the witness it carries for it,
-    are the model and the witness of the published all-decks row. Conversion
-    decides both, so the ideal a word row is measured against is the model
-    psl211_rows.v publishes and not a second description of it. *)
+(** The model the certificate calls ideal is the model the published
+    all-decks row carries, and the port built from the witness the certificate
+    carries is that row's port. Conversion decides both, so the ideal a word
+    row is measured against is the model psl211_rows.v publishes and not a
+    second description of it. *)
 Lemma psl211_word_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (psl211_word_proximity_cert R idx)
   = amf_sample (ab_f (published_at psl211_row_alldecks_tableau)) R idx
   /\ ExactIndependence (ipc_witness (psl211_word_proximity_cert R idx))
      = ab_port (published_at psl211_row_alldecks_tableau) R idx.
+Proof.
 (* exact: erefl and not by []: done does not return on an equation between two
-   rows' coordinates, where exact: erefl decides it at once. Both projections
-   close by exact: erefl in under 0.01 s. *)
-Proof. split; exact: erefl. Qed.
+   rows' coordinates, where exact: erefl decides it at once. *)
+split; exact: erefl.
+Qed.
 
 (** The secret the certificate names and the secret its witness carries are
     one term, psl211_alldecks_secret. A proximity certificate whose two
@@ -194,7 +199,9 @@ Proof. split; exact: erefl. Qed.
     At a one-point carrier the arm's proposition compares two readings and
     mentions no secret at all, the second factor of the product being a point
     mass, so the number would bound nothing about what a coalition learns of
-    the bit. *)
+    the bit. The bit is not a constant either: psl211_alldecks_secret_expectedE
+    of instances/psl211/psl211_models.v reads it as the value the run recovers
+    at every sample point. *)
 Lemma psl211_word_proximity_cert_secretTE (R : realType) (idx : unit) :
   ew_secretT (ipc_witness (psl211_word_proximity_cert R idx)) = bool.
 Proof. exact: erefl. Qed.
@@ -203,8 +210,7 @@ Proof. exact: erefl. Qed.
 (*     The number                                                             *)
 (******************************************************************************)
 
-(** The certificate's number in closed form: the 584-letter walk's number,
-    2^-40, which is 9.094947017729282e-13. *)
+(** The certificate's number is the 584-letter walk's number, 2^-40. *)
 Lemma psl211_word_proximity_cert_epsE (R : realType) (idx : unit) :
   ipc_eps (psl211_word_proximity_cert R idx) = 2%:R^-40 :> R.
 Proof. exact: erefl. Qed.
@@ -233,17 +239,20 @@ Proof. exact: var_dist_le2. Qed.
       while it is expected to have type
        "is_true (var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2 ^- 40)".
 
-    So the number psl211_word_lawE proves is carried by psl211_word_mixing and
-    by nothing that holds of an arbitrary pair of laws. *)
-Fail Definition psl211_word_law_tauto (R : realType) :
+    So the bound var_dist_le2 gives for an arbitrary pair of laws does not
+    reach this number: the term that proves the distance at two is rejected at
+    2^-40. What carries the number psl211_word_law_le40 proves is
+    psl211_word_mixing. *)
+Fail Definition psl211_word_law_by_var_dist_le2 (R : realType) :
   var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R^-40
   := var_dist_le2 _ _.
 
 (** The certificate's number is below two, the bound var_dist_le2 of
-    lib/var_dist_supp.v gives for a variation distance. What this rules out
-    is that bound's own tautology: psl211_word_law_le2 proves the distance
-    at two with no fact about this instance and no fact about the walk, and
-    the same term is rejected at 2^-40. The number is 2^-41 of that bound.
+    lib/var_dist_supp.v gives for a sum of absolute differences. What this
+    rules out is that bound's own tautology: psl211_word_law_le2 proves the
+    distance at two with no fact about this instance and no fact about the
+    walk, and the same term is rejected at 2^-40. The number is 2^-41 of that
+    bound.
     The second shape a proximity certificate can be vacuous in is closed
     beside that rejection: psl211_word_proximity_cert_secretE and
     psl211_word_proximity_cert_secretTE give the certificate's secret and
@@ -267,7 +276,7 @@ Qed.
     chirality is within that number, in the sum of absolute differences, of
     the product of the two marginals the all-decks execution has, where the
     reading and the chirality are independent outright; a distinguisher's
-    advantage is therefore at most half of it. The claim is an average over
+    advantage is therefore at most 2^-41. The claim is an average over
     the deck description and the cut and is not a statement at a fixed deck
     description. That every coalition below the threshold reads an ideal cut
     by the same law at every run argument is false at each cut named here:
@@ -278,8 +287,8 @@ Qed.
     psl211_dealt_constancy_false at the group-uniform cut under the
     dealer-dealt run, a different execution. Each is witnessed at a coalition
     of three seats, and all three stay true beside this row. Its transfer
-    status is IdealFinite, an idealised shuffle being replaced here by a
-    shuffle of 584 letters. *)
+    status is IdealFinite: the cut is a shuffle of 584 letters where
+    psl211_row_alldecks draws it uniformly from the group. *)
 Definition psl211_row_word_proximity : PublishedRow :=
   psl211_alldecks_prefix
     sample  psl211_word_family
@@ -288,8 +297,7 @@ Definition psl211_row_word_proximity : PublishedRow :=
 
 (** The arm the row carries, at every real field and index: the distance to a
     private ideal model, and not the distance between two readings of one
-    model. This is the value a paper's table prints in the arm column for this
-    row. *)
+    model. *)
 Lemma psl211_row_word_proximity_armE (R : realType)
     (idx : amf_index (ab_f (published_at psl211_row_word_proximity)) R) :
   security_arm_of psl211_row_word_proximity R idx = IdealProximityArm.
@@ -299,11 +307,13 @@ Proof. exact: erefl. Qed.
     chirality instance at the 584-letter word model. Its five coordinates are
     the observed execution the program runs on, the completion level the
     publish terminal reaches, the model family the sample step named, and the
-    two statuses the terminal was given, so the manifest's description of this
-    path is read off the program and not written beside it. It differs from
-    psl211_row_alldecks in the model family and in the transfer status, the
-    all-decks row comparing no idealized model where this one replaces an
-    idealized shuffle by a finite word. *)
+    two statuses the terminal was given. The manifest writes those coordinates
+    in the facade's vocabulary and the program in this file's, and conversion
+    decides the equation, so the manifest's row for this path is a claim this
+    equation discharges rather than a table maintained beside the program. It
+    differs from psl211_row_alldecks in the model family and in the transfer
+    status, the all-decks row comparing no idealized model where this one
+    replaces an idealized shuffle by a finite word. *)
 Lemma psl211_row_word_proximity_rowE :
   published_row psl211_row_word_proximity = psl211_row_word.
 Proof. exact: erefl. Qed.
@@ -360,7 +370,8 @@ Fail Definition psl211_word_proximity_cert_pgl27_ideal (R : realType)
     (2%:R^-40)
     (fun C HC => @psl211_word_proximity_close R C HC).
 
-(** The certificate's ideal is not the word model it is about. A certificate
+(** The certificate's ideal is not convertible with the word model it is
+    about. A certificate
     naming its own model as the ideal holds its distance field at zero, the
     two sides of that field being one term, so the number it publishes bounds
     a distance from the model to itself. The rejection is a failure to unify

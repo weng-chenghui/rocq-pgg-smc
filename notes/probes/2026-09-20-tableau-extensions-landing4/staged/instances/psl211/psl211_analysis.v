@@ -40,7 +40,7 @@
 (*   deck-level coalition observer            -> static_view                  *)
 (*   exact-uniform sample model               -> exact_sample,                *)
 (*                                               exact_family                 *)
-(*   584-letter word sample model           -> word_sample, word_family       *)
+(*   584-letter word sample model             -> word_sample, word_family     *)
 (*   distribution-to-observer bridges         -> cut_distE,                   *)
 (*                                               exact_coalition_distE,       *)
 (*                                               content_traceE               *)

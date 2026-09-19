@@ -93,9 +93,9 @@ Lemma f_psl211_word_cut_distE (R : realType) :
   = psl211_word_cutP R.
 Proof. exact: psl211_word_cut_distE. Qed.
 
-Lemma f_psl211_word_lawE (R : realType) :
+Lemma f_psl211_word_law_le40 (R : realType) :
   var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R^-40.
-Proof. exact: psl211_word_lawE. Qed.
+Proof. exact: psl211_word_law_le40. Qed.
 
 (* The cut law of the word model is the 584-letter walk the refutation
    psl211_alldecks_constancy_false_word584 is stated on, so the adapter and
@@ -248,7 +248,7 @@ Print Assumptions psl211_word_sample.
 Print Assumptions psl211_word_sampleP_E.
 Print Assumptions psl211_word_cut_distE.
 Print Assumptions psl211_word_family.
-Print Assumptions psl211_word_lawE.
+Print Assumptions psl211_word_law_le40.
 
 (* psl211_analysis.v *)
 Print Assumptions PSL211Analysis.word_sample.

@@ -67,12 +67,28 @@ NEW = [
      ["p6_psl211_word_proximity.v", "p6_mutations.v"]),
 ]
 
+# landed declarations the landing renames, staged name -> probe name.  The
+# comparison is made under the probe's name, so the rename shows up as the
+# token difference it is and nothing else is hidden.
+RENAMED = {
+    "psl211_word_law_le40": "psl211_word_lawE",
+    "psl211_word_law_by_var_dist_le2": "psl211_word_law_tauto",
+}
+
 # the declarations whose token stream is meant to differ from the probe's,
 # and why.  Every other declaration must come out token-identical.
 EXPECTED = {
     "psl211_row_word_proximity_rowE":
         "stated at the manifest row psl211_row_word, which did not exist when"
         " the probe was written",
+    "psl211_word_law_le40":
+        "renamed from psl211_word_lawE: in this tree E names an equation and"
+        " the statement is an inequality",
+    "psl211_word_law_by_var_dist_le2":
+        "renamed from psl211_word_law_tauto: the rejected proof term is the"
+        " tautology, not the statement",
+    "psl211_word_proximity_close":
+        "its proof cites psl211_word_law_le40 under the new name",
 }
 
 # declarations of a landed file that are the landing's own text and appear in
@@ -170,13 +186,14 @@ def blocks(path):
 
 
 def compare(nm, st, sd, pt, pd, where):
-    ok = pt[nm] == st[nm]
+    pn = RENAMED.get(nm, nm)
+    ok = pt[pn] == st[nm]
     if not ok:
         if nm in EXPECTED:
             print("   EXPECTED DIFFERENCE in %s: %s" % (nm, EXPECTED[nm]))
-        report("%s (from %s)" % (nm, where), pt[nm], st[nm], "code tokens")
-    if pd[nm] != sd[nm]:
-        report("%s (from %s)" % (nm, where), pd[nm], sd[nm], "comment words")
+        report("%s (from %s)" % (nm, where), pt[pn], st[nm], "code tokens")
+    if pd[pn] != sd[nm]:
+        report("%s (from %s)" % (nm, where), pd[pn], sd[nm], "comment words")
     return ok
 
 
@@ -218,7 +235,7 @@ def main():
         print("=== %s" % rel)
         idn, cmpd = 0, 0
         for nm in sorted(st, key=list(st).index):
-            where = [f for f in srcs if nm in probe[f][0]]
+            where = [f for f in srcs if RENAMED.get(nm, nm) in probe[f][0]]
             if not where:
                 print("   NOT IN ANY PROBE FILE: %s" % nm)
                 continue

@@ -42,7 +42,7 @@
 (* marginal bound. The exclusion covers the input-indistinguishability arm    *)
 (* alone: a proximity certificate carries no shuffle bound and no constancy   *)
 (* field, and the row of instances/psl211/psl211_word_proximity.v publishes   *)
-(* 2^-40 over the word model through that arm.                                *)
+(* 2^-40 over the word model through the proximity arm.                       *)
 (*                                                                            *)
 (* Dealt mode. The run argument is the chirality itself, so here the field    *)
 (* is exactly constancy in the secret, and it still fails: three seats see a  *)
@@ -739,7 +739,7 @@ exact: (@psl211_alldecks_no_small_eps_cert R cert Hlt).
 Qed.
 
 (******************************************************************************)
-(*     The word model, which this tree carries no sample adapter for          *)
+(*     The word model, whose sample adapter is psl211_word_sample             *)
 (******************************************************************************)
 
 (** psl211_alldecks_constancy_false_word — take a cut law W within d of the
@@ -770,13 +770,14 @@ Qed.
     draw, and the 2^-40 is the whole information-theoretic price of that
     replacement, while the eps is a certificate's own distance field. It is
     stated on the cut law rather than on a certificate because it quantifies
-    over every law within eps of that cut, so it covers the ideal of every
-    certificate at once and needs no adapter to name one. The weighted-word
-    adapter psl211_word_sample of instances/psl211/psl211_word_model.v draws
-    this cut, and the row published over it in
+    over every law within eps of that cut: a certificate whose adapter draws
+    this cut is reached at its own shuffle bound, through ic_close read with
+    ic_Hd, and no adapter has to be named here. The weighted-word adapter
+    psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut,
+    and the row published over it in
     instances/psl211/psl211_word_proximity.v carries a proximity certificate,
-    which has no constancy field, so that row and this refutation are two
-    propositions and neither bears on the other. *)
+    which has no constancy field for this refutation to touch, so this
+    refutation rules out no proximity row. *)
 Lemma psl211_alldecks_constancy_false_word584 (R : realType)
     (ideal : R.-fdist cutT) (eps : R) :
   var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R))

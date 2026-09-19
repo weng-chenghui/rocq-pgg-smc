@@ -11,9 +11,11 @@
 (* union of the two supports restores the transport, and that is the form in  *)
 (* which a per-position number becomes a number about the group. Beside it    *)
 (* sit the scale a published variation distance is read against, the          *)
-(* invariance of a uniform law under an injective endomap, and the fact that  *)
-(* a pushforward charges only the image. security/var_dist_joint_law.v        *)
-(* carries the distance between two joint laws of a reading and a secret.     *)
+(* invariance of a uniform law under an injective endomap, the fact that a    *)
+(* pushforward charges only the image, and the distance between the point     *)
+(* mass at true on the booleans and the uniform law there.                    *)
+(* security/var_dist_joint_law.v carries the distance between two joint laws  *)
+(* of a reading and a secret.                                                 *)
 (*                                                                            *)
 (* Lemmas:                                                                    *)
 (*   var_dist_le2               == a variation distance is at most two        *)
@@ -156,7 +158,7 @@ by move: (Hno a); rewrite Ha.
 Qed.
 
 (******************************************************************************)
-(*     A point mass against the uniform law on the booleans                   *)
+(*     The point mass at true against the uniform law on the booleans         *)
 (******************************************************************************)
 
 (** The distance between the point mass at true on the booleans and the

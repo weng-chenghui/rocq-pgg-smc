@@ -19,15 +19,9 @@
 (* labelling of the club codes, the three coordinates other than the secret.  *)
 (* The secret is the chirality bit.                                           *)
 (*                                                                            *)
-(* Both models put a deck description and a cut in one sample point, so the   *)
-(* model below is the all-decks adapter with the law of the cut coordinate    *)
-(* replaced, and the chirality of one model is the chirality of the other as  *)
-(* one term rather than two readings of one bit.                              *)
-(*                                                                            *)
-(* The deck description and the cut are independent in both models because    *)
-(* each law is written as a product, which is the dealer drawing the word     *)
-(* without seeing the deck: a premise about how the shuffle is performed and  *)
-(* not a theorem about the execution.                                         *)
+(* That both laws are written as products is a premise about how the shuffle  *)
+(* is performed and not a theorem about the execution: it says the dealer     *)
+(* draws the word without seeing the deck.                                    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_word_cutP     == the law of the cut a dealer performs by hand     *)
@@ -38,7 +32,7 @@
 (* Key results:                                                               *)
 (*   psl211_word_sampleP_E == the adapter's law is the word model's law       *)
 (*   psl211_word_cut_distE == the model's cut is the 584-letter word law      *)
-(*   psl211_word_lawE      == the two models' laws are within 2^-40           *)
+(*   psl211_word_law_le40  == the two models' laws are within 2^-40           *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -73,17 +67,16 @@ Local Open Scope proba_scope.
     group of a word of 584 letters, each letter drawn uniformly and
     independently from the three generators, block reversal and the two Monge
     letters. It is the one coordinate in which this model departs from the
-    all-decks model, and 2^-40, the bound psl211_word_mixing proves, is the
-    whole price of the departure. *)
+    all-decks model, and psl211_word_mixing bounds the distance between the
+    two cut laws by 2^-40. *)
 Definition psl211_word_cutP (R : realType) : R.-fdist (pgg_gT psl211_M) :=
   @rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R).
 
 (** The law of the word model: the deck description uniform over the
     136857600 of them, the cut the 584-letter word law, the two independent
-    by construction, which is the dealer drawing the word without seeing the
-    deck. It differs from psl211_alldecksP in the cut factor alone, so a
-    coalition reads a deck drawn from the same law under a different
-    shuffle. *)
+    by construction. It differs from psl211_alldecksP in the cut factor
+    alone, so a coalition reads a deck drawn from the same law under a
+    different shuffle. *)
 Definition psl211_wordP (R : realType)
   : R.-fdist (psl211_inputT * pgg_gT psl211_M)%type :=
   (`U psl211_alldecks_gt0) `x (psl211_word_cutP R).
@@ -107,7 +100,7 @@ Proof. exact: erefl. Qed.
 
 (** The cut this model draws is the 584-letter word law. That law is the one
     psl211_word_mixing bounds against uniform, so the distance the proximity
-    arm spends is a distance between the two cuts of one execution and not a
+    arm bounds is a distance between the two cuts of one execution and not a
     distance between two executions. *)
 Lemma psl211_word_cut_distE (R : realType) :
   @sa_cut_dist R (instance_profile psl211_algebra)
@@ -128,13 +121,13 @@ Definition psl211_word_family : AnalysisModelFamily psl211_alldecks_observed :=
 (******************************************************************************)
 
 (** The two models' laws are within 2^-40 of each other in the sum of
-    absolute differences, which is 9.094947017729282e-13. The deck
-    description is drawn from one law in both models and independently of the
-    cut in both, so the distance between the two joint laws of description
-    and cut is the distance between the two cuts, which psl211_word_mixing
-    bounds. The bound is unconditional and information-theoretic: it counts
-    the 3^584 words and assumes nothing about an adversary's resources. *)
-Lemma psl211_word_lawE (R : realType) :
+    absolute differences. The deck description is drawn from one law in both
+    models and independently of the cut in both, so the distance between the
+    two joint laws of description and cut is the distance between the two
+    cuts, which psl211_word_mixing bounds. The bound is unconditional and
+    information-theoretic: it counts the 3^584 words and assumes nothing
+    about an adversary's resources. *)
+Lemma psl211_word_law_le40 (R : realType) :
   var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R^-40.
 Proof.
 rewrite /psl211_wordP /psl211_alldecksP /psl211_word_cutP var_dist_prodR.

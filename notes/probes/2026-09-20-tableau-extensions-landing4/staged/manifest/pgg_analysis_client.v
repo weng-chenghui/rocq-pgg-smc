@@ -4,7 +4,7 @@
 (* pgg_analysis_client: the clean client of the analysis manifest             *)
 (*                                                                            *)
 (* One import reaches all four facades, the typed status vocabulary and the   *)
-(* eleven typed rows. The file has EXACTLY ONE Require of any kind, and      *)
+(* eleven typed rows. The file has EXACTLY ONE Require of any kind, and       *)
 (* every Check below is a bare Check on an alias, so no scope needs to be     *)
 (* open and no notation needs to be in scope: what is established here is     *)
 (* reachability of the aliases, not their spelling.                           *)

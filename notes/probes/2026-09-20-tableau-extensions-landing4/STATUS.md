@@ -132,7 +132,7 @@ Seven declarations, all seven token-identical to probe
 | the law | `psl211_word_cutP`, `psl211_wordP` | `:76`, `:85` |
 | the adapter | `psl211_word_sample`, `psl211_word_sampleP_E`, `psl211_word_cut_distE` | `:94`, `:102`, `:110` |
 | the family | `psl211_word_family` | `:120` |
-| the distance | `psl211_word_lawE` | `:135` |
+| the distance | `psl211_word_law_le40` (probe `psl211_word_lawE`) | `:135` |
 
 **What the file is.** The model is the all-decks carrier with the law of the
 cut coordinate alone replaced by the 584-letter word law. The header says
@@ -146,7 +146,7 @@ the colon is the landing's; the rest is the probe's.
 p1_joint_law_distance` becomes `From pgg_smc Require Import
 var_dist_joint_law`. The probe's file used two lemmas of
 `p1_joint_law_distance.v`, `fdist_prod_snd` in `psl211_word_cut_distE` and
-`var_dist_prodR` in `psl211_word_lawE`. **Landing 2 did not put them in
+`var_dist_prodR` in `psl211_word_law_le40`. **Landing 2 did not put them in
 `lib/var_dist_supp.v` as the design's section 2 says; it created
 `security/var_dist_joint_law.v` and put all four there.** The design's
 sentence "`p1_joint_law_distance` resolves to `var_dist_supp` after landing 2"
@@ -253,7 +253,8 @@ block constrains `NoModelComparison` and `StaticExecutedOnly` rows and names
 the S5 word row separately; this row is neither, and that block is unchanged.
 
 Whole-file token diff against landing 3's staged text: **3 hunks, 88 tokens**,
-the typed row, the five pins and the family application.
+the typed row, the five pins and the family application. The fix pass adds no
+code token to this file.
 
 ---
 
@@ -276,7 +277,8 @@ the `Check`.
 ## E5 — `psl211_reading_constancy.v`, comments only
 
 Code tokens identical to production: **YES**, 0 hunks, `verify.py` check (2).
-Four comment changes, 157 words. Two are the sentences landing 4 makes false
+Five comment changes, 175 words, the fifth being the section banner of the
+fix pass's S1. Two are the sentences landing 4 makes false
 and two are sentences it makes incomplete, which the design's section 4 asks
 for at this landing. Each was checked against the declarations it speaks of
 and against the new word model.
@@ -367,7 +369,7 @@ the forced edit below.
 | the number | `psl211_word_proximity_cert_epsE`, `psl211_pow2_40_ge1`, `psl211_pow2_40_gt0`, `psl211_word_law_le2`, `psl211_word_proximity_cert_eps_lt2` | `p6_word:176,181,185`, `p6_mut:75`, `p6_word:198` |
 | the row | `psl211_row_word_proximity`, `psl211_row_word_proximity_armE`, `psl211_row_word_proximity_rowE` | `p6_word:229,239,250` |
 | what the row states | `psl211_word_view_proximity` | `p6_word:267` |
-| recorded `Fail`s | `psl211_word_law_tauto`, `psl211_word_proximity_cert_pgl27_ideal`, `psl211_word_proximity_cert_ideal_self` | `p6_mut:88,107,155` |
+| recorded `Fail`s | `psl211_word_law_by_var_dist_le2` (probe `psl211_word_law_tauto`), `psl211_word_proximity_cert_pgl27_ideal`, `psl211_word_proximity_cert_ideal_self` | `p6_mut:88,107,155` |
 
 R7 needs no rename here: the probe's `p6_psl211_word_proximity.v` already
 declares the two power facts as `psl211_pow2_40_ge1` and
@@ -440,7 +442,7 @@ correction was applied to the manifest's typed-row docstring.
 
 Five, each with its reason. `verify.py` prints all five in full.
 
-`psl211_word_law_le2` and `psl211_word_law_tauto`, two words each: "ceiling"
+`psl211_word_law_le2` and the recorded guard, two words each: "ceiling"
 is a metaphor noun for a bound and landings 2 and 3 removed it from their own
 files.
 
@@ -514,7 +516,7 @@ fail, and each fails for the reason its comment states, verbatim.
 
 | Guard | Error |
 |---|---|
-| `psl211_word_law_tauto` | `The term "var_dist_le2 ?P ?Q" has type "is_true (var_dist ?P ?Q <= 2)" while it is expected to have type "is_true (var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2 ^- 40)"` |
+| `psl211_word_law_by_var_dist_le2` | `The term "var_dist_le2 ?P ?Q" has type "is_true (var_dist ?P ?Q <= 2)" while it is expected to have type "is_true (var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2 ^- 40)"` |
 | `psl211_word_proximity_cert_pgl27_ideal` | `The term "amf_sample pgl27_exact_family R tt" has type "SampleAdapter R (OE.oe_execution pgl27_exec.pgl27_observed)" while it is expected to have type "SampleAdapter R (instance_exec psl211_alldecks_params)"` |
 | `psl211_word_proximity_cert_ideal_self` | `The term "erefl" has type "ipc_ideal (...) = ipc_ideal (...)" while it is expected to have type "ipc_ideal (...) = amf_sample psl211_word_family R idx" (cannot unify …)` |
 
@@ -668,10 +670,11 @@ Five checks, output in `verify.out`.
    is production's, reported YES, and its comment text is printed as a
    157-word unified diff in four hunks, the four changes of E5.
 3. **Per-declaration token diffs against the probe.**
-   `psl211_word_model.v` **7 of 7** token-identical.
-   `psl211_word_proximity.v` **16 of 17** token-identical. The one that is not
-   is named in the script's `EXPECTED` map, printed with its reason and then
-   in full: `psl211_row_word_proximity_rowE`, 8 tokens, the right-hand side.
+   `psl211_word_model.v` **6 of 7** token-identical.
+   `psl211_word_proximity.v` **14 of 17** token-identical. The one that is not
+   are named in the script's `EXPECTED` map, printed with their reason and
+   then in full: `psl211_row_word_proximity_rowE`, 8 tokens, the right-hand
+   side, and the three the fix pass's two renames touch.
 4. **Comment word diffs.** Five differences, each listed with before and after
    in E6 and each classified. The largest,
    `psl211_row_word_proximity_rowE` at 126 words, is the docstring rewritten
@@ -727,3 +730,235 @@ The other four files of landing 4 are already in `_CoqProject`.
    status separates them too. The correction is applied in two places, the
    lemma's docstring and the manifest's typed-row docstring, and is flagged
    because it is a correction to audited probe text and not a landing edit.
+
+---
+
+# Fix pass 1
+
+Both audits of `833acaf` applied to the staged text. Only files inside this
+directory were edited. The four generated files were changed through
+`rebase_shared.py`'s operation lists and never by hand: `python3
+rebase_shared.py` run twice in a row reproduces all four byte for byte
+(`cmp` clean).
+
+Code changes: the two renames the orchestrator ruled and the fidelity lines
+they force, and nothing else. A comment-stripped token diff of the six landed
+files and `landing_fidelity.v` against `833acaf` gives exactly
+
+| File | changed tokens |
+|---|---|
+| `staged/instances/psl211/psl211_word_model.v` | 2: `psl211_word_lawE` to `psl211_word_law_le40` |
+| `staged/instances/psl211/psl211_word_proximity.v` | 4: the `exact:` of `psl211_word_proximity_close`, and `psl211_word_law_tauto` to `psl211_word_law_by_var_dist_le2` |
+| `landing_fidelity.v` | 6: `f_psl211_word_lawE` renamed and its two mentions |
+| the other four landed files | 0 |
+
+## A — the whole-file re-read of `psl211_reading_constancy.v`
+
+All 1025 lines read. Every sentence naming an adapter, a family, a row, an
+arm, a publication or a non-existence, and what it says after landing 4:
+
+| Where | What it says | Verdict |
+|---|---|---|
+| `:4-16` header opening | the instance publishes its all-decks row at the exact arm and its word row at the proximity arm | true, and it is passage (d) |
+| `:18-30` all-decks mode | the field asks for constancy outside the secret; `psl211_alldecks_static_indep` is what the published row carries | true |
+| `:32-45` quantitative form | a certificate over the all-decks model states its distance against the group-uniform law, its identification field pinning its shuffle law to the adapter's cut | true of `psl211_alldecks_sample`, whose cut is `psl211_alldecks_cut_distE` |
+| `:42-45` passage (c) | the exclusion covers one arm | true after S2 |
+| `:47-56` dealt mode | "this tree carrying no dealt-mode sample adapter" | STILL TRUE: `psl211_word_sample : SampleAdapter R (instance_exec psl211_alldecks_params)` is an all-decks-mode adapter |
+| `:58-77` "Not claimed" | the arm is not shown unavailable; the larger-eps range is occupied and argued, not compiled | true; `:71-75` is passage (a) |
+| `:79-91` "Names" | prefixes and proof-script letters | no existence claim |
+| `:93-134` index blocks | twelve entries | each checked against its declaration; `_word584`'s entry is true |
+| `:188-206` `coalition_reading_constancy` | the field as a standalone Prop | true |
+| `:207-216` `indistinguishability_cert_reading_constancy` | refuting the proposition at a law refutes every certificate whose ideal cut is that law | true, and it is the lemma S3 reads against |
+| `:222-248` the three seats | coalition size and threshold | true |
+| `:254-265` `_constancy_false` | no certificate takes the group-uniform law as its ideal cut here | true |
+| `:297-510` block-line section | fibers, counts, masses | no existence claim |
+| `:529-560` `_ideal_lawE` | per-deck symmetry | true |
+| `:562-566` `_fiber_true0` | "which is not the law the row is about" | true of either row: both are averages over deck descriptions |
+| `:575-616` `_false_supp` | support form | true |
+| `:618-671` `_false_close` | eps form | true |
+| `:673-688` `_cert_ideal_close` | "this adapter's cut is the uniform law on the shuffle group" | true of the all-decks adapter, which is the one the type names |
+| `:690-739` `_no_small_eps_cert`, `_no_zero_eps_cert` | scoped to input-indistinguishability certificates over the all-decks model | true |
+| **`:742` section banner** | "The word model, which this tree carries no sample adapter for" | **FALSE — S1** |
+| `:745-764` `_false_word` | two-step form over W and ideal | true |
+| `:766-795` `_word584` | passage (b) | true after S3 and S4 |
+| `:801-992` dealt section | "this tree carrying no dealt-mode sample adapter through which a certificate's ideal could be pinned to it" (`:962-963`) | STILL TRUE, same reason as `:55-56` |
+| `:994-1025` empty coalition | the field holds at `set0` | true |
+
+S1 is the only sentence the word model makes false. Nothing else in the file
+says that an adapter, a family or a row does not exist.
+
+Two inherited sentences of production carry an economic metaphor and were
+left, because N28's ruling confines this pass to the two new files: `:750`
+("the price of replacing the exact shuffle by one a dealer can perform … pays
+both") and `:770` ("the whole information-theoretic price of that
+replacement"), beside the `:16` the ruling names. All three belong to a later
+pass over production.
+
+## B — the soundness findings
+
+| id | final text | declaration checked | note |
+|---|---|---|---|
+| S1 | `(*     The word model, whose sample adapter is psl211_word_sample             *)` | `psl211_word_sample (R : realType) : SampleAdapter R (instance_exec psl211_alldecks_params)`, `psl211_word_model.v` | DEVIATION: the auditor's text was "whose sample adapter is psl211_word_model.v", which names a file where an adapter is meant. The declaration is named instead. 80 bytes. |
+| S2 | "…and the row of instances/psl211/psl211_word_proximity.v publishes 2^-40 over the word model through the proximity arm." | `psl211_row_word_proximity_armE : security_arm_of psl211_row_word_proximity R idx = IdealProximityArm` | as proposed |
+| S3+S4 | "It is stated on the cut law rather than on a certificate because it quantifies over every law within eps of that cut: a certificate whose adapter draws this cut is reached at its own shuffle bound, through ic_close read with ic_Hd, and no adapter has to be named here. The weighted-word adapter psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut, and the row published over it in instances/psl211/psl211_word_proximity.v carries a proximity certificate, which has no constancy field for this refutation to touch, so this refutation rules out no proximity row." | `psl211_alldecks_constancy_false_word584`, whose two hypotheses are `var_dist (rho_from_words_weighted …) ideal <= eps` and `(2^-40 + eps) + (2^-40 + eps) < 1/#\|G\|`; `ic_close`/`ic_Hd` as used in `psl211_alldecks_cert_ideal_close`'s proof; `IdealProximityCert`'s five fields | ONE TEXT for both. S3's "covers the ideal of every certificate at once" is gone and replaced by the `ic_close`/`ic_Hd` route; S4's "neither bears on the other" is gone and replaced by the one-directional statement. The eps restriction stays where it already was, in the sentence before. |
+| S5+N8 | "…is the ideal this row's certificate is measured against. The two models differ in the law of the cut alone. The two rows differ in the model family and in the transfer status, and they carry different statements, Row 9 exact independence and this row a bound on the distance to that independent model." | `psl211_row_alldecks` (`exact_family`, `StaticExecutedOnly`) against `psl211_row_word` (`word_family`, `IdealFinite`) | ONE TEXT for both. S5's model clause is kept because it is true and is what the file's own header says; N8's "a bound on the distance" is used, not S5's "a distance", per N20. |
+| S6 | "The propositions refuted in instances/psl211/psl211_reading_constancy.v are instances of coalition_reading_constancy, which indistinguishability_cert_reading_constancy reads as ic_const, the fifth field of an input-indistinguishability certificate and a field a proximity certificate has no counterpart of. Those refutations stay true beside this row." | `coalition_reading_constancy` is a standalone `Definition`; `indistinguishability_cert_reading_constancy … : coalition_reading_constancy E (ic_ideal cert)` proved by `exact: ic_const cert` | DEVIATION: the auditor wrote "The three refutations"; the cell does not name three and the file carries more than three refutations, so no count is given. |
+| S7 | "…so every security statement below is about a static coalition of at most five of the twelve seats…" | `profile_k_psl211_algebra : profile_k (instance_profile psl211_algebra) = 6`, `psl211_exec.v:132` | as proposed |
+| S8+N10 | "So the bound var_dist_le2 gives for an arbitrary pair of laws does not reach this number: the term that proves the distance at two is rejected at 2^-40. What carries the number psl211_word_law_le40 proves is psl211_word_mixing." | the quoted rejection, which is about `var_dist_le2 ?P ?Q` alone | ONE TEXT for both. No universal claim over a class of facts is left. |
+| S9 | "The certificate's ideal is not convertible with the word model it is about." | the `Fail` is on `erefl` at that equation | as proposed |
+| S10 | added: "The bit is not a constant either: psl211_alldecks_secret_expectedE of instances/psl211/psl211_models.v reads it as the value the run recovers at every sample point." | `psl211_alldecks_secret_expectedE (R) (u) : psl211_alldecks_secret R u = ex_expected psl211_alldecks_params ((psl211_alldecks_sample R).(sa_arg) u)`, `psl211_models.v:449` | as proposed |
+| S11 | added to the cell: "…; the row's reading is the framework's own sa_coalition_view at word_sample, which the adapter's projections make the all-decks reading, so no facade-level reading bridge is named" | `psl211_word_sample` and `psl211_alldecks_sample` are both `@MkSampleAdapter … (… : finType) … fst snd`; `psl211_word_view_proximity` is stated at `sa_coalition_view … (amf_sample psl211_word_family R tt)` | as proposed |
+| S12+N11 | `(* eleven typed rows. The file has EXACTLY ONE Require of any kind, and       *)` | — | 80 bytes, checked. Both reports proposed the same line. |
+| S13 | recorded below | — | |
+| S14 | recorded below | — | |
+
+### S13 — the reverse closure count
+
+STATUS.md's "The reverse closures" reports nine reverse-dependants of
+`instances/psl211/psl211_analysis.v`. The `Require` walk over the tree at
+`833acaf` with the landing's staged text gives twelve: the nine of the
+design's section 3, plus `five_card_proximity` and
+`pgg_tableau_arm_relations` from landings 2 and 3 and `psl211_word_proximity`
+from this one. All twelve are among the twenty-two staged files, so the
+conclusion the number supports is unaffected.
+
+### S14 — `psl211_endpoints.vo`
+
+The landing never recompiles `instances/psl211/psl211_endpoints.v`. Its `.vo`
+is dated 2026-09-17 16:32 and its `.v` 2026-09-18 16:10, at commit `c9634fd`,
+whose whole diff to that file adds `Optimize Proof` and `Optimize Heap` lines
+inside the proof of `psl211_profile_endpoints` and changes neither the
+statement nor the proof term. So nothing this landing measured moves, and the
+limit of the evidence is that the compiles and the assumption reports are not
+reproducible from the committed sources until that `.vo` is rebuilt.
+
+## C, D, E — the naming findings
+
+| id | disposition |
+|---|---|
+| N1 | applied; the docstring now carries the fixed sibling's "The manifest writes those coordinates in the facade's vocabulary and the program in this file's, and conversion decides the equation, so the manifest's row for this path is a claim this equation discharges rather than a table maintained beside the program", followed by the two-coordinate difference |
+| N2 | applied; the "paper's table" sentence deleted, leaving the fixed sibling's docstring verbatim |
+| N3 | applied; header entry now "== the certificate's ideal is the all-decks row's model, and the port built from its witness is that row's port". Checked against the second conjunct `ExactIndependence (ipc_witness …) = ab_port (published_at psl211_row_alldecks_tableau) R idx` |
+| N4 | applied; the docstring now says "the port built from the witness the certificate carries is that row's port" |
+| N5 | applied; "== the proximity row's security statement, at 2^-40". Checked against the theorem's conclusion `… <= 2%:R^-40` |
+| N6 | applied; header "== the certificate's number is 2^-40", docstring "The certificate's number is the 584-letter walk's number, 2^-40." Decimal dropped under N27 |
+| N7 | applied; "== below the six-seat threshold, the two models' joint laws of a coalition's reading and the chirality are within 2^-40". Checked against `(#\|C\| < profile_k (instance_profile psl211_algebra))%N ->` and `profile_k … = 6` |
+| N9 | applied; `psl211_word_law_tauto` renamed `psl211_word_law_by_var_dist_le2` |
+| N12 | applied; `(*   584-letter word sample model             -> word_sample, word_family     *)`, 80 bytes with `->` at column 46, the column of the other thirteen rows |
+| N13 | applied; `psl211_word_lawE` renamed `psl211_word_law_le40` at all six mentions: the declaration, the model file's header entry, the `exact:` in `psl211_word_proximity_close`, the comment of the recorded guard, Row 11's model-transfer cell (through `rebase_shared.py`), and `landing_fidelity.v`'s restatement and `Print Assumptions`. `verify.py` gained a `RENAMED` map so the two declarations are still compared against the probe under the probe's name, and three `EXPECTED` entries |
+| N14 | applied; both "idealised" are now "idealized" |
+| N15 | applied; "the twelve-card chirality instance is the third to publish through that arm" |
+| N16 | applied; the duplicated header paragraph deleted. The "one random variable for the two models" clause stays where it already was, in the `psl211_word_sample` docstring |
+| N17 | applied; the header paragraph is now "That both laws are written as products is a premise about how the shuffle is performed and not a theorem about the execution: it says the dealer draws the word without seeing the deck", and the repeated clause is dropped from `psl211_wordP`'s docstring, leaving "the two independent by construction" |
+| N18 | dissolved by N27: the decimal the "which" attached to is gone, so the sentence is "The two models' laws are within 2^-40 of each other in the sum of absolute differences." |
+| N19 | applied; "The ideal, its witness and the secret are terms the all-decks row publishes, and the number is this certificate's own." |
+| N20 | applied; "and psl211_word_proximity_close as the distance field, which bounds by that number the distance between the two models' joint laws of a coalition's reading with the chirality" |
+| N21 | applied; the timing sentence deleted |
+| N22 | applied; the comment moved inside `Proof.` |
+| N23 | applied; the two entries now name the number two and `var_dist_le2` inside themselves |
+| N24 | applied; "for a sum of absolute differences" |
+| N25 | applied; "so which arm a path carries is told from the certificate its table names and not from a field of the record" |
+| N26 | applied; "It is the distance field of this instance's proximity certificate" |
+| N27 | applied; both decimal literals dropped, `2^-40` throughout |
+| N28 | applied in the two new files: `:77` is now "and psl211_word_mixing bounds the distance between the two cut laws by 2^-40", `:110` "the distance the proximity arm bounds". DEVIATION from the note's own suggestion "the whole distance between the two models": 2^-40 is a bound on that distance and not the distance, per N20. `psl211_reading_constancy.v:16` left, per the ruling |
+| N29, N30, N31, N32, N35, N37 | clean in the report; nothing to apply |
+| N33 | applied; "Its transfer status is IdealFinite: the cut is a shuffle of 584 letters where psl211_row_alldecks draws it uniformly from the group." This also removes one "idealised" |
+| N34 | applied; "2^-41" in all three places |
+| N36 | applied; the "Word gloss" paragraph is in `psl211_word_model.v` only, and `psl211_word_proximity.v` now opens that paragraph's place with "The word gloss of this instance is in instances/psl211/psl211_word_model.v." |
+
+Nothing was declined.
+
+What the audits asked a fix pass not to lose is all still there:
+`psl211_word_law_le2`'s "A proximity certificate carrying two would be a
+certificate about nothing", `_cert_secretTE`'s one-point-carrier sentence,
+`psl211_word_law_le40`'s "The bound is unconditional and
+information-theoretic: it counts the 3^584 words and assumes nothing about an
+adversary's resources", and `psl211_row_word_proximity`'s "once twice the sum
+of eps and 2^-40 stays below 1/660".
+
+## Chain state at hand-back
+
+`python3 restage.py --check` reports two chain-consistency copies as
+**comments only** drift, `staged/lib/var_dist_supp.v` and
+`staged/instances/pgl27/pgl27_proximity.v`. Landing 3's fix pass rewrote them
+at 04:12 and 04:24, after landing 4's last restage at 03:50. Neither was
+copied here, because landing 3 is not yet in production and the main session
+reruns `restage.py` after it is. The drift is comments only, so the code every
+compile below loaded is the chain's; the fixed `pgl27_proximity.v` text is
+nonetheless the text this fix pass diffed the PGL(2,7) roles against, so the
+wording adopted for N1 to N7 is landing 3's current wording and not its older
+one. The two files landing 4 rebases onto, `pgg_analysis_manifest.v` and
+`pgg_analysis_client.v`, are regenerated from landing 3's current text, so
+they carry no drift.
+
+## Fix pass 1 — verification
+
+`python3 rebase_shared.py` run twice: the four generated files are byte
+identical across the two runs (`cmp` clean on all four), 7, 2, 4 and 5
+operations applied, every anchor found exactly once, 0 lines over 80 bytes.
+
+Compiles after the fix pass, one Rocq process at a time through the `rocq1`
+lock, `rocq compile -time`, never `make`, and
+`instances/psl211/psl211_endpoints.v` never compiled. The seven chain files
+before `psl211_word_model.v` in the `_CoqProject` order were not recompiled:
+nothing this pass touched is in their forward closure. Wall times include
+other sessions' holds on the lock, so the "slow" column is read off the
+`-time` lines.
+
+| File | rc | wall | sentences over 5 s |
+|---|---|---|---|
+| `staged/instances/psl211/psl211_word_model.v` | 0 | 3.8 s | none |
+| `staged/instances/psl211/psl211_analysis.v` | 0 | 3.7 s | none |
+| `staged/manifest/pgg_analysis_manifest.v` | 0 | 5.9 s | one, 5.218 s, the `Require Export` block |
+| `staged/manifest/pgg_tableau.v` | 0 | 13.1 s | none |
+| `staged/manifest/pgg_tableau_syntax.v` | 0 | 4.4 s | none |
+| `staged/instances/pgl27/pgl27_rows.v` | 0 | 6.4 s | none |
+| `staged/instances/kim2025/five_card_rows.v` | 0 | 4.6 s | none |
+| `staged/instances/s5/s5_rows.v` | 0 | 4.0 s | none |
+| `staged/instances/psl211/psl211_reading_constancy.v` | 0 | 22.7 s | three, 5.186 s, 6.200 s and 6.219 s, all three production's |
+| `staged/instances/psl211/psl211_rows.v` | 0 | 5.5 s | none |
+| `staged/manifest/pgg_analysis_client.v` | 0 | 3.8 s | none |
+| `staged/manifest/pgg_tableau_arm_relations.v` | 0 | 3.7 s | none |
+| `staged/instances/kim2025/five_card_proximity.v` | 0 | 5.7 s | none |
+| `staged/instances/pgl27/pgl27_proximity.v` | 0 | 5.2 s | none |
+| `staged/instances/psl211/psl211_word_proximity.v` | 0 | 4.6 s | none |
+| `landing_fidelity.v` | 0 | 269.3 s | thirteen, each a `Print Assumptions` at about 20 s |
+
+The last two rows are a second run of those two files: one header paragraph
+of `psl211_word_proximity.v` was rewrapped after the first, so the fidelity
+file was recompiled against the final text.
+
+No sentence of a landed file is over 5 s.
+
+`Print Assumptions`, recaptured in `landing_fidelity.out`: 24 `Axioms:`
+blocks, each exactly `propositional_extensionality`,
+`functional_extensionality_dep` and `constructive_indefinite_description`,
+24 occurrences of each name and of no other, no declaration closed under the
+global context, and no `Error`, `Axiom`, `Admitted` or `Abort` anywhere in
+the run. `psl211_word_law_le40` appears twice, in the restatement and in the
+`Print Assumptions` line; `psl211_word_lawE` appears nowhere.
+
+`python3 verify.py`, in `verify.out`:
+
+1. Whole-file token diffs unchanged: `psl211_analysis.v` 3 hunks 14 tokens
+   against production, `psl211_reading_constancy.v` 0 hunks,
+   `pgg_analysis_manifest.v` 3 hunks 88 tokens and `pgg_analysis_client.v`
+   1 hunk 2 tokens against landing 3.
+2. `psl211_reading_constancy.v` code tokens identical to production, YES; its
+   comment diff is now 5 hunks, 175 words.
+3. `psl211_word_model.v` 6 of 7 and `psl211_word_proximity.v` 14 of 17
+   token-identical to the probe. The four that differ are all in `EXPECTED`:
+   `psl211_row_word_proximity_rowE` as before, and the three the two renames
+   touch, compared against the probe under the probe's names through the new
+   `RENAMED` map.
+4. Comment word diffs: one per rewritten docstring, each mapping to a finding
+   of this pass.
+5. Scans unchanged from landing 4's own report: every retired and barred
+   pattern 0, `indistinguishability` never abbreviated, `ceiling` 8 hits all
+   in the chain copy of `five_card_rows.v`, and 4 lines over 80 bytes all in
+   chain copies. No landed file has a line over 80 bytes and every box line
+   of the six landed files closes at column 80.
+
+Code-token diff of the landed files and `landing_fidelity.v` against
+`833acaf`: 2, 0, 0, 0, 0, 4 and 6 tokens, all of them one of the two renames
+or a mention of a renamed lemma. No other code token moved.

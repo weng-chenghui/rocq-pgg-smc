@@ -45,9 +45,9 @@ M_HEADER = """\
 (* status.                                                                    *)
 (*                                                                            *)
 (* A row records no security arm. Which arm a published program carries is    *)
-(* read off that program by security_arm_of of manifest/pgg_tableau.v, so a   *)
-(* row at the proximity arm is told from one at the exact arm by the          *)
-(* certificate its table names and not by a field of the record.              *)
+(* read off that program by security_arm_of of manifest/pgg_tableau.v, so     *)
+(* which arm a path carries is told from the certificate its table names and  *)
+(* not from a field of the record.                                            *)
 (*                                                                            *)
 """
 
@@ -96,7 +96,11 @@ M_BLOCK = """\
 (* | distribution-to-observer bridges | psl211_word_sampleP_E and             *)
 (*                        psl211_word_cut_distE of                            *)
 (*                        instances/psl211/psl211_word_model.v, which name    *)
-(*                        the adapter's own law and its cut law |             *)
+(*                        the adapter's own law and its cut law; the row's    *)
+(*                        reading is the framework's own sa_coalition_view at *)
+(*                        word_sample, which the adapter's projections make   *)
+(*                        the all-decks reading, so no facade-level reading   *)
+(*                        bridge is named |                                   *)
 (* | bound or certificate | psl211_word_proximity_cert of                     *)
 (*                          instances/psl211/psl211_word_proximity.v, whose   *)
 (*                          number is 2^-40 and whose distance field is       *)
@@ -105,9 +109,9 @@ M_BLOCK = """\
 (*                          instances/psl211/psl211_word_proximity.v |        *)
 (* | correctness theorem  | PSL211Analysis.observed_recovers,                 *)
 (*                          PSL211Analysis.secret_expectedE |                 *)
-(* | model transfer       | an idealised uniform shuffle replaced by a word   *)
-(*                          of 584 letters: psl211_word_lawE bounds the two   *)
-(*                          models' laws at 2^-40 and                         *)
+(* | model transfer       | an idealized uniform shuffle replaced by a word   *)
+(*                          of 584 letters: psl211_word_law_le40 bounds the   *)
+(*                          two models' laws at 2^-40 and                     *)
 (*                          psl211_word_proximity_close carries that number   *)
 (*                          to the joint law of a coalition's reading with    *)
 (*                          the chirality, in the sum of absolute             *)
@@ -144,11 +148,16 @@ M_BLOCK = """\
 (* literature, so a distinguisher's advantage against this row is at most     *)
 (* 2^-41. Row 9 records the same instance and the same execution at the       *)
 (* uniform cut, and the model of Row 9 is the ideal this row's certificate    *)
-(* is measured against; the two rows differ in the law of the cut alone and   *)
-(* carry different statements, Row 9 exact independence and this row a        *)
-(* distance to that independent model. The constancy propositions refuted in  *)
-(* instances/psl211/psl211_reading_constancy.v are fields of an               *)
-(* input-indistinguishability certificate and stay true beside this row.      *)
+(* is measured against. The two models differ in the law of the cut alone.    *)
+(* The two rows differ in the model family and in the transfer status, and    *)
+(* they carry different statements, Row 9 exact independence and this row a   *)
+(* bound on the distance to that independent model. The propositions refuted  *)
+(* in instances/psl211/psl211_reading_constancy.v are instances of            *)
+(* coalition_reading_constancy, which                                         *)
+(* indistinguishability_cert_reading_constancy reads as ic_const, the fifth   *)
+(* field of an input-indistinguishability certificate and a field a proximity *)
+(* certificate has no counterpart of. Those refutations stay true beside this *)
+(* row.                                                                       *)
 (*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 """
@@ -231,7 +240,7 @@ C_HEADER = \
     "(* One import reaches all four facades, the typed status vocabulary " \
     "and the   *)\n" \
     "(* eleven typed rows. The file has EXACTLY ONE Require of any kind, " \
-    "and      *)"
+    "and       *)"
 
 C_CHECK_ANCHOR = \
     "Check PSL211Analysis.exact_family.              (* 4 Models, typed " \
@@ -255,8 +264,8 @@ A_TABLE_ANCHOR = \
     "(*                                               exact_family    " \
     "             *)"
 A_TABLE = A_TABLE_ANCHOR + "\n" + \
-    "(*   584-letter word sample model           -> word_sample, word_" \
-    "family       *)"
+    "(*   584-letter word sample model             -> word_sample, word_" \
+    "family     *)"
 
 A_IMPORT_ANCHOR = "From pgg_smc Require Import psl211_alldecks psl211_models."
 A_IMPORT = \
@@ -345,7 +354,7 @@ CONSTANCY = [
      " constancy",
      "field, and the row of instances/psl211/psl211_word_proximity.v"
      " publishes",
-     "2^-40 over the word model through that arm."])),
+     "2^-40 over the word model through the proximity arm."])),
     # the clause the word adapter makes false
     (banner([
      "each. Nothing here says the word row is excluded outright:",
@@ -372,13 +381,19 @@ CONSTANCY = [
     could be held near it. *)""",
      """    replacement, while the eps is a certificate's own distance field. It is
     stated on the cut law rather than on a certificate because it quantifies
-    over every law within eps of that cut, so it covers the ideal of every
-    certificate at once and needs no adapter to name one. The weighted-word
-    adapter psl211_word_sample of instances/psl211/psl211_word_model.v draws
-    this cut, and the row published over it in
+    over every law within eps of that cut: a certificate whose adapter draws
+    this cut is reached at its own shuffle bound, through ic_close read with
+    ic_Hd, and no adapter has to be named here. The weighted-word adapter
+    psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut,
+    and the row published over it in
     instances/psl211/psl211_word_proximity.v carries a proximity certificate,
-    which has no constancy field, so that row and this refutation are two
-    propositions and neither bears on the other. *)"""),
+    which has no constancy field for this refutation to touch, so this
+    refutation rules out no proximity row. *)"""),
+    # the section banner the word adapter makes false
+    ("(*     The word model, which this tree carries no sample adapter for"
+     "          *)",
+     "(*     The word model, whose sample adapter is psl211_word_sample"
+     "             *)"),
 ]
 
 JOBS = [("manifest/pgg_analysis_manifest.v", MANIFEST, BASE),
