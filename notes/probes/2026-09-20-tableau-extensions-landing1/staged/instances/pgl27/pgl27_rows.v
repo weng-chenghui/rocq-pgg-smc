@@ -36,10 +36,10 @@
 (* pgl27_static_obs_funE and pgl27_exact_viewE; pgl27_word_cut_distE, which   *)
 (* identifies the word adapter's cut law with rho_word; and                   *)
 (* pgl27_word_marginal_bound, the walk's marginal bound. Two further          *)
-(* things stay outside the programs: the reprice of the word row's bound from *)
-(* 2^-40 + 2^-40 to 2^-39, which moves a number and proves nothing new about  *)
-(* a coalition, and the two bridge lemmas that carry a row's accumulated      *)
-(* proposition to the statement a paper cites.                                *)
+(* things stay outside the programs: the word row's conclusion at 2^-39,      *)
+(* which moves a number and proves nothing new about a coalition, and the     *)
+(* two bridge lemmas that carry a row's accumulated proposition to the        *)
+(* statement a paper cites.                                                   *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_dealt             == the prefix shared by both rows                *)
@@ -414,12 +414,13 @@ Fail Definition pgl27_inline_reuse : Tableau Sampled :=
     serve, because the security port quantifies over the field. *)
 Definition pgl27_reprice39 : Reprice := fun R => Some (2%:R^-39 : R).
 
-(** The word row concluded at the single constant 2^-39. The accumulated bound
-    is 2^-40 twice, pow2_split adds the two copies, and eqW reads that identity
-    as the inequality the terminal asks for; the data, the model and the
-    certificate are untouched, so the published row asserts about a coalition
-    no more than pgl27_row_word_tableau, at the number a reader expects to
-    cite. *)
+(** The word row concluded at the single constant 2^-39. The data, the model
+    and the certificate are untouched, so the published row asserts about a
+    coalition no more than pgl27_row_word_tableau, at the number a reader
+    expects to cite. *)
+(* The accumulated bound is 2^-40 twice; pow2_split adds the two copies and
+   eqW reads that identity as the inequality the terminal's obligation asks
+   for. *)
 Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
   pgl27_dealt
     sample  pgl27_word_family
@@ -482,15 +483,11 @@ Fail Definition pgl27_row_word39_unindexed_bind
 Definition pgl27_word_sampled : Tableau Sampled :=
   pgl27_dealt sample pgl27_word_family.
 
-(** The word program continued from the named value pgl27_word_sampled,
-    certified by the input-indistinguishability arm and concluded at 2^-39
-    before it is published. The accumulated bound is 2^-40 twice, pow2_split
-    adds the two copies, and eqW reads that identity as the inequality the
-    terminal's obligation asks for, so the row publishes the constant a
-    reader cites and asserts about a coalition below the privacy threshold no
-    more than the certificate proved. Continuing from a named Sampled value
+(** The word row built from the named value pgl27_word_sampled rather than
+    from the dealt prefix: the same certificate, the same terminal at 2^-39
+    and the same two statuses as pgl27_row_word39. Naming the Sampled value
     is what lets a further row over this model be written without repeating
-    the dealt prefix. *)
+    the prefix. *)
 Definition pgl27_row_word_branch39 : PublishedRowAt pgl27_reprice39 :=
   pgl27_word_sampled
     certify InputIndistinguishability pgl27_word_cert

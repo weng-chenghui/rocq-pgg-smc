@@ -49,15 +49,15 @@
 (* information a reveal of any list of card positions gives about the two     *)
 (* inputs, which five_card_row_biased_leak_bound carries. No arm of certify   *)
 (* takes a bound of either kind: the exact arm asks for independence of the   *)
-(* static coalition observation from a secret, which the development states   *)
-(* under the uniform cut and not under the biased one, and a conditional      *)
-(* mutual information is not a variation distance. AnalysisBridged is one     *)
+(* direct computation from a secret, which the development states under the   *)
+(* uniform cut and not under the biased one, and a conditional mutual         *)
+(* information is not a variation distance. AnalysisBridged is one            *)
 (* constructor with two admission criteria. The manifest admits a row to it   *)
 (* on any theorem about the sampled distribution and the observer, which is   *)
 (* how manifest/pgg_analysis_status.v defines the level and which a leakage   *)
 (* bound meets. A program reaches it only through an arm of certify. Both     *)
-(* criteria are met at both Kim rows. instances/s5/s5_rows.v records for      *)
-(* s5_row_word the gap this file no longer has: there the constancy an        *)
+(* criteria are met at both Kim rows. instances/s5/s5_rows.v records the      *)
+(* other answer for s5_row_word: there the constancy an                       *)
 (* input-indistinguishability certificate asks for is false.                  *)
 (*                                                                            *)
 (* No statement of a program is a theorem about this instance. What the       *)
@@ -95,8 +95,8 @@
 (*   kim_centi_cert, kim_biased_cert                                          *)
 (*                           == each Kim row's certificate at its own         *)
 (*                              bundle's spectral number                      *)
-(*   kim_biased_cert_exact   == the one-cut certificate with a constant in    *)
-(*                              the marginal-bound field                      *)
+(*   kim_biased_cert_exact   == the one-cut certificate at the exact number   *)
+(*                              one fiftieth                                  *)
 (*   five_card_row_repeated_indistinguishability_tableau                      *)
 (*   five_card_row_biased_indistinguishability_tableau                        *)
 (*                           == each Kim row certified against the uniform    *)
@@ -135,6 +135,12 @@
 (*   five_card_row_biased_indistinguishability_rowE                           *)
 (*                           == each certified program publishes its own      *)
 (*                              manifest row                                  *)
+(*   five_card_row_repeated_indistinguishability_armE                         *)
+(*   five_card_row_biased_indistinguishability_armE                           *)
+(*                           == each certified program carries the            *)
+(*                              input-indistinguishability arm                *)
+(*   five_card_row_repeated39_armE, five_card_row_biased_inv25_armE           *)
+(*                           == each concluded row carries that same arm      *)
 (*   five_card_row_repeated_indistinguishability_publishedE                   *)
 (*   five_card_row_biased_indistinguishability_publishedE                     *)
 (*                           == the three coordinates each certified program  *)
@@ -154,8 +160,9 @@
 (*                              constant PGL(2,7)'s word row publishes        *)
 (*   kim_biased_cert_eps_lt2 == the one-cut row's number is under the         *)
 (*                              ceiling a variation distance has              *)
-(*   five_card_pow2_39_split, five_card_inv50_split                           *)
-(*                           == the identity behind each concluded number     *)
+(*   five_card_inv50_split   == the identity the one-cut row's terminal       *)
+(*                              discharges                                    *)
+(*   five_card_pow2_39_split == 2^-39 as a sum of two per-pair bounds         *)
 (*   five_card_reprice_inv25_lt2                                              *)
 (*                           == the concluded one-cut number under the        *)
 (*                              ceiling                                       *)
@@ -640,6 +647,31 @@ Lemma five_card_row_biased_indistinguishability_rowE :
   = five_card_row_biased.
 Proof. by []. Qed.
 
+(** The arm the repeated row's certified program carries, at every real field
+    and index: a variation distance between the readings of the cut at two
+    committed pairs, and not independence of the view from the conjunction of
+    the committed bits. This is the value a paper's table prints in the arm
+    column for this row, settled by the certify statement the program
+    wrote. *)
+Lemma five_card_row_repeated_indistinguishability_armE (R : realType)
+    (idx : amf_index
+             (ab_f (published_at
+                      five_card_row_repeated_indistinguishability_tableau)) R) :
+  security_arm_of five_card_row_repeated_indistinguishability_tableau R idx
+  = InputIndistinguishabilityArm.
+Proof. exact: erefl. Qed.
+
+(** The arm the one-cut row's certified program carries. The two Kim rows
+    publish different manifest rows, and a reader of the manifest alone could
+    not tell which arm either committed to. *)
+Lemma five_card_row_biased_indistinguishability_armE (R : realType)
+    (idx : amf_index
+             (ab_f (published_at
+                      five_card_row_biased_indistinguishability_tableau)) R) :
+  security_arm_of five_card_row_biased_indistinguishability_tableau R idx
+  = InputIndistinguishabilityArm.
+Proof. exact: erefl. Qed.
+
 (** What a row equation does reject is a program written for another path.
     The repeated row's certified program publishes the seven-cut model at
     IdealFinite and the uniform row holds the uniform family at
@@ -677,10 +709,11 @@ Lemma five_card_row_biased_indistinguishability_publishedE :
 Proof. by []. Qed.
 
 (** Two copies of two to the minus fortieth make two to the minus
-    thirty-ninth. An input-indistinguishability certificate publishes its
-    marginal bound twice, once for each of the two committed pairs, so a row
-    at the constant bound publishes a sum of two equal terms, and this
-    identity is what bounds that sum by a single constant. *)
+    thirty-ninth. A certificate's cert_eps is its marginal bound's epsilon
+    twice, once for each of the two committed pairs, and this identity puts
+    the constant the repeated row publishes into that same shape, so the
+    certificate's two spectral terms can be compared with it one at a
+    time. *)
 (* The mulr_natl and mulr_natr routes fail here because the ring numeral 2
    is itself a natmul and the rewrite fires inside it, yielding
    (2 * 1) ^- 40. *)
@@ -745,11 +778,12 @@ End kim_cert_numbers.
 Definition five_card_reprice39 : Reprice := fun R => Some (2%:R ^- 39 : R).
 
 (** The repeated row concluded at that constant, continuing from the
-    certificate at the bundle's own spectral number. The terminal is supplied
-    kim_centi_cert_eps_lt weakened to a non-strict inequality, and it changes
-    nothing else: the data, the model and the certificate are the same terms,
-    so what a coalition of at most one seat is shown is what the certificate
-    proved, stated at the number a reader cites. *)
+    certificate at the bundle's own spectral number. The data, the model and
+    the certificate are the same terms, and kim_centi_cert_eps_lt is strict,
+    so the number the row publishes is strictly above the number the
+    certificate proved and the row asserts about a coalition of at most one
+    seat no more than that certificate did, at the number a reader cites. *)
+(* The terminal's payload is kim_centi_cert_eps_lt weakened by ltW. *)
 Definition five_card_row_repeated39 : PublishedRowAt five_card_reprice39 :=
   five_card_committed
     sample  kim_centi_family
@@ -785,6 +819,16 @@ Lemma five_card_row_repeated39_atE :
   = published_at five_card_row_repeated_indistinguishability_tableau.
 Proof. reflexivity. Qed.
 
+(** The arm the concluded repeated row carries. Concluding at a number at or
+    above the certificate's own leaves the port where the certify statement
+    put it, so the row at 2^-39 and the row at the bundle's spectral number
+    print one arm column. *)
+Lemma five_card_row_repeated39_armE (R : realType)
+    (idx : amf_index (ab_f (published_at five_card_row_repeated39)) R) :
+  security_arm_of five_card_row_repeated39 R idx
+  = InputIndistinguishabilityArm.
+Proof. exact: erefl. Qed.
+
 (** The one-cut row's certificate at the exact number one fiftieth. *)
 Definition kim_biased_cert_exact (R : realType) (idx : unit)
   : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
@@ -797,8 +841,8 @@ Definition kim_biased_cert_exact (R : realType) (idx : unit)
     (@five_card_static_obs_const R).
 
 (** Two copies of one fiftieth make one twenty-fifth. It is the identity
-    that bounds the sum of the one-cut row's two exact per-card-position
-    numbers by the single constant that row publishes. *)
+    that equates the sum of the one-cut row's two exact per-card-position
+    numbers with the single constant that row publishes. *)
 Fact five_card_inv50_split (R : realType) : (1 / 50 : R) + 1 / 50 = 1 / 25.
 Proof. by lra. Qed.
 
@@ -830,6 +874,16 @@ Definition five_card_row_biased_inv25
 Lemma five_card_row_biased_forms_publishedE :
   published_row five_card_row_biased_indistinguishability_tableau
   = published_row five_card_row_biased_inv25.
+Proof. exact: erefl. Qed.
+
+(** The arm the concluded one-cut row carries. It carries the exact
+    certificate where five_card_row_biased_indistinguishability_tableau
+    carries the spectral one, so the two rows differ in the number they
+    publish and not in what kind of fact they state about a coalition. *)
+Lemma five_card_row_biased_inv25_armE (R : realType)
+    (idx : amf_index (ab_f (published_at five_card_row_biased_inv25)) R) :
+  security_arm_of five_card_row_biased_inv25 R idx
+  = InputIndistinguishabilityArm.
 Proof. exact: erefl. Qed.
 
 (** One twenty-fifth is under two, the ceiling var_dist_le2 gives for a

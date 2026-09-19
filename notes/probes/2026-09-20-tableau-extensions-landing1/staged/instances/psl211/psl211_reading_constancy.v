@@ -233,7 +233,7 @@ by case: (_ \notin _); case: (_ \notin _).
 Qed.
 
 (** psl211_perdeck_coalition_below_k — those three seats meet the threshold
-    premise of both security arms, the derived profile declaring six. A
+    premise every security arm states, the derived profile declaring six. A
     refutation of a field quantified over coalitions below the threshold has
     to discharge this premise, and it is the only nontrivial premise the
     counterexample owes. *)
@@ -686,7 +686,7 @@ Qed.
     its shuffle bound epsilon added to itself strictly below the reciprocal
     1/660 of the group order, so every such certificate has an epsilon of at
     least 1/1320, the value 1/1320 itself not excluded. A row publishes
-    odflt (cert_eps cert) (c R) at its own conclude coordinate c, and cert_eps
+    odflt (cert_eps cert) (c R) at its own coordinate c, and cert_eps
     cert is the shuffle bound epsilon twice, so a row over this model that
     publishes its certificate's own number publishes at least 1/660. The
     obligation of conclude bounds the published number below by cert_eps
@@ -696,9 +696,7 @@ Qed.
     of at most five seats reads. *)
 (* The obligation of conclude at an input-indistinguishability port is
    cert_eps cert <= odflt (cert_eps cert) (c R), and the proposition the row
-   carries is IndistinguishabilityPropAt cert c, a variation distance bounded
-   above by c. The bound below on what a row over this model publishes is
-   therefore the obligation itself and not a further argument. *)
+   carries is IndistinguishabilityPropAt cert (odflt (cert_eps cert) (c R)). *)
 (* The excluded range of epsilon is bounded above. The header records why the
    larger range is occupied and that the occupancy is argued and not
    compiled. *)

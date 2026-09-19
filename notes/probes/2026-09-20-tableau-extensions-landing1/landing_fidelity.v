@@ -78,6 +78,36 @@ Check (ipc_close cert
 
 End proximity_cert_fields.
 
+(** The proposition the proximity arm publishes, restated by unfolding. Its
+    left side is the joint law of the coalition's executed reading with the
+    secret under the actual model, and its right side is the product of the
+    ideal model's two marginals and not a joint law, so it is a different
+    statement from the ipc_close field restated above. *)
+Lemma landing_idealproximity_propE (R : realType) (A : PGGAlgebraic)
+    (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
+    (cert : IdealProximityCert sa) (c : R) :
+  IdealProximityPropAt cert c
+  = forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
+      (#|C| < profile_k (instance_profile A))%N ->
+      var_dist
+        (fdistmap (fun u => (@sa_coalition_view R (instance_profile A)
+                               (instance_exec E) sa 0 C u, ipc_secret cert u))
+           (sa_sampleP sa))
+        ((fdistmap (@sa_coalition_view R (instance_profile A)
+                      (instance_exec E) (ipc_ideal cert) 0 C)
+            (sa_sampleP (ipc_ideal cert)))
+         `x (fdistmap (ew_secret (ipc_witness cert))
+               (sa_sampleP (ipc_ideal cert))))
+      <= c.
+Proof. exact: erefl. Qed.
+
+(** The projection a reader of the proximity arm is pointed at is the term
+    the other two arms' readers are pointed at, so an arm's name on a
+    projection tells a reader what to expect and decides nothing. *)
+Lemma landing_view_proximity_of (c : Reprice) (r : PublishedRowAt c) :
+  view_proximity_of r = view_indistinguishability_of r.
+Proof. exact: erefl. Qed.
+
 (******************************************************************************)
 (*     The arm reader                                                         *)
 (******************************************************************************)
@@ -207,6 +237,34 @@ Lemma landing_five_card_uniform_armE (R : realType)
   security_arm_of five_card_row_uniform_tableau R idx = ExactIndependenceArm.
 Proof. exact: five_card_row_uniform_armE. Qed.
 
+Lemma landing_five_card_repeated_armE (R : realType)
+    (idx : amf_index
+             (ab_f (published_at
+                      five_card_row_repeated_indistinguishability_tableau)) R) :
+  security_arm_of five_card_row_repeated_indistinguishability_tableau R idx
+  = InputIndistinguishabilityArm.
+Proof. exact: five_card_row_repeated_indistinguishability_armE. Qed.
+
+Lemma landing_five_card_biased_armE (R : realType)
+    (idx : amf_index
+             (ab_f (published_at
+                      five_card_row_biased_indistinguishability_tableau)) R) :
+  security_arm_of five_card_row_biased_indistinguishability_tableau R idx
+  = InputIndistinguishabilityArm.
+Proof. exact: five_card_row_biased_indistinguishability_armE. Qed.
+
+Lemma landing_five_card_repeated39_armE (R : realType)
+    (idx : amf_index (ab_f (published_at five_card_row_repeated39)) R) :
+  security_arm_of five_card_row_repeated39 R idx
+  = InputIndistinguishabilityArm.
+Proof. exact: five_card_row_repeated39_armE. Qed.
+
+Lemma landing_five_card_biased_inv25_armE (R : realType)
+    (idx : amf_index (ab_f (published_at five_card_row_biased_inv25)) R) :
+  security_arm_of five_card_row_biased_inv25 R idx
+  = InputIndistinguishabilityArm.
+Proof. exact: five_card_row_biased_inv25_armE. Qed.
+
 Lemma landing_s5_rand_armE (R : realType)
     (idx : amf_index (ab_f (published_at s5_row_rand_tableau)) R) :
   security_arm_of s5_row_rand_tableau R idx = ExactIndependenceArm.
@@ -318,6 +376,20 @@ Lemma landing_pgl27_branch39_rowE :
   published_row pgl27_row_word_branch39 = published_row pgl27_row_word39.
 Proof. exact: erefl. Qed.
 
+(** The two rows accumulate one stack, so naming the Sampled value changes
+    the data the row carries in nothing, and not only its manifest row. *)
+Lemma landing_pgl27_branch39_atE :
+  published_at pgl27_row_word_branch39 = published_at pgl27_row_word39.
+Proof. exact: erefl. Qed.
+
+(** The branch row carries the input-indistinguishability arm, so the name
+    at Sampled leaves the arm where the certify statement put it. *)
+Lemma landing_pgl27_branch39_armE (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_word_branch39)) R) :
+  security_arm_of pgl27_row_word_branch39 R idx
+  = InputIndistinguishabilityArm.
+Proof. exact: erefl. Qed.
+
 (******************************************************************************)
 (*     Assumptions                                                            *)
 (*                                                                            *)
@@ -360,6 +432,10 @@ Print Assumptions five_card_row_repeated_indistinguishability_rowE.
 Print Assumptions five_card_row_biased_indistinguishability_rowE.
 Print Assumptions five_card_row_biased_forms_publishedE.
 Print Assumptions five_card_row_repeated39_atE.
+Print Assumptions five_card_row_repeated_indistinguishability_armE.
+Print Assumptions five_card_row_biased_indistinguishability_armE.
+Print Assumptions five_card_row_repeated39_armE.
+Print Assumptions five_card_row_biased_inv25_armE.
 
 (* S5. *)
 Print Assumptions s5_row_rand_tableau.
