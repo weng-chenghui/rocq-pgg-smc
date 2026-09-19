@@ -42,10 +42,10 @@ the owner edits the `.tex` files from it. No paper file is edited by this campai
 
 | # | Step | State |
 |---|---|---|
-| 1.A | Stage A: `<=` obligation, `ConcludePayload`/`port_conclude`, arm reader, `conclude` notation, `pgl27_rows.v` payload through `eqW`, repeated five-card row on the `ltW` route, withdrawal of `kim_centi_cert40` with `kim_centi_cert40_epsE`, `kim_centi_marginal_bound40`, `kim_centi_cut_mixing40` | open |
-| 1.B | Stage B: the `IdealProximity` arm and notation, header counts, `var_dist_prodR` and `fdist_prod_snd` into `lib/var_dist_supp.v`, the header sentence on the freedom of a certificate's ideal and secret, the five-card proximity row | open |
-| 1.C | Stage C: `pgl27_prior_sample`, the prior-indexed family, its manifest row, the word proximity row; clean the `first [...]` list in `var_dist_fdist1_uniform` | open |
-| 1.D | Stage D: new file `instances/psl211/psl211_word_model.v`, its manifest row, the word proximity row, rewrite of the production comment of `psl211_alldecks_constancy_false_word584` | open |
+| 1.A | LANDING 1 (design `notes/2026-09-20-000000-tableau-extensions-landing-design.md`, which regroups the landings: the framework lands once with stages A and B together, then rows): framework, four rows files, `psl211_reading_constancy.v` comments, withdrawal of `kim_centi_cert40` and its `_epsE`, `pgl27_word_sampled` and `pgl27_row_word_branch39` moved into `pgl27_rows.v` | staged text built by an Opus rocq-prover in `notes/probes/2026-09-20-tableau-extensions-landing1/` (16066cd), token diffs and recompile checked by the main session; two Opus audits running; `cp` not done |
+| 1.B | LANDING 2: `lib/var_dist_supp.v` (promotions, `card_tnth_count` leaves), `five_card_mixing.v` (`card_tnth_count` arrives, the two `*40` declarations leave), new `manifest/pgg_tableau_arm_relations.v`, new `instances/kim2025/five_card_proximity.v` | staged build running in `notes/probes/2026-09-20-tableau-extensions-landing2/` |
+| 1.C | LANDING 3, stage C: `pgl27_prior_sample`, the prior-indexed family, its manifest row, the word proximity row; clean the `first [...]` list in `var_dist_fdist1_uniform` | open |
+| 1.D | LANDING 4, stage D: new file `instances/psl211/psl211_word_model.v`, its manifest row, the word proximity row, rewrite of the production comment of `psl211_alldecks_constancy_false_word584` | open |
 | 1.E | As-built fidelity note for the four landings | open |
 
 ## Step 2. Per-instance `tableau/` directory (proposal: `notes/2026-09-19-124500-instance-tableau-directory-proposal.md`)
