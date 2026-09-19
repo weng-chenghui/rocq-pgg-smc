@@ -1,0 +1,265 @@
+Chars 1378 - 1412 [From~HB~Require~Import~structu...] 0.058 secs (0.045u,0.01s)
+Chars 1413 - 1485 [From~mathcomp~Require~Import~s...] 0.043 secs (0.038u,0.004s)
+Chars 1486 - 1561 [From~mathcomp~Require~Import~d...] 0.105 secs (0.097u,0.006s)
+Chars 1562 - 1633 [From~mathcomp~Require~Import~m...] 1.542 secs (1.465u,0.067s)
+Chars 1634 - 1675 [From~mathcomp~Require~Import~b...] 0.79 secs (0.753u,0.031s)
+Chars 1676 - 1745 [From~infotheo~Require~Import~r...] 1.464 secs (1.384u,0.06s)
+Chars 1746 - 1810 [From~pgg_smc~Require~Import~pg...] 0.037 secs (0.034u,0.003s)
+Chars 1811 - 1858 [From~pgg_smc~Require~Import~pg...] 0.003 secs (0.002u,0.s)
+Chars 1859 - 1917 [From~pgg_reconstruct~Require~I...] 0. secs (0.u,0.s)
+Chars 1918 - 1959 [From~pgg_smc~Require~Import~pg...] 0.001 secs (0.u,0.s)
+Chars 1960 - 2000 [From~pgg_smc~Require~Import~pg...] 0.028 secs (0.025u,0.003s)
+Chars 2001 - 2069 [From~pgg_smc~Require~Import~ps...] 0. secs (0.u,0.s)
+Chars 2070 - 2141 [From~pgg_smc~Require~Import~ps...] 0. secs (0.u,0.s)
+Chars 2142 - 2184 [From~pgg_smc~Require~Import~ps...] 0. secs (0.u,0.s)
+Chars 2185 - 2246 [From~psl211_nogo_landing~Requi...] 0.006 secs (0.001u,0.s)
+Chars 2248 - 2271 [Set~Implicit~Arguments.] 0. secs (0.u,0.s)
+Chars 2272 - 2294 [Unset~Strict~Implicit.] 0. secs (0.u,0.s)
+Chars 2295 - 2319 [Unset~Printing~Implicit~Defens...] 0. secs (0.u,0.s)
+Chars 2320 - 2340 [Import~GRing.Theory.] 0. secs (0.u,0.s)
+Chars 2341 - 2359 [Import~Num.Theory.] 0. secs (0.u,0.s)
+Chars 2361 - 2390 [#[local]~Open~Scope~fdist_scope.] 0. secs (0.u,0.s)
+Chars 2391 - 2420 [#[local]~Open~Scope~proba_scope.] 0. secs (0.u,0.s)
+Chars 2421 - 2449 [#[local]~Open~Scope~ring_scope.] 0. secs (0.u,0.s)
+Chars 2861 - 3028 [Lemma~fidelity_alldecks_consta...] 0. secs (0.u,0.s)
+Chars 3029 - 3035 [Proof.] 0. secs (0.u,0.s)
+Chars 3036 - 3075 [exact~:~psl211_alldecks_consta...] 0. secs (0.u,0.s)
+Chars 3076 - 3080 [Qed.] 0. secs (0.u,0.s)
+Chars 3214 - 3391 [Lemma~fidelity_alldecks_consta...] 0. secs (0.u,0.s)
+Chars 3392 - 3398 [Proof.] 0. secs (0.u,0.s)
+Chars 3399 - 3448 [exact~:~psl211_alldecks_consta...] 0. secs (0.u,0.s)
+Chars 3449 - 3453 [Qed.] 0. secs (0.u,0.s)
+Chars 3566 - 3727 [Lemma~fidelity_dealt_constancy...] 0. secs (0.u,0.s)
+Chars 3728 - 3734 [Proof.] 0. secs (0.u,0.s)
+Chars 3735 - 3771 [exact~:~psl211_dealt_constancy...] 0. secs (0.u,0.s)
+Chars 3772 - 3776 [Qed.] 0. secs (0.u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4019 - 4065 [Print~Assumptions~coalition_re...] 0.085 secs (0.074u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4066 - 4116 [Print~Assumptions~spectral_cer...] 0.046 secs (0.045u,0.s)
+Closed under the global context
+Chars 4117 - 4164 [Print~Assumptions~psl211_perde...] 0.081 secs (0.078u,0.001s)
+Closed under the global context
+Chars 4165 - 4216 [Print~Assumptions~psl211_perde...] 0.075 secs (0.074u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4217 - 4267 [Print~Assumptions~psl211_allde...] 0.137 secs (0.135u,0.002s)
+Closed under the global context
+Chars 4268 - 4309 [Print~Assumptions~psl211_block...] 0.014 secs (0.013u,0.s)
+Closed under the global context
+Chars 4310 - 4351 [Print~Assumptions~psl211_block...] 0.074 secs (0.073u,0.001s)
+Closed under the global context
+Chars 4352 - 4393 [Print~Assumptions~psl211_block...] 0.001 secs (0.u,0.s)
+Closed under the global context
+Chars 4394 - 4436 [Print~Assumptions~psl211_block...] 0.077 secs (0.076u,0.001s)
+Closed under the global context
+Chars 4437 - 4481 [Print~Assumptions~psl211_allde...] 0.077 secs (0.075u,0.001s)
+Closed under the global context
+Chars 4482 - 4522 [Print~Assumptions~psl211_block...] 0.015 secs (0.015u,0.s)
+Closed under the global context
+Chars 4523 - 4568 [Print~Assumptions~psl211_block...] 0.015 secs (0.015u,0.s)
+Closed under the global context
+Chars 4569 - 4616 [Print~Assumptions~psl211_block...] 0.015 secs (0.015u,0.s)
+Closed under the global context
+Chars 4617 - 4658 [Print~Assumptions~psl211_block...] 0.022 secs (0.022u,0.s)
+Closed under the global context
+Chars 4659 - 4705 [Print~Assumptions~psl211_block...] 0.001 secs (0.001u,0.s)
+Closed under the global context
+Chars 4706 - 4753 [Print~Assumptions~psl211_block...] 0.015 secs (0.015u,0.s)
+Closed under the global context
+Chars 4754 - 4796 [Print~Assumptions~psl211_block...] 0.076 secs (0.074u,0.001s)
+Closed under the global context
+Chars 4797 - 4840 [Print~Assumptions~psl211_block...] 0.101 secs (0.099u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4841 - 4883 [Print~Assumptions~psl211_block...] 0.098 secs (0.096u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4884 - 4928 [Print~Assumptions~psl211_block...] 0.138 secs (0.135u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4929 - 4989 [Print~Assumptions~psl211_allde...] 0.142 secs (0.14u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4990 - 5029 [Print~Assumptions~fdistmap_poi...] 0.032 secs (0.031u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5030 - 5074 [Print~Assumptions~psl211_perde...] 0.1 secs (0.098u,0.001s)
+Closed under the global context
+Chars 5075 - 5120 [Print~Assumptions~psl211_perde...] 0.109 secs (0.107u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5121 - 5176 [Print~Assumptions~psl211_allde...] 0.136 secs (0.133u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5177 - 5233 [Print~Assumptions~psl211_allde...] 0.144 secs (0.142u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5234 - 5285 [Print~Assumptions~psl211_allde...] 0.115 secs (0.109u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5286 - 5337 [Print~Assumptions~psl211_allde...] 0.155 secs (0.153u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5338 - 5390 [Print~Assumptions~psl211_allde...] 0.155 secs (0.152u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5391 - 5446 [Print~Assumptions~psl211_allde...] 0.144 secs (0.142u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5447 - 5505 [Print~Assumptions~psl211_allde...] 0.281 secs (0.269u,0.005s)
+Closed under the global context
+Chars 5506 - 5545 [Print~Assumptions~psl211_dealt...] 0.001 secs (0.001u,0.s)
+Closed under the global context
+Chars 5546 - 5586 [Print~Assumptions~psl211_dealt...] 0.005 secs (0.005u,0.s)
+Closed under the global context
+Chars 5587 - 5630 [Print~Assumptions~psl211_dealt...] 0.001 secs (0.001u,0.s)
+Closed under the global context
+Chars 5631 - 5667 [Print~Assumptions~psl211_dealt...] 0.076 secs (0.075u,0.001s)
+Closed under the global context
+Chars 5668 - 5704 [Print~Assumptions~psl211_dealt...] 0.001 secs (0.001u,0.s)
+Closed under the global context
+Chars 5705 - 5742 [Print~Assumptions~psl211_dealt...] 0.078 secs (0.077u,0.001s)
+Closed under the global context
+Chars 5743 - 5784 [Print~Assumptions~psl211_dealt...] 0.001 secs (0.001u,0.s)
+Closed under the global context
+Chars 5785 - 5827 [Print~Assumptions~psl211_dealt...] 0. secs (0.u,0.s)
+Closed under the global context
+Chars 5828 - 5871 [Print~Assumptions~psl211_dealt...] 0.075 secs (0.074u,0.001s)
+Closed under the global context
+Chars 5872 - 5913 [Print~Assumptions~psl211_dealt...] 0.08 secs (0.079u,0.001s)
+Closed under the global context
+Chars 5914 - 5951 [Print~Assumptions~psl211_dealt...] 0.076 secs (0.075u,0.001s)
+Closed under the global context
+Chars 5952 - 5990 [Print~Assumptions~psl211_dealt...] 0.105 secs (0.103u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 5991 - 6028 [Print~Assumptions~psl211_dealt...] 0.1 secs (0.098u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 6029 - 6076 [Print~Assumptions~psl211_dealt...] 0.131 secs (0.128u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+Chars 6077 - 6127 [Print~Assumptions~psl211_allde...] 0.077 secs (0.075u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 6128 - 6177 [Print~Assumptions~psl211_allde...] 0.096 secs (0.094u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 6179 - 6231 [Print~Assumptions~fidelity_all...] 0.139 secs (0.136u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 6232 - 6294 [Print~Assumptions~fidelity_all...] 0.144 secs (0.141u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 6295 - 6344 [Print~Assumptions~fidelity_dea...] 0.129 secs (0.127u,0.001s)

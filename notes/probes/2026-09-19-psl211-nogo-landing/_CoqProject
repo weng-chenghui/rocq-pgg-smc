@@ -1,0 +1,34 @@
+-arg -w -arg -projection-no-head-constant
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -notation-overridden
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -notation-incompatible-format
+
+-R ../../../lib pgg_smc
+-R ../../../protocol pgg_smc
+-R ../../../groups pgg_smc
+-R ../../../security pgg_smc
+-R ../../../smc pgg_smc
+-R ../../../reconstruct pgg_reconstruct
+-R ../../../instances/denboer1989 pgg_smc
+-R ../../../instances/kim2025 pgg_smc
+-R ../../../instances/s5 pgg_smc
+-R ../../../instances/pgl27 pgg_smc
+-R ../../../instances/psl211 pgg_smc
+-R ../../../manifest pgg_smc
+-R ../../../legacy/groups pgg_smc
+-R ../../../legacy/instances/abelian pgg_smc
+-R ../../../legacy/instances/cyclic pgg_smc
+-R ../../../legacy/instances/monster pgg_smc
+-R ../../../legacy/instances/oc pgg_smc
+-R ../../../legacy/instances/s5x5 pgg_smc
+-R ../../../legacy/instances/star pgg_smc
+-R ../../../legacy/protocol pgg_smc
+-R ../../../legacy/reconstruct pgg_reconstruct
+-R ../../../legacy/security pgg_smc
+
+-Q . psl211_nogo_landing
+
+psl211_spectral_nogo.v
+psl211_rows.v
+psl211_nogo_fidelity.v

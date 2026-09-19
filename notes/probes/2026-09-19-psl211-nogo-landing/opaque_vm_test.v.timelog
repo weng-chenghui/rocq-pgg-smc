@@ -1,0 +1,7 @@
+Chars 0 - 72 [From~mathcomp~Require~Import~s...] 0.105 secs (0.088u,0.014s)
+Chars 74 - 118 [Definition~tbl~:~seq~nat~:=~[:...] 0. secs (0.u,0.s)
+Chars 120 - 137 [#[local]~Opaque~tbl.] 0. secs (0.u,0.s)
+Chars 139 - 188 [Lemma~tbl_size~:~count~(fun~n~...] 0. secs (0.u,0.s)
+Chars 189 - 195 [Proof.] 0. secs (0.u,0.s)
+Chars 196 - 210 [by~vm_compute.] 0. secs (0.u,0.s)
+Chars 211 - 215 [Qed.] 0. secs (0.u,0.s)
