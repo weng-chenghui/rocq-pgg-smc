@@ -1,0 +1,38 @@
+Chars 1783 - 1848 [From~mathcomp~Require~Import~s...] 0.097 secs (0.084u,0.013s)
+Chars 1849 - 1906 [From~mathcomp~Require~Import~f...] 1.885 secs (1.818u,0.066s)
+Chars 1907 - 1942 [From~infotheo~Require~Import~f...] 1.21 secs (1.166u,0.041s)
+Chars 1943 - 2004 [From~pgg_smc~Require~Import~pg...] 0.043 secs (0.038u,0.003s)
+File "/Users/cheng-huiweng/Projects/coq/rocq-pgg-smc/notes/probes/2026-09-19-tableau-extensions/g2_keyword_measure.v", line 28, characters 0-50:
+Warning: Notations "_ <| _ |> _" defined at level 49 with arguments constr
+at next level, constr at next level and "_ <| _" defined at level 70
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+Chars 2005 - 2055 [From~pgg_smc~Require~Import~pg...] 0.487 secs (0.475u,0.009s)
+Chars 2056 - 2125 [From~tableau_ext_probe~Require...] 0.001 secs (0.001u,0.s)
+Chars 2127 - 2150 [Set~Implicit~Arguments.] 0. secs (0.u,0.s)
+Chars 2151 - 2173 [Unset~Strict~Implicit.] 0. secs (0.u,0.s)
+conclude
+     : forall (c : Reprice) (q : StackAt AnalysisBridged),
+       StackProp AnalysisBridged q ->
+       ConcludePayload c q -> TableauAt AnalysisBridged (BridgedProp c)
+Chars 2250 - 2265 [Check~conclude.] 0. secs (0.u,0.s)
+ConcludePayload
+     : Reprice -> StackAt AnalysisBridged -> Type
+Chars 2340 - 2362 [Check~ConcludePayload.] 0. secs (0.u,0.s)
+Chars 2506 - 2576 [Definition~conclude_stays_bind...] 0. secs (0.u,0.s)
+publish
+     : AssumptionStatus ->
+       forall (c : Reprice) (q : StackAt AnalysisBridged),
+       BridgedProp c q -> TransferStatus -> PublishedRowAt c
+Chars 2715 - 2729 [Check~publish.] 0. secs (0.u,0.s)
+IdealProximity
+     : forall (R : realType) (A : PGGAlgebraic) (E : ExecutionParams A)
+         (sa : SampleAdapter R (instance_exec E)),
+       IdealProximityCert (E:=E) sa -> SecurityPort (E:=E) sa
+Chars 2843 - 2864 [Check~IdealProximity.] 0. secs (0.u,0.s)
+IdealProximityCert
+     : forall (R : realType) (A : PGGAlgebraic) (E : ExecutionParams A),
+       SampleAdapter R (instance_exec E) -> Type
+Chars 2930 - 2955 [Check~IdealProximityCert.] 0. secs (0.u,0.s)
+Chars 3105 - 3195 [Definition~idealproximity_stay...] 0. secs (0.u,0.s)

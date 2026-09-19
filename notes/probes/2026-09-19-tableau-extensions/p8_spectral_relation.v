@@ -5,23 +5,44 @@
 (*                                                                            *)
 (* The spectral arm and the proximity arm each carry a number, and both       *)
 (* numbers can be read off one variation distance on the cut group, so a      *)
-(* reader may take one proposition for a restatement of the other. They are   *)
-(* not. The spectral arm's proposition does not mention its certificate at    *)
-(* all: it compares two readings of one model at two run arguments, and       *)
-(* spectral_prop_cert_free below says that replacing the certificate, ideal   *)
-(* cut and all, leaves it the same proposition. It therefore constrains the   *)
-(* actual cut law alone and cannot decide any distance to an ideal model. The *)
-(* proximity arm's proposition does mention its certificate, through the      *)
-(* ideal adapter, that ideal's witness and the actual model's secret, and the *)
-(* recorded failure beside it says that replacing the certificate does not    *)
-(* leave it the same. What they do share is a carrier:                        *)
-(* idealproximity_reading_le reads the proximity number as a bound between    *)
-(* the two models' reading marginals, which is the carrier the spectral arm   *)
-(* states its own bound on.                                                   *)
+(* reader may take one proposition for a restatement of the other. Four       *)
+(* statements separate them, and two of the four are compiled.                *)
+(*                                                                            *)
+(* Compiled: the spectral arm's proposition does not mention its certificate. *)
+(* spectral_prop_cert_free says it is one proposition at two certificates     *)
+(* over one model, so the ideal cut and the constancy field are spent inside  *)
+(* spectral_tail and have left the claim.                                     *)
+(*                                                                            *)
+(* Compiled: at the five-card instance the proximity proposition at the       *)
+(* published one fiftieth is a theorem outright, so the implication from the  *)
+(* spectral proposition holds there for a reason that does not read the       *)
+(* spectral premise at all, and idealproximity_ceiling of p7_mutations.v      *)
+(* holds the same implication at two from any premise whatever.               *)
+(*                                                                            *)
+(* Argued and not compiled: no implication holds uniformly in the proximity   *)
+(* certificate. A countermodel is what would settle it, and it needs a model  *)
+(* whose reading law is the same at every run argument, which is what the     *)
+(* spectral proposition asks, and far from the ideal's, which is what the     *)
+(* proximity conclusion forbids. No such model is built here.                 *)
+(*                                                                            *)
+(* Not compiled: the statement the spec intends, in which the proximity       *)
+(* proposition is derived from the spectral certificate's own fields at a     *)
+(* stated constant, rather than proved beside it at one instance.             *)
+(*                                                                            *)
+(* What the two arms share is a carrier: idealproximity_reading_le reads the  *)
+(* proximity number as a bound between the two models' reading marginals,     *)
+(* which is the carrier the spectral arm states its own bound on.             *)
+(*                                                                            *)
+(* Lemmas:                                                                    *)
 (*   spectral_prop_cert_free   == the spectral proposition does not mention   *)
 (*                                the certificate it is stated at             *)
 (*   idealproximity_reading_le == the proximity number bounds the distance    *)
 (*                                between the two models' reading marginals   *)
+(*   five_card_biased_proximity_prop_holds                                    *)
+(*                             == the proximity proposition at one fiftieth,  *)
+(*                                at the five-card instance                   *)
+(*   five_card_biased_spectral_implies_proximity                              *)
+(*                             == the same, from a spectral premise unread    *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -33,8 +54,13 @@ From pgg_smc Require Import pgg_monodromy_profile pgg_execution_plug.
 From pgg_smc Require Import pgg_observed_execution pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_sample_adapter.
 From pgg_smc Require Import pgg_collusion_bound.
+From pgg_reconstruct Require Import algebraic_rigidity.
+From pgg_smc Require Import five_card_group five_card_family.
+From pgg_smc Require Import five_card_exec five_card_models five_card_leakage.
+From pgg_smc Require Import five_card_kim kim_input_privacy five_card_mixing.
 From tableau_ext_probe Require Import pgg_tableau pgg_tableau_syntax.
-From tableau_ext_probe Require Import p1_joint_law_distance.
+From tableau_ext_probe Require Import p1_joint_law_distance five_card_rows.
+From tableau_ext_probe Require Import p4_kim_biased_proximity.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -55,17 +81,22 @@ Variable sa : SampleAdapter R (instance_exec E).
     proposition. The certificate is a parameter of the statement and occurs
     nowhere in it, so what the spectral arm claims is a property of the
     model's own cut law and the number, and the ideal law the certificate
-    names has left the claim by the time it is published. A statement about
-    how far that model is from an ideal one therefore cannot follow from it,
-    whatever the numbers are. *)
+    names has left the claim. An ideal a proximity certificate names can
+    therefore not be recovered from a spectral premise, and a bound on the
+    distance to that ideal has to be proved from something else. The
+    implication is not empty for all that: idealproximity_ceiling holds it at
+    two whatever the premise, and the two lemmas at the end of this file hold
+    it at the five-card instance at one fiftieth. *)
 Lemma spectral_prop_cert_free (cert cert' : SpectralCert sa) (c : R) :
   SpectralPropAt cert c = SpectralPropAt cert' c.
 Proof. by []. Qed.
 
-(** The proximity arm's proposition is not certificate-free: two certificates
-    over one model naming two ideals are two claims. It is what separates the
-    arm from the spectral one, and what makes the ideal a part of what a
-    proximity row publishes rather than a part of how it was proved. *)
+(** The proximity arm's proposition mentions its certificate, through the
+    ideal adapter, that ideal's witness and the actual model's secret, so the
+    two are not two readings of one object. The recorded failure beside it
+    says that the equality between the proposition at two certificates is not
+    closed by conversion, and no more: two logically equivalent propositions
+    would still be equal under propositional extensionality. *)
 Fail Definition idealproximity_prop_cert_free
     (cert cert' : IdealProximityCert sa) (c : R) :
   IdealProximityPropAt cert c = IdealProximityPropAt cert' c
@@ -118,3 +149,25 @@ exact: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _) (H C HC)).
 Qed.
 
 End proximity_against_spectral.
+
+(******************************************************************************)
+(*     Where the implication does hold, and why that is not the spec's claim  *)
+(******************************************************************************)
+
+(** The proximity proposition of Kim's one-cut row at the number that row
+    publishes, taken off the published row itself. It is the conclusion the
+    spec's P8 row wants, standing on its own at this instance. *)
+Lemma five_card_biased_proximity_prop_holds (R : realType) :
+  IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50).
+Proof. exact: (view_proximity_of five_card_row_biased_proximity R tt). Qed.
+
+(** The spectral proposition implies the proximity proposition at the
+    five-card instance, at every constant the spectral premise is stated at,
+    because the conclusion is a theorem there and the premise is discarded.
+    The implication holds and carries no information: what the spec asks for
+    is a derivation that reads the spectral certificate's fields, and this is
+    not one. *)
+Lemma five_card_biased_spectral_implies_proximity (R : realType) (c : R) :
+  SpectralPropAt (kim_biased_cert R tt) c ->
+  IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50).
+Proof. by move=> _; exact: five_card_biased_proximity_prop_holds. Qed.

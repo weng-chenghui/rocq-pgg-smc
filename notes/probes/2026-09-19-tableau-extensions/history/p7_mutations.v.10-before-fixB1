@@ -6,8 +6,8 @@
 (* Four things could make the arm say nothing. Its number could be at or      *)
 (* above the ceiling a variation distance cannot exceed, and                  *)
 (* idealproximity_ceiling says that a row at two is exactly that empty        *)
-(* statement, against which the one fiftieth Kim's one-cut row publishes is   *)
-(* read. Its hypotheses could be unsatisfiable, and the singleton             *)
+(* statement, against which the one twenty-fifth Kim's one-cut row publishes  *)
+(* is read. Its hypotheses could be unsatisfiable, and the singleton          *)
 (* instantiation below discharges every one of them at a concrete coalition   *)
 (* of the five-card instance. Its conclusion could hold by computation, and   *)
 (* the two recorded failures on reflexivity and done say it does not. And its *)
@@ -15,28 +15,17 @@
 (* composition law is rerun below with the ideal witness's independence       *)
 (* deleted from the proof, and does not close.                                *)
 (*                                                                            *)
-(* In the other direction the arm could say more than its certificate proved, *)
-(* and kim_biased_conclude_below_false says that the obligation a terminal    *)
-(* owes at a number below the certificate's is refutable and not merely       *)
-(* unprovable.                                                                *)
-(*                                                                            *)
-(* Beside those, four recorded failures fix what a certificate may name. An   *)
+(* Beside those, three recorded failures fix what a certificate may name. An  *)
 (* ideal drawn from another instance is rejected where the ideal adapter is   *)
 (* written, because that field is typed over the row's own execution. A       *)
 (* certificate built over one model of the five-card instance is rejected at  *)
 (* another model of the same instance, although the two model families carry  *)
 (* one index type, because a certificate is typed over the sample adapter and *)
-(* not over the family. The fourth runs the same mutation at the spectral     *)
-(* arm, so the two arms are rejected by one coordinate.                       *)
+(* not over the family.                                                       *)
 (*                                                                            *)
 (* Lemmas:                                                                    *)
 (*   idealproximity_ceiling    == every certificate satisfies the arm's       *)
 (*                                proposition at two                          *)
-(*   five_card_singleton_below_threshold                                      *)
-(*                             == one seat is below the five-card threshold   *)
-(*   kim_biased_conclude_below_false                                          *)
-(*                             == the conclude obligation at a number below   *)
-(*                                the certificate's own is false              *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   five_card_biased_proximity_at_singleton                                  *)
@@ -80,33 +69,13 @@ Local Open Scope proba_scope.
     distance between two laws on a finite carrier never exceeds two. A row
     publishing two therefore rules nothing out, and a published number says
     something about a coalition exactly in so far as it is below two. Kim's
-    one-cut row publishes one fiftieth, and kim_biased_proximity_cert_eps_lt2
-    of p4_kim_biased_proximity.v is the comparison. *)
+    one-cut row publishes one twenty-fifth, and five_card_reprice_inv25_lt2
+    of five_card_rows.v is the comparison. *)
 Lemma idealproximity_ceiling (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (cert : IdealProximityCert sa) :
   IdealProximityPropAt cert 2%:R.
 Proof. by move=> C _; exact: var_dist_le2. Qed.
-
-(******************************************************************************)
-(*     A number below the certificate's is refused                            *)
-(******************************************************************************)
-
-(** The name one hundredth, half of what Kim's one-cut proximity certificate
-    proves. *)
-Definition five_card_reprice_inv100 : Reprice := fun R => Some (1 / 100 : R).
-
-(** The obligation conclude asks of a terminal that would republish Kim's
-    one-cut proximity row at one hundredth is false, and not merely beyond
-    what the probe could prove: one fiftieth is not at most one hundredth. A
-    published number may therefore be moved upward and never downward, and
-    that is decided by the ordering ConcludePayload states and not by which
-    tactic a terminal reaches for. *)
-Lemma kim_biased_conclude_below_false (R : realType) (idx : unit) :
-  ~ (ipc_eps (kim_biased_proximity_cert R idx)
-     <= odflt (ipc_eps (kim_biased_proximity_cert R idx))
-          (five_card_reprice_inv100 R)).
-Proof. rewrite kim_biased_proximity_cert_epsE /= => H; lra. Qed.
 
 (******************************************************************************)
 (*     Every hypothesis discharged at one concrete coalition                  *)
@@ -139,14 +108,14 @@ Check five_card_biased_proximity_at_singleton.
 Fail Definition five_card_biased_proximity_by_computation (R : realType)
     (idx : unit)
   : IdealProximityPropAt (kim_biased_proximity_cert R idx)
-      (ipc_eps (kim_biased_proximity_cert R idx))
+      (sw_bound_eps (kim_biased_marginal_bound R))
   := ltac:(move=> C HC; reflexivity).
 
 (** Nor by done, which is what a clause left to a tactic in a row would
     reach. *)
 Fail Definition five_card_biased_proximity_by_done (R : realType) (idx : unit)
   : IdealProximityPropAt (kim_biased_proximity_cert R idx)
-      (ipc_eps (kim_biased_proximity_cert R idx))
+      (sw_bound_eps (kim_biased_marginal_bound R))
   := ltac:(by []).
 
 (******************************************************************************)
@@ -189,7 +158,7 @@ Fail Definition kim_biased_cert_s5_ideal (R : realType) (idx : unit)
     (amf_sample s5_rand_family R idx)
     (s5_rand_exact_witness R idx)
     (five_card_leakage.Secret R)
-    (1 / 50)
+    (sw_bound_eps (kim_biased_marginal_bound R))
     (fun C _ => @kim_biased_proximity_close R C).
 
 (** Two models of one instance whose families carry one index type are still

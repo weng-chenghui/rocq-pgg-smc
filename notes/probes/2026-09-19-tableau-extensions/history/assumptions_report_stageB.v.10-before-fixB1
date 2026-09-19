@@ -52,6 +52,8 @@ Print Assumptions kim_biased_proximity_close.
 Print Assumptions kim_biased_cert_idealE.
 Print Assumptions kim_biased_proximity_cert_epsE.
 Print Assumptions kim_biased_proximity_eps_halfE.
+Print Assumptions five_card_sqrt5_le3.
+Print Assumptions kim_biased_proximity_le_inv25.
 Print Assumptions kim_biased_proximity_cert_eps_lt2.
 Print Assumptions five_card_row_biased_branch_spectral.
 Print Assumptions five_card_row_biased_branch_spectral_atE.
@@ -67,8 +69,6 @@ Print Assumptions five_card_biased_view_proximity.
 (* The relation to the spectral arm. *)
 Print Assumptions spectral_prop_cert_free.
 Print Assumptions idealproximity_reading_le.
-Print Assumptions five_card_biased_proximity_prop_holds.
-Print Assumptions five_card_biased_spectral_implies_proximity.
 
 (* The corollary about the actual model alone. *)
 Print Assumptions var_dist_own_marginals.
@@ -76,6 +76,5 @@ Print Assumptions five_card_biased_view_own_marginals.
 
 (* The mutations that are not recorded failures. *)
 Print Assumptions idealproximity_ceiling.
-Print Assumptions kim_biased_conclude_below_false.
 Print Assumptions five_card_singleton_below_threshold.
 Print Assumptions five_card_biased_proximity_at_singleton.

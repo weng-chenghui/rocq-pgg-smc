@@ -30,7 +30,7 @@
 (*   fdist_prod_snd         == the second marginal of a product is its second *)
 (*                             factor                                         *)
 (*   fdist_uniform_prod     == the uniform law on a product is the product of *)
-(*                             the uniform laws                               *)
+(*                             the uniform laws                              *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.

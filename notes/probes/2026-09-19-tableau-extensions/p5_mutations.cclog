@@ -1,0 +1,32 @@
+Chars 1621 - 1693 [From~mathcomp~Require~Import~s...] 0.095 secs (0.084u,0.01s)
+Chars 1694 - 1765 [From~mathcomp~Require~Import~f...] 0.102 secs (0.098u,0.004s)
+Chars 1766 - 1833 [From~mathcomp~Require~Import~b...] 2.086 secs (2.022u,0.063s)
+File "/Users/cheng-huiweng/Projects/coq/rocq-pgg-smc/notes/probes/2026-09-19-tableau-extensions/p5_mutations.v", line 25, characters 0-77:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+Chars 1834 - 1911 [From~infotheo~Require~Import~r...] 1.288 secs (1.248u,0.039s)
+Chars 1912 - 1972 [From~pgg_smc~Require~Import~pg...] 0.013 secs (0.012u,0.001s)
+Chars 1973 - 2042 [From~pgg_smc~Require~Import~pg...] 0.025 secs (0.023u,0.002s)
+Chars 2043 - 2114 [From~pgg_smc~Require~Import~pg...] 0.001 secs (0.001u,0.s)
+Chars 2115 - 2194 [From~pgg_smc~Require~Import~pg...] 0.001 secs (0.001u,0.s)
+Chars 2195 - 2259 [From~pgg_smc~Require~Import~pg...] 0.002 secs (0.002u,0.s)
+Chars 2260 - 2334 [From~pgg_smc~Require~Import~pg...] 0.002 secs (0.002u,0.s)
+Chars 2335 - 2387 [From~pgg_smc~Require~Import~pg...] 0.002 secs (0.002u,0.s)
+Chars 2388 - 2438 [From~pgg_smc~Require~Import~pg...] 0.548 secs (0.541u,0.006s)
+Chars 2439 - 2508 [From~tableau_ext_probe~Require...] 0.001 secs (0.001u,0.s)
+Chars 2509 - 2582 [From~tableau_ext_probe~Require...] 0. secs (0.u,0.s)
+Chars 2583 - 2642 [From~tableau_ext_probe~Require...] 0. secs (0.u,0.s)
+Chars 2643 - 2705 [From~tableau_ext_probe~Require...] 0. secs (0.u,0.s)
+Chars 2707 - 2730 [Set~Implicit~Arguments.] 0. secs (0.u,0.s)
+Chars 2731 - 2753 [Unset~Strict~Implicit.] 0. secs (0.u,0.s)
+Chars 2754 - 2778 [Unset~Printing~Implicit~Defens...] 0. secs (0.u,0.s)
+Chars 2779 - 2810 [Import~GRing.Theory~Num.Theory.] 0.001 secs (0.001u,0.s)
+Chars 2812 - 2840 [#[local]~Open~Scope~ring_scope.] 0. secs (0.u,0.s)
+Chars 2841 - 2870 [#[local]~Open~Scope~fdist_scope.] 0. secs (0.u,0.s)
+Chars 2871 - 2900 [#[local]~Open~Scope~proba_scope.] 0. secs (0.u,0.s)
+Chars 3423 - 3912 [Fail~Definition~pgl27_word_pro...] 0.001 secs (0.001u,0.s)
+Chars 4726 - 5208 [Fail~Definition~pgl27_word_pro...] 0.022 secs (0.021u,0.s)
+Chars 5663 - 5807 [Fail~Definition~pgl27_cross_mo...] 0.002 secs (0.002u,0.s)

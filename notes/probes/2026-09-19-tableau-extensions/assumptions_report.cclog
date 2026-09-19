@@ -1,0 +1,290 @@
+Chars 1459 - 1524 [From~mathcomp~Require~Import~s...] 0.098 secs (0.084u,0.013s)
+Chars 1525 - 1582 [From~mathcomp~Require~Import~f...] 1.893 secs (1.822u,0.068s)
+Chars 1583 - 1618 [From~infotheo~Require~Import~f...] 1.21 secs (1.17u,0.039s)
+Chars 1619 - 1680 [From~pgg_smc~Require~Import~pg...] 0.042 secs (0.039u,0.002s)
+File "/Users/cheng-huiweng/Projects/coq/rocq-pgg-smc/notes/probes/2026-09-19-tableau-extensions/assumptions_report.v", line 24, characters 0-50:
+Warning: Notations "_ <| _ |> _" defined at level 49 with arguments constr
+at next level, constr at next level and "_ <| _" defined at level 70
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+Chars 1681 - 1731 [From~pgg_smc~Require~Import~pg...] 0.481 secs (0.472u,0.008s)
+Chars 1732 - 1801 [From~tableau_ext_probe~Require...] 0.001 secs (0.001u,0.s)
+Chars 1802 - 1874 [From~tableau_ext_probe~Require...] 0.001 secs (0.001u,0.s)
+Chars 1875 - 1925 [From~tableau_ext_probe~Require...] 0. secs (0.u,0.s)
+Chars 1926 - 1982 [From~tableau_ext_probe~Require...] 0. secs (0.u,0.s)
+Chars 1983 - 2045 [From~tableau_ext_probe~Require...] 0. secs (0.u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2126 - 2158 [Print~Assumptions~port_conclude.] 0.188 secs (0.176u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2225 - 2252 [Print~Assumptions~port_arm.] 0.056 secs (0.056u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2253 - 2278 [Print~Assumptions~ab_arm.] 0.165 secs (0.164u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2279 - 2313 [Print~Assumptions~security_arm...] 0.229 secs (0.227u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2426 - 2463 [Print~Assumptions~certify_exac...] 0.582 secs (0.555u,0.008s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2464 - 2504 [Print~Assumptions~certify_spec...] 0.24 secs (0.234u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2505 - 2537 [Print~Assumptions~conclude_armE.] 0.234 secs (0.233u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2538 - 2569 [Print~Assumptions~publish_armE.] 0.237 secs (0.236u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2635 - 2674 [Print~Assumptions~pgl27_row_ex...] 1.396 secs (1.372u,0.013s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2675 - 2713 [Print~Assumptions~pgl27_row_wo...] 1.192 secs (1.182u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2714 - 2754 [Print~Assumptions~pgl27_row_wo...] 1.176 secs (1.17u,0.003s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2755 - 2800 [Print~Assumptions~five_card_ro...] 0.941 secs (0.916u,0.009s)
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (n:=3) (pgg_raag_path.path_gen_tuple 3))| = 120%R
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2801 - 2836 [Print~Assumptions~s5_row_rand_...] 0.746 secs (0.733u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2837 - 2880 [Print~Assumptions~psl211_row_a...] 20.649 secs (20.601u,0.028s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 2956 - 3001 [Print~Assumptions~pgl27_word_r...] 0.028 secs (0.028u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3050 - 3091 [Print~Assumptions~pgl27_row_wo...] 1.157 secs (1.154u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3188 - 3235 [Print~Assumptions~five_card_ro...] 0.713 secs (0.703u,0.003s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3292 - 3344 [Print~Assumptions~five_card_ro...] 0.114 secs (0.114u,0.s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3345 - 3396 [Print~Assumptions~five_card_ro...] 0.873 secs (0.867u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3397 - 3454 [Print~Assumptions~five_card_ro...] 0.875 secs (0.87u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3455 - 3515 [Print~Assumptions~five_card_ro...] 0.873 secs (0.867u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3584 - 3629 [Print~Assumptions~pgl27_row_ex...] 1.319 secs (1.313u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3630 - 3681 [Print~Assumptions~pgl27_row_ex...] 1.326 secs (1.321u,0.003s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3682 - 3728 [Print~Assumptions~pgl27_row_ex...] 0.872 secs (0.87u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3729 - 3773 [Print~Assumptions~pgl27_row_wo...] 1.159 secs (1.156u,0.001s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3774 - 3820 [Print~Assumptions~pgl27_row_wo...] 1.159 secs (1.156u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3821 - 3866 [Print~Assumptions~pgl27_row_wo...] 1.158 secs (1.154u,0.003s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3944 - 3979 [Print~Assumptions~pgl27_row_wo...] 1.153 secs (1.149u,0.003s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 3980 - 4027 [Print~Assumptions~five_card_ro...] 0.872 secs (0.867u,0.004s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4028 - 4081 [Print~Assumptions~five_card_ro...] 0.87 secs (0.864u,0.005s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4082 - 4123 [Print~Assumptions~pgl27_row_ex...] 1.316 secs (1.312u,0.003s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4124 - 4166 [Print~Assumptions~pgl27_row_wo...] 1.157 secs (1.154u,0.002s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4167 - 4210 [Print~Assumptions~five_card_ro...] 0.79 secs (0.783u,0.004s)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Chars 4211 - 4256 [Print~Assumptions~five_card_ro...] 0.798 secs (0.795u,0.003s)

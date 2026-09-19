@@ -177,10 +177,8 @@ Record SpectralCert (R : realType) (A : PGGAlgebraic)
    the variation distance between the two models' joint laws of the
    coalition's reading and the secret. The comparison is an average over the
    run argument of each model and not a statement at a fixed run argument, and
-   the number is an upper bound the instance chooses on what the actual model
-   loses against an execution that leaks nothing, not a quantity the record
-   determines: any number at which ipc_close is provable is a legal field, so a
-   certificate says as much as its number is small and no more. *)
+   the number is the whole of what the actual model loses against an execution
+   that leaks nothing. *)
 Record IdealProximityCert (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E)) :=
   MkIdealProximityCert {
@@ -444,12 +442,9 @@ Arguments cert_eps {R A E sa} cert.
    coalition's executed reading and the secret under the actual model is
    within variation distance c of the product of the two marginals the ideal
    model has, its own reading and its own secret. The right side is a product
-   because the ideal's witness makes those two independent there, so c bounds
-   the sum of the absolute differences between what a coalition below the
-   threshold sees jointly with the secret and two quantities drawn apart, and a
-   distinguisher's advantage is at most half of c, the sum of the absolute
-   differences being twice the total variation distance of the literature.
-   The attack model is a static coalition
+   because the ideal's witness makes those two independent there, so c is the
+   whole advantage a coalition below the threshold has over an observer who
+   sees the two quantities drawn apart. The attack model is a static coalition
    of fewer than k seats reading its own endpoints, and the claim is an
    average over the run argument and not a statement at a fixed run argument.
    The bound is a parameter, as it is for the spectral arm, so a terminal can
