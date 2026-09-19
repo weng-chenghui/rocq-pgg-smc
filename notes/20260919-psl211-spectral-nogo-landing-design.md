@@ -120,6 +120,35 @@ claimed.
 6. `instances/psl211/psl211_endpoints.v` is never compiled. No file with it
    among its reverse-dependants is edited.
 
+## Changes after the audits
+
+Recorded on 2026-09-19, after two rounds of audits of the landing probe. The
+ledger and the decisions above stand as written, so that what was planned can
+be compared with what was found.
+
+1. **Decision 3, reversed in one point.** The corollary that refutes the
+   constancy field from the pair of deck descriptions of one chirality does not
+   land. The field is a universally quantified proposition, so its refutation
+   from that pair has the same statement as the refutation from the pair of
+   opposite chirality, and a reader cannot cite the two separately. What carries
+   soundness invariant 4 is `psl211_blockline1_law_neq`: three seats read the
+   group-uniform cut under two different laws at two run arguments of one
+   chirality. Ledger row N3 therefore holds two refutations at the field's
+   type, all-decks and dealt, and one law inequality.
+2. **Decision 1, the file name.** The file is
+   `instances/psl211/psl211_spectral_constancy.v`. The first name said the arm
+   has no row here, which invariant 2 forbids saying.
+3. **Names.** `sc_const_prop` is `coalition_reading_constancy`,
+   `psl211_samechir_*` is `psl211_blockline1_*`,
+   `psl211_alldecks_no_spectral_cert` is `psl211_alldecks_no_small_eps_cert`.
+4. **Decision 4.** No generic lemma survived decision 3, so no `lib/` file is
+   made.
+5. **The sentence about leakage** reads "its failure is no proof of leakage"
+   and names the separate theorem, `psl211_alldecks_view_secrecy`. "Is not
+   leakage" claims an absence that the constancy file does not prove.
+6. **The warning** `notation-incompatible-prefix` is already emitted by
+   `instances/psl211/psl211_rows.v` in production and is accepted.
+
 ## Probe artifacts
 
 Directory `notes/probes/2026-09-19-psl211-nogo-landing/`, logical path
