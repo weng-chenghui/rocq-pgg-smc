@@ -183,7 +183,7 @@ lemma carries a bound in which direction, and a `Lemmas:` table.
 
 Reverse closure: `instances/kim2025/five_card_proximity.v` only.
 `manifest/pgg_tableau_arm_relations.v` does not `Require` it, because
-`idealproximity_ceiling` needs `var_dist_le2` of `var_dist_supp` and no
+`idealproximity_prop_at2` needs `var_dist_le2` of `var_dist_supp` and no
 joint-law lemma.
 
 ---
@@ -243,7 +243,7 @@ file. Six land here, exactly the tables' list under R8.
 
 | Declaration | Probe source | Kind |
 |---|---|---|
-| `idealproximity_ceiling` | `p7_mutations.v:87` | Lemma |
+| `idealproximity_prop_at2` | `p7_mutations.v:87`, where the probe names it `idealproximity_ceiling` | Lemma |
 | `indistinguishability_prop_cert_free` | `p8_spectral_relation.v:100` | Lemma |
 | `idealproximity_prop_cert_free` | `p8_spectral_relation.v:111` | recorded `Fail` |
 | `indistinguishability_cert_in_proximity_prop` | `p8_spectral_relation.v:120` | recorded `Fail` |
@@ -264,7 +264,7 @@ Q2.
 
 Two comment changes, both removals of a pointer into another file:
 
-`idealproximity_ceiling`, last sentence removed:
+`idealproximity_prop_at2`, last sentence removed:
 
 - before: "…a published number says something about a coalition exactly in so
   far as it is below two. **Kim's one-cut row publishes one fiftieth, and
@@ -279,6 +279,7 @@ Two comment changes, both removals of a pointer into another file:
   the two lemmas at the end of this file hold it at the five-card instance at
   one fiftieth.**"
 - after: "…idealproximity_ceiling holds it at two whatever the premise."
+  Fix pass 1 rewrote this clause again, at N15 below.
   The two lemmas it named are not in this file; they are in
   `five_card_proximity.v`, and the header of this file says where.
 
@@ -287,8 +288,9 @@ plus `var_dist_supp` for `var_dist_le2`. `pgg_tableau_syntax` is not imported,
 because no declaration here uses the statement surface.
 
 Header: what the file states, the two arms' propositions and the carrier they
-share, the ceiling, where the arm's mathematics is spent, and a `Not claimed.`
-paragraph. The type-honest reading of the partial verdict is in that
+share, the scale a published number is read against, where the arm's
+mathematics is spent, and a `Not claimed.` paragraph. The type-honest
+reading of the partial verdict is in that
 paragraph: no implication from the input-indistinguishability proposition to
 the proximity proposition at a constant below two, uniform in the certificate,
 is claimed; no countermodel is built; no derivation from an
@@ -462,7 +464,7 @@ files is over 5 s.
 |---|---|---|
 | `security/var_dist_joint_law.v` | `var_dist_fdistmap_pair`, `var_dist_prodR`, `var_dist_prodL`, `fdist_prod_snd`, `var_dist_own_marginals` | trio |
 | `five_card_mixing.v` | `card_tnth_count` | **closed under the global context** |
-| `pgg_tableau_arm_relations.v` | `idealproximity_ceiling`, `indistinguishability_prop_cert_free`, `idealproximity_reading_le` | trio |
+| `pgg_tableau_arm_relations.v` | `idealproximity_prop_at2`, `indistinguishability_prop_cert_free`, `idealproximity_reading_le` | trio |
 | `five_card_proximity.v` | `five_card_uniform_pairE`, `five_card_reading_secretE`, `five_card_arg_cut_prodE`, `kim_biased_proximity_close`, `kim_biased_proximity_cert`, `kim_biased_proximity_cert_idealE`, `kim_biased_proximity_cert_epsE`, `kim_biased_proximity_eps_halfE`, `kim_biased_proximity_cert_eps_lt2`, `five_card_row_biased_branch_indistinguishability` and its `_atE`, `_rowE`, `_armE`, `five_card_row_biased_proximity` and its `_rowE`, `_publishedE`, `_armE`, `five_card_row_biased_arm_neq`, `five_card_biased_view_proximity`, `five_card_biased_view_own_marginals`, `five_card_reprice_inv100`, `kim_biased_conclude_below_false`, `five_card_biased_proximity_at_singleton`, `five_card_biased_proximity_prop_holds`, `five_card_biased_indistinguishability_implies_proximity` | trio |
 | `five_card_proximity.v` | `five_card_singleton_below_threshold` | **closed under the global context** |
 
@@ -563,3 +565,282 @@ existing line each goes after:
 
 Nothing is left open. The one thing the main session must redo if landing 1
 moves again is the restage, and `restage.py` above is how.
+
+---
+
+# Fix pass 1
+
+Date: 2026-09-20, after `soundness-audit-landing2.md` and
+`naming-audit-landing2.md`. Edited: the five landed files,
+`landing_fidelity.v`, `verify.py` and this file. The ten chain-consistency
+copies were not touched and not re-copied.
+
+**Code-token diff against `b5c4094`**, comments stripped: 2 tokens in
+`staged/manifest/pgg_tableau_arm_relations.v`, which is the N12 rename, and
+0 tokens in each of the other four landed files. `landing_fidelity.v` gains
+33 code tokens: the three S6 provenance probes, the rename at three sites,
+and the one `Check` of soundness N5. Every comment passage that changed maps
+to a finding below.
+
+**Compiles**, `python3 compile.py`, the `_CoqProject` order, through the
+`rocq1` lock, `rocq compile` and never `make`,
+`instances/psl211/psl211_endpoints.v` never compiled:
+
+| File | rc | wall |
+|---|---|---|
+| `staged/lib/var_dist_supp.v` | 0 | 16.3 s |
+| `staged/security/var_dist_joint_law.v` | 0 | 4.1 s |
+| `staged/instances/kim2025/five_card_mixing.v` | 0 | 4.3 s |
+| `staged/instances/kim2025/five_card_analysis.v` | 0 | 3.9 s |
+| `staged/manifest/pgg_analysis_manifest.v` | 0 | 6.0 s |
+| `staged/manifest/pgg_tableau.v` | 0 | 13.1 s |
+| `staged/manifest/pgg_tableau_syntax.v` | 0 | 4.4 s |
+| `staged/instances/pgl27/pgl27_rows.v` | 0 | 6.4 s |
+| `staged/instances/kim2025/five_card_rows.v` | 0 | 4.6 s |
+| `staged/instances/s5/s5_rows.v` | 0 | 4.0 s |
+| `staged/instances/psl211/psl211_reading_constancy.v` | 0 | 22.0 s |
+| `staged/instances/psl211/psl211_rows.v` | 0 | 5.4 s |
+| `staged/manifest/pgg_analysis_client.v` | 0 | 3.9 s |
+| `staged/manifest/pgg_tableau_arm_relations.v` | 0 | 3.7 s |
+| `staged/instances/kim2025/five_card_proximity.v` | 0 | 5.6 s |
+| `landing_fidelity.v` | 0 | 28.3 s |
+
+No sentence of a landed file is over 5 s. `landing_fidelity.out` recaptured:
+33 `Axioms:` blocks naming only the classical trio and 2 "Closed under the
+global context", which is the 35 above unchanged. `verify.py` recaptured in
+`verify.out`: 5 of 5, 6 of 6 and 32 of 32 declarations token-identical to the
+probe's, the two whole-file hunks unchanged at 57 and 151 tokens, no
+declaration with a code-token difference, and the scans clean, with the four
+lines over 80 bytes all in chain-consistency copies as before.
+
+## Soundness findings
+
+**S1 (MUST).** `five_card_proximity.v` header. Final text:
+
+> Both numbers come from one distance on the cut group, the one fiftieth of
+> kim_biased_cut_mixing_exact. The input-indistinguishability arm doubles
+> whatever marginal bound its certificate carries and the proximity arm
+> spends the distance once, so the proximity row publishes one fiftieth where
+> the row built on kim_biased_cert_exact, five_card_row_biased_inv25 of
+> five_card_rows.v, publishes one twenty-fifth. The input-indistinguishability
+> row continued below carries kim_biased_cert instead, whose marginal bound is
+> the one-cut bundle's spectral number, and publishes sqrt 5 over forty.
+
+Declarations read: `kim_biased_epsE` (`five_card_rows.v:555`,
+`sw_bound_eps (kim_biased_marginal_bound R) = Num.sqrt 5%:R * (1 / 80)`);
+`kim_biased_cert_epsE` (`:748`, `cert_eps (kim_biased_cert R idx) =
+Num.sqrt 5%:R * (1 / 80) + Num.sqrt 5%:R * (1 / 80)`, so `cert_eps` doubles
+the marginal bound); `five_card_row_biased_inv25 : PublishedRowAt
+five_card_reprice_inv25` (`:860`) continuing `kim_biased_cert_exact` (`:833`)
+with `five_card_reprice_inv25 = Some (1 / 25)` (`:850`);
+`kim_biased_proximity_cert_epsE` (`ipc_eps … = 1 / 50`);
+`kim_biased_proximity_eps_halfE` (`cert_eps (kim_biased_cert_exact R idx) =
+ipc_eps … + ipc_eps …`). Deviation: "sqrt 5 over forty", not the audit's "the
+square root of five over forty", because the file's own comment at
+`kim_biased_proximity_eps_halfE` already spells it that way and one word per
+concept applies.
+
+**S2 + naming N8.** One text satisfying both, on `kim_biased_proximity_cert`:
+
+> The ideal and the witness are the terms the published uniform row carries,
+> which kim_biased_proximity_cert_idealE states, and the secret is the same
+> conjunction that row's witness is stated at. The number is the bound
+> kim_biased_cut_mixing_exact proves on the cut group's own distance, and the
+> last field is kim_biased_proximity_close of this file, which says the
+> distance between the two joint laws is at most that number.
+
+The clause the naming audit was unsure of was checked and kept:
+`five_card_exact_witness` is `@MkExactWitness R five_card_algebra
+five_card_params (amf_sample five_card_uniform_family R idx) bool (Secret R)
+(@five_card_static_obs_indep R idx)` (`five_card_rows.v:383`), and
+`ew_secret` is the fifth argument, so the certificate's `ipc_secret`,
+`five_card_leakage.Secret R`, is that same term.
+
+**S3.** `five_card_biased_proximity_at_singleton`, final clause:
+
+> The coalition is not empty, so the reading the bound is stated on is the
+> seat's own content observation at that seat, where the empty coalition's
+> reading is ord0 at every seat.
+
+Checked against `static_coalition_obs` (`protocol/pgg_instance.v:481`),
+`[ffun i => if i \in C then ex_content_obs E x … else ord0]`.
+
+**S4 + naming N14.** One text on `idealproximity_reading_le`: the superlative
+is gone and the checkable half of N14 is kept.
+
+> This is the arm's number read on the carrier the input-indistinguishability
+> arm states its own bound on, and it needs no model of one arm to be a model
+> of the other.
+
+**S5.** The `Not claimed.` paragraph of `pgg_tableau_arm_relations.v`:
+
+> Refuting it needs a model whose reading law is the same at every run
+> argument, which is what the input-indistinguishability proposition asks, and
+> far from the ideal's, which is what the proximity conclusion forbids. No
+> such model is built here, and no proof of the implication is given either.
+
+**S6.** Three qualified provenance probes added to `landing_fidelity.v` beside
+the existing block, in the spelling the audit reports and with no
+`pgg_smc.` prefix needed:
+
+```
+Check var_dist_supp.var_dist_le2.
+Fail Check var_dist_supp.card_tnth_count.
+Check five_card_mixing.card_tnth_count.
+```
+
+The file compiles rc 0 with them, so the middle `Fail` is satisfied: the
+staged `lib/var_dist_supp.v` no longer declares `card_tnth_count` and the
+staged `five_card_mixing.v` does.
+
+**Soundness N1.** `pgg_tableau_arm_relations.v` header, second paragraph:
+
+> The proximity proposition does mention its certificate, through the ideal
+> adapter, that ideal's witness and the actual model's secret, as its
+> definition shows. The two recorded failures beside it record what a written
+> term does with that: …
+
+Checked against `IdealProximityPropAt` (`pgg_tableau.v:487`), which names
+`ipc_secret cert`, `ipc_ideal cert` and `ew_secret (ipc_witness cert)`.
+
+**Soundness N2, N3 with the naming report's table proposals.** The
+`var_dist_joint_law.v` `Lemmas:` entries now read "two products with a common
+left factor are exactly as far apart as their right factors" and "a joint law
+within a number of a product law is within three times that number of the
+product of its own marginals", so the shared factor and the factor three are
+both in the table. Checked against `var_dist_prodR : var_dist (P `x Q1)
+(P `x Q2) = var_dist Q1 Q2` and `var_dist_own_marginals : var_dist J
+(Mr `x Ms) <= d -> var_dist J ((fdistmap fst J) `x (fdistmap snd J)) <=
+3%:R * d`.
+
+**Soundness N4.** No change, as proposed. The distinction recorded: the
+header of `pgg_tableau_arm_relations.v` names
+`instances/kim2025/five_card_proximity.v` as exposition of what is not
+claimed, while the declaration comment of the renamed
+`idealproximity_prop_at2` cites no instance. Header exposition may place the
+file in the tree; a statement comment states the statement.
+
+**Soundness N5.** Applied, one line, and it compiles:
+`Check (five_card_biased_proximity_at_singleton : forall (R : realType)
+(i : 'I_5), _).` in `landing_fidelity.v`.
+
+**Soundness N6 with naming N17.** Proof strategy moved out of the two
+docstrings into plain `(* *)` comments inside the proofs:
+`var_dist_fdistmap_pair` gains `(* var_dist_fdistmap at (reading, secret),
+then transitivity. *)` and `var_dist_own_marginals` gains the three sentences
+about spending the number three times.
+
+## Naming findings
+
+**N1 (MUST).** The 14 missing entries added to the `Key results:` block of
+`five_card_proximity.v`, each checked against its declaration, with the
+block now indexing all 21 non-`Fail` declarations that are not in the
+`Definitions:` block, so the file's coverage is 26 of 26. The two `_rowE`
+share one entry because both conclude `= five_card_row_biased`. Deviation on
+one entry: `kim_biased_proximity_cert_eps_lt2` reads "that number is below the
+bound two var_dist_le2 gives", not the audit's "under the ceiling a variation
+distance has", per the ruling on N12's prose half.
+
+**N2 (MUST).** `var_dist_prodR`, history gone:
+
+> Two files carry a section-local proof of the same statement,
+> instances/pgl27/pgl27_mixing.v and instances/psl211/psl211_mixing.v. Each is
+> used once, inside that file's joint mixing lemma, and neither is visible
+> outside it.
+
+**N3, N4 (MUST / SHOULD).** The header of `pgg_tableau_arm_relations.v` keeps
+its own frame and the `Not claimed.` paragraph; the three sentences that copy
+declaration comments are gone, and the paragraph that restated the proof of
+`idealproximity_tail_without_independence` is cut to N3's one sentence:
+
+> One recorded failure below says where the arm's mathematics is spent: the
+> ideal witness's independence is what turns the ideal joint law into the
+> product of its marginals, and the arm's proposition compares the actual
+> joint law with exactly that product.
+
+**N5, N6, N7, N9, N10, N11, N13, N15, N16, N18, N21, N25, N26, N27, N28.**
+All applied. N9 and N10 together give
+`five_card_biased_view_own_marginals`:
+
+> The one-cut row's bound restated against the executed law's own two
+> marginals: at fewer than two colluding seats, the joint law of the
+> coalition's reading with the conjunction of the committed bits is within
+> three fiftieths of the product of that same law's two marginals. The den
+> Boer uniform model has left the statement. What remains is a bound on how
+> far the one-cut run is from making a coalition's reading and the secret
+> independent, and the advantage a distinguisher gets from it is at most three
+> hundredths.
+
+N10 also rewrites `five_card_biased_view_proximity`'s "executed coalition
+view" to "the coalition's executed reading". After the pass, "view" appears in
+the five landed files only inside identifiers.
+
+Deviation on N13: the trailing clause names the certificate rather than
+saying "the input-indistinguishability certificate of the same model", because
+S1 establishes that the one-cut model carries two such certificates at two
+different numbers:
+
+> At one percent of that bound it is a weak separation and not a cryptographic
+> one, as is kim_biased_cert_exact at one twenty-fifth.
+
+`cert_eps (kim_biased_cert_exact R idx) = 1 / 25` by
+`kim_biased_proximity_eps_halfE`, which is two percent of two.
+
+**N12, as ruled.** `idealproximity_ceiling` is now
+`idealproximity_prop_at2`. Updated at the declaration, the header entry, the
+header prose, the docstring of `indistinguishability_prop_cert_free`,
+`landing_fidelity.v` (the restatement's own name, its `exact:` and its
+`Print Assumptions`), `verify.py` and this file. `verify.py` gains a
+`RENAMED` map that rewrites the staged name to the probe's before the token
+comparison and prints the substitution, so the declaration is still reported
+token-identical to the probe's modulo that one name.
+
+The prose half of the ruling removes "ceiling" from the five landed files:
+`var_dist_supp.v` twice (the header sentence and the section banner, now "The
+bound two on a variation distance"), `five_card_mixing.v` once, and
+`five_card_proximity.v` three times. **Deviation to record:**
+`lib/var_dist_supp.v` and `instances/kim2025/five_card_mixing.v` therefore
+carry comment changes beyond the single documented change of E1 and E2. Both
+are comment-only; the whole-file code-token diffs against production are
+unchanged at 1 hunk / 57 tokens and 2 hunks / 151 tokens.
+
+**N19, as ruled.** The file name stays `security/var_dist_joint_law.v` and the
+header gains one sentence in the shape `five_card_mixing.v` uses for a
+layering fact:
+
+> The two variation-distance lemmas this file applies, var_dist_fdistmap and
+> var_dist_triangle, are stated in security/pgg_collusion_bound.v, so the file
+> sits above that one and not in lib/, which carries no dependency on
+> security/.
+
+Deviation: "variation-distance lemmas", not "data-processing lemmas".
+`var_dist_fdistmap` (`security/pgg_collusion_bound.v:126`) is data processing;
+`var_dist_triangle` (`:43`) is a triangle inequality, so the collective noun
+the finding proposed would be false of one of the two.
+
+**N22, as ruled.** The `Recorded failures:` block of
+`pgg_tableau_arm_relations.v` is removed, following the tree's precedent that
+a recorded `Fail` is not indexed. No such block was added to
+`five_card_proximity.v`. The header prose that says what the file records is
+kept, because it is not a copy of a declaration comment.
+
+**N24.** Applied as one line: "The statements here separate the two that carry
+a number."
+
+**N31, declined.** Moving the `(* exact: erefl … *)` comment of
+`five_card_row_biased_branch_indistinguishability_atE` inside `Proof. … Qed.`
+is not a one-line change; it reflows a proof body that `verify.py` compares
+token by token against the probe. The finding itself records the current
+placement as reading fine and the convention as already satisfied: the comment
+is a plain `(* *)` comment and not part of the docstring.
+
+**N20, N23, N29, N30.** Recorded by the audit with no action, and none taken.
+
+## Scans after the pass
+
+No line over 80 bytes in any landed file and no box-comment row whose closing
+`*)` is off column 80. Zero hits in the five landed files for `apex`,
+`gate`/`gates`/`gated`/`gating`, `posit`/`posits`/`posited`/`positing`, `L1`,
+any abbreviation of "indistinguishability", and the meta words `renamed`,
+`formerly`, `no longer`, `predate`, `probe`, `stage`, `landing`, `audit`,
+`spec`. "percent" is spelled one way in both files that use it.

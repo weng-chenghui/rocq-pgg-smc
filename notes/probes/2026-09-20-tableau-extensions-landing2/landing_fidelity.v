@@ -62,6 +62,9 @@ Fail Check kim_centi_marginal_bound40.
 Fail Check kim_centi_cut_mixing40.
 Fail Check kim_centi_cert40.
 Fail Check kim_centi_cert40_epsE.
+Check var_dist_supp.var_dist_le2.
+Fail Check var_dist_supp.card_tnth_count.
+Check five_card_mixing.card_tnth_count.
 
 (******************************************************************************)
 (*     The five lemmas of security/var_dist_joint_law.v                       *)
@@ -108,11 +111,11 @@ Proof. exact: card_tnth_count. Qed.
 (*     manifest/pgg_tableau_arm_relations.v                                   *)
 (******************************************************************************)
 
-Lemma landing_idealproximity_ceiling (R : realType) (A : PGGAlgebraic)
+Lemma landing_idealproximity_prop_at2 (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (cert : IdealProximityCert sa) :
   IdealProximityPropAt cert 2%:R.
-Proof. exact: idealproximity_ceiling. Qed.
+Proof. exact: idealproximity_prop_at2. Qed.
 
 Lemma landing_indistinguishability_prop_cert_free (R : realType)
     (A : PGGAlgebraic) (E : ExecutionParams A)
@@ -324,6 +327,9 @@ Lemma landing_five_card_singleton_below_threshold (i : 'I_5) :
   (#|[set i]| < profile_k (instance_profile five_card_algebra))%N.
 Proof. exact: five_card_singleton_below_threshold. Qed.
 
+Check (five_card_biased_proximity_at_singleton
+       : forall (R : realType) (i : 'I_5), _).
+
 Lemma landing_five_card_biased_proximity_prop_holds (R : realType) :
   IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50).
 Proof. exact: five_card_biased_proximity_prop_holds. Qed.
@@ -354,7 +360,7 @@ Print Assumptions card_tnth_count.
 (*     Print Assumptions : manifest/pgg_tableau_arm_relations.v               *)
 (******************************************************************************)
 
-Print Assumptions idealproximity_ceiling.
+Print Assumptions idealproximity_prop_at2.
 Print Assumptions indistinguishability_prop_cert_free.
 Print Assumptions idealproximity_reading_le.
 

@@ -52,6 +52,11 @@ NEW = [
 # the lemma moved out of lib/var_dist_supp.v into its only user
 MOVED = {"card_tnth_count": os.path.join(REPO, "lib/var_dist_supp.v")}
 
+# staged name -> the name the probe declares it under.  The staged token
+# stream has the staged name rewritten to the probe's before the comparison,
+# so a declaration reported token-identical is identical modulo this name.
+RENAMED = {"idealproximity_prop_at2": "idealproximity_ceiling"}
+
 DECL = re.compile(
     r"^(?:Fail\s+)?(Lemma|Definition|Theorem|Fact|Corollary)\s+([A-Za-z_][\w']*)",
     re.M)
@@ -166,20 +171,28 @@ def main():
         st, sd = blocks(os.path.join(HERE, rel))
         print("=== %s" % rel)
         for nm in st:
-            where = [f for f in srcs if nm in probe[f][0]]
+            pnm = RENAMED.get(nm, nm)
+            if pnm != nm:
+                print("   RENAMED: staged %s is the probe's %s" % (nm, pnm))
+            where = [f for f in srcs if pnm in probe[f][0]]
             if not where:
                 print("   NOT IN ANY PROBE FILE: %s" % nm)
                 continue
             f = where[0]
             pt, pd = probe[f]
-            if pt[nm] != st[nm]:
-                report("%s (from %s)" % (nm, f), pt[nm], st[nm], "code tokens")
-            if pd[nm] != sd[nm]:
-                report("%s (from %s)" % (nm, f), pd[nm], sd[nm],
+            stoks = [pnm if t == nm else t for t in st[nm]]
+            if pt[pnm] != stoks:
+                report("%s (from %s)" % (nm, f), pt[pnm], stoks, "code tokens")
+            if pd[pnm] != sd[nm]:
+                report("%s (from %s)" % (nm, f), pd[pnm], sd[nm],
                        "comment words")
-        idn = sum(1 for nm in st
-                  if any(nm in probe[f][0] and probe[f][0][nm] == st[nm]
-                         for f in srcs))
+        idn = 0
+        for nm in st:
+            pnm = RENAMED.get(nm, nm)
+            stoks = [pnm if t == nm else t for t in st[nm]]
+            if any(pnm in probe[f][0] and probe[f][0][pnm] == stoks
+                   for f in srcs):
+                idn += 1
         print("   %d of %d declarations token-identical to the probe's"
               % (idn, len(st)))
         print()

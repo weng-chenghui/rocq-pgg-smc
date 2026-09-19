@@ -5,10 +5,11 @@
 (*                                                                            *)
 (* A shuffle bound is proved on the cut group. What a coalition is shown is a *)
 (* bound on the pair of its reading and the secret. The two carriers are not  *)
-(* the same, and the lemmas here are the steps between them, each stated on   *)
-(* the sum of the absolute differences of two laws, which is twice the total  *)
-(* variation distance of the literature and bounds twice a distinguisher's    *)
-(* advantage.                                                                 *)
+(* the same, and the lemmas here are the steps between them. Each distance    *)
+(* step is stated on the sum of the absolute differences of two laws, which   *)
+(* is twice the total variation distance of the literature and bounds twice a *)
+(* distinguisher's advantage. fdist_prod_snd is the marginal identity those   *)
+(* steps consume.                                                             *)
 (*                                                                            *)
 (* Downward, var_dist_fdistmap_pair carries a bound from any common carrier   *)
 (* to the pair, because a coalition's reading and the secret are both         *)
@@ -22,17 +23,24 @@
 (* within three times that number of the product of its own two marginals, so *)
 (* a statement comparing two models becomes a statement about one.            *)
 (*                                                                            *)
+(* The two variation-distance lemmas this file applies, var_dist_fdistmap and *)
+(* var_dist_triangle, are stated in security/pgg_collusion_bound.v, so the    *)
+(* file sits above that one and not in lib/, which carries no dependency on   *)
+(* security/.                                                                 *)
+(*                                                                            *)
 (* Lemmas:                                                                    *)
 (*   var_dist_fdistmap_pair     == two laws on one sample space stay within   *)
 (*                                 their bound when read as a reading and a   *)
 (*                                 secret                                     *)
-(*   var_dist_prodR             == two products with one left factor are as   *)
-(*                                 far apart as their right factors           *)
+(*   var_dist_prodR             == two products with a common left factor are *)
+(*                                 exactly as far apart as their right        *)
+(*                                 factors                                    *)
 (*   var_dist_prodL             == the same on the other side                 *)
 (*   fdist_prod_snd             == the second marginal of a product is its    *)
 (*                                 second factor                              *)
-(*   var_dist_own_marginals     == a joint law close to a product law is      *)
-(*                                 close to the product of its own marginals  *)
+(*   var_dist_own_marginals     == a joint law within a number of a product   *)
+(*                                 law is within three times that number of   *)
+(*                                 the product of its own marginals           *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -55,17 +63,18 @@ Local Open Scope fdist_scope.
 
 (** Two laws on one sample space, within d of each other, stay within d when
     each is read as the pair of a coalition's reading and the secret. It is
-    the data processing inequality var_dist_fdistmap at the map pairing the
-    two readers, and it is the step by which the proximity arm's certificate
-    is discharged: the actual and the ideal model of one execution differ only
-    in the law they draw a sample point from, and the pair the arm compares is
-    a deterministic function of that point. *)
+    data processing along the map pairing the two readers, and it is the step
+    by which the proximity arm's certificate is discharged: the actual and the
+    ideal model of one execution differ only in the law they draw a sample
+    point from, and the pair the arm compares is a deterministic function of
+    that point. *)
 Lemma var_dist_fdistmap_pair (R : realType) (U V W : finType)
     (P Q : R.-fdist U) (reading : U -> V) (secret : U -> W) (d : R) :
   var_dist P Q <= d ->
   var_dist (fdistmap (fun u => (reading u, secret u)) P)
            (fdistmap (fun u => (reading u, secret u)) Q) <= d.
 Proof.
+(* var_dist_fdistmap at (reading, secret), then transitivity. *)
 move=> H.
 exact: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _) H).
 Qed.
@@ -80,11 +89,11 @@ Variables A B : finType.
 
 (** Two product laws with the same left factor are exactly as far apart as
     their right factors. Tensoring a shuffle law with a run argument drawn
-    independently of it therefore neither creates nor destroys variation
-    distance, which is what lets a bound proved on the cut group be read as a
-    bound on the joint law of argument and cut. Two section-local proofs of
-    this statement predate the one here, at instances/pgl27/pgl27_mixing.v and
-    instances/psl211/psl211_mixing.v; each is used once, inside its own file's
+    independently of it therefore neither creates nor destroys the sum, which
+    is what lets a bound proved on the cut group be read as a bound on the
+    joint law of argument and cut. Two files carry a section-local proof of
+    the same statement, instances/pgl27/pgl27_mixing.v and
+    instances/psl211/psl211_mixing.v. Each is used once, inside that file's
     joint mixing lemma, and neither is visible outside it. *)
 Lemma var_dist_prodR (P : R.-fdist A) (Q1 Q2 : R.-fdist B) :
   var_dist (P `x Q1) (P `x Q2) = var_dist Q1 Q2.
@@ -113,10 +122,12 @@ apply: eq_bigr => a _.
 by rewrite -big_distrr /= FDist.f1 mulr1.
 Qed.
 
-(** The second marginal of a product law is its second factor. infotheo's
-    fdist_prod1 states this for the first marginal of a product with a
-    channel, and the second marginal of such a product is a mixture, so the
-    statement for a constant channel has no counterpart there. *)
+(** The second marginal of a product law is its second factor. It is the
+    second half of the identification a comparison with an ideal makes: the
+    ideal's joint law is a product, so each of its marginals is one of the two
+    laws the ideal was built from, and var_dist_own_marginals needs both
+    halves. infotheo's fdist_prod1 gives the first half for a product with a
+    channel, where the second marginal is a mixture and has no counterpart. *)
 Lemma fdist_prod_snd (P : R.-fdist A) (Q : R.-fdist B) :
   fdistmap snd (P `x Q) = Q.
 Proof. by rewrite -/(fdist_snd _) -fdistX_prod fdistX2 fdist_prod1. Qed.
@@ -128,16 +139,17 @@ End var_dist_product_factor.
 (******************************************************************************)
 
 (** A joint law within d of a product of two laws is within three times d of
-    the product of its own two marginals. Each marginal of the joint law is
-    within d of the corresponding factor by data processing, and replacing the
-    two factors one at a time costs d each, so the number is spent three
-    times. It is what turns a statement comparing two models into a statement
-    about one, at a constant no reader has to trace back to the ideal. *)
+    the product of its own two marginals. It is what turns a statement
+    comparing two models into a statement about one, at a constant no reader
+    has to trace back to the ideal. *)
 Lemma var_dist_own_marginals (R : realType) (V W : finType)
     (J : R.-fdist (V * W)) (Mr : R.-fdist V) (Ms : R.-fdist W) (d : R) :
   var_dist J (Mr `x Ms) <= d ->
   var_dist J ((fdistmap fst J) `x (fdistmap snd J)) <= 3%:R * d.
 Proof.
+(* Each marginal of the joint law is within d of the corresponding factor by
+   data processing, and replacing the two factors one at a time costs d each,
+   so the number is spent three times. *)
 move=> H.
 have Hfst : fdistmap fst (Mr `x Ms) = Mr by exact: fdist_prod1.
 have Hsnd : fdistmap snd (Mr `x Ms) = Ms by exact: fdist_prod_snd.

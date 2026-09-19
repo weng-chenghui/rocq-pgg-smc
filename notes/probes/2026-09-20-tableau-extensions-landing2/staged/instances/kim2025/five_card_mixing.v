@@ -476,8 +476,8 @@ Qed.
     under the single biased cut sees laws within twice the length-one bundle's
     spectral number of each other at the two committed pairs. This is the
     security statement of Kim's one-cut analysis path. Its number is about three
-    percent of the ceiling var_dist_le2 gives, so it is a weak separation bound
-    and not a cryptographic one. *)
+    percent of the bound two that var_dist_le2 gives, so it is a weak
+    separation bound and not a cryptographic one. *)
 Lemma kim_biased_static_obs_indistinguishability
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   (#|C| < profile_k (instance_profile five_card_algebra))%N ->

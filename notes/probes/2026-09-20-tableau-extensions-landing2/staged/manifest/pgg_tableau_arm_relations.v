@@ -6,59 +6,50 @@
 (* A Tableau row certifies one of three arms, and two of the three carry a    *)
 (* number. Both numbers can be read off one variation distance on the cut     *)
 (* group, so a reader may take one arm's proposition for a restatement of the *)
-(* other's. The statements here are what separates them. Every one of them is *)
-(* stated at an arbitrary algebra, arbitrary execution parameters and an      *)
-(* arbitrary sample adapter, so none names an instance.                       *)
+(* other's. The statements here separate the two that carry a number. Every   *)
+(* one of them is stated at an arbitrary algebra, arbitrary execution         *)
+(* parameters and an arbitrary sample adapter, so none names an instance.     *)
 (*                                                                            *)
 (* The input-indistinguishability proposition does not mention the            *)
 (* certificate it is stated at: it is one proposition at two certificates     *)
 (* over one model, so the ideal cut and the constancy field are spent inside  *)
-(* indistinguishability_tail and have left the claim. An ideal that a         *)
-(* proximity certificate names can therefore not be recovered from an         *)
-(* input-indistinguishability premise, and a bound on the distance to that    *)
-(* ideal has to be proved from something else. The proximity proposition does *)
-(* mention its certificate, through the ideal adapter, that ideal's witness   *)
-(* and the actual model's secret, and the two recorded failures beside it say *)
-(* so from both sides: the equality of the proposition at two certificates is *)
-(* not closed by conversion, and the proposition cannot be stated at an       *)
+(* indistinguishability_tail and have left the claim. The proximity           *)
+(* proposition does mention its certificate, through the ideal adapter, that  *)
+(* ideal's witness and the actual model's secret, as its definition shows.    *)
+(* The two recorded failures beside it record what a written term does with   *)
+(* that: the equality of the proposition at two certificates is not closed by *)
+(* conversion, and the proposition cannot be stated at an                     *)
 (* input-indistinguishability certificate at all.                             *)
 (*                                                                            *)
 (* What the two arms share is a carrier. idealproximity_reading_le reads the  *)
 (* proximity number as a bound between the two models' reading marginals,     *)
 (* which is the carrier the input-indistinguishability arm states its own     *)
-(* bound on. The secret leaves the proximity statement by data processing     *)
-(* along the first projection, and the ideal's joint law is a product, so its *)
-(* first marginal is the ideal reading outright.                              *)
+(* bound on.                                                                  *)
 (*                                                                            *)
-(* idealproximity_ceiling fixes the scale a published number is read against. *)
-(* Every proximity certificate satisfies the arm's proposition at two, so a   *)
-(* row publishing two rules nothing out, and a published number says          *)
-(* something about a coalition exactly in so far as it is below two. The      *)
-(* number bounds a sum of absolute differences, twice the total variation     *)
-(* distance, so a distinguisher's advantage is at most half of it.            *)
+(* idealproximity_prop_at2 fixes the scale a published number is read         *)
+(* against. The number bounds a sum of absolute differences, twice the total  *)
+(* variation distance, so a distinguisher's advantage is at most half of it.  *)
 (*                                                                            *)
-(* The recorded failure of the composition law says where the arm's           *)
-(* mathematics is spent. With the ideal witness's independence deleted from   *)
-(* the proof, what remains is the certificate's distance between two joint    *)
-(* laws and the two link lemmas; the arm's proposition compares the actual    *)
-(* joint law with a product, so the step that turns the ideal joint law into  *)
-(* the product of its marginals is where the witness is spent, and without it *)
-(* the final application does not typecheck.                                  *)
+(* One recorded failure below says where the arm's mathematics is spent: the  *)
+(* ideal witness's independence is what turns the ideal joint law into the    *)
+(* product of its marginals, and the arm's proposition compares the actual    *)
+(* joint law with exactly that product.                                       *)
 (*                                                                            *)
 (* Not claimed. An implication from the input-indistinguishability            *)
 (* proposition to the proximity proposition at a constant below two, uniform  *)
-(* in the proximity certificate. Settling it needs a model whose reading law  *)
+(* in the proximity certificate. Refuting it needs a model whose reading law  *)
 (* is the same at every run argument, which is what the                       *)
 (* input-indistinguishability proposition asks, and far from the ideal's,     *)
-(* which is what the proximity conclusion forbids; no such model is built     *)
-(* here. Nor is the proximity proposition derived from an                     *)
-(* input-indistinguishability certificate's own fields at a stated constant.  *)
-(* The implication that does hold at the five-card one-cut model, in          *)
+(* which is what the proximity conclusion forbids. No such model is built     *)
+(* here, and no proof of the implication is given either. Nor is the          *)
+(* proximity proposition derived from an input-indistinguishability           *)
+(* certificate's own fields at a stated constant. The implication that does   *)
+(* hold at the five-card one-cut model, in                                    *)
 (* instances/kim2025/five_card_proximity.v, holds because its conclusion is a *)
 (* theorem there and its premise is discarded.                                *)
 (*                                                                            *)
 (* Lemmas:                                                                    *)
-(*   idealproximity_ceiling     == every proximity certificate satisfies the  *)
+(*   idealproximity_prop_at2    == every proximity certificate satisfies the  *)
 (*                                 arm's proposition at two                   *)
 (*   indistinguishability_prop_cert_free                                      *)
 (*                              == the input-indistinguishability proposition *)
@@ -66,19 +57,6 @@
 (*                                 stated at                                  *)
 (*   idealproximity_reading_le  == the proximity number bounds the distance   *)
 (*                                 between the two models' reading marginals  *)
-(*                                                                            *)
-(* Recorded failures:                                                         *)
-(*   idealproximity_prop_cert_free                                            *)
-(*                              == the proximity proposition at two           *)
-(*                                 certificates is not one proposition by     *)
-(*                                 conversion                                 *)
-(*   indistinguishability_cert_in_proximity_prop                              *)
-(*                              == the proximity proposition cannot be stated *)
-(*                                 at an input-indistinguishability           *)
-(*                                 certificate                                *)
-(*   idealproximity_tail_without_independence                                 *)
-(*                              == the composition law without the ideal      *)
-(*                                 witness's independence does not typecheck  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -104,7 +82,7 @@ Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 
 (******************************************************************************)
-(*     The ceiling the proximity number is read against                       *)
+(*     The scale the proximity number is read against                         *)
 (******************************************************************************)
 
 (** Every proximity certificate satisfies the arm's proposition at two,
@@ -112,7 +90,7 @@ Local Open Scope proba_scope.
     distance between two laws on a finite carrier never exceeds two. A row
     publishing two therefore rules nothing out, and a published number says
     something about a coalition exactly in so far as it is below two. *)
-Lemma idealproximity_ceiling (R : realType) (A : PGGAlgebraic)
+Lemma idealproximity_prop_at2 (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (cert : IdealProximityCert sa) :
   IdealProximityPropAt cert 2%:R.
@@ -135,9 +113,10 @@ Variable sa : SampleAdapter R (instance_exec E).
     cut law and the number, and the ideal law the certificate names has left
     the claim. An ideal a proximity certificate names can therefore not be
     recovered from an input-indistinguishability premise, and a bound on the
-    distance to that ideal has to be proved from something else. The
-    implication is not empty for all that: idealproximity_ceiling holds it at
-    two whatever the premise. *)
+    distance to that ideal has to be proved from something else. An
+    implication from this proposition to the proximity proposition is not
+    empty for all that: idealproximity_prop_at2 gives the proximity
+    proposition at two whatever the premise. *)
 Lemma indistinguishability_prop_cert_free
     (cert cert' : IndistinguishabilityCert sa) (c : R) :
   IndistinguishabilityPropAt cert c = IndistinguishabilityPropAt cert' c.
@@ -167,10 +146,8 @@ Fail Definition indistinguishability_cert_in_proximity_prop
     statement by data processing along the first projection, and the ideal's
     joint law is a product, so its first marginal is the ideal reading
     outright. This is the arm's number read on the carrier the
-    input-indistinguishability arm states its bound on, and it is the
-    sharpest comparison of the input-indistinguishability arm with the
-    proximity arm that does not need a model of one to be a model of the
-    other. *)
+    input-indistinguishability arm states its own bound on, and it needs no
+    model of one arm to be a model of the other. *)
 Lemma idealproximity_reading_le (cert : IdealProximityCert sa) (c : R) :
   IdealProximityPropAt cert c ->
   forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
