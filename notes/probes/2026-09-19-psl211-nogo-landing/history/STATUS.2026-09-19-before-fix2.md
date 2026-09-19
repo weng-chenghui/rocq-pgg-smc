@@ -42,7 +42,7 @@ the rows copy rewrites.
 |---|---|---|
 | N1 | GO | one file, production import paths, 46 declarations in the briefed order, exit 0 |
 | N2 | GO | `spectral_cert_reading_constancy` by `exact: sc_const cert` |
-| N3 | Deviation from decision 3, recorded below | `psl211_alldecks_constancy_false` and `psl211_dealt_constancy_false`, both restated in the fidelity file; the third refutation is withdrawn, see the note below |
+| N3 | GO, with the third refutation withdrawn | `psl211_alldecks_constancy_false` and `psl211_dealt_constancy_false`, both restated in the fidelity file; see the note below |
 | N4 | GO | `psl211_alldecks_no_small_eps_cert`, `psl211_alldecks_constancy_false_word584`, with infotheo's `leq_var_dist` in place of SRC's local copy |
 | N5 | GO | table below, all 48 SRC declarations dispositioned |
 | N6 | GO with two recorded deviations | table below; two sentences are 0.35 s and 0.41 s slower than SRC's rounded figures, both `perm_filter` steps |
@@ -235,25 +235,18 @@ Proof-local hypothesis names. SRC's `psl211_samechir_law_neq` named its eight
 proof-local hypotheses with bare capitals L, C, E and H suffixed by the digits
 0 and 1, and the L form with digit one spells a term this project bars for a
 distance, L being a word length here. The fix pass settled one scheme for the
-whole file, stated in the header: a leading C is a fiber cardinality, U a mass
-at the group-uniform law, L a mass at the ideal, E a reader identification, T a
-step of an inequality chain and H every other named fact; a C, U, L or E suffix
-names the coordinate the quantity is taken at, `t` and `f` the chirality and
-`j0` and `j1` the block line; and a trailing digit is an index and never a
-value. So `psl211_blockline1_law_neq` carries `Cj0`,
-`Cj1`, `Uj0`, `Uj1`, `Ej0`, `Ej1`, `Hj0` and `Hj1`; the fiber cardinalities of
+whole file, stated in the header: a leading C is a fiber cardinality, L a mass,
+U a mass at the group-uniform law, E a reader identification and H a hypothesis
+taken as given; the suffix names the coordinate the quantity is taken at, `t`
+and `f` the chirality and `j0` and `j1` the block line; and a trailing digit is
+an index and never a value. So `psl211_blockline1_law_neq` carries `Cj0`,
+`Cj1`, `Lj0`, `Lj1`, `Ej0`, `Ej1`, `Hj0` and `Hj1`; the fiber cardinalities of
 `psl211_alldecks_constancy_false_close`, `_supp` and
 `psl211_dealt_constancy_false` are `Ct` and `Cf` where they were `H0`, `H1` and
 `Hcard1`; and `psl211_alldecks_no_zero_eps_cert`'s hypothesis is `Heps` where
-it was `H0`, that digit having named a value. Fix pass 2 brought the file to
-that scheme: `Ht0` of `psl211_alldecks_constancy_false_supp` became `Lt`, the
-masses `Lt` and `Lf` of `psl211_dealt_constancy_false` became `Ut` and `Uf`,
-and `Lj0` and `Lj1` of `psl211_blockline1_law_neq` became `Uj0` and `Uj1`. The
-digits surviving in a proof script are the block-line indices `j0` and `j1`,
-the chain indices of `T1`, `T2` and `T3` in
-`psl211_alldecks_constancy_false_close`, the witness `g0` of
-`psl211_alldecks_constancy_false_supp` and the names built on it, and the three
-conjunct names of an `and3P` split, where they index the seat.
+it was `H0`, that digit having named a value. The digits surviving anywhere in
+a proof script are the three conjunct names of an `and3P` split, where they
+index the seat.
 
 Names kept unchanged, with the reason: `psl211_perdeck_coalition_le3`,
 `psl211_perdeck_coalition_below_k` (the `k` is `profile_k`),
@@ -441,13 +434,11 @@ that file this week.
 
 Boxed, 80 bytes a line, checked in Python on the byte length. It states what the
 file proves and its position: what the arm's fifth field asks for, and per mode
-what the run argument is. All-decks, the run argument is a whole deck
-description, whose chirality is the secret and whose other three coordinates
-are public, and the field fails between two deck descriptions of one chirality
-as well as between the two chiralities, so the field asks for constancy in
-public data and not for secrecy alone. What a coalition of at most five of the
-twelve seats reads about the chirality under the all-decks law is the separate
-theorem `psl211_alldecks_static_indep`. Dealt, the run argument is the secret
+what the run argument is. All-decks, the run argument is the public deck
+description and the field fails between two deck descriptions of one chirality
+as well as between the two chiralities, so no refutation here is a proof of
+leakage and the exact arm's independence, `psl211_alldecks_static_indep`, is a
+separate theorem about the all-decks law. Dealt, the run argument is the secret
 and the field fails because the group is 2-transitive and not 3-transitive,
 where `pgl27_word_view_const` proves the same field at PGL(2,7).
 
@@ -560,10 +551,6 @@ character and so stated no fact a reader could cite separately. Its text is in
    files of `instances/psl211/` already emit it. Reported under the compile
    table so that a landing is not surprised by it. This record's pre-fix
    version of that sentence was wrong in both halves.
-6. **The spec's decision 3 is reversed.** The corollary it asked for had the
-   statement of `psl211_alldecks_constancy_false` character for character, so
-   the refutation at one chirality is carried at the law's type by
-   `psl211_blockline1_law_neq` and not at the field's type.
 
 ## Reproduction
 
@@ -599,43 +586,3 @@ Four files, in this order, each through the machine-wide `rocq1` lock with
 and `.aux` of the old file name were removed after the new name compiled; they
 are ignored build products, not records. `make` was never invoked and
 `instances/psl211/psl211_endpoints.v` was never compiled.
-
-## Fix pass 2, what changed and what was compiled
-
-Comments and proof-local names only. No statement and no proof body changed
-beyond the rebound names. The pre-fix-2 copy of every file touched is in
-`history/` under the `2026-09-19-before-fix2` suffix; nothing was deleted.
-
-The two blocking findings of the second audit. The header's naming sentence
-is now true of the file: the three renames above were applied, the chain-step
-letter `T` is declared, and the suffix clause is restricted to the letters
-that carry a coordinate, since `T1`, `T2` and `T3` are indexed by the step.
-Every proof-local name introduced with a capital initial was listed
-mechanically and checked against the scheme, with no name off it. The rows
-header no longer says the field's failure "is not leakage": it says the
-failure is no proof of leakage and names the theorem that settles what a
-coalition reads, `psl211_alldecks_view_secrecy` of the same file, whose
-premise is `(#|C| < 6)%N` and whose first conjunct is independence of the
-chirality under the all-decks law.
-
-The certificate theorem's docstring no longer says the obligation of
-`conclude` pins the published number to `cert_eps cert`. It says the
-obligation bounds that number below, which is true of the equality in
-`manifest/pgg_tableau.v` and of the inequality in stage A of
-`notes/probes/2026-09-19-tableau-extensions/pgg_tableau.v`. `PortProp` and
-`publish` are the same in both, so the number a row publishes is
-`odflt (cert_eps cert) (c R)` in both.
-
-One word per object. *Deck description* is the whole run argument and *deal*
-is its three public coordinates, said once in the header's naming paragraph
-and applied in both landing copies. *Single-card marginal bound* replaces
-*own marginal bound* wherever it named `psl211_marginal_bound`.
-
-Three files, in this order, each through the machine-wide `rocq1` lock with
-`rocq compile -time`, real `subprocess.returncode`, nothing piped in between:
-`psl211_spectral_constancy.v`, `psl211_rows.v`, `psl211_nogo_fidelity.v`. All
-three exit 0, at 24.0 s, 6.1 s and 8.1 s of wall time with the lock free. The
-slowest sentence of the constancy file is a `size_filter` rewrite at 6.4 s.
-`make` was never invoked and `instances/psl211/psl211_endpoints.v` was never
-compiled. The rows copy is still character-identical to
-`instances/psl211/psl211_rows.v` once comments and whitespace are stripped.

@@ -18,15 +18,15 @@
 (* two chiralities, one of the 132 block lines of that chirality's Steiner    *)
 (* system, and two labellings. Only the chirality is secret, so the field     *)
 (* asks for constancy of the reading in three public coordinates as well.     *)
-(* At the group-uniform ideal the field fails between the two chiralities of  *)
-(* one deal, and the equation it asserts is false again at a pair of run      *)
-(* arguments of one chirality differing in the block line alone,              *)
-(* psl211_blockline1_law_neq. The second failure moves no secret, so the      *)
-(* field asks for constancy in public data and not for secrecy alone. What a  *)
-(* coalition of at most five of the twelve seats reads about the chirality    *)
-(* under the all-decks law is psl211_alldecks_static_indep of                 *)
-(* instances/psl211/psl211_models.v, which says it reads nothing, exactly, at *)
-(* every real field, and that is the theorem the published row carries.       *)
+(* The field fails between the two chiralities of one deck description, and   *)
+(* the equation it asserts is false again at a pair of run arguments of one   *)
+(* chirality differing in the block line alone, psl211_blockline1_law_neq.    *)
+(* The second failure moves no secret, so no reading of these refutations     *)
+(* gives leakage. What a coalition of at most five of the twelve seats reads  *)
+(* about the chirality under the all-decks law is                             *)
+(* psl211_alldecks_static_indep of instances/psl211/psl211_models.v, which    *)
+(* says it reads nothing, exactly, at every real field, and that is the       *)
+(* theorem the published row carries.                                         *)
 (*                                                                            *)
 (* The quantitative form fixes what a spectral row would have to publish. A   *)
 (* certificate over the all-decks model states its distance against the       *)
@@ -72,17 +72,15 @@
 (*                                                                            *)
 (* Names. The first two declarations are framework-level: they are stated for *)
 (* any algebra and any execution parameters, and sit here rather than beside  *)
-(* SpectralCert in manifest/pgg_tableau.v. A deck description is a whole run  *)
-(* argument and a deal is its three public coordinates. The                   *)
-(* psl211_blockline1_ prefix names block line one and the comparison with     *)
-(* block line zero at one chirality, as psl211_perdeck_ of                    *)
-(* instances/psl211/psl211_models.v names the comparison between the two      *)
-(* chiralities at one deal. In a proof script a leading C is a fiber          *)
-(* cardinality, U a mass at the group-uniform law, L a mass at the ideal, E a *)
-(* reader identification, T a step of an inequality chain and H every other   *)
-(* named fact; a C, U, L or E suffix names the coordinate the quantity is     *)
-(* taken at, t and f the chirality and j0 and j1 the block line; and a        *)
-(* trailing digit is an index and never a value.                              *)
+(* SpectralCert in manifest/pgg_tableau.v. The psl211_blockline1_ prefix      *)
+(* names the comparison between block line zero and block line one at one     *)
+(* chirality, as psl211_perdeck_ of instances/psl211/psl211_models.v names    *)
+(* the comparison between the two chiralities at one deck description. In a   *)
+(* proof script a leading C is a fiber cardinality, L a mass, U a mass at the *)
+(* group-uniform law, E a reader identification and H a hypothesis taken as   *)
+(* given; the suffix names the coordinate the quantity is taken at, t and f   *)
+(* the chirality and j0 and j1 the block line; and a trailing digit is an     *)
+(* index and never a value.                                                   *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   coalition_reading_constancy                                              *)
@@ -114,8 +112,8 @@
 (*                              carries a shuffle bound epsilon under 1/1320  *)
 (*   psl211_alldecks_no_zero_eps_cert                                         *)
 (*                           == in particular none carries an epsilon of      *)
-(*                              zero, the epsilon of this instance's          *)
-(*                              single-card marginal bound                    *)
+(*                              zero, the epsilon of this instance's own      *)
+(*                              marginal bound                                *)
 (*   psl211_alldecks_constancy_false_word584                                  *)
 (*                           == the field is false at every ideal within eps  *)
 (*                              of the 584-letter word shuffle's cut law      *)
@@ -185,10 +183,10 @@ Local Notation viewT := ({ffun seatT -> cardT}).
     the certificate's variation-distance field is what transfers that
     assertion from the ideal to the real cut. Where the run argument carries
     the secret, as it does in both run modes of this instance, the field is
-    at least constancy in the secret; where the run argument carries public
-    data as well, as it does under the all-decks parameters, the field asks
-    for constancy in that public data too and is stronger than the privacy
-    the instance claims. *)
+    at least constancy in the secret; where the run
+    argument carries public data as well, as it does under the all-decks
+    parameters, the field asks for constancy in that public data too and is
+    stronger than the privacy the instance claims. *)
 Definition coalition_reading_constancy (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A)
     (ideal : R.-fdist (pgg_gT (mp_M (instance_profile A)))) : Prop :=
@@ -246,15 +244,15 @@ Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
 (** psl211_alldecks_constancy_false — under the all-decks run parameters the
     uniform law on the shuffle group is the ideal cut of no spectral
     certificate: seats 0, 1 and 2 read that law differently at the two
-    chiralities of the deal psl211_perdeck_deal. The run argument of this
-    mode is a whole deck description, whose first coordinate is the
-    chirality and whose other three are public, and the field quantifies
-    over every pair of them, so the equation it asserts is false at a pair
-    of one chirality too, psl211_blockline1_law_neq. A change of secret is
-    always also a change of the laid deck here, the chirality selecting the
-    table the block line indexes. Three seats learn nothing about the
-    chirality under the all-decks law, which is
-    psl211_alldecks_static_indep, and this refutation states no leakage. *)
+    chiralities of the deck description psl211_perdeck_deal. The run argument
+    of this mode is a whole deck description, whose first coordinate is the
+    chirality and whose other three are public, and the field quantifies over
+    every pair of them, so the equation it asserts is false at a pair of one
+    chirality too, psl211_blockline1_law_neq. A change of secret is always
+    also a change of the laid deck here, the chirality selecting the table
+    the block line indexes. Three seats learn nothing about the chirality
+    under the all-decks law, which is psl211_alldecks_static_indep, and this
+    refutation states no leakage. *)
 Lemma psl211_alldecks_constancy_false (R : realType) :
   ~ coalition_reading_constancy psl211_alldecks_params
       ((`U psl211_G_pos) : R.-fdist cutT).
@@ -329,8 +327,8 @@ Qed.
 
 (** psl211_alldecks_raw_viewE — the raw reading is the instance's reading, at
     every deck description. This is psl211_perdeck_raw_viewE of
-    psl211_models.v with the deck description left free instead of fixed at
-    the deal psl211_perdeck_deal. *)
+    psl211_models.v with the deck description left free instead of fixed to
+    psl211_perdeck_deal. *)
 Lemma psl211_alldecks_raw_viewE (x : psl211_inputT) (g : cutT) :
   psl211_perdeck_raw_view (psl211_alldecks_seq x) (psl211_ptbl g)
   = psl211_alldecks_view psl211_perdeck_coalition x g.
@@ -447,13 +445,13 @@ Lemma psl211_blockline1_massE (R : realType) (x : psl211_inputT) :
   = (#|pgg_G psl211_M|%:R)^-1 *+ #|psl211_blockline1_fiber x| :> R.
 Proof. by rewrite /psl211_blockline1_fiber uniform_fdistmap_pointE. Qed.
 
-(** psl211_blockline1_law_neq — the run arguments (true, psl211_perdeck_deal)
-    and (true, psl211_blockline1_deal) send the group-uniform cut law to two
-    different laws on what seats 0, 1 and 2 read. This is the equation the
-    constancy field asserts, at a pair of run arguments carrying the same
-    secret, and it is false, so the field's failure at the all-decks
-    parameters does not need the chirality to move: it is already a failure
-    of constancy in the public block line. *)
+(** psl211_blockline1_law_neq — at chirality true the deck descriptions
+    psl211_perdeck_deal and psl211_blockline1_deal send the group-uniform cut
+    law to two different laws on what seats 0, 1 and 2 read. This is the
+    equation the constancy field asserts, at a pair of run arguments carrying
+    the same secret, and it is false, so the field's failure at the all-decks
+    parameters does not need the chirality to move: it is already a failure of
+    constancy in the public block line. *)
 Lemma psl211_blockline1_law_neq (R : realType) :
   fdistmap (@static_coalition_obs psl211_algebra psl211_alldecks_params
       psl211_perdeck_coalition (true, psl211_perdeck_deal))
@@ -479,11 +477,11 @@ have Ej1 : @static_coalition_obs psl211_algebra psl211_alldecks_params
    = (fun g => psl211_alldecks_view psl211_perdeck_coalition
         (true, psl211_blockline1_deal) g)
   := psl211_alldecks_static_obs_funE _ _.
-have Uj0 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
+have Lj0 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
     (true, psl211_perdeck_deal) g) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_blockline1_view = (#|pgg_G psl211_M|%:R)^-1 :> R.
   by rewrite psl211_blockline1_massE Cj0 mulr1n.
-have Uj1 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
+have Lj1 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
     (true, psl211_blockline1_deal) g) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_blockline1_view = 0 :> R.
   by rewrite psl211_blockline1_massE Cj1 mulr0n.
@@ -493,9 +491,9 @@ have Hv := etrans
   (etrans Heq
     (congr1 (fun f => fdistmap f ((`U psl211_G_pos) : R.-fdist cutT)) Ej1)).
 have Hz : (#|pgg_G psl211_M|%:R)^-1 = 0 :> R :=
-  etrans (esym Uj0)
+  etrans (esym Lj0)
     (etrans (congr1 (fun q : R.-fdist viewT => q psl211_blockline1_view) Hv)
-      Uj1).
+      Lj1).
 have : (#|pgg_G psl211_M|%:R)^-1 == 0 :> R by rewrite Hz.
 rewrite invr_eq0 pnatr_eq0 => /eqP Hcard.
 by move: psl211_G_pos; rewrite Hcard.
@@ -555,7 +553,7 @@ Qed.
     chirality-true deck of psl211_perdeck_deal to the reading
     psl211_perdeck_view. The false chirality reaches that reading under
     exactly one cut, so one reading already tells the two chiralities apart
-    at this fixed deal, which is not the law the row is about. *)
+    at this fixed deck description, which is not the law the row is about. *)
 Lemma psl211_perdeck_fiber_true0 : psl211_perdeck_fiber true = set0.
 Proof.
 have [Ht _] := psl211_perdeck_raw_countE.
@@ -587,7 +585,7 @@ move: Hg0; rewrite inE => /andP[Hg0G Hg0v].
 (* the true mass vanishes term by term: a cut producing the reading is either
    outside the group, where the law is zero, or inside it and in the empty
    true fiber *)
-have Lt : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
+have Ht0 : (fdistmap (fun g => psl211_alldecks_view psl211_perdeck_coalition
     (true, psl211_perdeck_deal) g) ideal) psl211_perdeck_view = 0 :> R.
   rewrite fdistmap_point_condE; apply: big1 => g Hg.
   apply: Hout; apply/negP => HgG.
@@ -601,7 +599,7 @@ have Hfge : ideal g0 <= (fdistmap (fun g => psl211_alldecks_view
   rewrite fdistmap_point_condE (bigD1 g0 Hg0v).
   rewrite -{1}(addr0 (ideal g0)) lerD2l.
   by apply: sumr_ge0 => g _; exact: FDist.ge0.
-move: Hfge; rewrite -Hlaw Lt => Hle.
+move: Hfge; rewrite -Hlaw Ht0 => Hle.
 have Hzero : ideal g0 = 0 :> R.
   by apply/eqP; rewrite Order.POrderTheory.eq_le Hle andTb; exact: FDist.ge0.
 by move: (Hin g0 Hg0G); rewrite Hzero eqxx.
@@ -684,19 +682,18 @@ Qed.
     epsilon added to itself strictly below the reciprocal 1/660 of the group
     order, so every such certificate has an epsilon of at least 1/1320, the
     value 1/1320 itself not excluded. A row publishes
-    odflt (cert_eps cert) (c R) at its own reprice coordinate c, and cert_eps
-    cert is the shuffle bound epsilon twice, so a row over this model that
-    publishes its certificate's own number publishes at least 1/660. The
-    obligation of conclude bounds the published number below by cert_eps
-    cert, so no row over this model publishes less. This fixes from below
-    what the spectral arm can publish at this model. It says neither that the
-    arm is unavailable here nor anything about what a coalition of at most
-    five seats reads. *)
-(* Argued and not compiled: the proposition a row carries is
-   SpectralPropAt cert c, a variation distance bounded above by c, so an
-   obligation weakened from an equality to cert_eps cert <= odflt (cert_eps
-   cert) (c R) could only let a row publish a number larger than cert_eps,
-   never a smaller one. *)
+    odflt (cert_eps cert) (c R) at its own reprice coordinate c, the
+    obligation of conclude pins that number to cert_eps cert, and cert_eps
+    cert is the shuffle bound epsilon twice, so every row over this model
+    that publishes its certificate's own number publishes at least 1/660.
+    This fixes from below what the spectral arm can publish at this model.
+    It says neither that the arm is unavailable here nor anything about what
+    a coalition of at most five seats reads. *)
+(* Argued and not compiled: the exclusion survives a weaker conclude. The
+   proposition a row carries is SpectralPropAt cert c, a variation distance
+   bounded above by c, so an obligation weakened from that equality to
+   cert_eps cert <= odflt (cert_eps cert) (c R) could only let a row publish
+   a number larger than cert_eps, never a smaller one. *)
 (* The excluded range of epsilon is bounded above. The header records why the
    larger range is occupied and that the occupancy is argued and not
    compiled. *)
@@ -713,11 +710,11 @@ Qed.
 
 (** psl211_alldecks_no_zero_eps_cert — in particular no spectral certificate
     over the all-decks model has a shuffle bound epsilon of zero, which is
-    the epsilon profile_eps_psl211 of instances/psl211/psl211_profile.v
-    gives this instance's single-card marginal bound. A certificate must
-    hold its ideal cut within its own epsilon of the group-uniform law, and
-    the group-uniform law is not a cut these three seats read constantly, so
-    the sharper the shuffle bound the less room the certificate has. *)
+    the epsilon profile_eps_psl211 of instances/psl211/psl211_profile.v gives
+    this instance's own marginal bound. A certificate must hold its ideal cut
+    within its own epsilon of the group-uniform law, and the group-uniform
+    law is not a cut these three seats read constantly, so the sharper the
+    shuffle bound the less room the certificate has. *)
 Corollary psl211_alldecks_no_zero_eps_cert (R : realType)
     (cert : SpectralCert (psl211_alldecks_sample R)) :
   sw_bound_eps (sc_b cert) = 0 -> False.
@@ -964,17 +961,17 @@ have Ct : #|psl211_dealt_fiber true| = 0 :=
   etrans (psl211_dealt_fiberE true) Ht.
 have Cf : #|psl211_dealt_fiber false| = 1 :=
   etrans (psl211_dealt_fiberE false) Hf.
-have Ut : (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
+have Lt : (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
     psl211_perdeck_coalition true) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_dealt_view = 0 :> R.
   by rewrite psl211_dealt_massE Ct mulr0n.
-have Uf : (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
+have Lf : (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
     psl211_perdeck_coalition false) ((`U psl211_G_pos) : R.-fdist cutT))
     psl211_dealt_view = (#|pgg_G psl211_M|%:R)^-1 :> R.
   by rewrite psl211_dealt_massE Cf mulr1n.
 have Hz : (0 : R) = (#|pgg_G psl211_M|%:R)^-1 :=
-  etrans (esym Ut)
-    (etrans (congr1 (fun q : R.-fdist viewT => q psl211_dealt_view) Heq) Uf).
+  etrans (esym Lt)
+    (etrans (congr1 (fun q : R.-fdist viewT => q psl211_dealt_view) Heq) Lf).
 have : (#|pgg_G psl211_M|%:R)^-1 == 0 :> R by rewrite -Hz.
 rewrite invr_eq0 pnatr_eq0 => /eqP Hcard.
 by move: psl211_G_pos; rewrite Hcard.
