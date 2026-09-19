@@ -2,9 +2,14 @@
 
 Date: 2026-09-19
 
-Status: spec written. Probe and audits not yet run. This is a probe batch. It
-ends in a verdict on two claims and in no edit to a permanent file. A landing
-is a separate batch and needs the user's decision.
+Status: probe complete, 2026-09-19. Both claims hold. Kim's two five-card rows
+can be certified by the existing `SpectralDecay` arm, with no change to
+`manifest/pgg_tableau.v`. Five soundness audits found every compiled statement
+true. Five naming audits ended with no blocking finding in the five `.v`
+files. The record is `notes/probes/2026-09-19-kim-spectral-arm/STATUS.md`. No
+permanent file was edited. A landing is a separate batch and needs the user's
+decision. The companion probe `notes/probes/2026-09-19-psl211-sc-const/`
+shows the same arm cannot serve PSL(2,11).
 
 Follows [[20260919-kim-tableau-sampled-design]] and
 [[2026-09-19-062455-third-certify-arm-for-the-biased-row]].
@@ -177,6 +182,39 @@ S1 to S10 each end in GO or in NO-GO with an isolating counter-probe. An
 independent soundness audit and an independent naming audit end in a verdict.
 The batch then reports to the user what a landing would change. It edits no
 permanent file.
+
+## Results, folded back on 2026-09-19
+
+| ID | Verdict | What was compiled |
+|---|---|---|
+| S1 | GO | `var_dist_fdistmap_supp_inj`: a pushforward along a map injective on the union of two supports preserves variation distance. infotheo has no lemma relating `var_dist` and `fdistmap`. The tree's `var_dist_fdistmap` is data processing and runs the wrong way for this use, so the equality was needed. A constant reader is the compiled mutation. |
+| S2 | GO | `fc_sigma_pow_point_inj`, and one support lemma at every word length and weighting, `fc_kim_rho_supp_pow`, from which the two Kim cut laws follow in one line each. |
+| S3, S4 | GO | `kim_centi_cut_mixing` and `kim_biased_cut_mixing`, at the exact type of the certificate's fourth field, with no added hypothesis. |
+| S5 | GO | `five_card_static_obs_const`, at the exact type of the fifth field. The reason is the colour census of den Boer's layout: three hearts and two clubs at each of the four inputs. The layout at both inputs true is not a rotation of the other three, so the rotation orbit alone does not give it. `five_card_viewS_indep` does not imply it: independence equates averages, and the field equates laws at two fixed inputs. |
+| S6 | GO | Four certificates and four published programs. |
+| S7 | GO | Repeated row: the certificate's own number is `2 * sqrt 5 * (1/80)^7`, about `2.13e-13`, below `2^-39`; written as a constant it is `2^-40 + 2^-40`, repriced to `2^-39`, about eight and a half times weaker. One-cut row: `sqrt 5 / 40`, about `0.056`, or the exact `1/50 + 1/50 = 1/25`, which is the stronger of the two. Every number is compared with the ceiling 2, proved as `var_dist_le2`. |
+| S8 | GO | Both manifest rows change at a landing. `five_card_row_repeated` moves to `AnalysisBridged` and `IdealFinite`. `five_card_row_biased` moves from `StaticExecutedOnly` to `IdealFinite`, because a row whose certificate is a comparison with an ideal cut is `IdealFinite` by the manifest's own definitions. A row equation compares row metadata and carries no theorem. |
+| S9 | done | At every real field, for every coalition of at most one seat and every two committed pairs, the variation distance between the two static endpoint readings under the row's own cut law is at most the published number. It is not independence from the secret, not a statement about two seats, and not a statement about the full reveal. |
+| S10 | done | Generic lemmas to a new `lib/var_dist_supp.v`, which needs one line in `_CoqProject`. The instance theorems either in `five_card_rows.v`, 10 files to recompile, or in a new `five_card_mixing.v` below the analysis facade, 11 files, which is the tree's convention and lets the manifest name the base premise. `psl211_endpoints` is in neither set. |
+
+What this spec had wrong, as the probe and the audits showed.
+
+1. The ceiling of infotheo's `var_dist` is 2 and not 1, since it is the sum of
+   absolute differences and not half of it.
+2. S1 suggested an inequality might do. The equality is required.
+3. S2 asked for three support statements. One covers all three cut laws.
+4. S8 expected the biased row to need no manifest change. It needs one.
+5. The spec did not ask what a landing breaks. Finding that took three audit
+   rounds, because the tree states the same facts in pins, in facade aliases
+   and in sentences that carry no row name. The record now holds a seed list
+   and the method for rebuilding it.
+
+What the audits found about the arm itself, which the next batch takes up
+([[20260919-tableau-three-extensions-probe-design]]): `spectral_tail` does not
+consume the link lemma of `Sampled`, so the claim a spectral row publishes is
+about static readings on both sides and never reaches the executed reader; and
+the ideal in a certificate is a bare law on the cut group that never passed
+through the phases.
 
 ## Out of scope
 
