@@ -30,7 +30,11 @@ rows files, so the chain is recompiled once more after step 0.1. The paper
 drafts cite two of the names, `pgl27_word_view_indist` and
 `pgl27_word_trace_indist`: `paper-wadt2026/main.tex` lines 134, 135, 1639,
 1708, 1709 and `paper-wadt2026-baseline-application/candidate-main.tex` lines
-145, 146, 1700, 1762. No paper file is edited by this campaign, so after step
+145, 146, 1700, 1762, and `paper-wadt2026/analysis/shinagawa21-paragraph-baseline.tex`
+lines 5015, 5016, 5019, 5022 (found by the later full scan). The complete list
+of renamed names is
+`notes/2026-09-19-230614-renamed-identifiers-input-indistinguishability.md`;
+the owner edits the `.tex` files from it. No paper file is edited by this campaign, so after step
 0.4 those lines are the owner's to change (deadline of the full paper:
 2026-09-24).
 
