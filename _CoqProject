@@ -219,5 +219,6 @@ manifest/pgg_tableau_syntax.v
 instances/pgl27/pgl27_rows.v
 instances/kim2025/five_card_rows.v
 instances/s5/s5_rows.v
+instances/psl211/psl211_spectral_constancy.v
 instances/psl211/psl211_rows.v
 manifest/pgg_analysis_client.v
