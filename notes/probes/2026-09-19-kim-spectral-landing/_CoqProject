@@ -40,3 +40,9 @@ pgl27_rows.v
 psl211_rows.v
 five_card_rows.v
 kim_landing_fidelity.v
+
+# kim_asbuilt_fidelity.v is compiled against the production flags only, with
+# the -Q . kim_landing_probe line above left out, so that no probe copy is
+# reachable from it. It is listed here for the record, not to be built with
+# this file.
+kim_asbuilt_fidelity.v

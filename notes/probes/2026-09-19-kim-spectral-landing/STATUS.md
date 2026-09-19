@@ -985,3 +985,69 @@ single `Require Export`, which is loading the four facades' `.vo` files and not
 checking a proof, and the three in `psl211_spectral_constancy.v` are a
 `vm_compute` and two `size_filter` rewrites in a file this landing recompiles
 without changing a byte of.
+
+## As built, 2026-09-19
+
+The landing is two commits on `main`. `3b9e463` adds the library file
+`lib/var_dist_supp.v`. `871a4c3` adds the instance file
+`instances/kim2025/five_card_mixing.v`, rewrites the facade
+`instances/kim2025/five_card_analysis.v`, the manifest
+`manifest/pgg_analysis_manifest.v`, the client
+`manifest/pgg_analysis_client.v` and the rows file
+`instances/kim2025/five_card_rows.v`, and adds the two `_CoqProject` lines
+for the two new files.
+
+The main session then compiled twelve production files in place, in
+dependency order, with the production flags. Every return code is 0.
+
+| file | wall |
+|---|---|
+| `lib/var_dist_supp.v` | 4.2 s |
+| `instances/kim2025/five_card_mixing.v` | 4.2 s |
+| `instances/kim2025/five_card_analysis.v` | 4.1 s |
+| `manifest/pgg_analysis_manifest.v` | 6.0 s |
+| `manifest/pgg_tableau.v` | 13.0 s |
+| `manifest/pgg_tableau_syntax.v` | 4.6 s |
+| `manifest/pgg_analysis_client.v` | 3.8 s |
+| `instances/s5/s5_rows.v` | 4.0 s |
+| `instances/pgl27/pgl27_rows.v` | 6.1 s |
+| `instances/psl211/psl211_rows.v` | 5.5 s |
+| `instances/psl211/psl211_spectral_constancy.v` | 23.0 s |
+| `instances/kim2025/five_card_rows.v` | 4.7 s |
+
+No landing sentence is above five seconds. The manifest's slow sentence is
+its single `Require Export`, 5.3 s of that file's 6.0 s, which loads the four
+facades' `.vo` files and checks no proof.
+
+`instances/psl211/psl211_spectral_constancy.v` is in the set because it
+landed the same day and imports both the manifest and the Tableau. It is a
+reverse dependant that the probe's cost row could not list.
+
+`instances/psl211/psl211_endpoints.vo` was loaded and not rebuilt. It is
+dated 17 September, before this landing. The main session listed the
+production importers of every touched file, and all of them lie inside the
+recompiled set, so nothing that imports a touched file was left on a stale
+`.vo`.
+
+`kim_asbuilt_fidelity.v` reports the same 72 targets as
+`kim_landing_fidelity.v`, against the permanent modules instead of the probe
+copies. It is compiled with the production `_CoqProject` flags alone, from a
+working directory outside the repository, and the probe directory is mapped
+to no logical root on that command line, so no probe copy is reachable from
+it by any `Require`. Return code 0, 28.8 s wall. Its three `Locate`
+sentences print
+
+```
+Constant pgg_smc.five_card_mixing.kim_centi_static_obs_indist
+Constant pgg_smc.five_card_rows.five_card_row_repeated_spectral_tableau
+Constant pgg_smc.var_dist_supp.var_dist_fdistmap_supp_inj
+```
+
+Of the 72 targets, 10 are closed under the global context and 62 rest on
+`propositional_extensionality`, `functional_extensionality_dep` and
+`constructive_indefinite_description`, all three in each of the 62. No other
+constant appears. Those are the counts `kim_landing_fidelity.v` gives against
+the probe copies, so the landing left what each of these declarations assumes
+unchanged. The full output is `kim_asbuilt_fidelity.out` in this directory.
+
+The plan is `docs/superpowers/plans/2026-09-19-kim-spectral-landing.md`.

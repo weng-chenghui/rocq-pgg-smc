@@ -2,12 +2,17 @@
 
 Date: 2026-09-19
 
-Status: spec written, on the user's decision of 2026-09-19 to land. Landing
-probe and audits not yet run. Follows
+Status: LANDED on 2026-09-19. Production commits `3b9e463`
+(`lib/var_dist_supp.v`) and `871a4c3` (the new
+`instances/kim2025/five_card_mixing.v`, the facade, the manifest, its client
+and the rows file, with two `_CoqProject` lines). Three audit rounds on the
+landing probe `notes/probes/2026-09-19-kim-spectral-landing/`; what they
+changed is the section "Changes after the audits" below. Plan:
+`docs/superpowers/plans/2026-09-19-kim-spectral-landing.md`. As-built record:
+the last section of that probe's `STATUS.md`. Follows
 [[20260919-kim-spectral-arm-probe-design]], whose probe
 `notes/probes/2026-09-19-kim-spectral-arm/` (SRC below) is the verbatim source
-of every declaration, and whose `STATUS.md` S8 and S10 are the seed of the
-change list. Summary of what was found:
+of every declaration. Summary of what was found:
 [[2026-09-19-112500-spectral-arm-at-kim-and-psl211-summary]].
 
 ## Problem
@@ -125,6 +130,52 @@ As in the feasibility spec: `amf_sample kim_centi_family R tt` and
 5. A row equation is not presented as evidence about a certificate.
 6. `instances/psl211/psl211_endpoints.v` is never compiled. No file with it
    among its reverse-dependants is edited.
+
+## Changes after the audits
+
+Recorded on 2026-09-19 after three rounds. The decisions and the ledger above
+stand as written, so that what was planned can be compared with what was done.
+
+1. **A bridge theorem below the facade.** The first soundness audit showed that
+   a mixing bound on the cut carrier names no observer, so it cannot fill the
+   manifest's "final bridge theorem" cell. As at PGL(2,7)
+   (`pgl27_word_view_indist_via_transfer`), `five_card_mixing.v` now states the
+   conclusion of the transfer: `kim_centi_static_obs_indist` and
+   `kim_biased_static_obs_indist`, a bound on the variation distance between
+   the static readings of a coalition of at most one seat at two committed
+   pairs. Rows 4 and 5 name them, declare the observer `static_obs`, and give
+   each a capability line. Decision 2 said the facade aliases three theorems;
+   it aliases seven, and the reader.
+2. **The fidelity file is honest about direction.** One lemma per row takes the
+   proposition the published certified row delivers (`view_indist_of`) to the
+   corollary's statement, and one takes the corollary to `SpectralPropAt`; each
+   uses the certificate's identification equation and nothing else. The two
+   propositions are not convertible.
+3. **`kim_biased_sample_cut_witnessE` sits below the facade**, stated at the
+   adapter `kim_single_sample`, the shape `kim_centi_cut_distE` has; the
+   certificate's identification field typechecks by conversion.
+4. **`exec_transfer_status` is `uniform_transfer_status`**, since the facade now
+   has three statuses named after their model families.
+5. **The manifest's client changed.** Ledger row L5 expected every
+   reverse-dependant to change by imports alone; `manifest/pgg_analysis_client.v`
+   carried a sentence the landing made false and has four changed lines. Five
+   files are recompiled and not copied.
+6. **The S_5 sentence of the manifest** says the sum of absolute differences
+   from group uniform is at least one, not one.
+7. **The landing procedure was mechanical.** The probe's `tools/` hold the
+   script that prints the import differences, the one that builds the
+   permanent-form files under `staged/`, and the one that proves each staged
+   file equals its probe copy outside `Require` sentences. Measured on the
+   way: `Require` resolves a logical name to the last matching load-path
+   entry, and `Locate Library` does not show what was loaded.
+8. **A reverse-dependant the cost row could not list:**
+   `instances/psl211/psl211_spectral_constancy.v` landed the same day, imports
+   the manifest and the Tableau, and was recompiled (23 s).
+9. **Left for stage A of the Tableau extensions:** under the weakened
+   obligation of `conclude` the repeated row can publish `2^-39` from
+   `kim_centi_cert` itself, which makes `kim_centi_cert40` and its two
+   supporting declarations unnecessary; five sentences and three payload sites
+   change. The list is in the probe's `STATUS.md`.
 
 ## Probe artifacts
 
