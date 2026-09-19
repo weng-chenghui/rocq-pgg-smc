@@ -43,8 +43,8 @@ the owner edits the `.tex` files from it. No paper file is edited by this campai
 | # | Step | State |
 |---|---|---|
 | 1.A | LANDING 1 (design `notes/2026-09-20-000000-tableau-extensions-landing-design.md`, which regroups the landings: the framework lands once with stages A and B together, then rows): framework, four rows files, `psl211_reading_constancy.v` comments, withdrawal of `kim_centi_cert40` and its `_epsE`, `pgl27_word_sampled` and `pgl27_row_word_branch39` moved into `pgl27_rows.v` | DONE, production commit b03b467: staged build, soundness and naming audits, fix pass 1, its audit, fix pass 2 audited by the main session, `cp`, seven files recompiled, as-built fidelity rc=0 (record: the landing directory's `STATUS.md`) |
-| 1.B | LANDING 2: `lib/var_dist_supp.v` (`card_tnth_count` leaves), new `security/var_dist_joint_law.v` (the five joint-law lemmas, so that `lib/` keeps no dependency on `security/`), `five_card_mixing.v` (`card_tnth_count` arrives, the two `*40` declarations leave), new `manifest/pgg_tableau_arm_relations.v`, new `instances/kim2025/five_card_proximity.v` | staged build and both audits done (`notes/probes/2026-09-20-tableau-extensions-landing2/`), fix pass 1 running; `idealproximity_ceiling` becomes `idealproximity_prop_at2` |
-| 1.C | LANDING 3, stage C: `pgl27_prior_sample`, the prior-indexed family, its manifest row, the word proximity row; clean the `first [...]` list in `var_dist_fdist1_uniform` | open |
+| 1.B | LANDING 2: `lib/var_dist_supp.v` (`card_tnth_count` leaves), new `security/var_dist_joint_law.v` (the five joint-law lemmas, so that `lib/` keeps no dependency on `security/`), `five_card_mixing.v` (`card_tnth_count` arrives, the two `*40` declarations leave), new `manifest/pgg_tableau_arm_relations.v`, new `instances/kim2025/five_card_proximity.v` | DONE, production commit 0397f8e: staged build, two audits, fix pass 1, its audit (GO), fix pass 2 audited by the main session, `cp`, fifteen files recompiled, three `_CoqProject` lines, as-built fidelity rc=0. `card_tnth_count` moved (item 3.2 closed); `idealproximity_ceiling` landed as `idealproximity_prop_at2` |
+| 1.C | LANDING 3, stage C: `pgl27_prior_sample`, the prior-indexed family, its manifest row, the word proximity row; clean the `first [...]` list in `var_dist_fdist1_uniform` | staged build running in `notes/probes/2026-09-20-tableau-extensions-landing3/` |
 | 1.D | LANDING 4, stage D: new file `instances/psl211/psl211_word_model.v`, its manifest row, the word proximity row, rewrite of the production comment of `psl211_alldecks_constancy_false_word584` | open |
 | 1.E | As-built fidelity note for the four landings | open |
 
@@ -57,7 +57,7 @@ Open. One file per phase, per instance. Needs its own plan after step 1.
 | # | Item | State |
 |---|---|---|
 | 3.1 | Eighteen "deck description" sentences in `instances/psl211/psl211_models.v` (file is not in the endpoint file's forward closure) | open |
-| 3.2 | Home of `card_tnth_count`: decided, `instances/kim2025/five_card_mixing.v`, its only user, whose den Boer colour census its comment already speaks of; moved at the landing of stage B, which edits `lib/var_dist_supp.v` anyway | decided, open |
+| 3.2 | Home of `card_tnth_count`: decided, `instances/kim2025/five_card_mixing.v`, its only user, whose den Boer colour census its comment already speaks of; moved at the landing of stage B, which edits `lib/var_dist_supp.v` anyway | done with landing 2 (0397f8e) |
 | 3.3 | Dated note recording the removed `five_card_row_repeated_at_manifest_level` | done: `notes/2026-09-19-223500-removed-five-card-row-repeated-at-manifest-level.md` |
 | 3.4 | P8, the two parts not compiled: a countermodel for the implication below the ceiling two; proximity derived from the certificate's own fields | open |
 
