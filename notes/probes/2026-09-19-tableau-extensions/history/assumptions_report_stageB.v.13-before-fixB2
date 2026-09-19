@@ -49,7 +49,7 @@ Print Assumptions five_card_uniform_pairE.
 Print Assumptions five_card_reading_secretE.
 Print Assumptions five_card_arg_cut_prodE.
 Print Assumptions kim_biased_proximity_close.
-Print Assumptions kim_biased_proximity_cert_idealE.
+Print Assumptions kim_biased_cert_idealE.
 Print Assumptions kim_biased_proximity_cert_epsE.
 Print Assumptions kim_biased_proximity_eps_halfE.
 Print Assumptions kim_biased_proximity_cert_eps_lt2.

@@ -16,7 +16,7 @@ edited copies.
 |---|---|---|
 | P1 | GO | `p1_joint_law_distance.v`, `var_dist_fdistmap_pair` and `var_dist_prodR` |
 | P2 | GO | `pgg_tableau.v`, `IdealProximityCert`, `IdealProximityPropAt`, `idealproximity_tail`, `certify_idealproximity`, `certify_idealproximity_armE` |
-| P3 | GO | `p4_kim_biased_proximity.v`, `kim_biased_proximity_cert_idealE`, by `split` alone |
+| P3 | GO | `p4_kim_biased_proximity.v`, `kim_biased_cert_idealE`, by `split` alone |
 | P4 | GO, published at 1/50 | `p4_kim_biased_proximity.v`, `five_card_row_biased_proximity` |
 | P7 | GO | `p7_mutations.v`, `idealproximity_ceiling`, `kim_biased_conclude_below_false` and seven recorded failures |
 | P8 | partial, in four parts: two compiled and two not (below) | `p8_spectral_relation.v`, `spectral_prop_cert_free` and the two five-card lemmas |
@@ -116,9 +116,9 @@ cut and the uniform rotation on the cut group.
 `kim_biased_cut_mixing_exact`, and the spectral arm spends it once for each of
 the two committed pairs it compares while the proximity arm compares one law
 with one law. The relation is between those two certificates and not between
-the two arms; the same model also carries `kim_biased_cert`, whose marginal
-bound is sqrt 5 over eighty and which therefore publishes sqrt 5 over forty, so
-neither arm determines the other's number.
+the two arms; the same model also carries `kim_biased_cert`, a spectral
+certificate at sqrt 5 over eighty, so neither arm determines the other's
+number.
 
 The spectral row of the same model, `five_card_row_biased_inv25`, publishes
 1/25, which is 1/50 + 1/50. Reading the two rows in one column therefore costs
@@ -197,19 +197,17 @@ where it is fast, and `reflexivity` where it is not.
 `assumptions_report_stageB.v` prints one `Print Assumptions` for every lemma
 and every published program stage B writes, 36 blocks. The output was scanned
 with a regular expression allowing dots in a constant name,
-`^([\w.]+)\s*:`. The scan returns five distinct tokens: the header word
-`Axioms`, the three boolp constants `constructive_indefinite_description`,
-`functional_extensionality_dep` and `propositional_extensionality`, and
-`Warning`, which is not a constant name but the first line of the
-notation-prefix warning about the two `<|` notations that the run prints once.
+`^([\w.]+)\s*:`, and the whole scan returns four distinct tokens: the header
+word `Axioms` and the three boolp constants
+`constructive_indefinite_description`, `functional_extensionality_dep` and
+`propositional_extensionality`.
 
 - 35 blocks hold exactly those three constants and nothing else.
 - 1 block reports `Closed under the global context`:
   `five_card_singleton_below_threshold`, which speaks only of a finite set.
 - The list of lines matching the scan that are not one of the four expected
-  tokens holds that one `Warning` line and nothing else. There is no axiom, no
-  assumed constant, no `Admitted` and no `Abort` anywhere in stage B, and no
-  decomposition probe was needed.
+  tokens is empty. There is no axiom, no assumed constant, no `Admitted` and
+  no `Abort` anywhere in stage B, and no decomposition probe was needed.
 
 ## Recorded failures, with the decisive line of each
 
@@ -402,14 +400,6 @@ Built by scanning 136 production `.v` files with Python, not from memory.
     `instances/s5/s5_rows.v:278`, `instances/pgl27/pgl27_rows.v:273`, `:284`,
     `:298` and `instances/psl211/psl211_rows.v:198`, and every one of them is
     a `certify` clause, not a `match`.
-11. The framework header should say that the arm's proposition is as strong as
-    its certificate's ideal and secret are meaningful: a certificate whose
-    ideal is the actual model and whose witness carries the unit secret makes
-    the proposition true at zero, a freedom `SpectralCert`'s `sc_ideal` and
-    `ExactWitness`'s `ew_secret` already have, so the domain content of a
-    proximity row lives in those two fields and not in its number. The
-    auditor of fix pass 1 compiled that case (`x7_n2.v`); nothing here lands
-    it as a declaration.
 
 ## Fixes carried from audit round 4 of stage A
 
@@ -467,9 +457,8 @@ in well under a second, so no `reflexivity` swap was needed.
      premise (`five_card_biased_spectral_implies_proximity`), and
      `idealproximity_ceiling` holds the same implication at two from any
      premise whatever.
-   - **Argued and not compiled.** At a constant below two, no implication
-     holds uniformly in the proximity certificate. Settling it needs a
-     countermodel, a model whose
+   - **Argued and not compiled.** No implication holds uniformly in the
+     proximity certificate. Settling it needs a countermodel, a model whose
      reading law is the same at every run argument, which is what the spectral
      proposition asks, and far from the ideal's, which is what the proximity
      conclusion forbids. No such model is built.
@@ -590,9 +579,8 @@ out wrong" list above:
 published one fiftieth is a theorem, so the implication from the spectral
 proposition holds there without reading the premise, and
 `idealproximity_ceiling` holds it at two from any premise whatever.
-(c) Argued and not compiled, and marked as argued: at a constant below two, no
-implication holds uniformly in the proximity certificate; a countermodel would
-need a model whose
+(c) Argued and not compiled, and marked as argued: no implication holds
+uniformly in the proximity certificate; a countermodel would need a model whose
 reading law is the same at every run argument and far from the ideal's, and
 none is built.
 (d) Not compiled: the spec's intended statement, in which the proximity
@@ -602,9 +590,8 @@ constant.
 The two new lemmas are `five_card_biased_proximity_prop_holds` and
 `five_card_biased_spectral_implies_proximity`, at the end of
 `p8_spectral_relation.v`, outside the file's section. The file gained the
-requires they need: `algebraic_rigidity`, eight production modules, seven
-`five_card_*` and `kim_input_privacy`, and `five_card_rows` and
-`p4_kim_biased_proximity` from the probe.
+requires they need: `algebraic_rigidity`, the five five-card production
+modules, and `five_card_rows` and `p4_kim_biased_proximity` from the probe.
 The P8 verdict is "partial, in four parts"; it is not "the spec's claim is
 refuted".
 
@@ -714,97 +701,8 @@ The compile table and the assumptions section above were rewritten in place
 for this run: every file of the `_CoqProject`, in its order, one at a time
 through the machine-wide lock, all returning 0, the four `p5_*` and stage C
 files unchanged and still compiling. `assumptions_report_stageB.v` now holds
-36 blocks; the dotted-name scan `^([\w.]+)\s*:` returns the header word
-`Axioms`, the three boolp constants and `Warning`, the first line of the
-notation-prefix warning, and nothing else, with 35 blocks at exactly those
-three constants and one, `five_card_singleton_below_threshold`, reported
-closed under the global context. No axiom, no assumed constant, no `Admitted`
-and no `Abort` anywhere in stage B.
-
-## Fix pass 2, after the audit of fix pass 1
-
-Applied from `audit-stageB-fix1.md` (A1-A4, N1, N4, N5, and N2 as a D2 line)
-and from `naming-audit-stageC.md` S4. Each file was snapshotted as
-`history/<name>.13-before-fixB2` before it was touched. The only code change
-is one rename; everything else is prose. `pgg_tableau.v`, `pgg_tableau_syntax.v`,
-`p1_joint_law_distance.v`, the stage A, C and D files and every audit file are
-unchanged.
-
-1. **A1, the qualifier on part (c).** `p8_spectral_relation.v`'s header and
-   both places in this note now read "at a constant below two, no implication
-   holds uniformly in the proximity certificate", still marked argued and not
-   compiled. Without the constant the sentence is refuted by
-   `idealproximity_ceiling`, which gives the proximity proposition at two for
-   every certificate over every model.
-2. **A2, the number `kim_biased_cert` carries.** The comment above
-   `kim_biased_proximity_eps_halfE` and this note's P4 paragraph now read "the
-   same model also carries `kim_biased_cert`, whose marginal bound is sqrt 5
-   over eighty and which therefore publishes sqrt 5 over forty". Re-checked
-   against the declarations: `kim_biased_cert`'s `sc_b` field is
-   `kim_biased_marginal_bound R`, `kim_biased_epsE`
-   (`instances/kim2025/five_card_rows.v:533`) gives its `sw_bound_eps` as
-   `Num.sqrt 5%:R * (1 / 80)`, and `cert_eps` (`pgg_tableau.v:438-440`) is that
-   twice.
-3. **A3, the token count of the scan.** Stated as five tokens, with the fifth
-   named. The auditor's other option, running the scan from the first
-   `Axioms:` line on, was **not** taken: in the log this pass committed the
-   notation-prefix warning is at line 297, after the first `Axioms:` block at
-   line 14, so that qualifier would be false here. Re-derived with Python from
-   the new `assumptions_report_stageB.cclog`: `Axioms` 35,
-   `propositional_extensionality` 35, `functional_extensionality_dep` 35,
-   `constructive_indefinite_description` 35, `Warning` 1.
-4. **A4, what the published number does to the sum.** `p9_actual_marginals.v`'s
-   header now reads "the published number bounding the sum of the absolute
-   differences and the advantage being half of that bound", which agrees with
-   `IdealProximityPropAt`'s comment at `pgg_tableau.v:447`. The arithmetic is
-   unchanged: 3/50 and at most 3/100.
-5. **N1, the tightness claim in p4.** "so no slack is carried into the record"
-   is replaced by what is proved: the number "is the bound
-   `kim_biased_cut_mixing_exact` proves on the cut group's own distance, and
-   the distance between the two joint laws is at most it". The auditor's own
-   replacement and the brief both say "the tree's exact distance on the cut
-   group"; that was **not** used, because `kim_biased_cut_mixing_exact`
-   (`instances/kim2025/five_card_mixing.v:548-551`) is an inequality, and the
-   equality at one fiftieth, `kim_one_cut_centiE`
-   (`instances/kim2025/five_card_kim.v:661-666`), is about a single card
-   position and not about the cut group.
-6. **N4.** `p7_mutations.v`'s `Definitions:` index gains
-   `five_card_reprice_inv100  == the constant one hundredth, as a reprice`.
-7. **N5.** "the five five-card production modules" now reads "eight production
-   modules, seven `five_card_*` and `kim_input_privacy`". Counted from
-   `p8_spectral_relation.v:58-60` against
-   `history/p8_spectral_relation.v.10-before-fixB1`, which has neither line.
-8. **N2.** D2 gains item 11: the arm's proposition is as strong as its
-   certificate's ideal and secret are meaningful, and the fields carrying that
-   freedom are named.
-9. **S4, the rename.** `kim_biased_cert_idealE` becomes
-   `kim_biased_proximity_cert_idealE`. The old name is keyed to
-   `kim_biased_cert`, the spectral certificate of `five_card_rows.v:579`,
-   while the lemma is about `kim_biased_proximity_cert`; the new name matches
-   stage C's `pgl27_word_proximity_cert_idealE`. Changed at
-   `p4_kim_biased_proximity.v:13`, `:40` (now two index lines, since the
-   longer name no longer fits one), `:188`,
-   `assumptions_report_stageB.v:52` and the P3 row of the verdict table above.
-   `p7`, `p8` and `p9` never named it. A Python scan of every `.v` and `.md`
-   outside `.git` and the worktrees finds the new name nowhere else in
-   production or the probe, and the old name only in `soundness-audit-stageB.md`
-   and `naming-audit-stageC.md`, which are audit files and were not edited.
-
-### Compile after fix pass 2
-
-Five files, in this order, one Rocq process at a time through the machine-wide
-lock, production `_CoqProject` flags with `-Q <probe> tableau_ext_probe` last.
-No `make`, no production recompile, and `instances/psl211/psl211_endpoints.v`
-was never opened.
-
-| file | rc | wall | slowest sentence |
-|---|---|---|---|
-| `p4_kim_biased_proximity.v` | 0 | 5.8 s | 2.44 s |
-| `p8_spectral_relation.v` | 0 | 4.5 s | 2.23 s |
-| `p9_actual_marginals.v` | 0 | 4.3 s | 2.46 s |
-| `p7_mutations.v` | 0 | 4.2 s | 2.48 s |
-| `assumptions_report_stageB.v` | 0 | 27.5 s | 1.99 s |
-
-Every slowest sentence is a `From ... Require Import`. The assumptions report
-is unchanged in shape: 36 `Print Assumptions`, 35 `Axioms:` blocks at the three
-boolp constants and one `Closed under the global context`.
+36 blocks; the dotted-name scan `^([\w.]+)\s*:` over its output returns the
+header word `Axioms` and the three boolp constants and nothing else, with 35
+blocks at exactly those three and one, `five_card_singleton_below_threshold`,
+reported closed under the global context. No axiom, no assumed constant, no
+`Admitted` and no `Abort` anywhere in stage B.

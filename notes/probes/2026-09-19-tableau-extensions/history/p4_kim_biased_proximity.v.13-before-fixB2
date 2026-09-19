@@ -10,7 +10,7 @@
 (* instance is the first carrier of the arm. The uniform model is the ideal:  *)
 (* five_card_row_uniform_tableau publishes it with the exact arm, so what     *)
 (* the certificate holds as its ideal is a model whose own privacy is already *)
-(* a theorem, and kim_biased_proximity_cert_idealE says the two are one term. *)
+(* a theorem, and kim_biased_cert_idealE says the two are one term.           *)
 (*                                                                            *)
 (* One named Tableau Sampled value, five_card_row_biased_tableau of           *)
 (* five_card_rows.v, carries both claims about the one-cut model: the         *)
@@ -37,8 +37,7 @@
 (*   kim_biased_proximity_close                                               *)
 (*                             == the two models' joint laws of reading and   *)
 (*                                secret are within one fiftieth              *)
-(*   kim_biased_proximity_cert_idealE                                         *)
-(*                             == the certificate's ideal is the uniform row  *)
+(*   kim_biased_cert_idealE    == the certificate's ideal is the uniform row  *)
 (*   kim_biased_proximity_eps_halfE                                           *)
 (*                             == kim_biased_cert_exact's number is twice it  *)
 (******************************************************************************)
@@ -168,9 +167,9 @@ End five_card_proximity_distance.
     what makes the ideal an execution whose coalitions learn nothing at all;
     the conjunction of the committed bits as the one-cut model's own secret;
     one fiftieth; and the distance above. Every field is a term the uniform
-    row already publishes except the number, which is the bound
-    kim_biased_cut_mixing_exact proves on the cut group's own distance, and
-    the distance between the two joint laws is at most it. *)
+    row already publishes except the number, and the number is the one the
+    cut group's own mixing bound gives, so no slack is carried into the
+    record. *)
 Definition kim_biased_proximity_cert (R : realType) (idx : unit)
   : IdealProximityCert (amf_sample kim_biased_family R idx) :=
   @MkIdealProximityCert R five_card_algebra five_card_params
@@ -185,7 +184,7 @@ Definition kim_biased_proximity_cert (R : realType) (idx : unit)
     are the model and the witness of the published uniform row. Conversion
     decides both, so the ideal a biased row is measured against is the row the
     manifest already carries and not a second description of it. *)
-Lemma kim_biased_proximity_cert_idealE (R : realType) (idx : unit) :
+Lemma kim_biased_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (kim_biased_proximity_cert R idx)
   = amf_sample (ab_f (published_at five_card_row_uniform_tableau)) R idx
   /\ ExactIndependence (ipc_witness (kim_biased_proximity_cert R idx))
@@ -212,9 +211,8 @@ Proof. exact: erefl. Qed.
     spectral arm spends it once for each of the two committed pairs it
     compares and the proximity arm compares one law with one law. The relation
     is between these two certificates and not between the two arms: the same
-    model also carries kim_biased_cert, whose marginal bound is sqrt 5 over
-    eighty and which therefore publishes sqrt 5 over forty, so neither arm
-    determines the number of the other. *)
+    model also carries kim_biased_cert, a spectral certificate at sqrt 5 over
+    eighty, so neither arm determines the number of the other. *)
 Lemma kim_biased_proximity_eps_halfE (idx : unit) :
   cert_eps (kim_biased_cert_exact R idx)
   = ipc_eps (kim_biased_proximity_cert R idx)

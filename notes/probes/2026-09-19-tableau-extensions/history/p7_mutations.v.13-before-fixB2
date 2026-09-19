@@ -39,7 +39,6 @@
 (*                                the certificate's own is false              *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   five_card_reprice_inv100  == the constant one hundredth, as a reprice    *)
 (*   five_card_biased_proximity_at_singleton                                  *)
 (*                             == the row's claim at one concrete seat        *)
 (******************************************************************************)

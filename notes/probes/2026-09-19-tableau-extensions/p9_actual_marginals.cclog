@@ -1,21 +1,15 @@
-Chars 2350 - 2422 [From~mathcomp~Require~Import~s...] 0.094 secs (0.083u,0.011s)
-Chars 2423 - 2494 [From~mathcomp~Require~Import~f...] 0.104 secs (0.098u,0.005s)
-Chars 2495 - 2566 [From~mathcomp~Require~Import~b...] 2.3 secs (2.221u,0.078s)
-File "/Users/cheng-huiweng/Projects/coq/rocq-pgg-smc/notes/probes/2026-09-19-tableau-extensions/p9_actual_marginals.v", line 34, characters 0-69:
-Warning: Notations "_ <| _" defined at level 70 with arguments constr
-at next level, constr at next level and "_ <| _ |> _" defined at level 49
-with arguments constr at next level, constr at next level
-have incompatible prefixes. One of them will likely not work.
-[notation-incompatible-prefix,parsing,default]
-Chars 2567 - 2636 [From~infotheo~Require~Import~r...] 1.159 secs (1.13u,0.028s)
-Chars 2637 - 2697 [From~pgg_smc~Require~Import~pg...] 0.018 secs (0.017u,0.001s)
+Chars 2350 - 2422 [From~mathcomp~Require~Import~s...] 0.11 secs (0.091u,0.015s)
+Chars 2423 - 2494 [From~mathcomp~Require~Import~f...] 0.107 secs (0.096u,0.006s)
+Chars 2495 - 2566 [From~mathcomp~Require~Import~b...] 2.465 secs (2.352u,0.097s)
+Chars 2567 - 2636 [From~infotheo~Require~Import~r...] 1.258 secs (1.205u,0.039s)
+Chars 2637 - 2697 [From~pgg_smc~Require~Import~pg...] 0.024 secs (0.018u,0.002s)
 Chars 2698 - 2767 [From~pgg_smc~Require~Import~pg...] 0.017 secs (0.016u,0.001s)
 Chars 2768 - 2839 [From~pgg_smc~Require~Import~pg...] 0.001 secs (0.001u,0.s)
 Chars 2840 - 2900 [From~pgg_smc~Require~Import~pg...] 0. secs (0.u,0.s)
 Chars 2901 - 2949 [From~pgg_smc~Require~Import~pg...] 0. secs (0.u,0.s)
 Chars 2950 - 3011 [From~pgg_smc~Require~Import~fi...] 0.002 secs (0.002u,0.s)
-Chars 3012 - 3090 [From~pgg_smc~Require~Import~fi...] 0.008 secs (0.008u,0.s)
-Chars 3091 - 3160 [From~tableau_ext_probe~Require...] 0.021 secs (0.018u,0.002s)
+Chars 3012 - 3090 [From~pgg_smc~Require~Import~fi...] 0.009 secs (0.008u,0.s)
+Chars 3091 - 3160 [From~tableau_ext_probe~Require...] 0.02 secs (0.017u,0.002s)
 Chars 3161 - 3221 [From~tableau_ext_probe~Require...] 0. secs (0.u,0.s)
 Chars 3222 - 3284 [From~tableau_ext_probe~Require...] 0. secs (0.u,0.s)
 Chars 3286 - 3309 [Set~Implicit~Arguments.] 0. secs (0.u,0.s)
@@ -36,14 +30,20 @@ Chars 4643 - 4708 [exact~:~(Order.POrderTheory.le...] 0. secs (0.u,0.s)
 Chars 4709 - 4753 [have~Hs:~var_dist~Ms~(fdistmap...] 0. secs (0.u,0.s)
 Chars 4756 - 4789 [rewrite~symmetric_var_dist~-Hsnd.] 0. secs (0.u,0.s)
 Chars 4792 - 4857 [exact~:~(Order.POrderTheory.le...] 0. secs (0.u,0.s)
-Chars 4858 - 4904 [have~H3:~(3%:R~:~R)~*~d~=~d~+~...] 0.048 secs (0.041u,0.002s)
+Chars 4858 - 4904 [have~H3:~(3%:R~:~R)~*~d~=~d~+~...] 0.041 secs (0.039u,0.002s)
 Chars 4905 - 4916 [rewrite~H3.] 0. secs (0.u,0.s)
 Chars 4917 - 4989 [apply~:~(Order.POrderTheory.le...] 0. secs (0.u,0.s)
 Chars 4990 - 5018 [apply~:~lerD~~;~first~~exact~:...] 0. secs (0.u,0.s)
 Chars 5019 - 5115 [apply~~:~(Order.POrderTheory.l...] 0. secs (0.u,0.s)
 Chars 5116 - 5182 [by~apply~:~lerD~;~[~rewrite~va...] 0.001 secs (0.001u,0.s)
 Chars 5183 - 5187 [Qed.] 0.006 secs (0.006u,0.s)
-Chars 5886 - 7001 [Theorem~five_card_biased_view_...] 0.041 secs (0.04u,0.s)
+Chars 5886 - 7001 [Theorem~five_card_biased_view_...] 0.038 secs (0.037u,0.s)
 Chars 7002 - 7008 [Proof.] 0. secs (0.u,0.s)
 Chars 7009 - 7083 [exact~:~(var_dist_own_marginal...] 0. secs (0.u,0.s)
-Chars 7084 - 7088 [Qed.] 0.013 secs (0.013u,0.s)
+Chars 7084 - 7088 [Qed.] 0.012 secs (0.012u,0.s)
+File "/Users/cheng-huiweng/Projects/coq/rocq-pgg-smc/notes/probes/2026-09-19-tableau-extensions/p9_actual_marginals.v", line 34, characters 0-69:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
