@@ -33,23 +33,37 @@ that do not show the Tableau stay outside it and are imported by it.
 
 ## Assessment
 
-Agreed in direction. Split by where the tree of rows branches and not by every
-phase. `Algebraic`, `Executable` and `Observed` are one definition of three to
-seven lines, and a file per phase would make several files of a few lines. The
-tree branches at `Sampled`, by model, and at `AnalysisBridged`, by claim.
+Agreed, with one file per phase, as the user asked. A first version of this note
+split the directory where the tree of rows branches and named the files
+`prefix`, `sampled`, `payloads`, `rows`, `checks`. That hid three of the five
+phases inside a file name of my own, and the user's point on reading it was
+that the phases could not be seen. The directory listing should be the
+Tableau's phases in order. That the first three files are a few lines each is
+no objection: they are there to show the structure.
 
-Proposed layout, PGL(2,7) as the example:
+Layout, the five-card instance as the example, the same seven roles at every
+instance:
 
 ```
-instances/pgl27/tableau/
-  pgl27_prefix.v    the trunk, Algebraic to Observed
-  pgl27_sampled.v   one named Tableau Sampled value per model
-  pgl27_payloads.v  witnesses and certificates assembled from the theorems
-                    below, with their number lemmas
-  pgl27_rows.v      published rows, their row equations and arm pins only:
-                    the one file that answers "what is claimed here"
-  pgl27_checks.v    recorded failures, mutations, realises_expected
+instances/kim2025/tableau/
+  five_card_algebraic.v         Algebraic: the algebra and the functionality
+  five_card_executable.v        Executable: run mode, inputs, layout, fuel
+  five_card_observed.v          Observed: the three run facts
+  five_card_sampled.v           Sampled: one named value per model
+  five_card_analysis_bridged.v  AnalysisBridged: one program per claim, with
+                                its terminal, its row equation and its claim
+                                pin; the one file that answers "what is
+                                claimed here"
+  five_card_certificates.v      the witness and certificate records the
+                                AnalysisBridged step takes as payloads
+  five_card_checks.v            recorded failures, mutations,
+                                realises_expected
 ```
+
+Each phase file imports the one before it. The terminals are not a phase of
+their own: `publish` and `conclude` are the last line of a row and stay with
+the row. `psl211_spectral_nogo.v` names `SpectralCert`, so it belongs in
+`instances/psl211/tableau/` and moves there in this batch.
 
 Three constraints, read off the code.
 
@@ -63,9 +77,16 @@ Three constraints, read off the code.
 2. File names keep the instance prefix. `_CoqProject` maps every instance
    directory to the one logical root `pgg_smc`, so four files named
    `tableau/rows.v` would collide.
-3. `pgl27_sampled.v` presupposes that two programs can continue from one named
-   `Tableau Sampled` value. Nothing in the tree does that today. It is row T0
-   of the extensions probe.
+3. A phase file continues from the named value of the phase before it. Stage A
+   of the extensions probe showed on 2026-09-19 that two programs continue from
+   one named `Tableau Sampled` value with no change to the framework. The two
+   steps below it are not yet checked. `execute` takes a `Tableau Executable`
+   and `sample` a `Tableau Observed`, so those should behave the same way. The
+   step from `Algebraic` to `Executable` is different: the keyword rules
+   `A dealt fuel n` and `t encoded inputs ... fuel n` start from the algebra
+   itself and not from a named `Tableau Algebraic` value, so continuing from
+   the name in `*_algebraic.v` may need one more notation. This is the first
+   ledger row of the batch.
 
 Cost. The four rows files have no importer, so moving them recompiles only
 themselves. `_CoqProject` lists files by name and changes. Paths cited in the
@@ -74,8 +95,8 @@ manifest's header, in notes and in the paper change.
 ## What the batch would check
 
 That every program and every row equation survives the split unchanged as a
-term. That `pgl27_rows.v` after the split contains no declaration that is not a
-published row, a row equation or an arm pin. That the recorded failures still
+term. That each `*_analysis_bridged.v` after the split contains no declaration that
+is not a program, a row equation or a claim pin. That the recorded failures still
 fail for their recorded reasons from their new file. That each new file's
-header is true. That the four instances end up with the same five file roles,
+header is true. That the four instances end up with the same seven file roles,
 so a reader who has seen one has seen all.
