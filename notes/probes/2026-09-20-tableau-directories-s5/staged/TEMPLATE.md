@@ -209,3 +209,21 @@ Rules added by the second instance; its scripts are the ones to copy:
 5. A phase header names separately what the manifest publishes and what this
    development's programs do; check which manifest rows belong to the instance
    by reading the manifest, not by the row's number.
+
+## Second addendum: the twelve rulings of the PSL(2,11) audit (2026-09-20)
+
+Read `notes/probes/2026-09-20-tableau-directories-psl211/audit-psl211.md`,
+section "Rulings to carry to PGL(2,7) and five-card", before writing any header.
+In one line each: "the value the run is meant to recover" below Observed, never
+"recovers"; a record no program continues still carries statements, so say "the
+only security statement made at it is" after a grep; one premise, one
+rejection, and a `Fail` about an existing term is not a refusal of a term nobody
+wrote; the Sampled obligation is about the run argument and the cut, not the
+layout; in an AnalysisBridged header write "every statement here that
+quantifies over a coalition"; the reduced mathematics file stays a file of its
+own and is not folded into the model file; earn every phase import and re-run
+the `Fail` check if one is dropped; a box content line ends with a space before
+`*)`, which a width check does not see; `Print Assumptions` every new
+definition; a published row is a program, not a claim; `baseline.v` (production
+modules, the phase files' scope block) is the scope pin, `fidelity.v` is not;
+regenerate every count in STATUS.md from the script's output.
