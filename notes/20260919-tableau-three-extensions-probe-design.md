@@ -2,7 +2,7 @@
 
 Date: 2026-09-19
 
-Status: PROBED on 2026-09-19, all four stages, every ledger row GO except P8,
+Status: PROBED on 2026-09-19, LANDED on 2026-09-20 (see the last section), all four stages, every ledger row GO except P8,
 which is partial. The results, and what they change in this spec, are in the
 last section, "Results of the probe". The text above that section is the
 third version of the spec, after the design audit
@@ -349,6 +349,16 @@ only, except the production S5 row, which rests on the production
    `sc_ideal` and `ExactWitness`'s secret have the same freedom in production
    today, so the arm adds none. A landing says this in the framework's header.
    At PSL(2,11) the probe compiles that the certificate is not of that kind.
+   CORRECTED AT THE LANDING (2026-09-20, soundness audit of landing 1): the
+   clause about `sc_ideal` is wrong. The input-indistinguishability proposition
+   does not mention its certificate at all, so its ideal (now `ic_ideal`) is a
+   means of proof and not a term the row's meaning depends on, and the fields
+   `ic_Hd`, `ic_close`, `ic_const` constrain it: at some models no certificate
+   exists below a positive number (`psl211_alldecks_no_small_eps_cert`). What
+   is true, and what the header of `manifest/pgg_tableau.v` now says, is that
+   the exact and the proximity propositions mention terms the instance chooses
+   (`ew_secret`; `ipc_ideal` and `ipc_secret`), so a row of either says as much
+   as those terms say.
 6. **The five-card number is one fiftieth.** The first certificate used the
    spectral marginal bound, sqrt 5 over eighty. The tree already had
    `kim_biased_cut_mixing_exact` at one fiftieth, an auditor compiled the row
@@ -427,3 +437,17 @@ port literal's first word, and `ideal` is already a surface keyword and a
 field name, so the whole literal is used. A naming auditor compiled the short
 form (`certify_proximity` and so on); it stays available as a mechanical
 rename.
+
+## Landed (2026-09-20)
+
+The extensions are in production, in four landings, each with a staged text,
+two independent audits, fix passes audited in turn, a `cp`, a single-file
+recompile of the production closure and an as-built fidelity compile:
+b03b467 (framework and the stage A rows), 0397f8e (the five-card proximity row,
+`security/var_dist_joint_law.v`, `manifest/pgg_tableau_arm_relations.v`),
+31468b6 (PGL(2,7)), 2373576 (PSL(2,11)). The record of what was built, of what
+the landing changed against this spec and of what is left is
+`notes/2026-09-20-054425-tableau-extensions-as-built.md`. Names in this spec
+are the probe's of 2026-09-19; the names in production are listed in
+`notes/2026-09-19-230614-renamed-identifiers-input-indistinguishability.md`
+and in the as-built note.
