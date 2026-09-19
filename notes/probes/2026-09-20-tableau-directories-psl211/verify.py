@@ -270,6 +270,13 @@ def main():
                 if len(r) != 80:
                     fail("%s:%d box line is %d columns, not 80"
                          % (base, i, len(r)))
+                # The right edge, not only the width: a content line of a box
+                # must not run into the closing *).  Both spellings are
+                # exactly 80 bytes, so a width check passes either way.
+                # Template trap 2 in its quieter form; audit F11.
+                if set(r[2:-2]) != {"*"} and r[-3] not in " *)":
+                    fail("%s:%d box content touches the closing *): %s"
+                         % (base, i, r[-34:]))
             for pat in BANNED:
                 if re.search(pat, line, re.I):
                     fail("%s:%d banned vocabulary %s: %s"

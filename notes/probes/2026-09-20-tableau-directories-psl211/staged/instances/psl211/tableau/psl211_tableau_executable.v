@@ -19,9 +19,10 @@
 (* psl211_row_word, are over this one run, and they part at the model.        *)
 (*                                                                            *)
 (* psl211_exec.v carries a second parameter record, psl211_dealt_params, in   *)
-(* the dealer-dealt mode, where the run argument is the secret itself. No     *)
+(* the dealer-dealt mode, where the run argument is the secret itself. It     *)
+(* carries that record's own reconstruction and termination facts. No         *)
 (* program of this development continues from it and the manifest carries no  *)
-(* row over it; what is stated at it is the refutation                        *)
+(* row over it, and the only security statement made at it is the refutation  *)
 (* psl211_dealt_constancy_false of psl211_reading_constancy.v. It is named    *)
 (* here and not built into a value.                                           *)
 (*                                                                            *)
@@ -66,13 +67,13 @@ Local Open Scope ring_scope.
 
 (** The all-decks mode at the Executable level: the run argument is a deck
     description, the dealer lays that description as the twelve dealt cards,
-    the value the run recovers is the chirality bit of its argument, and the
-    interpreter is given the instance's budget of 220 steps. No party commits
-    an input, so the run carries no commit process and the value recovered is
-    a reading of the run's own argument rather than an ideal function of
-    anyone's input. Naming the parameters as a program is what lets the run
-    facts of the level above be adjoined to a value rather than to a prefix
-    spelled out again. *)
+    the value the run is meant to recover is the chirality bit of its
+    argument, and the interpreter is given the instance's budget of 220
+    steps. No party commits an input, so the run carries no commit process,
+    and the value it names is a reading of the run's own argument rather than
+    an ideal function of anyone's input. Naming the parameters as a program
+    is what lets the run facts of the level above be adjoined to a value
+    rather than to a prefix spelled out again. *)
 Definition psl211_alldecks_executable : Tableau Executable :=
   psl211_algebraic_start ;;; params_step
     of (supplied_input_params psl211_algebra psl211_inputT

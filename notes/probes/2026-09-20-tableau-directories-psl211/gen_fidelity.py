@@ -225,7 +225,10 @@ Print Assumptions psl211_word_view_proximity.
 
 # Only the staged tree has these.  The four new Definitions are ascribed at
 # their type, which a wrong body would still satisfy; what pins their bodies
-# is the four equations below, each of which holds by conversion.
+# is the four equations below, each of which holds by conversion.  All five
+# new definitions have their assumptions printed, not only the ones an
+# equation pins: a type ascription alone would pass on a wrong body, and
+# audit F12 asked for the record and not only for the fact.
 NEW = r"""
 Check (psl211_algebraic_start : Tableau Algebraic).
 Check (psl211_alldecks_executable : Tableau Executable).
@@ -254,6 +257,9 @@ Check (psl211_row_word_proximity_sampledE :
   = psl211_row_word_proximity).
 
 Print Assumptions psl211_algebraic_start.
+Print Assumptions psl211_alldecks_executable.
+Print Assumptions psl211_exact_sampled.
+Print Assumptions psl211_word_sampled.
 Print Assumptions psl211_alldecks_executable_paramsE.
 Print Assumptions psl211_alldecks_executableE.
 Print Assumptions psl211_row_alldecks_sampledE.

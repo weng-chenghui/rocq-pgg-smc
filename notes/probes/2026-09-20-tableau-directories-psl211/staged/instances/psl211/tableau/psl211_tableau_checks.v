@@ -13,14 +13,16 @@
 (* the statement is written is not the named lemma: the inline-reduction      *)
 (* prefix and the named prefix drive the same run, and the equation between   *)
 (* the two prefixes is still refused, because an opaque lemma is convertible  *)
-(* with nothing. The second is what that fork costs, that the model is typed  *)
+(* with nothing. The second is what that fork rules out: the model is typed   *)
 (* over the observed execution the named prefix builds and is refused over    *)
 (* the inline one, so no typed evidence crosses between them. The third is    *)
-(* which ideal the proximity arm admits: a certificate's ideal is a sample    *)
+(* which ideal the proximity arm admits. A certificate's ideal is a sample    *)
 (* adapter over the row's own execution, so the eight-card orbit instance's   *)
-(* model is refused at its type, and the word model itself is refused as its  *)
-(* own ideal, a certificate naming its own model holding its distance field   *)
-(* at zero.                                                                   *)
+(* model is refused at its type and no distance is reached. Beside it, the    *)
+(* ideal of the certificate this instance builds is refused as the word model *)
+(* the certificate is about; a certificate whose ideal were its own model     *)
+(* would hold its distance field at zero, the two sides of that field being   *)
+(* one term.                                                                  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -42,7 +44,7 @@ From pgg_smc Require Import psl211_scheme psl211_profile psl211_mixing.
 From pgg_smc Require Import psl211_exec psl211_alldecks psl211_models.
 From pgg_smc Require Import psl211_word_model psl211_word_proximity.
 From pgg_smc Require Import pgl27_models.
-From pgg_smc Require Import psl211_tableau_observed psl211_tableau_sampled.
+From pgg_smc Require Import psl211_tableau_observed.
 From pgg_smc Require Import psl211_tableau_analysis_bridged.
 
 Set Implicit Arguments.

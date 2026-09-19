@@ -44,10 +44,11 @@ Local Open Scope ring_scope.
 (******************************************************************************)
 
 (** The twelve-card chirality instance at the Algebraic level: the algebra
-    alone, under True, the proposition that level carries. The all-decks run
-    of every published row of this instance continues from this one value,
-    and so do the dealer-dealt parameters of psl211_exec.v, which no program
-    of this development continues. What separates the run modes is the level
+    alone, under True, the proposition that level carries. One run mode is
+    built on this value, the all-decks one, and psl211_alldecks_executableE
+    is where the prefix both published rows continue from is identified with
+    it. The dealer-dealt parameters of psl211_exec.v are built from the same
+    algebra and from no program. What separates the run modes is the level
     above and not this one. *)
 Definition psl211_algebraic_start : Tableau Algebraic :=
   tableau_start psl211_algebra.

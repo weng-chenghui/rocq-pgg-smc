@@ -222,6 +222,9 @@ Check (psl211_row_word_proximity_sampledE :
   = psl211_row_word_proximity).
 
 Print Assumptions psl211_algebraic_start.
+Print Assumptions psl211_alldecks_executable.
+Print Assumptions psl211_exact_sampled.
+Print Assumptions psl211_word_sampled.
 Print Assumptions psl211_alldecks_executable_paramsE.
 Print Assumptions psl211_alldecks_executableE.
 Print Assumptions psl211_row_alldecks_sampledE.
