@@ -388,7 +388,7 @@ Lemma landing_pgl27_branch39_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word_branch39)) R) :
   security_arm_of pgl27_row_word_branch39 R idx
   = InputIndistinguishabilityArm.
-Proof. exact: erefl. Qed.
+Proof. exact: pgl27_row_word_branch39_armE. Qed.
 
 (******************************************************************************)
 (*     Assumptions                                                            *)
@@ -418,6 +418,7 @@ Print Assumptions pgl27_row_word_rowE.
 Print Assumptions pgl27_row_exact_armE.
 Print Assumptions pgl27_row_word_armE.
 Print Assumptions pgl27_row_word39_armE.
+Print Assumptions pgl27_row_word_branch39_armE.
 Print Assumptions pgl27_row_word39_bindE.
 
 (* Kim's five-card rows. *)

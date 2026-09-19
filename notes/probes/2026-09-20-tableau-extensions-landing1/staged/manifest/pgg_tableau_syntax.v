@@ -389,8 +389,9 @@ Notation "s 'certify' 'InputIndistinguishability' c" :=
   (s ;;; certify_indistinguishability of c)
   (at level 90, left associativity, c at level 0).
 
-(* The proximity rule takes one certificate whole, as the
-   input-indistinguishability rule does, and has no builder. *)
+(* The proximity rule takes its certificate whole and has no builder. The
+   input-indistinguishability rule has both that form, above, and the
+   five-clause builder mk_indistinguishability below. *)
 Notation "s 'certify' 'IdealProximity' c" :=
   (s ;;; certify_idealproximity of c)
   (at level 90, left associativity, c at level 0).

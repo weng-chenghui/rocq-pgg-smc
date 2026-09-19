@@ -36,10 +36,10 @@
 (* pgl27_static_obs_funE and pgl27_exact_viewE; pgl27_word_cut_distE, which   *)
 (* identifies the word adapter's cut law with rho_word; and                   *)
 (* pgl27_word_marginal_bound, the walk's marginal bound. Two further          *)
-(* things stay outside the programs: the word row's conclusion at 2^-39,      *)
-(* which moves a number and proves nothing new about a coalition, and the     *)
-(* two bridge lemmas that carry a row's accumulated proposition to the        *)
-(* statement a paper cites.                                                   *)
+(* things stay outside the two programs that publish the manifest's rows: the *)
+(* word row's conclusion at 2^-39, which moves a number and proves nothing    *)
+(* new about a coalition, and the two bridge lemmas that carry a row's        *)
+(* accumulated proposition to the statement a paper cites.                    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_dealt             == the prefix shared by both rows                *)
@@ -87,6 +87,8 @@
 (*   pgl27_row_word_armE     == the word row carries the                      *)
 (*                              input-indistinguishability arm                *)
 (*   pgl27_row_word39_armE   == the concluded row carries that same arm       *)
+(*   pgl27_row_word_branch39_armE                                             *)
+(*                           == the branch row carries that arm as well       *)
 (*   pgl27_row_word39_bindE  == the surface and the bind build one term       *)
 (*   pgl27_word_reprice41_false                                               *)
 (*                           == the terminal's obligation at 2^-41 is false   *)
@@ -493,6 +495,14 @@ Definition pgl27_row_word_branch39 : PublishedRowAt pgl27_reprice39 :=
     certify InputIndistinguishability pgl27_word_cert
     |> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
+
+(** The arm the branch row carries. Naming the Sampled value before the
+    certify statement leaves the port where that statement put it, so the
+    branch row's table column is the one pgl27_row_word39 has. *)
+Lemma pgl27_row_word_branch39_armE (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_word_branch39)) R) :
+  security_arm_of pgl27_row_word_branch39 R idx = InputIndistinguishabilityArm.
+Proof. exact: erefl. Qed.
 
 (******************************************************************************)
 (*     A number below the proved one                                          *)

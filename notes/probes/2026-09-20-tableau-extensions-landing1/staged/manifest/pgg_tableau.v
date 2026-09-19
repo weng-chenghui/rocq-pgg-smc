@@ -39,15 +39,18 @@
 (* satisfies ew_indep at every coalition. IdealProximityPropAt mentions       *)
 (* the certificate's ipc_secret and the two marginals of its ipc_ideal, and   *)
 (* at an ipc_ideal that is the row's own adapter, with ipc_secret that        *)
-(* adapter's witness's own secret, ipc_close compares one distribution with   *)
-(* itself and holds at the number zero. The input-indistinguishability arm    *)
-(* is different in kind: IndistinguishabilityPropAt mentions neither          *)
-(* ic_ideal nor a secret, only the readings of the model's own cut law at     *)
-(* two run arguments and the number bounding their distance, so ic_ideal      *)
-(* is a means of proving it. ic_close holds ic_ideal within the marginal      *)
-(* bound's epsilon of that bound's own law and ic_const asks a coalition      *)
-(* below the threshold to read it the same at every two run arguments, and    *)
-(* at some models no law satisfies both below a positive number.              *)
+(* adapter's witness's own secret, the two sides of ipc_close are one term at *)
+(* every coalition below the threshold and the field holds at an ipc_eps of   *)
+(* zero. The input-indistinguishability arm is different in kind:             *)
+(* IndistinguishabilityPropAt mentions neither ic_ideal nor a secret, only    *)
+(* the readings of the model's own cut law at two run arguments and the       *)
+(* number bounding their distance, so ic_ideal is a means of proving it.      *)
+(* ic_close holds ic_ideal within the marginal bound's epsilon of that        *)
+(* bound's own law, ic_Hd identifies that law with the model's own cut law,   *)
+(* and ic_const asks a coalition below the threshold to read ic_ideal the     *)
+(* same at every two run arguments. At some models these three fields leave   *)
+(* no certificate whose marginal bound's epsilon, taken twice, is below a     *)
+(* positive number.                                                           *)
 (*                                                                            *)
 (* Each arm has one composition law, and those laws are where the mathematics *)
 (* of the row sits. exact_tail transports a witness's independence from the   *)
@@ -482,8 +485,9 @@ Arguments cert_eps {R A E sa} cert.
    The attack model is a static coalition of fewer than k seats reading its
    own endpoints, and the claim is an average over the run argument and not a
    statement at a fixed run argument. The bound is a parameter, as it is for
-   the input-indistinguishability arm, so conclude can state a finished row at
-   any number at or above it, the one a paper cites among them. *)
+   the input-indistinguishability arm, so conclude can state a finished row
+   at any number at or above the certificate's ipc_eps, the one a paper
+   cites among them. *)
 Definition IdealProximityPropAt (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (cert : IdealProximityCert sa) (c : R) : Prop :=
@@ -905,8 +909,8 @@ Record RestatedTableau (Q : Prop) := MkRestatedTableau {
 Arguments RestatedTableau : clear implicits.
 
 (* The terminal handing a row over as a proposition its caller writes out.
-   conclude is not an instance of it: conclude's target is computed by the
-   framework from that coordinate, this one's is supplied. *)
+   conclude is not an instance of it: conclude's target is BridgedProp of the
+   Reprice it is given, where this terminal's target Q is a parameter. *)
 Definition restate (Q : Prop) (q : StackAt AnalysisBridged)
     (pf : StackProp AnalysisBridged q) (p : RestatePayload Q q)
     : RestatedTableau Q :=

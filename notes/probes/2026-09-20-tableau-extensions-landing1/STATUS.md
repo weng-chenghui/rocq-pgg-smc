@@ -231,7 +231,8 @@ The coordinator ruled on Q1 that `pgl27_row_word_branch` and the lemmas of
 `pgl27_row_word_branch39` is rewritten so that it names no referent outside
 the staged file. The code is unchanged: the code-token diff of
 `pgl27_rows.v` is the same 3 hunks and 47 changed lines it was before the
-rewrite.
+rewrite. Fix pass 2 adds the branch row's arm equation inside that same E3
+hunk, carrying it to 79 changed lines.
 
 **`pgl27_row_word_branch39`, before** (probe `t0_sampled_branch_pgl27.v:145-147`,
 moved verbatim in the first pass):
@@ -447,7 +448,7 @@ tokenized, unified diff against the source.
 |---|---|---|---|
 | `manifest/pgg_tableau.v` | probe | 0 | — |
 | `manifest/pgg_tableau_syntax.v` | probe | 1 | E1 |
-| `instances/pgl27/pgl27_rows.v` | probe | 3 | E1, E1, E3 insertion |
+| `instances/pgl27/pgl27_rows.v` | probe | 3 | E1, E1, E3 insertion, with fix pass 2's `pgl27_row_word_branch39_armE` inside the E3 hunk |
 | `instances/kim2025/five_card_rows.v` | probe | 6 | E1, E1, E2 removal, and the three insertions of the four arm equations of fix pass 1 |
 | `instances/s5/s5_rows.v` | probe | 2 | E1, E1 |
 | `instances/psl211/psl211_rows.v` | probe | 1 | E1 |
@@ -458,15 +459,16 @@ definitions, and the moved text is byte-identical to `t0_sampled_branch_pgl27.v`
 (both blocks occur exactly once in each file). The E2 hunk is a deletion only,
 of the 108 tokens of the two withdrawn declarations. The three further hunks
 in `five_card_rows.v` are insertions only, of the four `_armE` lemmas fix
-pass 1 adds; they are the only code the fix pass writes.
+pass 1 adds, and they are the only code that pass writes.
+`pgl27_row_word_branch39_armE` is the only code fix pass 2 writes.
 
 ### 2. Comment words
 
 | Staged file | Comment-word hunks | Classification |
 |---|---|---|
 | `manifest/pgg_tableau.v` | 14 | E4's paragraph as fix pass 1 rewrote it, and the seven further comment edits of fix pass 1 (naming M3, M5 at four sites, naming S5 at three sites) |
-| `manifest/pgg_tableau_syntax.v` | 2 | fix pass 1's naming S10 and S11 |
-| `instances/pgl27/pgl27_rows.v` | 7 | E3 index entries; E3 moved section banner and the moved `pgl27_word_sampled` comment; the `pgl27_row_word_branch39` and `pgl27_row_word39` comments as fix pass 1 rewrote them (naming M7); the header sentence of naming S4 |
+| `manifest/pgg_tableau_syntax.v` | 1 | fix pass 1's naming S11 and fix pass 2's F3, which fall in one hunk |
+| `instances/pgl27/pgl27_rows.v` | 9 | E3 index entries; E3 moved section banner and the moved `pgl27_word_sampled` comment; the `pgl27_row_word_branch39` and `pgl27_row_word39` comments as fix pass 1 rewrote them (naming M7); the header sentence of naming S4 as fix pass 2 rewrote it (F6); and fix pass 2's index entry and docstring for `pgl27_row_word_branch39_armE` (F10) |
 | `instances/kim2025/five_card_rows.v` | 18 | E2: index entry removed, index entry reworded, index entry removed, two declaration comments removed; and fix pass 1's naming M1, M2, M6, S6, S12, S13, soundness S4 and S9, plus the docstrings and index entries of the four new arm equations |
 | `instances/s5/s5_rows.v` | 0 | — |
 | `instances/psl211/psl211_rows.v` | 0 | — |
@@ -509,19 +511,18 @@ a time through the `rocq1` lock. No `make`.
 `.vo` by digest through `psl211_models` and `psl211_analysis`, which is R3's
 recorded state.
 
-Times are the fourth run, after the correction of the header paragraph's last
-clause. Every file was recompiled in this
+Times are the fifth run, after fix pass 2. Every file was recompiled in this
 order, because `manifest/pgg_tableau.v` is upstream of all six others.
 
 | File | rc | wall | sentences over 5 s |
 |---|---|---|---|
-| `staged/manifest/pgg_tableau.v` | 0 | 13.0 s | none |
+| `staged/manifest/pgg_tableau.v` | 0 | 12.9 s | none |
 | `staged/manifest/pgg_tableau_syntax.v` | 0 | 4.3 s | none |
 | `staged/instances/pgl27/pgl27_rows.v` | 0 | 6.3 s | none |
 | `staged/instances/kim2025/five_card_rows.v` | 0 | 4.5 s | none |
 | `staged/instances/s5/s5_rows.v` | 0 | 3.9 s | none |
-| `staged/instances/psl211/psl211_reading_constancy.v` | 0 | 22.1 s | two, 6.04 s and 6.07 s, with a third, `by split; vm_compute`, at the 5 s boundary and over it on some runs |
-| `staged/instances/psl211/psl211_rows.v` | 0 | 5.4 s | none |
+| `staged/instances/psl211/psl211_reading_constancy.v` | 0 | 22.0 s | two, 6.04 s and 6.07 s, with a third, `by split; vm_compute`, at the 5 s boundary and over it on some runs |
+| `staged/instances/psl211/psl211_rows.v` | 0 | 5.5 s | none |
 | `landing_fidelity.v` | 0 | 92.1 s | three, 20.86 s, 20.20 s and 20.82 s |
 
 The slow sentences of `psl211_reading_constancy.v` are two
@@ -533,7 +534,11 @@ landing existed. The three slow sentences of the fidelity file are the three
 declarations fix pass 1 adds is over 5 s: `five_card_rows.v` and the four
 new arm equations report no slow sentence at all, and the fidelity file's
 nine added sentences are likewise all under the threshold, so every one of
-them closes by `exact: erefl` and none needed `reflexivity`.
+them closes by `exact: erefl` and none needed `reflexivity`. The one
+declaration fix pass 2 adds is under the threshold as well: `-time` reports
+`Chars 29042 - 29243 [Lemma~pgl27_row_word_branch39_...] 0. secs`,
+`[Proof.] 0. secs`, `[exact~:~erefl~.] 0. secs` and `[Qed.] 0. secs`, so
+`exact: erefl` stands and no `reflexivity` fallback was taken.
 
 `psl211_reading_constancy.v` compiled against the staged framework is the
 check the brief requires either way: production's text, unchanged in code,
@@ -543,14 +548,14 @@ compiles under the `<=` obligation.
 
 ## Print Assumptions
 
-39 declarations, from `landing_fidelity.out`. The trio is
+40 declarations, from `landing_fidelity.out`. The trio is
 `constructive_indefinite_description`, `functional_extensionality_dep` and
 `propositional_extensionality`.
 
 | Group | Declarations | Assumptions |
 |---|---|---|
 | framework | `port_conclude`, `idealproximity_tail`, `certify_exact_armE`, `certify_indistinguishability_armE`, `certify_idealproximity_armE`, `conclude_armE`, `publish_armE` | trio |
-| PGL(2,7) | `pgl27_row_exact_tableau`, `pgl27_row_word_tableau`, `pgl27_row_word39`, `pgl27_row_word39_bind`, `pgl27_row_word_branch39`, `pgl27_row_exact_rowE`, `pgl27_row_word_rowE`, `pgl27_row_exact_armE`, `pgl27_row_word_armE`, `pgl27_row_word39_armE`, `pgl27_row_word39_bindE` | trio |
+| PGL(2,7) | `pgl27_row_exact_tableau`, `pgl27_row_word_tableau`, `pgl27_row_word39`, `pgl27_row_word39_bind`, `pgl27_row_word_branch39`, `pgl27_row_exact_rowE`, `pgl27_row_word_rowE`, `pgl27_row_exact_armE`, `pgl27_row_word_armE`, `pgl27_row_word39_armE`, `pgl27_row_word_branch39_armE`, `pgl27_row_word39_bindE` | trio |
 | five-card | `five_card_row_uniform_tableau`, `five_card_row_repeated_indistinguishability_tableau`, `five_card_row_biased_indistinguishability_tableau`, `five_card_row_repeated39`, `five_card_row_biased_inv25`, `five_card_row_uniform_rowE`, `five_card_row_uniform_armE`, `five_card_row_repeated_indistinguishability_rowE`, `five_card_row_biased_indistinguishability_rowE`, `five_card_row_biased_forms_publishedE`, `five_card_row_repeated39_atE`, `five_card_row_repeated_indistinguishability_armE`, `five_card_row_biased_indistinguishability_armE`, `five_card_row_repeated39_armE`, `five_card_row_biased_inv25_armE` | trio |
 | S5 | `s5_row_rand_tableau`, `s5_row_rand_rowE`, `s5_row_rand_armE` | trio **and** `rigidity_s5_instance.s5_group_order_eq` |
 | PSL(2,11) | `psl211_row_alldecks_tableau`, `psl211_row_alldecks_rowE`, `psl211_row_alldecks_armE` | trio |
@@ -797,3 +802,253 @@ at the classical trio. Header index entries were added for all four.
 | naming N1, N2, N3, N4, N5, N7, N8, N9, N10 | Recorded by the auditor as notes with no action asked |
 | soundness S8 | Superseded: it offers "reprice coordinate" or "coordinate"; the brief's ruling on the pending `Reprice` decision selects the second, which is what naming S7 asks and what was written |
 | naming S9 as written | It asks for the two arm equations to be deferred to landing 2. The brief's item E lands them here instead, and four rather than two, so the finding is closed rather than deferred |
+
+---
+
+## Fix pass 2
+
+Applies `audit-landing1-fix1.md`: F1 as a MUST, F2 to F6 as SHOULDs, F9 as a
+NOTE, all on comment text, and F10 as the pass's one code change. F7 and F8
+ask for no action. Every sentence below was written after opening the
+declaration it describes and reading its type. Where the auditor's
+replacement is not exactly true or not clear English, the written text and
+the deviation are both recorded.
+
+### F1 — the last clause of the header paragraph of `manifest/pgg_tableau.v`
+
+Declarations read: `IndistinguishabilityCert` (staged `pgg_tableau.v:186-197`),
+`psl211_alldecks_no_small_eps_cert` (staged `psl211_reading_constancy.v:703`)
+and `psl211_alldecks_cert_ideal_close` (`:673`).
+
+The paragraph's tail as it now reads, refilled at 74 columns so that no line
+runs into the closing marker and none is left short:
+
+```
+(* adapter's witness's own secret, the two sides of ipc_close are one term at *)
+(* every coalition below the threshold and the field holds at an ipc_eps of   *)
+(* zero. The input-indistinguishability arm is different in kind:             *)
+(* IndistinguishabilityPropAt mentions neither ic_ideal nor a secret, only    *)
+(* the readings of the model's own cut law at two run arguments and the       *)
+(* number bounding their distance, so ic_ideal is a means of proving it.      *)
+(* ic_close holds ic_ideal within the marginal bound's epsilon of that        *)
+(* bound's own law, ic_Hd identifies that law with the model's own cut law,   *)
+(* and ic_const asks a coalition below the threshold to read ic_ideal the     *)
+(* same at every two run arguments. At some models these three fields leave   *)
+(* no certificate whose marginal bound's epsilon, taken twice, is below a     *)
+(* positive number.                                                           *)
+```
+
+Each clause against the declaration:
+
+| Clause | Read from |
+|---|---|
+| `ic_close` holds `ic_ideal` within the marginal bound's epsilon of that bound's own law | `ic_close : var_dist (sw_rho_dist ic_b) ic_ideal <= sw_bound_eps ic_b` |
+| `ic_Hd` identifies that law with the model's own cut law | `ic_Hd : sw_rho_dist ic_b = sa_cut_dist sa` |
+| `ic_const` asks a coalition below the threshold to read `ic_ideal` the same at every two run arguments | `ic_const : forall C, (#|C| < profile_k (instance_profile A))%N -> forall x x', fdistmap (static_coalition_obs C x) ic_ideal = fdistmap (static_coalition_obs C x') ic_ideal` |
+| at some models these three fields leave no certificate whose marginal bound's epsilon, taken twice, is below a positive number | `psl211_alldecks_no_small_eps_cert (R) (cert) : sw_bound_eps (ic_b cert) + sw_bound_eps (ic_b cert) < (#\|pgg_G psl211_M\|%:R)^-1 -> False`, proved by `psl211_alldecks_constancy_false_close` applied to `psl211_alldecks_cert_ideal_close cert`, itself `etrans (ic_Hd cert) (psl211_alldecks_cut_distE R)` against `ic_close cert`, with `indistinguishability_cert_reading_constancy cert` |
+
+**Deviation from R-F1.** The proposal is the one-word substitution "no
+certificate meets both below a positive number". Not taken as written. "Meets
+both" still names `ic_close` and `ic_const` only, and the exclusion goes
+through `ic_Hd`, which is why the pass gives `ic_Hd` a clause of its own. And
+"below a positive number" needs the quantity named, because what the theorem
+excludes is `sw_bound_eps (ic_b cert) + sw_bound_eps (ic_b cert)` under
+`(#|pgg_G psl211_M|%:R)^-1`, which the written clause calls the marginal
+bound's epsilon taken twice. "Leave no certificate" is the theorem's own
+quantifier, over certificates and not over laws.
+
+### F2 — the subject of the verdict on `ipc_close`
+
+Declarations read: `IdealProximityCert` (`pgg_tableau.v:212-229`),
+`IdealProximityPropAt` (`:487-506`).
+
+Written: "at an ipc_ideal that is the row's own adapter, with ipc_secret that
+adapter's witness's own secret, the two sides of ipc_close are one term at
+every coalition below the threshold and the field holds at an ipc_eps of
+zero."
+
+Checked: with `ipc_ideal := sa` and `ipc_secret := ew_secret ipc_witness`, the
+two `fdistmap` arguments of `ipc_close` are the same function and both are
+taken against `sa_sampleP sa`, at every `C`, since `C` occurs identically on
+the two sides. `var_dist X X <= 0` holds, so the field is inhabited at
+`ipc_eps = 0`. Nothing is claimed here about `IdealProximityPropAt`, whose
+right side is a product of two marginals and not a joint law, which is what
+`landing_idealproximity_propE` records.
+
+**Deviation from R-F2.** "holds at zero" is written "holds at an ipc_eps of
+zero", because the number is the record's own field and the bare form reads
+as a claim about the arm's proposition, which is the reading F2 faults.
+
+### F3 — the two surfaces of `manifest/pgg_tableau_syntax.v`
+
+Written above the proximity notation:
+
+```
+(* The proximity rule takes its certificate whole and has no builder. The
+   input-indistinguishability rule has both that form, above, and the
+   five-clause builder mk_indistinguishability below. *)
+```
+
+Checked against the three notations around it: the whole-certificate form of
+the input-indistinguishability rule at `:388-390`, the proximity rule at
+`:394-396`, and the five-clause builder at `:402-408`, whose body is
+`certify_indistinguishability of (mk_indistinguishability ...)`.
+
+**Deviation from R-F3.** The proposal's single sentence is split in two and
+the builder is named `mk_indistinguishability`, the name the file's header
+uses at `:22`, so that "the five-clause builder below" points at a
+declaration and not at a position.
+
+### F4 — the referent of "at or above it"
+
+Written, in the docstring of `IdealProximityPropAt`: "The bound is a
+parameter, as it is for the input-indistinguishability arm, so conclude can
+state a finished row at any number at or above the certificate's ipc_eps, the
+one a paper cites among them."
+
+Checked: `ConcludePayload`'s branch, `IdealProximity cert => ipc_eps cert <=
+odflt (ipc_eps cert) (c R)` (`:863`), and `port_conclude`'s matching branch
+(`:863` and `:858-866`).
+
+**Deviation from R-F4.** The proposal writes the bare field name `ipc_eps`.
+The field is applied to the certificate everywhere it occurs, so the written
+text says "the certificate's ipc_eps".
+
+### F5 — the dangling "that coordinate" above `restate`
+
+Written:
+
+```
+(* The terminal handing a row over as a proposition its caller writes out.
+   conclude is not an instance of it: conclude's target is BridgedProp of the
+   Reprice it is given, where this terminal's target Q is a parameter. *)
+```
+
+Declarations read: `Definition restate (Q : Prop) (q : StackAt
+AnalysisBridged) (pf : StackProp AnalysisBridged q) (p : RestatePayload Q q) :
+RestatedTableau Q` (`:912-916`), `RestatePayload Q q := StackProp
+AnalysisBridged q -> Q` (`:894-895`), and `Definition conclude (c : Reprice)
+(q : StackAt AnalysisBridged) (pf : StackProp AnalysisBridged q) (p :
+ConcludePayload c q) : TableauAt AnalysisBridged (BridgedProp c)`
+(`:880-886`).
+
+**Deviation from R-F5.** The proposal keeps "this one's is supplied", which
+has no stated subject and is the unclear half of the sentence F5 faults. Both
+targets are named instead: `conclude`'s is `BridgedProp c` at the `Reprice` it
+is given, `restate`'s is its parameter `Q`. The identifier `Reprice` is used
+as an identifier, and no new term is coined.
+
+### F6 — which programs publish the manifest's rows
+
+Written, in the header of `staged/instances/pgl27/pgl27_rows.v`:
+
+```
+(* things stay outside the two programs that publish the manifest's rows: the *)
+(* word row's conclusion at 2^-39, which moves a number and proves nothing    *)
+(* new about a coalition, and the two bridge lemmas that carry a row's        *)
+(* accumulated proposition to the statement a paper cites.                    *)
+```
+
+Checked: the two programs are `pgl27_row_exact_tableau` and
+`pgl27_row_word_tableau`, which the same paragraph names at `:23-26` and which
+`pgl27_row_exact_rowE` (`:336`) and `pgl27_row_word_rowE` (`:343`) equate with
+the manifest's `pgl27_row_exact` and `pgl27_row_word`. The conclusion at
+2^-39 is a line of `pgl27_row_word39` (`:424-429`), a program in the same
+surface, so it stays outside those two and not outside the programs. R-F6 in
+content, refilled to the box.
+
+### F9 — the direction of the one-cut identity
+
+```
+(*   five_card_inv50_split   == the identity that discharges the one-cut      *)
+(*                              row's terminal obligation                     *)
+```
+
+Checked: `Fact five_card_inv50_split (R : realType) : (1 / 50 : R) + 1 / 50 =
+1 / 25`, and the row's terminal `|> conclude five_card_reprice_inv25 by
+(fun R _ => ssr_ext.eqW (five_card_inv50_split R))` against the obligation
+`cert_eps cert <= odflt (cert_eps cert) (c R)`. **Deviation from R-F9:** the
+proposal ends at "the one-cut row's terminal"; the entry says "terminal
+obligation", because what the identity discharges is the obligation and not
+the terminal.
+
+### F10 — the branch row's arm equation, the pass's only code
+
+Added to `staged/instances/pgl27/pgl27_rows.v`, beside
+`pgl27_row_word_branch39`:
+
+```
+(** The arm the branch row carries. Naming the Sampled value before the
+    certify statement leaves the port where that statement put it, so the
+    branch row's table column is the one pgl27_row_word39 has. *)
+Lemma pgl27_row_word_branch39_armE (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_row_word_branch39)) R) :
+  security_arm_of pgl27_row_word_branch39 R idx = InputIndistinguishabilityArm.
+Proof. exact: erefl. Qed.
+```
+
+The statement is the pattern of `pgl27_row_word39_armE` (`:447-451`) with the
+row name in both positions, the `published_at` inside the index binder and the
+`security_arm_of` subject, and nothing else changed. `-time` reports
+`Chars 29042 - 29243 [Lemma~pgl27_row_word_branch39_...] 0. secs`,
+`[Proof.] 0. secs`, `[exact~:~erefl~.] 0. secs`, `[Qed.] 0. secs`, all under
+the 5 s threshold, so `exact: erefl` stands and `reflexivity` was not needed.
+`by []` was not used, as the brief requires and as the project's own measured
+hang on `published_at` equations across `conclude` warns.
+
+A header index entry was added under "Key results", after
+`pgl27_row_word39_armE`:
+
+```
+(*   pgl27_row_word_branch39_armE                                             *)
+(*                           == the branch row carries that arm as well       *)
+```
+
+In `landing_fidelity.v`, `landing_pgl27_branch39_armE` now closes by
+`exact: pgl27_row_word_branch39_armE` rather than proving the fact itself, and
+`Print Assumptions pgl27_row_word_branch39_armE.` was added to the PGL(2,7)
+block after `pgl27_row_word39_armE`. The recaptured `landing_fidelity.out`
+carries the new block at the classical trio, so the branch row's arm now
+reaches the assumption report through a staged declaration, which is what F10
+asks for.
+
+### What the pass changed, measured
+
+`python3 compile.py` over the `_CoqProject` order, one process at a time
+through the `rocq1` lock, no `make`, `psl211_endpoints.v` never compiled:
+
+| File | rc | wall | sentences over 5 s |
+|---|---|---|---|
+| `staged/manifest/pgg_tableau.v` | 0 | 12.9 s | none |
+| `staged/manifest/pgg_tableau_syntax.v` | 0 | 4.3 s | none |
+| `staged/instances/pgl27/pgl27_rows.v` | 0 | 6.3 s | none |
+| `staged/instances/kim2025/five_card_rows.v` | 0 | 4.5 s | none |
+| `staged/instances/s5/s5_rows.v` | 0 | 3.9 s | none |
+| `staged/instances/psl211/psl211_reading_constancy.v` | 0 | 22.0 s | two, 6.05 s and 6.08 s |
+| `staged/instances/psl211/psl211_rows.v` | 0 | 5.5 s | none |
+| `landing_fidelity.v` | 0 | 92.1 s | three, 20.28 s, 19.88 s and 20.53 s |
+
+`python3 verify.py` exits 0. Against the sources it reports, after this pass:
+`pgg_tableau.v` 0 code hunks and 14 comment hunks, `pgg_tableau_syntax.v` 1
+code hunk and 1 comment hunk, `pgl27_rows.v` 3 code hunks and 9 comment hunks,
+`five_card_rows.v` 6 and 18, `s5_rows.v` 2 and 0, `psl211_rows.v` 1 and 0,
+`psl211_reading_constancy.v` 0 and 4.
+
+Against commit d737a46, with every comment stripped and the remainder
+tokenized, the only code changed in the staged tree is the seven lines of
+`pgl27_row_word_branch39_armE`, and in `landing_fidelity.v` the one proof term
+and the one `Print Assumptions` line. With the code stripped instead and the
+comment text normalized to one word per line, the changed passages are exactly
+F1 and F2 in `pgg_tableau.v`, F4 and F5 in the same file, F3 in
+`pgg_tableau_syntax.v`, F6 and F10's entry and docstring in `pgl27_rows.v`,
+and F9 in `five_card_rows.v`. `psl211_reading_constancy.v`, `psl211_rows.v`
+and `s5_rows.v` are untouched in both, and `landing_fidelity.v`'s comments are
+untouched.
+
+Line lengths: every line of every staged file is at most 80 bytes except
+`pgg_tableau_syntax.v:334`, `:372` and `:403`, the three notation string
+literals the brief exempts. No banned word appears in any line the pass
+writes, "indistinguishability" is never abbreviated, no meta narration
+entered the staged text, and the one piece of proof strategy the pass could
+have written, why `exact: erefl` rather than `by []`, is in this file and not
+in a docstring.
