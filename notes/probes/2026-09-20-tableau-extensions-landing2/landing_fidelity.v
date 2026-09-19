@@ -8,8 +8,11 @@
 (* restates.                                                                  *)
 (*                                                                            *)
 (* The provenance block is what fails if a production object were loaded in   *)
-(* place of a staged one. var_dist_own_marginals and var_dist_prodL exist in  *)
-(* the staged lib/var_dist_supp.v and in no production file;                  *)
+(* place of a staged one. security/var_dist_joint_law.v is a file no          *)
+(* production load path holds at all, so a Require of it that resolves        *)
+(* resolved to the staged tree, and var_dist_own_marginals and var_dist_prodL *)
+(* exist in it and in no production file. card_tnth_count has to be gone from *)
+(* the staged lib/var_dist_supp.v and present in five_card_mixing.v;          *)
 (* kim_centi_marginal_bound40 and kim_centi_cut_mixing40 exist in the         *)
 (* production instances/kim2025/five_card_mixing.v and not in the staged one, *)
 (* so a Check on them has to fail. kim_centi_cert40 and its number equation   *)
@@ -26,6 +29,7 @@ From pgg_smc Require Import pgg_monodromy_profile pgg_execution_plug.
 From pgg_smc Require Import pgg_observed_execution pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_sample_adapter.
 From pgg_smc Require Import pgg_collusion_bound var_dist_supp.
+From pgg_smc Require Import var_dist_joint_law.
 From pgg_reconstruct Require Import algebraic_rigidity.
 From pgg_smc Require Import five_card_group five_card_family.
 From pgg_smc Require Import five_card_exec five_card_models.
@@ -52,6 +56,7 @@ Local Open Scope proba_scope.
 
 Check var_dist_own_marginals.
 Check var_dist_prodL.
+Check var_dist_fdistmap_pair.
 Check card_tnth_count.
 Fail Check kim_centi_marginal_bound40.
 Fail Check kim_centi_cut_mixing40.
@@ -59,7 +64,7 @@ Fail Check kim_centi_cert40.
 Fail Check kim_centi_cert40_epsE.
 
 (******************************************************************************)
-(*     The five lemmas promoted into lib/var_dist_supp.v                      *)
+(*     The five lemmas of security/var_dist_joint_law.v                       *)
 (******************************************************************************)
 
 Lemma landing_var_dist_fdistmap_pair (R : realType) (U V W : finType)
@@ -319,8 +324,6 @@ Lemma landing_five_card_singleton_below_threshold (i : 'I_5) :
   (#|[set i]| < profile_k (instance_profile five_card_algebra))%N.
 Proof. exact: five_card_singleton_below_threshold. Qed.
 
-Check five_card_biased_proximity_at_singleton.
-
 Lemma landing_five_card_biased_proximity_prop_holds (R : realType) :
   IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50).
 Proof. exact: five_card_biased_proximity_prop_holds. Qed.
@@ -332,7 +335,7 @@ Lemma landing_five_card_biased_indistinguishability_implies_proximity
 Proof. exact: five_card_biased_indistinguishability_implies_proximity. Qed.
 
 (******************************************************************************)
-(*     Print Assumptions : lib/var_dist_supp.v                                *)
+(*     Print Assumptions : security/var_dist_joint_law.v                      *)
 (******************************************************************************)
 
 Print Assumptions var_dist_fdistmap_pair.

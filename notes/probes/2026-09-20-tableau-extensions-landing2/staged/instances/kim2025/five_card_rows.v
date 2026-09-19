@@ -648,9 +648,9 @@ Lemma five_card_row_biased_indistinguishability_rowE :
 Proof. by []. Qed.
 
 (** The arm the repeated row's certified program carries, at every real field
-    and index: a variation distance between the readings of two committed
-    pairs, and not independence of the view from the conjunction of the
-    committed bits. This is the value a paper's table prints in the arm
+    and index: a variation distance between the readings of the cut at two
+    committed pairs, and not independence of the view from the conjunction of
+    the committed bits. This is the value a paper's table prints in the arm
     column for this row, settled by the certify statement the program
     wrote. *)
 Lemma five_card_row_repeated_indistinguishability_armE (R : realType)
@@ -876,10 +876,10 @@ Lemma five_card_row_biased_forms_publishedE :
   = published_row five_card_row_biased_inv25.
 Proof. exact: erefl. Qed.
 
-(** The arm the concluded one-cut row carries. Its certificate is the exact
-    one and the one above it is the spectral one, so the two rows differ in
-    the number they publish and not in what kind of fact they state about a
-    coalition. *)
+(** The arm the concluded one-cut row carries. It carries the exact
+    certificate where five_card_row_biased_indistinguishability_tableau
+    carries the spectral one, so the two rows differ in the number they
+    publish and not in what kind of fact they state about a coalition. *)
 Lemma five_card_row_biased_inv25_armE (R : realType)
     (idx : amf_index (ab_f (published_at five_card_row_biased_inv25)) R) :
   security_arm_of five_card_row_biased_inv25 R idx

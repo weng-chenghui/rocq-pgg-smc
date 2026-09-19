@@ -40,6 +40,8 @@ WHOLE = [
 
 # new staged file -> the probe files its declarations come from
 NEW = [
+    ("staged/security/var_dist_joint_law.v",
+     ["p1_joint_law_distance.v", "p9_actual_marginals.v"]),
     ("staged/manifest/pgg_tableau_arm_relations.v",
      ["p7_mutations.v", "p8_spectral_relation.v"]),
     ("staged/instances/kim2025/five_card_proximity.v",
@@ -47,15 +49,7 @@ NEW = [
       "p8_spectral_relation.v", "p9_actual_marginals.v"]),
 ]
 
-# the five lemmas promoted from p1 into lib/var_dist_supp.v, and the one
-# moved out of it into five_card_mixing.v
-PROMOTED = {
-    "var_dist_fdistmap_pair": "p1_joint_law_distance.v",
-    "var_dist_prodR": "p1_joint_law_distance.v",
-    "var_dist_prodL": "p1_joint_law_distance.v",
-    "fdist_prod_snd": "p1_joint_law_distance.v",
-    "var_dist_own_marginals": "p9_actual_marginals.v",
-}
+# the lemma moved out of lib/var_dist_supp.v into its only user
 MOVED = {"card_tnth_count": os.path.join(REPO, "lib/var_dist_supp.v")}
 
 DECL = re.compile(
@@ -155,21 +149,8 @@ def main():
     print("(2) and (3) PER-DECLARATION TOKENS AND COMMENT WORDS")
     print("=" * 78)
     probe = {}
-    for fn in sorted(set(sum([f for _, f in NEW], []))
-                     | set(PROMOTED.values())):
+    for fn in sorted(set(sum([f for _, f in NEW], []))):
         probe[fn] = blocks(os.path.join(PROBE, fn))
-
-    # the promoted lemmas, in their new home
-    st, sd = blocks(os.path.join(HERE, "staged/lib/var_dist_supp.v"))
-    print("=== staged/lib/var_dist_supp.v (promoted from the probe)")
-    for nm, fn in PROMOTED.items():
-        pt, pd = probe[fn]
-        if nm not in st:
-            print("   MISSING in staged: %s" % nm)
-            continue
-        report(nm, pt[nm], st[nm], "code tokens")
-        report(nm, pd[nm], sd[nm], "comment words")
-    print()
 
     # the moved lemma, in its new home
     mt, md = blocks(os.path.join(HERE,

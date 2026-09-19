@@ -14,11 +14,12 @@ declaration's assumptions are the classical trio or none.
 
 ## Layout
 
-Four files are LANDED: their text is the permanent text landing 2 proposes.
+Five files are LANDED: their text is the permanent text landing 2 proposes.
 
 | Staged path | Source | What it is |
 |---|---|---|
-| `staged/lib/var_dist_supp.v` | PRODUCTION `lib/var_dist_supp.v` plus five lemmas of probe `p1_joint_law_distance.v` and `p9_actual_marginals.v`, minus `card_tnth_count` | landed |
+| `staged/lib/var_dist_supp.v` | PRODUCTION `lib/var_dist_supp.v` minus `card_tnth_count` and its header entry, and nothing else | landed |
+| `staged/security/var_dist_joint_law.v` | NEW; five lemmas of probe `p1_joint_law_distance.v` and `p9_actual_marginals.v` | landed |
 | `staged/instances/kim2025/five_card_mixing.v` | PRODUCTION `instances/kim2025/five_card_mixing.v` plus `card_tnth_count`, minus `kim_centi_marginal_bound40` and `kim_centi_cut_mixing40` | landed |
 | `staged/manifest/pgg_tableau_arm_relations.v` | NEW; six declarations of probe `p7_mutations.v` and `p8_spectral_relation.v` | landed |
 | `staged/instances/kim2025/five_card_proximity.v` | NEW; thirty-two declarations of probe `p4_kim_biased_proximity.v`, `p7_mutations.v`, `p8_spectral_relation.v`, `p9_actual_marginals.v` | landed |
@@ -41,30 +42,44 @@ is what the `cp` will force in production.
 | `staged/instances/psl211/psl211_reading_constancy.v` | landing 1's staged copy |
 | `staged/instances/psl211/psl211_rows.v` | landing 1's staged copy |
 
-The six copies taken from landing 1 are its WORKING-TREE text, not its text at
-HEAD `16066cd`, and that working tree moved twice while this directory was
-being built. All six were copied again at 01:01:27 on 2026-09-20 and
-everything downstream was recompiled; the compile table below is that run.
+The seven copies taken from landing 1 come from its **commit `d737a46`**, "probe(tableau-ext
+landing 1): fix pass 1 after the two audits", which is the branch HEAD as this
+file is written and which landing 1's working tree matches exactly. That fix
+pass changed comments in `pgg_tableau.v`, `pgl27_rows.v` and
+`psl211_reading_constancy.v`, and added four `_armE` lemmas to
+`five_card_rows.v`: `five_card_row_repeated_indistinguishability_armE`,
+`five_card_row_biased_indistinguishability_armE`,
+`five_card_row_repeated39_armE` and `five_card_row_biased_inv25_armE`, each
+`exact: erefl` at `InputIndistinguishabilityArm`. They are additions, so
+nothing landing 2 states changed.
 
-| Landing 1 file | What its fix pass changed | Effect here |
-|---|---|---|
-| `staged/manifest/pgg_tableau.v` | comments only | recopied, chain recompiled |
-| `staged/instances/pgl27/pgl27_rows.v` | comments only | recopied, recompiled |
-| `staged/instances/psl211/psl211_reading_constancy.v` | comments only | recopied, recompiled |
-| `staged/instances/kim2025/five_card_rows.v` | **four `_armE` lemmas added**: `five_card_row_repeated_indistinguishability_armE`, `five_card_row_biased_indistinguishability_armE`, `five_card_row_repeated39_armE`, `five_card_row_biased_inv25_armE`, all `exact: erefl` at `InputIndistinguishabilityArm` | recopied, recompiled; `five_card_proximity.v` and the fidelity file recompiled against it. Additions only, so nothing landing 2 states changed |
+Seven, not six: `psl211_rows.v` is a landing-1 file as well, and `restage.py`
+copies all seven.
 
-Landing 1 was still editing at 01:01. A landing-2 compile is evidence only
-against the landing-1 text it loaded, so if that text moves again before the
-`cp`, the six copies have to be taken again and the chain recompiled. The
-check is cheap: a comment-stripped token comparison of each copy against
-landing 1's current file.
+**Landing 1 may move again**, and a landing-2 compile is evidence only against
+the landing-1 text it loaded. `restage.py` is how to redo this:
 
-One measurement worth carrying: the first recompile of
-`staged/instances/kim2025/five_card_rows.v` after the refresh reported 149.4 s
-wall and no sentence over 5 s, and an immediate second run reported 4.5 s. The
-`rocq1` lock is machine-wide, so a wall time measured while another session
-compiles includes that session's run. Every number in the table below was
-measured with no other Rocq process running.
+```
+python3 restage.py --check     # report which of the six differ, and whether
+                               # the difference is code or comments only
+python3 restage.py             # copy them and recompile the whole chain
+```
+
+It reports each file as `unchanged`, `comments only` or `CODE CHANGED`, using
+the same comment-stripped token comparison `verify.py` uses, then calls
+`compile.py` with no arguments, which compiles the `_CoqProject` order: the
+fifteen staged files and the fidelity file, one Rocq process at a time through
+the `rocq1` lock. Equivalently, by hand: copy the seven paths of
+`restage.py`'s `CHAIN` from
+`notes/probes/2026-09-20-tableau-extensions-landing1/staged/` and run
+`python3 compile.py`.
+
+One measurement worth carrying: a recompile of
+`staged/instances/kim2025/five_card_rows.v` once reported 149.4 s wall with no
+sentence over 5 s, and an immediate second run reported 4.5 s. The `rocq1`
+lock is machine-wide, so a wall time measured while another session compiles
+includes that session's run. Every number in the table below was measured with
+no other Rocq process running.
 
 Those ten plus `five_card_mixing.v` are exactly the eleven files of
 `lib/var_dist_supp.v`'s reverse closure, which the design's section 3
@@ -90,51 +105,65 @@ root, which is that remapping and not an error.
 
 ---
 
-## E1 — the promotion into `lib/var_dist_supp.v`
+## E1 — `lib/var_dist_supp.v` loses one lemma and gains nothing
 
-Five lemmas land, at the probe's text. `verify.py`'s per-declaration check
-reports every one of the five token-identical to the probe's.
+The first staging put the five joint-law lemmas here and had to add
+`From mathcomp Require Import lra` and
+`From pgg_smc Require Import pgg_collusion_bound` to carry them, which made a
+`lib/` file depend on a `security/` one. That is not accepted (Q3). The five
+lemmas are re-homed to `staged/security/var_dist_joint_law.v` (E1b), and this
+file's only difference from production is D5's removal:
 
-| Lemma | Probe source | Design table says |
+- `card_tnth_count` and its proof deleted, with the banner above them.
+- Its two lines removed from the header's `Lemmas:` block.
+- The header's description sentence, which named it, rewritten:
+  - before: "…the invariance of a uniform law under an injective endomap, the
+    fact that a pushforward charges only the image, and the count of the tuple
+    positions at which a predicate holds."
+  - after: "…the invariance of a uniform law under an injective endomap, and
+    the fact that a pushforward charges only the image. The distance between
+    two joint laws of a reading and a secret is
+    security/var_dist_joint_law.v."
+
+The import block is production's, unchanged. Whole-file token diff against
+production: **1 hunk, 57 tokens, the deleted lemma**. Nothing else in the file
+moved.
+
+---
+
+## E1b — the new `security/var_dist_joint_law.v`
+
+Q3's re-homing. Five lemmas, all token-identical to the probe's; `verify.py`
+reports `5 of 5 declarations token-identical to the probe's`, so the move
+changed no statement and no proof.
+
+| Lemma | Probe source | Why it lands |
 |---|---|---|
-| `var_dist_fdistmap_pair` | `p1_joint_law_distance.v:61` | lands (P1) |
-| `var_dist_prodR` | `p1_joint_law_distance.v:84` | lands (D5) |
-| `var_dist_prodL` | `p1_joint_law_distance.v:100` | **"stays in the probe"** — see question Q1 |
-| `fdist_prod_snd` | `p1_joint_law_distance.v:115` | lands (D5) |
-| `var_dist_own_marginals` | `p9_actual_marginals.v:65` | lands |
+| `var_dist_fdistmap_pair` | `p1_joint_law_distance.v:61` | the data-processing step down to the pair |
+| `var_dist_prodR` | `p1_joint_law_distance.v:84` | the step up from the cut, D5 |
+| `var_dist_prodL` | `p1_joint_law_distance.v:100` | premise of `var_dist_own_marginals`, Q1 accepted |
+| `fdist_prod_snd` | `p1_joint_law_distance.v:115` | D5 |
+| `var_dist_own_marginals` | `p9_actual_marginals.v:65` | removes the ideal from the comparison |
 
-`card_tnth_count` leaves the file, so the header's `Lemmas:` entry for it
-goes and the description sentence that named it is rewritten.
+`security/` is the right layer, because both data-processing steps come from
+there: `var_dist_fdistmap` is `security/pgg_collusion_bound.v:126` and
+`var_dist_triangle` is `:43`, and neither is in infotheo's
+`variation_dist.v`, which carries only `symmetric_var_dist`. The file
+`Require`s `var_dist_supp` and `pgg_collusion_bound`, both already in
+`pgg_smc`, plus `lra` for the one arithmetic step of
+`var_dist_own_marginals`. No cycle: `pgg_collusion_bound` requires
+`perm_uniform` and `pgg_interface` only.
 
-Two forced edits to the import block, both needed by lemmas the design sends
-here:
+Name checks before the file was written. No module named `var_dist_joint_law`
+exists anywhere in the tree. Of the five lemma names, only `var_dist_prodR`
+occurs in production, twice, and both are `Local`:
+`instances/pgl27/pgl27_mixing.v:1077` and
+`instances/psl211/psl211_mixing.v:577`, invisible outside their files. R5's
+decision leaves both, and the new lemma's comment names them.
 
-```
--From mathcomp Require Import boolp reals.
-+From mathcomp Require Import boolp reals lra.
- From infotheo Require Import realType_ext fdist proba variation_dist.
-+From pgg_smc Require Import pgg_collusion_bound.
-```
+Two comment changes against the probe's text, both deliberate:
 
-`lra` closes `3%:R * d = d + (d + d)` inside `var_dist_own_marginals`.
-`pgg_collusion_bound` holds `var_dist_fdistmap`, which
-`var_dist_fdistmap_pair` applies, and `var_dist_triangle`, which
-`var_dist_own_marginals` applies twice. Neither lemma exists in infotheo's
-`variation_dist.v`, which carries only `symmetric_var_dist`. No cycle:
-`security/pgg_collusion_bound.v` requires `perm_uniform` and `pgg_interface`
-and neither requires `var_dist_supp`; the only production occurrences of the
-string `var_dist_supp` outside `lib/` are the lemma name `var_dist_supp_ge`
-in `pgg_collusion_bound.v` and its two uses in
-`legacy/instances/s5x5/s5x5_models.v`, so the reverse closure is unchanged at
-eleven. See question Q3 on the layering.
-
-Whole-file token diff against production: 3 hunks. Hunk 1 is `lra`, hunk 2 is
-the `pgg_collusion_bound` line, hunk 3 is `card_tnth_count` replaced by the
-five lemmas and their two section banners.
-
-### Comment changes in this file
-
-`var_dist_prodR`, R5's sentence, added at the end of the probe's comment:
+`var_dist_prodR`, R5's sentence appended:
 
 > Two section-local proofs of this statement predate the one here, at
 > instances/pgl27/pgl27_mixing.v and instances/psl211/psl211_mixing.v; each is
@@ -142,23 +171,20 @@ five lemmas and their two section banners.
 > outside it.
 
 `var_dist_prodL`, one word, because the probe's comment pointed at a
-"corollary" that is now a theorem in this tree:
+"corollary" that is a theorem in this tree:
 
 - before: "The **corollary** about the actual model alone needs both sides"
 - after: "The **statement** about the actual model alone needs both sides"
 
-Header, the description sentence:
+The file header is quoted in full in the report; it states what the file is
+about (the sum of absolute differences between joint laws, twice the total
+variation distance of the literature, bounding twice an advantage), which
+lemma carries a bound in which direction, and a `Lemmas:` table.
 
-- before: "…the invariance of a uniform law under an injective endomap, the
-  fact that a pushforward charges only the image, and the count of the tuple
-  positions at which a predicate holds."
-- after: "…the invariance of a uniform law under an injective endomap, and the
-  fact that a pushforward charges only the image." followed by a new paragraph
-  for the second group, which says what the five lemmas move and between which
-  carriers.
-
-Header, the `Lemmas:` block: `card_tnth_count`'s two lines removed, five
-entries added.
+Reverse closure: `instances/kim2025/five_card_proximity.v` only.
+`manifest/pgg_tableau_arm_relations.v` does not `Require` it, because
+`idealproximity_ceiling` needs `var_dist_le2` of `var_dist_supp` and no
+joint-law lemma.
 
 ---
 
@@ -289,12 +315,17 @@ recorded `Fail`s beside the rows they guard.
 | what the row states | `five_card_biased_view_proximity` | `p4:337` |
 | the actual model alone | `five_card_biased_view_own_marginals` | `p9:98` |
 | the number cannot move down | `five_card_reprice_inv100`, `kim_biased_conclude_below_false` | `p7:99,107` |
-| every hypothesis discharged | `five_card_singleton_below_threshold`, `five_card_biased_proximity_at_singleton`, the `Check` beside it | `p7:118,127,131` |
+| every hypothesis discharged | `five_card_singleton_below_threshold`, `five_card_biased_proximity_at_singleton` | `p7:118,127` |
 | the arm's proposition here | `five_card_biased_proximity_prop_holds`, `five_card_biased_indistinguishability_implies_proximity` | `p8:173,184` |
 | recorded `Fail`s | `five_card_biased_proximity_by_computation`, `five_card_biased_proximity_by_done`, `kim_biased_cert_s5_ideal`, `kim_centi_proximity_from_biased`, `five_card_row_repeated_proximity`, `kim_biased_indistinguishability_from_centi` | `p7:141,149,187,202,208,218` |
 
-It `Require`s landing 1's staged `five_card_rows` and `s5_rows` and the staged
-framework, through `From pgg_smc Require Import` in every case. The `s5_rows`
+The bare `Check five_card_biased_proximity_at_singleton.` of `p7:131` does NOT
+land (Q5): a `Check` states no proposition, so it stays in the probe. The
+definition it checked lands, and `landing_fidelity.v` pins it by
+`Print Assumptions` instead. The `Check` is also gone from the fidelity file.
+
+It `Require`s `security/var_dist_joint_law.v`, landing 1's staged
+`five_card_rows` and `s5_rows`, and the staged framework, through `From pgg_smc Require Import` in every case. The `s5_rows`
 edge exists only for `kim_biased_cert_s5_ideal`, whose subject
 `s5_rand_exact_witness` is declared at `instances/s5/s5_rows.v:255`; the
 design's section 3 keeps that edge deliberately.
@@ -394,23 +425,26 @@ beside its `.v` under `staged/`.
 
 | File | rc | wall | sentences over 5 s |
 |---|---|---|---|
-| `staged/lib/var_dist_supp.v` | 0 | 4.0 s | none |
+| `staged/lib/var_dist_supp.v` | 0 | 4.1 s | none |
+| `staged/security/var_dist_joint_law.v` | 0 | 3.9 s | none |
 | `staged/instances/kim2025/five_card_mixing.v` | 0 | 4.1 s | none |
 | `staged/instances/kim2025/five_card_analysis.v` | 0 | 3.8 s | none |
-| `staged/manifest/pgg_analysis_manifest.v` | 0 | 5.8 s | one, 5.10 s, the `Require Export` block |
+| `staged/manifest/pgg_analysis_manifest.v` | 0 | 5.8 s | one, 5.15 s, the `Require Export` block |
 | `staged/manifest/pgg_tableau.v` | 0 | 12.9 s | none |
 | `staged/manifest/pgg_tableau_syntax.v` | 0 | 4.3 s | none |
 | `staged/instances/pgl27/pgl27_rows.v` | 0 | 6.3 s | none |
-| `staged/instances/kim2025/five_card_rows.v` | 0 | 4.5 s | none |
+| `staged/instances/kim2025/five_card_rows.v` | 0 | 4.6 s | none |
 | `staged/instances/s5/s5_rows.v` | 0 | 4.0 s | none |
-| `staged/instances/psl211/psl211_reading_constancy.v` | 0 | 22.3 s | three, 5.06 s, 6.11 s and 6.14 s |
+| `staged/instances/psl211/psl211_reading_constancy.v` | 0 | 22.2 s | three, 5.06 s, 6.05 s and 6.06 s |
 | `staged/instances/psl211/psl211_rows.v` | 0 | 5.5 s | none |
 | `staged/manifest/pgg_analysis_client.v` | 0 | 3.8 s | none |
 | `staged/manifest/pgg_tableau_arm_relations.v` | 0 | 3.8 s | none |
 | `staged/instances/kim2025/five_card_proximity.v` | 0 | 5.7 s | none |
-| `landing_fidelity.v` | 0 | 28.0 s | none |
+| `landing_fidelity.v` | 0 | 28.2 s | none |
 
-The slow sentence of `pgg_analysis_manifest.v` is its `Require Export` block,
+Fifteen staged files and the fidelity file, compiled in the `_CoqProject`
+order by `python3 compile.py` with no arguments. The slow sentence of
+`pgg_analysis_manifest.v` is its `Require Export` block,
 which loads the four facades. The three of `psl211_reading_constancy.v` are
 the `by split; vm_compute` and the two `rewrite -!size_filter` the Kim landing
 and landing 1 both measured at the same cost. No sentence of the four landed
@@ -426,7 +460,7 @@ files is over 5 s.
 
 | Group | Declarations | Assumptions |
 |---|---|---|
-| `lib/var_dist_supp.v` | `var_dist_fdistmap_pair`, `var_dist_prodR`, `var_dist_prodL`, `fdist_prod_snd`, `var_dist_own_marginals` | trio |
+| `security/var_dist_joint_law.v` | `var_dist_fdistmap_pair`, `var_dist_prodR`, `var_dist_prodL`, `fdist_prod_snd`, `var_dist_own_marginals` | trio |
 | `five_card_mixing.v` | `card_tnth_count` | **closed under the global context** |
 | `pgg_tableau_arm_relations.v` | `idealproximity_ceiling`, `indistinguishability_prop_cert_free`, `idealproximity_reading_le` | trio |
 | `five_card_proximity.v` | `five_card_uniform_pairE`, `five_card_reading_secretE`, `five_card_arg_cut_prodE`, `kim_biased_proximity_close`, `kim_biased_proximity_cert`, `kim_biased_proximity_cert_idealE`, `kim_biased_proximity_cert_epsE`, `kim_biased_proximity_eps_halfE`, `kim_biased_proximity_cert_eps_lt2`, `five_card_row_biased_branch_indistinguishability` and its `_atE`, `_rowE`, `_armE`, `five_card_row_biased_proximity` and its `_rowE`, `_publishedE`, `_armE`, `five_card_row_biased_arm_neq`, `five_card_biased_view_proximity`, `five_card_biased_view_own_marginals`, `five_card_reprice_inv100`, `kim_biased_conclude_below_false`, `five_card_biased_proximity_at_singleton`, `five_card_biased_proximity_prop_holds`, `five_card_biased_indistinguishability_implies_proximity` | trio |
@@ -451,8 +485,8 @@ What it checks:
 
 | Section | Checks |
 |---|---|
-| provenance | `Check var_dist_own_marginals`, `Check var_dist_prodL`, `Check card_tnth_count`, and `Fail Check` on `kim_centi_marginal_bound40`, `kim_centi_cut_mixing40`, `kim_centi_cert40`, `kim_centi_cert40_epsE` |
-| the promotion | all five lemmas restated and closed by the staged `var_dist_supp` |
+| provenance | `Check var_dist_own_marginals`, `Check var_dist_prodL`, `Check var_dist_fdistmap_pair`, `Check card_tnth_count`, and `Fail Check` on `kim_centi_marginal_bound40`, `kim_centi_cut_mixing40`, `kim_centi_cert40`, `kim_centi_cert40_epsE` |
+| the promotion | all five lemmas restated and closed by the staged `var_dist_joint_law` |
 | the move | `card_tnth_count` restated and closed by the staged `five_card_mixing` |
 | the arm relations | the three lemmas restated with their four section variables |
 | the five-card distance | the four lemmas of the distance section restated |
@@ -462,9 +496,10 @@ What it checks:
 | the theorems | `five_card_biased_view_proximity` at one fiftieth and `five_card_biased_view_own_marginals` at three fiftieths |
 | assumptions | the 35 `Print Assumptions` above |
 
-The provenance test is one-sided in both directions. If production's
-`var_dist_supp.vo` were loaded, the three `Check`s would error, because
-`var_dist_own_marginals` and `var_dist_prodL` exist in no production file. If
+The provenance test is one-sided in both directions. No production load path
+holds a `var_dist_joint_law` at all, so a `Require` of it that resolves
+resolved to the staged tree, and the three `Check`s on its lemmas would error
+otherwise. If
 production's `five_card_mixing.vo` or `five_card_rows.vo` were loaded, the
 four `Fail Check`s would error, because each of those names exists there.
 
@@ -478,15 +513,16 @@ is the token check of `verify.py` and the nine scratch compiles above.
 
 Four checks, output in `verify.out`.
 
-1. **Whole-file token diffs against production.** `var_dist_supp.v`: 3 hunks,
-   the two import lines and the one block replacement. `five_card_mixing.v`:
+1. **Whole-file token diffs against production.** `var_dist_supp.v`: 1 hunk,
+   57 tokens, the deletion of `card_tnth_count`. `five_card_mixing.v`:
    2 hunks, the addition of `card_tnth_count` and the removal of the two
    withdrawn declarations. Nothing else in either file moved.
 2. **Per-declaration token diffs against the probe.** Every landed declaration
-   is looked up by name in the probe file that declares it. Result: the five
-   promoted lemmas, `card_tnth_count`, all six of
+   is looked up by name in the probe file that declares it. Result: all five
+   of `security/var_dist_joint_law.v`, `card_tnth_count`, all six of
    `pgg_tableau_arm_relations.v` and all 32 of `five_card_proximity.v` are
-   token-identical to their source. Zero hunks anywhere.
+   token-identical to their source. Zero hunks anywhere. This is the token
+   proof that Q3's re-homing moved the five lemmas without touching them.
 3. **Comment word diffs.** Every difference is listed with before and after in
    E1 to E4 above and classified: one R5 addition, one wrong-word fix, one
    naming-convention prefix, and six narration removals.
@@ -509,56 +545,21 @@ existing line each goes after:
 
 | New line | Inserted after | Why |
 |---|---|---|
+| `security/var_dist_joint_law.v` | `security/pgg_collusion_bound.v` (`_CoqProject:87`), before `security/pgg_security_solver.v` | it `Require`s `pgg_collusion_bound` and `lib/var_dist_supp.v` (`:35`) and nothing else of the project |
 | `manifest/pgg_tableau_arm_relations.v` | `manifest/pgg_tableau_syntax.v` (`_CoqProject:220`), before `instances/pgl27/pgl27_rows.v` | it `Require`s `pgg_tableau` and `var_dist_supp` and nothing below them |
-| `instances/kim2025/five_card_proximity.v` | `instances/kim2025/five_card_rows.v` (`_CoqProject:222`), before `instances/s5/s5_rows.v` | the design's section 1 anchor; it `Require`s `five_card_rows` and `s5_rows` |
-
-The second line sits before `s5_rows.v` although it `Require`s it. That is
-harmless, because `coq_makefile` orders by the dependency graph and not by the
-file list, and it is the anchor the design fixes. Moving it after
-`instances/s5/s5_rows.v` (`:223`) would read better to a human; recorded as
-question Q4 rather than decided here.
+| `instances/kim2025/five_card_proximity.v` | `instances/s5/s5_rows.v` (`_CoqProject:223`), before `instances/psl211/psl211_reading_constancy.v` | Q4: it `Require`s `five_card_rows` and `s5_rows`, so it goes after both |
 
 ---
 
-## Questions
+## The five questions, as ruled
 
-**Q1. `var_dist_prodL` lands, against R6.** The design's p1 table and the
-orchestrator's R6 both say `var_dist_prodL` stays in the probe, "used by no
-landing declaration". It is used by a landing declaration:
-`var_dist_own_marginals` closes with
-`by apply: lerD; [rewrite var_dist_prodR | rewrite var_dist_prodL]`
-(`p9_actual_marginals.v:85`), and `var_dist_own_marginals` is in the same
-table as landing in `lib/var_dist_supp.v`. Following the brief's rule, the
-dependency is landed rather than the proof changed, and this is the record.
-`fdist_uniform_prod`, the other lemma R6 names, is used by nothing that lands
-and stays in the probe, so R6 holds for it unchanged.
+| Q | Ruling | How it is built |
+|---|---|---|
+| Q1 | accepted, `var_dist_prodL` lands | it is in `security/var_dist_joint_law.v` as a premise of `var_dist_own_marginals`; `fdist_uniform_prod` stays in the probe |
+| Q2 | accepted | `idealproximity_tail_without_independence` is in `manifest/pgg_tableau_arm_relations.v` |
+| Q3 | not accepted as first built | the five lemmas moved to the new `staged/security/var_dist_joint_law.v`; `staged/lib/var_dist_supp.v` differs from production by the one removal and nothing else, its import block reverted |
+| Q4 | accepted | the `_CoqProject` line for `five_card_proximity.v` goes after `instances/s5/s5_rows.v` |
+| Q5 | accepted | the bare `Check five_card_biased_proximity_at_singleton.` is gone from the staged file and from `landing_fidelity.v`; the definition still lands and is pinned by `Print Assumptions` |
 
-**Q2. `idealproximity_tail_without_independence` names no instance.** The
-design's section 2 and R8 both say it "is stated at a five-card certificate".
-Read at `p7_mutations.v:164-177`, it is stated at `(A : PGGAlgebraic)`,
-`(E : ExecutionParams A)`, `(sa : SampleAdapter R (instance_exec E))` and
-`(cert : IdealProximityCert sa)`. Under R8's decision — "the declarations that
-name no instance do not go to an instance file" — it lands in
-`manifest/pgg_tableau_arm_relations.v`. If the owner meant the count of six to
-split five and one, this is the one that moves.
-
-**Q3. `lib/var_dist_supp.v` now `Require`s `security/pgg_collusion_bound.v`.**
-The design sends `var_dist_fdistmap_pair` and `var_dist_own_marginals` to
-`lib/`, and both apply lemmas that live in `security/`: `var_dist_fdistmap`
-(`pgg_collusion_bound.v:126`) and `var_dist_triangle` (`:43`). Neither is in
-infotheo. So a `lib/` file now depends on a `security/` file. There is no
-cycle and the reverse closure is unchanged, but the layering is new and the
-design did not anticipate it. The alternatives are to move the two lemmas to a
-file above `security/`, or to move `var_dist_fdistmap` and
-`var_dist_triangle` down into `lib/`, which is its own batch with
-`pgg_collusion_bound`'s reverse closure.
-
-**Q4. The `_CoqProject` line for `five_card_proximity.v` precedes a file it
-requires.** See the placement table above. The design's anchor is kept.
-
-**Q5. The five-card file has one `Check` sentence in permanent text.**
-`Check five_card_biased_proximity_at_singleton.` is the probe's
-`p7_mutations.v:131`, and the design's p7 table says "the `Check` at :131
-lands with it". Kept verbatim. The tree's rows files carry bare `Check`s in
-permanent text, so this is not new, but it is a sentence with no proposition
-and an auditor may want it replaced by an ascription.
+Nothing is left open. The one thing the main session must redo if landing 1
+moves again is the restage, and `restage.py` above is how.

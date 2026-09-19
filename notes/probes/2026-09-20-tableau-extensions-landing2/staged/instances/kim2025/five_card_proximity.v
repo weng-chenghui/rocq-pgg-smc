@@ -88,6 +88,7 @@ From pgg_smc Require Import pgg_monodromy_profile pgg_execution_plug.
 From pgg_smc Require Import pgg_observed_execution pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_sample_adapter.
 From pgg_smc Require Import pgg_collusion_bound var_dist_supp.
+From pgg_smc Require Import var_dist_joint_law.
 From pgg_reconstruct Require Import algebraic_rigidity.
 From pgg_smc Require Import five_card_group five_card_family.
 From pgg_smc Require Import five_card_exec five_card_models.
@@ -452,8 +453,6 @@ Proof. by rewrite cards1. Qed.
 Definition five_card_biased_proximity_at_singleton (R : realType) (i : 'I_5) :=
   @five_card_biased_view_proximity R [set i]
     (five_card_singleton_below_threshold i).
-
-Check five_card_biased_proximity_at_singleton.
 
 (******************************************************************************)
 (*     The conclusion does not hold by computation                            *)

@@ -259,14 +259,15 @@ Proof. by []. Qed.
    view whose mutual information with the secret is strictly positive. It is
    the affirmation, at size k, of what an ExactWitness denies below the
    threshold, stated at the same reader ew_indep is stated at, so the two are
-   claims about one object rather than two.  A scheme guarantees nothing at
-   or above its threshold, and this is what separates a threshold that is
-   sharp from one that is merely as far as a proof reached. It is an
-   annotation on the guarantee and not part of it: k occurs in the type, so
-   the kernel checks the number against the proof, and the annotated program
-   is convertible with the unannotated one. It attaches to the exact arm
-   alone, so a program certifying input indistinguishability carries no such
-   claim. *)
+   claims about one object rather than two.
+
+   A scheme guarantees nothing at or above its threshold, and this is what
+   separates a threshold that is sharp from one that is merely as far as a
+   proof reached. It is an annotation on the guarantee and not part of it: k
+   occurs in the type, so the kernel checks the number against the proof, and
+   the annotated program is convertible with the unannotated one. It attaches
+   to the exact arm alone, so a program certifying input indistinguishability
+   carries no such claim. *)
 Definition ExactLeakAt (k : nat) (x : StackAt Sampled) (p : ExactPayload x)
     : Prop :=
   forall (R : realType) (idx : amf_index (sp_f x) R),
@@ -388,10 +389,8 @@ Notation "s 'certify' 'InputIndistinguishability' c" :=
   (s ;;; certify_indistinguishability of c)
   (at level 90, left associativity, c at level 0).
 
-(* The proximity arm takes one certificate, as the input-indistinguishability
-   arm does, and the certificate's own five components are not split into
-   clauses here: four of them are terms of the instance and the fifth is the
-   number, so a builder would display the plumbing and not the mathematics. *)
+(* The proximity rule takes one certificate whole, as the
+   input-indistinguishability rule does, and has no builder. *)
 Notation "s 'certify' 'IdealProximity' c" :=
   (s ;;; certify_idealproximity of c)
   (at level 90, left associativity, c at level 0).

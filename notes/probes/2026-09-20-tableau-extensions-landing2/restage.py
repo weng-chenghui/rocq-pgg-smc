@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""Re-copy landing 1's six chain files and rebuild everything below them.
+
+Landing 1's staged text moves whenever a fix pass answers an audit.  A
+landing-2 compile is evidence only against the landing-1 text it loaded, so
+after any such move this script copies the six files again, reports whether
+each changed in code or only in comments, and recompiles the whole chain in
+the _CoqProject order.
+
+Usage:  python3 restage.py            copy, report, recompile
+        python3 restage.py --check    copy nothing; only report what differs
+"""
+
+import os
+import subprocess
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+L1 = os.path.join(REPO, "notes/probes/2026-09-20-tableau-extensions-landing1",
+                  "staged")
+L2 = os.path.join(HERE, "staged")
+
+CHAIN = [
+    "manifest/pgg_tableau.v",
+    "manifest/pgg_tableau_syntax.v",
+    "instances/pgl27/pgl27_rows.v",
+    "instances/kim2025/five_card_rows.v",
+    "instances/s5/s5_rows.v",
+    "instances/psl211/psl211_rows.v",
+    "instances/psl211/psl211_reading_constancy.v",
+]
+
+sys.path.insert(0, HERE)
+from verify import split_comments, tokens  # noqa: E402
+
+
+def main():
+    check = "--check" in sys.argv[1:]
+    moved = []
+    for rel in CHAIN:
+        a = open(os.path.join(L1, rel)).read()
+        b = open(os.path.join(L2, rel)).read()
+        if a == b:
+            print("%-48s unchanged" % rel)
+            continue
+        code = "CODE CHANGED" if tokens(split_comments(a)[0]) != \
+            tokens(split_comments(b)[0]) else "comments only"
+        print("%-48s %s" % (rel, code))
+        moved.append(rel)
+        if not check:
+            open(os.path.join(L2, rel), "w").write(a)
+    if check or not moved:
+        print("\n%d file(s) differ; nothing recompiled."
+              % len(moved) if check else "\nnothing to do.")
+        return 0
+    print("\ncopied %d file(s); recompiling the chain." % len(moved))
+    return subprocess.run([sys.executable,
+                           os.path.join(HERE, "compile.py")],
+                          cwd=HERE).returncode
+
+
+if __name__ == "__main__":
+    sys.exit(main())

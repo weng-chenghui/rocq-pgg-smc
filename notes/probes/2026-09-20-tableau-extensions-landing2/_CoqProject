@@ -37,6 +37,7 @@
 # own logical root, with the same result. Only this order loads the staged
 # copies.
 -R staged/lib pgg_smc
+-R staged/security pgg_smc
 -R staged/manifest pgg_smc
 -R staged/instances/pgl27 pgg_smc
 -R staged/instances/kim2025 pgg_smc
@@ -44,6 +45,7 @@
 -R staged/instances/psl211 pgg_smc
 
 staged/lib/var_dist_supp.v
+staged/security/var_dist_joint_law.v
 staged/instances/kim2025/five_card_mixing.v
 staged/instances/kim2025/five_card_analysis.v
 staged/manifest/pgg_analysis_manifest.v

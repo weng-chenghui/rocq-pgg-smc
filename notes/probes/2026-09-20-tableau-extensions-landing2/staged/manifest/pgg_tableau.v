@@ -47,7 +47,7 @@
 (* is a means of proving it. ic_close holds ic_ideal within the marginal      *)
 (* bound's epsilon of that bound's own law and ic_const asks a coalition      *)
 (* below the threshold to read it the same at every two run arguments, and    *)
-(* at a small enough epsilon no law satisfies both.                           *)
+(* at some models no law satisfies both below a positive number.              *)
 (*                                                                            *)
 (* Each arm has one composition law, and those laws are where the mathematics *)
 (* of the row sits. exact_tail transports a witness's independence from the   *)
