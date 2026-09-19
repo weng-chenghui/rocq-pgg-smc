@@ -13,7 +13,7 @@ Four checks.
   (2) PER-DECLARATION TOKENS.  Each landed declaration is looked up by name in
       the probe file that declares it and its token stream compared.  Two
       substitutions are applied to the staged stream before the comparison and
-      printed: the R7 rename of pow2_40_ge1 and pow2_40_gt0, and nothing else.
+      printed: the renames listed in RENAMED, and nothing else.
       A declaration whose tokens differ is printed in full, and the three
       that are meant to differ are named in EXPECTED below and printed with
       their reason.
@@ -49,6 +49,8 @@ WHOLE = [
      os.path.join(REPO, "manifest/pgg_analysis_manifest.v")),
     ("staged/manifest/pgg_analysis_client.v",
      os.path.join(REPO, "manifest/pgg_analysis_client.v")),
+    ("staged/lib/var_dist_supp.v",
+     os.path.join(REPO, "lib/var_dist_supp.v")),
 ]
 
 # staged file -> the probe files its landed declarations come from
@@ -65,13 +67,21 @@ ADDED = [
      {"pgl27_prior_sample": "p5_pgl27_prior_ideal.v"}),
     ("staged/instances/pgl27/pgl27_models.v",
      {"pgl27_prior_exact_family": "p5_pgl27_prior_ideal.v"}),
+    ("staged/lib/var_dist_supp.v",
+     {"var_dist_fdist1_uniform": "p5_mutations.v"}),
 ]
 
-# staged name -> the name the probe declares it under (R7).  The staged token
+# staged name -> the name the probe declares it under.  The staged token
 # stream has the staged name rewritten to the probe's before the comparison,
 # so a declaration reported token-identical is identical modulo this name.
+# The first pair is the R7 rename; the other two are the renames of fix
+# pass 1, N3 and N15.
 RENAMED = {"pgl27_pow2_40_ge1": "pow2_40_ge1",
-           "pgl27_pow2_40_gt0": "pow2_40_gt0"}
+           "pgl27_pow2_40_gt0": "pow2_40_gt0",
+           "pgl27_row_word_families_sampledE":
+               "pgl27_row_word_arms_sampledE",
+           "pgl27_word_uniform_ideal_close_false":
+               "pgl27_word_uniform_ideal_not_close"}
 
 # the declarations whose token stream is meant to differ from the probe's,
 # and why.  Every other declaration must come out token-identical.
@@ -111,6 +121,7 @@ LANDED = [
     "staged/manifest/pgg_analysis_manifest.v",
     "staged/manifest/pgg_analysis_client.v",
     "staged/instances/pgl27/pgl27_proximity.v",
+    "staged/lib/var_dist_supp.v",
 ]
 
 

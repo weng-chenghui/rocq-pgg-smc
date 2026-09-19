@@ -14,8 +14,8 @@
 (* the staged roots to pgg_smc after production's.  The provenance block      *)
 (* below is what witnesses that: each Check names a constant that exists only *)
 (* in the staged text of the file that declares it, so loading production's   *)
-(* pgl27_exec, pgl27_models, pgl27_analysis or pgg_analysis_manifest would    *)
-(* make it an error.                                                          *)
+(* pgl27_exec, pgl27_models, pgl27_analysis, pgg_analysis_manifest or         *)
+(* var_dist_supp would make it an error.                                      *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -26,7 +26,7 @@ From pgg_smc Require Import pgg_interface pgg_session_types.
 From pgg_smc Require Import pgg_monodromy_profile pgg_execution_plug.
 From pgg_smc Require Import pgg_observed_execution pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_sample_adapter pgg_weighted_words.
-From pgg_smc Require Import pgg_collusion_bound.
+From pgg_smc Require Import pgg_collusion_bound var_dist_supp.
 From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
 From pgg_smc Require Import pgl27_exec pgl27_models pgl27_analysis.
@@ -44,7 +44,7 @@ Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
 
 (******************************************************************************)
-(*     Provenance: the four edited files are the staged ones                  *)
+(*     Provenance: the five edited files are the staged ones                  *)
 (******************************************************************************)
 
 Check pgl27_exec.pgl27_prior_sample.
@@ -52,12 +52,13 @@ Check pgl27_models.pgl27_prior_exact_family.
 Check pgl27_analysis.PGL27Analysis.prior_sample.
 Check pgl27_analysis.PGL27Analysis.prior_exact_family.
 Check pgg_analysis_manifest.pgl27_row_prior_exact.
+Check var_dist_supp.var_dist_fdist1_uniform.
 
 (* The new file is reachable and is not in any production load path. *)
 Check pgl27_proximity.pgl27_word_proximity_cert.
 
 (******************************************************************************)
-(*     The four additions to the edited files                                 *)
+(*     The five additions to the edited instance and manifest files           *)
 (******************************************************************************)
 
 Check (pgl27_prior_sample
@@ -70,6 +71,10 @@ Check (PGL27Analysis.prior_exact_family
   : AnalysisModelFamily PGL27Analysis.observed).
 
 Check (pgl27_row_prior_exact : AnalysisPathRow).
+
+Check (PGL27Analysis.prior_sample
+  : forall (R : realType) (secretP : R.-fdist bool),
+      SampleAdapter R pgl27_exec_plug).
 
 (******************************************************************************)
 (*     The ideal at every prior                                               *)
@@ -204,12 +209,12 @@ Lemma f_pgl27_row_word_proximity_armE (R : realType)
   security_arm_of pgl27_row_word_proximity R idx = IdealProximityArm.
 Proof. exact: pgl27_row_word_proximity_armE. Qed.
 
-Lemma f_pgl27_row_word_arms_sampledE :
+Lemma f_pgl27_row_word_families_sampledE :
   ab_f (published_at pgl27_row_word_proximity)
   = sp_f (tableau_at pgl27_word_sampled)
   /\ ab_f (published_at pgl27_row_word_branch39)
      = sp_f (tableau_at pgl27_word_sampled).
-Proof. exact: pgl27_row_word_arms_sampledE. Qed.
+Proof. exact: pgl27_row_word_families_sampledE. Qed.
 
 Lemma f_pgl27_row_word_obs_sampledE :
   ab_obs (published_at pgl27_row_word_proximity)
@@ -245,7 +250,7 @@ Lemma f_var_dist_fdist1_uniform (R : realType) :
   = 1.
 Proof. exact: var_dist_fdist1_uniform. Qed.
 
-Lemma f_pgl27_word_uniform_ideal_not_close (R : realType)
+Lemma f_pgl27_word_uniform_ideal_close_false (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   ~ (var_dist
        (fdistmap (fun u => (@static_coalition_obs pgl27_algebra
@@ -264,7 +269,7 @@ Lemma f_pgl27_word_uniform_ideal_not_close (R : realType)
                             pgl27_secret R u))
           (sa_sampleP (pgl27_sample R)))
      <= 2%:R^-40).
-Proof. exact: pgl27_word_uniform_ideal_not_close. Qed.
+Proof. exact: pgl27_word_uniform_ideal_close_false. Qed.
 
 (******************************************************************************)
 (*     Assumptions                                                            *)
@@ -302,9 +307,9 @@ Print Assumptions pgl27_word_proximity_cert_eps_lt2.
 Print Assumptions pgl27_row_word_proximity.
 Print Assumptions pgl27_row_word_proximity_rowE.
 Print Assumptions pgl27_row_word_proximity_armE.
-Print Assumptions pgl27_row_word_arms_sampledE.
+Print Assumptions pgl27_row_word_families_sampledE.
 Print Assumptions pgl27_row_word_obs_sampledE.
 Print Assumptions pgl27_row_word_arm_neq.
 Print Assumptions pgl27_word_view_proximity.
 Print Assumptions var_dist_fdist1_uniform.
-Print Assumptions pgl27_word_uniform_ideal_not_close.
+Print Assumptions pgl27_word_uniform_ideal_close_false.

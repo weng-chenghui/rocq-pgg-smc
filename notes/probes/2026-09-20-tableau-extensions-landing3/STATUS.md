@@ -15,7 +15,8 @@ declaration's assumptions are the classical trio.
 
 ## Layout
 
-Six files are LANDED: their text is the permanent text landing 3 proposes.
+Seven files are LANDED: their text is the permanent text landing 3 proposes.
+The seventh, `staged/lib/var_dist_supp.v`, became landed in fix pass 1.
 
 | Staged path | Source | What it is |
 |---|---|---|
@@ -24,16 +25,16 @@ Six files are LANDED: their text is the permanent text landing 3 proposes.
 | `staged/instances/pgl27/pgl27_analysis.v` | PRODUCTION plus two facade aliases | landed |
 | `staged/manifest/pgg_analysis_manifest.v` | PRODUCTION plus Row 10, its typed row and its pins | landed |
 | `staged/manifest/pgg_analysis_client.v` | PRODUCTION plus one `Check`, row count ten | landed |
-| `staged/instances/pgl27/pgl27_proximity.v` | NEW; twenty-seven declarations of probe `p5_pgl27_prior_ideal.v`, `p5_pgl27_word_proximity.v`, `p5_mutations.v` | landed |
+| `staged/instances/pgl27/pgl27_proximity.v` | NEW; twenty-six declarations of probe `p5_pgl27_prior_ideal.v`, `p5_pgl27_word_proximity.v`, `p5_mutations.v` | landed |
+| `staged/lib/var_dist_supp.v` | PRODUCTION plus `var_dist_fdist1_uniform` and the `lra` import its proof needs | landed, from fix pass 1 |
 
-Thirteen files are CHAIN-CONSISTENCY COPIES. They are not landed by this
+Twelve files are CHAIN-CONSISTENCY COPIES. They are not landed by this
 landing. They exist so that everything downstream of landing 2's five files
 and of `instances/pgl27/pgl27_exec.v` compiles against the staged text rather
 than against production's, which is what the `cp` will force in production.
 
 | Staged path | Whose text it is |
 |---|---|
-| `staged/lib/var_dist_supp.v` | landing 2 |
 | `staged/security/var_dist_joint_law.v` | landing 2 |
 | `staged/instances/kim2025/five_card_mixing.v` | landing 2 |
 | `staged/manifest/pgg_tableau_arm_relations.v` | landing 2 |
@@ -47,17 +48,17 @@ than against production's, which is what the `cp` will force in production.
 | `staged/instances/psl211/psl211_reading_constancy.v` | landing 1 |
 | `staged/instances/psl211/psl211_rows.v` | landing 1 |
 
-All thirteen are copied from **production**, which holds landings 1 and 2
+All twelve are copied from **production**, which holds landings 1 and 2
 (landing 2 landed at commit `0397f8e`; the branch HEAD as this file is written
-is `c8b1923`). `cmp` reports each of the thirteen byte-identical to landing 2's
+is `c8b1923`). `cmp` reports each of the twelve byte-identical to landing 2's
 staged text at commit `cb3adfc`, the text every compile before that copy had
 loaded, so the change of source moved nothing.
 
-**Any of the thirteen may move again**, and a landing-3 compile is evidence
+**Any of the twelve may move again**, and a landing-3 compile is evidence
 only against the text it loaded. `restage.py` is how to redo this:
 
 ```
-python3 restage.py --check     # report which of the thirteen differ, and
+python3 restage.py --check     # report which of the twelve differ, and
                                # whether the difference is code or comments
 python3 restage.py             # copy them and recompile the whole chain
 ```
@@ -68,7 +69,7 @@ the same comment-stripped token comparison `verify.py` uses, then calls
 nineteen staged files and the fidelity file, one Rocq process at a time
 through the `rocq1` lock.
 
-Those thirteen plus the six landed are the union of two reverse closures. A
+Those twelve plus the seven landed are the union of two reverse closures. A
 Python walk over the `Require` lines of every `.v` file outside `notes/`,
 `_build` and `.git` gives `instances/pgl27/pgl27_exec.v` the eleven
 reverse-dependants the design's section 3 computes, `pgl27_models`,
@@ -242,9 +243,11 @@ Whole-file token diff against production: **1 hunk, 2 tokens**, the `Check`.
 
 ## E6 — the new `instances/pgl27/pgl27_proximity.v`
 
-Twenty-seven declarations, twenty-four of them statements and three recorded
-`Fail`s. Twenty-four are token-identical to the probe's; the three that are
-not are the forced edits below.
+Twenty-six declarations, twenty-three of them statements and three recorded
+`Fail`s. Twenty-four are token-identical to the probe's; the two that are not
+are the forced edits (b) and (c) below. Fix pass 1 moved the twenty-seventh,
+`var_dist_fdist1_uniform`, to `staged/lib/var_dist_supp.v` and renamed two of
+the twenty-six; see the Fix pass 1 section.
 
 | Group | Declarations | Probe source |
 |---|---|---|
@@ -252,9 +255,10 @@ not are the forced edits below.
 | the distance | `pgl27_word_secret`, `pgl27_word_proximity_close` | `p5_word:111,128` |
 | the certificate | `pgl27_word_proximity_cert`, `pgl27_word_proximity_cert_idealE` | `p5_word:191,206` |
 | the number | `pgl27_word_proximity_cert_epsE`, `pgl27_word_proximity_eps_halfE`, `pgl27_pow2_40_ge1`, `pgl27_pow2_40_gt0`, `pgl27_word_proximity_le39`, `pgl27_word_proximity_cert_eps_lt2` | `p5_word:220,234,241,245,251,263` |
-| the two rows | `pgl27_row_word_proximity`, `pgl27_row_word_proximity_rowE`, `pgl27_row_word_proximity_armE`, `pgl27_row_word_arms_sampledE`, `pgl27_row_word_obs_sampledE`, `pgl27_row_word_arm_neq` | `p5_word:285,299,307,323,335,350` |
+| the two rows | `pgl27_row_word_proximity`, `pgl27_row_word_proximity_rowE`, `pgl27_row_word_proximity_armE`, `pgl27_row_word_families_sampledE` (renamed in fix pass 1), `pgl27_row_word_obs_sampledE`, `pgl27_row_word_arm_neq` | `p5_word:285,299,307,323,335,350` |
 | what the row states | `pgl27_word_view_proximity` | `p5_word:382` |
-| the ideals refused | `var_dist_fdist1_uniform`, `pgl27_word_uniform_ideal_not_close` | `p5_mut:88,120` |
+| the ideals refused | `pgl27_word_uniform_ideal_close_false` (renamed in fix pass 1) | `p5_mut:120` |
+| in `lib/var_dist_supp.v` | `var_dist_fdist1_uniform` (moved there in fix pass 1) | `p5_mut:88` |
 | recorded `Fail`s | `pgl27_word_proximity_cert_unit_ideal`, `pgl27_word_proximity_cert_uniform_ideal`, `pgl27_cross_model_proximity` | `p5_mut:68,187,205` |
 
 `pgl27_row_word_branch39_armE` (`p5_word:314`) does NOT land: landing 1 put it
@@ -275,7 +279,8 @@ ones; `t0_sampled_branch_pgl27` resolves to `pgl27_rows` under R1(a);
 ### The three forced code edits
 
 **(a) `var_dist_fdist1_uniform`: the `first [...]` list replaced by the branch
-that fires.** The probe writes, at `p5_mutations.v:98-100`:
+that fires.** Since fix pass 1 this declaration lands in
+`staged/lib/var_dist_supp.v`. The probe writes, at `p5_mutations.v:98-100`:
 
 ```
 have Hf : (fdist1 true : R.-fdist bool) false = 0.
@@ -291,9 +296,9 @@ have Hf : (fdist1 true : R.-fdist bool) false = 0.
   by rewrite fdist1E.
 ```
 
-Determined by compiling: `staged/instances/pgl27/pgl27_proximity.v` compiles
-rc 0 with it. The statement is unchanged; `verify.py` prints the 27-token
-proof-body difference in full.
+Determined by compiling: the file that carries it compiles rc 0 with it. The
+statement is unchanged; `verify.py` prints the 27-token proof-body difference
+in full, from `staged/lib/var_dist_supp.v` since fix pass 1.
 
 **(b) `pgl27_cross_model_proximity`: its subject respelled.** The probe writes
 `pgl27_exact_sampled certify IdealProximity pgl27_word_proximity_cert`, and
@@ -472,7 +477,7 @@ beside its `.v` under `staged/`.
 
 | File | rc | wall | sentences over 5 s |
 |---|---|---|---|
-| `staged/lib/var_dist_supp.v` | 0 | 3.9 s | none |
+| `staged/lib/var_dist_supp.v` | 0 | 4.0 s | none |
 | `staged/security/var_dist_joint_law.v` | 0 | 3.9 s | none |
 | `staged/instances/pgl27/pgl27_exec.v` | 0 | 17.0 s | one, 8.73 s, production's own `by vm_compute` |
 | `staged/instances/pgl27/pgl27_models.v` | 0 | 4.1 s | none |
@@ -490,8 +495,19 @@ beside its `.v` under `staged/`.
 | `staged/manifest/pgg_analysis_client.v` | 0 | 3.8 s | none |
 | `staged/manifest/pgg_tableau_arm_relations.v` | 0 | 3.7 s | none |
 | `staged/instances/kim2025/five_card_proximity.v` | 0 | 5.7 s | none |
-| `staged/instances/pgl27/pgl27_proximity.v` | 0 | 5.3 s | none |
-| `landing_fidelity.v` | 0 | 30.0 s | none |
+| `staged/instances/pgl27/pgl27_proximity.v` | 0 | 5.2 s | none |
+| `landing_fidelity.v` | 0 | 29.8 s | none |
+
+The table is the fix-pass-1 run, `python3 compile.py` with no arguments,
+captured in `compile.out`. Another session held the machine-wide `rocq1` lock
+during part of the run, so the wall times above are the per-file figures
+`compile.py` prints after the lock is taken; the `-time` lines, not the wall
+times, are what the "sentences over 5 s" column reads. Every file is rc 0 and
+no landed file has a sentence over 5 s: the three slow sentences are
+`pgl27_exec.v`'s production `by vm_compute.` at 8.902 s, the manifest's
+`Require Export` block at 5.222 s, and the three of
+`psl211_reading_constancy.v` at 5.073 s, 6.059 s and 6.084 s, all measured by
+landings 1 and 2 as well.
 
 Nineteen staged files and the fidelity file, compiled in the `_CoqProject`
 order by `python3 compile.py` with no arguments, captured in `compile.out`.
@@ -525,7 +541,8 @@ declaration is closed under the global context.
 | `pgl27_models.v` | `pgl27_prior_exact_family` |
 | `pgl27_analysis.v` | `PGL27Analysis.prior_sample`, `PGL27Analysis.prior_exact_family` |
 | `pgg_analysis_manifest.v` | `pgl27_row_prior_exact` |
-| `pgl27_proximity.v` | the 24 non-`Fail` declarations |
+| `pgl27_proximity.v` | the 23 non-`Fail` declarations |
+| `var_dist_supp.v` | `var_dist_fdist1_uniform` |
 
 No axiom other than the trio appears anywhere in the run, and no `Axiom`,
 `Parameter`, `Admitted` or `Abort` is introduced by any landed file. The trio
@@ -543,8 +560,8 @@ and no `done` appears on a `published_at` or `published_row` equation.
 
 | Section | Checks |
 |---|---|
-| provenance | `Check` on `pgl27_exec.pgl27_prior_sample`, `pgl27_models.pgl27_prior_exact_family`, `pgl27_analysis.PGL27Analysis.prior_sample`, `pgl27_analysis.PGL27Analysis.prior_exact_family`, `pgg_analysis_manifest.pgl27_row_prior_exact`, `pgl27_proximity.pgl27_word_proximity_cert` |
-| the four additions | each ascribed at its type, including `PGL27Analysis.prior_exact_family : AnalysisModelFamily PGL27Analysis.observed` |
+| provenance | `Check` on `pgl27_exec.pgl27_prior_sample`, `pgl27_models.pgl27_prior_exact_family`, `pgl27_analysis.PGL27Analysis.prior_sample`, `pgl27_analysis.PGL27Analysis.prior_exact_family`, `pgg_analysis_manifest.pgl27_row_prior_exact`, `var_dist_supp.var_dist_fdist1_uniform`, `pgl27_proximity.pgl27_word_proximity_cert` |
+| the five additions | each ascribed at its type, including `PGL27Analysis.prior_exact_family : AnalysisModelFamily PGL27Analysis.observed` and, since fix pass 1, `PGL27Analysis.prior_sample` |
 | the ideal | `pgl27_prior_viewE` restated, the witness and the program ascribed, `_armE` restated |
 | the manifest row | the landed `published_row pgl27_row_prior_exact_tableau = pgl27_row_prior_exact`, closed by the landed lemma, and beside it the probe's raw-family form of the same equation, closed by `exact: erefl` |
 | the distance | `pgl27_word_proximity_close` restated at its threshold premise |
@@ -554,12 +571,12 @@ and no `done` appears on a `published_at` or `published_row` equation.
 | the theorems | `pgl27_word_view_proximity` at 2^-39, `var_dist_fdist1_uniform` at one, the refutation at the point mass |
 | assumptions | the 29 `Print Assumptions` above |
 
-The provenance test is one-sided in both directions. Each of the six `Check`s
+The provenance test is one-sided in both directions. Each of the seven `Check`s
 names a constant that exists only in this landing's text of the file that
 declares it, so if production's `pgl27_exec.vo`, `pgl27_models.vo`,
-`pgl27_analysis.vo` or `pgg_analysis_manifest.vo` were loaded, the
-corresponding `Check` would be an error; and no production load path holds a
-`pgl27_proximity` at all.
+`pgl27_analysis.vo`, `pgg_analysis_manifest.vo` or `var_dist_supp.vo` were
+loaded, the corresponding `Check` would be an error; and no production load
+path holds a `pgl27_proximity` at all.
 
 The equation `published_row pgl27_row_prior_exact_tableau = pgl27_row_exact`
 is a row-against-row conversion, measured at 48 to 96 s on this instance, and
@@ -575,26 +592,31 @@ is the token check of `verify.py` and the three scratch compiles above.
 
 Four checks, output in `verify.out`.
 
-1. **Whole-file token diffs against production**, for the five files
+1. **Whole-file token diffs against production**, for the six files
    production already has. `pgl27_exec.v`: 1 hunk, 45 tokens.
    `pgl27_models.v`: 1 hunk, 32 tokens. `pgl27_analysis.v`: 2 hunks, 11
    tokens. `pgg_analysis_manifest.v`: 3 hunks, 98 tokens.
-   `pgg_analysis_client.v`: 1 hunk, 2 tokens. Every hunk is an addition listed
-   in E1 to E5; nothing in any of the five moved.
+   `pgg_analysis_client.v`: 1 hunk, 2 tokens. `var_dist_supp.v`: 2 hunks, 251
+   tokens, the moved lemma and the `lra` import, both from fix pass 1. Every
+   hunk is an addition listed in E1 to E5 or in Fix pass 1; nothing in any of
+   the six moved.
 2. **Per-declaration token diffs against the probe.** `pgl27_prior_sample`
-   1 of 1, `pgl27_prior_exact_family` 1 of 1, and
-   `instances/pgl27/pgl27_proximity.v` **24 of 27** token-identical. The three
-   that are not are the three forced edits of E6. Each is named in the script's
-   `EXPECTED` map, printed with its reason and then printed in full:
+   1 of 1, `pgl27_prior_exact_family` 1 of 1,
+   `instances/pgl27/pgl27_proximity.v` **24 of 26** and
+   `lib/var_dist_supp.v` **0 of 1** token-identical. The three that are not
+   are the three forced edits of E6. Each is named in the script's `EXPECTED`
+   map, printed with its reason and then printed in full:
    `pgl27_row_prior_exact_rowE` (8 tokens, the right-hand side),
-   `var_dist_fdist1_uniform` (27 tokens, the proof body) and
-   `pgl27_cross_model_proximity` (4 tokens, the subject). The R7 rename is
-   undone before every comparison, at the declaration names and at the two
-   references inside other proofs, and the substitution is printed.
-3. **Comment word diffs.** Seven differences, each listed with before and
-   after in E1, E2 and E6 and each classified. The largest,
-   `pgl27_row_prior_exact_rowE` at 106 words, is the docstring rewritten with
-   its statement.
+   `var_dist_fdist1_uniform` (27 tokens, the proof body, now reported from
+   its new home) and `pgl27_cross_model_proximity` (4 tokens, the subject).
+   The four renames of `RENAMED` are undone before every comparison, at the
+   declaration names and at the two references inside other proofs, and each
+   substitution is printed.
+3. **Comment word diffs.** Against the probe, every declaration whose
+   comment a landing edit or a fix-pass finding touched. The Fix pass 1
+   section maps each changed passage to its finding; the largest,
+   `pgl27_row_prior_exact_rowE` at 133 words, is the docstring rewritten with
+   its statement and then again for L3-3 and N2.
 4. **Scans.** `SpectralDecay` 0, `SpectralCert` 0, `_indist\b` 0,
    `RepricePayload` 0, `idealproximity_ceiling` 0, any abbreviation of
    "indistinguishability" 0, `apex` 0, `gate`/`gates`/`gated`/`gating` 0,
@@ -639,3 +661,150 @@ The `_CoqProject` line for `instances/pgl27/pgl27_proximity.v` goes after
 `instances/kim2025/five_card_proximity.v`, as ruled.
 
 Nothing else is left open.
+
+---
+
+## Fix pass 1
+
+Date: 2026-09-20. Input: `soundness-audit-landing3.md` (L3-1 to L3-11) and
+`naming-audit-landing3.md` (N1 to N35), plus the orchestrator's rulings on
+N3, N15 and N16. Every replacement was checked against the declaration it
+describes before it was written; where the two reports proposed different
+texts for one passage, one text was written that satisfies both.
+
+The landed files are now **seven**: the six of the Layout table plus
+`staged/lib/var_dist_supp.v`, which gains `var_dist_fdist1_uniform` under
+ruling N16(b).
+
+### Code changes, in full
+
+Four, and nothing else. `verify.py` check (1) prints each as a hunk.
+
+1. `pgl27_row_word_arms_sampledE` renamed `pgl27_row_word_families_sampledE`
+   (N3). The statement is about `ab_f`, the `AnalysisModelFamily` accessor
+   (`manifest/pgg_tableau.v:351-353`), and `sp_f` (`:334`); there is no
+   `ab_arms` field. Sites: the declaration, the header entry, and
+   `landing_fidelity.v` at the restatement, its `exact:` and its
+   `Print Assumptions`.
+2. `pgl27_word_uniform_ideal_not_close` renamed
+   `pgl27_word_uniform_ideal_close_false` (N15). The tree spells a refutation
+   with `_false`: `kim_biased_conclude_below_false`,
+   `psl211_alldecks_constancy_false_word584`. Sites: the declaration, the
+   header entry, the prose reference inside the second recorded `Fail`'s
+   comment, and the same three lines of `landing_fidelity.v`.
+3. `var_dist_fdist1_uniform` moved from `pgl27_proximity.v` to
+   `staged/lib/var_dist_supp.v` (N16(b)), statement and proof body
+   unchanged, with a docstring rewritten for its new home and a
+   header-table entry.
+4. The two `Require` lines the move forces:
+   `From pgg_smc Require Import pgg_collusion_bound var_dist_supp.` in
+   `pgl27_proximity.v` (the spelling `instances/kim2025/five_card_proximity.v`
+   already uses) and in `landing_fidelity.v`; and
+   `From mathcomp Require Import boolp reals lra.` in `var_dist_supp.v`.
+
+**The `lra` import was measured, not assumed.** Compiling the moved lemma
+into `var_dist_supp.v` with the file's existing imports gives rc 1,
+`Error: The reference lra was not found in the current environment.`
+(`staged/lib/var_dist_supp.v`, line 184). With `lra` added to the
+`boolp reals` line the file compiles rc 0 in 4.1 s, no slow sentence.
+
+**The recompile closure of the move is complete.** A `Require` walk over
+every `.v` file outside `notes/`, `_build` and `.git` gives the reverse
+closure of `lib/var_dist_supp.v` as exactly 14 modules:
+`five_card_analysis`, `five_card_mixing`, `five_card_proximity`,
+`five_card_rows`, `pgg_analysis_client`, `pgg_analysis_manifest`,
+`pgg_tableau`, `pgg_tableau_arm_relations`, `pgg_tableau_syntax`,
+`pgl27_rows`, `psl211_reading_constancy`, `psl211_rows`, `s5_rows`,
+`var_dist_joint_law`. Every one of the 14 is already a staged file of this
+chain, and `pgl27_proximity.v` joins them by the new `Require`, so the
+chain compile recompiles the whole closure. Nothing outside it loads
+`var_dist_supp`.
+
+### Per finding
+
+| id | final text, or the decision | declaration checked |
+|---|---|---|
+| L3-1 (MUST) | Guard 1's last sentence becomes "The term written here is therefore refused before any distance is considered. The same family at its own index tt is a well-typed ideal for this actual model, and what refuses it there is the distance field, which the guard below records." | `pgl27_word_proximity_cert_unit_ideal`, whose written ideal is `amf_sample pgl27_exact_family R secretP`, and guard 2, whose comment already says the distance field is what the kernel rejects at index `tt` |
+| L3-1, second half | Guard 3's last sentence becomes "The Fail rejects the one term written here, on that mismatch of index types, and the mismatch is what separates the two models of this instance." Guard 2's comment already carries "The Fail rejects the one term written here, on that mismatch of types, and rules out no other term." and is unchanged. | `pgl27_cross_model_proximity`; the three guards now agree that a `Fail` refuses one written term |
+| L3-2 | "The only inexact quantity is that number: the ideal and its witness are the terms the ideal row already publishes, and the secret is the word model's own first projection, typed at the carrier that witness names." | `pgl27_word_proximity_cert`, field `ipc_secret = pgl27_word_secret secretP = fun u => u.1` on `sa_sampleP (pgl27_word_sample secretP)` |
+| L3-3 + N2 | One text: "The manifest's typed row for the eight-card orbit instance at the prior-indexed exact shuffle is the row this program publishes. Its five coordinates are the observed execution the program runs on, the completion level the publish terminal reaches, the model family the sample step named, and the two statuses the terminal was given. The manifest writes those coordinates in the facade's vocabulary and the program in this file's, and conversion decides the equation, so the manifest's row for this path is a claim this equation discharges rather than a table maintained beside the program." | `pgl27_row_prior_exact_rowE`, and the hand-written `Definition pgl27_row_prior_exact` of the manifest; the closing clause is `pgl27_rows.v:342-344`'s own wording, which L3-3 names |
+| L3-4 | Header entry: "== below the four-seat threshold, the two models' joint laws of reading and secret are within 2^-40" | `pgl27_word_proximity_close`, premise `(#\|C\| < profile_k (instance_profile pgl27_algebra))%N` |
+| L3-5 + N9 | One text. Docstring: "The certificate's number is at most 2^-39, the constant the word row publishes for the input-indistinguishability arm. It is the obligation of the terminal that concludes the proximity row at that constant, and the obligation is met strictly, the certificate's number being half of the published one." Header entry: "== the certificate's number is at most 2^-39" | `pgl27_word_proximity_le39`, conclusion `<= 2%:R^-39` |
+| L3-6 + N17 | One text, in the Row 10 level justification: "Row 1 records the same instance and the same cut at the uniform secret alone, its family being indexed by the unit type. The two rows agree in their other four coordinates and differ in the model family, and the member of this row's family at the uniform prior is the member of Row 1's at tt." | `pgl27_row_exact` and `pgl27_row_prior_exact`; the last clause is the equation the soundness auditor closed `by []` |
+| L3-7 | The sentence moves with the lemma to `var_dist_supp.v` and loses "beat": "Pushing two joint laws of a reading and a secret along the secret coordinate leaves the two laws of the secret and can only shorten the distance, so a proximity number between two models whose secrets are drawn from these two laws is at least one, whatever the rest of the two executions does." | `var_dist_fdist1_uniform`; the mechanism named is `var_dist_fdistmap`, the step `pgl27_word_uniform_ideal_close_false` takes |
+| L3-8 | "The proximity row publishes the manifest's row for the word path, as pgl27_row_word_rowE of pgl27_rows.v says of the word program." | `pgl27_row_word_rowE : published_row pgl27_row_word_tableau = pgl27_row_word`, `pgl27_rows.v:345-347` |
+| L3-9 | `landing_fidelity.v` banner becomes "The five additions to the edited instance and manifest files" and gains `Check (PGL27Analysis.prior_sample : forall (R : realType) (secretP : R.-fdist bool), SampleAdapter R pgl27_exec_plug).` | `PGL27Analysis.prior_sample := @pgl27_prior_sample`; the ascription is the one the soundness auditor compiled |
+| L3-10 + N10 | One text: "== the certificate's ideal and witness are the model and the port the ideal row publishes" | `pgl27_word_proximity_cert_idealE`, a conjunction of an `ipc_ideal` equation and an `ExactIndependence (ipc_witness …) = ab_port …` equation |
+| L3-11 + N12 | One text, twice. Header entry: "== the framework's reading of a coalition at the prior-indexed exact shuffle is the instance's own reading pgl27_view". Docstring: "The framework's static reading of a coalition at this model is the instance's own reading pgl27_view, with the secret left inside the sample point." | `pgl27_prior_viewE`, right-hand side `pgl27_view R C` |
+| N1 (MUST) | Header paragraph three, rewritten: "Both certificates over the word model are built from one number, the walk's single-card marginal number 2^-40 of pgl27_word_marginal_bound, which rests on pgl27_word_mixing, the distance between the word walk and the uniform cut on the group. The proximity certificate carries that number and the input-indistinguishability certificate carries it added to itself, which pgl27_word_proximity_eps_halfE states. The proximity row concludes at 2^-39, the constant pgl27_row_word_branch39 publishes for the other arm, so the two rows over this model are published at one constant and the terminal's obligation is met strictly. Each of these numbers bounds a sum of absolute differences, twice the total variation distance, so a distinguisher's advantage against the published row is at most 2^-40." | all three lemmas read: `pgl27_word_marginal_bound` is `@MkShuffleMarginalBound R pgl27_M 200 (2%:R^-40) rho_word (@pgl27_endpoint_mixing R)`; `pgl27_endpoint_mixing` is proved `le_trans … pgl27_word_mixing`; `pgl27_word_mixing` bounds the distance from `rho_from_words_weighted` to `` `U pgl27_G_pos ``; `pgl27_view_mixing` is on the joint law and is no longer named here. `ic_b (pgl27_word_cert …) = pgl27_word_marginal_bound R` and `cert_eps = sw_bound_eps (ic_b …) + sw_bound_eps (ic_b …)`. Both rows are `PublishedRowAt pgl27_reprice39`, and `pgl27_reprice39 = fun R => Some (2%:R^-39 : R)` |
+| N4 (MUST) | Both "This is the value a paper's table prints in the arm column …" sentences deleted. | `pgl27_row_prior_exact_armE` and `pgl27_row_word_proximity_armE`; what remains is the fixed wording production `five_card_proximity.v:394-396` carries |
+| N5 | "The number is spent once, against the input-indistinguishability row's twice. Its transfer status is IdealFinite, the same the input-indistinguishability row carries, and the two certificates compare against the same ideal cut." | `pgl27_row_word_proximity`, whose `publish` clause writes `IdealFinite`; the replacement is production `five_card_proximity.v:356-359` word for word |
+| N6 | Header paragraph two cut to: "The ideal's own privacy is a theorem and not an assumption. pgl27_row_prior_exact_tableau publishes the exact execution through the exact arm at every law of the dealt secret, and pgl27_word_proximity_cert_idealE says that the model the proximity certificate calls ideal is the model that row publishes, and the witness it carries for that model the row's own port." | `pgl27_row_prior_exact_tableau` and `pgl27_word_proximity_cert_idealE`. Deviation from the auditor's text: the last clause names both halves of the conjunction, so that the header and the L3-10 entry say the same thing |
+| N7 | "At about 4.5e-13 of that bound it is a cryptographic separation, where the proximity certificate of Kim's one-cut model at one percent of the same bound is a weak one." | `pgl27_word_proximity_cert_eps_lt2`; production `five_card_proximity.v:311-314` says of Kim's "At one percent of that bound it is a weak separation and not a cryptographic one" |
+| N8 | Docstring keeps only "The premise is the arm's threshold at this instance, four seats." The proof comment gains "The threshold is used twice, once for the ideal witness's independence and once for pgl27_view_mixing." | `pgl27_word_proximity_close`; `H3` is used at the `inde_dist_of_RV2 (pgl27_view_indep_gen secretP H3)` line and at the `pgl27_view_mixing secretP H3` line |
+| N11 | "== the input-indistinguishability certificate's number is twice the proximity certificate's" | `pgl27_word_proximity_eps_halfE` |
+| N13 | "== the proximity row's security statement, at 2^-39" | `pgl27_word_view_proximity`, conclusion `<= 2%:R^-39` |
+| N14 | Header entry "== the certificate's number is 2^-40"; the docstring's "in closed form" also goes, to "The certificate's number is the two-hundred-letter walk's marginal number, 2^-40." | `pgl27_word_proximity_cert_epsE`, conclusion `= 2%:R^-40` |
+| N19 | "It differs from pgl27_sample only in leaving the law of the dealt secret free, which is what a comparison with the word model at the same law requires." | `pgl27_prior_sample` against `pgl27_sample`; "coordinate" now has one sense in `pgl27_exec.v`, the coordinate law |
+| N20 | "The payload type is IdealProximityPayload at the model family the Sampled value names, so the clause is checked first against that family's index type, unit against a distribution on the booleans." | `pgl27_cross_model_proximity`; the Sampled value's family is `pgl27_exact_family`, index type `unit`, against the certificate's `{fdist bool}` |
+| N21 | Applied: the section banner becomes "What a certificate may name as its ideal, and what refutes one". The order of the section is unchanged, as the finding allows. | the section holds three `Fail` guards and one refutation lemma; "the proximity arm refuses" attributed to the arm what the kernel and one theorem do |
+| N22 | Applied at the lemma's new home: the `var_dist_supp.v` header entry reads "== the point mass at true and the uniform law on the booleans are one apart". | `var_dist_fdist1_uniform`, stated at `fdist1 true` |
+| N24 | Applied: the `(* exact: erefl and not by [] … *)` comment moves inside `Proof. … Qed.` of `pgl27_row_word_proximity_rowE`, the placement `pgl27_row_word_obs_sampledE` already uses. | `pgl27_row_word_proximity_rowE`; the code tokens are unchanged |
+| N27 | Applied at the one header entry that differed: `pgl27_row_word_proximity` == "the proximity claim, concluded at 2^-39". | the row's terminal is `conclude pgl27_reprice39` |
+
+### Declined, with reasons
+
+| id | decision |
+|---|---|
+| N23 | **Declined.** The replacement `have Hpos := pgl27_pow2_40_gt0 R.` is a proof-body edit, which the fix pass's own constraint forbids and which would make `pgl27_word_uniform_ideal_close_false` a fourth expected token difference from the probe. The duplication is two one-line `have`s inside one proof and costs nothing. |
+| N25 | **Kept.** Both in-proof timing comments say what was measured: which tactic on which goal shape, and against which alternative. Neither is a bare number. They sit inside `Proof`, which is where the rule puts proof engineering. |
+| N26 | **Kept.** "4.5e-13" is checkable against `2^-41` in one step; the words-form the auditor offers is not, and the finding itself says nothing turns on it. |
+| N28 | **No action, as the finding asks.** The proposed change is to Row 1's capability column, which landing 3 does not own. Row 10's own text already spells out "the law of prior_sample at the row's index" and does not use "prior" in the manifest's older sense. |
+| N29, N30, N31, N32, N34, N35 | Clean in the audit; nothing to apply. The leading-name convention of `pgl27_exec.v`, `pgl27_models.v` and `pgl27_analysis.v`, with the em-dash, is unchanged by this pass; `pgl27_proximity.v` keeps the no-leading-name convention of `pgl27_rows.v` and `five_card_proximity.v`. |
+| N33 | Applied as part of the move (D), not as a separate change: `var_dist_supp` is now imported, so the comment naming `var_dist_le2` points at an imported file. |
+
+### Deviations from the auditors' proposed replacements
+
+| where | deviation | reason |
+|---|---|---|
+| N1 | "carries it added to itself" in place of "carries it twice"; "published at one constant" in place of "read in one column". | `cert_eps` is *by definition* `sw_bound_eps (ic_b cert) + sw_bound_eps (ic_b cert)`, so the addition is the exact statement; and both rows are literally `PublishedRowAt pgl27_reprice39`, where "read in one column" invokes a table outside the development, which is the class N4 deletes. |
+| N6 | The closing clause names both halves of `pgl27_word_proximity_cert_idealE`. | The lemma is a conjunction; naming one half in the header and both in the index entry would be two descriptions of one lemma. |
+| L3-7 | "can only shorten the distance" replaces the auditor's bare "is therefore at least one". | The lower bound needs the data-processing step; naming it makes the sentence checkable from the lemma it is attached to. |
+| L3-9 | The banner reads "the edited instance and manifest files" rather than "the edited files". | After the move there are five edited production files, and `var_dist_supp.v` is a `lib/` file whose addition is restated in the theorems block and witnessed by the new provenance `Check`, not in this block. |
+
+### Verification of fix pass 1
+
+`python3 compile.py` with no arguments: the twenty files of the `_CoqProject`
+order, every one rc 0, captured in `compile.out`. `staged/lib/var_dist_supp.v`
+and `landing_fidelity.v` were recompiled once more after the last two comment
+edits of `pgl27_proximity.v`'s header, both rc 0. Read the `-time` lines and
+not the wall times: another session held the `rocq1` lock through part of
+both runs, which is why `pgl27_proximity.v` reads 5.2 s in one run and 77.5 s
+in the other while its `-time` output has no sentence over 5 s in either.
+
+`python3 verify.py`, in `verify.out`. Check (1): six whole-file hunks, all
+additions. Check (2): `pgl27_prior_sample` 1 of 1,
+`pgl27_prior_exact_family` 1 of 1, `pgl27_proximity.v` **24 of 26**,
+`var_dist_supp.v` **0 of 1**. The two differences inside `pgl27_proximity.v`
+and the one inside `var_dist_supp.v` are the three `EXPECTED` entries, each
+printed with its reason; the four `RENAMED` substitutions are printed.
+Check (4): every barred pattern 0 hits; `ceiling` 8 hits and four lines over
+80 bytes, all in chain copies this landing does not own, unchanged from the
+run before the fix pass.
+
+`Print Assumptions`: 29 blocks in `landing_fidelity.out`, the distinct axiom
+names across all of them being `constructive_indefinite_description`,
+`functional_extensionality_dep` and `propositional_extensionality`, no block
+closed under the global context, no `Error` line.
+
+Against commit `0c4a4ef`, the code-token diff of the seven landed files and
+`landing_fidelity.v` is exactly: 0 tokens in `pgl27_exec.v`, `pgl27_models.v`,
+`pgl27_analysis.v`, `pgg_analysis_manifest.v` and `pgg_analysis_client.v`;
+255 in `pgl27_proximity.v` (the `var_dist_supp` `Require`, the two renames and
+the removal of the moved lemma); 251 in `var_dist_supp.v` (the `lra` import
+and the same lemma arriving); 41 in `landing_fidelity.v` (the `Require`, the
+new provenance `Check`, the L3-9 ascription and the two renames at three sites
+each). No other code token moved.
+
+The header of `pgl27_proximity.v` indexes 23 entries against 23 non-`Fail`
+declarations, total in both directions, and none of the three `Fail`s.

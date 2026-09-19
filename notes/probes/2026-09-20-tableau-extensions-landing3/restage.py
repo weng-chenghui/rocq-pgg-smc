@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Re-copy the thirteen chain files from production and rebuild below them.
+"""Re-copy the twelve chain files from production and rebuild below them.
 
-The thirteen files are the ones landings 1 and 2 own.  Both are in production,
+The twelve files are the ones landings 1 and 2 own and landing 3 does not.  Both are in production,
 so production is the source.  A landing-3 compile is evidence only against the
-text it loaded, so whenever one of the thirteen moves this script copies them
+text it loaded, so whenever one of the twelve moves this script copies them
 again, reports whether each changed in code or only in comments, and
 recompiles the whole chain in the _CoqProject order.
 
@@ -20,9 +20,10 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 SRC = REPO
 L3 = os.path.join(HERE, "staged")
 
-# landing 2's five landed files
+# landing 2's landed files that landing 3 does not own.  lib/var_dist_supp.v
+# is NOT here: fix pass 1 of landing 3 adds var_dist_fdist1_uniform to it, so
+# it is a landed file of this landing and production is not its source.
 CHAIN = [
-    "lib/var_dist_supp.v",
     "security/var_dist_joint_law.v",
     "instances/kim2025/five_card_mixing.v",
     "manifest/pgg_tableau_arm_relations.v",

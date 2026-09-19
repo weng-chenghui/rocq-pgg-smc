@@ -14,31 +14,26 @@
 (* therefore only be the ideal of a word model at the uniform prior, and the  *)
 (* distance of a word model at another prior to it is at least the distance   *)
 (* between the two laws of the secret, which                                  *)
-(* pgl27_word_uniform_ideal_not_close exhibits at a point mass.               *)
+(* pgl27_word_uniform_ideal_close_false exhibits at a point mass.             *)
 (*                                                                            *)
 (* The ideal's own privacy is a theorem and not an assumption.                *)
-(* pgl27_view_indep_gen is three-transitivity of PGL(2,7) on the eight points *)
-(* read as a privacy statement, and three-transitivity says nothing about how *)
-(* the secret is drawn, so a coalition of fewer than four seats learns        *)
-(* nothing at all from the exact execution at every law of that secret.       *)
-(* pgl27_row_prior_exact_tableau publishes that execution through the exact   *)
-(* arm, and pgl27_word_proximity_cert_idealE says that the model the          *)
-(* proximity certificate calls ideal and the model that row publishes are one *)
-(* term.                                                                      *)
+(* pgl27_row_prior_exact_tableau publishes the exact execution through the    *)
+(* exact arm at every law of the dealt secret, and                            *)
+(* pgl27_word_proximity_cert_idealE says that the model the proximity         *)
+(* certificate calls ideal is the model that row publishes, and that the      *)
+(* witness it carries for that model is the row's own port.                   *)
 (*                                                                            *)
-(* Both numbers this instance carries come from one distance,                 *)
-(* pgl27_view_mixing on the cut group. The certificate below carries 2^-40,   *)
-(* and pgl27_word_cert of pgl27_rows.v carries that number added to itself,   *)
-(* because the input-indistinguishability arm spends the distance once for    *)
-(* each of the two dealt secrets it compares and the proximity arm compares   *)
-(* one law with one law. The relation is between those two certificates and   *)
-(* not between the two arms: a proximity certificate is free to choose any    *)
-(* number its distance field proves. The row concludes at 2^-39, the number   *)
-(* pgl27_row_word_branch39 publishes for the other arm, so the two rows over  *)
-(* this model are read in one column; the terminal's obligation is met        *)
-(* strictly, 2^-40 being half of 2^-39. Each of these numbers bounds a sum of *)
-(* absolute differences, twice the total variation distance, so a             *)
-(* distinguisher's advantage against the published row is at most 2^-40.      *)
+(* Both certificates over the word model are built from one number, the       *)
+(* walk's single-card marginal number 2^-40 of pgl27_word_marginal_bound,     *)
+(* which rests on pgl27_word_mixing, the distance between the word walk and   *)
+(* the uniform cut on the group. The proximity certificate carries that       *)
+(* number and the input-indistinguishability certificate carries it added to  *)
+(* itself, which pgl27_word_proximity_eps_halfE states. The proximity row     *)
+(* concludes at 2^-39, the constant pgl27_row_word_branch39 publishes for the *)
+(* other arm, so the two rows over this model are published at one constant   *)
+(* and the terminal's obligation is met strictly. Each of these numbers       *)
+(* bounds a sum of absolute differences, twice the total variation distance,  *)
+(* so a distinguisher's advantage against the published row is at most 2^-40. *)
 (*                                                                            *)
 (* What the row claims is an average over the run argument under the law of   *)
 (* the secret: both sides are pushforwards of whole sample laws and neither   *)
@@ -56,29 +51,33 @@
 (*                             == that shuffle published as its own program   *)
 (*   pgl27_word_secret         == the dealt secret on the word sample space   *)
 (*   pgl27_word_proximity_cert == the word model's proximity certificate      *)
-(*   pgl27_row_word_proximity  == the proximity claim, published at 2^-39     *)
+(*   pgl27_row_word_proximity  == the proximity claim, concluded at 2^-39     *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_prior_viewE         == the framework's reading of a coalition at   *)
 (*                                the prior-indexed exact shuffle is the      *)
-(*                                instance's coalition view                   *)
+(*                                instance's own reading pgl27_view           *)
 (*   pgl27_row_prior_exact_armE                                               *)
 (*                             == the ideal row carries the exact arm         *)
 (*   pgl27_row_prior_exact_rowE                                               *)
 (*                             == the ideal program publishes                 *)
 (*                                pgl27_row_prior_exact                       *)
 (*   pgl27_word_proximity_close                                               *)
-(*                             == the two models' joint laws of reading and   *)
-(*                                secret are within 2^-40                     *)
+(*                             == below the four-seat threshold, the two      *)
+(*                                models' joint laws of reading and secret    *)
+(*                                are within 2^-40                            *)
 (*   pgl27_word_proximity_cert_idealE                                         *)
-(*                             == the certificate's ideal is the ideal row    *)
+(*                             == the certificate's ideal and witness are the *)
+(*                                model and the port the ideal row publishes  *)
 (*   pgl27_word_proximity_cert_epsE                                           *)
-(*                             == the certificate's number in closed form     *)
+(*                             == the certificate's number is 2^-40           *)
 (*   pgl27_word_proximity_eps_halfE                                           *)
-(*                             == pgl27_word_cert's number is twice it        *)
+(*                             == the input-indistinguishability              *)
+(*                                certificate's number is twice the proximity *)
+(*                                certificate's                               *)
 (*   pgl27_pow2_40_ge1         == two to the fortieth is at least one         *)
 (*   pgl27_pow2_40_gt0         == two to the fortieth is positive             *)
-(*   pgl27_word_proximity_le39 == the certificate's number is under 2^-39     *)
+(*   pgl27_word_proximity_le39 == the certificate's number is at most 2^-39   *)
 (*   pgl27_word_proximity_cert_eps_lt2                                        *)
 (*                             == that number is below the bound two          *)
 (*                                var_dist_le2 gives                          *)
@@ -86,7 +85,7 @@
 (*                             == the proximity row publishes pgl27_row_word  *)
 (*   pgl27_row_word_proximity_armE                                            *)
 (*                             == that row carries the proximity arm          *)
-(*   pgl27_row_word_arms_sampledE                                             *)
+(*   pgl27_row_word_families_sampledE                                         *)
 (*                             == both rows over the word model read their    *)
 (*                                model family off the one named Sampled      *)
 (*                                value                                       *)
@@ -94,13 +93,13 @@
 (*                             == both rows read their observed execution     *)
 (*                                off that same value                         *)
 (*   pgl27_row_word_arm_neq    == the two rows carry different arms           *)
-(*   pgl27_word_view_proximity == what the row states at this instance        *)
-(*   var_dist_fdist1_uniform   == a point mass and the uniform law on the     *)
-(*                                booleans are one apart                      *)
-(*   pgl27_word_uniform_ideal_not_close                                       *)
-(*                             == the distance field is false with the        *)
-(*                                uniform-secret exact model as the ideal of  *)
-(*                                the word model at a point-mass prior        *)
+(*   pgl27_word_view_proximity == the proximity row's security statement, at  *)
+(*                                2^-39                                       *)
+(*   pgl27_word_uniform_ideal_close_false                                     *)
+(*                             == the distance field is false at every        *)
+(*                                coalition, with the uniform-secret exact    *)
+(*                                model as the ideal of the word model at a   *)
+(*                                point-mass prior                            *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -111,7 +110,7 @@ From pgg_smc Require Import pgg_interface pgg_session_types.
 From pgg_smc Require Import pgg_monodromy_profile pgg_execution_plug.
 From pgg_smc Require Import pgg_observed_execution pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_sample_adapter pgg_weighted_words.
-From pgg_smc Require Import pgg_collusion_bound.
+From pgg_smc Require Import pgg_collusion_bound var_dist_supp.
 From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
 From pgg_smc Require Import pgl27_exec pgl27_models.
@@ -133,10 +132,10 @@ Local Open Scope proba_scope.
 (******************************************************************************)
 
 (** The framework's static reading of a coalition at this model is the
-    instance's coalition view, with the secret left inside the sample point.
-    Every security statement of a row is made about the left-hand side and
-    every theorem of the instance about the right, so this equation is the
-    whole of what carries one to the other at the prior-indexed model. *)
+    instance's own reading pgl27_view, with the secret left inside the sample
+    point. Every security statement of a row is made about the left-hand side
+    and every theorem of the instance about the right, so this equation is
+    the whole of what carries one to the other at the prior-indexed model. *)
 Lemma pgl27_prior_viewE (R : realType) (secretP : R.-fdist bool)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (fun u => @static_coalition_obs pgl27_algebra pgl27_dealt_params C
@@ -178,20 +177,22 @@ Definition pgl27_row_prior_exact_tableau : PublishedRow :=
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
 (** The arm the ideal row carries, at every real field and prior:
-    independence of the dealt secret, and not a distance to some other model.
-    This is the value a paper's table prints in the arm column for the ideal
-    row. *)
+    independence of the dealt secret, and not a distance to some other
+    model. *)
 Lemma pgl27_row_prior_exact_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_prior_exact_tableau)) R) :
   security_arm_of pgl27_row_prior_exact_tableau R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
-(** The manifest row the ideal program publishes: the row of the eight-card
-    orbit instance at the prior-indexed exact shuffle. Its five coordinates
-    are the observed execution the program runs on, the completion level the
-    publish terminal reaches, the model family the sample step named, and the
-    two statuses the terminal was given, so the manifest's description of this
-    path is read off the program and not written beside it. *)
+(** The manifest's typed row for the eight-card orbit instance at the
+    prior-indexed exact shuffle is the row this program publishes. Its five
+    coordinates are the observed execution the program runs on, the
+    completion level the publish terminal reaches, the model family the
+    sample step named, and the two statuses the terminal was given. The
+    manifest writes those coordinates in the facade's vocabulary and the
+    program in this file's, and conversion decides the equation, so the
+    manifest's row for this path is a claim this equation discharges rather
+    than a table maintained beside the program. *)
 Lemma pgl27_row_prior_exact_rowE :
   published_row pgl27_row_prior_exact_tableau = pgl27_row_prior_exact.
 Proof. exact: erefl. Qed.
@@ -216,11 +217,10 @@ Arguments pgl27_word_secret [R] secretP.
     cut alone, the secret is drawn from the same prior and independently of
     the cut in both, and the pair of a reading and the secret is a
     deterministic function of the pair of the secret and the cut. The premise
-    is the arm's threshold at this instance, four seats, and the proof spends
-    it twice, on the ideal model's own independence and on pgl27_view_mixing.
-    The cut group's own distance, pgl27_word_mixing, carries no coalition
-    premise, so the same bound is reachable at every coalition by a route
-    this proof does not take. *)
+    is the arm's threshold at this instance, four seats. The cut group's own
+    distance, pgl27_word_mixing, carries no coalition premise, so the same
+    bound is reachable at every coalition by a route this proof does not
+    take. *)
 Lemma pgl27_word_proximity_close (R : realType) (secretP : R.-fdist bool)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
@@ -240,7 +240,9 @@ Proof.
 (* The word side is rewritten as a reading of the pair of the secret and the
    evaluated cut, which is the carrier pgl27_view_mixing is stated on; the
    ideal side is that same reading under the uniform cut, turned into the
-   product of its marginals by the ideal witness's own independence. *)
+   product of its marginals by the ideal witness's own independence. The
+   threshold is used twice, once for the ideal witness's independence and
+   once for pgl27_view_mixing. *)
 move=> HC.
 have H3 : (#|C| <= 3)%N := HC.
 have Hact :
@@ -282,8 +284,9 @@ Qed.
     exact witness, which is what makes the ideal an execution whose coalitions
     below four seats learn nothing at all; the dealt secret of the word model;
     the walk's marginal number 2^-40; and the distance above. The only inexact
-    quantity is that number: the ideal, its witness and the secret are the
-    terms the ideal row already publishes. *)
+    quantity is that number: the ideal and its witness are the terms the ideal
+    row already publishes, and the secret is the word model's own first
+    projection, typed at the carrier that witness names. *)
 Definition pgl27_word_proximity_cert (R : realType) (secretP : R.-fdist bool)
   : IdealProximityCert (amf_sample pgl27_word_family R secretP) :=
   @MkIdealProximityCert R pgl27_algebra pgl27_dealt_params
@@ -311,8 +314,8 @@ Proof. by split. Qed.
 (*     The number                                                             *)
 (******************************************************************************)
 
-(** The certificate's number in closed form: the two-hundred-letter walk's
-    marginal number, 2^-40. *)
+(** The certificate's number is the two-hundred-letter walk's marginal
+    number, 2^-40. *)
 Lemma pgl27_word_proximity_cert_epsE (R : realType) (secretP : R.-fdist bool) :
   ipc_eps (pgl27_word_proximity_cert secretP) = 2%:R^-40 :> R.
 Proof. exact: erefl. Qed.
@@ -341,10 +344,11 @@ Proof. by apply: exprn_ege1; rewrite ler1n. Qed.
 Fact pgl27_pow2_40_gt0 (R : realType) : (0:R) < 2%:R^+40.
 Proof. by rewrite exprn_gt0 // ltr0n. Qed.
 
-(** The certificate's number is under 2^-39, the constant the word row
+(** The certificate's number is at most 2^-39, the constant the word row
     publishes for the input-indistinguishability arm. It is the obligation of
-    the terminal that concludes the proximity row at that constant, and it is
-    met strictly, the certificate's number being half of the published one. *)
+    the terminal that concludes the proximity row at that constant, and the
+    obligation is met strictly, the certificate's number being half of the
+    published one. *)
 Lemma pgl27_word_proximity_le39 (R : realType) (secretP : R.-fdist bool) :
   ipc_eps (pgl27_word_proximity_cert secretP) <= 2%:R^-39 :> R.
 Proof.
@@ -355,8 +359,9 @@ Qed.
 
 (** The certificate's own number is below two, the bound var_dist_le2 gives
     for a variation distance, so the certificate is not vacuous. At about
-    4.5e-13 of that bound it is a cryptographic separation and not a weak
-    one, as the proximity certificate of Kim's one-cut model is. *)
+    4.5e-13 of that bound it is a cryptographic separation, where the
+    proximity certificate of Kim's one-cut model at one percent of the same
+    bound is a weak one. *)
 Lemma pgl27_word_proximity_cert_eps_lt2 (R : realType)
     (secretP : R.-fdist bool) :
   ipc_eps (pgl27_word_proximity_cert secretP) < 2%:R :> R.
@@ -376,31 +381,31 @@ Qed.
     of its reading with the dealt secret is within that number of the product
     of the two marginals the prior-indexed exact execution has, where the
     reading and the secret are independent outright. The number is spent
-    once, against the input-indistinguishability row's twice, and the
-    transfer status is the one the input-indistinguishability row earns,
-    since the same ideal cut is what both certificates compare against. *)
+    once, against the input-indistinguishability row's twice. Its transfer
+    status is IdealFinite, the same the input-indistinguishability row
+    carries, and the two certificates compare against the same ideal cut. *)
 Definition pgl27_row_word_proximity : PublishedRowAt pgl27_reprice39 :=
   pgl27_word_sampled
     certify IdealProximity pgl27_word_proximity_cert
     |> conclude pgl27_reprice39 by (fun R idx => pgl27_word_proximity_le39 idx)
     |> publish IdealFinite BaselineClassicalOnly.
 
-(* exact: erefl and not by []: done does not return on an equation between
-   two rows' coordinates. *)
-
-(** The proximity row publishes the manifest's row for the word path, as its
-    input-indistinguishability sibling does. An AnalysisPathRow holds
-    descriptive metadata and no Prop, so one manifest row carrying an
-    input-indistinguishability row and a proximity row says nothing about
-    either claim. *)
+(** The proximity row publishes the manifest's row for the word path, as
+    pgl27_row_word_rowE of pgl27_rows.v says of the word program. An
+    AnalysisPathRow holds descriptive metadata and no Prop, so one manifest
+    row carrying an input-indistinguishability row and a proximity row says
+    nothing about either claim. *)
 Lemma pgl27_row_word_proximity_rowE :
   published_row pgl27_row_word_proximity = pgl27_row_word.
-Proof. exact: erefl. Qed.
+Proof.
+(* exact: erefl and not by []: done does not return on an equation between
+   two rows' coordinates. *)
+exact: erefl.
+Qed.
 
 (** The arm the proximity row carries, at every real field and prior: the
     distance to a private ideal model, and not the distance between two
-    readings of one model. This is the value a paper's table prints in the arm
-    column for this row. *)
+    readings of one model. *)
 Lemma pgl27_row_word_proximity_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word_proximity)) R) :
   security_arm_of pgl27_row_word_proximity R idx = IdealProximityArm.
@@ -410,7 +415,7 @@ Proof. by []. Qed.
     named Tableau Sampled value, so the pair differs in the arm and in nothing
     about the algebra, the run or the law. The family is what a continuation
     of a named value reads off the name. *)
-Lemma pgl27_row_word_arms_sampledE :
+Lemma pgl27_row_word_families_sampledE :
   ab_f (published_at pgl27_row_word_proximity)
   = sp_f (tableau_at pgl27_word_sampled)
   /\ ab_f (published_at pgl27_row_word_branch39)
@@ -485,16 +490,17 @@ exact: (view_proximity_of pgl27_row_word_proximity R secretP C HC).
 Qed.
 
 (******************************************************************************)
-(*     The ideals the proximity arm refuses                                   *)
+(*     What a certificate may name as its ideal, and what refutes one         *)
 (******************************************************************************)
 
 (** The unit-indexed exact family cannot be read at the prior the word model
     carries. The index of an analysis model family is a type depending on the
     real field alone, and amf_sample asks for an inhabitant of it, so a
     distribution on the booleans is offered where the unit type is expected
-    and the two sample adapters are never reached. A proximity certificate
-    over a prior-indexed actual model therefore cannot take the tree's exact
-    family as its ideal, whatever the two models' distance is. *)
+    and the two sample adapters are never reached. The term written here is
+    therefore refused before any distance is considered. The same family at
+    its own index tt is a well-typed ideal for this actual model, and what
+    refuses it there is the distance field, which the guard below records. *)
 Fail Definition pgl27_word_proximity_cert_unit_ideal (R : realType)
     (secretP : R.-fdist bool)
   : IdealProximityCert (amf_sample pgl27_word_family R secretP) :=
@@ -505,29 +511,6 @@ Fail Definition pgl27_word_proximity_cert_unit_ideal (R : realType)
     (pgl27_word_secret secretP)
     (sw_bound_eps (pgl27_word_marginal_bound R))
     (fun C HC => pgl27_word_proximity_close secretP HC).
-
-(** The distance between a point mass on the booleans and the uniform law on
-    the booleans, in the sum of absolute differences: one. This is the
-    quantity a proximity bound between two models whose secrets are drawn
-    from those two laws has to beat, whatever the rest of the two executions
-    does. *)
-Lemma var_dist_fdist1_uniform (R : realType) :
-  var_dist (fdist1 true : R.-fdist bool) (fdist_uniform (R := R) card_bool)
-  = 1.
-Proof.
-have Hu : forall b : bool, (fdist_uniform (R := R) card_bool) b = 2%:R^-1.
-  by move=> b; rewrite fdist_uniformE card_bool.
-have H2 : (0:R) < 2%:R by rewrite ltr0n.
-have Hhalf : (0:R) <= 2%:R^-1 by rewrite invr_ge0 ler0n.
-have Hle1 : 2%:R^-1 <= (1:R) by rewrite invf_le1 // ler1n.
-have Ht : (fdist1 true : R.-fdist bool) true = 1 by rewrite fdist1E eqxx.
-have Hf : (fdist1 true : R.-fdist bool) false = 0.
-  by rewrite fdist1E.
-have E1 : `|(1:R) - 2%:R^-1| = 1 - 2%:R^-1 by rewrite ger0_norm ?subr_ge0.
-have E2 : `|(0:R) - 2%:R^-1| = 2%:R^-1 by rewrite sub0r normrN ger0_norm.
-rewrite /var_dist big_bool /= !Hu Ht Hf E1 E2.
-by lra.
-Qed.
 
 Section pgl27_word_uniform_ideal.
 Variable R : realType.
@@ -541,8 +524,9 @@ Let P1 : R.-fdist bool := fdist1 true.
     the two priors themselves, one apart, and 2^-40 is below that, so the two
     models are separated by their secrets alone and no reading of the cut can
     bring them together. It says nothing at a prior near the uniform one,
-    where the same lower bound is small. *)
-Lemma pgl27_word_uniform_ideal_not_close
+    where the same lower bound is small. It is stated at every coalition and
+    not only below four seats, so it refutes more than the field asks. *)
+Lemma pgl27_word_uniform_ideal_close_false
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   ~ (var_dist
        (fdistmap (fun u => (@static_coalition_obs pgl27_algebra
@@ -606,7 +590,7 @@ End pgl27_word_uniform_ideal.
     word model at secretP and the exact model at the uniform prior. The Fail
     rejects the one term written here, on that mismatch of types, and rules
     out no other term. What refutes the field itself is
-    pgl27_word_uniform_ideal_not_close above, at the point-mass prior, where
+    pgl27_word_uniform_ideal_close_false above, at the point-mass prior, where
     the two secret marginals are one apart and 2^-40 is not; at a prior near
     the uniform one that lower bound is small and nothing is claimed. *)
 Fail Definition pgl27_word_proximity_cert_uniform_ideal (R : realType)
@@ -622,11 +606,11 @@ Fail Definition pgl27_word_proximity_cert_uniform_ideal (R : realType)
 
 (** The word model's proximity certificate does not continue the exact
     model's branch point. The payload type is IdealProximityPayload at the
-    coordinate the Sampled value holds, so the clause is checked first
-    against the index type that coordinate's family carries, unit against a
-    distribution on the booleans. A certificate of one model of an instance
-    therefore does not reach another model of the same instance, whichever
-    arm it belongs to. *)
+    model family the Sampled value names, so the clause is checked first
+    against that family's index type, unit against a distribution on the
+    booleans. The Fail rejects the one term written here, on that mismatch of
+    index types, and the mismatch is what separates the two models of this
+    instance. *)
 Fail Definition pgl27_cross_model_proximity : Tableau AnalysisBridged :=
   pgl27_dealt sample pgl27_exact_family
     certify IdealProximity pgl27_word_proximity_cert.

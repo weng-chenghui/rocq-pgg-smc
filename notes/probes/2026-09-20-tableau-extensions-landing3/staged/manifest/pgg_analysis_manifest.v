@@ -755,7 +755,9 @@ Local Open Scope ring_scope.
 (* every law of the dealt secret, three-transitivity of the group saying      *)
 (* nothing about how that secret is drawn. Row 1 records the same instance    *)
 (* and the same cut at the uniform secret alone, its family being indexed by  *)
-(* the unit type; the two rows differ in that index and in nothing else.      *)
+(* the unit type. The two rows agree in their other four coordinates and      *)
+(* differ in the model family, and the member of this row's family at the     *)
+(* uniform prior is the member of Row 1's at tt.                              *)
 (*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
@@ -980,9 +982,10 @@ Definition psl211_row_alldecks : AnalysisPathRow :=
     pgl27_view_indep_gen is proved at this row's own sample distribution and
     observer, which is what reaches AnalysisBridged; the shuffle is already
     the exact uniform distribution on the group, so no idealized model is
-    compared. It differs from pgl27_row_exact in the index type of its model
-    family alone, and that index is what lets a row over the word model and a
-    row over this one be read at one law of the secret. *)
+    compared. It differs from pgl27_row_exact in its model family, whose
+    index is the law of the dealt secret where the other's is the unit type,
+    and that index is what lets a row over the word model and a row over this
+    one be read at one law of the secret. *)
 Definition pgl27_row_prior_exact : AnalysisPathRow :=
   @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
     PGL27Analysis.prior_exact_family StaticExecutedOnly BaselineClassicalOnly.

@@ -21,11 +21,13 @@
 (*                                 mass transports the distance exactly       *)
 (*   fdistmap_inj_uniform_id    == an injective endomap fixes the uniform law *)
 (*   fdistmap_neq0_codom        == a pushforward charges only the image       *)
+(*   var_dist_fdist1_uniform    == the point mass at true and the uniform law *)
+(*                                 on the booleans are one apart              *)
 (******************************************************************************)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra.
-From mathcomp Require Import boolp reals.
+From mathcomp Require Import boolp reals lra.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 
 Set Implicit Arguments.
@@ -151,4 +153,33 @@ have Hsimp : \sum_(a in A | a \in f @^-1 b) P a = \sum_(a | f a == b) P a.
   by apply: eq_bigl => a /=; rewrite inE.
 rewrite fdistmapE Hsimp big1 // => a Ha.
 by move: (Hno a); rewrite Ha.
+Qed.
+
+(******************************************************************************)
+(*     A point mass against the uniform law on the booleans                   *)
+(******************************************************************************)
+
+(** The distance between the point mass at true on the booleans and the
+    uniform law on the booleans, in the sum of absolute differences: one.
+    Pushing two joint laws of a reading and a secret along the secret
+    coordinate leaves the two laws of the secret and can only shorten the
+    distance, so a proximity number between two models whose secrets are
+    drawn from these two laws is at least one, whatever the rest of the two
+    executions does. *)
+Lemma var_dist_fdist1_uniform (R : realType) :
+  var_dist (fdist1 true : R.-fdist bool) (fdist_uniform (R := R) card_bool)
+  = 1.
+Proof.
+have Hu : forall b : bool, (fdist_uniform (R := R) card_bool) b = 2%:R^-1.
+  by move=> b; rewrite fdist_uniformE card_bool.
+have H2 : (0:R) < 2%:R by rewrite ltr0n.
+have Hhalf : (0:R) <= 2%:R^-1 by rewrite invr_ge0 ler0n.
+have Hle1 : 2%:R^-1 <= (1:R) by rewrite invf_le1 // ler1n.
+have Ht : (fdist1 true : R.-fdist bool) true = 1 by rewrite fdist1E eqxx.
+have Hf : (fdist1 true : R.-fdist bool) false = 0.
+  by rewrite fdist1E.
+have E1 : `|(1:R) - 2%:R^-1| = 1 - 2%:R^-1 by rewrite ger0_norm ?subr_ge0.
+have E2 : `|(0:R) - 2%:R^-1| = 2%:R^-1 by rewrite sub0r normrN ger0_norm.
+rewrite /var_dist big_bool /= !Hu Ht Hf E1 E2.
+by lra.
 Qed.

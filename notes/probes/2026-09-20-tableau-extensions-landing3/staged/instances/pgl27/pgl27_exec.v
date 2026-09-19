@@ -634,9 +634,8 @@ End pgl27_execution.
     sample space is the pair of the dealt secret and the cut, under the
     product of the given prior with the uniform law on PGL(2,7); the run
     argument is the secret and the cut is the group element itself. It differs
-    from pgl27_sample only in refusing to fix the prior, which is the
-    coordinate a comparison with the word model at that prior needs to
-    hold. *)
+    from pgl27_sample only in leaving the law of the dealt secret free, which
+    is what a comparison with the word model at the same law requires. *)
 Definition pgl27_prior_sample (R : realType) (secretP : R.-fdist bool)
   : SampleAdapter R pgl27_exec_plug :=
   @MkSampleAdapter R pgl27_profile pgl27_exec_plug
