@@ -217,7 +217,7 @@ secret. The distance field is stated on the last.
 
 ## Probe artifacts
 
-Directory `notes/probes/2026-09-20-tableau-extensions/`, logical path
+Directory `notes/probes/2026-09-19-tableau-extensions/`, logical path
 `tableau_ext_probe`. Full copies of `manifest/pgg_tableau.v`,
 `manifest/pgg_tableau_syntax.v` and the four rows files, with their imports of
 one another pointed at the copies. One file of generic lemmas. One file per new
