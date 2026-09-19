@@ -69,12 +69,12 @@ Local Notation viewT := ({ffun seatT -> cardT}).
 (*     The encoder deck as a raw table                                      *)
 (*****************************************************************************)
 
-(** psl211_dealt_decktbl b — the encoder deck of chirality b as a
-    twelve-entry position-to-code table: the heart codes 0 to 5 ascend
-    along the representative row of the system b names and the club codes
-    6 to 11 ascend along its complement. *)
-(* Only raw nat data is counted from here on, the ordinal enumeration
-   going through an opaque decision that does not reduce. *)
+(** psl211_dealt_decktbl b — the encoder deck of chirality b as a twelve-entry
+    position-to-code table: the heart codes 0 to 5 ascend along the
+    representative row of the system b names and the club codes 6 to 11
+    ascend along its complement. Only raw nat data is counted below, the
+    ordinal enumeration going through an opaque decision that does not
+    reduce. *)
 Definition psl211_dealt_decktbl (b : bool) : seq nat :=
   if b then [:: 6; 7; 0; 1; 8; 2; 9; 3; 4; 5; 10; 11]
        else [:: 0; 1; 6; 2; 7; 8; 9; 3; 10; 11; 4; 5].

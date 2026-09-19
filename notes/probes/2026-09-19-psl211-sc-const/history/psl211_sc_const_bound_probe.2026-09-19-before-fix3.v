@@ -92,11 +92,11 @@ Qed.
 
 (** fdist_uniform_close_supp — a law closer than one atom of the uniform law
     to the uniform law gives every point positive mass. The hypothesis is the
-    infotheo variation distance, which is the sum of absolute differences
-    and not half of it, so the threshold is the atom itself and not half of
-    it. Nothing here spends it: the ideal that matters at this instance is
-    close to the uniform law on the shuffle group and not to the uniform
-    law on the ambient carrier. *)
+    infotheo variation distance, which is the full L1 sum and not half of it,
+    so the threshold is the atom itself and not half of it. Nothing here
+    spends it: the ideal that matters at this instance is close to the
+    uniform law on the shuffle group and not to the uniform law on the
+    ambient carrier. *)
 Lemma fdist_uniform_close_supp (R : realType) (T : finType) (n : nat)
     (HT : #|T| = n.+1) (Q : R.-fdist T) :
   var_dist (fdist_uniform HT) Q < (#|T|%:R)^-1 -> forall t, Q t != 0.
@@ -302,22 +302,22 @@ Qed.
     bound epsilon below 1/1320, the hypothesis holding twice that epsilon
     below the reciprocal 1/660 of the group order. A row publishes
     odflt (cert_eps cert) (c R) at its own reprice coordinate c, and the
-    obligation of conclude is today the equality of cert_eps cert with
-    that published number, so what this excludes is every published
-    number equal to cert_eps: at least 1/660, against a shuffle whose
-    single-card marginal error this instance proves to be exactly zero. *)
+    obligation of conclude is today the equality cert_eps cert = c R, so
+    what this excludes is every published number equal to cert_eps: at
+    least 1/660, against a shuffle whose single-card marginal error this
+    instance proves to be exactly zero. *)
 (* Argued and not compiled: the exclusion survives a weaker conclude. The
    proposition a row carries is SpectralPropAt cert c, a variation distance
-   bounded above by c, so an obligation weakened from that equality to
-   cert_eps cert <= odflt (cert_eps cert) (c R) could only let a row
-   publish a number larger than cert_eps, never a smaller one. *)
+   bounded above by c, so an obligation weakened from cert_eps cert = c R to
+   cert_eps cert <= c R could only let a row publish a number larger than
+   cert_eps, never a smaller one. *)
 (* Argued and not compiled: the range this theorem leaves open is occupied.
    The uniform law on the whole of {perm 'I_12} satisfies the constancy
    field, its variation distance from `U psl211_G_pos is 2 * (1 - 660/12!),
    and a certificate at that ideal therefore exists, with an epsilon near
-   infotheo's ceiling of 2 on the sum of absolute differences. So the
-   spectral arm is not unavailable at this instance, and what this theorem
-   excludes is a range of epsilon and not the arm.
+   infotheo's L1 ceiling of 2. So the spectral arm is not unavailable at
+   this instance, and what this theorem excludes is a range of epsilon and
+   not the arm.
    notes/probes/2026-09-15-psl211-planb/AUDIT-SOUNDNESS-2.md, row 18. *)
 Theorem psl211_alldecks_no_spectral_cert (R : realType)
     (cert : SpectralCert (psl211_alldecks_sample R)) :

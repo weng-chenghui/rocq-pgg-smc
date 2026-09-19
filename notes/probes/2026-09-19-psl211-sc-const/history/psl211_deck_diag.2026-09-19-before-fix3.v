@@ -6,7 +6,7 @@
 (*   psl211_rep_list false = [:: 0;1;3;7;10;11]                               *)
 (*   psl211_perdeck_seq true  = [:: 0;1;2;3;4;6;7;8;9;10;5;11]                *)
 (*   psl211_perdeck_seq false = [:: 0;1;2;3;4;6;7;8;9;10;11;5]                *)
-(* Block line zero of either chirality's table is therefore not the           *)
+(* Block index zero of either chirality's table is therefore not the          *)
 (* representative row the encoder deals on, so the encoder deck is not the    *)
 (* deck the all-decks dealer lays at psl211_perdeck_deal and the all-decks    *)
 (* refutation does not transport to the dealt mode by that route.             *)

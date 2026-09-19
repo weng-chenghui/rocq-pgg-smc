@@ -1,21 +1,19 @@
 # Can a PSL(2,11) row be certified by the Tableau's SpectralDecay arm?
 
-Probe, 2026-09-19, branch `feat/kim-spectral-probe`. Three fix passes applied
-the same day, the first after the round 1 soundness audit, `soundness-audit.md`,
-the second after the round 2 audit, `soundness-audit-round2.md`, the third
-after the round 3 audit, `soundness-audit-round3.md`. The second and third
-passes changed comments and this document only. No permanent file edited, no
+Probe, 2026-09-19, branch `feat/kim-spectral-probe`. Two fix passes applied the
+same day, the first after the round 1 soundness audit, `soundness-audit.md`,
+the second after the round 2 audit, `soundness-audit-round2.md`. The second
+pass changed comments and this document only. No permanent file edited, no
 `make` run. Logical path `psl211_sc_const_probe`, directory
 `notes/probes/2026-09-19-psl211-sc-const/`. The four `.v` files and this
-document are in `history/` three times, as they stood before each pass, with
-`.2026-09-19-before-fix`, `.2026-09-19-before-fix2` and
-`.2026-09-19-before-fix3` inserted before the extension.
+document are in `history/` twice, as they stood before each pass, with
+`.2026-09-19-before-fix` and `.2026-09-19-before-fix2` inserted before the
+extension.
 
 Answer: **no at any number equal to a certificate's own bound.** A row
 publishes `odflt (cert_eps cert) (c R)` at its reprice coordinate `c`
 (`PortProp`, `manifest/pgg_tableau.v:363-369`), and the obligation of
-`conclude` is today the equality
-`cert_eps cert = odflt (cert_eps cert) (c R)` (`RepricePayload`,
+`conclude` is today the equality `cert_eps cert = c R` (`RepricePayload`,
 `:610-614`), with
 `cert_eps cert = sw_bound_eps (sc_b cert) + sw_bound_eps (sc_b cert)`
 (`:345-347`). Over the all-decks model no certificate carries
@@ -24,14 +22,14 @@ epsilon below `1/1320`, so a spectral row written for this dealer would publish
 at least `1/660` against a shuffle whose single-card marginal error this
 instance proves to be exactly zero. The constancy field is false at the
 group-uniform ideal, at every ideal that vanishes off the shuffle group and is
-nonzero at every element of it, and at every ideal closer than variation
-distance `1/1320` to the group-uniform law. The dealt mode fails too, at the
-record's own field type, at one named ideal. What is excluded is that range of
-epsilon and nothing wider. Argued and not compiled: the range above it is
-occupied, so the spectral arm is not unavailable at this instance. Argued and
-not compiled as well: a `conclude` whose obligation were weakened from the
-equality to `cert_eps cert <= odflt (cert_eps cert) (c R)` could only publish
-a number larger than `cert_eps`, so the exclusion would carry over to it.
+nonzero at every element of it, and at every ideal within variation distance
+`1/1320` of the group-uniform law. The dealt mode fails too, at the record's
+own field type, at one named ideal. What is excluded is that range of epsilon
+and nothing wider. Argued and not compiled: the range above it is occupied, so
+the spectral arm is not unavailable at this instance. Argued and not compiled
+as well: a `conclude` whose obligation were weakened from the equality to
+`cert_eps cert <= c R` could only publish a number larger than `cert_eps`, so
+the exclusion would carry over to it.
 
 ## Ledger
 
@@ -149,21 +147,20 @@ inside the group. The quantitative form is what carries the argument:
       (cert : SpectralCert (psl211_alldecks_sample R)) :
       sw_bound_eps (sc_b cert) = 0 -> False.
 
-The threshold is `1/1320` because infotheo's `var_dist` is the sum of absolute
-differences and not half of it. Excluded: every certificate whose shuffle
-bound epsilon is below `1/1320`, that is every certificate whose published
-`cert_eps`, twice that epsilon, is below `1/660`.
+The threshold is `1/1320` because infotheo's `var_dist` is the full L1 sum and
+not half of it. Excluded: every certificate whose shuffle bound epsilon is
+below `1/1320`, that is every certificate whose published `cert_eps`, twice
+that epsilon, is below `1/660`.
 
 Not excluded: an ideal at variation distance `1/1320` or more from the
 group-uniform law, whose certificate publishes `1/660` or more. Argued and not
 compiled, from
 `notes/probes/2026-09-15-psl211-planb/AUDIT-SOUNDNESS-2.md` row 18: that range
 is not merely unvisited, it is occupied. The uniform law on the whole of
-`{perm 'I_12}` satisfies the constancy field, and under infotheo's
-sum-of-absolute-differences convention its distance from
-`` `U psl211_G_pos `` is `2 * (1 - 660/12!)`, essentially 2, which is that
-convention's ceiling. A certificate at that ideal therefore exists, with an
-epsilon near 2, and `sc_close` prices it at that distance. So
+`{perm 'I_12}` satisfies the constancy field, and under infotheo's full-L1
+convention its distance from `` `U psl211_G_pos `` is `2 * (1 - 660/12!)`,
+essentially 2, which is the L1 ceiling. A certificate at that ideal therefore
+exists, with an epsilon near 2, and `sc_close` prices it at that distance. So
 a different ideal cut does repair the field; what it cannot repair is the
 number the row would then have to publish. Nothing in this paragraph is
 compiled, here or anywhere in the tree.
@@ -290,7 +287,7 @@ at the deck of `psl211_perdeck_deal` and 0 at the deck of
 the 660-row closure table costing 5.1 s. The witness was found by a search
 outside the repository, which also reported 300 readings reachable at the first
 deck and not the second and 300 the other way round, consistent with the
-auditor's sum of absolute differences, 600 over 660.
+auditor's L1 gap of 600 of 660.
 
 Two lemmas of `psl211_models.v` had to be restated. `psl211_perdeck_raw_viewE`
 is restated here as `psl211_alldecks_raw_viewE`, with the deck description left
@@ -334,11 +331,10 @@ from that same-secret pair, four lines along the route of
 failure is remains measured only. The auditor's
 `audit-soundness/audit_diag.v`, with its output in
 `audit-soundness/audit_diag.log.txt`, `vm_compute`s the reading multiplicity
-vectors over `psl211_elem_table` and reports a sum of absolute differences of
-600 over 660 cuts between block line 0 and block line 1 at chirality `true`,
-against 360 over 660 between the two chiralities at block line 0, and 660
-distinct readings at seats 0, 1 and 2 under one deck description. Those three
-numbers are a
+vectors over `psl211_elem_table` and reports an L1 gap of 600 of 660 cuts
+between block line 0 and block line 1 at chirality `true`, against 360 of 660
+between the two chiralities at block line 0, and 660 distinct readings at
+seats 0, 1 and 2 under one deck description. Those three numbers are a
 `vm_compute` diagnostic and not Rocq theorems. The same source gives the
 diagnostic consequence that any certificate would need `cert_eps >= 10/11`,
 about 600 times the proved floor; that too is a diagnostic and not a theorem.
@@ -443,7 +439,7 @@ one at lines 40-45:
 
 Only the last clause is out of date. The all-decks statement has been measured
 and is false at the group-uniform ideal, at every ideal whose support is
-exactly the shuffle group, and at every ideal closer than `1/1320` to the
+exactly the shuffle group, and at every ideal within `1/1320` of the
 group-uniform law. The first clause is not out of date: the dealt-mode failure
 at three seats at the group-uniform ideal was true before and is now carried at
 the record's own field type rather than at the raw count, which is a
@@ -458,11 +454,11 @@ replaces the passage with something of this shape:
 > argument is the secret, it fails at three seats at the group-uniform ideal.
 > Under the all-decks parameters, where the run argument is the deck
 > description, it fails at the group-uniform ideal, at every ideal whose
-> support is exactly the shuffle group and at every ideal closer than
-> `1/1320` to the group-uniform law, so a row over this model that
-> publishes its certificate's own bound publishes at least `1/660` against
-> a shuffle whose single-card marginal error is zero. It fails at two deck
-> descriptions of one chirality as well, so the field is stronger than the
+> support is exactly the shuffle group and at every ideal within `1/1320` of
+> the group-uniform law, so a row over this model that publishes its
+> certificate's own bound publishes at least `1/660` against a shuffle whose
+> single-card marginal error is zero. It fails at two deck descriptions of
+> one chirality as well, so the field is stronger than the
 > secret-independence this row claims and its failure is not leakage.
 
 ## What a paper may and may not say
@@ -567,8 +563,8 @@ carry.
 - S3(b), a same-chirality refutation, was applied: it is Q8,
   `psl211_samechir_law_neq`, closed on the first attempt, as the field's own
   equation refuted at one pair of run arguments. What remains measured and not
-  proved is the width of the failure, the sum of absolute differences of 600
-  over 660, and the `cert_eps >= 10/11` floor that follows from it.
+  proved is the width of the failure, the 600-of-660 L1 gap, and the
+  `cert_eps >= 10/11` floor that follows from it.
 - S8 and S10 are the audit's own NOTEs with recommendation "harmless" and
   "none". Nothing to apply.
 - S9 asks that `fdist_uniform_close_supp` be kept only if a later statement
@@ -634,7 +630,7 @@ and is listed below as not applied.
 | id | disposition |
 |---|---|
 | SF1 | `psl211_alldecks_sc_const_false_supp`: the loose "any law that sees the group at all" replaced by the audit's text, which carries both hypotheses, vanishing off `pgg_G` and nonzero at every element of it |
-| SF2 | `psl211_perdeck_fiber_true0`: "which is the whole of the per-deck asymmetry" replaced. The sum of absolute differences between the two chiralities' reading multiplicity vectors at this deck description is 360 over 660 cuts, a `vm_compute` diagnostic of `audit-soundness/audit_diag.v` recorded at `audit-soundness/audit_diag.log.txt:59` and not a theorem, so one reading is the whole of what the refutation spends, not the whole of the asymmetry |
+| SF2 | `psl211_perdeck_fiber_true0`: "which is the whole of the per-deck asymmetry" replaced, 360 of the 660 cuts separate the two chiralities at this deck description, so one reading is the whole of what the refutation spends, not the whole of the asymmetry |
 | SF3 | `psl211_samechir_view`: the 660-distinct-readings claim moved out of the rendered comment into a source comment labelled "measured once and not proved", citing `audit-soundness/audit_diag.v` line 62 and its log |
 | SF4 | header of `psl211_sc_const_probe.v`: "Everything mathematical is already in psl211_models.v" replaced by the audit's text naming the second count |
 | SF5 | "the public deck description" replaced at all three surviving sites, `psl211_sc_const_probe.v` header, `psl211_perdeck_ideal_lawE` and this document's "All-decks mode"; the fourth site was inside B2a |
@@ -664,9 +660,9 @@ and is listed below as not applied.
 `cert_eps cert = odflt (cert_eps cert) (c R)`, an equality. So today's excluded
 set is exactly the published numbers equal to `cert_eps`. A row carries
 `SpectralPropAt cert c`, a variation distance bounded above by `c`, so an
-obligation weakened to `cert_eps cert <= odflt (cert_eps cert) (c R)` could
-only let a row publish a number larger than `cert_eps` and the exclusion would
-carry over. That second half is argued here and compiled nowhere.
+obligation weakened to `cert_eps cert <= c R` could only let a row publish a
+number larger than `cert_eps` and the exclusion would carry over. That second
+half is argued here and compiled nowhere.
 
 **N7, the duplicate lemma.** The probe's `var_dist_point_le` duplicates
 infotheo's `leq_var_dist` (`probability/variation_dist.v:51`) statement for
@@ -704,12 +700,9 @@ round 1 pass did. Five were found and fixed.
   says a row that publishes its certificate's own bound.
 
 Checked and found clean: nothing in the four files or here says the spectral
-arm cannot be closed at all; every occurrence of 360/660, 600/660 and 10/11
-names the quantity a sum of absolute differences between the reading
-multiplicity vectors, or a floor derived from one, and names its source, the
-`vm_compute` diagnostic or the auditor's measurement, and none of them is
-called a theorem; the unexcluded range reads `1/1320` in epsilon and `1/660`
-in the published number everywhere.
+arm cannot be closed at all; 360/660, 600/660 and 10/11 are labelled
+`vm_compute` diagnostics at every occurrence; the unexcluded range reads
+`1/1320` in epsilon and `1/660` in the published number everywhere.
 
 ## Round 2 findings not applied
 
@@ -720,49 +713,7 @@ in the published number everywhere.
   artifact a paper would cite, and it is a landing item.
 - **N7.** Replacing `var_dist_point_le` by `leq_var_dist` is a code change. The
   Q7 row records it as a landing item with both call sites named.
-- **The 300-reading event.** Proving the sum of absolute differences of 600
-  over 660, and with it the `cert_eps >= 10/11` diagnostic, needs the mass of
-  a 300-reading event rather than of one reading. That was already out of
-  scope in round 1 and stays out of scope here.
-
-## Round 3 audit and what changed
-
-Third fix pass, after `soundness-audit-round3.md`, one blocking finding and
-four should-fix items. Comments and this document only: no `.v` code changed,
-and the comment-stripped text of each of the four files is identical to its
-`history/*.2026-09-19-before-fix3.v` copy.
-
-| id | what changed |
-|---|---|
-| R3-1, blocking | the SF2 row of the round 2 change log said "360 of the 660 cuts separate the two chiralities at this deck description", a count of cuts that no measurement makes. The measured quantity is `audit_l1gap`, the sum over the two 660-entry reading multiplicity vectors of the absolute differences of their entries, and it is 360. The row now says that and names the `vm_compute` diagnostic and its log line; the "Checked and found clean" paragraph, which had certified that every such occurrence is labelled, now claims only what holds of every occurrence |
-| R3-2 | "within `1/1320`" replaced by "closer than `1/1320`" in the answer paragraph, in the paragraph dating the old paper passage, and in the passage a landing copies into `instances/psl211/psl211_rows.v`. The hypothesis of `psl211_alldecks_sc_const_false_close` is strict, `eps + eps < 1/660`, so the ideal at exactly `1/1320` is the one this document already lists as not excluded, and the boundary point is now claimed in one direction only |
-| R3-3 | `cert_eps cert = c R` does not typecheck, `c R` being an `option R`. The obligation now reads `cert_eps cert = odflt (cert_eps cert) (c R)` at the two sites in `psl211_sc_const_bound_probe.v` and at three sites here, the third being the weakened form in the answer paragraph, which the audit's own list did not name |
-| R3-4 | the reduction warning inside the rendered comment of `psl211_dealt_decktbl` moved to an ordinary source comment below it, as SF10 did at the other site. The rendered comment now states the table's content and nothing else |
-| R3-5 | `psl211_deck_diag.v:9` "Block index zero" is now "Block line zero", the term the other three files use for the first coordinate of a deck description. The two surviving "block index" strings here are quotations of replaced text inside the round 2 change log |
-| vocabulary | "L1" is barred in this project, `L` being a word length here, so the seven occurrences in this document and the three in the comments of `psl211_sc_const_probe.v` and `psl211_sc_const_bound_probe.v` now read "the sum of absolute differences". That is what infotheo's `var_dist` computes, the sum over the carrier of the absolute differences of the two masses, which is twice the total variation distance and at most 2. Two `L1` identifiers survive in the proof script of `psl211_sc_const_probe.v`, at `:426` and `:440`, this pass changing no code |
-
-**The audit's bonus observation.** The premise of the occupancy claim, that the
-uniform law on the whole of `{perm 'I_12}` satisfies the constancy field, needs
-every deck description to lay a deck of twelve distinct cards, and the tree
-proves it: `psl211_alldecks_uniq (x : psl211_inputT) : uniq
-(psl211_alldecks_layout x)` (`instances/psl211/psl211_alldecks.v:421-429`),
-through `ad_uniq_gen` and the tabulated validity of the block rows. The
-occupancy claim itself stays argued and not compiled. What is unproved in Rocq
-is the separate step, that the parametrization enumerates the valid decks once
-each.
-
-The five NOTE items of round 3 are recorded in `soundness-audit-round3.md` and
-not acted on here.
-
-## Closure, 2026-09-19
-
-Three soundness audits found every compiled statement true. Round 3 was NO-GO
-on one sentence of this file, with four should-fix items. The third fix pass
-applied all five. Its result was verified by the main session and not by a
-fourth independent audit, by the user's decision: all four files recompiled
-from source in a fresh directory with exit status 0, the code with comments
-stripped is identical to the version round 3 audited, no line exceeds 80 bytes,
-and the five corrections read as the audit asked, reworded where the audit's
-own text used a term the project bars. One item is left for a landing: the
-local hypothesis name at `psl211_sc_const_probe.v:426` and `:440` spells that
-barred term and is code, so it was not renamed in a comment-only pass.
+- **The 300-reading event.** Proving the 600-of-660 L1 gap, and with it the
+  `cert_eps >= 10/11` diagnostic, needs the mass of a 300-reading event rather
+  than of one reading. That was already out of scope in round 1 and stays out
+  of scope here.

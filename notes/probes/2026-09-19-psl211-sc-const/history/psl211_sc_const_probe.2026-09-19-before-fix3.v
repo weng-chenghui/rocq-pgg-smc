@@ -161,11 +161,10 @@ Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
 (* psl211_samechir_law_neq refutes the field's own equation at one pair of
    run arguments of chirality true, at the reading that gives cards 3, 2 and
    4 to the three seats. How wide that failure is remains measured and not
-   proved: at chirality true the sum of absolute differences between the two
-   reading multiplicity vectors is 600 over 660 cuts between block line 0
-   and block line 1, against 360 over 660 between the two chiralities at
-   block line 0. Those numbers are a vm_compute diagnostic of
-   audit-soundness/audit_diag.v, recorded in
+   proved: at chirality true the L1 gap of the two reading multiplicity
+   vectors is 600 of 660 cuts between block line 0 and block line 1, against
+   360 of 660 between the two chiralities at block line 0. Those numbers are
+   a vm_compute diagnostic of audit-soundness/audit_diag.v, recorded in
    audit-soundness/audit_diag.log.txt, and not Rocq theorems. *)
 Lemma psl211_alldecks_sc_const_false (R : realType) :
   ~ sc_const_prop psl211_alldecks_params
