@@ -8,71 +8,56 @@ Logical path of this directory: `kim_landing_probe`.
 Home decision taken: **option 2** of SRC `STATUS.md` S10, the new
 `instances/kim2025/five_card_mixing.v` below the analysis facade.
 
-Fix pass 1 applied on 2026-09-19 after two independent audits returned NO-GO
-(`soundness-audit.md`, `naming-audit.md`). Every file the pass touched was
-copied to `history/<name>.2026-09-19-before-fix1<ext>` first. The pass adds
-two corollaries and moves one equation, renames three declarations, and
-rewrites the prose the two audits found false; what it did and did not do is
-recorded in "Fix pass 1" below.
-
 ## Verdict per ledger row
 
 | ID | Verdict | Evidence |
 |---|---|---|
 | L1a | GO | `var_dist_supp.v` compiles alone in 4.6 s at mathcomp plus infotheo, requiring no PGG file. None of its five lemmas duplicates infotheo or the tree. |
-| L2 | GO | `five_card_mixing.v` compiles in 4.3 s, requires neither the manifest, nor `pgg_analysis_status`, nor the Tableau files, nor the facade. Twenty-four declarations: the recomputed cone of twenty-one, the moved tying equation and the two coalition bounds the fix pass adds. |
-| L3 | GO | `five_card_analysis.v` compiles in 4.0 s with six theorem aliases, a split status alias and the moved pins. Every changed line listed below. |
+| L2 | GO | `five_card_mixing.v` compiles in 4.3 s, requires neither the manifest, nor `pgg_analysis_status`, nor the Tableau files, nor the facade. Twenty-one declarations, the recomputed cone. |
+| L3 | GO | `five_card_analysis.v` compiles in 4.8 s with three theorem aliases, a split status alias and the moved pins. Every changed line listed below. |
 | L4 | GO | `pgg_analysis_manifest.v` compiles in 6.6 s with both rows moved, the five pins following, three new spelled-type pins, both docstrings, the Row 3, 4 and 5 tables and the "Absent capabilities" paragraph rewritten. |
-| L5 | GO | `pgg_tableau.v`, `pgg_tableau_syntax.v`, `s5_rows.v`, `pgl27_rows.v`, `psl211_rows.v` compile against the manifest copy, each with one code hunk and that hunk an import. `pgg_analysis_client.v` has two: the import, and one landing hunk, the section-7 block the fix pass corrects. `psl211_endpoints.v` is only loaded. |
+| L5 | GO | `pgg_tableau.v`, `pgg_tableau_syntax.v`, `pgg_analysis_client.v`, `s5_rows.v`, `pgl27_rows.v`, `psl211_rows.v` compile against the manifest copy, each with one code hunk and that hunk an import. `psl211_endpoints.v` is only loaded. |
 | L6 | GO | `five_card_rows.v` compiles in 7.2 s with four certificates, four programs, two row equations by `erefl`, three recorded failures, the number lemmas, the repricing identities and a rewritten header. `five_card_row_repeated_at_manifest_level` is gone and nothing else landed on 2026-09-19 is removed. |
 | L7 | GO | Five breakages found by the compiler, all five predicted by SRC S8. No unpredicted error; no predicted error missing. Table below. |
 | L8 | GO | 195 production `.v` files searched by proposition. Every five-card hit is inside one of the three files this landing changes. Table below. |
-| L9 | GO | 38 diff hunks over nine copies; with comments stripped, 23 code hunks, of which 10 are import repoints and 13 are the landing itself. |
-| L10 | GO | 71 `Print Assumptions` blocks: 9 closed under the global context, 62 the classical trio and nothing else. No repository axiom. |
-| L11 | GO | Names as SRC left them after its five naming audits, except the section rename and the fix pass's one rename, both below. No collision with a production name. |
-| L12 | GO | Eleven production files recompile, as S10 predicted for option 2, and `instances/psl211/psl211_endpoints.vo` is in the reverse closure of none of them, so the landing never recompiles it. |
+| L9 | GO | 35 diff hunks over nine copies; with comments stripped, 16 code hunks, of which 9 are import repoints and 7 are the landing itself. |
+| L10 | GO | 62 `Print Assumptions` blocks: 9 closed under the global context, 53 the classical trio and nothing else. No repository axiom. |
+| L11 | GO | Names as SRC left them after its five naming audits, except the section rename below. No collision with a production name. |
+| L12 | GO | Eleven production files recompile, as S10 predicted for option 2, and `instances/psl211/psl211_endpoints.vo` is in none of their closures. |
 
 ## Compile table
 
 Every invocation through the machine-wide `rocq1` lock, driven from Python, in
 this directory, with the production flags and `-Q . kim_landing_probe`.
 
-The order below is the landing's dependency order and is listed explicitly,
-because the production `_CoqProject` is not itself in dependency order: an
-audit script finds 101 places in it where a file is listed before one of its
-own prerequisites. Figures from one clean run in this order after the fix
-pass, each file compiled once on its own.
+Figures from one clean run over the whole `_CoqProject` list, in that order,
+after every file had already been compiled once on its own; the first-run
+figures agree with these to within a second.
 
 | file | rc | time |
 |---|---|---|
-| `var_dist_supp.v` | 0 | 4.2 s |
-| `five_card_mixing.v` | 0 | 4.3 s |
-| `five_card_analysis.v` | 0 | 4.0 s |
-| `pgg_analysis_manifest.v` | 0 | 6.8 s |
-| `pgg_tableau.v` | 0 | 13.9 s |
-| `pgg_tableau_syntax.v` | 0 | 4.6 s |
-| `pgg_analysis_client.v` | 0 | 3.9 s |
-| `s5_rows.v` | 0 | 4.0 s |
-| `pgl27_rows.v` | 0 | 6.4 s |
-| `psl211_rows.v` | 0 | 5.5 s |
-| `five_card_rows.v` | 0 | 7.2 s |
-| `kim_landing_fidelity.v` | 0 | 30.7 s |
+| `var_dist_supp.v` | 0 | 4.4 s |
+| `five_card_mixing.v` | 0 | 4.5 s |
+| `five_card_analysis.v` | 0 | 4.4 s |
+| `pgg_analysis_manifest.v` | 0 | 6.3 s |
+| `pgg_tableau.v` | 0 | 13.4 s |
+| `pgg_tableau_syntax.v` | 0 | 4.7 s |
+| `pgg_analysis_client.v` | 0 | 4.0 s |
+| `s5_rows.v` | 0 | 4.4 s |
+| `pgl27_rows.v` | 0 | 6.5 s |
+| `psl211_rows.v` | 0 | 5.8 s |
+| `five_card_rows.v` | 0 | 7.5 s |
+| `kim_landing_fidelity.v` | 0 | 22.6 s |
 | `l7_fail_messages.v` (diagnostic, expected to fail) | 1 | 7.9 s |
 
-The manifest, the file feared long at 1905 lines, compiles in 6.8 s. The
-eleven landing files together are about 61 s, and the whole list including
-the fidelity file is about 92 s. The fidelity file grew because the fix pass
-adds four restatements and nine assumption prints to it.
+The manifest, the file feared long at 1905 lines, compiles in 6.3 s. The
+eleven landing files together are about 66 s, and the whole list including
+the fidelity file is about 89 s.
 
 `l7_fail_messages.v` is a diagnostic and is not in `_CoqProject`. It states,
 without the `Fail` guard, the declaration `five_card_rows.v` keeps as a
 recorded `Fail`, because `rocq compile` prints nothing for a guard that
-passes. Fix pass 1 does not change it or the message it records: it names
-`five_card_row_repeated_spectral_tableau` and `five_card_row_uniform`, and
-neither is renamed or restated. Re-run after the fix pass it still returns 1
-and still prints that message word for word. Its 7.9 s is the figure from a
-run with the machine-wide lock free; the re-run waited about twelve minutes
-for another session to release the lock, which is queueing and not compiling.
+passes.
 
 ## L12: what a landing recompiles
 
@@ -83,11 +68,9 @@ all: two new files (`lib/var_dist_supp.v`,
 `instances/kim2025/five_card_mixing.v`), two edited
 (`instances/kim2025/five_card_analysis.v`,
 `manifest/pgg_analysis_manifest.v`), one both edited and following
-(`instances/kim2025/five_card_rows.v`), and six following. `_CoqProject`
-needs two new lines, one for each new file, at the positions given under
-"Import rewrite at cp time" below. `instances/psl211/psl211_endpoints.v` is
-loaded through `psl211_analysis` and recompiled by nothing the landing
-touches.
+(`instances/kim2025/five_card_rows.v`), and six following. `_CoqProject` needs
+two new lines, one for each new file, after its dependencies.
+`instances/psl211/psl211_endpoints.v` is in no closure and was never compiled.
 
 ## L7: the breakages, against SRC S8's predictions
 
@@ -212,137 +195,12 @@ the existing `centi_sample`, `centi_cut_distE`, `centi_bundle` and
 `biased_family`.
 
 The status alias split keeps the name `exec_transfer_status` on the **uniform**
-path and adds `biased_transfer_status` for the single-biased path. The
-residual is that the name says "exec" and no longer says which of the three
-executed paths it means; its docstring says which. The constraint that
-originally forced the name, the bare
-`Check FiveCardAnalysis.exec_transfer_status.` in
-`manifest/pgg_analysis_client.v`, no longer forces it, because the fix pass
-makes that file an edited file. The rename is nevertheless **left undone and
-recorded**: the soundness audit's preferred option adds a second alias for one
-value, which the facade's own contract of one alias per public value refuses
-and whose docstring would have to narrate the earlier name, and the
-alternative renames a public facade alias, which is the owner's call. Both
-options cost pin changes only inside the landing, so either is available
-whenever the owner decides.
-
-## Fix pass 1
-
-Applied 2026-09-19 after `soundness-audit.md` and `naming-audit.md`. What
-changed, by finding.
-
-- **The two Kim rows now name a bridge theorem, not a pair of premises.**
-  `five_card_mixing.v` gains `kim_centi_static_obs_indist` and
-  `kim_biased_static_obs_indist`: for every coalition below the privacy
-  threshold and every two committed pairs, the variation distance between the
-  two static endpoint readings of the row's own cut law is at most twice the
-  bundle's number. Each is `var_dist_fdistmap_transfer` applied to the row's
-  mixing theorem and to `five_card_static_obs_const`, which is the shape
-  `instances/pgl27/pgl27_models.v` uses for
-  `pgl27_word_view_indist_via_transfer`. The facade aliases them as
-  `centi_static_obs_indist` and `biased_static_obs_indist`; Row 5's final
-  bridge theorem cell names the first, Row 4's names the second beside
-  `colour_view_leak_bound`; both level justifications and both row docstrings
-  say that the transfer's conclusion is what reaches `AnalysisBridged` and
-  that the mixing theorem with the constancy theorem is what gives
-  `IdealFinite`; two spelled-type pins follow, in the manifest's existing pin
-  style. `mixing` stays under **bound or certificate**.
-- **The certified proposition and the corollary are interderivable, in both
-  directions.** `kim_landing_fidelity.v` proves
-  `landing_centi_prop_of_indist`, `landing_centi_indist_of_prop`,
-  `landing_biased_prop_of_indist` and `landing_biased_indist_of_prop`. Neither
-  direction is a bare `exact:`, and the reason is mathematical rather than
-  performance: a certified program's proposition is stated at
-  `sa_cut_dist (amf_sample ...)` and the corollary at the bundle's
-  `sw_rho_dist`, and those two are equal by the certificate's tying equation,
-  a `Qed` lemma, so they are not convertible. Each direction therefore
-  rewrites with that tying equation first, `kim_centi_cut_distE` for the
-  repeated row and `kim_biased_sample_cut_witnessE` for the one-cut row, and
-  closes by `exact` or `apply:`. No attempt hung and no attempt was abandoned.
-- **The one-cut tying equation moved down.** `kim_biased_sample_cut_witnessE`
-  leaves `five_card_rows.v` for `five_card_mixing.v`, beside
-  `kim_biased_marginal_bound`, as a `Lemma ... Qed.`; opacity costs nothing,
-  every row equation and certificate still compiles. It is stated at the
-  adapter `kim_single_sample` at bias one hundredth, which is the shape
-  `kim_centi_cut_distE` has, and not at `amf_sample kim_biased_family`: that
-  form needs `pgg_analysis_status`, which `five_card_mixing.v` does not import
-  and must not. The facade aliases it as `biased_sample_cut_witnessE`, Row 4's
-  distribution-to-observer bridges cell and model-transfer cell name it, and
-  it has its own spelled-type pin.
-- **One rename.** `five_card_row_biased_ideal_tableau`, `_rowE` and
-  `_publishedE` become `five_card_row_biased_spectral_tableau`, `_rowE` and
-  `_publishedE`, at every use in the rows file, the fidelity file and the
-  headers. Seventeen occurrences, none outside this directory.
-- **The capability vocabulary is not widened.** "cut-carrier mixing" is
-  reverted out of convention (3), and the two capability lines that used it
-  are dropped. Both theorems stay under **bound or certificate**, which is
-  where Row 2 puts `PGL27Analysis.word_mixing`, a bound of the same shape.
-- **`manifest/pgg_analysis_client.v`** no longer says section 7 of the
-  five-card facade carries no theorem. It names what the section carries and
-  checks one bridge alias and the biased typed status beside the two statuses
-  it already checked, on the pattern of the PGL(2,7) block above it.
-- **The S_5 missing-premise sentence.** The barred two-character term is gone,
-  the quantity is named as the sum of the absolute differences, the claim is
-  weakened from "one" to "at least one", which is what coset confinement
-  gives, and the comment box that production leaves ragged is closed.
-- **The at-most-one-seat restriction** is now carried by both sentences that
-  state the constancy outside the file that proves it, the facade header and
-  the manifest's "Absent capabilities" paragraph. The same paragraph no longer
-  says every `StaticExecutedOnly` path "names what it lacks", which rows 1, 7
-  and 9 do not: it says each states either the premise it lacks or why none is
-  absent.
-- **`lib/var_dist_supp.v`** describes its own five lemmas correctly in its
-  header, names `var_dist_fdistmap_inj` and `var_dist_fdistmap` as the results
-  it weakens, and opens all five docstrings with a descriptive phrase, which
-  is the convention of all 28 docstrings in `lib/`.
-- **The rows file index** no longer calls `2^-39` a ceiling, and gains the
-  five declarations of indexed kinds it was missing. The sixth,
-  `kim_biased_sample_cut_witnessE`, is indexed in `five_card_mixing.v`
-  instead, because that is where it now lives.
-
-Left undone, and why.
-
-- The `exec_transfer_status` rename, recorded under "Naming" above.
-- `var_dist_le2` stays with no proof consuming it. Soundness invariant 3 of
-  the spec cites it as the scale the published numbers are read against, and
-  two docstrings and the fidelity file name it, so it is kept under the
-  repository's "claimed or premise" standard.
-- `instances/kim2025/five_card_kim.v` carries the same barred term in a
-  parenthesis glossing `var_dist`. The landing does not edit that file.
-
-## Import rewrite at cp time
-
-`cp` alone does not produce the permanent files. Every `From kim_landing_probe
-Require ...` line resolves to this directory and must become `pgg_smc`. The
-list is exhaustive: no other line of any copy differs from the permanent file
-by a logical path.
-
-| file | line as it is in the copy | line as it must be in the permanent file |
-|---|---|---|
-| `five_card_mixing.v` | `From pgg_smc Require Import perm_uniform pgg_interface pgg_collusion_bound.` and, last of the block, `From kim_landing_probe Require Import var_dist_supp.` | `From pgg_smc Require Import perm_uniform var_dist_supp.` followed by `From pgg_smc Require Import pgg_interface pgg_collusion_bound.`, and the `kim_landing_probe` line deleted. `var_dist_supp` is a `lib/` file and belongs in the `pgg_smc` library block, not appended after `algebraic_rigidity`. |
-| `five_card_analysis.v` | `From kim_landing_probe Require Import five_card_mixing.` | `From pgg_smc Require Import five_card_mixing.` |
-| `pgg_analysis_manifest.v` | `From pgg_smc Require Export pgl27_analysis s5_analysis psl211_analysis.` and `From kim_landing_probe Require Export five_card_analysis.` | the production form restored: `From pgg_smc Require Export pgl27_analysis five_card_analysis s5_analysis` with the continuation `                            psl211_analysis.` |
-| `pgg_tableau.v` | `From pgg_smc Require Import pgg_instance.` and `From kim_landing_probe Require Import pgg_analysis_manifest.` | the production form restored: `From pgg_smc Require Import pgg_instance pgg_analysis_manifest.` |
-| `pgg_tableau_syntax.v` | one `From kim_landing_probe Require ...` line | the same line at `pgg_smc` |
-| `pgg_analysis_client.v` | one `From kim_landing_probe Require ...` line | the same line at `pgg_smc` |
-| `s5_rows.v`, `pgl27_rows.v`, `psl211_rows.v` | one `From kim_landing_probe Require ...` line each | the same line at `pgg_smc` |
-| `five_card_rows.v` | `From kim_landing_probe Require Import five_card_mixing.`, `From kim_landing_probe Require Import pgg_analysis_manifest pgg_tableau.`, `From kim_landing_probe Require Import pgg_tableau_syntax.` | the same three lines at `pgg_smc` |
-| `kim_landing_fidelity.v` | six `From kim_landing_probe Require ...` lines | this file does not land: it is the probe's own evidence file |
-
-`_CoqProject` gains two lines. The production file is not in dependency order,
-so the rule is its own grouping convention, and both anchors were checked in
-the production `_CoqProject` as it stands:
-
-- `lib/var_dist_supp.v` as a new line 35, immediately after
-  `lib/mutual_info_recoding.v` (line 34, confirmed) and before
-  `smc/graded_resource.v` (line 35, confirmed). The file has no project
-  prerequisite, so no earlier position is required, and the `lib` block is
-  where its neighbours of the same shape sit.
-- `instances/kim2025/five_card_mixing.v` as a new line 76, immediately after
-  `instances/kim2025/five_card_models.v` (line 75, confirmed) and immediately
-  before `instances/kim2025/five_card_analysis.v` (line 76, confirmed), which
-  becomes line 77. This is the position `instances/pgl27/pgl27_mixing.v` holds
-  relative to `instances/pgl27/pgl27_analysis.v`.
+path and adds `biased_transfer_status` for the single-biased path. Keeping the
+old name is forced, not chosen: `manifest/pgg_analysis_client.v:48` has a bare
+`Check FiveCardAnalysis.exec_transfer_status.`, and renaming it would break a
+file this landing must leave alone but for its import, which is what ledger
+row L5 exists to show. The residual is that the name says "exec" and no longer
+says which of the two exact-cut paths it means; its docstring now says so.
 
 ## L8: the propositions, and where the tree states them
 
@@ -360,14 +218,14 @@ facade's section 7.
 | endpoint marginals only, no security statement attached | `five_card_analysis.v:367`; `pgg_analysis_manifest.v:359` | both changed |
 | no model comparison, no transfer-layer result exists | `five_card_analysis.v:351`; `pgg_analysis_manifest.v:669`, `:1381` | all three changed |
 | the same words at rows 1, 2, 6, 7 | `pgg_analysis_manifest.v:116`, `:406`, `:460`, `:597` | stay: other paths, untouched |
-| nothing to alias, section 7 empty | `five_card_analysis.v:16-17`, `:351-358`, `:431`; `pgg_analysis_client.v:34-37` | all four changed; the client hit was missed by the probe's first search and found by the soundness audit |
+| nothing to alias, section 7 empty | `five_card_analysis.v:16-17`, `:351-358`, `:431` | all three changed |
 | a count of the five-card rows or programs | `five_card_rows.v:4`, `:28-30`, `:413`, `:416` | `:4` and `:28-30` changed; `:413` and `:416` say the three rows share one prefix, which stays true of the three prefixed programs |
 | row counts by completion level or transfer status | none at the five-card rows | nothing to change; the two hits in `groups/` and `instances/psl211/` are about tables of a different kind |
 | the biased path carries no shuffle certificate | `pgg_analysis_manifest.v:301-302` | changed |
 | the repeated path's bound-or-certificate list | `pgg_analysis_manifest.v:351-354` | changed |
 | no final bridge theorem | `pgg_analysis_manifest.v:355` | changed; the hit at `:405` is the S_5 deterministic row and stays |
 | the bundle does not raise the level | `pgg_analysis_manifest.v:379-380` | changed |
-| every `StaticExecutedOnly` or `NoModelComparison` path names what it lacks | `pgg_analysis_manifest.v:664-665` | changed: each such path states in its missing-premise cell either the premise it lacks or why none is absent, which is what rows 1, 7 and 9 do |
+| every `StaticExecutedOnly` or `NoModelComparison` path names what it lacks | `pgg_analysis_manifest.v:664-665` | changed, from "the premise it lacks" to "what it lacks", because row 3 now lacks a second model and not a premise |
 | the manifest's criterion met by a theorem no arm takes | `five_card_rows.v:49` | changed; the sentence stays in the file as the description of `s5_row_word` |
 | the five-card typed statuses as prose | `five_card_analysis.v:364`, `:368`; `five_card_rows.v:333`; `pgg_analysis_manifest.v:751`, `:758`, `:763`, `:768`, `:772`, `:775`, `:778` | `:364` keeps its value with a new docstring, `:368` moves; `five_card_rows.v:333` stays, it is the uniform row's program and gives the same reason the landing gives for row 3; the manifest's uniform-row lines stay, the biased and repeated lines move |
 
@@ -385,22 +243,20 @@ lemma in the tree proves the ceiling two. That becomes false the moment
 
 ## L9: the diffs
 
-Nine copies of existing files, 38 hunks with comments, 23 with comments
-stripped. The `diffs/` directory was regenerated after fix pass 1, so the
-tables below are true of the final copies. The comment diffs carry two lines
-of context and the code diffs one, which is what reproduces the counts.
+Nine copies of existing files, 35 hunks with comments, 16 with comments
+stripped.
 
 | copy | hunks | code hunks | what the code hunks are |
 |---|---|---|---|
 | `pgg_tableau.v` | 1 | 1 | the import of the manifest, repointed |
 | `pgg_tableau_syntax.v` | 1 | 1 | the same |
+| `pgg_analysis_client.v` | 1 | 1 | the same |
 | `s5_rows.v` | 1 | 1 | the same |
 | `pgl27_rows.v` | 1 | 1 | the same |
 | `psl211_rows.v` | 1 | 1 | the same |
-| `pgg_analysis_client.v` | 3 | 2 | the import; and the section-7 block, which gains a `Check` on a bridge alias and on the biased typed status |
-| `five_card_analysis.v` | 6 | 5 | the import of `five_card_mixing`; the tying-equation alias; three transfer aliases and the status split; the two bridge aliases; one spelled-type pin; two status pins |
-| `pgg_analysis_manifest.v` | 15 | 7 | the import of the facade copy; the two row definitions; the tying-equation pin; five spelled-type pins; the facade status pins; the two biased-row pins; the two repeated-row pins |
-| `five_card_rows.v` | 9 | 4 | three import lines; the deletion of `five_card_row_repeated_at_manifest_level` and of the tying equation, which moves down to `five_card_mixing.v`; the twenty-five new declarations and three recorded failures |
+| `five_card_analysis.v` | 5 | 4 | the import of `five_card_mixing`; three alias definitions and the status split; one spelled-type pin; two status pins |
+| `pgg_analysis_manifest.v` | 15 | 6 | the import of the facade copy; the two row definitions; three spelled-type pins; the facade status pins; the two biased-row pins; the two repeated-row pins |
+| `five_card_rows.v` | 9 | 4 | three import lines; the deletion of `five_card_row_repeated_at_manifest_level`; the twenty-six new declarations and three recorded failures |
 
 Every other code line is identical after comments are stripped. The
 comment-only hunks are the header, table and docstring rewrites listed under
@@ -435,21 +291,18 @@ here.
 `manifest/pgg_analysis_manifest.v`, eighteen edits:
 
 1. `:75-76`, the `Require Export` line split, the facade coming from the copy.
-2. `:66`, the closed capability vocabulary of convention (3) is left as
-   production has it. Both cut-carrier bounds sit under **bound or
-   certificate**, where Row 2 puts `PGL27Analysis.word_mixing`, a bound of
-   the same shape with no capability line of its own.
+2. `:66`, the closed capability vocabulary of convention (3) gains
+   "cut-carrier mixing". This is the one term the landing adds to a list the
+   file declares closed; the alternative was to leave the Row 4 and Row 5
+   capability tables silent about the theorem that raises the rows.
 3. `:244-248`, Row 3's missing-premise cell.
 4. `:301-302`, Row 4's bound-or-certificate cell.
 5. `:305-308`, Row 4's model transfer, missing premise and transfer status.
-6. Row 4's capability table is unchanged; its distribution-to-observer
-   bridges cell gains `biased_sample_cut_witnessE` and its final bridge
-   theorem cell gains `biased_static_obs_indist`.
+6. `:314-316`, Row 4's capability table gains a line for `biased_cut_mixing`.
 7. `:326-328`, Row 4's level justification gains the transfer sentence.
 8. `:351-362`, Row 5's table: bound or certificate, final bridge theorem,
    model transfer, missing premise, completion level, transfer status.
-9. Row 5's capability table is unchanged; its final bridge theorem cell
-   names `centi_static_obs_indist` in place of the pair of premises.
+9. `:370-372`, Row 5's capability table gains a line for `centi_cut_mixing`.
 10. `:374-380`, Row 5's level justification.
 11. `:664-665`, "names the premise it lacks".
 12. `:669-673`, the "Absent capabilities" five-card paragraph.
@@ -493,12 +346,10 @@ adjustments are declarative:
 
 ## L10: assumptions
 
-`kim_landing_fidelity.v` imports the copies beside the production vocabulary
-its restatements are written in, restates the two row equations, derives each
-certified program's own proposition and the corollary the manifest's bridge
-cell names from the other, and prints the assumptions of all 71 declarations
-the landing adds or moves. Nine are closed under the global context; 62
-report the classical trio `propositional_extensionality`,
+`kim_landing_fidelity.v` imports the copies and nothing else, restates the two
+row equations, and prints the assumptions of all 62 declarations the landing
+adds or moves. Nine are closed under the global context; 53 report the
+classical trio `propositional_extensionality`,
 `functional_extensionality_dep`, `constructive_indefinite_description` and
 nothing else. No repository axiom, no `Admitted`, no `Abort`, no `Parameter`,
 no `admit`.
@@ -536,21 +387,11 @@ seats, and it is not a statement about the full reveal.
    into that file's imports.
 5. SRC S8 does not mention that the facade's own retention-check contract
    (`five_card_analysis.v:372-382`, "one representative per section") obliges
-   section 7 to gain a spelled-type `Check` once it has theorems. That is
-   done here. The first form of this probe also widened the manifest's closed
-   capability vocabulary; the soundness audit showed that Row 2 already
-   settles the question for a bound of this shape by giving it no capability
-   line, so the widening is reverted.
+   section 7 to gain a spelled-type `Check` once it has theorems, nor that the
+   manifest's convention (3) declares its capability vocabulary closed, so a
+   cut-carrier mixing capability line needs that vocabulary widened. Both are
+   done here and both are judgement calls a reviewer should confirm.
 6. SRC S8 says the facade's status alias "must split in two". It does not say
    that `manifest/pgg_analysis_client.v:48` pins the name
-   `exec_transfer_status` with a bare `Check`. That pin is no longer a
-   constraint, because the same file carries a false sentence about section 7
-   that the landing has to correct anyway.
-7. The naming audit says the one-cut tying equation can move to
-   `five_card_mixing.v` because "everything it needs, `five_card_models` and
-   `five_card_exec`, is already imported there". Its statement as SRC writes
-   it also needs `amf_sample`, which comes from `manifest/pgg_analysis_status.v`
-   and which `five_card_mixing.v` deliberately does not import. Restating the
-   equation at the adapter `kim_single_sample`, which is the shape
-   `kim_centi_cut_distE` already has, is what makes the move possible without
-   that import.
+   `exec_transfer_status` with a bare `Check`, so the split cannot rename it
+   without editing a file ledger row L5 requires be left alone.

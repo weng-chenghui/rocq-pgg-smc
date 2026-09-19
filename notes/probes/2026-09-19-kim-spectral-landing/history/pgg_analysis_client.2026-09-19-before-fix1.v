@@ -32,10 +32,9 @@ Check PGL27Analysis.word_view_indist_via_transfer. (* 7 Transfer *)
 Check PGL27Analysis.word_transfer_status.       (* 7 Transfer, typed status *)
 
 (* Five-card development, sections 1 to 6, the bound sub-block and section 7.
-   Section 7 carries the base premises of the two cut-carrier transfers and
-   the coalition bound each pair of them concludes, so it is represented here
-   by one of those bounds and by the typed transfer statuses; the bound alias
-   below is deliberately NOT a security alias. *)
+   That section carries no theorem, so its representative is the typed
+   transfer status; the bound alias below is deliberately NOT a security
+   alias. *)
 Check FiveCardAnalysis.profile.                 (* 1 Program *)
 Check FiveCardAnalysis.exec_plug.               (* 2 Execution *)
 Check FiveCardAnalysis.colour_view.             (* 3 Observers *)
@@ -46,9 +45,7 @@ Check FiveCardAnalysis.centi_family.            (* 4 Models, typed family *)
 Check FiveCardAnalysis.observed_recovers.       (* 5 Correctness *)
 Check FiveCardAnalysis.exec_trace_secrecy.      (* 6 Security *)
 Check FiveCardAnalysis.deal_centi_lt.           (* bound, not security *)
-Check FiveCardAnalysis.centi_static_obs_indist. (* 7 Transfer *)
 Check FiveCardAnalysis.exec_transfer_status.    (* 7 Transfer, typed status *)
-Check FiveCardAnalysis.biased_transfer_status.
 Check FiveCardAnalysis.repeated_transfer_status.
 
 (* Five-seat S_5 instance, sections 1 to 6, the bound sub-block and section

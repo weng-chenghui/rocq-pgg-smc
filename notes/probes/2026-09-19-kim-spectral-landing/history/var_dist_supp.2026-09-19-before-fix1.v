@@ -3,17 +3,16 @@
 (******************************************************************************)
 (* var_dist_supp: variation distance under a reader separating the supports   *)
 (*                                                                            *)
-(* var_dist_fdistmap_inj, the equality case of the data processing            *)
-(* inequality var_dist_fdistmap, asks that the reader be injective on the     *)
-(* whole domain. A reader of the form sigma |-> sigma s on a permutation      *)
-(* group is not, so that case carries no distance between two laws on the     *)
-(* group back from a bound on the reading of one card position. Weakening     *)
-(* the hypothesis to the union of the two supports restores the transport,    *)
-(* and that is the form in which a per-position number becomes a number       *)
-(* about the group. Beside it sit the ceiling a published variation           *)
-(* distance is read against, the invariance of a uniform law under an         *)
-(* injective endomap, the fact that a pushforward charges only the image,     *)
-(* and the count of the tuple positions at which a predicate holds.           *)
+(* The equality case of the data processing inequality asks that the reader   *)
+(* be injective on the whole domain. A reader of the form sigma |-> sigma s   *)
+(* on a permutation group is not, so that case carries no distance between    *)
+(* two laws on the group back from a bound on the reading of one card         *)
+(* position. Weakening the hypothesis to the union of the two supports        *)
+(* restores the transport, and that is the form in which a per-position       *)
+(* number becomes a number about the group. Beside it sit the ceiling a       *)
+(* published variation distance is read against, two support facts about      *)
+(* pushforwards, and the count that reads a law on tuple positions off the    *)
+(* underlying sequence.                                                       *)
 (*                                                                            *)
 (* Lemmas:                                                                    *)
 (*   var_dist_le2               == a variation distance is at most two        *)
@@ -42,8 +41,8 @@ Local Open Scope fdist_scope.
 (*     The ceiling of a variation distance                                    *)
 (******************************************************************************)
 
-(** The variation distance between two laws on a finite carrier is at most
-    two, since it is the sum of the absolute differences
+(** var_dist_le2 — the variation distance between two laws on a finite
+    carrier is at most two, since it is the sum of the absolute differences
     and each law sums to one. It is the scale a published number is read
     against: a certificate says something about a coalition's two readings
     exactly in so far as its number is below two, and the total variation
@@ -69,11 +68,10 @@ Qed.
 Section var_dist_supp_inj.
 Variable R : realType.
 
-(** A reader that separates the points carrying mass transports the
-    variation distance exactly. It is var_dist_fdistmap_inj, the equality
-    case of the data processing inequality var_dist_fdistmap, with
-    injectivity weakened from the whole domain to the union of the two
-    supports. The weakening is what a
+(** var_dist_fdistmap_supp_inj — a reader that separates the points carrying
+    mass transports the variation distance exactly. It is the equality case
+    of the data processing inequality with injectivity weakened from the
+    whole domain to the union of the two supports. The weakening is what a
     cut law needs: the inequality runs from the group to the reading, and a
     certificate states its bound on the reading and owes it on the group. *)
 Lemma var_dist_fdistmap_supp_inj (A B : finType) (f : A -> B)
@@ -118,8 +116,8 @@ End var_dist_supp_inj.
 (*     A bijective reader on one finite type keeps a law uniform              *)
 (******************************************************************************)
 
-(** An injective endomap of a finite type leaves the uniform law fixed. It
-    is the endomap case of fdistmap_inj_uniform,
+(** fdistmap_inj_uniform_id — an injective endomap of a finite type leaves
+    the uniform law fixed. It is the endomap case of fdistmap_inj_uniform,
     whose conclusion is uniform on the image and which does not simplify back
     to the uniform law when the two types differ. The ideal cut of the
     five-card instance is uniform on the rotations, and one card position of
@@ -139,8 +137,8 @@ rewrite big1; last first.
 by rewrite addr0 !fdist_uniformE.
 Qed.
 
-(** A pushforward gives mass only to points in the image of the map. It
-    is how the support of a cut law defined as a
+(** fdistmap_neq0_codom — a pushforward gives mass only to points in the
+    image of the map. It is how the support of a cut law defined as a
     word-shuffle pushforward is read off the word evaluation. *)
 Lemma fdistmap_neq0_codom (R : realType) (A B : finType) (f : A -> B)
     (P : R.-fdist A) (b : B) :
@@ -159,8 +157,8 @@ Qed.
 (*     Counting a tuple's entries through the positions                       *)
 (******************************************************************************)
 
-(** The positions of a tuple at which a predicate holds are counted by the
-    predicate on the underlying sequence. It is the bridge
+(** card_tnth_count — the positions of a tuple at which a predicate holds are
+    counted by the predicate on the underlying sequence. It is the bridge
     from a law on card positions to the deck's colour census, which is the
     level at which den Boer's encoding is constant in the committed bits. *)
 Lemma card_tnth_count (n : nat) (T : Type) (t : n.-tuple T) (p : pred T) :

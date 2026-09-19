@@ -16,7 +16,16 @@
 +  @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
 +    FiveCardAnalysis.centi_family IdealFinite BaselineClassicalOnly.
  Definition s5_row_det : AnalysisPathRow :=
-@@ -475,2 +475,25 @@
+@@ -353,2 +353,8 @@
+         (@five_card_models.kim_repeated_dist R eps Hlt Hgt L)).
++Timeout 60 Check (FiveCardAnalysis.biased_sample_cut_witnessE :
++  forall R : realType,
++    sw_rho_dist (five_card_mixing.kim_biased_marginal_bound R)
++    = sa_cut_dist (@FiveCardAnalysis.single_biased_sample R (1 / 100)
++                     (five_card_kim.kim_centi_lt R)
++                     (five_card_kim.kim_centi_gt R))).
+ Timeout 60 Check (FiveCardAnalysis.centi_cut_distE :
+@@ -475,2 +481,57 @@
      < 2%:R^-40).
 +Timeout 60 Check (FiveCardAnalysis.centi_cut_mixing :
 +  forall R : realType,
@@ -41,20 +50,52 @@
 +      = fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
 +                    five_card_exec.five_card_params C x')
 +                 (sa_cut_dist (FiveCardAnalysis.uniform_sample R))).
++Timeout 60 Check (FiveCardAnalysis.centi_static_obs_indist :
++  forall (R : realType)
++    (C : {set 'I_(pi_T' (mp_PI (instance_profile
++                                  five_card_exec.five_card_algebra))).+1}),
++    (#|C| < profile_k (instance_profile
++                         five_card_exec.five_card_algebra))%N ->
++    forall x x' : ex_inputT five_card_exec.five_card_params,
++      var_dist
++        (fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
++                     five_card_exec.five_card_params C x)
++           (sw_rho_dist (scb_bound (FiveCardAnalysis.centi_bundle R))))
++        (fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
++                     five_card_exec.five_card_params C x')
++           (sw_rho_dist (scb_bound (FiveCardAnalysis.centi_bundle R))))
++      <= sw_bound_eps (scb_bound (FiveCardAnalysis.centi_bundle R))
++         + sw_bound_eps (scb_bound (FiveCardAnalysis.centi_bundle R))).
++Timeout 60 Check (FiveCardAnalysis.biased_static_obs_indist :
++  forall (R : realType)
++    (C : {set 'I_(pi_T' (mp_PI (instance_profile
++                                  five_card_exec.five_card_algebra))).+1}),
++    (#|C| < profile_k (instance_profile
++                         five_card_exec.five_card_algebra))%N ->
++    forall x x' : ex_inputT five_card_exec.five_card_params,
++      var_dist
++        (fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
++                     five_card_exec.five_card_params C x)
++           (sw_rho_dist (five_card_mixing.kim_biased_marginal_bound R)))
++        (fdistmap (@static_coalition_obs five_card_exec.five_card_algebra
++                     five_card_exec.five_card_params C x')
++           (sw_rho_dist (five_card_mixing.kim_biased_marginal_bound R)))
++      <= sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)
++         + sw_bound_eps (five_card_mixing.kim_biased_marginal_bound R)).
  Timeout 60 Check
-@@ -478,3 +501,5 @@
+@@ -478,3 +539,5 @@
  Timeout 60 Check
 -  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).
 +  (erefl : FiveCardAnalysis.biased_transfer_status = IdealFinite).
 +Timeout 60 Check
 +  (erefl : FiveCardAnalysis.repeated_transfer_status = IdealFinite).
  Timeout 60 Check (S5Analysis.profile : MonodromyProfile).
-@@ -755,3 +780,3 @@
+@@ -755,3 +818,3 @@
  Timeout 60 Check
 -  (erefl : apr_transfer five_card_row_biased = StaticExecutedOnly).
 +  (erefl : apr_transfer five_card_row_biased = IdealFinite).
  Timeout 60 Check
-@@ -761,5 +786,6 @@
+@@ -761,5 +824,6 @@
    : AnalysisModelFamily FiveCardAnalysis.observed).
 -Timeout 60 Check (erefl : apr_completion five_card_row_repeated = Sampled).
 -Timeout 60 Check

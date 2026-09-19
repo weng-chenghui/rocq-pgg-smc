@@ -13,12 +13,10 @@
 (* A bound sub-block sits beside section 6 and carries the endpoint marginal  *)
 (* bounds of the repeated and seven-cut models. Those are not privacy or      *)
 (* security statements and are not aliased under the security heading.        *)
-(* Section 7 carries the base premises Kim's one-cut and seven-cut rows rest  *)
-(* on, the distance of each cut law from the uniform rotation law and the     *)
-(* constancy, at every coalition of at most one of the five seats, of that    *)
-(* coalition's reading of the uniform rotation law. Beside them it carries the*)
-(* coalition bound each pair of premises gives, and one typed transfer status *)
-(* per analysis path.                                                         *)
+(* Section 7 carries the two base premises Kim's one-cut and seven-cut rows   *)
+(* rest on, the distance of each cut law from the uniform rotation law and    *)
+(* the constancy of a coalition's reading of that law, together with one      *)
+(* typed transfer status per analysis path.                                   *)
 (*                                                                            *)
 (* The facade contract:                                                       *)
 (*                                                                            *)
@@ -62,9 +60,6 @@
 (*   cut-law distance from the ideal cut      -> centi_cut_mixing,            *)
 (*                                               biased_cut_mixing            *)
 (*   ideal reading constancy                  -> static_obs_const             *)
-(*   coalition reading bound at two pairs     -> centi_static_obs_indist,     *)
-(*                                               biased_static_obs_indist     *)
-(*   one-cut tying equation                   -> biased_sample_cut_witnessE   *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -260,11 +255,6 @@ Definition repeated_seat_distE := @kim_repeated_seat_distE.
     bound of the seven-cut certificate bundle. *)
 Definition centi_cut_distE := @kim_centi_cut_distE.
 
-(** biased_sample_cut_witnessE — the single-biased model's cut distribution
-    is the marginal bound of the length-one certificate bundle. It is what
-    centi_cut_distE is for the seven-cut model. *)
-Definition biased_sample_cut_witnessE := @kim_biased_sample_cut_witnessE.
-
 (** centi_witness_rhoE — the seven-cut certificate bundle's marginal bound
     carries the weighted word shuffle at word length seven. *)
 Definition centi_witness_rhoE := @kim_centi_witness_rhoE.
@@ -391,21 +381,6 @@ Definition biased_cut_mixing := @kim_biased_cut_mixing.
     reader pushforwards under the ideal cut, the second hypothesis of the
     generic transfer bound, and the two paths share it. *)
 Definition static_obs_const := @five_card_static_obs_const.
-
-(** centi_static_obs_indist — a coalition of at most one seat, reading the
-    static endpoint colours under the seven-cut law, sees laws within twice
-    the seven-cut bundle's spectral number of each other at any two committed
-    pairs. It is what the two premises above give when fed to the generic
-    transfer bound, and it is the security statement of the repeated-cut
-    path: the attacker is that coalition, and the number is how far it can be
-    from telling the two pairs apart. *)
-Definition centi_static_obs_indist := @kim_centi_static_obs_indist.
-
-(** biased_static_obs_indist — the same bound at word length one, at twice
-    the length-one bundle's spectral number. It is the security statement of
-    the single-biased path, at a number of hundredth scale rather than a
-    cryptographic one. *)
-Definition biased_static_obs_indist := @kim_biased_static_obs_indist.
 
 (** exec_transfer_status — the transfer status of the uniform exact-cut path:
     it carries its landed static results to its executed observers, and its

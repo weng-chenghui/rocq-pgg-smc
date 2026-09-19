@@ -22,7 +22,7 @@
 -  : Tableau (apr_completion five_card_row_repeated) :=
 -  five_card_row_repeated_tableau.
  Lemma five_card_row_biased_levelE :
-@@ -173,2 +173,163 @@
+@@ -173,2 +173,157 @@
    five_card_row_biased_tableau.
 +Lemma kim_biased_epsE (R : realType) :
 +  sw_bound_eps (kim_biased_marginal_bound R) = Num.sqrt 5%:R * (1 / 80).
@@ -40,12 +40,6 @@
 +rewrite -!natrX -natrM ler_nat.
 +by lia.
 +Qed.
-+Definition kim_biased_sample_cut_witnessE (R : realType)
-+  : sw_rho_dist (kim_biased_marginal_bound R)
-+  = sa_cut_dist (amf_sample kim_biased_family R tt) :=
-+  ltac:(rewrite /kim_biased_marginal_bound /= rho_from_words_weighted1
-+                kim_single_cut_distE;
-+        congr fdistmap; apply: funext => k; exact: fc_kim_gensE).
 +Definition kim_centi_cert (R : realType) (idx : unit)
 +  : SpectralCert (amf_sample kim_centi_family R idx) :=
 +  @MkSpectralCert R five_card_algebra five_card_params
@@ -69,7 +63,7 @@
 +    sample kim_centi_family
 +    certify SpectralDecay kim_centi_cert
 +    |> publish IdealFinite BaselineClassicalOnly.
-+Definition five_card_row_biased_ideal_tableau : PublishedRow :=
++Definition five_card_row_biased_spectral_tableau : PublishedRow :=
 +  five_card_committed
 +    sample kim_biased_family
 +    certify SpectralDecay kim_biased_cert
@@ -78,8 +72,8 @@
 +  published_row five_card_row_repeated_spectral_tableau
 +  = five_card_row_repeated.
 +Proof. by []. Qed.
-+Lemma five_card_row_biased_ideal_rowE :
-+  published_row five_card_row_biased_ideal_tableau = five_card_row_biased.
++Lemma five_card_row_biased_spectral_rowE :
++  published_row five_card_row_biased_spectral_tableau = five_card_row_biased.
 +Proof. by []. Qed.
 +Fail Definition five_card_row_repeated_spectral_uniform_rowE
 +  : published_row five_card_row_repeated_spectral_tableau
@@ -93,12 +87,12 @@
 +  /\ apr_assumptions (published_row five_card_row_repeated_spectral_tableau)
 +     = BaselineClassicalOnly.
 +Proof. by []. Qed.
-+Lemma five_card_row_biased_ideal_publishedE :
-+  apr_completion (published_row five_card_row_biased_ideal_tableau)
++Lemma five_card_row_biased_spectral_publishedE :
++  apr_completion (published_row five_card_row_biased_spectral_tableau)
 +    = AnalysisBridged
-+  /\ apr_transfer (published_row five_card_row_biased_ideal_tableau)
++  /\ apr_transfer (published_row five_card_row_biased_spectral_tableau)
 +     = IdealFinite
-+  /\ apr_assumptions (published_row five_card_row_biased_ideal_tableau)
++  /\ apr_assumptions (published_row five_card_row_biased_spectral_tableau)
 +     = BaselineClassicalOnly.
 +Proof. by []. Qed.
 +Fact five_card_pow2_39_split (R : realType) :
@@ -180,7 +174,7 @@
 +    ;;; conclude five_card_reprice_inv25 of (fun R _ => five_card_inv50_split R)
 +    ;;; publish BaselineClassicalOnly of IdealFinite.
 +Lemma five_card_row_biased_forms_publishedE :
-+  published_row five_card_row_biased_ideal_tableau
++  published_row five_card_row_biased_spectral_tableau
 +  = published_row five_card_row_biased_inv25.
 +Proof. by []. Qed.
 +Lemma five_card_reprice_inv25_lt2 (R : realType) : (1 / 25 : R) < 2%:R.

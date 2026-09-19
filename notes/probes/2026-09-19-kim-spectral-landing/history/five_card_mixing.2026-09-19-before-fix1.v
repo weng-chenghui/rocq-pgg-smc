@@ -20,14 +20,6 @@
 (* numbers come from. Each law is given in the two forms the rows use, the    *)
 (* bundle's own spectral number and the constant a text quotes.               *)
 (*                                                                            *)
-(* Feeding those two premises to the generic transfer inequality gives, for   *)
-(* each of Kim's two cut laws, the statement the attack model asks for: a     *)
-(* coalition of at most one seat, reading static endpoint colours at two      *)
-(* committed pairs, sees laws within twice the bundle's number of each        *)
-(* other. That is the conclusion the analysis manifest's two Kim rows are     *)
-(* bridged by, and it is stated here rather than there because the manifest   *)
-(* is imported by the file that certifies those rows.                         *)
-(*                                                                            *)
 (* Definitions:                                                               *)
 (*   kim_biased_marginal_bound == the one-cut law's marginal bound at the     *)
 (*                                bundle's spectral number                    *)
@@ -48,14 +40,7 @@
 (*                                       bound of the ideal cut               *)
 (*   kim_centi_cut_mixing == the seven-cut law is within the bundle's         *)
 (*                           spectral number of the ideal cut                 *)
-(*   kim_centi_static_obs_indist == a coalition below the privacy threshold   *)
-(*                                  reads the seven-cut law within twice      *)
-(*                                  that number at both committed pairs       *)
-(*   kim_biased_sample_cut_witnessE == the one-cut adapter draws from the     *)
-(*                                     law the length-one bundle bounds       *)
 (*   kim_biased_cut_mixing == the one-cut law likewise at word length one     *)
-(*   kim_biased_static_obs_indist == the same reading statement at word       *)
-(*                                   length one                               *)
 (*   den_boer_layout_law_const == the card at a uniformly chosen position     *)
 (*                                has one law at every committed pair         *)
 (*   five_card_static_obs_const == a coalition below the privacy threshold    *)
@@ -385,39 +370,6 @@ Proof.
 by apply: five_card_cut_mixing_of_supp_pow; exact: kim_centi_cut_supp_pow.
 Qed.
 
-(** kim_centi_static_obs_indist — at every coalition of at most one seat and
-    every two committed pairs, the law of what that coalition reads off the
-    static endpoints under the seven-cut cut is within twice the bundle's
-    spectral number of the same law at the other pair, in variation distance.
-    This is the security statement of Kim's seven-cut analysis path, and it
-    is what the two premises above are for: the attacker is a coalition below
-    the privacy threshold that sees only static endpoint colours, and the
-    bound says how far it can be from telling the two pairs apart. The number
-    is the bundle's spectral one spent once for each pair, so the only inexact
-    quantity is that mixing distance; the constancy of the ideal reading is
-    exact and costs nothing. *)
-Lemma kim_centi_static_obs_indist
-    (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
-  (#|C| < profile_k (instance_profile five_card_algebra))%N ->
-  forall x x' : ex_inputT five_card_params,
-    var_dist
-      (fdistmap (@static_coalition_obs five_card_algebra five_card_params C x)
-         (sw_rho_dist (scb_bound (kim_security_bundle_centi R))))
-      (fdistmap
-         (@static_coalition_obs five_card_algebra five_card_params C x')
-         (sw_rho_dist (scb_bound (kim_security_bundle_centi R))))
-    <= sw_bound_eps (scb_bound (kim_security_bundle_centi R))
-       + sw_bound_eps (scb_bound (kim_security_bundle_centi R)).
-Proof.
-move=> HC x x'.
-apply: (@var_dist_fdistmap_transfer R _ _
-  (sw_rho_dist (scb_bound (kim_security_bundle_centi R)))
-  (sa_cut_dist (five_card_sample R)) _ _
-  (sw_bound_eps (scb_bound (kim_security_bundle_centi R)))).
-- exact: kim_centi_cut_mixing.
-- exact: (@five_card_static_obs_const R C HC x x').
-Qed.
-
 (******************************************************************************)
 (*     The biased row, at the word-length-one bundle                          *)
 (******************************************************************************)
@@ -432,21 +384,6 @@ Definition kim_biased_marginal_bound
   scb_bound (@fc_kim_security_bundle R (1 / 100)
                (kim_centi_lt R) (kim_centi_gt R) (kim_centi_spec R) 1).
 
-(** kim_biased_sample_cut_witnessE — the cut law the one-cut adapter draws
-    from is the law the length-one bundle bounds. It is the tying field of
-    the spectral certificate: without it the bundle's number would be a bound
-    on some other shuffle than the one the row executes, and the seven-cut
-    row's counterpart kim_centi_cut_distE would have no analogue here. *)
-Lemma kim_biased_sample_cut_witnessE :
-  sw_rho_dist kim_biased_marginal_bound
-  = sa_cut_dist (@kim_single_sample R (1 / 100)
-                   (kim_centi_lt R) (kim_centi_gt R)).
-Proof.
-rewrite /kim_biased_marginal_bound /= rho_from_words_weighted1
-        kim_single_cut_distE.
-by congr fdistmap; apply: funext => k; exact: fc_kim_gensE.
-Qed.
-
 (** kim_biased_cut_mixing — Kim's one-cut law is within the bundle's own
     spectral number of the uniform rotation law, in variation distance on the
     cut group. This is the mixing field of the spectral certificate for the
@@ -458,35 +395,6 @@ Lemma kim_biased_cut_mixing :
   <= sw_bound_eps kim_biased_marginal_bound.
 Proof.
 by apply: five_card_cut_mixing_of_supp_pow; exact: kim_single_cut_supp_pow.
-Qed.
-
-(** kim_biased_static_obs_indist — the same statement at word length one: a
-    coalition of at most one seat reading the static endpoints under the
-    single biased cut sees laws within twice the length-one bundle's spectral
-    number of each other at the two committed pairs. This is the security
-    statement of Kim's one-cut analysis path. Its number is of hundredth
-    scale rather than cryptographic, so it rules out a coalition separating
-    the pairs with certainty and no more. *)
-Lemma kim_biased_static_obs_indist
-    (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
-  (#|C| < profile_k (instance_profile five_card_algebra))%N ->
-  forall x x' : ex_inputT five_card_params,
-    var_dist
-      (fdistmap (@static_coalition_obs five_card_algebra five_card_params C x)
-         (sw_rho_dist kim_biased_marginal_bound))
-      (fdistmap
-         (@static_coalition_obs five_card_algebra five_card_params C x')
-         (sw_rho_dist kim_biased_marginal_bound))
-    <= sw_bound_eps kim_biased_marginal_bound
-       + sw_bound_eps kim_biased_marginal_bound.
-Proof.
-move=> HC x x'.
-apply: (@var_dist_fdistmap_transfer R _ _
-  (sw_rho_dist kim_biased_marginal_bound)
-  (sa_cut_dist (five_card_sample R)) _ _
-  (sw_bound_eps kim_biased_marginal_bound)).
-- exact: kim_biased_cut_mixing.
-- exact: (@five_card_static_obs_const R C HC x x').
 Qed.
 
 End five_card_cut_mixing.
