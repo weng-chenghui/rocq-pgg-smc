@@ -882,3 +882,106 @@ landing goes second corrects it rather than rediscovers it.
    `ltW (kim_centi_cert_eps_lt R idx)`, which needs no wrapper and makes
    `kim_centi_cert40` unnecessary, and with it `kim_centi_marginal_bound40`
    and `kim_centi_cut_mixing40` in `five_card_mixing.v`.
+
+## Staged permanent-form files
+
+`staged/` holds the six files a landing copies, each already in its permanent
+form and under its permanent relative path, so the directory copies into the
+tree one for one:
+
+```
+staged/lib/var_dist_supp.v
+staged/instances/kim2025/five_card_mixing.v
+staged/instances/kim2025/five_card_analysis.v
+staged/manifest/pgg_analysis_manifest.v
+staged/manifest/pgg_analysis_client.v
+staged/instances/kim2025/five_card_rows.v
+```
+
+Each is its probe copy with the `Require` sentences rewritten to the permanent
+block of the section "Import rewrite at cp time" above, and with no other byte
+changed. `tools/make_staged.py` performs the rewrite as one asserted
+single-occurrence byte substitution per file and reads the manifest's and the
+client's restored sentences out of the production files rather than retyping
+them. `var_dist_supp.v` names no probe logical path, so its staged file is the
+probe copy byte for byte. No header comment of any of the six describes its
+file as a copy or names the probe's logical path, so nothing had to be
+reworded.
+
+`tools/check_staged.py` proves five things per file and exits non-zero if any
+fails. It passes on all six. (a) Comment-stripped, and with every
+`From ... Require ...` sentence dropped whole, the staged file is line for line
+the probe copy, so nothing outside the import block moved: 165, 539, 488, 2070,
+213 and 905 lines respectively. (b) The staged `Require` sentences, whitespace
+normalized, are the permanent block, read back out of this file's own fenced
+blocks for `five_card_mixing.v` and `five_card_rows.v`, out of the production
+file for `pgg_analysis_manifest.v` and `pgg_analysis_client.v`, out of
+production plus the one spelled `five_card_mixing` sentence for
+`five_card_analysis.v`, and out of the probe copy for `var_dist_supp.v`.
+(c) `kim_landing_probe` occurs nowhere in a staged file, comments included.
+(d) No line over 80 bytes that is not byte-identical to a line of the
+production file of the same path. The two new files have no line over 80 bytes
+at all; the one long line among the other four is `five_card_analysis.v`'s
+docstring for `colour_view_RV_E`, 81 bytes and 79 characters, and it is
+production's own text. (e) The raw byte diff of probe copy against staged file,
+as a unified diff. It is one hunk per file, five files together changing eight
+physical lines: the mixing file's `perm_uniform` line splits in two and its
+probe `var_dist_supp` line disappears, the facade's and the client's single
+probe line is repointed, the manifest's two sentences become production's one
+sentence over two physical lines, and the rows file's three probe lines are
+repointed.
+
+The compile check was the strong one: the staged modules were loaded, and the
+permanent import blocks are compile-checked. Twelve files compiled single file
+in a scratch directory outside the tree, the six staged ones copied flat
+together with flat copies of production `manifest/pgg_tableau.v`,
+`manifest/pgg_tableau_syntax.v`, `instances/s5/s5_rows.v`,
+`instances/pgl27/pgl27_rows.v`, `instances/psl211/psl211_rows.v` and
+`instances/psl211/psl211_spectral_constancy.v`, in the order the landing plan
+gives, with the production `_CoqProject` flags. Every return code is 0. No
+production file was written and no `.vo` landed outside the scratch directory.
+
+Where the scratch directory goes among the load-path flags decides which
+`.vo` a `Require` picks, and the order that works is the opposite of the
+expected one. **`Require` resolves a logical name to the LAST matching `-R` or
+`-Q` entry.** With `-Q <scratch> pgg_smc` ahead of the production directories,
+production's `five_card_analysis.vo` is what loads, and the staged manifest
+stops at `The reference FiveCardAnalysis.static_obs was not found`. With the
+scratch mapping after them, the staged file loads and the run goes through.
+
+`Locate Library` does not witness this and will report the opposite. In both
+orders it prints `pgg_smc.five_card_analysis has been loaded from file
+<production path>`, including in the run where the staged file demonstrably
+was the one loaded. The witness that does work is a constant that exists on
+one side only. `provenance_witness.v` in the scratch directory requires only
+`pgg_analysis_manifest` and then asserts, through the manifest's own re-export
+chain, that `FiveCardAnalysis.exec_transfer_status` is absent, under `Fail`,
+and that `FiveCardAnalysis.static_obs`, `uniform_transfer_status` and
+`biased_transfer_status` resolve. The first is production's name for the alias
+and the other three exist only in the staged facade, so the file compiles only
+against the staged manifest and the staged facade. It returns 0. For the two
+new files there is no production counterpart and `Locate Library` is then
+honest: it names the scratch `var_dist_supp.vo` and `five_card_mixing.vo`.
+
+Wall times, and the sentences over five seconds that `-time` reports:
+
+| file | rc | wall | sentences over 5 s |
+|---|---|---|---|
+| `var_dist_supp.v` | 0 | 4.1 s | none |
+| `five_card_mixing.v` | 0 | 4.3 s | none |
+| `five_card_analysis.v` | 0 | 3.8 s | none |
+| `pgg_analysis_manifest.v` | 0 | 5.9 s | the `Require Export`, 5.25 s |
+| `pgg_tableau.v` | 0 | 12.8 s | none |
+| `pgg_tableau_syntax.v` | 0 | 4.5 s | none |
+| `pgg_analysis_client.v` | 0 | 3.9 s | none |
+| `s5_rows.v` | 0 | 4.0 s | none |
+| `pgl27_rows.v` | 0 | 6.3 s | none |
+| `psl211_rows.v` | 0 | 5.8 s | none |
+| `psl211_spectral_constancy.v` | 0 | 22.5 s | three, 5.2 s, 6.1 s and 6.2 s |
+| `five_card_rows.v` | 0 | 4.8 s | none |
+
+No landing sentence is above five seconds. The manifest's slow sentence is its
+single `Require Export`, which is loading the four facades' `.vo` files and not
+checking a proof, and the three in `psl211_spectral_constancy.v` are a
+`vm_compute` and two `size_filter` rewrites in a file this landing recompiles
+without changing a byte of.
