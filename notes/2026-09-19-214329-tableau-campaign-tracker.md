@@ -17,9 +17,9 @@ file edited; "indistinguishability" is always spelled out.
 
 | # | Step | State |
 |---|---|---|
-| 0.1 | Production rename of the arm `SpectralDecay` to `InputIndistinguishability` (map in section "Rename map"), six files plus the recompile of `psl211_rows.v` | running |
-| 0.2 | Main-session check: code identical modulo the map, recompile of seven files | open |
-| 0.3 | Opus audit of the rewritten comment prose | open |
+| 0.1 | Production rename of the arm `SpectralDecay` to `InputIndistinguishability` (map in section "Rename map"), six files plus the recompile of `psl211_rows.v` | done, bf42b4d |
+| 0.2 | Main-session check: code identical modulo the map (one intended difference, the notation literal), recompile of seven files rc=0 | done |
+| 0.3 | Opus audit of the rewritten comment prose | running |
 | 0.4 | Production rename of the remaining `_indist` lemma names and of the file `psl211_spectral_constancy.v`. Files: `five_card_analysis.v`, `five_card_mixing.v`, `pgg_analysis_client.v`, `pgg_analysis_manifest.v`, `pgl27_analysis.v`, `pgl27_models.v`, `pgl27_rows.v`, `pgl27_spectral.v`, `pgl27_word_privacy.v`, plus importers to recompile | open |
 | 0.5 | The same combined map applied to the probe copy `notes/probes/2026-09-19-tableau-extensions/` (it is the landing source), recompiled from source | open |
 
@@ -54,7 +54,7 @@ Open. One file per phase, per instance. Needs its own plan after step 1.
 |---|---|---|
 | 3.1 | Eighteen "deck description" sentences in `instances/psl211/psl211_models.v` (file is not in the endpoint file's forward closure) | open |
 | 3.2 | Home of `card_tnth_count` | open |
-| 3.3 | Dated note recording the removed `five_card_row_repeated_at_manifest_level` | open |
+| 3.3 | Dated note recording the removed `five_card_row_repeated_at_manifest_level` | done: `notes/2026-09-19-223500-removed-five-card-row-repeated-at-manifest-level.md` |
 | 3.4 | P8, the two parts not compiled: a countermodel for the implication below the ceiling two; proximity derived from the certificate's own fields | open |
 
 ## Step 4. Roadmap groups of the spec (each probe-first: spec and ledger, probe, two audits, fold, plan, landing)
