@@ -1,0 +1,314 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
+(******************************************************************************)
+(* psl211_rows: the twelve-card chirality instance's all-decks row, written   *)
+(*              as a program                                                  *)
+(*                                                                            *)
+(* The dealer this row is about is the all-decks one. The deck description is *)
+(* drawn uniformly over all the decks: one of the two chiralities, one of the *)
+(* 132 block lines of that chirality's Steiner system for the six heart       *)
+(* positions, one of the 720 labellings of the heart codes and one of the 720 *)
+(* labellings of the club codes. The cut is drawn uniformly over the 660      *)
+(* elements of the group, and each of the twelve seats reads the card at its  *)
+(* own position. Six is the privacy threshold the derived profile declares,   *)
+(* so every statement below is about a coalition of at most five of the       *)
+(* twelve seats, and what the row carries about such a coalition is           *)
+(* independence of the chirality: exact, at every real field, with no numeric *)
+(* bound in it. The fixed-dealer colour result of psl211_secrecy.v is about a *)
+(* different dealer and a different observer and is not a row.                *)
+(*                                                                            *)
+(* The program is written in the statement surface of pgg_tableau_syntax.v    *)
+(* over the statements of pgg_tableau.v: the prefix names the algebra, drives *)
+(* the run in the supplied-layout mode at the instance's budget and adjoins   *)
+(* the three run facts; one further line adjoins the probability model, one   *)
+(* adjoins the exact arm's witness, and the last publishes the manifest row.  *)
+(* The published row is the manifest's psl211_row_alldecks and the rowE       *)
+(* lemma below holds by conversion, so the manifest's claim about this        *)
+(* instance and the proof of it are one term.                                 *)
+(*                                                                            *)
+(* No line of the program is a theorem about this instance. What the instance *)
+(* supplies it supplies as a payload: the algebra and the run data on the     *)
+(* first two lines, the three run facts on the third, the probability model   *)
+(* on the fourth and one security record on the fifth. The security           *)
+(* mathematics reaches the row through that last payload alone, and through   *)
+(* psl211_alldecks_exact_viewE, which identifies the framework's seat reader  *)
+(* with the instance's with the deck description left inside the sample       *)
+(* point. The witness is built here and not beside that lemma because         *)
+(* ExactWitness is a record of the manifest layer, and an instance file       *)
+(* importing it would close a cycle through the analysis manifest.            *)
+(*                                                                            *)
+(* Not claimed. A spectral row for this dealer. A certificate's constancy     *)
+(* field asks that a coalition below the privacy threshold read the ideal cut *)
+(* the same way at every run argument, and                                    *)
+(* instances/psl211/psl211_spectral_constancy.v restates that field as        *)
+(* coalition_reading_constancy and refutes it in both run modes. Under the    *)
+(* dealer-dealt parameters, where the run argument is the secret, it fails at *)
+(* three seats at the group-uniform ideal, psl211_dealt_constancy_false. Under*)
+(* the all-decks parameters, where the run argument is the deck description,  *)
+(* it fails at the group-uniform ideal, psl211_alldecks_constancy_false, at   *)
+(* every ideal whose support is exactly the shuffle group,                    *)
+(* psl211_alldecks_constancy_false_supp, and at every ideal closer than 1/1320*)
+(* to the group-uniform law, psl211_alldecks_constancy_false_close. No        *)
+(* certificate over this model therefore carries a shuffle bound epsilon      *)
+(* strictly below 1/1320, psl211_alldecks_no_small_eps_cert, so a row over    *)
+(* this model that publishes its certificate's own bound publishes at least   *)
+(* 1/660. In particular no certificate carries an epsilon of zero,            *)
+(* psl211_alldecks_no_zero_eps_cert, which is the epsilon profile_eps_psl211  *)
+(* of psl211_profile.v gives this instance's single-card marginal bound. At   *)
+(* two deck descriptions of one chirality, differing in the block line alone, *)
+(* the coalition of seats 0, 1 and 2 reads the group-uniform cut under two    *)
+(* different laws, psl211_blockline1_law_neq, so the field asks for more than *)
+(* the secret-independence this row claims, and its failure is no proof of    *)
+(* leakage: under the all-decks law a coalition of at most five of the twelve *)
+(* seats reads nothing about the chirality, psl211_alldecks_view_secrecy.     *)
+(* What is excluded is a range of epsilon and not the arm. Trace secrecy is   *)
+(* not a field of an AnalysisPathRow, so no trace row is written and the      *)
+(* executed content reader of psl211_models.v is what the facade carries      *)
+(* instead.                                                                   *)
+(* ExactLeakAt 6 is not claimed: the six-seat separation is a numeric check   *)
+(* and not a Rocq theorem. The parametrization (j, ph, pc) |-> deck is not    *)
+(* proved in Rocq. That it enumerates the valid decks of a chirality once     *)
+(* each, injective through the heart set and the tables' uniqueness and       *)
+(* surjective because a valid deck's heart codes are distinct and below six,  *)
+(* is checked numerically in items (e) and (e') of                            *)
+(* notes/probes/2026-09-15-psl211-planb/audit-soundness/audit_alldecks.out.   *)
+(* The row's law is stated on the parameter carrier and does not depend on it.*)
+(*                                                                            *)
+(* Definitions:                                                               *)
+(*   psl211_alldecks_prefix  == the algebra, the supplied-layout run and the  *)
+(*                              three run facts                               *)
+(*   psl211_exact_witness    == the exact arm's witness at every field and    *)
+(*                              index                                         *)
+(*   psl211_row_alldecks_tableau                                              *)
+(*                           == the all-decks row as a program                *)
+(*   psl211_alldecks_prefix_vm                                                *)
+(*                           == the prefix with the termination reduction     *)
+(*                              written inline                                *)
+(*   psl211_alldecks_prefix_lit                                               *)
+(*                           == the prefix with the budget written as a       *)
+(*                              literal                                       *)
+(*                                                                            *)
+(* Key results:                                                               *)
+(*   psl211_row_alldecks_rowE == the program publishes the manifest's row     *)
+(*   psl211_alldecks_view_secrecy                                             *)
+(*                           == the exact arm's four conjuncts at this        *)
+(*                              instance                                      *)
+(*   psl211_alldecks_prefix_vm_paramsE                                        *)
+(*                           == the inline prefix drives the same run         *)
+(*   psl211_alldecks_prefix_lit_paramsE                                       *)
+(*                           == and so does the literal budget                *)
+(******************************************************************************)
+
+From HB Require Import structures.
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import morphism action bigop order ssrnum ssralg.
+From mathcomp Require Import boolp reals.
+From infotheo Require Import realType_ext fdist proba.
+From pgg_smc Require Import smc_interpreter pgg_interface pgg_monodromy_profile.
+From pgg_smc Require Import pgg_execution_plug pgg_observed_execution.
+From pgg_smc Require Import pgg_sample_adapter.
+From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
+From pgg_smc Require Import pgg_instance.
+From pgg_smc Require Import pgg_analysis_status pgg_analysis_manifest.
+From pgg_smc Require Import pgg_tableau pgg_tableau_syntax.
+From pgg_smc Require Import psl211_group psl211_orbit.
+From pgg_smc Require Import psl211_scheme psl211_profile.
+From pgg_smc Require Import psl211_exec psl211_alldecks psl211_models.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+Import GRing.Theory Num.Theory.
+
+Local Open Scope fdist_scope.
+Local Open Scope proba_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+
+(** seatT — a seat of the instance's starting interface, the index a coalition
+    is a set of. *)
+Local Notation seatT :=
+  ('I_(pi_T' (mp_PI (instance_profile psl211_algebra))).+1).
+
+(** cardT — a card of the twelve-card deck, the value a seat reads. *)
+Local Notation cardT :=
+  ('I_(pgg_N' (mp_M (instance_profile psl211_algebra))).+1).
+
+(******************************************************************************)
+(*     The prefix of the all-decks row                                        *)
+(******************************************************************************)
+
+(** psl211_alldecks_prefix — the first three statements of the all-decks row:
+    the algebra, the run driven in the supplied-layout mode at the instance's
+    budget, and the three run facts. What has been proved at this point is run
+    correctness and nothing about a coalition. *)
+Definition psl211_alldecks_prefix : Tableau Observed :=
+  psl211_algebra
+    supplied inputs psl211_inputT
+             layout psl211_alldecks_layout
+             expecting psl211_alldecks_expected
+             fuel psl211_fuel
+    execute terminates by psl211_alldecks_terminates
+            endpoints by psl211_alldecks_endpoints
+            recon by psl211_alldecks_recon.
+
+(******************************************************************************)
+(*     The exact arm's witness                                                *)
+(******************************************************************************)
+
+(** psl211_exact_witness — the exact arm's witness: the chirality as a random
+    variable on the all-decks sample space, and, at every coalition of fewer
+    than six of the twelve seats, the independence of that coalition's reading
+    from it. The independence is psl211_alldecks_view_indep, which is the
+    equality of the two chiralities' deal counts read as a privacy statement,
+    and it is exact: a uniform deck description and a uniform cut leave the
+    reading carrying no information about the chirality at all, not a small
+    amount. The framework derives the zero mutual information, the unchanged
+    conditional entropy and the closure under post-processing from this one
+    field, so the witness is the whole of what this instance owes the exact
+    arm. *)
+Definition psl211_exact_witness (R : realType) (idx : unit)
+  : ExactWitness (amf_sample psl211_exact_family R idx) :=
+  @MkExactWitness R psl211_algebra psl211_alldecks_params
+    (amf_sample psl211_exact_family R idx) bool (psl211_alldecks_secret R)
+    (fun C HC =>
+       let H5 : (#|C| <= 5)%N := HC in
+       (eq_ind_r
+          (fun v => psl211_alldecksP R |= v _|_ psl211_alldecks_secret R)
+          (psl211_alldecks_view_indep R H5)
+          (psl211_alldecks_exact_viewE C))).
+
+(******************************************************************************)
+(*     The row program                                                        *)
+(******************************************************************************)
+
+(** psl211_row_alldecks_tableau — the published row. What the finished row
+    carries about a coalition of fewer than six of the twelve seats is
+    independence of the chirality, at every real field, with no numeric bound
+    in it; the independence is exact, not small, because both the deck
+    description and the cut are drawn uniformly and the two Steiner systems
+    are met in the same block patterns by every set of at most five positions.
+    Its last line publishes a row whose transfer status is StaticExecutedOnly,
+    because the cut this model draws is already the uniform one and no
+    idealized shuffle is being compared with a real one. *)
+Definition psl211_row_alldecks_tableau : PublishedRow :=
+  psl211_alldecks_prefix
+    sample  psl211_exact_family
+    certify ExactIndependence psl211_exact_witness
+    |> publish StaticExecutedOnly BaselineClassicalOnly.
+
+(** psl211_row_alldecks_rowE — the row this program publishes is the
+    manifest's own row for this instance. Conversion decides it, so the
+    descriptive row and the theorem proved about it cannot drift apart. *)
+Lemma psl211_row_alldecks_rowE :
+  published_row psl211_row_alldecks_tableau = psl211_row_alldecks.
+Proof. by []. Qed.
+
+(******************************************************************************)
+(*     The exact arm's four conjuncts at this instance                        *)
+(******************************************************************************)
+
+(** psl211_alldecks_view_secrecy — the row's view secrecy at this instance: at
+    fewer than six colluding seats the executed coalition reading is
+    independent of the chirality, carries zero mutual information with it,
+    leaves the chirality's entropy unchanged under conditioning, and stays
+    independent of it under every deterministic function of the seat-to-card
+    map. The four conjuncts are the whole content of the exact arm here; the
+    proof is the row's security projection applied, so a reader who wants the
+    information-theoretic reading of the row needs no further derivation. *)
+Theorem psl211_alldecks_view_secrecy (R : realType) (C : {set seatT})
+    (HC : (#|C| < 6)%N) :
+  [/\ psl211_alldecksP R
+      |= (@sa_coalition_view R (instance_profile psl211_algebra)
+            (instance_exec psl211_alldecks_params)
+            (psl211_alldecks_sample R) 0 C) _|_ (psl211_alldecks_secret R),
+      `I( psl211_alldecks_secret R ;
+          @sa_coalition_view R (instance_profile psl211_algebra)
+            (instance_exec psl211_alldecks_params)
+            (psl211_alldecks_sample R) 0 C ) = 0,
+      `H( psl211_alldecks_secret R |
+          @sa_coalition_view R (instance_profile psl211_algebra)
+            (instance_exec psl211_alldecks_params)
+            (psl211_alldecks_sample R) 0 C )
+      = `H `p_ (psl211_alldecks_secret R)
+    & forall (W : finType) (h : {ffun seatT -> cardT} -> W),
+        psl211_alldecksP R
+        |= (h `o (@sa_coalition_view R (instance_profile psl211_algebra)
+                    (instance_exec psl211_alldecks_params)
+                    (psl211_alldecks_sample R) 0 C))
+           _|_ (psl211_alldecks_secret R)].
+Proof. exact: (view_secrecy_of psl211_row_alldecks_tableau R tt C HC). Qed.
+
+(******************************************************************************)
+(*     The same prefix through the literal reduction                          *)
+(******************************************************************************)
+
+(** psl211_alldecks_prefix_vm — the prefix again, with the termination
+    obligation built where the statement is written instead of named. The
+    proposition proved is the one psl211_alldecks_prefix proves and the run is
+    the same run, but the term is not psl211_alldecks_terminates, and an
+    opaque lemma is convertible with nothing; so the observed execution this
+    prefix reaches is a second value, equal to psl211_alldecks_observed only
+    up to the irrelevance of an obligation. Everything typed against
+    psl211_alldecks_observed, the instance's model first of all, would have to
+    be built again over it, which is why no row is written here. *)
+Definition psl211_alldecks_prefix_vm : Tableau Observed :=
+  psl211_algebra
+    supplied inputs psl211_inputT
+             layout psl211_alldecks_layout
+             expecting psl211_alldecks_expected
+             fuel psl211_fuel
+    execute terminates by vm_compute
+            endpoints by psl211_alldecks_endpoints
+            recon by psl211_alldecks_recon.
+
+(** The two prefixes are not the same term. The rejection is a conversion
+    failure between the two prefixes themselves:
+
+      The term "erefl" has type
+       "psl211_alldecks_prefix_vm = psl211_alldecks_prefix_vm"
+      while it is expected to have type
+       "psl211_alldecks_prefix_vm = psl211_alldecks_prefix"
+      (cannot unify "psl211_alldecks_prefix_vm" and "psl211_alldecks_prefix").
+*)
+Fail Definition psl211_alldecks_prefix_vm_neq :
+  psl211_alldecks_prefix_vm = psl211_alldecks_prefix := erefl.
+
+(** psl211_alldecks_prefix_vm_paramsE — the inline-reduction prefix drives the
+    same run as the named one. The run parameters carry no proof, so the two
+    prefixes fork only in the three run facts and in the value that packages
+    them. *)
+Lemma psl211_alldecks_prefix_vm_paramsE :
+  projT1 (projT2 (tableau_at psl211_alldecks_prefix_vm))
+  = psl211_alldecks_params.
+Proof. by []. Qed.
+
+(** psl211_alldecks_prefix_lit — the prefix once more, with the interpreter
+    budget written as the literal 220 rather than named. *)
+Definition psl211_alldecks_prefix_lit : Tableau Observed :=
+  psl211_algebra
+    supplied inputs psl211_inputT
+             layout psl211_alldecks_layout
+             expecting psl211_alldecks_expected
+             fuel 220
+    execute terminates by psl211_alldecks_terminates
+            endpoints by psl211_alldecks_endpoints
+            recon by psl211_alldecks_recon.
+
+(** psl211_alldecks_prefix_lit_paramsE — the prefix written with the fuel
+    literal drives the same run, so fuel 220 and fuel psl211_fuel name one
+    run. The row names the budget, so that it is stated once. *)
+Lemma psl211_alldecks_prefix_lit_paramsE :
+  projT1 (projT2 (tableau_at psl211_alldecks_prefix_lit))
+  = psl211_alldecks_params.
+Proof. by []. Qed.
+
+(** The analysis model family is typed against the observed execution the
+    named prefix builds, and is rejected over the inline-reduction one: the
+    two prefixes hold different termination proofs, so their observed
+    executions are different terms and no typed evidence crosses between them.
+    This is the fork made visible, and the reason the row names its
+    termination lemma. *)
+Fail Definition psl211_row_vm_reuse : Tableau Sampled :=
+  psl211_alldecks_prefix_vm sample psl211_exact_family.

@@ -241,13 +241,11 @@ step of an inequality chain and H every other named fact; a C, U, L or E suffix
 names the coordinate the quantity is taken at, `t` and `f` the chirality and
 `j0` and `j1` the block line; and a trailing digit is an index and never a
 value. So `psl211_blockline1_law_neq` carries `Cj0`,
-`Cj1`, `Uj0`, `Uj1`, `Ej0`, `Ej1`, `Hj0` and `Hj1`; the fiber cardinalities are
-`Ct` and `Cf` in `psl211_alldecks_constancy_false_close` and
-`psl211_dealt_constancy_false`, where they were `H0` and `H1`, `Cf` alone in
-`_supp`, where it was `Hcard1`, and a third `Ct` in
-`psl211_perdeck_fiber_true0`, where it was `Hcard0`; and
-`psl211_alldecks_no_zero_eps_cert`'s hypothesis is `Heps` where it was `H0`,
-that digit having named a value. Fix pass 2 brought the file to
+`Cj1`, `Uj0`, `Uj1`, `Ej0`, `Ej1`, `Hj0` and `Hj1`; the fiber cardinalities of
+`psl211_alldecks_constancy_false_close`, `_supp` and
+`psl211_dealt_constancy_false` are `Ct` and `Cf` where they were `H0`, `H1` and
+`Hcard1`; and `psl211_alldecks_no_zero_eps_cert`'s hypothesis is `Heps` where
+it was `H0`, that digit having named a value. Fix pass 2 brought the file to
 that scheme: `Ht0` of `psl211_alldecks_constancy_false_supp` became `Lt`, the
 masses `Lt` and `Lf` of `psl211_dealt_constancy_false` became `Ut` and `Uf`,
 and `Lj0` and `Lj1` of `psl211_blockline1_law_neq` became `Uj0` and `Uj1`. The
@@ -506,18 +504,7 @@ From `.Makefile.rocq.d`, reverse closures over `.vo` nodes.
 | `instances/psl211/psl211_rows.v` | header comment | 0 | no |
 
 A landing therefore compiles exactly two files and one line is added to
-`_CoqProject`. That line is `instances/psl211/psl211_spectral_constancy.v`, and
-it goes directly before `instances/psl211/psl211_rows.v`, that is between
-`instances/s5/s5_rows.v` and `instances/psl211/psl211_rows.v`. The reason is
-that production's `_CoqProject` lists a file after the files it imports,
-`manifest/pgg_analysis_manifest.v` before `manifest/pgg_tableau.v` and
-`instances/psl211/psl211_models.v` before `instances/psl211/psl211_analysis.v`,
-so the new file has to follow `manifest/pgg_tableau.v`, which it imports, and
-putting it before the rows block keeps the four rows files together as the last
-instance-level block they are today. `Makefile` delegates to
-`rocq makefile -f _CoqProject`, which computes the dependency order itself, so
-the position is for a reader and not for the build.
-`instances/psl211/psl211_endpoints.v` is loaded by the new file
+`_CoqProject`. `instances/psl211/psl211_endpoints.v` is loaded by the new file
 and never compiled: it was not touched, not compiled and not opened in this
 probe. No file whose reverse closure contains it is edited;
 `security/pgg_collusion_bound.v`, which has `psl211_endpoints` among its
@@ -652,167 +639,3 @@ slowest sentence of the constancy file is a `size_filter` rewrite at 6.4 s.
 `make` was never invoked and `instances/psl211/psl211_endpoints.v` was never
 compiled. The rows copy is still character-identical to
 `instances/psl211/psl211_rows.v` once comments and whitespace are stripped.
-
-## Fix pass 3, what changed and what was compiled
-
-Comments in `psl211_spectral_constancy.v` and this record only. No statement
-and no proof body changed. The pre-fix-3 copy of every file touched is in
-`history/` under the `2026-09-19-before-fix3` suffix; nothing was deleted.
-`psl211_rows.v` needed no edit in this pass and is byte-identical to its
-pre-fix-3 copy.
-
-The four SHOULD findings of the third audit.
-
-1. **F1, the header's obligation sentence.** The header said the obligation of
-   `conclude` is `cert_eps cert = odflt (cert_eps cert) (c R)`. That is
-   `RepricePayload` of `manifest/pgg_tableau.v` and not `ConcludePayload` of
-   `notes/probes/2026-09-19-tableau-extensions/pgg_tableau.v`, whose obligation
-   is `cert_eps cert <= odflt (cert_eps cert) (c R)`; both definitions were
-   read before the edit. The header now says the obligation bounds the
-   published number below by `cert_eps cert`, which is true of the equality, of
-   the inequality, and of a row carrying `no_reprice`, where `c R` is `None`
-   and `odflt (cert_eps cert) None` is `cert_eps cert`. That is the wording
-   `psl211_alldecks_no_small_eps_cert`'s docstring already used, so the file
-   now names this obligation one way.
-2. **F2, `psl211_alldecks_raw_viewE`'s docstring.** It said the landing lemma
-   is production's `psl211_perdeck_raw_viewE` with the deck description "fixed
-   at the deal `psl211_perdeck_deal`", which under the file's own gloss is
-   ill-typed: a deck description is a whole run argument and cannot be fixed at
-   a deal. Both statements were opened. Production's
-   `psl211_perdeck_raw_viewE (b : bool) (g : cutT)` is at
-   `psl211_alldecks_seq (b, psl211_perdeck_deal)`, so its deal is pinned and
-   its chirality is free; the landing's
-   `psl211_alldecks_raw_viewE (x : psl211_inputT) (g : cutT)` is at
-   `psl211_alldecks_seq x`, so the whole run argument is free and the
-   difference between the two is the deal coordinate alone. The docstring now
-   says the deal is left free instead of fixed at `psl211_perdeck_deal`, and
-   its first sentence already carries that the reading is identified at every
-   deck description.
-3. **F3, the word *public* for the deal.** The gloss said a deal is the run
-   argument's "three public coordinates". `psl211_fixed_deal_view_dep` of
-   `instances/psl211/psl211_models.v` refutes independence of three seats'
-   reading from the chirality under a dealer that lays one fixed deal, so a
-   reader who takes *public* in its usual sense, known to the adversary, draws
-   the conclusion that theorem refutes. The gloss now reads "a deal is its
-   three coordinates other than the secret". Both landing copies were then
-   grepped for the word: `psl211_rows.v` has none, and the eight other uses in
-   the constancy file, every one of which labels a deal, a deck coordinate or
-   the data outside the secret, were reworded to the same term. The header's
-   "constancy of the reading in three public coordinates" becomes "in the
-   other three coordinates" and its
-   "constancy in public data" becomes "constancy in data outside the secret";
-   `coalition_reading_constancy`'s docstring carries the same two changes at
-   the framework level; `psl211_perdeck_ideal_lawE`'s and
-   `psl211_alldecks_constancy_false`'s "whose other three are public" become
-   "whose first coordinate is the secret chirality and whose other three are
-   not"; `psl211_blockline1_deal`'s "a public coordinate of the run argument
-   that carries no secret" drops the adjective its own relative clause already
-   defined; and `psl211_blockline1_law_neq`'s "constancy in the public block
-   line" becomes "constancy in the block line", the sentence above it already
-   saying the pair carries the same secret. The word is now absent from both
-   landing copies. This is wider than F3 asked, which named only the gloss line.
-4. **F4, the `_CoqProject` line.** Recorded in N11 above, with the line, the
-   anchor, and why the anchor is where it is.
-
-Of the eight NOTEs, one was a comment edit and is applied. **F12**: the
-`(* Argued and not compiled *)` comment under
-`psl211_alldecks_no_small_eps_cert` said a weakened obligation "could only let
-a row publish a number larger than `cert_eps`, never a smaller one". The
-weakened obligation is `cert_eps cert <= odflt (cert_eps cert) (c R)`, which
-permits equality, so *larger* was loose. It now says "no smaller than
-`cert_eps`", and the trailing clause it duplicated is gone.
-
-**F9** and **F10** are record edits and are applied, F9 in N10 above and F10
-below. F9's own text was incomplete: the audit named `Hcard1` and the `H0`,
-`H1` pairs, and the third `Ct`, in `psl211_perdeck_fiber_true0`, was `Hcard0`,
-which no earlier pass recorded. N10 now names all four sites and all four old
-names.
-
-Five NOTEs proposed no action and none was taken.
-
-- **F5**, the header's clause "as `psl211_perdeck_` of
-  `instances/psl211/psl211_models.v` names the comparison between the two
-  chiralities at one deal". Most of that family names an object and not a
-  comparison. The audit proposed no replacement, the clause is an analogy
-  rather than a claim about the file, and tightening it costs a header line.
-- **F6**, `g0` and the `let H` / `let K` of `psl211_blockline1_seq`. The scheme
-  sentence is scoped to proof scripts and to named facts, and the two `let`
-  names are character for character production's own in `psl211_perdeck_seq`,
-  so changing them here would split one construction across two files.
-- **F7**, `psl211_alldecks_constancy_false_word584`, whose trailing digits name
-  the word length. The scheme sentence is scoped to proof scripts, and three
-  prior passes accepted the name.
-- **F8**, the constancy file citing `psl211_alldecks_static_indep` where the
-  rows file cites `psl211_alldecks_view_secrecy`. Each is the citation matching
-  its own reader, and the rows header already carries the bridge between them.
-- **F11**, `c` naming both a `Reprice` and a real number around
-  `psl211_alldecks_no_small_eps_cert`. `manifest/pgg_tableau.v` overloads the
-  letter the same way, so the landing inherits the overload rather than
-  inventing it.
-
-### Recorded, not changed: production uses "deck description" for the deal
-
-`instances/psl211/psl211_models.v` uses *deck description* in the deal sense in
-eighteen sentences. This landing does not edit that file, and it should not:
-its reverse closure holds `instances/psl211/psl211_analysis.v`,
-`manifest/pgg_analysis_manifest.v`, and through the manifest every rows file
-and `manifest/pgg_analysis_client.v`, so a comment pass over it would put the
-whole tableau layer in the compile set of a landing that is meant to compile
-two files. The same file also uses the word in the run-argument sense at lines
-9, 46, 192, 205, 219, 235, 311 and 356, so the split is internal to it, and
-every other production file that uses the word agrees with the landing's gloss.
-The list, for whoever reconciles the two senses later:
-
-| file and line | text |
-|---|---|
-| `psl211_models.v:51` | "under a dealer laying one fixed deck description the reading of three seats is not independent of the chirality" |
-| `psl211_models.v:73` | "`psl211_perdeck_deal` == the deck description fixing the counterexample" |
-| `psl211_models.v:78` | "`psl211_fixed_deal_delta` == the dealer laying one deck description at both chiralities" |
-| `psl211_models.v:117` | "`psl211_perdeck_raw_countE` == at one deck description the two chiralities have 0 and 1 cuts producing one reading" |
-| `psl211_models.v:564` | "dealT — a deck description: a chirality-free block index together with two labellings." |
-| `psl211_models.v:585` | "psl211_deal_pos — the type of deck descriptions is inhabited, so it carries a uniform law." |
-| `psl211_models.v:594` | "psl211_dealer_delta — the all-decks dealer: whatever the chirality, the deck description is drawn uniformly and independently of it." |
-| `psl211_models.v:690` | "psl211_dealer_sectionE — at one cut, the two chiralities send the uniform law on deck descriptions to the same law on what a coalition of at most five seats reads." |
-| `psl211_models.v:786` | "psl211_perdeck_deal — the deck description that fixes the counterexample: block index zero of the chirality's table, with both labellings the identity." |
-| `psl211_models.v:887` | "at a fixed deck description the two chiralities do not have equally many cuts producing a given reading" |
-| `psl211_models.v:888` | "even though summing over deck descriptions they do" |
-| `psl211_models.v:994` | "psl211_perdeck_fiber_card_neq — at one deck description the two chiralities have different numbers of cuts producing one reading." |
-| `psl211_models.v:997` | "which fixes a cut and counts deck descriptions" |
-| `psl211_models.v:998` | "The statement with the roles exchanged, fixing a deck description and counting cuts, is false" |
-| `psl211_models.v:1115` | "and the uniform law on deck descriptions meets it" |
-| `psl211_models.v:1132` | "psl211_fixed_deal_delta — the degenerate dealer that lays one and the same deck description whatever the chirality." |
-| `psl211_models.v:1136` | "one deck description names two different decks" |
-| `psl211_models.v:1142` | "psl211_fixed_dealP — the dealer law at that kernel: a uniform chirality, a fixed deck description, a uniform cut." |
-
-### Recorded, not changed: two other probes hold a copy of psl211_rows.v
-
-`notes/probes/2026-09-19-kim-spectral-landing/psl211_rows.v` and
-`notes/probes/2026-09-19-tableau-extensions/psl211_rows.v` were each taken from
-production before this landing, so both carry production's header and neither
-carries the rewritten "Not claimed" paragraph this landing lands. The Kim copy
-differs from production in its `Require` lines alone and that landing's ledger
-records it as a recompile; the extensions copy differs in a `Require` line, a
-new "Key results" entry `psl211_row_alldecks_armE`, and that lemma. Nothing in
-either becomes false when this landing lands, and nothing in this landing's
-rows header becomes false when either of them lands.
-
-The hazard is order, not content. Whichever of the three lands after this one
-must take this landing's `instances/psl211/psl211_rows.v` header as its base
-and apply its own hunk onto it. Copying its own probe copy over production
-would revert this landing's header silently, because neither probe's ledger
-checks that paragraph.
-
-### Compiled after fix pass 3
-
-Three files, in this order, each through the machine-wide `rocq1` lock with
-`rocq compile -time`, real `subprocess.returncode`, nothing piped in between:
-`psl211_spectral_constancy.v`, `psl211_rows.v`, `psl211_nogo_fidelity.v`. All
-three exit 0, at 39.0 s, 5.6 s and 8.0 s of wall time, the first with another
-probe's compile holding the lock for part of it. The slowest sentences are
-unchanged from fix pass 2, two `size_filter` rewrites at 6.1 s each. The only
-message is the pre-existing notation-level warning the whole tree carries.
-`make` was never invoked and `instances/psl211/psl211_endpoints.v` was never
-compiled. Recompiling all three is the guard against an unclosed comment, which
-is the one way a comment-only pass can break a file. The rows copy is still
-character-identical to `instances/psl211/psl211_rows.v` once comments and
-whitespace are stripped, and in this pass it was not edited at all.
