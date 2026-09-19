@@ -22,14 +22,9 @@
 (* replaced, and the chirality of one model is the chirality of the other as  *)
 (* one term rather than two readings of one bit.                              *)
 (*                                                                            *)
-(* The deck description and the cut are independent in both models because    *)
-(* each law is written as a product, which is the dealer drawing the word     *)
-(* without seeing the deck: a premise about how the shuffle is performed and  *)
-(* not a theorem about the execution.                                         *)
-(*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_word_cutP     == the law of the cut a dealer performs by hand     *)
-(*   psl211_wordP         == the law of the word model, decks times cuts      *)
+(*   psl211_wordP         == the law of the word model, decks times words     *)
 (*   psl211_word_sample   == the word model as a sample adapter               *)
 (*   psl211_word_family   == that adapter as a unit-indexed family            *)
 (*                                                                            *)
@@ -71,17 +66,15 @@ Local Open Scope proba_scope.
     group of a word of 584 letters, each letter drawn uniformly and
     independently from the three generators, block reversal and the two Monge
     letters. It is the one coordinate in which this model departs from the
-    all-decks model, and 2^-40, the bound psl211_word_mixing proves, is the
-    whole price of the departure. *)
+    all-decks model, and psl211_word_mixing is the whole price of the
+    departure. *)
 Definition psl211_word_cutP (R : realType) : R.-fdist (pgg_gT psl211_M) :=
   @rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R).
 
 (** The law of the word model: the deck description uniform over the
-    136857600 of them, the cut the 584-letter word law, the two independent
-    by construction, which is the dealer drawing the word without seeing the
-    deck. It differs from psl211_alldecksP in the cut factor alone, so a
-    coalition reads a deck drawn from the same law under a different
-    shuffle. *)
+    136857600 of them, the cut the 584-letter word law, the two independent.
+    It differs from psl211_alldecksP in the cut factor alone, so a coalition
+    reads a deck laid by the same dealer under a different shuffle. *)
 Definition psl211_wordP (R : realType)
   : R.-fdist (psl211_inputT * pgg_gT psl211_M)%type :=
   (`U psl211_alldecks_gt0) `x (psl211_word_cutP R).

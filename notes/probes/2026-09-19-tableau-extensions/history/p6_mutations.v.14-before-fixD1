@@ -18,20 +18,9 @@
 (* execution, so a family belonging to another instance is rejected at the    *)
 (* field's type before any distance is looked at.                             *)
 (*                                                                            *)
-(* The third is about the two further shapes a proximity certificate is       *)
-(* vacuous in. A certificate whose secret has a one-point carrier, and a      *)
-(* certificate whose ideal is the very model it is about, both make the       *)
-(* arm's proposition hold with nothing behind it. Neither shape is this       *)
-(* certificate's.                                                             *)
-(*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_word_law_le2 == the two models' laws are within the ceiling every *)
 (*                          pair of laws on one sample space meets            *)
-(*   psl211_word_proximity_cert_secretE                                       *)
-(*                       == the certificate's secret and the secret its       *)
-(*                          witness carries are one term                      *)
-(*   psl211_word_proximity_cert_secretTE                                      *)
-(*                       == the carrier of that secret is bool                *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -72,9 +61,8 @@ Local Open Scope proba_scope.
     twelve-card instance and no fact about the 584-letter walk. A proximity
     certificate carrying two would be a certificate about nothing, which is
     why the number a row publishes is what a reader of the arm must read. *)
-Lemma psl211_word_law_le2 (R : realType) :
-  var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R.
-Proof. exact: var_dist_le2. Qed.
+Definition psl211_word_law_le2 (R : realType) :
+  var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R := var_dist_le2 _ _.
 
 (** The same ceiling does not reach 2^-40. The rejection is a failure to unify
     the two numbers:
@@ -114,45 +102,3 @@ Fail Definition psl211_word_proximity_cert_pgl27_ideal (R : realType)
     (psl211_alldecks_secret R)
     (2%:R^-40)
     (fun C HC => @psl211_word_proximity_close R C HC).
-
-(******************************************************************************)
-(*     What the certificate keeps a secret, and of which model                *)
-(******************************************************************************)
-
-(** The secret the certificate names and the secret its witness carries are
-    one term, psl211_alldecks_secret. A proximity certificate whose two
-    secrets differ compares a coalition's reading against a product taken in
-    a different bit, so what a coalition is shown says nothing about the bit
-    the arm's proposition names. *)
-Lemma psl211_word_proximity_cert_secretE (R : realType) (idx : unit) :
-  ipc_secret (psl211_word_proximity_cert R idx) = psl211_alldecks_secret R
-  /\ ew_secret (ipc_witness (psl211_word_proximity_cert R idx))
-     = psl211_alldecks_secret R.
-Proof. split; exact: erefl. Qed.
-
-(** The carrier of that secret is the two-element type of the chirality bit.
-    At a one-point carrier the arm's proposition compares two readings and
-    mentions no secret at all, the second factor of the product being a point
-    mass, so the number would bound nothing about what a coalition learns of
-    the bit. *)
-Lemma psl211_word_proximity_cert_secretTE (R : realType) (idx : unit) :
-  ew_secretT (ipc_witness (psl211_word_proximity_cert R idx)) = bool.
-Proof. exact: erefl. Qed.
-
-(** The certificate's ideal is not the word model it is about. A certificate
-    naming its own model as the ideal holds its distance field at zero, the
-    two sides of that field being one term, so the number it publishes bounds
-    a distance from the model to itself. The rejection is a failure to unify
-    the two models:
-
-      The term "erefl" has type
-       "ipc_ideal (psl211_word_proximity_cert R idx) =
-        ipc_ideal (psl211_word_proximity_cert R idx)"
-      while it is expected to have type
-       "ipc_ideal (psl211_word_proximity_cert R idx) =
-        amf_sample psl211_word_family R idx".
-*)
-Fail Definition psl211_word_proximity_cert_ideal_self (R : realType)
-    (idx : unit) :
-  ipc_ideal (psl211_word_proximity_cert R idx)
-  = amf_sample psl211_word_family R idx := erefl.

@@ -25,13 +25,8 @@
 (* statement below is about a static coalition of at most five of the twelve  *)
 (* seats reading its own endpoints. The row publishes the number the          *)
 (* certificate proves and names no constant: this instance has no row         *)
-(* carrying a constant for this model to be read in one column with. The      *)
-(* constancy field a spectral certificate would need is refuted at the        *)
-(* group-uniform ideal cut and at the 584-letter word cut law, and            *)
-(* psl211_alldecks_no_small_eps_cert excludes every spectral certificate      *)
-(* whose shuffle bound is strictly below 1/1320. The larger bounds are left   *)
-(* open, so no spectral sibling exists here to read this row in one column    *)
-(* with and none is shown impossible.                                         *)
+(* carrying a constant for this model to be read in one column with, the      *)
+(* constancy field a spectral certificate would need being refuted at it.     *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_word_proximity_cert == the word model's proximity certificate     *)
@@ -53,9 +48,8 @@
 (*                                 variation distance meets                   *)
 (*   psl211_row_word_proximity_armE                                           *)
 (*                              == the row carries the proximity arm          *)
-(*   psl211_row_word_proximity_rowE                                           *)
-(*                              == the whole manifest row the program         *)
-(*                                 publishes                                  *)
+(*   psl211_row_word_proximity_publishedE                                     *)
+(*                              == the three coordinates the row publishes    *)
 (*   psl211_word_view_proximity == what the row states at this instance       *)
 (******************************************************************************)
 
@@ -95,7 +89,7 @@ Local Notation seatT :=
 (*     The distance between the two models' joint laws                        *)
 (******************************************************************************)
 
-(** At every coalition of the twelve seats, the joint law of
+(** At every coalition of at most five of the twelve seats, the joint law of
     that coalition's reading with the chirality under the 584-letter word
     shuffle is within 2^-40 of the same joint law under the uniform shuffle.
     It is the certificate field of the proximity arm at this instance: the two
@@ -123,8 +117,8 @@ Lemma psl211_word_proximity_close (R : realType) (C : {set seatT}) :
   <= 2%:R^-40.
 Proof.
 (* The two maps are one term, the two adapters reading a sample point by the
-   same two projections, so var_dist_fdistmap_pair applies with no pointwise
-   rewriting of either reader. *)
+   same two projections, so the data processing step of p1 applies with no
+   pointwise rewriting of either reader. *)
 move=> _.
 apply: var_dist_fdistmap_pair.
 rewrite psl211_word_sampleP_E psl211_alldecks_sampleP_E.
@@ -185,15 +179,10 @@ Fact psl211_pow2_40_gt0 (R : realType) : (0:R) < 2%:R^+40.
 Proof. by rewrite exprn_gt0 // ltr0n. Qed.
 
 (** The certificate's number is under two, the ceiling var_dist_le2 of
-    lib/var_dist_supp.v gives for a variation distance. What this rules out
-    is the ceiling's own tautology: psl211_word_law_le2 proves the distance
-    at two with no fact about this instance and no fact about the walk, and
-    the same term is rejected at 2^-40. The number is 2^-41 of the ceiling.
-    The second shape a proximity certificate can be vacuous in is closed
-    beside that rejection: psl211_word_proximity_cert_secretE and
-    psl211_word_proximity_cert_secretTE give the certificate's secret and
-    its witness's secret as one term at the carrier bool, and the ideal is
-    refused as the model the certificate is about. *)
+    lib/var_dist_supp.v gives for a variation distance, so the certificate is
+    not vacuous. At about 4.5e-13 of that ceiling it is a cryptographic
+    separation and not a weak one, as the proximity certificate of Kim's
+    one-cut model is. *)
 Lemma psl211_word_proximity_cert_eps_lt2 (R : realType) (idx : unit) :
   ipc_eps (psl211_word_proximity_cert R idx) < 2%:R :> R.
 Proof.
@@ -214,15 +203,10 @@ Qed.
     reading and the chirality are independent outright; a distinguisher's
     advantage is therefore at most half of it. The claim is an average over
     the deck description and the cut and is not a statement at a fixed deck
-    description: a coalition below the threshold does not read an ideal cut
-    the same way at every run argument, which psl211_alldecks_constancy_false
-    refutes at the group-uniform cut under the all-decks run,
-    psl211_alldecks_constancy_false_word584 at every cut within eps of the
-    584-letter word law this row's model draws, once twice the sum of eps and
-    2^-40 stays below 1/660, and psl211_dealt_constancy_false at the
-    group-uniform cut under the dealer-dealt run, a different execution. Each
-    is witnessed at the coalition of three seats, and those refutations stay
-    true beside this row. Its transfer
+    description: the reading of a coalition below the threshold is not
+    constant in the run argument, which psl211_alldecks_constancy_false and
+    psl211_dealt_constancy_false of psl211_spectral_constancy.v refute in both
+    run modes, and those refutations stay true beside this row. Its transfer
     status is IdealFinite, an idealised shuffle being replaced here by a
     shuffle of 584 letters. *)
 Definition psl211_row_word_proximity : PublishedRow :=
@@ -240,17 +224,16 @@ Lemma psl211_row_word_proximity_armE (R : realType)
   security_arm_of psl211_row_word_proximity R idx = IdealProximityArm.
 Proof. exact: erefl. Qed.
 
-(** The whole manifest row the program above publishes. What separates it
-    from the manifest's all-decks row is the fourth coordinate, the model
-    family an AnalysisPathRow records: psl211_row_alldecks carries the exact
-    family and this row carries the word family, which the manifest of the
-    tree holds no row at. The equation published_row psl211_row_word_proximity
-    = psl211_row_alldecks typechecks and is not provable by conversion. *)
-Lemma psl211_row_word_proximity_rowE :
-  published_row psl211_row_word_proximity
-  = @MkAnalysisPathRow psl211_alldecks_observed AnalysisBridged
-      psl211_word_family IdealFinite BaselineClassicalOnly.
-Proof. exact: erefl. Qed.
+(** The three coordinates the row publishes. The manifest of the tree carries
+    no row at this model, an AnalysisPathRow recording the model family and
+    this family being new, so the row below is the word model's own and not
+    psl211_row_alldecks under another name. *)
+Lemma psl211_row_word_proximity_publishedE :
+  apr_completion (published_row psl211_row_word_proximity) = AnalysisBridged
+  /\ apr_transfer (published_row psl211_row_word_proximity) = IdealFinite
+  /\ apr_assumptions (published_row psl211_row_word_proximity)
+     = BaselineClassicalOnly.
+Proof. split; [exact: erefl | split; exact: erefl]. Qed.
 
 (******************************************************************************)
 (*     What the row states at this instance                                   *)

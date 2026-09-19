@@ -1,8 +1,7 @@
 # Stage D — the PSL(2,11) word model and its row through the proximity arm
 
 Spec ledger row P6, with its share of P3, P7, K1, G1, D1 and D2.
-Repository `rocq-pgg-smc`, stage D written at `ceb2317` and committed at
-`0a4f4f4`, whose parent is `df6ebfb`, branch `feat/tableau-extensions-probe`.
+Repository `rocq-pgg-smc` at HEAD `ceb2317`, branch `feat/tableau-extensions-probe`.
 Probe `notes/probes/2026-09-19-tableau-extensions`, logical path `tableau_ext_probe`.
 
 ## Verdict per item
@@ -41,18 +40,14 @@ touched, so its 900 s rebuild was never triggered.
 The brief allows a `conclude` at a named constant when there is a reason. There
 is none here. The eight-card orbit instance concluded its word row at `2^-39`
 because a spectral row over the same model publishes that constant and the two
-are read in one column. The twelve-card instance has no spectral row. What is
-compiled against one is this: the constancy field a spectral certificate needs
-is refuted at the group-uniform ideal cut and at the 584-letter word cut law,
-by the three lemmas tabled below under invariant 3, and
-`psl211_alldecks_no_small_eps_cert` excludes every spectral certificate whose
-shuffle bound `eps` satisfies `eps + eps < 1/660`, that is every `eps` strictly
-below `1/1320`. The larger bounds are left open, and the header of
-`instances/psl211/psl211_spectral_constancy.v:67-68` says so itself, "Nothing
-here says the word row is excluded outright". So there is no column to line
-this row up with and no constant a paper cites for this model, and no claim
-that a spectral sibling could not be built. The row publishes plainly, and the
-payload of a `conclude` would have had to be a `<=`, of which none is written.
+are read in one column. The twelve-card instance has no spectral row: the
+constancy field a spectral certificate needs is refuted at this model in both
+run modes, `psl211_alldecks_constancy_false` and `psl211_dealt_constancy_false`
+of `instances/psl211/psl211_spectral_constancy.v`, and
+`psl211_alldecks_no_small_eps_cert` excludes every shuffle bound strictly below
+`1/1320`. There is therefore no column to line up with and no constant a paper
+cites for this model, so the row publishes plainly. The payload of a `conclude`
+would have had to be a `<=`; none is written.
 
 ## The word model
 
@@ -183,11 +178,12 @@ Lemma psl211_row_word_proximity_armE (R : realType)
   security_arm_of psl211_row_word_proximity R idx = IdealProximityArm.
 Proof. exact: erefl. Qed.
 
-Lemma psl211_row_word_proximity_rowE :
-  published_row psl211_row_word_proximity
-  = @MkAnalysisPathRow psl211_alldecks_observed AnalysisBridged
-      psl211_word_family IdealFinite BaselineClassicalOnly.
-Proof. exact: erefl. Qed.
+Lemma psl211_row_word_proximity_publishedE :
+  apr_completion (published_row psl211_row_word_proximity) = AnalysisBridged
+  /\ apr_transfer (published_row psl211_row_word_proximity) = IdealFinite
+  /\ apr_assumptions (published_row psl211_row_word_proximity)
+     = BaselineClassicalOnly.
+Proof. split; [exact: erefl | split; exact: erefl]. Qed.
 ```
 
 Cost of the row and data equations, from the `-time` lines, all far under the
@@ -199,8 +195,8 @@ statement was weakened:
 | `split; exact: erefl` of `psl211_word_proximity_cert_idealE` | 0.000 |
 | its `Qed` | 0.003 |
 | `exact: erefl` of `psl211_row_word_proximity_armE` | 0.000 |
-| `exact: erefl` of `psl211_row_word_proximity_rowE` | 0.001 |
-| `exact: (view_proximity_of ...)` of `psl211_word_view_proximity` | 0.121 |
+| `split; [exact: erefl \| split; exact: erefl]` of `..._publishedE` | 0.000 |
+| `exact: (view_proximity_of ...)` of `psl211_word_view_proximity` | 0.118 |
 
 `by []` and `done` were not used on any of them, following the hang shape
 recorded in `STATUS.md`. `reflexivity` was not needed, no `exact: erefl` having
@@ -211,23 +207,12 @@ come near five seconds.
 Carried in the statement comment of `psl211_row_word_proximity` and in the
 statement comment of `psl211_word_proximity_close`. The claim is an average
 over the deck description and the cut. It is not a statement at a fixed deck
-description: a coalition below the threshold does not read an ideal cut the
-same way at every run argument. The refuted proposition is
-`coalition_reading_constancy` of
-`instances/psl211/psl211_spectral_constancy.v`, an equality of two pushforward
-laws of the reading of a named ideal cut at two run arguments, and three
-lemmas of that file refute it, each witnessed at `psl211_perdeck_coalition`,
-the three seats 0, 1 and 2.
-
-| lemma | which ideal cut | which execution |
-|---|---|---|
-| `psl211_alldecks_constancy_false` (`:258`) | the group-uniform cut law | the all-decks run |
-| `psl211_alldecks_constancy_false_word584` (`:769`) | every cut within `eps` of the 584-letter word law this row's model draws, once `(2^-40 + eps) + (2^-40 + eps) < 1/660` | the all-decks run |
-| `psl211_dealt_constancy_false` (`:953`) | the group-uniform cut law | the dealer-dealt run, a different execution |
-
-The third is at a different execution from this row's, and the second is the
-refutation at this row's own cut law. Those refutations stay true beside this
-row and all three are cited by name in the row's comment.
+description: the reading of a coalition below the threshold is not constant in
+the run argument, which `psl211_alldecks_constancy_false` and
+`psl211_dealt_constancy_false` of
+`instances/psl211/psl211_spectral_constancy.v` refute in the two run modes.
+Those refutations stay true beside this row and are cited by name in the row's
+comment.
 
 Word gloss, used in every comment of the two files. A deck description is the
 whole run argument, a chirality bit together with a deal. A deal is the block
@@ -252,7 +237,8 @@ while it is expected to have type
 ```
 
 The pair places the whole content of `psl211_word_lawE` in
-`psl211_word_mixing`. The accepted half is kept as `psl211_word_law_le2`.
+`psl211_word_mixing`. The accepted half is kept as
+`psl211_word_law_le2`, the only declaration `p6_mutations.v` adds.
 
 **A certificate naming another instance's exact family.** `pgl27_exact_family`
 as `ipc_ideal` of a twelve-card certificate:
@@ -265,27 +251,6 @@ while it is expected to have type
 ```
 
 The field is rejected at its type, before any distance is looked at.
-
-**A certificate whose ideal is the model it is about.** `ipc_ideal` set to
-`amf_sample psl211_word_family R idx`, the certificate's own model:
-
-```
-The term "erefl" has type
- "ipc_ideal (psl211_word_proximity_cert R idx) =
-  ipc_ideal (psl211_word_proximity_cert R idx)"
-while it is expected to have type
- "ipc_ideal (psl211_word_proximity_cert R idx) =
-  amf_sample psl211_word_family R idx".
-```
-
-The two sides of `ipc_close` would then be one term and the field would hold
-at zero, so the number published would bound a distance from the model to
-itself. Beside that rejection stand the two accepted checks
-`psl211_word_proximity_cert_secretE`, that the certificate's secret and the
-secret its witness carries are one term, and
-`psl211_word_proximity_cert_secretTE`, that the carrier is `bool` and not a
-one-point type. Together with the ceiling pair those close the three vacuity
-shapes `audit-stageB-fix1.md` N2 named.
 
 ## Compile table
 
@@ -306,48 +271,26 @@ comment-only edit to `p6_psl211_word_proximity.v`, with the same result.
 | `p6_mutations.v` | 0 | 4.2 s | 4.111 s | 29 | 0.056 s |
 | `assumptions_report_stageD.v` | 0 | 244.1 s | 244.00 s | 31 | 23.93 s |
 
-Fix pass 1 recompiled all four in `_CoqProject` order against the live probe
-directory:
-
-| file | rc | wall | sum of `-time` | sentences | slowest non-import sentence |
-|---|---|---|---|---|---|
-| `p6_psl211_word_model.v` | 0 | 4.6 s | 4.423 s | 38 | 0.069 s |
-| `p6_psl211_word_proximity.v` | 0 | 5.1 s | 4.929 s | 67 | 0.121 s |
-| `p6_mutations.v` | 0 | 4.3 s | 4.171 s | 41 | 0.022 s |
-| `assumptions_report_stageD.v` | 0 | 282.6 s | 282.47 s | 33 | 21.70 s |
-
-The report grew from 21 prints to 23 and from 244 s to 282 s, the two added
-prints being on declarations whose type reaches the observed execution.
-
 The three source files are dominated by their `Require` lines, the three
 largest of which are the mathcomp algebra block, the infotheo block and
 `boolp reals`, at about 1.5 s, 1.4 s and 0.8 s each. No sentence outside a
 `Require` reaches 0.12 s in them.
 
 The assumptions report is the only file with sentences above five seconds, and
-every one of them is a `Print Assumptions`, which the brief exempts. Thirteen
-of the 23 prints exceed five seconds, between 19.92 s and 21.70 s. The other
-ten stay under 0.3 s.
-
-The split follows whether the declaration's type reaches the observed
-execution, not whether it mentions the probability model. Measured in this
-pass: `psl211_wordP` 0.062 s, `psl211_word_sample` 0.119 s,
-`psl211_word_cut_distE` 0.122 s, `psl211_word_lawE` 0.218 s,
-`psl211_word_proximity_close` 0.258 s and `psl211_word_law_le2` 0.060 s all
-name a probability model and all stay under 0.3 s, and
-`psl211_pow2_40_gt0` at 0.019 s names no model at all. The 20 s band starts at
-`psl211_word_family` at 19.92 s, the first declaration whose type names
-`psl211_alldecks_observed`, and holds for every row lemma after it, those
-prints traversing the instance's interpreter tables. The cost is not something
-stage D introduces: the production `psl211_row_alldecks_tableau` print is in
-the same band.
+every one of them is a `Print Assumptions`, which the brief exempts. Eleven of
+the 21 prints exceed five seconds, between about 21 s and 23.93 s; the other
+ten are between 0.01 s and 0.06 s. The split follows what the declaration
+mentions. A print on a bare real field, such as `psl211_pow2_40_gt0`, costs
+0.01 s; a print on anything that mentions the twelve-card probability model
+traverses the instance's interpreter tables and costs about 22 s. The cost is
+not something stage D introduces: the production `psl211_row_alldecks_tableau`
+print is in the same band.
 
 ## Assumptions
 
-Twenty-three `Print Assumptions`, one per declaration stage D writes plus the
-two production declarations printed for comparison. Every one of the
-twenty-three prints an `Axioms:` block, and every block is the same three
-constants:
+Twenty-one `Print Assumptions`, one per declaration stage D writes plus the two
+production declarations printed for comparison. Every one of the twenty-one
+prints an `Axioms:` block, and every block is the same three constants:
 
 ```
 propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
@@ -361,11 +304,8 @@ constructive_indefinite_description :
 The whole log was scanned for constant names with `[\w.]+`, which catches a
 module-qualified `Axiom` that a `\w+` scan would miss. The names found are the
 three above and nothing else. No declaration printed `Closed under the global
-context`, which is expected: every one of them is stated at a `realType`, and
-mathcomp-analysis builds that structure with the three boolp constants. Two of
-the prints, `psl211_pow2_40_ge1` and `psl211_pow2_40_gt0`, mention no fdist
-record at all and print the same three, so the carrier and not the probability
-model is what puts them there.
+context`, which is expected: every one of them mentions an fdist record, and an
+fdist record carries the three boolp constants through its own section context.
 
 Stage D therefore rests on exactly what the production all-decks row rests on.
 That row was printed here for the comparison: `psl211_row_alldecks_tableau` and
@@ -426,13 +366,9 @@ nothing already compiled is rebuilt by adding it.
 
 The certificate, the row and their lemmas would go beside
 `psl211_exact_witness` in the instance's rows file, whose reverse closure is
-empty as well, for the reason that file's header already gives for
-`ExactWitness`: it is a record of the manifest layer, and an instance file
-importing that layer closes a cycle through the analysis manifest.
-`IdealProximityCert` is not in `manifest/pgg_tableau.v` today, that file
-containing no occurrence of `IdealProximity`; the record exists only in the
-probe's framework copy, `pgg_tableau.v:184`. The landing of the arm itself
-puts it in the manifest layer first, and the row group follows it.
+empty as well, for the reason that file's header already gives: `ExactWitness`
+and `IdealProximityCert` are records of the manifest layer, and an instance
+file importing that layer closes a cycle through the analysis manifest.
 
 Two P1 lemmas the landing needs are probe-local today.
 `var_dist_prodR` is `Local` in both `instances/pgl27/pgl27_mixing.v` and
@@ -440,53 +376,14 @@ Two P1 lemmas the landing needs are probe-local today.
 counterpart, `fdist_prod1` covering the first marginal only. A landing would
 make one copy of each global beside `var_dist_le2` in `lib/var_dist_supp.v`,
 whose reverse closure has eleven members and does not contain
-`psl211_endpoints`. That is the one edit to an existing file the landing needs,
-and it leaves the two `Local` copies of `var_dist_prodR` at
-`instances/pgl27/pgl27_mixing.v:1077` and
-`instances/psl211/psl211_mixing.v:577` in place, three copies of one lemma in
-the tree. Retiring those is two further edits, and the closure decides whether
-they are affordable. Recomputed here with Python over the `Require` lines of
-every `.v` under a production `-R` or `-Q` root: `psl211_mixing` is **not** in
-the forward closure of `psl211_endpoints` and neither is `pgl27_mixing`, so
-neither edit forces the 900 s rebuild. Their reverse closures differ by an
-order of magnitude: `psl211_mixing` has one member,
-`psl211_spectral_constancy`, while `pgl27_mixing` has twenty-one, every
-PGL(2,7) file plus the manifest layer and the three rows files. So the
-PSL(2,11) copy is cheap to retire and the PGL(2,7) copy is not, and neither is
-barred by the rule on `psl211_endpoints`.
+`psl211_endpoints`. That is the one edit to an existing file the landing needs.
 
-Landing `psl211_word_sample` also falsifies a reason written into a production
-comment. `psl211_alldecks_constancy_false_word584`
-(`instances/psl211/psl211_spectral_constancy.v:765-768`) says it is stated on
-the cut law rather than on a certificate "because no weighted-word
-SampleAdapter exists in this tree, so there is no adapter whose cut is this law
-and no `sc_Hd` through which a certificate's ideal could be held near it".
-`psl211_word_sample` is exactly that adapter, so the same landing rewrites that
-comment. `psl211_spectral_constancy`'s reverse closure is empty, so the edit
-rebuilds nothing.
-
-**What a landing changes.** One new instance file and one new row group. Two
-lemmas promoted out of `Local` into `lib/var_dist_supp.v`. One production
-comment rewritten, the one named above. And one manifest row for the word path,
-which does not exist today, since an `AnalysisPathRow` records the model family
-and this family is new. The row a landing adds, verbatim, is what
-`psl211_row_word_proximity_rowE` proves the program publishes:
-
-```coq
-@MkAnalysisPathRow psl211_alldecks_observed AnalysisBridged
-  psl211_word_family IdealFinite BaselineClassicalOnly
-```
-
-The manifest edit is what makes the landing cost the ten-file reverse closure
-of `psl211_models`, not the model file itself.
-
-`psl211_pow2_40_ge1` and `psl211_pow2_40_gt0` carry an instance prefix for two
-facts with no instance content, `(1:R) <= 2%:R^+40` and `(0:R) < 2%:R^+40`,
-where stage C names the same pair `pow2_40_ge1` and `pow2_40_gt0`. The prefix
-is forced here: G1 bars stage D from editing `p1_joint_law_distance.v`, where
-the pair belongs, and this file does not import stage C's. A landing merges the
-two copies into one unprefixed pair in `p1`'s permanent home rather than
-landing both.
+**What a landing changes.** One new instance file and one new row group; two
+lemmas promoted out of `Local` into `lib/var_dist_supp.v`; one manifest row for
+the word path, which does not exist today, since an `AnalysisPathRow` records
+the model family and this family is new. The manifest edit is what makes the
+landing cost the ten-file reverse closure of `psl211_models`, not the model
+file itself.
 
 ## G1: stage A, B and C untouched
 
@@ -531,156 +428,3 @@ that pass's sources.
 4. **The brief offers a `conclude` at a named constant as an option.** There is
    no constant to conclude at, for the reason given above. The row publishes
    plainly and no `conclude` payload is written.
-
-## Fix pass 1, after the soundness and the naming audits
-
-Both audits returned GO with no blocking item. Snapshots of every file touched
-are in `history/` under the suffix `.14-before-fixD1`. Five files changed:
-`p6_psl211_word_model.v`, `p6_psl211_word_proximity.v`, `p6_mutations.v`,
-`assumptions_report_stageD.v` and this note. Nothing outside the probe
-directory was touched, `_CoqProject` was not edited, no stage A, B or C file
-was opened for writing, no `make` was run, no production file was compiled,
-and `instances/psl211/psl211_endpoints.v` was never opened.
-
-### What the fixed-deck refutations refute (naming D2, soundness S4)
-
-The row's comment and the invariant 3 section said the cited lemmas refute
-that "the reading of a coalition below the threshold is not constant in the run
-argument". The refuted proposition, `coalition_reading_constancy`, is an
-equality of two pushforward laws of the reading of a named ideal cut at two run
-arguments, so both now follow production's own sentence in
-`instances/psl211/psl211_rows.v:40-42`, "read the ideal cut the same way at
-every run argument". Three lemmas are now cited, each with its ideal cut and
-its execution, in the table under invariant 3, and the coalition their
-witnesses use is named: `psl211_perdeck_coalition`, the three seats 0, 1 and 2,
-which `psl211_alldecks_constancy_false` and `psl211_dealt_constancy_false`
-instantiate directly and which `psl211_alldecks_constancy_false_word584`
-reaches through `psl211_alldecks_constancy_false_word` and
-`psl211_alldecks_constancy_false_close`. The point of the paragraph is kept:
-the row's claim is an average over the run argument and these statements at
-fixed run arguments stay true beside it.
-
-### The spectral comparison (soundness S3)
-
-"the constancy field a spectral certificate would need being refuted at it"
-overstated what is compiled and is replaced, in the file header and in the
-section on why the row does not conclude, by the three compiled facts: the
-refutations at the group-uniform ideal cut and at the word law, the exclusion
-`psl211_alldecks_no_small_eps_cert` gives for every `eps` strictly below
-`1/1320`, and the production header's own sentence that nothing excludes the
-word row outright. That is now given as the reason this row has no spectral
-sibling to be read in one column with, with no claim that none can exist.
-
-### The ceiling sentences (soundness S1, S2)
-
-"so the certificate is not vacuous" claimed the general property from the
-narrow fact and is replaced by what is proved: the number is not the ceiling's
-own tautology, `psl211_word_law_le2` proving the distance at two with no fact
-about the instance and the same term being rejected at `2^-40`. "At about
-4.5e-13 of that ceiling it is a cryptographic separation and not a weak one, as
-the proximity certificate of Kim's one-cut model is" is gone entirely, both the
-unproved security word and the ranking of one row against another, and the
-ratio is stated as a number, `2^-41` of the ceiling.
-
-The soundness auditor's `a_checks.v` compiled that this certificate is not of
-the vacuous kind `audit-stageB-fix1.md` N2 named. Each of its three checks
-closes in well under a second, measured here at 0.001 s, 0.000 s and 0.001 s,
-so all three are landed in `p6_mutations.v`: two lemmas,
-`psl211_word_proximity_cert_secretE` and
-`psl211_word_proximity_cert_secretTE`, and one `Fail` on the ideal set to the
-certificate's own model, whose decisive error line was obtained by compiling
-the same term without the guard. The ceiling comment cites the two lemmas and
-the rejection.
-
-### The whole manifest row (naming D3, soundness N on `_publishedE`)
-
-`psl211_row_word_proximity_publishedE` is withdrawn and
-`psl211_row_word_proximity_rowE` replaces it, as stage C did with its own,
-stating all five coordinates by `exact: erefl` at 0.001 s. The snapshot
-`history/p6_psl211_word_proximity.v.14-before-fixD1` is the record of the
-withdrawn lemma. Its comment is corrected: what differs from the manifest's
-all-decks row is the model family the row records, the manifest holds no row at
-this model, and the row it describes is above the lemma and not below it.
-
-### The `Definition` with a propositional type (naming D4)
-
-`psl211_word_law_le2` is now `Lemma ... Proof. exact: var_dist_le2. Qed.` Its
-statement is unchanged.
-
-### The header gloss (naming D1) and three soundness notes
-
-`psl211_wordP == the law of the word model, decks times cuts`, checked against
-the definition: the second factor of `R.-fdist (psl211_inputT * pgg_gT
-psl211_M)` is the cut, drawn from `psl211_word_cutP R`, a law on group elements
-and not on words. `psl211_word_mixing is the whole price` becomes "2^-40, the
-bound `psl211_word_mixing` proves, is the whole price" (N2), a lemma not being
-a number. `psl211_word_proximity_close`'s comment now opens "At every coalition
-of the twelve seats", matching the lemma, which discards its threshold premise
-(N3). One sentence in the word model's file header says that the deck
-description and the cut are independent because each law is written as a
-product, which is the dealer drawing the word without seeing the deck, a
-premise about how the shuffle is performed and not a theorem about the
-execution (N4). "a deck laid by the same dealer" becomes "a deck drawn from the
-same law", "dealer" naming the dealer-dealt run mode elsewhere in this instance
-(D10). The proof comment that named "p1" now names `var_dist_fdistmap_pair`,
-which survives a landing (D13). The record corrections D5, D6, D7, D15 and D16
-are applied to the sections above, and the D8 and N5 landing hazards are in the
-D1/D2 section.
-
-### Not applied
-
-- **D14**, padding four section comments of `assumptions_report_stageD.v` to
-  80 bytes. Stage A's and stage B's reports leave theirs unpadded, stage C's
-  pads them, so the tree is split two against two. Recorded: the stage D
-  report follows stage A's convention, and a coordinator's ruling can change
-  all four at once.
-- **D9**, renaming `psl211_pow2_40_ge1` and `psl211_pow2_40_gt0` to the
-  unprefixed stage C names. The auditor proposed no rename, only that the
-  reason be recorded, which is now in the D1/D2 section.
-- **D17**, the adjacency of the proposed `instances/psl211/psl211_word_model.v`
-  to `instances/psl211/psl211_models.v`. The auditor proposed no rename.
-- **N6**'s optional fourth conjunct on `_publishedE`. That lemma is withdrawn
-  and `_rowE` pins the model coordinate outright, so the conjunct has no home.
-- The auditor's replacement for S1 that would have said "so the certificate is
-  not the ceiling tautology" and stopped there. The stronger sentence is
-  written instead, because the three checks are compiled and landed.
-
-### Auditor sentences altered
-
-- **S3's replacement** ended "and leaves the larger ones open". Rewritten to
-  name what is left open as shuffle bounds at or above `1/1320` and to add the
-  production header's own sentence, so the reader is not left to infer that
-  the open range is unoccupied.
-- **S4's replacement** said `psl211_alldecks_constancy_false_word584` refutes
-  the field "at the 584-letter word cut this row draws". The lemma refutes it
-  at every ideal within `eps` of that law, under `(2^-40 + eps) + (2^-40 + eps)
-  < 1/660`, and those premises are now written out. The auditor did not compile
-  an instantiation at this row's own cut law and neither did this pass.
-- **S1's compiled evidence** is landed as two lemmas and one `Fail` rather than
-  cited from the auditor's scratch file, which does not survive the session.
-- **D2's replacement** cited two lemmas. The third, at this row's own cut law,
-  is added, and the two run modes are named as two executions.
-- **D5's replacement** said "every one of them is stated at a `realType`". Kept,
-  with the two prints that mention no fdist record named, so the claim is
-  checkable against the report.
-- **D6's replacement** is kept and its figures are replaced by this pass's own
-  measurements.
-
-### Compile and assumptions
-
-Every file recompiled `rc=0`, in `_CoqProject` order, against the live probe
-directory with the production flags and `-Q <probe dir> tableau_ext_probe`
-last, under `rocq1 600 8000 rocq compile -time`. The figures are in the second
-table of the compile section. No sentence outside a `Require` or a
-`Print Assumptions` reaches 0.13 s.
-
-The assumptions scan starts at each `Axioms:` line of
-`assumptions_report_stageD.v`'s log and reads constant names with
-`^([\w'.]+)\s*:`, a pattern that catches a module-qualified `Axiom` a `\w+`
-scan would miss. It returns 23 blocks and three tokens,
-`propositional_extensionality`, `functional_extensionality_dep` and
-`constructive_indefinite_description`, with no fourth token anywhere and no
-declaration `Closed under the global context`. That is the set the production
-`psl211_row_alldecks_tableau` and `psl211_alldecks_view_secrecy` print. The two
-declarations this pass adds and the one it renames print the same three, so the
-pass introduces no assumption.

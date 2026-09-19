@@ -48,13 +48,11 @@ Print Assumptions psl211_pow2_40_gt0.
 Print Assumptions psl211_word_proximity_cert_eps_lt2.
 Print Assumptions psl211_row_word_proximity.
 Print Assumptions psl211_row_word_proximity_armE.
-Print Assumptions psl211_row_word_proximity_rowE.
+Print Assumptions psl211_row_word_proximity_publishedE.
 Print Assumptions psl211_word_view_proximity.
 
 (* The rejections. *)
 Print Assumptions psl211_word_law_le2.
-Print Assumptions psl211_word_proximity_cert_secretE.
-Print Assumptions psl211_word_proximity_cert_secretTE.
 
 (* The production all-decks row, for comparison. *)
 Print Assumptions psl211_row_alldecks_tableau.
