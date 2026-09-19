@@ -14,12 +14,12 @@ and D2. The IdealProximity arm and the instance programs are later stages.
 |---|---|---|
 | T0 | GO, no framework change needed | `t0_sampled_branch.v`, `t0_sampled_branch_pgl27.v` |
 | C1 | GO | `pgg_tableau.v`, `ConcludePayload` and `port_conclude` |
-| C2 | GO, three payloads change in the tree | `pgl27_rows.v` and, since the Kim landing, `five_card_rows.v` |
+| C2 | GO, one payload changed in the whole tree | `pgl27_rows.v`, the `conclude` line of `pgl27_row_word39` |
 | C3 | GO | `pgl27_rows.v`, `pgl27_reprice41` and `pgl27_word_reprice41_false`, with the `Fail pgl27_row_word41` beside them |
 | G2 | GO, `conclude` costs no keyword | `pgg_tableau_syntax.v`, the `conclude` notation rule before the `publish` one |
 | K1 | GO | `pgg_tableau.v`, four rows copies |
 | G1 | GO at baseline, after C, and after K | compile table below |
-| G3 | the header sentences listed below | list below |
+| G3 | eight sentences rewritten | list below |
 | D2 | list below | built by searching the tree |
 
 ## Step 1. The copies, and the baseline (G1)
@@ -165,10 +165,9 @@ So the slow equation is the second, the branch point against its own
 **concluded** continuation, and the slow tactic is `by []`. ssreflect's `done`
 spends its search before it reaches reflexivity, and on a goal whose two sides
 are `published_at` of a row without `conclude` and of a row with it that
-search did not return inside the bounds in the table above, 130 s for the
-equation and 200 s for the conjunction. The conversion the goal actually
-needs is a tenth of a second. Neither equation needs weakening: both are
-provable, and provable fast.
+search does not return; the conversion the goal actually needs is a tenth of a
+second. Neither equation needs weakening: both are provable, and provable
+fast.
 
 Each conjunction is now two lemmas closed by `exact: erefl`:
 `pgl27_row_exact_branch_atE` and `pgl27_row_exact_branch_ideal_atE`,
@@ -221,26 +220,19 @@ is not in scope in this file, which imports `GRing.Theory Num.Theory` and not
 
 ### C2, the payloads in the importers
 
-`conclude` is used in two production files outside the framework. The search
-over `manifest protocol instances security smc lib reconstruct groups legacy`
-for `RepricePayload`, `port_reprice`, `cert_eps`, `Reprice`, `no_reprice` and
-`conclude` was run before the Kim landing and returned hits outside
-`manifest/pgg_tableau.v` in `instances/pgl27/pgl27_rows.v` alone, at `:371`,
-`:382` and `:393`, beside the English word in a `legacy/reconstruct/ag_code.v`
-comment and a second at `security/pgg_mixing.v:304`. Re-run after that
-landing, it returns `instances/kim2025/five_card_rows.v` as well. Three
-payloads change under C and not one.
+`conclude` occurs in exactly one production file. Searched over
+`manifest protocol instances security smc lib reconstruct groups legacy` for
+`RepricePayload`, `port_reprice`, `cert_eps`, `Reprice`, `no_reprice` and
+`conclude`: the only hits outside `manifest/pgg_tableau.v` are
+`instances/pgl27/pgl27_rows.v:371`, `:382`, `:393` (and one occurrence of the
+English word in a `legacy/reconstruct/ag_code.v` comment).
 
-In the copy of `pgl27_rows.v`:
+One payload change, in the copy of `pgl27_rows.v`:
 
 | | text |
 |---|---|
 | old (`:382`) | `;;; conclude pgl27_reprice39 of (fun R _ => pow2_split R)` |
 | new (`:382`) | `\|> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))` |
-
-In the refreshed copy of `five_card_rows.v`, two more, both written in the
-keyword surface. The one-cut row takes the same one-token fix; the repeated
-row takes the route of the fix pass 3 section below and needs no wrapper.
 
 `ssr_ext.eqW : x = y -> (x <= y)%O` is infotheo's, reachable under its
 qualified name from this file's existing `From infotheo Require Import fdist`.
@@ -446,11 +438,6 @@ unchanged.
 
 ### G1, the compile table
 
-These are the measurements taken at the baseline, after C and after K. The
-numbers for the ten files as they stand are in the fix pass 3 section below;
-this table is kept for the three-point comparison and not as the current
-state.
-
 Real return codes from a Python driver, one file at a time through the
 machine-wide lock, `rocq compile -time`. Peak resident memory from
 `RUSAGE_CHILDREN` of a fresh child per file.
@@ -534,7 +521,7 @@ Production line numbers.
 | `:60` | `conclude == the terminal republishing the bound` | false: it publishes an upper bound, not the same number renamed | `conclude == the terminal publishing an upper bound of the accumulated bound` |
 | `:63` | (index) | no change | `ab_arm` is a level accessor, and the index lists none of them, not `ab_port`, not `ab_f`, not `sp_f` |
 | `:68` | `view_indist_of == the same statement, spectral-arm name` | incomplete | `security_arm_of` line added after it |
-| `:74` | `port_reprice == a port's proposition at a renamed bound` | false: at an upper bound, and the name is the operation `conclude` owns | `port_conclude == a port's proposition at a number above its own bound` |
+| `:74` | `port_reprice == a port's proposition at a renamed bound` | false: at an upper bound | `port_reprice == a port's proposition at a number above its own bound` |
 
 `:17` "There are five statements." stays true: Stage A adds no statement.
 
@@ -576,7 +563,6 @@ the four rows files)
 | `:618-621` | comment "Renaming proves nothing new about the coalition" | rewritten |
 | `:628` | same equality in `port_reprice`'s statement | `=` becomes `<=` |
 | `:631` | `Proof. by case: p => [w\|cert] //= H1 H2; rewrite -H2. Qed.` | two-line proof by transitivity |
-| `:74`, `:610`, `:616`, `:639`, `:622`, `:632`, `:643` | `RepricePayload` (3 occurrences) and `port_reprice` (4) | renamed `ConcludePayload` and `port_conclude`, by E2; no other production file holds either name |
 | `:634-637` | comment on `conclude` | rewritten |
 | `:722` | end of file, after `Arguments view_indist_of {c} r.` | `security_arm_of` added |
 
@@ -592,7 +578,7 @@ the four rows files)
 
 | line | current text | change |
 |---|---|---|
-| `:53-54` | `pgl27_reprice39 == the name 2^-39 for the word row's bound`, `pgl27_row_word39 == the word row republished at that name` | "republished at that name" becomes "concluded at that number"; index lines added for `pgl27_row_word39_bind`, `pgl27_reprice41`, the three `_armE` lemmas, `pgl27_row_word39_bindE` and `pgl27_word_reprice41_false` if C3 and K1 land here |
+| `:53-54` | `pgl27_reprice39 == the name 2^-39 for the word row's bound`, `pgl27_row_word39 == the word row republished at that name` | "republished at that name" becomes "concluded at that number"; index lines added for `pgl27_row_word39_bind`, `pgl27_reprice41`, the three `_armE` lemmas, `pgl27_row_word39E` and `pgl27_word_reprice41_false` if C3 and K1 land here |
 | `:373-377` | "the identity that adds the two copies is pow2_split" | rewritten: the identity plus `eqW` |
 | `:378-383` | `pgl27_row_word39`, raw form | rewritten in the `\|> conclude ... by ... \|> publish` surface; the raw spelling kept as `pgl27_row_word39_bind` with an `erefl` lemma |
 | `:382` | `;;; conclude pgl27_reprice39 of (fun R _ => pow2_split R)` | `\|> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))` |
@@ -601,18 +587,14 @@ the four rows files)
 | `:320-330` | the two `rowE` lemmas | three claim pins added beside them |
 | `:574-582` | the comment and `Fail pgl27_word_arm_is_not_exact` | still true and still failing; its comment becomes incomplete, since the difference between the arms is now also readable through `security_arm_of` |
 
-**`instances/kim2025/five_card_rows.v`**: `five_card_row_uniform_armE` and
-its index line after `five_card_row_uniform_rowE`; and, since the Kim landing,
-the two `conclude` payloads, the recorded failure, the vocabulary sites listed
-in the fix pass 3 section and the surface of the two repriced rows. Named and
-not numbered: that file moved twice on 2026-09-19.
+**`instances/kim2025/five_card_rows.v`**: `:348-350`, one claim pin after
+`five_card_row_uniform_rowE`.
 
-**`instances/s5/s5_rows.v`**: `:285-287`, `s5_row_rand_armE` and its index
-line after `s5_row_rand_rowE`.
+**`instances/s5/s5_rows.v`**: `:285-287`, one claim pin after
+`s5_row_rand_rowE`.
 
-**`instances/psl211/psl211_rows.v`**: `psl211_row_alldecks_armE` and its index
-line after `psl211_row_alldecks_rowE`. Named and not numbered: the PSL landing
-rewrote that file's header on 2026-09-19.
+**`instances/psl211/psl211_rows.v`**: `:184-186`, one claim pin after
+`psl211_row_alldecks_rowE`.
 
 **Not changed, checked by searching**
 
@@ -678,20 +660,13 @@ The soundness audit's objection that "View" names the executed reader in one
 constructor and the static reading in the other is answered by the rename: the
 tag now mirrors the surface literal and adds no word of its own.
 
-What a new arm costs in the arm plumbing, so that stage B can price that
-part: a constructor in `SecurityPort`, a constructor in `SecurityArm`, a
-branch in `port_arm`, a branch in `PortProp`, a branch in `ConcludePayload`
-and a case in `port_conclude`, whose proof splits on the port. Beside the
-plumbing the arm owes its own mathematics and its own surface: a certificate
-record, the arm's proposition, a payload type, a `certify` statement, a
-composition law ending in `Qed`, a fifth general `_armE` lemma, one `certify`
-rule in `pgg_tableau_syntax.v` with the keyword measurement repeated for each
-new word, one index line in the header of `pgg_tableau.v` per new name, and
-the sentences of G3 that count the arms and the statements. `SecurityArm` is
-a second variant and not a projection of the first because `SecurityPort` is
-indexed by the real field, the algebra, the run parameters and the sample
-adapter, and a tag the manifest's table prints must be closed in none of
-them.
+What a new arm costs, so that stage B can price it: a constructor in
+`SecurityPort`, a constructor in `SecurityArm`, a branch in `port_arm`, a
+branch in `PortProp`, a branch in `ConcludePayload` and a case in
+`port_conclude`. `SecurityArm` is a second variant and not a projection of the
+first because `SecurityPort` is indexed by the real field, the algebra, the run
+parameters and the sample adapter, and a tag the manifest's table prints must
+be closed in none of them.
 
 ### D2. The pins become named lemmas, over four general ones
 
@@ -785,9 +760,8 @@ on each rows file is itself the check that every `Fail` in it still fails.
 
 The paragraph of `pgg_tableau.v` that said an instance's mathematics enters
 only through a certify payload now names `conclude`'s payload as the second
-entry and says what it carries at each arm: at a spectral port an inequality
-between the number the row's own certificate proved and the number the row
-publishes, and at an exact port nothing. The sentence on
+entry and says what it carries: an inequality between the number the row's own
+certificate proved and the number the row publishes. The sentence on
 `certify_spectral` gains the same clause. `port_conclude` and `ConcludePayload`
 now state the condition the `<=` obligation rests on, that the spectral arm's
 proposition is monotone in its number, and that an arm whose proposition is
@@ -817,15 +791,14 @@ under the weakened obligation, at `:288` and `:365`. Each supplies an equality
 payload where `<=` is now asked for, and each needs `ssr_ext.eqW`, the same
 one-token fix `pgl27_rows.v` took. The recorded `Fail` at `:299` still fails.
 
-The same two rows are in production. The Kim landing put them in
-`instances/kim2025/five_card_rows.v` as `five_card_row_repeated39` and
-`five_card_row_biased_inv25`, each with an equality payload under its
-`conclude` line and with the recorded `Fail` `five_card_row_repeated39_bare`
-between them, beside a third equality payload in that landing probe's
-`pgl27_rows.v`. That `Fail` is the same shape and the same defect stage A
-renamed `pgl27_row_word39_unindexed` for, so the two probes owed one word
-between them, and the refreshed copy in this directory spends it. The sites
-are named and not numbered because that file moved twice today.
+The same two rows stand in the probe that would carry them to production,
+`notes/probes/2026-09-19-kim-spectral-landing/five_card_rows.v`, at `:745` and
+`:788`, with a recorded `Fail` at `:751-757` and a third equality payload in
+that directory's `pgl27_rows.v:382`. That `Fail` is
+`five_card_row_repeated39_bare`, the same shape and the same defect stage A
+renamed `pgl27_row_word39_unindexed` for, so the two probes owe one word
+between them. A Kim landing edits that copy and not the arm probe, so the
+landing's own status note owes the four sites.
 
 **The better end state for the Kim landing.** Rather than wrapping both
 payloads, the repeated row can publish `2^-39` from `kim_centi_cert` itself,
@@ -966,9 +939,10 @@ D2 seed items, measured over
 | `port_reprice` | 4 | `manifest/pgg_tableau.v`, and nowhere else |
 
 The Kim landing probe's copy of `pgg_tableau.v` holds the same 3 and 4 and
-moves with them. The PSL landing probe has no `.v` occurrence and mentions
-both carriers in its prose. Searched only: no file outside this probe was
-edited.
+moves with them. The PSL landing probe has no `.v` occurrence; its prose
+mentions `RepricePayload` twice in `audit-2.md` and `RepricePayload` twice
+with `port_reprice` twice in `soundness-audit.md`. Searched only: no file
+outside this probe was edited.
 
 ### E3. Why the two cross-model rejections hold
 
@@ -1069,11 +1043,8 @@ Not applied:
 
 ### E6. Names that no longer exist
 
-Every back-quoted Rocq name in this note that is not one of these exists as a
-whole word in a `.v` file of the probe or of production, checked mechanically
-over 198 production and 10 probe files. The check exempts what is not a Rocq
-name: file names, directory and branch names, the suffix fragments this note
-quotes as fragments, and Rocq commands.
+Every back-quoted name in this note that is not one of these exists as a whole
+word in a `.v` file of the probe or of production, checked mechanically.
 
 | name | what it was |
 |---|---|
@@ -1088,14 +1059,8 @@ quotes as fragments, and Rocq commands.
 | `five_card_row_repeated39`, `five_card_row_repeated39_bare`, `kim_centi_cert`, `kim_centi_cert40`, `kim_centi_cert_eps_lt` | declarations of the Kim probes, cited here as seed items |
 | `kim_spectral_rows_probe` | the Kim arm probe's module, cited as a code site |
 | `var_dist_le2` | a lemma of the Kim arm probe, cited for a landing |
-| `SecurityClaim`, `ExactViewIndependence`, `SpectralViewDecay` | the tag and its two constructors before fix pass 1, in the D1 rename table |
-| `IdealProximityArm`, `LeakageCeilingArm`, `DependenceArm` | names D1 proposes for the arms of later stages, written nowhere yet |
-| `IdealProximity`, `certify_idealproximity` | stage B's port constructor and its certify statement, named here for the price in D1 |
 
 ### E7. The compile table after fix pass 2
-
-Superseded by the table in the fix pass 3 section below, which measures the
-same ten files after the two copies were refreshed.
 
 All ten files of the probe's `_CoqProject`, in its order, one at a time through
 the machine-wide lock, `rocq compile -time`, return codes from a Python driver.
@@ -1118,240 +1083,3 @@ prints thirty assumption blocks. Twenty-nine hold the three boolp constants
 alone; the thirteenth, `s5_row_rand_armE`, holds those three and
 `rigidity_s5_instance.s5_group_order_eq`, which is production's and reaches
 the report through the S5 instance's own witness.
-
-## Fix pass 3, after the third audit and two landings
-
-Two production files moved under this probe on 2026-09-19: the PSL landing
-rewrote the header of `instances/psl211/psl211_rows.v` and added
-`instances/psl211/psl211_spectral_constancy.v`, and the Kim landing put Kim's
-two certified rows and their two repriced forms into
-`instances/kim2025/five_card_rows.v`. Both copies here were rebuilt from
-today's production file, so that the diff a landing reads is stage A's changes
-and nothing else. `pgl27_rows.v`, `s5_rows.v`, `pgg_tableau.v` and
-`pgg_tableau_syntax.v` were compared against production and are unchanged
-since the copies were taken.
-
-### F1. The refreshed `psl211_rows.v`
-
-Rebuilt from production. Stage A's changes to it are three: both imports of
-the framework repointed to `tableau_ext_probe`, one index line, and
-`psl211_row_alldecks_armE` after `psl211_row_alldecks_rowE`. Nothing else
-differs from production, checked by a whole-file diff.
-
-### F2. The refreshed `five_card_rows.v`, and the repeated row's route
-
-Rebuilt from production, then made to compile under the `<=` obligation.
-
-**The repeated row continues from `kim_centi_cert`.** The certificate at the
-bundle's own spectral number already proves a strict inequality against the
-constant the row publishes, `kim_centi_cert_eps_lt`, whose statement is
-`cert_eps (kim_centi_cert R idx) < 2%:R ^- 39` at every real field and index.
-Weakened by `Order.POrderTheory.ltW` it is exactly the payload `conclude`
-asks for, so the row needs no second certificate and no wrapper:
-
-```
-Definition five_card_row_repeated39 : PublishedRowAt five_card_reprice39 :=
-  five_card_committed
-    sample  kim_centi_family
-    certify SpectralDecay kim_centi_cert
-    |> conclude five_card_reprice39
-       by (fun R idx => Order.POrderTheory.ltW (kim_centi_cert_eps_lt R idx))
-    |> publish IdealFinite BaselineClassicalOnly.
-```
-
-Because the certificate is the one the row at its own number carries, the
-two rows accumulate one stack, which `five_card_row_repeated39_atE` states and
-conversion decides. The constant a text cites and the expression the
-certificate proved are then two readings of one security claim.
-
-**That equation is closed by `reflexivity` and not by `exact: erefl`.** Both
-close it by the kernel's conversion and only one reaches it: measured in this
-file, `exact: erefl` spent 147.07 s and left the file at 151.6 s, while
-`reflexivity` spends 0.068 s and leaves the file at 5.0 s. Unfolding both row
-definitions first does not help, 151.50 s. The probe's rule against `by []`
-and `done` on a `published_at` goal stands, and its reason, that `done` spends
-a search before it reaches reflexivity, is not the reason here: the refine
-path `exact: erefl` takes is what costs the time.
-
-**The one-cut row keeps its second certificate.** `conclude` may publish only
-a number at least the certificate's, and the one-cut bundle's number is
-sqrt 5 over forty, about 0.0559, while the constant the row publishes is one
-twenty-fifth, 0.04. The inequality runs the wrong way, so the one-cut row
-cannot be concluded at one twenty-fifth from `kim_biased_cert`, and
-`kim_biased_cert_exact` at the exact number stays. `kim_biased_exact_le_eps`
-is the tree's statement of that direction, `1 / 50 <= sw_bound_eps
-(kim_biased_marginal_bound R)`, and it is the one that makes the exact
-certificate the honest carrier of the constant. That row's payload takes the
-one-token fix, `ssr_ext.eqW (five_card_inv50_split R)`.
-
-**What a landing of stage A may withdraw.** With the repeated row on this
-route, `kim_centi_cert40`, `kim_centi_cert40_epsE`,
-`kim_centi_marginal_bound40` and `kim_centi_cut_mixing40` are used by no row.
-They are left in the copy. Their uses, measured over the tree:
-
-| name | production | elsewhere |
-|---|---|---|
-| `kim_centi_cert40` | `instances/kim2025/five_card_rows.v`, its definition, its index line, and the two row lines a landing removes | the Kim arm probe, the Kim landing probe and that probe's two fidelity files |
-| `kim_centi_cert40_epsE` | the same file, its statement and its index line | the same three probes |
-| `kim_centi_marginal_bound40` | `instances/kim2025/five_card_mixing.v`, its definition, its index line, and `kim_centi_cut_mixing40`'s statement | the same three probes |
-| `kim_centi_cut_mixing40` | the same file, its statement and its index line | the same three probes |
-
-Withdrawing them is a Kim decision and not stage A's: a landing that takes
-this route should say so in the Kim landing's own note first.
-
-**The recorded failure.** `five_card_row_repeated39_bare` becomes
-`five_card_row_repeated39_unindexed`, the shape stage A already records at
-PGL(2,7): a payload with the relation `conclude` asks for and no index binder.
-Compiled without `Fail`, the message is
-
-```
-The term "Order.POrderTheory.ltW (kim_centi_cert_eps_lt R tt)" has type
- "is_true (cert_eps (kim_centi_cert R tt) <= 2 ^- 39)"
-while it is expected to have type
- "forall idx : amf_index (ab_f (tableau_at (five_card_committed
-    sample kim_centi_family certify SpectralDecay kim_centi_cert))) R,
-  match ab_port (...) R idx with
-  | ExactIndependence _ => unit
-  | SpectralDecay cert =>
-      cert_eps cert <= odflt (cert_eps cert) (five_card_reprice39 R)
-  end"
-```
-
-so the relation is right and the quantification over the index is what is
-missing, which is the defect the record is kept for. The file has one surface
-and so one record, where `pgl27_rows.v` has two of each.
-
-**The five items the Kim landing's note lists.** Its first, the recorded
-failure's docstring, now says one inequality per real field and per index. Its
-third, the two splitting identities, now says each identity bounds its sum by
-a single constant rather than names it. Its fifth is the payload count, which
-C2 above now carries. Its fourth, the index line
-`five_card_reprice39, five_card_reprice_inv25 == the names 2^-39 and 1/25 for
-a bound`, needs no change: a `Reprice` still names a bound under `<=`, and the
-copy of `pgl27_rows.v` keeps the identical gloss for `pgl27_reprice39`. Its
-second is a sentence of the Kim landing's own note, which belongs to that note
-and is not edited here. Beside the four, the index line for the two repriced
-rows now says concluded at rather than repriced to.
-
-**Vocabulary.** The refreshed copy inherited production's *republish* and its
-*reprice* as a word for the operation, in the file header, in four index
-lines, in the section banner over the two repriced rows, in the closed-form
-bound's docstring, in each repriced row's own docstring and in the docstring
-of the one-cut row's ceiling lemma. Each is rewritten to *conclude*,
-*concluded at* or *publish*, by E2's rule, so the copy reads in one vocabulary
-with the framework file it imports. A landing of stage A carries those
-rewrites into production; this paragraph adds them to the D2 seed list.
-
-### F3. The third audit's other findings
-
-**A5**, applied: `ConcludePayload`'s comment says concluding a row where it
-said a reprice. **A8**, applied: `five_card_row_uniform_branch_atE` is split
-into the two lemmas the PGL(2,7) file has, `five_card_row_uniform_branch_atE`
-and `five_card_row_uniform_branch_ideal_atE`, each closed by `exact: erefl`,
-with the header index and `assumptions_report.v` following. Round-3 **N4**,
-applied: the missing article production leaves at the head of `Reprice`'s
-comment. Round-3 **N7**, applied: the forward pointer in
-`t0_sampled_branch.v` now names the T0 step of this note.
-
-**A9**, not applied, and the audit's own ruling followed. Swapping the sides
-of `pgl27_row_exact_branch_ideal_atE` and `pgl27_row_word_branch39_atE` would
-put each name's subject on the left, which is the tree's `E` rule, and the
-audit declines to overturn the earlier decline. There is a second reason to
-land it rather than spend it here: the source note in `t0_sampled_branch.v`
-says of the sibling file that `done` did not return on a goal of this shape
-**whose right side is a concluded row**, and that sentence is true of
-`pgl27_row_word_branch39_atE` only in its present orientation. Whoever swaps
-the statements rewrites that sentence in the same pass.
-
-**A12**, answered here rather than by a new lemma: the pair
-`published_row A <> published_row B` for two continuations of one branch point
-is recorded once, at the five-card instance, as
-`five_card_row_uniform_branch_transfer_neq`. The PGL(2,7) file's exact branch
-would admit the same statement. The fact is the framework's and not the
-instance's, so one witness carries it.
-
-**The round-3 notes.** N1 is C2's sentence, rewritten above. N2 is E6's
-universal, narrowed to Rocq names with two rows added for the names of later
-stages. N3 is E2's per-file prose counts, dropped, the `.v` counts kept. N5
-and N6 carry nothing owed and are left as the audit leaves them: the two
-baseline sentences N5 names are in the D2 seed list, and N6's preference for
-naming the lemmas a comment depends on stands from round 2.
-
-**Round-2 soundness N1**, seen and nothing owed: that `conclude` cannot be
-applied twice is a property of the terminal's type, `PublishedRowAt` being the
-result and `StackAt AnalysisBridged` the argument, so no sentence of the note
-or of the framework asserts it and none needs to.
-
-### F4. The sentences a third arm makes false
-
-Sixteen sentences of the copy were true of a two-arm Tableau and would have
-become false when stage B adds `IdealProximity`. Fifteen are the audit's own
-list; its sixteenth, "There are five statements", carries a count and is in
-the Counts list below, and the refreshed five-card header supplied one more. Each is now written so that
-it is true today and stays true at three arms: "the two arms" becomes "the
-arms", "both arms" becomes "each arm", "which of the two" becomes "which arm",
-"the two certify statements" becomes "the certify statements", and "neither
-arm" becomes "no arm". The sites, checked one by one against the code they
-describe:
-
-| file | what it said | what it says |
-|---|---|---|
-| `pgg_tableau.v`, the header on the statements | "a security witness of one of the two arms" | "a security witness of one arm" |
-| the same paragraph | "Both arms speak only of a coalition below the privacy threshold" | "Each arm speaks only of a coalition below the privacy threshold" |
-| the same paragraph | "claims nothing about the other ... which of the two a finished row committed to" | "claims nothing about the rest ... which arm a finished row committed to" |
-| the same header, on the composition laws | "the two laws are where the mathematics of the row sits" | "those laws are where the mathematics of the row sits" |
-| the index line of `security_arm_of` | "which of the two arms a published row carries" | "which arm a published row carries" |
-| `SecurityPort`'s comment | "Which of the two arms an instance certifies ... the two are different statements" | "Which arm an instance certifies ... the arms are different statements" |
-| `SecurityArm`'s comment | "Which of the two arms a row commits to" | "Which arm a row commits to" |
-| `ab_arm`'s comment | "The two certify statements build a port" | "The certify statements build a port" |
-| `certify_spectral`'s comment | "The two certify statements are the only lines" | "The certify statements are the only lines" |
-| `security_arm_of`'s comment | "Which of the two arms a published row carries" | "Which arm a published row carries" |
-| `certify_spectral_armE`'s comment | "the two statements are the only ones that build a port" | "the certify statements are the only ones that build a port" |
-| `assumptions_report.v`, the arm block | "the two certify statements write it" | "the certify statements write it" |
-| `pgl27_rows.v`, above the recorded failure | "The two arms are different statements" | "The arms are different statements" |
-| `five_card_rows.v`, the header on AnalysisBridged | "one of the two arms of certify" | "an arm of certify" |
-| the same header, on the two kinds of bound | "Neither arm of certify takes a bound of either kind" | "No arm of certify takes a bound of either kind" |
-| `five_card_rows.v`, the biased row's docstring | "neither arm of certify takes a bound of that kind" | "no arm of certify takes a bound of that kind" |
-
-**Counts stage B changes.** Two sentences carry a count that is the point of
-the sentence, so the count is kept and the number is what stage B edits:
-
-- `pgg_tableau.v`, the header's "There are five statements." Stage A adds no
-  statement; stage B's `certify_idealproximity` makes it six.
-- `pgg_tableau_syntax.v`, the count of nineteen keywords in its header. Stage
-  B's `certify` rule changes it only if the rule writes a word after a slot.
-
-`five_card_rows.v`'s "no arm of certify takes a bound of that kind" is kept
-as a statement about every arm, and it stays true at three arms: the new arm
-takes a variation distance to an ideal and not a conditional mutual
-information.
-
-### F5. The compile table after fix pass 3
-
-All ten files of the probe's `_CoqProject`, in its order, one at a time
-through the machine-wide lock, `rocq compile -time`, return codes from a
-Python driver. Every production `.vo` was rebuilt on 2026-09-19, so every
-probe `.vo` was stale and all ten were recompiled from source.
-
-| file | rc | wall | slowest sentence |
-|---|---|---|---|
-| `pgg_tableau.v` | 0 | 14.1 s | 4.22 s, `Definition ab_port` |
-| `pgg_tableau_syntax.v` | 0 | 5.3 s | 1.69 s, a `Require Import` line |
-| `pgl27_rows.v` | 0 | 7.0 s | 2.14 s, a `Require Import` line |
-| `five_card_rows.v` | 0 | 5.0 s | 1.50 s, a `Require Import` line |
-| `s5_rows.v` | 0 | 4.5 s | 1.98 s, a `Require Import` line |
-| `psl211_rows.v` | 0 | 5.9 s | 1.54 s, a `Require Import` line |
-| `t0_sampled_branch.v` | 0 | 4.3 s | 1.93 s, a `Require Import` line |
-| `t0_sampled_branch_pgl27.v` | 0 | 4.7 s | 2.31 s, a `Require Import` line |
-| `g2_keyword_measure.v` | 0 | 4.1 s | 2.02 s, a `Require Import` line |
-| `assumptions_report.v` | 0 | 53.2 s | 21.91 s, `Print Assumptions psl211_row_alldecks_armE` |
-
-No sentence outside a `Print Assumptions` command reaches 5 s. The report
-prints thirty-four assumption blocks, four more than after fix pass 2:
-`five_card_row_repeated39_atE`, `five_card_row_uniform_branch_ideal_atE` and
-the two refreshed five-card programs, `five_card_row_repeated39` and
-`five_card_row_biased_inv25`. Thirty-three hold the three boolp constants
-alone; `s5_row_rand_armE` holds those three and
-`rigidity_s5_instance.s5_group_order_eq`, which is production's and reaches
-the report through the S5 instance's own witness. The scan allows dots in a
-constant name.

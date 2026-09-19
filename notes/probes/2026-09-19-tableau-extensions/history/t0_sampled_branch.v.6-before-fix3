@@ -32,11 +32,8 @@
 (*                           == the branch publishes the manifest's own       *)
 (*                              uniform row                                   *)
 (*   five_card_row_uniform_branch_atE                                         *)
-(*                           == the first continuation and the unbranched     *)
+(*                           == the two continuations and the unbranched      *)
 (*                              program hold one AnalysisBridged coordinate   *)
-(*   five_card_row_uniform_branch_ideal_atE                                   *)
-(*                           == the second continuation holds that same       *)
-(*                              coordinate                                    *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool eqtype ssrnat seq.
@@ -100,26 +97,23 @@ Lemma five_card_row_uniform_branch_rowE :
 Proof. by []. Qed.
 
 (* The coordinate equations below close by exact: erefl and not by [],
-   following the measurements under the T0 step of STATUS.md, where done did
-   not return inside the time bound on a goal of this shape whose right side
-   is a concluded row. *)
+   following t0_sampled_branch_pgl27.v, where done did not return inside the
+   time bound on a goal of this shape whose right side is a concluded row.
+   The numbers are in STATUS.md, under the T0 step. *)
 
-(** The first continuation and the unbranched program hold one and the same
+(** The two continuations and the unbranched program hold one and the same
     AnalysisBridged coordinate: the algebra, the run, the three run facts, the
-    model and the port are one term in both, so what separates the two
-    published rows of this branch point is the transfer status alone. *)
+    model and the port are one term in all three, so naming the Sampled value
+    costs the row nothing it would otherwise have. What separates the two
+    published rows is the transfer status alone. *)
 Lemma five_card_row_uniform_branch_atE :
-  published_at five_card_row_uniform_branch
-  = published_at five_card_row_uniform_tableau.
-Proof. exact: erefl. Qed.
-
-(** The second continuation holds that same coordinate, so the two finished
-    rows of this branch point differ in their manifest row alone, and naming
-    the Sampled value costs the row nothing it would otherwise have. *)
-Lemma five_card_row_uniform_branch_ideal_atE :
-  published_at five_card_row_uniform_branch_ideal
-  = published_at five_card_row_uniform_branch.
-Proof. exact: erefl. Qed.
+  [/\ published_at five_card_row_uniform_branch
+      = published_at five_card_row_uniform_tableau,
+      published_at five_card_row_uniform_branch_ideal
+      = published_at five_card_row_uniform_tableau
+    & published_at five_card_row_uniform_branch
+      = published_at five_card_row_uniform_branch_ideal].
+Proof. split; exact: erefl. Qed.
 
 (** The two published rows differ, in the one coordinate their two publish
     statements differ in: what the manifest records of the transfer. *)

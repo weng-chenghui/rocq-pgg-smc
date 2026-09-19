@@ -36,8 +36,8 @@ Print Assumptions port_arm.
 Print Assumptions ab_arm.
 Print Assumptions security_arm_of.
 
-(* Where a row's arm is decided: the certify statements write it and the two
-   terminals carry it through. *)
+(* Where a row's arm is decided: the two certify statements write it and the
+   two terminals carry it through. *)
 Print Assumptions certify_exact_armE.
 Print Assumptions certify_spectral_armE.
 Print Assumptions conclude_armE.
@@ -57,14 +57,9 @@ Print Assumptions pgl27_word_reprice41_false.
 (* The surface and the bind build one term. *)
 Print Assumptions pgl27_row_word39_bindE.
 
-(* Kim's repeated row at the constant and at the bundle's own number stand on
-   one chain. *)
-Print Assumptions five_card_row_repeated39_atE.
-
-(* The four statements about the branch at Sampled. *)
+(* The three statements about the branch at Sampled. *)
 Print Assumptions five_card_row_uniform_branch_rowE.
 Print Assumptions five_card_row_uniform_branch_atE.
-Print Assumptions five_card_row_uniform_branch_ideal_atE.
 Print Assumptions five_card_row_uniform_branch_transfer_neq.
 
 (* The same branch shape at PGL(2,7), under a spectral payload. *)
@@ -81,5 +76,3 @@ Print Assumptions five_card_row_uniform_branch.
 Print Assumptions five_card_row_uniform_branch_ideal.
 Print Assumptions pgl27_row_exact_branch.
 Print Assumptions pgl27_row_word_branch39.
-Print Assumptions five_card_row_repeated39.
-Print Assumptions five_card_row_biased_inv25.

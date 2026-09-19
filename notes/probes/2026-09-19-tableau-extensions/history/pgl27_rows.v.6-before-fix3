@@ -670,8 +670,8 @@ Definition pgl27_exact_same_statement (R : realType) :
            0 C) `x (fdistmap (pgl27_secret R) (pgl27P R)))%fdist) :=
   (@pgl27_exec_exact_view_indep R, @pgl27_exec_exact_view_indep_restated R).
 
-(** The arms are different statements, and the difference is visible in what
-    a row's projection takes after the coalition. A row certifying decay
+(** The two arms are different statements, and the difference is visible in
+    what a row's projection takes after the coalition. A row certifying decay
     is asked here for a threshold proof in the position where it expects the
     first of two dealt secrets, and is rejected: what the word row proves at a
     coalition is a distance between the readings of two secrets, so the two
