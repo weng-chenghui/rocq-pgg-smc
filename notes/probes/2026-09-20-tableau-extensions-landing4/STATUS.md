@@ -787,12 +787,15 @@ arm, a publication or a non-existence, and what it says after landing 4:
 S1 is the only sentence the word model makes false. Nothing else in the file
 says that an adapter, a family or a row does not exist.
 
-Two inherited sentences of production carry an economic metaphor and were
-left, because N28's ruling confines this pass to the two new files: `:750`
-("the price of replacing the exact shuffle by one a dealer can perform … pays
-both") and `:770` ("the whole information-theoretic price of that
-replacement"), beside the `:16` the ruling names. All three belong to a later
-pass over production.
+Five inherited sentences of production carry an economic metaphor and were
+left, because N28's ruling confines this pass to the two new files. Production
+line numbers, so that the later pass can use them directly: `:15` ("what the
+input-indistinguishability arm would cost it"), `:512` ("the form a support
+hypothesis is spent in"), `:742` ("the first distance is the price … pays
+both"), `:764` ("the whole information-theoretic price of that replacement")
+and `:1002` ("has to spend a nonempty coalition"). In the staged text after
+fix pass 2 these sit at `:16`, `:520`, `:750`, `:772` and `:1015`. All five
+belong to a later pass over production; the two new files carry none.
 
 ## B — the soundness findings
 
@@ -962,3 +965,111 @@ the run. `psl211_word_law_le40` appears twice, in the restatement and in the
 Code-token diff of the landed files and `landing_fidelity.v` against
 `833acaf`: 2, 0, 0, 0, 0, 4 and 6 tokens, all of them one of the two renames
 or a mention of a renamed lemma. No other code token moved.
+
+## Fix pass 2 — comments only, on `a3095fc`
+
+Remit: F1 to F9 of `audit-landing4-fix1.md`. Only the staged text of landing 4
+was edited: `psl211_word_model.v`, `psl211_word_proximity.v`,
+`rebase_shared.py` and this file. The four generated files moved only through
+`rebase_shared.py`'s operation lists. No code token changed anywhere.
+
+Every replacement below was checked against the declaration named beside it
+before it was written, and against the campaign's defect classes: none
+quantifies over a class where the declaration is about one object, none calls
+a `<=` bound "the distance", none attributes an impossibility to a `Fail`,
+none calls a witness a port or a model a row, and no header entry drops a
+hypothesis.
+
+| id | file, lines after the pass | final text | declaration checked |
+|---|---|---|---|
+| F2 (MUST) | `staged/instances/psl211/psl211_word_proximity.v:26-32` | "constancy field an input-indistinguishability certificate would need is refuted at the group-uniform ideal cut and at the 584-letter word cut law, and psl211_alldecks_no_small_eps_cert excludes every input-indistinguishability certificate over the all-decks model whose shuffle bound is strictly below 1/1320. The larger bounds are left open, so no input-indistinguishability sibling exists here to read this row in one column with and none is shown impossible." | `psl211_alldecks_no_small_eps_cert (R : realType) (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) : sw_bound_eps (ic_b cert) + sw_bound_eps (ic_b cert) < (#\|pgg_G psl211_M\|%:R)^-1 -> False`, `psl211_reading_constancy.v:711-714`. The certificate argument is typed at the one adapter `psl211_alldecks_sample`, which is what "over the all-decks model" now says. The sentence stops there and says nothing about the word adapter, so `psl211_alldecks_constancy_false_word584`'s two hypotheses are not needed in it; the refutation clause before it already names the 584-letter word cut law and is true as it stands. |
+| F1 | `rebase_shared.py`, the `_word584` docstring op; `staged/instances/psl211/psl211_reading_constancy.v:781-782` | "…carries a proximity certificate, and IdealProximityCert has no constancy field, so this refutation denies no field of that row's certificate." | `Record IdealProximityCert … := MkIdealProximityCert { ipc_ideal ; ipc_witness ; ipc_secret ; ipc_eps ; ipc_close }`, `manifest/pgg_tableau.v:215-232`: five fields, none of them a constancy field, against `ic_const` as the fifth field of `IndistinguishabilityCert`. The conclusion is now about that row's certificate and not about every proximity row. |
+| F3 (a) | `staged/instances/psl211/psl211_word_proximity.v:291` | "Its transfer status is IdealFinite: the cut is a shuffle of 584 letters where the model of psl211_row_alldecks draws it uniformly from the group." | `psl211_row_alldecks : AnalysisPathRow := @MkAnalysisPathRow PSL211Analysis.observed AnalysisBridged PSL211Analysis.exact_family StaticExecutedOnly BaselineClassicalOnly`, five descriptive coordinates. The uniform draw is the law `psl211_alldecksP`, the product of the uniform deck law with the group-uniform cut law, carried by the adapter of that row's model family, `psl211_models.v:200-202`. |
+| F3 (b) | `rebase_shared.py`, `M_ROW`; `staged/manifest/pgg_analysis_manifest.v:1095-1096` | "…the cut is a word a dealer can perform where the model of psl211_row_alldecks draws it uniformly from the group, so an idealized shuffle is replaced by a finite one, which is the IdealFinite status." | same two declarations |
+| F4 | `staged/instances/psl211/psl211_word_proximity.v:201-203` | "The secret is also the one the protocol reconstructs: psl211_alldecks_secret_expectedE of instances/psl211/psl211_models.v reads it as the value the run recovers, at every sample point." | `psl211_alldecks_secret_expectedE (R : realType) (u : psl211_inputT * pgg_gT psl211_M) : psl211_alldecks_secret R u = ex_expected psl211_alldecks_params ((psl211_alldecks_sample R).(sa_arg) u)`, `psl211_models.v:449-452`. An identity at every sample point and nothing more; the non-constancy claim is gone, and no landed declaration is cited for a fact it does not carry. |
+| F5 | `staged/instances/psl211/psl211_word_model.v:22-24` | "That both laws are written as products is a premise about how the shuffle is performed and not a theorem about the execution: it says the dealer draws the cut without seeing the deck." | `psl211_alldecksP`, the uniform deck law times the group-uniform cut law, draws a group element and no word; only `psl211_wordP`, the same first factor times `psl211_word_cutP`, draws a word. The gloss now fits both laws, which is what the sentence's subject is. |
+| F6 | `rebase_shared.py`, a new header-index op; `staged/instances/psl211/psl211_reading_constancy.v:125-129` | "psl211_alldecks_constancy_false_word584 == the field is false at every ideal within eps of the 584-letter word shuffle's cut law, once twice the sum of eps and 2^-40 stays below 1/660" | `psl211_alldecks_constancy_false_word584 (R : realType) (ideal : R.-fdist cutT) (eps : R) : var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R)) ideal <= eps -> (2%:R^-40 + eps) + (2%:R^-40 + eps) < (#\|pgg_G psl211_M\|%:R)^-1 -> ~ coalition_reading_constancy psl211_alldecks_params ideal`. The second hypothesis is twice the sum of eps and 2^-40 below the reciprocal of the group order; the neighbouring `_close` entry spells that reciprocal 1/660, and so does this one. |
+| F8 | `psl211_word_proximity.v:151-159`, `:249-258`, `:371-375` | three docstrings re-filled | no word changed; the comment word diff over the whole file shows only F2, F3 (a) and F4 |
+
+### Deviations
+
+1. **F8, the `_cert_eps_lt2` docstring.** Fix pass 1 left a 10-byte line
+   "bound." with the next sentence starting on the following line and no blank
+   line between them. Re-filling only the sentences before it cannot absorb a
+   line that short, so the whole docstring is now filled as one paragraph.
+   No word changed and no sentence moved.
+2. **F3 (b), the manifest row docstring.** Inserting three words left a
+   19-byte line "from the group,", so the four lines after the insertion were
+   re-filled. No word changed beyond the insertion.
+3. **F2, the wrap column.** The seven box lines are re-wrapped at 74 columns
+   of body rather than 75. A 75-column body fills `ljust(78)` exactly and
+   leaves no space before the closing `*)`, which every other box line of
+   these files keeps.
+
+### F7 — the economic-metaphor inventory, corrected
+
+Section A above now records five inherited production sentences, at
+production's `:15`, `:512`, `:742`, `:764` and `:1002`, and gives the staged
+line numbers beside them. The earlier count of three was short by two. All
+five are production text this landing does not change, and the two new files
+carry none, so N28 is applied exactly where it was ruled to apply.
+
+### F9 — the deviation count of fix pass 1, corrected
+
+Fix pass 1 recorded **three** labelled deviations, not four: S1 (the auditor's
+text named a file where an adapter was meant), S6 (no count of refutations
+given) and N28 (a bound on the distance, not the distance). Two further
+departures from the reports' proposed wording are recorded in table B as
+merges rather than deviations: S3+S4 ("covered at its own shuffle bound"
+became "reached at") and S5+N8 (S5's "a distance to that independent model"
+became N8's "a bound on the distance"). So the correct statement is three
+labelled deviations plus two recorded merges.
+
+### Verification
+
+`python3 rebase_shared.py` run twice: 7, 2, 4 and 6 operations applied, every
+anchor found exactly once, 0 lines over 80 bytes, and the four generated files
+`cmp`-identical between the two runs.
+
+Code tokens of the six landed files and `landing_fidelity.v` against
+`a3095fc`, comments stripped with a nesting-aware stripper: **identical in all
+seven** (8544, 283, 577, 5044, 348, 1037 and 1119 tokens). The comment word
+diff over the same seven files has exactly six passages, and each maps to a
+finding: F6 and F1 in `psl211_reading_constancy.v`, F5 in
+`psl211_word_model.v`, F2, F4 and F3 (a) in `psl211_word_proximity.v`, F3 (b)
+in `pgg_analysis_manifest.v`. `pgg_analysis_client.v`, `psl211_analysis.v` and
+`landing_fidelity.v` have no comment change at all.
+
+No line of the seven files is over 80 bytes and every box line closes at
+column 80 with a space before the `*)`. No entry of the banned vocabulary list
+occurs; `indistinguishability` is never abbreviated.
+
+Compiles after fix pass 2, one Rocq process at a time through the `rocq1`
+lock, `rocq compile -time`, never `make`, and
+`instances/psl211/psl211_endpoints.v` never compiled. The targets are the two
+files edited by hand, the four regenerated files, and the reverse closure of
+`pgg_analysis_manifest.v` in the `_CoqProject` order.
+
+| File | rc | wall | sentences over 5 s |
+|---|---|---|---|
+| `staged/instances/psl211/psl211_word_model.v` | 0 | 3.8 s | none |
+| `staged/instances/psl211/psl211_analysis.v` | 0 | 3.7 s | none |
+| `staged/manifest/pgg_analysis_manifest.v` | 0 | 5.8 s | one, 5.082 s, the `Require Export` block |
+| `staged/manifest/pgg_tableau.v` | 0 | 12.8 s | none |
+| `staged/manifest/pgg_tableau_syntax.v` | 0 | 4.3 s | none |
+| `staged/instances/pgl27/pgl27_rows.v` | 0 | 6.3 s | none |
+| `staged/instances/kim2025/five_card_rows.v` | 0 | 4.5 s | none |
+| `staged/instances/s5/s5_rows.v` | 0 | 3.9 s | none |
+| `staged/instances/psl211/psl211_reading_constancy.v` | 0 | 22.1 s | three, 5.042 s, 6.047 s and 6.055 s, all three production's |
+| `staged/instances/psl211/psl211_rows.v` | 0 | 5.4 s | none |
+| `staged/manifest/pgg_analysis_client.v` | 0 | 3.8 s | none |
+| `staged/manifest/pgg_tableau_arm_relations.v` | 0 | 3.7 s | none |
+| `staged/instances/kim2025/five_card_proximity.v` | 0 | 5.6 s | none |
+| `staged/instances/pgl27/pgl27_proximity.v` | 0 | 5.2 s | none |
+| `staged/instances/psl211/psl211_word_proximity.v` | 0 | 4.5 s | none |
+| `landing_fidelity.v` | 0 | 269.6 s | thirteen, each a `Print Assumptions` at about 20 s |
+
+No sentence of a landed file is over 5 s, and the timings are within noise of
+fix pass 1's, which is what a comment-only pass should give.
+
+Nothing was committed.

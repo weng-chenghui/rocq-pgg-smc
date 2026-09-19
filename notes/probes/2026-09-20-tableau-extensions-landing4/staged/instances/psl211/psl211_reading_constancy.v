@@ -124,7 +124,9 @@
 (*                              single-card marginal bound                    *)
 (*   psl211_alldecks_constancy_false_word584                                  *)
 (*                           == the field is false at every ideal within eps  *)
-(*                              of the 584-letter word shuffle's cut law      *)
+(*                              of the 584-letter word shuffle's cut law,     *)
+(*                              once twice the sum of eps and 2^-40 stays     *)
+(*                              below 1/660                                   *)
 (*   psl211_dealt_constancy_false                                             *)
 (*                           == the field is false at the group-uniform       *)
 (*                              ideal under the dealt parameters              *)
@@ -776,8 +778,8 @@ Qed.
     psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut,
     and the row published over it in
     instances/psl211/psl211_word_proximity.v carries a proximity certificate,
-    which has no constancy field for this refutation to touch, so this
-    refutation rules out no proximity row. *)
+    and IdealProximityCert has no constancy field, so this refutation denies
+    no field of that row's certificate. *)
 Lemma psl211_alldecks_constancy_false_word584 (R : realType)
     (ideal : R.-fdist cutT) (eps : R) :
   var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R))

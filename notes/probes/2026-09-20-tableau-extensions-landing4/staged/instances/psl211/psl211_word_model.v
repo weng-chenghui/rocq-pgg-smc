@@ -21,7 +21,7 @@
 (*                                                                            *)
 (* That both laws are written as products is a premise about how the shuffle  *)
 (* is performed and not a theorem about the execution: it says the dealer     *)
-(* draws the word without seeing the deck.                                    *)
+(* draws the cut without seeing the deck.                                     *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_word_cutP     == the law of the cut a dealer performs by hand     *)

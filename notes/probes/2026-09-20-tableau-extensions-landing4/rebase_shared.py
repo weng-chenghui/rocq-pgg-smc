@@ -175,11 +175,11 @@ M_ROW = M_ROW_ANCHOR + """
     BaselineClassicalOnly.  psl211_word_view_proximity is proved at this
     row's own sample distribution and at that distribution's coalition
     reader, which is what reaches AnalysisBridged; the cut is a word a dealer
-    can perform where psl211_row_alldecks draws it uniformly from the group,
-    so an idealized shuffle is replaced by a finite one, which is the
-    IdealFinite status. It differs from psl211_row_alldecks in the model
-    family and in the transfer status, and the model of that row is the ideal
-    the certificate behind this one is measured against. *)
+    can perform where the model of psl211_row_alldecks draws it uniformly
+    from the group, so an idealized shuffle is replaced by a finite one,
+    which is the IdealFinite status. It differs from psl211_row_alldecks in
+    the model family and in the transfer status, and the model of that row is
+    the ideal the certificate behind this one is measured against. *)
 Definition psl211_row_word : AnalysisPathRow :=
   @MkAnalysisPathRow PSL211Analysis.observed AnalysisBridged
     PSL211Analysis.word_family IdealFinite BaselineClassicalOnly.
@@ -387,8 +387,17 @@ CONSTANCY = [
     psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut,
     and the row published over it in
     instances/psl211/psl211_word_proximity.v carries a proximity certificate,
-    which has no constancy field for this refutation to touch, so this
-    refutation rules out no proximity row. *)"""),
+    and IdealProximityCert has no constancy field, so this refutation denies
+    no field of that row's certificate. *)"""),
+    # the header index entry of psl211_alldecks_constancy_false_word584
+    ("""(*   psl211_alldecks_constancy_false_word584                                  *)
+(*                           == the field is false at every ideal within eps  *)
+(*                              of the 584-letter word shuffle's cut law      *)""",
+     """(*   psl211_alldecks_constancy_false_word584                                  *)
+(*                           == the field is false at every ideal within eps  *)
+(*                              of the 584-letter word shuffle's cut law,     *)
+(*                              once twice the sum of eps and 2^-40 stays     *)
+(*                              below 1/660                                   *)"""),
     # the section banner the word adapter makes false
     ("(*     The word model, which this tree carries no sample adapter for"
      "          *)",

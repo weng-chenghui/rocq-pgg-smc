@@ -26,10 +26,10 @@
 (* constancy field an input-indistinguishability certificate would need is    *)
 (* refuted at the group-uniform ideal cut and at the 584-letter word cut law, *)
 (* and psl211_alldecks_no_small_eps_cert excludes every                       *)
-(* input-indistinguishability certificate whose shuffle bound is strictly     *)
-(* below 1/1320. The larger bounds are left open, so no                       *)
-(* input-indistinguishability sibling exists here to read this row in one     *)
-(* column with and none is shown impossible.                                  *)
+(* input-indistinguishability certificate over the all-decks model whose      *)
+(* shuffle bound is strictly below 1/1320. The larger bounds are left open,   *)
+(* so no input-indistinguishability sibling exists here to read this row in   *)
+(* one column with and none is shown impossible.                              *)
 (*                                                                            *)
 (* Every number below bounds a sum of absolute differences, which is twice    *)
 (* the total variation distance of the literature, so a distinguisher's       *)
@@ -152,12 +152,11 @@ Qed.
     the all-decks model as the ideal; that model's exact witness, which is
     what makes the ideal an execution whose coalitions of at most five seats
     learn nothing at all; the chirality, which is the secret of the two models
-    as one term; the word walk's number 2^-40; and
-    psl211_word_proximity_close as the distance field, which bounds by that
-    number the distance between the two models' joint laws of a coalition's
-    reading with the chirality. The ideal, its witness and the secret are
-    terms the all-decks row publishes, and the number is this certificate's
-    own. *)
+    as one term; the word walk's number 2^-40; and psl211_word_proximity_close
+    as the distance field, which bounds by that number the distance between
+    the two models' joint laws of a coalition's reading with the chirality.
+    The ideal, its witness and the secret are terms the all-decks row
+    publishes, and the number is this certificate's own. *)
 Definition psl211_word_proximity_cert (R : realType) (idx : unit)
   : IdealProximityCert (amf_sample psl211_word_family R idx) :=
   @MkIdealProximityCert R psl211_algebra psl211_alldecks_params
@@ -199,9 +198,9 @@ Proof. split; exact: erefl. Qed.
     At a one-point carrier the arm's proposition compares two readings and
     mentions no secret at all, the second factor of the product being a point
     mass, so the number would bound nothing about what a coalition learns of
-    the bit. The bit is not a constant either: psl211_alldecks_secret_expectedE
-    of instances/psl211/psl211_models.v reads it as the value the run recovers
-    at every sample point. *)
+    the bit. The secret is also the one the protocol reconstructs:
+    psl211_alldecks_secret_expectedE of instances/psl211/psl211_models.v
+    reads it as the value the run recovers, at every sample point. *)
 Lemma psl211_word_proximity_cert_secretTE (R : realType) (idx : unit) :
   ew_secretT (ipc_witness (psl211_word_proximity_cert R idx)) = bool.
 Proof. exact: erefl. Qed.
@@ -252,12 +251,11 @@ Fail Definition psl211_word_law_by_var_dist_le2 (R : realType) :
     rules out is that bound's own tautology: psl211_word_law_le2 proves the
     distance at two with no fact about this instance and no fact about the
     walk, and the same term is rejected at 2^-40. The number is 2^-41 of that
-    bound.
-    The second shape a proximity certificate can be vacuous in is closed
-    beside that rejection: psl211_word_proximity_cert_secretE and
-    psl211_word_proximity_cert_secretTE give the certificate's secret and
-    its witness's secret as one term at the carrier bool, and the ideal is
-    refused as the model the certificate is about. *)
+    bound. The second shape a proximity certificate can be vacuous in is
+    closed beside that rejection: psl211_word_proximity_cert_secretE and
+    psl211_word_proximity_cert_secretTE give the certificate's secret and its
+    witness's secret as one term at the carrier bool, and the ideal is refused
+    as the model the certificate is about. *)
 Lemma psl211_word_proximity_cert_eps_lt2 (R : realType) (idx : unit) :
   ipc_eps (psl211_word_proximity_cert R idx) < 2%:R :> R.
 Proof.
@@ -288,7 +286,7 @@ Qed.
     dealer-dealt run, a different execution. Each is witnessed at a coalition
     of three seats, and all three stay true beside this row. Its transfer
     status is IdealFinite: the cut is a shuffle of 584 letters where
-    psl211_row_alldecks draws it uniformly from the group. *)
+    the model of psl211_row_alldecks draws it uniformly from the group. *)
 Definition psl211_row_word_proximity : PublishedRow :=
   psl211_alldecks_prefix
     sample  psl211_word_family
@@ -371,11 +369,10 @@ Fail Definition psl211_word_proximity_cert_pgl27_ideal (R : realType)
     (fun C HC => @psl211_word_proximity_close R C HC).
 
 (** The certificate's ideal is not convertible with the word model it is
-    about. A certificate
-    naming its own model as the ideal holds its distance field at zero, the
-    two sides of that field being one term, so the number it publishes bounds
-    a distance from the model to itself. The rejection is a failure to unify
-    the two models:
+    about. A certificate naming its own model as the ideal holds its distance
+    field at zero, the two sides of that field being one term, so the number
+    it publishes bounds a distance from the model to itself. The rejection is
+    a failure to unify the two models:
 
       The term "erefl" has type
        "ipc_ideal (psl211_word_proximity_cert R idx) =

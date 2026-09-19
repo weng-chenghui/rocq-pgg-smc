@@ -1092,11 +1092,11 @@ Definition pgl27_row_prior_exact : AnalysisPathRow :=
     BaselineClassicalOnly.  psl211_word_view_proximity is proved at this
     row's own sample distribution and at that distribution's coalition
     reader, which is what reaches AnalysisBridged; the cut is a word a dealer
-    can perform where psl211_row_alldecks draws it uniformly from the group,
-    so an idealized shuffle is replaced by a finite one, which is the
-    IdealFinite status. It differs from psl211_row_alldecks in the model
-    family and in the transfer status, and the model of that row is the ideal
-    the certificate behind this one is measured against. *)
+    can perform where the model of psl211_row_alldecks draws it uniformly
+    from the group, so an idealized shuffle is replaced by a finite one,
+    which is the IdealFinite status. It differs from psl211_row_alldecks in
+    the model family and in the transfer status, and the model of that row is
+    the ideal the certificate behind this one is measured against. *)
 Definition psl211_row_word : AnalysisPathRow :=
   @MkAnalysisPathRow PSL211Analysis.observed AnalysisBridged
     PSL211Analysis.word_family IdealFinite BaselineClassicalOnly.
