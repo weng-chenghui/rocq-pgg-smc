@@ -98,12 +98,12 @@
 (*                              certificate                                   *)
 (*   pgl27_row_exact_tableau == the exact row as a program                    *)
 (*   pgl27_row_word_tableau  == the word row as a program                     *)
-(*   pgl27_reprice39         == the name 2^-39 for the word row's bound       *)
+(*   pgl27_bound39           == the name 2^-39 for the word row's bound       *)
 (*   pgl27_row_word39        == the word row concluded at that number         *)
 (*   pgl27_row_word39_bind   == the same row written through the bind         *)
 (*   pgl27_row_word_branch39 == the continuation of the named word model      *)
 (*                              concluded at 2^-39                            *)
-(*   pgl27_reprice41         == the name 2^-41 for a bound                    *)
+(*   pgl27_bound41           == the name 2^-41 for a bound                    *)
 (*   pgl27_word_target       == the word row's published statement            *)
 (*   pgl27_exact_target      == the exact row's published statement           *)
 (*   pgl27_word_restated     == the word row through the restate terminal     *)
@@ -146,7 +146,7 @@
 (*   pgl27_row_word39_armE   == the concluded row carries that same arm       *)
 (*   pgl27_row_word_branch39_armE                                             *)
 (*                           == the branch row carries that arm as well       *)
-(*   pgl27_word_reprice41_false                                               *)
+(*   pgl27_word_bound41_false                                                 *)
 (*                           == the terminal's obligation at 2^-41 is false   *)
 (*   pgl27_word_bridge       == the word row's proposition gives its          *)
 (*                              published statement                           *)
@@ -441,7 +441,7 @@ Proof. by []. Qed.
 
 (** The name 2^-39 for a bound, at every real field. A single real will not
     serve, because the security port quantifies over the field. *)
-Definition pgl27_reprice39 : Reprice := fun R => Some (2%:R^-39 : R).
+Definition pgl27_bound39 : ConcludedBound := fun R => Some (2%:R^-39 : R).
 
 (** The word row concluded at the single constant 2^-39. The data, the model
     and the certificate are untouched, so the published row asserts about a
@@ -450,20 +450,20 @@ Definition pgl27_reprice39 : Reprice := fun R => Some (2%:R^-39 : R).
 (* The accumulated bound is 2^-40 twice; pow2_split adds the two copies and
    eqW reads that identity as the inequality the terminal's obligation asks
    for. *)
-Definition pgl27_row_word39 : PublishedRowAt pgl27_reprice39 :=
+Definition pgl27_row_word39 : PublishedRowAt pgl27_bound39 :=
   pgl27_dealt
     sample  pgl27_word_family
     certify InputIndistinguishability pgl27_word_cert
-    |> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))
+    |> conclude pgl27_bound39 by (fun R _ => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The same row written through the bind and its payloads, with no surface
     notation between the statements. *)
-Definition pgl27_row_word39_bind : PublishedRowAt pgl27_reprice39 :=
+Definition pgl27_row_word39_bind : PublishedRowAt pgl27_bound39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_indistinguishability of pgl27_word_cert
-    ;;; conclude pgl27_reprice39 of (fun R _ => ssr_ext.eqW (pow2_split R))
+    ;;; conclude pgl27_bound39 of (fun R _ => ssr_ext.eqW (pow2_split R))
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
 (** The two spellings are one term, so the conclude and publish surface adds
@@ -490,10 +490,10 @@ Proof. by []. Qed.
     and the same two statuses as pgl27_row_word39. Naming the Sampled value
     is what lets a further row over this model be written without repeating
     the prefix. *)
-Definition pgl27_row_word_branch39 : PublishedRowAt pgl27_reprice39 :=
+Definition pgl27_row_word_branch39 : PublishedRowAt pgl27_bound39 :=
   pgl27_word_sampled
     certify InputIndistinguishability pgl27_word_cert
-    |> conclude pgl27_reprice39 by (fun R _ => ssr_ext.eqW (pow2_split R))
+    |> conclude pgl27_bound39 by (fun R _ => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The arm the branch row carries. Naming the Sampled value before the
@@ -510,16 +510,16 @@ Proof. exact: erefl. Qed.
 (******************************************************************************)
 
 (** The name 2^-41 for a bound, at every real field. *)
-Definition pgl27_reprice41 : Reprice := fun R => Some (2%:R^-41 : R).
+Definition pgl27_bound41 : ConcludedBound := fun R => Some (2%:R^-41 : R).
 
 (** The word certificate's own bound is 2^-40 twice, and 2^-41 is strictly
     below that, so the terminal's obligation at 2^-41 is refutable and not
     merely unproved. It is what separates publishing an upper bound of the
     distance a row proved from publishing a number the certificate does not
     prove. *)
-Lemma pgl27_word_reprice41_false (R : realType) (secretP : R.-fdist bool) :
+Lemma pgl27_word_bound41_false (R : realType) (secretP : R.-fdist bool) :
   ~~ (cert_eps (@pgl27_word_cert R secretP)
-      <= odflt (cert_eps (@pgl27_word_cert R secretP)) (pgl27_reprice41 R)).
+      <= odflt (cert_eps (@pgl27_word_cert R secretP)) (pgl27_bound41 R)).
 Proof.
 rewrite /cert_eps /= pow2_split -Order.TotalTheory.ltNge.
 rewrite ltf_pV2 ?posrE ?exprn_gt0 //.
@@ -898,10 +898,10 @@ Qed.
     input-indistinguishability certificate's twice. Its transfer status is
     IdealFinite, the same the input-indistinguishability row carries, and the
     two certificates compare against the same ideal cut. *)
-Definition pgl27_row_word_proximity : PublishedRowAt pgl27_reprice39 :=
+Definition pgl27_row_word_proximity : PublishedRowAt pgl27_bound39 :=
   pgl27_word_sampled
     certify IdealProximity pgl27_word_proximity_cert
-    |> conclude pgl27_reprice39 by (fun R idx => pgl27_word_proximity_le39 idx)
+    |> conclude pgl27_bound39 by (fun R idx => pgl27_word_proximity_le39 idx)
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The proximity row publishes the manifest's row for the word path, as

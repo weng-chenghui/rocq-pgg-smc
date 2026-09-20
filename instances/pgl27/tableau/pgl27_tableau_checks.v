@@ -153,21 +153,21 @@ Fail Definition pgl27_inline_reuse : Tableau Sampled :=
     of the family. A payload with the right relation but no index binder is
     rejected, which is what keeps a row from publishing a bound that holds
     only at the index a reader happened to pick. *)
-Fail Definition pgl27_row_word39_unindexed : PublishedRowAt pgl27_reprice39 :=
+Fail Definition pgl27_row_word39_unindexed : PublishedRowAt pgl27_bound39 :=
   pgl27_dealt
     sample  pgl27_word_family
     certify InputIndistinguishability pgl27_word_cert
-    |> conclude pgl27_reprice39 by (fun R => ssr_ext.eqW (pow2_split R))
+    |> conclude pgl27_bound39 by (fun R => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The same rejection through the bind, so the surface is not what rejects
     it. *)
 Fail Definition pgl27_row_word39_unindexed_bind
-  : PublishedRowAt pgl27_reprice39 :=
+  : PublishedRowAt pgl27_bound39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_indistinguishability of pgl27_word_cert
-    ;;; conclude pgl27_reprice39 of (fun R => ssr_ext.eqW (pow2_split R))
+    ;;; conclude pgl27_bound39 of (fun R => ssr_ext.eqW (pow2_split R))
     ;;; publish BaselineClassicalOnly of IdealFinite.
 
 
@@ -176,11 +176,11 @@ Fail Definition pgl27_row_word39_unindexed_bind
 (******************************************************************************)
 
 (** The row at that number is rejected where its terminal is written. *)
-Fail Definition pgl27_row_word41 : PublishedRowAt pgl27_reprice41 :=
+Fail Definition pgl27_row_word41 : PublishedRowAt pgl27_bound41 :=
   pgl27_dealt
     sample  pgl27_word_family
     certify InputIndistinguishability pgl27_word_cert
-    |> conclude pgl27_reprice41 by (fun R _ => ssr_ext.eqW (pow2_split R))
+    |> conclude pgl27_bound41 by (fun R _ => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
 

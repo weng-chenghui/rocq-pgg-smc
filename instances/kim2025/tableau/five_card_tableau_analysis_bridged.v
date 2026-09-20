@@ -155,13 +155,13 @@
 (*                              indistinguishability arm                      *)
 (*   five_card_row_biased_indistinguishability_tableau                        *)
 (*                           == the one-cut row as a program at that same arm *)
-(*   five_card_reprice39     == the name two to the minus thirty-ninth for a  *)
+(*   five_card_bound39       == the name two to the minus thirty-ninth for a  *)
 (*                              bound                                         *)
 (*   five_card_row_repeated39                                                 *)
 (*                           == the repeated row concluded at that number     *)
 (*   kim_biased_cert_exact   == the one-cut row's certificate at the exact    *)
 (*                              number one fiftieth                           *)
-(*   five_card_reprice_inv25 == the name one twenty-fifth for a bound         *)
+(*   five_card_bound_inv25   == the name one twenty-fifth for a bound         *)
 (*   five_card_row_biased_inv25                                               *)
 (*                           == the one-cut row concluded at that number      *)
 (*   kim_biased_proximity_cert                                                *)
@@ -173,8 +173,7 @@
 (*   five_card_row_biased_proximity                                           *)
 (*                           == the one-cut row as a program at the proximity *)
 (*                              arm, published at one fiftieth                *)
-(*   five_card_reprice_inv100                                                 *)
-(*                           == the name one hundredth for a bound            *)
+(*   five_card_bound_inv100  == the name one hundredth for a bound            *)
 (*   five_card_biased_proximity_at_singleton                                  *)
 (*                           == the proximity row's claim at one concrete     *)
 (*                              seat                                          *)
@@ -263,7 +262,7 @@
 (*   five_card_row_biased_inv25_armE                                          *)
 (*                           == the concluded one-cut row carries that same   *)
 (*                              arm                                           *)
-(*   five_card_reprice_inv25_lt2                                              *)
+(*   five_card_bound_inv25_lt2                                                *)
 (*                           == one twenty-fifth is under two                 *)
 (*   kim_biased_proximity_cert_idealE                                         *)
 (*                           == the certificate's ideal is the uniform row's  *)
@@ -812,7 +811,7 @@ End kim_cert_numbers.
 
 (** The name two to the minus thirty-ninth for a bound, at every real
     field. *)
-Definition five_card_reprice39 : Reprice := fun R => Some (2%:R ^- 39 : R).
+Definition five_card_bound39 : ConcludedBound := fun R => Some (2%:R ^- 39 : R).
 
 (** The repeated row concluded at that constant, continuing from the
     certificate at the bundle's own spectral number. The data, the model and
@@ -821,11 +820,11 @@ Definition five_card_reprice39 : Reprice := fun R => Some (2%:R ^- 39 : R).
     certificate proved and the row asserts about a coalition of at most one
     seat no more than that certificate did, at the number a reader cites. *)
 (* The terminal's payload is kim_centi_cert_eps_lt weakened by ltW. *)
-Definition five_card_row_repeated39 : PublishedRowAt five_card_reprice39 :=
+Definition five_card_row_repeated39 : PublishedRowAt five_card_bound39 :=
   five_card_committed
     sample  kim_centi_family
     certify InputIndistinguishability kim_centi_cert
-    |> conclude five_card_reprice39
+    |> conclude five_card_bound39
        by (fun R idx => Order.POrderTheory.ltW (kim_centi_cert_eps_lt R idx))
     |> publish IdealFinite BaselineClassicalOnly.
 
@@ -835,7 +834,7 @@ Definition five_card_row_repeated39 : PublishedRowAt five_card_reprice39 :=
 Lemma five_card_row_repeated39_sampledE :
   (five_card_row_repeated_tableau
      certify InputIndistinguishability kim_centi_cert
-     |> conclude five_card_reprice39
+     |> conclude five_card_bound39
         by (fun R idx =>
               Order.POrderTheory.ltW (kim_centi_cert_eps_lt R idx))
      |> publish IdealFinite BaselineClassicalOnly)
@@ -884,7 +883,7 @@ Fact five_card_inv50_split (R : realType) : (1 / 50 : R) + 1 / 50 = 1 / 25.
 Proof. by lra. Qed.
 
 (** The name one twenty-fifth for a bound, at every real field. *)
-Definition five_card_reprice_inv25 : Reprice := fun R => Some (1 / 25 : R).
+Definition five_card_bound_inv25 : ConcludedBound := fun R => Some (1 / 25 : R).
 
 (** The one-cut row concluded at the exact constant, at the same transfer
     status as the row at the spectral number. The certificate it carries
@@ -895,11 +894,11 @@ Definition five_card_reprice_inv25 : Reprice := fun R => Some (1 / 25 : R).
     twice the bundle's number, sqrt 5 over forty, which is above one
     twenty-fifth. *)
 Definition five_card_row_biased_inv25
-  : PublishedRowAt five_card_reprice_inv25 :=
+  : PublishedRowAt five_card_bound_inv25 :=
   five_card_committed
     sample  kim_biased_family
     certify InputIndistinguishability kim_biased_cert_exact
-    |> conclude five_card_reprice_inv25
+    |> conclude five_card_bound_inv25
        by (fun R _ => ssr_ext.eqW (five_card_inv50_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
@@ -907,7 +906,7 @@ Definition five_card_row_biased_inv25
 Lemma five_card_row_biased_inv25_sampledE :
   (five_card_row_biased_tableau
      certify InputIndistinguishability kim_biased_cert_exact
-     |> conclude five_card_reprice_inv25
+     |> conclude five_card_bound_inv25
         by (fun R _ => ssr_ext.eqW (five_card_inv50_split R))
      |> publish IdealFinite BaselineClassicalOnly)
   = five_card_row_biased_inv25.
@@ -935,7 +934,7 @@ Proof. exact: erefl. Qed.
 
 (** One twenty-fifth is under two, the bound var_dist_le2 gives for a
     variation distance, so the concluded one-cut row is not vacuous. *)
-Lemma five_card_reprice_inv25_lt2 (R : realType) : (1 / 25 : R) < 2%:R.
+Lemma five_card_bound_inv25_lt2 (R : realType) : (1 / 25 : R) < 2%:R.
 Proof. by lra. Qed.
 
 
@@ -1164,7 +1163,8 @@ Qed.
 
 (** The name one hundredth, half of what Kim's one-cut proximity certificate
     proves. *)
-Definition five_card_reprice_inv100 : Reprice := fun R => Some (1 / 100 : R).
+Definition five_card_bound_inv100 : ConcludedBound :=
+  fun R => Some (1 / 100 : R).
 
 (** The obligation conclude asks of a terminal that would republish Kim's
     one-cut proximity row at one hundredth is false, and not merely beyond
@@ -1175,7 +1175,7 @@ Definition five_card_reprice_inv100 : Reprice := fun R => Some (1 / 100 : R).
 Lemma kim_biased_conclude_below_false (R : realType) (idx : unit) :
   ~ (ipc_eps (kim_biased_proximity_cert R idx)
      <= odflt (ipc_eps (kim_biased_proximity_cert R idx))
-          (five_card_reprice_inv100 R)).
+          (five_card_bound_inv100 R)).
 Proof. rewrite kim_biased_proximity_cert_epsE /= => H; lra. Qed.
 
 

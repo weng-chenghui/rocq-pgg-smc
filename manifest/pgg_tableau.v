@@ -507,11 +507,11 @@ Arguments IdealProximityPropAt {R A E sa} cert c.
 (* A bound named once per real field, with None meaning the program's own sum.
    A single real will not serve, because the security port quantifies over the
    real field and the published number is therefore a function of it. *)
-Definition Reprice := forall R : realType, option R.
+Definition ConcludedBound := forall R : realType, option R.
 
 (* The coordinate that names nothing. Every row that publishes the bound it
    accumulated carries it. *)
-Definition no_reprice : Reprice := fun _ => None.
+Definition no_concluded_bound : ConcludedBound := fun _ => None.
 
 (* The proposition a port carries at a given coordinate: independence for the
    exact arm, the variation bound at the named number for the
@@ -519,7 +519,7 @@ Definition no_reprice : Reprice := fun _ => None.
    law at the named number for the proximity arm. The arm selects the
    proposition, so a row cannot state one arm's claim about another's
    witness. *)
-Definition PortProp (c : Reprice) (R : realType) (A : PGGAlgebraic)
+Definition PortProp (c : ConcludedBound) (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (p : SecurityPort sa) : Prop :=
   match p with
@@ -536,7 +536,8 @@ Arguments PortProp c {R A E sa} p.
    proposition. The conjunction nests to the left, so each statement extends
    it by one conjunct on the right and the earlier conjuncts stay reachable
    by proj1. *)
-Definition BridgedProp (c : Reprice) (q : StackAt AnalysisBridged) : Prop :=
+Definition BridgedProp (c : ConcludedBound)
+    (q : StackAt AnalysisBridged) : Prop :=
   (oe_correct_prop (ab_obs q) /\ sampled_viewE_prop (ab_f q))
   /\ forall (R : realType) (idx : amf_index (ab_f q) R),
        PortProp c (ab_port q R idx).
@@ -557,7 +558,7 @@ Definition StackProp (b : CompletionLevel) : StackAt b -> Prop :=
   | Observed        => fun q => oe_correct_prop (ob_obs q)
   | Sampled         => fun q => oe_correct_prop (sp_obs q)
                                /\ sampled_viewE_prop (sp_f q)
-  | AnalysisBridged => fun q => BridgedProp no_reprice q
+  | AnalysisBridged => fun q => BridgedProp no_concluded_bound q
   end.
 Arguments StackProp : clear implicits.
 
@@ -839,7 +840,8 @@ Arguments certify_idealproximity x q p : assert.
    upper bound is the right obligation because the propositions of the two
    arms that carry a number are monotone in it; an arm whose proposition is
    not monotone in the number it carries owes a different obligation here. *)
-Definition ConcludePayload (c : Reprice) (q : StackAt AnalysisBridged) : Type :=
+Definition ConcludePayload (c : ConcludedBound)
+    (q : StackAt AnalysisBridged) : Type :=
   forall (R : realType) (idx : amf_index (ab_f q) R),
     match ab_port q R idx with
     | ExactIndependence _ => unit
@@ -856,10 +858,10 @@ Arguments ConcludePayload c q : assert.
    number owes as well; it is what lets a row state the constant a paper
    cites while asserting about the coalition no more than the certificate
    proved. *)
-Lemma port_conclude (c : Reprice) (R : realType) (A : PGGAlgebraic)
+Lemma port_conclude (c : ConcludedBound) (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (p : SecurityPort sa) :
-  PortProp no_reprice p ->
+  PortProp no_concluded_bound p ->
   (match p with
    | ExactIndependence _ => unit
    | InputIndistinguishability cert =>
@@ -881,7 +883,7 @@ Arguments port_conclude c {R A E sa} p.
    published constant rather than a step: the data and the arms are
    unchanged, only the real the input-indistinguishability arm's proposition
    mentions moves, and it moves only upward. *)
-Definition conclude (c : Reprice) (q : StackAt AnalysisBridged)
+Definition conclude (c : ConcludedBound) (q : StackAt AnalysisBridged)
     (pf : StackProp AnalysisBridged q) (p : ConcludePayload c q)
     : TableauAt AnalysisBridged (BridgedProp c) :=
   @MkTableau AnalysisBridged (BridgedProp c) q
@@ -910,7 +912,7 @@ Arguments RestatedTableau : clear implicits.
 
 (* The terminal handing a row over as a proposition its caller writes out.
    conclude is not an instance of it: conclude's target is BridgedProp of the
-   Reprice it is given, where this terminal's target Q is a parameter. *)
+   ConcludedBound it is given, where this terminal's target Q is a parameter. *)
 Definition restate (Q : Prop) (q : StackAt AnalysisBridged)
     (pf : StackProp AnalysisBridged q) (p : RestatePayload Q q)
     : RestatedTableau Q :=
@@ -921,7 +923,7 @@ Arguments restate : clear implicits.
    reached. The manifest already publishes the descriptive row; a published
    row is that same value with its theorem attached, so the manifest's claim
    about an instance and the proof of it are one term. *)
-Record PublishedRowAt (c : Reprice) := MkPublishedRow {
+Record PublishedRowAt (c : ConcludedBound) := MkPublishedRow {
   published_at  : StackAt AnalysisBridged ;
   published_row : AnalysisPathRow ;
   published_thm : BridgedProp c published_at }.
@@ -929,12 +931,12 @@ Arguments PublishedRowAt : clear implicits.
 
 (* A published row at the program's own bound: what a row whose coordinate
    names no number publishes. *)
-Notation PublishedRow := (PublishedRowAt no_reprice).
+Notation PublishedRow := (PublishedRowAt no_concluded_bound).
 
 (* The terminal pairing the accumulated proposition with the manifest row for
    it. The assumption status precedes the coordinate because the sequencing
    carries one payload per line and the transfer status is that payload. *)
-Definition publish (a : AssumptionStatus) (c : Reprice)
+Definition publish (a : AssumptionStatus) (c : ConcludedBound)
     (q : StackAt AnalysisBridged) (pf : BridgedProp c q)
     (t : TransferStatus) : PublishedRowAt c :=
   @MkPublishedRow c q
@@ -943,20 +945,20 @@ Arguments publish a {c} q pf t.
 
 (* Run correctness of a published row: every process finishes, the endpoints
    number one per seat, and decoding them returns the dealt value. *)
-Definition run_correct_of (c : Reprice) (r : PublishedRowAt c) :=
+Definition run_correct_of (c : ConcludedBound) (r : PublishedRowAt c) :=
   proj1 (proj1 (published_thm r)).
 Arguments run_correct_of {c} r.
 
 (* The link lemma of a published row, identifying its view with the direct
    computation, the fact on which its security statement is stated
    about a group action. *)
-Definition view_identification_of (c : Reprice) (r : PublishedRowAt c) :=
+Definition view_identification_of (c : ConcludedBound) (r : PublishedRowAt c) :=
   proj2 (proj1 (published_thm r)).
 Arguments view_identification_of {c} r.
 
 (* The security statement of a published row, under the name a reader of the
    exact arm expects. *)
-Definition view_secrecy_of (c : Reprice) (r : PublishedRowAt c) :=
+Definition view_secrecy_of (c : ConcludedBound) (r : PublishedRowAt c) :=
   proj2 (published_thm r).
 Arguments view_secrecy_of {c} r.
 
@@ -964,7 +966,8 @@ Arguments view_secrecy_of {c} r.
    input-indistinguishability arm expects. The arm is selected only when the
    result is applied, so naming the one that does not match a row fails at
    the next application rather than here. *)
-Definition view_indistinguishability_of (c : Reprice) (r : PublishedRowAt c) :=
+Definition view_indistinguishability_of (c : ConcludedBound)
+    (r : PublishedRowAt c) :=
   proj2 (published_thm r).
 Arguments view_indistinguishability_of {c} r.
 
@@ -972,7 +975,7 @@ Arguments view_indistinguishability_of {c} r.
    The three names are one term and differ in what a reader is told to expect
    of it, which is the arm's own proposition and is selected only when the
    result is applied. *)
-Definition view_proximity_of (c : Reprice) (r : PublishedRowAt c) :=
+Definition view_proximity_of (c : ConcludedBound) (r : PublishedRowAt c) :=
   proj2 (published_thm r).
 Arguments view_proximity_of {c} r.
 
@@ -980,7 +983,7 @@ Arguments view_proximity_of {c} r.
    family. It reads ab_arm past the publish statement, so it is the reader a
    paper's arm column is taken from, and publish_armE is why the publish
    statement does not change the answer. *)
-Definition security_arm_of (c : Reprice) (r : PublishedRowAt c)
+Definition security_arm_of (c : ConcludedBound) (r : PublishedRowAt c)
     (R : realType) (idx : amf_index (ab_f (published_at r)) R)
   : SecurityArm :=
   ab_arm (published_at r) R idx.
@@ -1029,7 +1032,7 @@ Proof. by []. Qed.
    statement put it. The terminal moves a real and not the alternative the
    row committed to, so a row at the constant a paper cites states the same
    kind of fact about a coalition as the row at its own bound. *)
-Lemma conclude_armE (c : Reprice) (q : StackAt AnalysisBridged)
+Lemma conclude_armE (c : ConcludedBound) (q : StackAt AnalysisBridged)
     (pf : StackProp AnalysisBridged q) (p : ConcludePayload c q)
     (R : realType)
     (idx : amf_index (ab_f (tableau_at (conclude c q pf p))) R) :
@@ -1040,7 +1043,7 @@ Proof. by []. Qed.
    a finished row reports is the arm its data carried before the last line.
    This is the step that carries the three certify statements' arm equations
    out to a published row, where a paper's table reads them. *)
-Lemma publish_armE (a : AssumptionStatus) (c : Reprice)
+Lemma publish_armE (a : AssumptionStatus) (c : ConcludedBound)
     (q : StackAt AnalysisBridged) (pf : BridgedProp c q) (t : TransferStatus)
     (R : realType)
     (idx : amf_index (ab_f (published_at (publish a q pf t))) R) :

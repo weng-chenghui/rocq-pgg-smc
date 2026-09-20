@@ -141,11 +141,11 @@ Fail Definition five_card_row_repeated_indistinguishability_uniform_rowE
     rejected, which is what keeps a row from publishing a bound that holds
     only at the index a reader happened to pick. *)
 Fail Definition five_card_row_repeated39_unindexed
-  : PublishedRowAt five_card_reprice39 :=
+  : PublishedRowAt five_card_bound39 :=
   five_card_committed
     sample  kim_centi_family
     certify InputIndistinguishability kim_centi_cert
-    |> conclude five_card_reprice39
+    |> conclude five_card_bound39
        by (fun R => Order.POrderTheory.ltW (kim_centi_cert_eps_lt R tt))
     |> publish IdealFinite BaselineClassicalOnly.
 
