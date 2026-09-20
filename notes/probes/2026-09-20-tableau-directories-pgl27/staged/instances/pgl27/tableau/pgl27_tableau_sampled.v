@@ -17,12 +17,12 @@
 (* is the unit type. The word family draws the cut by evaluating a sampled    *)
 (* two-hundred-letter generator word, and its index is a distribution on the  *)
 (* booleans, the law of the dealt secret. The prior-indexed exact family      *)
-(* draws the cut uniformly at that same law of the secret. The index types    *)
-(* are what separate the unit-indexed exact family from the other two, and    *)
-(* they separate two families and not two models: the exact family and the    *)
-(* prior-indexed exact family draw the same uniform cut, and differ in        *)
-(* whether the law of the secret is fixed at the uniform one or carried as an *)
-(* index.                                                                     *)
+(* draws the cut uniformly at that same law of the secret. The exact family's *)
+(* index is the unit type and the other two carry a law of the secret, so an  *)
+(* index type tells the exact family from the prior-indexed exact family.     *)
+(* That is a difference of families and not of models: both draw the uniform  *)
+(* cut, and they differ in whether the law of the secret is fixed at the      *)
+(* uniform one or carried as an index.                                        *)
 (*                                                                            *)
 (* pgl27_word_sampled is a name the instance already had, and the two rows    *)
 (* over the word model are written from it. The other two values are named    *)
@@ -74,11 +74,9 @@ Definition pgl27_exact_sampled : Tableau Sampled :=
 
 
 (******************************************************************************)
-(*     The word model as a branch point, under an input-indistinguishability  *)
-(* payload                                                                    *)
+(*     The word model as a branch point                                       *)
 (******************************************************************************)
 
-(* payload                                                                    *)
 (** The word model of PGL(2,7), named at Sampled. Its family is indexed by a
     distribution on the booleans, so a continuation here unifies a payload
     whose type mentions both the real field and that index. *)

@@ -338,6 +338,19 @@ def main():
                 if re.search(pat, line, re.I):
                     fail("%s:%d banned vocabulary %s: %s"
                          % (base, i, pat, line.strip()))
+    RULE = "(" + "*" * 78 + ")"
+    for path in STAGED:
+        L = open(path).read().split("\n")
+        idx = [i for i, l in enumerate(L) if l == RULE]
+        # the first two delimit the file header; every later pair is a
+        # section banner, and a banner is one content line
+        for k in range(2, len(idx) - 1, 2):
+            if idx[k + 1] - idx[k] != 2:
+                fail("%s:%d section banner is %d content lines, not 1"
+                     % (os.path.basename(path), idx[k] + 1,
+                        idx[k + 1] - idx[k] - 1))
+    print("section banners: one content line each")
+
     lasts = {}
     for path in STAGED_PHASE:
         opens = [l.strip() for l in open(path).read().splitlines()

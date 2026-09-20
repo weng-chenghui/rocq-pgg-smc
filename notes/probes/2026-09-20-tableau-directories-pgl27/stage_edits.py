@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage the comment repoints two production files need after the move.
+"""Stage the comment repoints three production files need after the move.
 
 Each edit is an anchored replacement of an exact block, so the staged copy is
 generated from production at run time and cannot freeze against a base that
@@ -48,6 +48,26 @@ EDITS = {
               "value of the scheme the rest of the development executes, "
               "and not of a",
               "variant of it."])),
+    ],
+    "instances/psl211/psl211_reading_constancy.v": [
+        (box(["proves the same field through pgl27_word_view_const of",
+              "instances/pgl27/pgl27_rows.v, three-transitivity read as "
+              "constancy for",
+              "coalitions of fewer than four seats. The dealt statement "
+              "rules out one",
+              "named ideal and no certificate, this tree carrying no "
+              "dealt-mode sample",
+              "adapter through which a certificate's ideal could be pinned "
+              "to it."]),
+         box(["proves the same field through pgl27_word_view_const of",
+              "instances/pgl27/tableau/pgl27_tableau_analysis_bridged.v,",
+              "three-transitivity read as constancy for coalitions of fewer "
+              "than four",
+              "seats. The dealt statement rules out one named ideal and no "
+              "certificate,",
+              "this tree carrying no dealt-mode sample adapter through "
+              "which a",
+              "certificate's ideal could be pinned to it."])),
     ],
     "manifest/pgg_analysis_manifest.v": [
         (box(["| distribution-to-observer bridges | pgl27_prior_viewE of",

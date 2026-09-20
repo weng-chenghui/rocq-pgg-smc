@@ -7,7 +7,8 @@ reorganization. Pattern and rulings: `../2026-09-20-tableau-directories-s5/`
 The main session does the `cp`, the `git rm`, the `_CoqProject` edit and the
 comment repoints.
 
-Branch `feat/tableau-extensions-probe`. `make` was never run; every compile
+Branch `feat/tableau-extensions-probe`, staged against HEAD `019f3f2`, after
+the PSL(2,11) tableau directory landed. `make` was never run; every compile
 went through `rocq1`, one Rocq process at a time.
 `instances/psl211/psl211_endpoints.v` was never compiled and no file of its
 forward closure was edited, moved or staged.
@@ -18,19 +19,20 @@ forward closure was edited, moved or staged.
 |---|---|
 | `pgl27_tableau_algebraic.v` | 61 |
 | `pgl27_tableau_executable.v` | 79 |
-| `pgl27_tableau_observed.v` | 148 |
-| `pgl27_tableau_sampled.v` | 98 |
-| `pgl27_tableau_analysis_bridged.v` | 950 |
+| `pgl27_tableau_observed.v` | 149 |
+| `pgl27_tableau_sampled.v` | 96 |
+| `pgl27_tableau_analysis_bridged.v` | 981 |
 | `pgl27_tableau_checks.v` | 260 |
-| `pgl27_proximity.v` (reduced) | 286 |
+| `pgl27_proximity.v` (reduced) | 289 |
 
-Production is 751 plus 624, so 1375 lines become 1882: the six headers and
-the section banners are the difference, and no declaration is duplicated.
+Production is 751 plus 624, so 1375 lines become 1915: the six headers, the
+locator table and the section banners are the difference, and no declaration
+is duplicated.
 
 ## The staged text
 
 ```
-staged/instances/pgl27/pgl27_proximity.v                 reduced, 7 items, 286 lines
+staged/instances/pgl27/pgl27_proximity.v                 reduced, 7 items, 289 lines
 staged/instances/pgl27/tableau/pgl27_tableau_algebraic.v
 staged/instances/pgl27/tableau/pgl27_tableau_executable.v
 staged/instances/pgl27/tableau/pgl27_tableau_observed.v
@@ -251,8 +253,8 @@ import.
 | `pgl27_tableau_analysis_bridged.v` | 0 | 7.1 s | 198 | 2.29 s (import) | 0.724 s |
 | `pgl27_tableau_checks.v` | 0 | 4.6 s | 45 | 2.33 s (import) | 0.127 s |
 
-The wall time of the reduced file's own run in the last full rebuild reads
-263 s, which is time spent waiting on the machine-wide Rocq lock behind
+The wall time of the reduced file's own run in a full rebuild can read 80 s
+or more, which is time spent waiting on the machine-wide Rocq lock behind
 another session; `-time` reports no sentence over 5 s in it.
 
 The load path behaved as the template records: under the existing recursive
@@ -321,11 +323,13 @@ instances/pgl27/tableau/pgl27_tableau_checks.v
 instances/kim2025/five_card_rows.v
 ```
 
-**The line numbers move.** `224` and `233` are this file's numbers at HEAD
-`154c742`. The PSL(2,11) landing is in flight and has already edited
-`_CoqProject`, so the main session re-derives both numbers by name at the
-time of the `cp` rather than trusting these. Nothing else about the edit
-depends on them.
+**The line numbers were re-derived by name at HEAD `019f3f2`**, after the
+PSL(2,11) tableau directory landed and `_CoqProject` was edited, and they
+have not moved: `manifest/pgg_tableau_arm_relations.v` is 223,
+`instances/pgl27/pgl27_rows.v` is 224, `instances/kim2025/five_card_rows.v`
+is 225 and `instances/pgl27/pgl27_proximity.v` is 233. The main session
+re-derives them by name again at the time of the `cp` rather than trusting
+these; nothing else about the edit depends on them.
 
 The reduced proximity file moves up from line 233 to sit ahead of all six,
 which its one arrow allows and the AnalysisBridged file's `Require` of it
@@ -342,8 +346,8 @@ production with its attached comment blocks and emits the seven files, so
 token identity and docstring identity are a property of the generator rather
 than of a hand edit.
 
-Three additions to `verify.py`, the first two from what this instance has
-and PSL(2,11) did not, the third from the PSL(2,11) audit's ruling 8:
+Four additions to `verify.py`, the first two from what this instance has
+and PSL(2,11) did not, the third and fourth from the two audits' rulings:
 
 1. A declaration's slice runs to the next declaration, so it absorbs any
    `Section`, `Variable`, `Let` or `End` line written between the two. Those
@@ -357,6 +361,10 @@ and PSL(2,11) did not, the third from the PSL(2,11) audit's ruling 8:
    not see a line that is exactly 80 bytes with its text abutting the close,
    which is what the PSL(2,11) audit found twice at F11. The generator
    enforces the same bound by wrapping to 74 columns and asserting 77.
+4. A section banner is exactly one content line. Every rule-line pair after
+   the two that delimit the file header must be two lines apart. This is the
+   PGL(2,7) audit's F4 and ruling 5, and it is what would have caught the
+   stray line the generator emitted in the Sampled file.
 
 ### `verify.py`, whole output in `verify.out`
 
@@ -423,8 +431,8 @@ the diff mean anything.
 
 | File | rc | wall | `Check` | `Print Assumptions` |
 |---|---|---|---|---|
-| `fidelity.v` (staged text) | 0 | 121.4 s | 73 | 56 |
-| `baseline.v` (production) | 0 | 51.0 s | 64 | 47 |
+| `fidelity.v` (staged text) | 0 | 58.5 s | 73 | 56 |
+| `baseline.v` (production) | 0 | 51.1 s | 64 | 47 |
 
 `baseline.v` is compiled without `-R staged/instances/pgl27 pgg_smc`, so it
 loads production's `pgl27_proximity` and not the reduced copy; a `Require`
@@ -445,19 +453,34 @@ scope is `proba_scope`, into the phase files, whose innermost is
 other way, out of `pgl27_rows.v` into `pgl27_proximity.v`. `verify.py` prints
 both directions on every run.
 
-### `stage_edits.py`, DEFERRED
+### `stage_edits.py`
 
 ```
 instances/pgl27/pgl27_encoding_r5.v              1 edit(s)  comment-only=True  over-80=none
+instances/psl211/psl211_reading_constancy.v      1 edit(s)  comment-only=True  over-80=none
 manifest/pgg_analysis_manifest.v                 2 edit(s)  comment-only=True  over-80=none
 ```
 
-Both staged under `staged-comments/`, never under `staged/`, which is an
-`-R` root. **Neither is applied with this instance.** Both wait for one pass
-after all four instances have landed, so the manifest is recompiled once
-rather than four times. `staged/RETIRED.md` lists both reverse closures: four
-modules for the first and seventeen for the second, twenty-two after the
-move.
+All three staged under `staged-comments/`, never under `staged/`, which is an
+`-R` root.
+
+**One is applied with this instance.**
+`instances/psl211/psl211_reading_constancy.v:55` cites `pgl27_word_view_const
+of instances/pgl27/pgl27_rows.v` in prose, and after the `git rm` that path
+names nothing, so it cannot wait. `pgl27_word_view_const` lands in
+`instances/pgl27/tableau/pgl27_tableau_analysis_bridged.v`, and the comment
+now names that path. Its reverse closure is empty, so the repoint costs one
+module. The staged copy is regenerated from production's current text, which
+the PSL(2,11) landing at `019f3f2` changed, and is verified comment-only by
+comparing the comment-stripped text of the two copies.
+
+**Two are deferred.** `instances/pgl27/pgl27_encoding_r5.v` and
+`manifest/pgg_analysis_manifest.v` wait for one pass after all four instances
+have landed, so the manifest is recompiled once rather than four times.
+Neither citation dangles in the meantime: both name a file that still exists.
+`staged/RETIRED.md` lists all three reverse closures: zero modules for the
+applied one, four and twenty-one for the deferred two, twenty-six after the
+PGL(2,7) move.
 
 ## Rulings taken
 
@@ -465,7 +488,7 @@ move.
 |---|---|---|
 | Where `pgl27_static_obsE` and `pgl27_static_obs_funE` live | the mathematics imports no tableau file | both lemmas are in the reduced `pgl27_proximity.v`, which now requires no tableau module and drops `pgg_tableau`, `pgg_tableau_syntax` and `pgg_analysis_manifest`; the `_CoqProject` order puts it ahead of all six phase files |
 | `Lemma pgl27_row_word_arm_neq` in the checks file | accepted | the checks header states the fact and the reason the order matters |
-| The two comment repoints | deferred to one pass after all four instances | marked deferred here and in `staged/RETIRED.md`; the staged copies are unchanged |
+| The two comment repoints | deferred to one pass after all four instances | marked deferred here and in `staged/RETIRED.md`; a third repoint, of `instances/psl211/psl211_reading_constancy.v`, is applied with this instance because after the `git rm` its citation would name nothing |
 | No `_sampledE` for `pgl27_row_word39` | accepted | nothing row against row anywhere in the staged text |
 
 ## Pre-audit pass
@@ -501,6 +524,48 @@ distance runs the other way", and the object it names, the refutation, is a
 statement about a distance bounded below rather than above, so the noun is
 right.
 
+## Fix pass 1
+
+Applied after `audit-pgl27.md`. Every replacement the audit proposed was
+checked against the declaration before it was written, and the deviations are
+at the end. The staged `.v` files' comment-stripped token streams are
+identical to commit `d3a1957`'s in all seven files, so this pass changed
+comments and nothing else.
+
+| id | Final text | Declaration or object checked | Deviation |
+|---|---|---|---|
+| F1 | analysis_bridged header: "…the executable file the Executable value and the parameter equation; the observed file the two prefixes…". Last paragraph: "This file requires instances/pgl27/pgl27_proximity.v, which holds the reading and the distance mathematics the certificates are built from: the two identifications of the framework's static reading of a coalition with pgl27_view, the dealt secret on the word sample space, the distance between the two models' joint laws, and the two arithmetic facts about 2^-40 the conclude obligation is proved with." | `grep -rn "static_obs\|identifications\|reader identification\|reading of a coalition"` over the whole staged tree: after the fix the only `.v` hits are the reduced file's own header, its index entries, its section banner and the two declarations. The Executable header's paragraph already pointed at the reduced file and is unchanged | as proposed, with "the certificates" in the plural: the two lemmas feed the input-indistinguishability certificate through `pgl27_word_view_const` and `pgl27_word_bridge`, not only the proximity one |
+| F2 | `(*   pgl27_realises_expected == the value the run is meant to recover is  *)` / `(*                              that functionality's function             *)` | `realises_expected oe F := OE.oe_expected oe = fn_f F`, `protocol/pgg_functionality.v`; the declaration's own moved docstring already says "The value the run is built to recover is that functionality's function, as terms" | none |
+| F3 | "The three probability models the instance analyses part three levels above" | `CompletionLevel` has five constructors, `manifest/pgg_analysis_status.v`; Algebraic to Sampled is three | none |
+| F4 | Banner re-wrapped to `(*     The word model as a branch point                                     *)`; the stray `(* payload *)` line is gone | `pgl27_word_sampled : Tableau Sampled := pgl27_dealt sample pgl27_word_family` carries no payload | the generator was fixed rather than the output: a banner is now a maximal run of comment lines containing a rule line, which also catches a production banner's second line. Checked across all seven files: every rule-line pair after the header is two lines apart |
+| F5 | `instances/psl211/psl211_reading_constancy.v:55` now cites `instances/pgl27/tableau/pgl27_tableau_analysis_bridged.v`, and `RETIRED.md` carries the row and the reason it is not deferred | `pgl27_word_view_const` is declared in that file; the reverse closure of `psl211_reading_constancy` is empty, computed from the `Require` lines of every file in a `-R` or `-Q` directory | the staged copy is regenerated from production's text at HEAD `019f3f2`, which the PSL(2,11) landing changed, and is verified comment-only |
+| F6 | "…and the proximity row, which publishes the same manifest row under a different arm. An AnalysisPathRow holds descriptive metadata and no Prop, so one manifest row carrying an input-indistinguishability row and a proximity row says nothing about either claim." | `pgl27_row_word_proximity_armE` gives `IdealProximityArm`, `pgl27_row_word_armE` gives `InputIndistinguishabilityArm`, and `pgl27_row_word_arm_neq` in the checks file proves they differ | none |
+| F7 | "The input-indistinguishability certificate crosses from the walk to the ideal cut once for each of the two dealt secrets it compares, so its cert_eps is that number added to itself, 2^-39." | `cert_eps` of `pgl27_word_cert` is `sw_bound_eps … + sw_bound_eps …`, which `pgl27_word_proximity_eps_halfE` states against the proximity certificate's field; the moved docstring of `pgl27_row_word_tableau` states the transfer inequality in the same terms | none |
+| F8 | "Every number below bounds a sum of absolute differences, which is twice the total variation distance of the literature, so a bound of 2^-40 here is a distinguishing advantage of at most 2^-41 wherever it is used." | copied from `instances/psl211/psl211_word_proximity.v:16-18`; both reduced files carry 2^-40, so the numbers did not change. The sentence that called the same quantity two things is gone | none |
+| F9 | `(*   pgl27_word_view_const  == below the four-seat threshold, two secrets  *)` / `(*                              give one reading of the ideal cut          *)` | premise `(#|C| < profile_k (instance_profile pgl27_algebra))%N`, and `profile_k` is 4 at this instance | extended beyond the one entry the audit names, by ruling 3: `pgl27_exact_view_secrecy` (premise `(#|C| < 4)%N`) and `pgl27_word_view_proximity` (premise `(#|C| <= 3)%N`) also carry "below the four-seat threshold" now. The other entries with a coalition inside a `Prop` were left alone, because they describe a provenance rather than assert a bound |
+| F10 | "Seven rows are published, and three of them publish the manifest's own. pgl27_row_exact_rowE, pgl27_row_word_rowE and pgl27_row_prior_exact_rowE discharge …" | seven `PublishedRow` and `PublishedRowAt` values in the file; three `AnalysisPathRow`s over this instance in the manifest | none |
+| F11 | the three entries are broken, name on its own line | `pgl27_row_word_proximity`, `pgl27_row_exact_sampledE` and `pgl27_exact_view_secrecy` are 24 characters, and the name column is 24 wide | the generator's break threshold went from `> 24` to `> 23`, so the rule is now enforced rather than reapplied by hand |
+| F12 | recorded, see "The docstring count that is production's" | `pgl27_dealt`'s docstring is production's and word-identical | no fourth intended docstring difference: the option the audit offered would edit production text |
+| F13 | "pgl27_proximity: the instance's reading of a coalition, and the distances between its two laws of the cut" | the file's seven declarations: two readings, one random variable, one distance, two arithmetic facts, one refuted bound | none |
+| F14 | "The exact family's index is the unit type and the other two carry a law of the secret, so an index type tells the exact family from the prior-indexed exact family. That is a difference of families and not of models: both draw the uniform cut, and they differ in whether the law of the secret is fixed at the uniform one or carried as an index." | `pgl27_exact_family` is unit-indexed and `pgl27_prior_exact_family` is indexed by `R.-fdist bool`, both over the uniform cut | none |
+| F15 | a locator after the "Seven rows are published" paragraph, headed "Where each published row's chain is, one entry per row", with one entry per published row naming its banner and its `_sampledE`, `_rowE`, `_armE` and reading statement | every banner title and every lemma name in it was grepped out of the file before it was written; the seven banners are "The two row programs" (twice), "The word row concluded at 2^-39" (twice), "The same row from the named word model", "The ideal: the exact shuffle at every prior" and "One model, two claims, two rows" | one file kept, as ruled. The locator is an indented entry list rather than a four-column table, because four columns do not fit an 80-column box; it adds 22 lines. `pgl27_row_word39`, `pgl27_row_word39_bind` and `pgl27_row_word_branch39` have no reading statement of their own and the entry says so |
+| F16 | recorded, see "Why the fidelity pin holds for bodies, not only for statements" | the four re-scoped `Definition`s and the four printed statements that carry every re-scoped numeral | none |
+| F17 | no change | the eleven narrative words and three timings are production's, word-identical | none, as the audit directs |
+| F18 | "One run parameter record reaches this level and two values name it." | `pgl27_inline_paramsE` proves the two prefixes share `pgl27_dealt_params` while their observed executions differ | none |
+| F19 | "… is identified with that mode." | `pgl27_dealt_executableE` has `pgl27_dealt_executable` on its left | none |
+
+### The index re-read, ruling 2
+
+Every index entry of every header this fix pass and the pre-audit pass
+touched was read against its declaration's statement. Twenty-two entries in
+the AnalysisBridged header, seven in the Observed header, three in the
+Sampled header, two in the Executable header, one in the Algebraic header,
+one in the checks header and seven in the reduced file. Three were wrong and
+are F2, F9 and the F9 extension; two more were broken for F11; the rest match.
+`pgl27_F == the ideal functionality the run realises` was checked and kept:
+`realises_expected` is the predicate's own name and the entry says no more
+than the predicate does.
+
 ## What no phase header claims
 
 The manifest carries exactly three `AnalysisPathRow`s over this instance,
@@ -514,3 +579,49 @@ exist because a program does not.
 
 The instance has exactly three analysis model families, and all three are
 named in the Sampled file, so no header says a model is unnamed.
+
+## Where a restate target is placed
+
+`pgl27_word_target` and `pgl27_exact_target` are plain `Prop`s over `var_dist`
+and `fdistmap` with no tableau object in them, so the subject test would send
+them to the mathematics file while the consumer test keeps them beside the
+`restate` terminal that takes them. **The consumer test wins, and it is the
+one place the two halves of the placement rule point different ways.** Each
+restate chain then reads contiguously: target, bridge, restated row, theorem.
+Five-card should cite this rather than argue it again.
+
+## The docstring count that is production's
+
+`pgl27_dealt`'s moved docstring says "the two rows part at the next line" and
+"common to both", while the Observed header's index calls the value "the
+prefix all seven rows share". The docstring is production's, word-identical,
+and it was already loose in `pgl27_rows.v`, which held five rows when it was
+written and never mentioned the proximity or prior-indexed rows that came
+later. It is recorded here rather than changed: adding a fourth intended
+docstring difference would edit production text to fix a count that production
+itself got wrong, which is a comment pass and not a move.
+
+## Why the fidelity pin holds for bodies, not only for statements
+
+A byte-identical `Check @f` pins a **statement**. `@` makes the implicit
+arguments explicit, and neither source file holds a `Local Notation` and no
+staged file declares one, so both sides print through one notation set under
+one scope block. What a printed type cannot pin is a `Definition` whose type
+hides its data, so the argument has to be made over the declarations whose
+environment changed.
+
+The only declarations whose scope changes are the 21 that leave
+`pgl27_proximity.v` and the two that enter it. Of the 21, four are
+`Definition`s: `pgl27_prior_exact_witness`, `pgl27_row_prior_exact_tableau`,
+`pgl27_word_proximity_cert` and `pgl27_row_word_proximity`. **None of the four
+holds a numeric literal in its body.** Every re-scoped numeral appears inside
+the printed statement of `pgl27_word_proximity_cert_epsE`,
+`pgl27_word_proximity_le39`, `pgl27_word_proximity_cert_eps_lt2` or
+`pgl27_word_view_proximity`, each of which is closed by conversion against the
+certificate it names, so a numeral that had resolved differently would show up
+as a printed-type difference or as a failed conversion. Of the two that enter,
+`pgl27_static_obsE` and `pgl27_static_obs_funE` are `Lemma`s, whose whole
+statement is printed. The token identity of the sources closes the rest.
+
+At five-card, if a re-scoped `Definition` does hold a literal, add `Print` for
+it to both files.

@@ -52,7 +52,7 @@ def entry(name, desc):
     """One line of a Definitions: or Key results: table."""
     out = []
     first = "  " + name.ljust(24)
-    if len(name) > 24:
+    if len(name) > 23:
         out.append(box("  " + name))
         first = " " * 26
     body = textwrap.wrap(" ".join(desc.split()), WIDTH - 29)
@@ -67,7 +67,13 @@ def header(title, paras, defs, results):
     out += para(title)
     for p in paras:
         out.append(box(""))
-        out += para(p)
+        if isinstance(p, tuple) and p[0] == "lit":
+            for l in p[1]:
+                out += [box(x) for x in
+                        textwrap.wrap(" ".join(l.split()), WIDTH,
+                                      subsequent_indent="    ")]
+        else:
+            out += para(p)
     if defs:
         out.append(box(""))
         out.append(box("Definitions:"))
@@ -141,6 +147,22 @@ def chunks(path):
             in_comment[k] = True
     starts = [(m.start(), m.group(2)) for m in DECL_RE.finditer(text)
               if not in_comment[m.start()]]
+    # A banner is a maximal run of lines opening with (* that contains at
+    # least one full-width rule line.  Keying on "the previous line is a
+    # rule" misses a production banner's SECOND content line, which is then
+    # emitted a second time outside the box.
+    banner_at, off, run, has_rule = set(), 0, [], False
+    for ln in text.split("\n"):
+        if ln.startswith("(*"):
+            run.append(off)
+            has_rule = has_rule or ln == RULE
+        else:
+            if has_rule:
+                banner_at |= set(run)
+            run, has_rule = [], False
+        off += len(ln) + 1
+    if has_rule:
+        banner_at |= set(run)
     # the file header and the preamble belong to no declaration
     head_end = max(m.end() for m in re.finditer(r"^Local Open Scope.*$",
                                                 text, re.M))
@@ -167,16 +189,9 @@ def chunks(path):
         attached = []
         for a, b in spans:
             if a >= prev_end and b <= off:
-                blk = text[a:b]
-                # a banner: the rule line itself, or the title line whose
-                # previous line is a rule line
-                if blk.startswith("(***"):
+                if a in banner_at:
                     continue
-                ls = text.rfind("\n", 0, a) + 1
-                prevline = text[text.rfind("\n", 0, ls - 1) + 1:ls - 1]
-                if prevline == RULE:
-                    continue
-                attached.append(blk)
+                attached.append(text[a:b])
         res[name] = ("\n".join(attached + [decl]), p)
     return {k: v[0] for k, v in res.items()}
 
@@ -289,8 +304,9 @@ Local Open Scope ring_scope.
             "algebra alone, under True, the proposition that level carries. "
             "One run mode is built on this value, the dealer-dealt one, "
             "and pgl27_dealt_executableE is where the prefix all seven "
-            "published rows continue from is identified with it. The three "
-            "probability models the instance analyses part two levels "
+            "published rows continue from is identified with that mode. The "
+            "three "
+            "probability models the instance analyses part three levels "
             "above, so what this file fixes is shared by every row the "
             "instance publishes.")
         + "\nDefinition pgl27_algebraic_start : Tableau Algebraic :="
@@ -371,7 +387,8 @@ emit(
          "endpoint, and the endpoints decode to the orbit class the run was "
          "built to recover. Nothing about a coalition is proved at this "
          "level, at any coalition size.",
-         "One run reaches this level and two values name it. pgl27_dealt is "
+         "One run parameter record reaches this level and two values name "
+         "it. pgl27_dealt is "
          "the one all seven published rows of the instance continue from, "
          "and it names its termination proof. pgl27_inline_dealt writes that "
          "proof a different way, and it is here because the difference it "
@@ -399,7 +416,8 @@ emit(
          ("pgl27_FE",
           "that functionality is the identity at three"),
          ("pgl27_realises_expected",
-          "the run recovers the functionality's value")]),
+          "the value the run is meant to recover is that functionality's "
+          "function")]),
     LOWER_MATHCOMP + """From pgg_smc Require Import pgg_tableau.
 From pgg_smc Require Import pgg_tableau_syntax.
 From pgg_smc Require Import pgl27_tableau_executable.
@@ -450,12 +468,13 @@ emit(
          "draws the cut by evaluating a sampled two-hundred-letter generator "
          "word, and its index is a distribution on the booleans, the law of "
          "the dealt secret. The prior-indexed exact family draws the cut "
-         "uniformly at that same law of the secret. The index types are what "
-         "separate the unit-indexed exact family from the other two, and "
-         "they separate two families and not two models: the exact family "
-         "and the prior-indexed exact family draw the same uniform cut, and "
-         "differ in whether the law of the secret is fixed at the uniform "
-         "one or carried as an index.",
+         "uniformly at that same law of the secret. The exact family's index "
+         "is "
+         "the unit type and the other two carry a law of the secret, so an "
+         "index type tells the exact family from the prior-indexed exact "
+         "family. That is a difference of families and not of models: both "
+         "draw the uniform cut, and they differ in whether the law of the "
+         "secret is fixed at the uniform one or carried as an index.",
          "pgl27_word_sampled is a name the instance already had, and the "
          "two rows over the word model are written from it. The other two "
          "values are named the same way so that a row over any of the three "
@@ -484,9 +503,7 @@ Local Open Scope ring_scope.
             "an ideal.")
         + "\nDefinition pgl27_exact_sampled : Tableau Sampled :="
           "\n  pgl27_dealt sample pgl27_exact_family."]),
-     ("The word model as a branch point, under an "
-      "input-indistinguishability payload",
-      [M("pgl27_word_sampled")]),
+     ("The word model as a branch point", [M("pgl27_word_sampled")]),
      ("The exact shuffle at every law of the secret", [
         doc("The dealer-dealt run under the exact shuffle read at every law "
             "of the dealt secret, named at Sampled. Its family is indexed by "
@@ -550,9 +567,9 @@ emit(
          "pgl27_word_mixing bounds the distance between the "
          "two-hundred-letter walk and the uniform cut on the group by 2^-40, "
          "and pgl27_word_marginal_bound carries that number. The "
-         "input-indistinguishability certificate spends it once for each of "
-         "the two dealt secrets it compares, so its cert_eps is that number "
-         "added to itself, 2^-39. The proximity certificate compares one law "
+         "input-indistinguishability certificate crosses from the walk to "
+         "the ideal cut once for each of the two dealt secrets it compares, "
+         "so its cert_eps is that number added to itself, 2^-39. The proximity certificate compares one law "
          "with one law and carries the number itself, 2^-40, and the "
          "proximity row concludes at 2^-39, the constant the other row over "
          "the same model publishes, so the terminal's obligation is met "
@@ -564,24 +581,52 @@ emit(
          "coalition quantifies over at most three of the eight seats, each "
          "seat reading the card at its own position, and "
          "pgl27_exact_leak4 records that four already leak.",
-         "Seven rows are published. Three of them are the manifest's own: "
-         "pgl27_row_exact_rowE, pgl27_row_word_rowE and "
+         "Seven rows are published, and three of them publish the "
+         "manifest's own. pgl27_row_exact_rowE, pgl27_row_word_rowE and "
          "pgl27_row_prior_exact_rowE discharge pgl27_row_exact, "
          "pgl27_row_word and pgl27_row_prior_exact of "
-         "pgg_analysis_manifest.v by conversion, and those are the three "
-         "AnalysisPathRows the manifest carries for this instance. The other "
-         "four write the same claims again: the word row concluded at 2^-39 "
-         "in three spellings, through the surface, through the raw bind and "
-         "from the named Sampled value, and the proximity row, which "
-         "publishes the manifest's word row a second time, an "
-         "AnalysisPathRow holding descriptive metadata and no Prop. The "
-         "manifest carries no fourth row over this instance and publishes "
-         "none of the three by a route this development's programs do not "
-         "take.",
+         "pgg_analysis_manifest.v by conversion, and those three are the "
+         "AnalysisPathRows the manifest carries for this instance. The "
+         "other four are the word row concluded at 2^-39 in three "
+         "spellings, through the surface, through the raw bind and from the "
+         "named Sampled value, and the proximity row, which publishes the "
+         "same manifest row under a different arm. An AnalysisPathRow holds "
+         "descriptive metadata and no Prop, so one manifest row carrying an "
+         "input-indistinguishability row and a proximity row says nothing "
+         "about either claim. The manifest carries no fourth row over this "
+         "instance and publishes none of the three by a route this "
+         "development's programs do not take.",
+         ("lit", [
+             "Where each published row's chain is, one entry per row.",
+             "pgl27_row_exact_tableau, under The two row programs: "
+             "pgl27_row_exact_sampledE, pgl27_row_exact_rowE, "
+             "pgl27_row_exact_armE, and the readings "
+             "pgl27_exec_exact_view_indep_restated and "
+             "pgl27_exact_view_secrecy.",
+             "pgl27_row_word_tableau, under the same banner: "
+             "pgl27_row_word_sampledE, pgl27_row_word_rowE, "
+             "pgl27_row_word_armE, and the reading "
+             "pgl27_word_view_indistinguishability_restated.",
+             "pgl27_row_word39, under The word row concluded at 2^-39: "
+             "pgl27_row_word39_armE, and no reading of its own.",
+             "pgl27_row_word39_bind, under the same banner: tied to the "
+             "row above by pgl27_row_word39_bindE.",
+             "pgl27_row_word_branch39, under The same row from the named "
+             "word model: written from pgl27_word_sampled, so no "
+             "_sampledE, and pgl27_row_word_branch39_armE.",
+             "pgl27_row_prior_exact_tableau, under The ideal: the exact "
+             "shuffle at every prior: pgl27_row_prior_exact_sampledE, "
+             "pgl27_row_prior_exact_rowE, pgl27_row_prior_exact_armE.",
+             "pgl27_row_word_proximity, under One model, two claims, two "
+             "rows: written from pgl27_word_sampled, so no _sampledE, "
+             "pgl27_row_word_proximity_rowE, "
+             "pgl27_row_word_proximity_armE, and the reading "
+             "pgl27_word_view_proximity.",
+         ]),
          "An importer of this instance names one module per kind of name. "
          "The algebraic file declares the Algebraic value; the executable "
-         "file the Executable value, the parameter equation and the two "
-         "identifications of a coalition's reading; the observed file the "
+         "file the Executable value and the parameter equation; the "
+         "observed file the "
          "two prefixes, the inline fork's parameter equation and the ideal "
          "functionality; the sampled file the three named models; this file "
          "the payloads, the rows, the row and arm equations, the bridges, "
@@ -589,10 +634,12 @@ emit(
          "file the recorded rejections and the comparison of the two word "
          "rows' arms. No file of the six uses Require Export.",
          "This file requires instances/pgl27/pgl27_proximity.v, which holds "
-         "the distance mathematics the proximity certificate is built from: "
-         "the dealt secret on the word sample space, the distance between "
-         "the two models' joint laws, and the two arithmetic facts about "
-         "2^-40 the conclude obligation is proved with."],
+         "the reading and the distance mathematics the certificates are "
+         "built from: the two identifications of the framework's static "
+         "reading of a coalition with pgl27_view, the dealt secret on the "
+         "word sample space, the distance between the two models' joint "
+         "laws, and the two arithmetic facts about 2^-40 the conclude "
+         "obligation is proved with."],
         [("pgl27_exact_witness",
           "the exact arm's witness at every field and index"),
          ("pgl27_word_cert",
@@ -633,7 +680,8 @@ emit(
          ("pgl27_exact_leak4",
           "four seats of this instance leak the secret"),
          ("pgl27_word_view_const",
-          "two secrets give one reading of the ideal cut"),
+          "below the four-seat threshold, two secrets give one reading of "
+          "the ideal cut"),
          ("pgl27_row_exact_sampledE",
           "the exact row continues the named exact model"),
          ("pgl27_row_word_sampledE",
@@ -664,7 +712,8 @@ emit(
          ("pgl27_exec_exact_view_indep_restated",
           "the exact statement, from the exact row alone"),
          ("pgl27_exact_view_secrecy",
-          "the exact arm's four conjuncts at this instance"),
+          "below the four-seat threshold, the exact arm's four conjuncts at "
+          "this instance"),
          ("pgl27_prior_viewE",
           "the framework's reading of a coalition at the prior-indexed "
           "exact shuffle is the instance's own reading pgl27_view"),
@@ -696,7 +745,8 @@ emit(
          ("pgl27_row_word_obs_sampledE",
           "both rows read their observed execution off that same value"),
          ("pgl27_word_view_proximity",
-          "the proximity row's security statement, at 2^-39")]),
+          "below the four-seat threshold, the proximity row's security "
+          "statement, at 2^-39")]),
     BRIDGED_PRE,
     [("The exact family's witness",
       [M("pgl27_exact_viewE"), M("pgl27_exact_witness"),
@@ -866,8 +916,8 @@ emit(
 emit(
     os.path.join(OUT_INST, "pgl27_proximity.v"),
     header(
-        "pgl27_proximity: the reading and the distances the eight-card "
-        "orbit instance's proximity certificate is built from",
+        "pgl27_proximity: the instance's reading of a coalition, and the "
+        "distances between its two laws of the cut",
         ["The eight-card orbit instance runs one execution under two laws of "
          "the cut: the exact shuffle, which draws it uniformly from "
          "PGL(2,7), and the two-hundred-letter word walk, which draws it by "
@@ -880,9 +930,11 @@ emit(
          "joint law under the uniform cut at the same law of the secret. The "
          "number is the walk's single-card marginal number, and it rests on "
          "pgl27_word_mixing, the bound by that same number on the distance "
-         "between the walk and the uniform cut on the group. The bound is an "
-         "upper bound on a sum of absolute differences and not the distance "
-         "itself.",
+         "between the walk and the uniform cut on the group.",
+         "Every number below bounds a sum of absolute differences, which is "
+         "twice the total variation distance of the literature, so a bound "
+         "of 2^-40 here is a distinguishing advantage of at most 2^-41 "
+         "wherever it is used.",
          "The other distance runs the other way. A proximity certificate "
          "compares two models at one index, so the two have to be read at "
          "one law of the dealt secret. pgl27_prior_exact_family of "
