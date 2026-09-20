@@ -344,7 +344,7 @@ Definition psl211_alldecks_endpoints
     psl211_alldecks_expected psl211_fuel psl211_profile_endpoints.
 
 (** psl211_alldecks_observed — the observed execution of the all-decks run:
-    the run finishes inside its budget, the verifier collects one endpoint per
+    the run finishes inside its fuel, the verifier collects one endpoint per
     seat, and decoding them returns the chirality the input names. This is the
     value every analysis of this instance consumes. *)
 Definition psl211_alldecks_observed : OE.ObservedExecution :=
@@ -383,7 +383,7 @@ Definition psl211_exec_content_trace (C : {set seatT}) (x : psl211_inputT)
                     (@exec_participant_trace mpP eP x w0 0 i)
              else ord0].
 
-(** psl211_alldecks_fuelE — the derived plug runs at the budget the
+(** psl211_alldecks_fuelE — the derived plug runs at the fuel the
     parametrization names. *)
 Lemma psl211_alldecks_fuelE : ep_fuel eP = psl211_fuel.
 (* Stated on its own so that the row equation below never has to compare two
@@ -454,7 +454,7 @@ Proof. by []. Qed.
 (** psl211_alldecks_exec_viewE — the executed coalition reader of the
     all-decks model is the static coalition reading. This is the step that
     turns a claim about the interpreter's messages into a claim about the
-    group action, and it is what the endpoint equation buys. *)
+    group action, and it is what the endpoint equation gives. *)
 Lemma psl211_alldecks_exec_viewE (R : realType) (C : {set seatT}) :
   @sa_coalition_view R mpP eP (psl211_alldecks_sample R) 0 C
   = (fun u => @static_coalition_obs psl211_algebra psl211_alldecks_params C
@@ -617,7 +617,7 @@ Definition psl211_dealer_assoc
 (** psl211_dealerPE — the reassociation carries the instance's all-decks law
     to the dealer model's law at psl211_dealer_delta and psl211_dealer_nu.  Both
     are uniform on the same finite set written in two associations, so the
-    identification costs nothing probabilistic and fixes which of the dealer
+    identification adds nothing probabilistic and fixes which of the dealer
     model's three draws each of the instance's coordinates is. *)
 Lemma psl211_dealerPE :
   fdistmap psl211_dealer_assoc (psl211_alldecksP R) = psl211_dealerP.

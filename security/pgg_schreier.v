@@ -116,7 +116,7 @@
 (*                                                                            *)
 (* Multi-shuffle card protocols (den Boer 1989, Mizuki-Sone 2009) are the     *)
 (* standard model in card-based cryptography (1989-2019). Shinagawa-Nuida     *)
-(* (2019) proved a single shuffle suffices at the cost of more cards.         *)
+(* (2019) proved a single shuffle suffices if more cards are used.            *)
 (* PGG's spectral analysis applies to the multi-shuffle regime, answering:    *)
 (* "How many shuffles are needed for k-coalition fairness?"                   *)
 (*                                                                            *)

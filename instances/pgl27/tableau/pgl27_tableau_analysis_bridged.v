@@ -8,7 +8,7 @@
 (* the proposition it carries is that arm's own, on top of run correctness    *)
 (* and of the identification of the two readings of a coalition. A publish    *)
 (* terminal then turns the value into a PublishedRow. Every payload this      *)
-(* instance owes an arm is here, every row it publishes is here, and every    *)
+(* instance gives an arm is here, every row it publishes is here, and every   *)
 (* statement whose subject is a payload or a row is here.                     *)
 (*                                                                            *)
 (* Three arms are used over the one dealer-dealt run. The exact arm takes an  *)
@@ -253,8 +253,7 @@ Proof. by apply: boolp.funext; case=> s g; exact: pgl27_static_obsE. Qed.
     the reading carry no information about the secret at all, not a small
     amount. The framework derives the zero mutual information, the unchanged
     conditional entropy and the closure under post-processing from this one
-    field, so the witness is the whole of what this instance owes the exact
-    arm. *)
+    field, so the witness is all the exact arm requires of this instance. *)
 Definition pgl27_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample pgl27_exact_family R idx) :=
   @MkExactWitness R pgl27_algebra pgl27_dealt_params
@@ -293,7 +292,7 @@ Qed.
     three-transitivity of PGL(2,7) read as a privacy statement, carried to
     the framework's reader at each of the two secrets; the statement is
     exact, and it is the half of the input-indistinguishability arm that
-    spends no mixing bound. *)
+    appeals to no mixing bound. *)
 Lemma pgl27_word_view_const (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
@@ -316,9 +315,10 @@ Qed.
     pgl27_word_mixing of the walk from that ideal, an unconditional theorem
     about the walk whose bound is 2^-40; and the constancy of a coalition's
     reading of the ideal cut in the dealt secret, which is
-    pgl27_word_view_const and is exact. The two currencies are visible in the
-    fields: everything about the ideal cut is exact and three-transitive, and
-    the only inexact quantity anywhere in this row is the walk's 2^-40. *)
+    pgl27_word_view_const and is exact. Perfect and statistical security are
+    both visible in the fields: everything about the ideal cut is exact and
+    three-transitive, and the only statistical quantity anywhere in this row
+    is the walk's 2^-40. *)
 Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
   : IndistinguishabilityCert (amf_sample pgl27_word_family R secretP) :=
   @MkIndistinguishabilityCert R pgl27_algebra pgl27_dealt_params
@@ -368,7 +368,7 @@ Proof. exact: erefl. Qed.
     cut. What the finished row carries is a variation distance between the
     readings of two dealt secrets, bounded by 2^-40 + 2^-40: the framework's
     transfer inequality crosses from the walk to the ideal cut and back again,
-    and each crossing spends the same mixing bound once. *)
+    and each of the two hops loses the same mixing bound. *)
 Definition pgl27_row_word_tableau : PublishedRow :=
   pgl27_dealt
     sample  pgl27_word_family
@@ -417,9 +417,8 @@ Proof. by []. Qed.
 
 (** The arm the exact row carries, at every real field and index:
     independence of the coalition's view from the secret, and not a distance
-    between two readings. This is the value a paper's table prints in the arm
-    column for this row; certify_exact_armE and publish_armE are why the
-    value is settled by the row's certify statement. *)
+    between two readings. The row's certify statement settles which arm that
+    is, through certify_exact_armE and publish_armE. *)
 Lemma pgl27_row_exact_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_exact_tableau)) R) :
   security_arm_of pgl27_row_exact_tableau R idx = ExactIndependenceArm.
@@ -473,8 +472,8 @@ Lemma pgl27_row_word39_bindE : pgl27_row_word39 = pgl27_row_word39_bind.
 Proof. by []. Qed.
 
 (** The arm the concluded row carries. Concluding at an upper bound leaves the
-    port untouched, so the row at 2^-39 carries the arm the row at its own sum
-    carries, and the table column is the same for both. *)
+    port untouched, so the row at 2^-39 carries the arm the row at its own
+    sum carries. *)
 Lemma pgl27_row_word39_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word39)) R) :
   security_arm_of pgl27_row_word39 R idx = InputIndistinguishabilityArm.
@@ -498,7 +497,7 @@ Definition pgl27_row_word_branch39 : PublishedRowAt pgl27_bound39 :=
 
 (** The arm the branch row carries. Naming the Sampled value before the
     certify statement leaves the port where that statement put it, so the
-    branch row's table column is the one pgl27_row_word39 has. *)
+    branch row carries the arm pgl27_row_word39 carries. *)
 Lemma pgl27_row_word_branch39_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word_branch39)) R) :
   security_arm_of pgl27_row_word_branch39 R idx = InputIndistinguishabilityArm.
@@ -841,7 +840,7 @@ Proof. exact: erefl. Qed.
 (** The number pgl27_word_cert carries at this model is twice the number
     pgl27_word_proximity_cert carries. Both are read off pgl27_word_mixing,
     the one bound on the cut group's distance; the input-indistinguishability
-    arm spends it once for each of the two dealt secrets it compares and the
+    arm loses that bound at each of two hops, one per dealt secret, and the
     proximity arm compares one law with one law. The relation is between
     these two certificates and not between the two arms: cert_eps is by
     definition the walk's marginal number added to itself, and this proximity
@@ -892,12 +891,12 @@ Qed.
     The certificate's own number is 2^-40, half of that. Below four seats its
     distance field, pgl27_word_proximity_close, puts the joint law of a
     coalition's reading with the dealt secret within that number of the same
-    joint law under the prior-indexed exact execution, where the reading and
-    the secret are independent outright, so the ideal side is the product of
-    its two marginals. The number is spent once, against the
-    input-indistinguishability certificate's twice. Its transfer status is
-    IdealFinite, the same the input-indistinguishability row carries, and the
-    two certificates compare against the same ideal cut. *)
+    joint law under the prior-indexed exact execution, where the reading and the
+    secret are independent outright, so the ideal side is the product of its two
+    marginals. The certificate hops to the ideal once and so loses that number
+    once, where the input-indistinguishability row hops twice. Its transfer
+    status is IdealFinite, the same the input-indistinguishability row carries,
+    and the two certificates compare against the same ideal cut. *)
 Definition pgl27_row_word_proximity : PublishedRowAt pgl27_bound39 :=
   pgl27_word_sampled
     certify IdealProximity pgl27_word_proximity_cert
@@ -948,7 +947,7 @@ Lemma pgl27_row_word_obs_sampledE :
      = sp_obs (tableau_at pgl27_word_sampled).
 Proof.
 (* Each row stated against the named value closes by exact: erefl in under
-   0.01 s. The row-against-row form is the expensive one, 96.0 s by
+   0.01 s. The row-against-row form is the slow one, 96.0 s by
    exact: erefl and 48.1 s by reflexivity, and is not stated. *)
 split; exact: erefl.
 Qed.

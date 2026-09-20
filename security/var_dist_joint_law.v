@@ -147,9 +147,10 @@ Lemma var_dist_own_marginals (R : realType) (V W : finType)
   var_dist J (Mr `x Ms) <= d ->
   var_dist J ((fdistmap fst J) `x (fdistmap snd J)) <= 3%:R * d.
 Proof.
-(* Each marginal of the joint law is within d of the corresponding factor by
-   data processing, and replacing the two factors one at a time costs d each,
-   so the number is spent three times. *)
+(* The hypothesis gives the first hop. Each marginal of the joint law is within
+   d of the corresponding factor by data processing, so replacing the two
+   factors one at a time gives the other two, and the three hops each lose at
+   most d, so the total is 3 * d. *)
 move=> H.
 have Hfst : fdistmap fst (Mr `x Ms) = Mr by exact: fdist_prod1.
 have Hsnd : fdistmap snd (Mr `x Ms) = Ms by exact: fdist_prod_snd.

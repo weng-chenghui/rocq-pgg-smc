@@ -96,7 +96,7 @@ Proof. rewrite pgl27_se_exact; exact: lexx. Qed.
     perfect uniformity of the PGL(2,7) shuffle, carrying word length 0, the
     uniform shuffle distribution and its per-position bound.  Word length 0
     records that this model does no word shuffling at all: the cut is drawn
-    from the group itself, and the price of that idealisation is paid by
+    from the group itself, and the loss of that idealisation is bounded by
     pgl27_word_mixing, not here. *)
 Definition pgl27_marginal_bound : ShuffleMarginalBound R pgl27_M :=
   @MkShuffleMarginalBound R pgl27_M 0 0%R pgl27_rho_dist pgl27_sw_bound.

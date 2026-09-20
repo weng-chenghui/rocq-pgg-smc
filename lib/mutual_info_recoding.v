@@ -40,7 +40,7 @@ Local Open Scope ring_scope.
 Local Open Scope proba_scope.
 Local Open Scope entropy_scope.
 
-(** Two maps that agree wherever a law charges push that law forward to the
+(** Two maps that agree wherever a law gives mass push that law forward to the
     same law: fdistmap f d = fdistmap g d as soon as f and g agree on
     fdist_supp d. A coalition view identity that holds only at samples whose
     shuffle lies in the monodromy group is available in this
@@ -77,7 +77,7 @@ Qed.
 (** The product of a law on a finite type with the uniform law on a group is
     invariant under left translation of the group component by an element of
     the group. A dealer that draws its group element uniformly from the whole
-    monodromy group charges every sample exactly as it charges the
+    monodromy group gives every sample the same mass it gives the
     premultiplied one, which is what lets a relabelling of the positions a
     coalition holds be absorbed into that group element. *)
 Lemma fdistmap_prod_uniform_Ml (R : realType) (gT : finGroupType)

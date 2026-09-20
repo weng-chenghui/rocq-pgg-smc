@@ -123,7 +123,7 @@ Definition profile := five_card_profile.
 
 (** den_boer_profile — the den Boer instance's name for the same program
     value as profile: the two aliases are erefl-equal, so naming the program
-    twice costs nothing at the value level, per the retention check below. *)
+    twice leaves the value unchanged, per the retention check below. *)
 Definition den_boer_profile := den_boer_profile.den_boer_profile.
 
 (******************************************************************************)

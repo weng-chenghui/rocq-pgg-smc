@@ -14,7 +14,7 @@
 (* publishes its all-decks row through the exact arm and its word row through *)
 (* the proximity arm, in                                                      *)
 (* instances/psl211/tableau/psl211_tableau_analysis_bridged.v, and this file  *)
-(* is what the input-indistinguishability arm would cost it.                  *)
+(* is what the input-indistinguishability arm would require of it.            *)
 (*                                                                            *)
 (* All-decks mode. The run argument is a whole deck description: one of the   *)
 (* two chiralities, one of the 132 block lines of that chirality's Steiner    *)
@@ -247,8 +247,8 @@ Qed.
 (** psl211_perdeck_coalition_below_k — those three seats meet the threshold
     premise every security arm states, the derived profile declaring six. A
     refutation of a field quantified over coalitions below the threshold has
-    to discharge this premise, and it is the only nontrivial premise the
-    counterexample owes. *)
+    to discharge this premise, and it is the counterexample's only nontrivial
+    premise. *)
 Lemma psl211_perdeck_coalition_below_k :
   (#|psl211_perdeck_coalition| < profile_k (instance_profile psl211_algebra))%N.
 Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
@@ -521,7 +521,7 @@ Qed.
 
 (** fdistmap_point_condE — the mass a pushed-forward law gives a value is the
     mass of that value's preimage, with the preimage written as a bigop
-    condition, which is the form a support hypothesis is spent in. *)
+    condition, which is the form a support hypothesis is used in. *)
 (* Two lines from infotheo's fdistmapE, which writes the same sum with the
    preimage as a set membership; it is kept local for that reason. *)
 Lemma fdistmap_point_condE (R : realType) (X T : finType) (f : X -> T)
@@ -751,10 +751,10 @@ Qed.
 (** psl211_alldecks_constancy_false_word — take a cut law W within d of the
     group-uniform law, and a law on cuts within eps of W. That law does not
     satisfy the constancy field, as long as twice the sum of d and eps stays
-    below the reciprocal of the group order. The first distance is the price
-    of replacing the exact shuffle by one a dealer can perform, the second is
-    a certificate's own distance field, and a row over any cut law but the
-    group-uniform one pays both. *)
+    below the reciprocal of the group order. The first number bounds the loss of
+    replacing the exact shuffle by one a dealer can perform, the second is a
+    certificate's own distance field, and an ideal that far from such a cut law
+    is within their sum of the group-uniform law. *)
 Lemma psl211_alldecks_constancy_false_word (R : realType)
     (W ideal : R.-fdist cutT) (d eps : R) :
   var_dist ((`U psl211_G_pos) : R.-fdist cutT) W <= d ->
@@ -773,7 +773,7 @@ Qed.
     word shuffle leaves the constancy field false at every ideal within eps of
     it, once twice the sum of eps and 2^-40 stays below the reciprocal of the
     group order. The dealer performs a finite word and not an exact uniform
-    draw, and the 2^-40 is the whole information-theoretic price of that
+    draw, and 2^-40 bounds the whole information-theoretic loss of that
     replacement, while the eps is a certificate's own distance field. It is
     stated on the cut law rather than on a certificate because it quantifies
     over every law within eps of that cut: a certificate whose adapter draws
@@ -1017,7 +1017,7 @@ Qed.
 
 (** psl211_alldecks_constancy_set0 — at the empty coalition the constancy
     statement holds, for every law on cuts. A refutation of the field at these
-    parameters therefore has to spend a nonempty coalition: the field is not
+    parameters therefore has to exhibit a nonempty coalition: the field is not
     false for the trivial reason that its quantifier over coalitions admits a
     reading no law can make constant. *)
 Lemma psl211_alldecks_constancy_set0 (R : realType)

@@ -393,7 +393,8 @@ Qed.
 
 (** s5_cert_bound_col_dominant — each column of the dominating matrix sums
     to at most the residual's diagonal entry in that column.  Column
-    dominance, the second half of the budget psd_of_dominant spends. *)
+    dominance, the second of the two sum conditions psd_of_dominant needs
+    beside its two entrywise ones. *)
 Lemma s5_cert_bound_col_dominant (R : realType) :
   forall j, \sum_(i | i != j) s5_cert_bound R i j <= s5_cert_resid R j j.
 Proof.
@@ -477,7 +478,7 @@ Qed.
 
 (** s5_gap_R — the spectral gap 1 - alpha = 19/200 of the S_5 word shuffle.
     The form a SecurityAsymptotic states its convergence rate in: one letter
-    of the word buys a factor 1 - gap. *)
+    of the word contributes a factor 1 - gap. *)
 Definition s5_gap_R (R : realType) : R := 1 - s5_alpha_R R.
 
 (** s5_gap_R_pos — the S_5 spectral gap [1 - alpha] is strictly positive,
@@ -507,8 +508,8 @@ Proof. by rewrite /s5_gap_R opprB addrA addrAC subrr add0r. Qed.
 (** s5_spectral_convergence_gap — after a uniform L-letter word the law of
     the card at position s is within sqrt(5) * (1 - gap)^L of uniform, with
     gap = 19/200.  The shape a SecurityAsymptotic and a spectral marginal
-    bound are stated in, which is how one letter of a dealer's word acquires
-    a price. *)
+    bound are stated in, which is where each letter of a dealer's word
+    contributes its factor 1 - gap. *)
 Lemma s5_spectral_convergence_gap
     (R : realType) (L : nat) (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)

@@ -84,7 +84,7 @@ Proof. exact: erefl. Qed.
     tape, the dealer lays the additive layout of that tape, the value the run
     is meant to recover is the tape's secret coordinate carried through the
     codec, and the interpreter is given fuel 150. No sharing claim is written
-    into the record, which is what leaves this mode owing a reconstruction
+    into the record, which is what leaves this mode with a reconstruction
     obligation of its own at the level above. *)
 Definition s5_supplied_executable : Tableau Executable :=
   s5_algebraic_start ;;; params_step

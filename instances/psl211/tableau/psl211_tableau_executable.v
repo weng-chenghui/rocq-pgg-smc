@@ -68,7 +68,7 @@ Local Open Scope ring_scope.
 (** The all-decks mode at the Executable level: the run argument is a deck
     description, the dealer lays that description as the twelve dealt cards,
     the value the run is meant to recover is the chirality bit of its
-    argument, and the interpreter is given the instance's budget of 220
+    argument, and the interpreter is given the instance's fuel of 220
     steps. No party commits an input, so the run carries no commit process,
     and the value it names is a reading of the run's own argument rather than
     an ideal function of anyone's input. Naming the parameters as a program

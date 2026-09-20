@@ -85,8 +85,8 @@ Definition rho_word : R.-fdist (pgg_gT pgl27_M) :=
     marginal of that law is within 2^-40 of uniform.  It is the word family's
     counterpart of pgl27_marginal_bound, which the exact family carries at
     length zero and epsilon zero because that model draws its cut from the
-    group itself; the 2^-40 here is what replacing that draw by a finite word
-    costs, and it is the number a word row's spectral arm spends. *)
+    group itself; 2^-40 here bounds the loss of replacing that draw by a
+    finite word, and it is the number a word row's spectral arm carries. *)
 Definition pgl27_word_marginal_bound : ShuffleMarginalBound R pgl27_M :=
   @MkShuffleMarginalBound R pgl27_M 200 (2%:R^-40) rho_word
     (@pgl27_endpoint_mixing R).

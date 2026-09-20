@@ -1109,8 +1109,8 @@ Proof. by vm_compute. Qed.
    counts: by Cartier-Foata the generating function depends on the graph only
    through P(z).  Path P_4 and star K_{1,3} both have
    P(z) = 1 - 4z + 3z^2 = (1-z)(1-3z), and the two rows agree.
-   For the search-space reading this means the deck designer buys nothing by
-   choosing between two graphs with the same clique polynomial. *)
+   For the search-space reading this means the choice between two graphs with
+   the same clique polynomial leaves the deck designer's trace counts equal. *)
 
 Lemma table_T4_star3 :
   [seq clique_traces 4 L (star_comm_nat 3) | L <- iota 0 6]

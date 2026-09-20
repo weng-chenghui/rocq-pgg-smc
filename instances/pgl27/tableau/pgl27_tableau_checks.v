@@ -98,8 +98,7 @@ Fail Definition pgl27_row_exact_leak7 : PublishedRow :=
 (******************************************************************************)
 
 (** Recording the word row at the exact arm is rejected by conversion, so the
-    table column holds the arm the row's certify statement wrote and no
-    other. *)
+    row carries the arm its certify statement wrote and no other. *)
 Fail Definition pgl27_row_word_arm_neq (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_row_word_tableau)) R) :=
   (erefl : security_arm_of pgl27_row_word_tableau R idx
@@ -112,7 +111,7 @@ Lemma pgl27_row_word_arm_neq (R : realType) (secretP : R.-fdist bool) :
   security_arm_of pgl27_row_word_proximity R secretP
   <> security_arm_of pgl27_row_word_branch39 R secretP.
 Proof.
-(* Three costs are each why one line reads as it does. Binding the prior as
+(* Three timings are each why one line reads as it does. Binding the prior as
    an index of the proximity row costs 78.7 s in the statement alone,
    because the branch row's index type is then reached by conversion through
    both rows' observed executions, so it is bound at its own type. Rewriting

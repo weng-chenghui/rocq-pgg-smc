@@ -23,11 +23,11 @@
 (* Two rows are published here and they part at the model. Over the uniform   *)
 (* cut, what a coalition is shown is independent of the chirality outright,   *)
 (* at every real field and with no number in the claim; that is the exact     *)
-(* arm, and the instance owes it one witness. Over the 584-letter word cut,   *)
+(* arm, and the instance gives it one witness. Over the 584-letter word cut,  *)
 (* what a coalition is shown is within 2^-40, in the sum of absolute          *)
 (* differences, of what the uniform-cut execution shows it, so a              *)
 (* distinguisher's advantage is at most 2^-41; that is the proximity arm, and *)
-(* the instance owes it a certificate whose ideal is the first row's own      *)
+(* the instance gives it a certificate whose ideal is the first row's own     *)
 (* model. Both numbers are the certificate's, not a constant read from        *)
 (* elsewhere.                                                                 *)
 (*                                                                            *)
@@ -146,8 +146,7 @@ Local Notation cardT :=
     reading carrying no information about the chirality at all, not a small
     amount. The framework derives the zero mutual information, the unchanged
     conditional entropy and the closure under post-processing from this one
-    field, so the witness is the whole of what this instance owes the exact
-    arm. *)
+    field, so the witness is all the exact arm requires of this instance. *)
 Definition psl211_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample psl211_exact_family R idx) :=
   @MkExactWitness R psl211_algebra psl211_alldecks_params
@@ -187,8 +186,8 @@ Proof. by []. Qed.
 
 (** The arm this row carries, at every real field and index: independence of
     the coalition's view from the chirality, and not a distance between two
-    readings. This is the value a paper's table prints in the arm column for
-    this row, settled by the certify statement the program wrote. *)
+    readings. The certify statement the program wrote settles which arm that
+    is. *)
 Lemma psl211_row_alldecks_armE (R : realType)
     (idx : amf_index (ab_f (published_at psl211_row_alldecks_tableau)) R) :
   security_arm_of psl211_row_alldecks_tableau R idx = ExactIndependenceArm.

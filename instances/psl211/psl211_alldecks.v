@@ -33,8 +33,8 @@
 (*                                                                            *)
 (* This file deliberately omits Set Implicit Arguments, as psl211_orbit.v     *)
 (* does: every helper below is applied at explicit block rows and explicit    *)
-(* labellings, and a stolen leading parameter is the most expensive mistake   *)
-(* to diagnose in that position.                                              *)
+(* labellings, and a stolen leading parameter is the mistake hardest to       *)
+(* diagnose in that position.                                                 *)
 (*                                                                            *)
 (* The counting half cites card_prescribed from lib/perm_uniform.v:117, whose *)
 (* own imports pull in all_algebra, boolp, reals and infotheo's fdist, proba, *)
@@ -67,7 +67,7 @@
 (*   psl211_alldecks_classE     == its chirality is the input's class bit     *)
 (*   psl211_alldecks_valid      == it is a valid deal of that bit             *)
 (*   psl211_alldecks_ts_valid   == the same in the framework's spelling       *)
-(*   psl211_alldecks_terminates == every process finishes inside the budget   *)
+(*   psl211_alldecks_terminates == every process finishes inside the fuel     *)
 (*   psl211_prescribed_of_set, psl211_perm_ext_count_ord,                     *)
 (*   psl211_perm_ext_count0_ord == the same two counts at any N               *)
 (*   psl211_perm_ext_count      == a labelling prescribed injectively on k    *)
@@ -563,10 +563,10 @@ Proof. exact: psl211_alldecks_valid. Qed.
 (* -------------------------------------------------------------------------- *)
 
 (* vm_compute never destructs the layout, so its stuck ordinal content is
-   carried through at no cost and the all-decks mode costs no more to
-   terminate than the dealer-dealt one. *)
+   carried through unchanged and the all-decks mode needs no more reduction
+   to terminate than the dealer-dealt one. *)
 (** psl211_alldecks_terminates — every process of the fourteen-process
-    all-decks run finishes inside the budget, at every deck description and
+    all-decks run finishes inside the fuel, at every deck description and
     every cut. *)
 Lemma psl211_alldecks_terminates :
   instance_terminates_stmt psl211_alldecks_params.
@@ -574,9 +574,8 @@ Proof. by vm_compute. Qed.
 
 (** psl211_alldecks_recon — decoding the coalition-free endpoints of the
     all-decks run returns the class bit, from validity alone.  The framework
-    derives it from the coordinate law, so the whole of what this instance
-    owes reconstruction is distinctness, the heart set and the chirality
-    readout. *)
+    derives it from the coordinate law, so all reconstruction requires of this
+    instance is distinctness, the heart set and the chirality readout. *)
 Definition psl211_alldecks_recon : instance_recon_stmt psl211_alldecks_params :=
   supplied_static_recon psl211_algebra psl211_alldecks_ts_valid.
 

@@ -10,7 +10,7 @@
 (* distributional. For a uniformly drawn PSL(2,11) shuffle and any prior on   *)
 (* the secret, a coalition of at most five positions has a colour view whose  *)
 (* law does not depend on the dealt chirality. At six positions, and at any   *)
-(* prior charging both chiralities, the law already depends on it.            *)
+(* prior giving mass to both chiralities, the law already depends on it.      *)
 (*                                                                            *)
 (* The two conditional laws are equal, not close. Nothing in the file is      *)
 (* conditional on a computational assumption, and the only inputs are the     *)
@@ -34,8 +34,8 @@
 (*     shuffles showing each view value, at every coalition of at most five   *)
 (*   psl211_colour_view_indep  == colour-view independence at five positions  *)
 (*   psl211_leak_coalition_card6 == the leak coalition has six positions      *)
-(*   psl211_colour_view_dep_k6 == at a prior charging both chiralities, a     *)
-(*     six-position coalition's colour view depends on the chirality          *)
+(*   psl211_colour_view_dep_k6 == at a prior giving mass to both chiralities, *)
+(*     a six-position coalition's colour view depends on the chirality        *)
 (*                                                                            *)
 (* The coalition observes colours only. The all-decks code view, in which     *)
 (* the dealt deck is redrawn uniformly over the valid decks of its class and  *)
@@ -320,11 +320,11 @@ Qed.
    shuffle under the mirror deal and under no hexad deal, because a hexad
    block containing the six mirror positions would equal that mirror block,
    which psl211_blocks_disjoint forbids. *)
-(** psl211_colour_view_dep_k6 — under a prior charging both chiralities, the
-    colour view of the six positions of the mirror representative is not
+(** psl211_colour_view_dep_k6 — under a prior giving mass to both chiralities,
+    the colour view of the six positions of the mirror representative is not
     independent of the dealt chirality. The five-position threshold is sharp:
-    one more position already separates the two block systems, and the
-    coalition that achieves it is a block of one of them. *)
+    one more position already separates the two block systems, and the coalition
+    that achieves it is a block of one of them. *)
 Lemma psl211_colour_view_dep_k6 :
   secretP true != 0 -> secretP false != 0 ->
   (#|psl211_leak_coalition| = 6)%N /\

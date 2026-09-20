@@ -20,9 +20,9 @@
 (* Both observed executions are the framework's derivation from one algebraic *)
 (* record, s5_algebra, and one parameter record per mode: dealer-dealt for    *)
 (* the deterministic run, supplied layout for the randomized one. The         *)
-(* instance spends three reductions in all, one termination per mode and the  *)
+(* instance needs three reductions in all, one termination per mode and the   *)
 (* single profile computation s5_profile_endpoints, which both endpoint       *)
-(* obligations instantiate; the two reconstructions cost no reduction at all, *)
+(* obligations instantiate; the two reconstructions use no reduction at all,  *)
 (* being read off the coordinate law and off the sharing claim. Each of       *)
 (* s5_exec_terminates, s5_exec_endpoints, s5_exec_recon, s5_rand_terminates,  *)
 (* s5_rand_endpoints and s5_rand_recon proves a statement convertible with    *)
@@ -360,9 +360,9 @@ Proof. by []. Qed.
 
 (** s5_dealt_params — the run-level data of a run that deals the secret
     position and recovers it: the run argument is the position itself, no
-    party commits an input, and the interpreter fuel is 150. The
-    dealer-dealt mode is what leaves the instance owing termination alone
-    among the three run facts. *)
+    party commits an input, and the interpreter fuel is 150. The dealer-dealt
+    mode is what leaves termination as the instance's only obligation among the
+    three run facts. *)
 Definition s5_dealt_params : ExecutionParams s5_algebra :=
   dealt_secret_params s5_algebra 150.
 
@@ -377,7 +377,7 @@ Proof. by []. Qed.
     within the fuel 150. The one run fact that has no route through the
     algebra: it depends on the interpreter and on the fuel, and is decided
     by reduction. The statement is convertible with s5_exec_terminates, which
-    states the same reduction at the hand-written plug; both spend the
+    states the same reduction at the hand-written plug; both use the
     instance's own vm_compute, and this one is stated on the plug the
     framework derives from s5_algebra. *)
 Lemma s5_dealt_terminates : instance_terminates_stmt s5_dealt_params.
@@ -394,7 +394,7 @@ Proof. by vm_compute. Qed.
 (** s5_dealt_endpoints — the endpoint obligation of the dealt run. The
     statement is convertible with s5_exec_endpoints, which proves it through
     the interpreter; this one instantiates the profile's abstract-readout
-    equation at the dealt readout, so the run pays no reduction of its own
+    equation at the dealt readout, so the run uses no reduction of its own
     for it. *)
 Definition s5_dealt_endpoints : instance_endpoints_stmt s5_dealt_params :=
   profile_endpointsE s5_profile_endpoints.
@@ -404,7 +404,7 @@ Definition s5_dealt_endpoints : instance_endpoints_stmt s5_dealt_params :=
     s5_exec_recon, which proves it through the interpreter; this one is
     dealt_static_recon, which the framework derives from the algebra's
     coordinate law alone, so reconstruction correctness of this run is a
-    consequence of that law and costs no further proof. *)
+    consequence of that law and needs no further proof. *)
 Definition s5_dealt_recon : instance_recon_stmt s5_dealt_params :=
   dealt_static_recon s5_algebra 150.
 
@@ -908,7 +908,7 @@ Qed.
     layout of that tape, the value the run recovers is the tape's secret
     coordinate carried through the codec, and the interpreter fuel is 150.
     No sharing claim is written into the record, which is what leaves this
-    run owing a reconstruction obligation of its own. *)
+    run with a reconstruction obligation of its own. *)
 Definition s5_supplied_params : ExecutionParams s5_algebra :=
   supplied_input_params s5_algebra 'rV['Z_5]_5
     s5_rfree_layout (fun u => s5_codec (s5_tape_secret u)) 150.
@@ -933,8 +933,8 @@ Proof. by vm_compute. Qed.
     read off the same profile equation the deterministic run reads. The
     statement is convertible with s5_rand_endpoints, which proves it through
     the interpreter; the profile's equation already quantifies over the
-    content readout, so instantiating it at the additive layout costs this
-    run no reduction of its own, and the two modes share one decision. *)
+    content readout, so this run uses no reduction of its own to instantiate it
+    at the additive layout, and the two modes share one decision. *)
 Definition s5_supplied_endpoints
   : instance_endpoints_stmt s5_supplied_params :=
   supplied_endpointsE s5_profile_endpoints.

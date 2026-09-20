@@ -12,7 +12,7 @@
 (*                                                                            *)
 (* The input-indistinguishability proposition does not mention the            *)
 (* certificate it is stated at: it is one proposition at two certificates     *)
-(* over one model, so the ideal cut and the constancy field are spent inside  *)
+(* over one model, so the ideal cut and the constancy field are used inside   *)
 (* indistinguishability_tail and have left the claim. The proximity           *)
 (* proposition does mention its certificate, through the ideal adapter, that  *)
 (* ideal's witness and the actual model's secret, as its definition shows.    *)
@@ -30,7 +30,7 @@
 (* against. The number bounds a sum of absolute differences, twice the total  *)
 (* variation distance, so a distinguisher's advantage is at most half of it.  *)
 (*                                                                            *)
-(* The arm's mathematics is spent on the ideal witness's independence: it     *)
+(* The arm's mathematics rests on the ideal witness's independence: it        *)
 (* turns the ideal joint law into the product of its marginals, and the arm's *)
 (* proposition compares the actual joint law with exactly that product. One   *)
 (* recorded failure below is a written term that omits that independence.     *)
@@ -189,7 +189,7 @@ End proximity_against_indistinguishability.
     proof. What remains is the certificate's distance between two joint laws
     and the two link lemmas, and the arm's proposition compares the actual
     joint law with a product, so the step that turns the ideal joint law into
-    the product of its marginals is where the witness is spent. Without it the
+    the product of its marginals is where the witness is used. Without it the
     final application does not typecheck. *)
 Fail Definition idealproximity_tail_without_independence (R : realType)
     (A : PGGAlgebraic) (E : ExecutionParams A)

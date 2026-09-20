@@ -192,7 +192,7 @@ Qed.
 
 (** den_boer_run_recovers — reconstructing the verifier's executed endpoints
     from the executed trace returns the committed AND a && b, for ANY cut w0
-    in the group: the random cut buys privacy, not correctness. This is the
+    in the group: the random cut gives privacy, not correctness. This is the
     file's DSDP dsdp_is_correct analog, read at the seq level via fcI_recon
     (= fc_three_consec of the decoded endpoints). *)
 Lemma den_boer_run_recovers (a b : bool) (w0 : pgg_gT FiveCardKim_M) :

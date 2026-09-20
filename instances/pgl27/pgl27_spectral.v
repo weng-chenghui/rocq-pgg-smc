@@ -103,7 +103,7 @@ Proof. by rewrite /pgl27_alpha_R ltr_pdivrMr ?ltr0n// mul1r ltr_nat. Qed.
 
 (** pgl27_gap_R — the spectral gap 1 - alpha = 1/8 of the PGL(2,7) word
     shuffle.  The form SchreierCertificate states its convergence rate in:
-    one letter of the word buys a factor 1 - gap. *)
+    one letter of the word contributes a factor 1 - gap. *)
 Definition pgl27_gap_R (R : realType) : R := 1 - pgl27_alpha_R R.
 
 (** pgl27_gap_R_pos — the gap is strictly positive, since alpha < 1.  A
@@ -514,7 +514,8 @@ Qed.
 
 (** pgl27_cert_bound_col_dominant — each column of the dominating matrix sums
     to at most the residual's diagonal entry in that column.  Column
-    dominance, the second half of the budget psd_of_dominant spends. *)
+    dominance, the second of the two sum conditions psd_of_dominant needs
+    beside its two entrywise ones. *)
 Lemma pgl27_cert_bound_col_dominant (R : realType) :
   forall j, \sum_(i | i != j) pgl27_cert_bound R i j <= pgl27_cert_resid R j j.
 Proof.
@@ -583,8 +584,8 @@ Qed.
 
 (** pgl27_spectral_convergence_gap — the endpoint bound written with the
     spectral gap, sqrt(8) * (1 - gap)^L with gap = 1/8.  The shape the
-    sc_convergence field of SchreierCertificate is stated in, which is how
-    one letter of the word acquires a price. *)
+    sc_convergence field of SchreierCertificate is stated in, which is where
+    each letter of the word contributes its factor 1 - gap. *)
 Lemma pgl27_spectral_convergence_gap (R : realType) (L : nat) (s : 'I_8) :
   var_dist (fdistmap (fun sigma : {perm 'I_8} => sigma s)
              (rho_from_words L pgl27_moves))

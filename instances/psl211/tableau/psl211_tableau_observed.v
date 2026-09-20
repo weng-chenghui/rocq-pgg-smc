@@ -5,7 +5,7 @@
 (*                                                                            *)
 (* The Observed level adjoins the three run facts to the run parameters, and  *)
 (* it is the first level at which a row proves anything. What it carries is   *)
-(* run correctness: the interpreter finishes within the budget of 220 steps,  *)
+(* run correctness: the interpreter finishes within the fuel of 220 steps,    *)
 (* every one of the twelve seats reaches an endpoint, and the endpoints       *)
 (* decode to the chirality bit the run was built to recover. Nothing about a  *)
 (* coalition is proved at this level, at any coalition size.                  *)
@@ -28,7 +28,7 @@
 (*                           == the prefix with the termination reduction     *)
 (*                              written inline                                *)
 (*   psl211_alldecks_prefix_lit                                               *)
-(*                           == the prefix with the budget written as a       *)
+(*                           == the prefix with the fuel written as a         *)
 (*                              literal                                       *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -38,7 +38,7 @@
 (*   psl211_alldecks_prefix_vm_paramsE                                        *)
 (*                           == the inline prefix drives the same run         *)
 (*   psl211_alldecks_prefix_lit_paramsE                                       *)
-(*                           == and so does the literal budget                *)
+(*                           == and so does the literal fuel                  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -70,7 +70,7 @@ Local Open Scope ring_scope.
 
 (** psl211_alldecks_prefix — the first three statements of the all-decks row:
     the algebra, the run driven in the supplied-layout mode at the instance's
-    budget, and the three run facts. What has been proved at this point is run
+    fuel, and the three run facts. What has been proved at this point is run
     correctness and nothing about a coalition. *)
 Definition psl211_alldecks_prefix : Tableau Observed :=
   psl211_algebra
@@ -127,7 +127,7 @@ Lemma psl211_alldecks_prefix_vm_paramsE :
 Proof. by []. Qed.
 
 (** psl211_alldecks_prefix_lit — the prefix once more, with the interpreter
-    budget written as the literal 220 rather than named. *)
+    fuel written as the literal 220 rather than named. *)
 Definition psl211_alldecks_prefix_lit : Tableau Observed :=
   psl211_algebra
     supplied inputs psl211_inputT
@@ -140,7 +140,7 @@ Definition psl211_alldecks_prefix_lit : Tableau Observed :=
 
 (** psl211_alldecks_prefix_lit_paramsE — the prefix written with the fuel
     literal drives the same run, so fuel 220 and fuel psl211_fuel name one
-    run. The row names the budget, so that it is stated once. *)
+    run. The row names the fuel, so that it is stated once. *)
 Lemma psl211_alldecks_prefix_lit_paramsE :
   projT1 (projT2 (tableau_at psl211_alldecks_prefix_lit))
   = psl211_alldecks_params.

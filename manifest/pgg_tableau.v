@@ -167,7 +167,8 @@ Local Open Scope ring_scope.
    that coalition's static endpoint reading from it. Independence is the
    statement rather than a numeric leakage bound, and the entropy forms and
    the closure under post-processing are derived from it below, so an instance
-   producing this record owes nothing further about mutual information. *)
+   producing this record has nothing further to supply about mutual
+   information. *)
 Record ExactWitness (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E)) :=
   MkExactWitness {
@@ -397,7 +398,7 @@ Arguments oe_correct_prop : clear implicits.
 
 (* The proof of that proposition, read off the observed execution's own field.
    It is the whole content of the Observed level: a row that supplies the
-   three run facts reaches run correctness at no further cost. *)
+   three run facts reaches run correctness with no further proof. *)
 Definition observed_correct (oe : OE.ObservedExecution) : oe_correct_prop oe :=
   @OE.oe_run_correct oe.
 Arguments observed_correct : clear implicits.
@@ -703,7 +704,7 @@ Definition IdealProximityPayload (x : StackAt Sampled) : Type :=
    to the view along the link lemma, with its entropy forms and
    its closure under deterministic post-processing. The composition law of the
    exact arm, and what makes an ExactWitness the whole of what an instance
-   owes on it. *)
+   supplies on it. *)
 Lemma exact_tail (R : realType) (A : PGGAlgebraic) (E : ExecutionParams A)
     (sa : SampleAdapter R (instance_exec E)) (w : ExactWitness sa)
     (Hview : forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
@@ -839,7 +840,7 @@ Arguments certify_idealproximity x q p : assert.
    exact arm carries no number, so concluding a row leaves it untouched. An
    upper bound is the right obligation because the propositions of the two
    arms that carry a number are monotone in it; an arm whose proposition is
-   not monotone in the number it carries owes a different obligation here. *)
+   not monotone in the number it carries needs a different obligation here. *)
 Definition ConcludePayload (c : ConcludedBound)
     (q : StackAt AnalysisBridged) : Type :=
   forall (R : realType) (idx : amf_index (ab_f q) R),
@@ -855,9 +856,9 @@ Arguments ConcludePayload c q : assert.
    number is at least that bound, give the port's proposition at the chosen
    number. The step is sound because the propositions of the arms that carry a
    number are monotone in it, which is the condition any future arm carrying a
-   number owes as well; it is what lets a row state the constant a paper
-   cites while asserting about the coalition no more than the certificate
-   proved. *)
+   number must satisfy as well; it is what lets a row state the constant a
+   paper cites while asserting about the coalition no more than the
+   certificate proved. *)
 Lemma port_conclude (c : ConcludedBound) (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (p : SecurityPort sa) :
@@ -980,9 +981,8 @@ Definition view_proximity_of (c : ConcludedBound) (r : PublishedRowAt c) :=
 Arguments view_proximity_of {c} r.
 
 (* Which arm a published row carries, at one real field and one index of its
-   family. It reads ab_arm past the publish statement, so it is the reader a
-   paper's arm column is taken from, and publish_armE is why the publish
-   statement does not change the answer. *)
+   family. It reads ab_arm past the publish statement, and publish_armE is
+   why the publish statement does not change the answer. *)
 Definition security_arm_of (c : ConcludedBound) (r : PublishedRowAt c)
     (R : realType) (idx : amf_index (ab_f (published_at r)) R)
   : SecurityArm :=
@@ -1042,7 +1042,7 @@ Proof. by []. Qed.
 (* Publishing attaches the manifest row and leaves the arm alone, so the arm
    a finished row reports is the arm its data carried before the last line.
    This is the step that carries the three certify statements' arm equations
-   out to a published row, where a paper's table reads them. *)
+   out to a published row. *)
 Lemma publish_armE (a : AssumptionStatus) (c : ConcludedBound)
     (q : StackAt AnalysisBridged) (pf : BridgedProp c q) (t : TransferStatus)
     (R : realType)

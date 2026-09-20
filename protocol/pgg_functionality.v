@@ -137,8 +137,8 @@ Arguments realises : clear implicits.
    as terms. Conversion decides this, so an instance that writes its recovered
    value as the ideal function discharges it by reflexivity, and one whose
    recovered value only agrees pointwise with the ideal function does not
-   discharge it by reflexivity. That case still closes through funext, at the
-   price of functional_extensionality_dep and propositional_extensionality in
+   discharge it by reflexivity. That case still closes through funext, which
+   puts functional_extensionality_dep and propositional_extensionality into
    the row's assumption list, so the difference between the two specifications
    is visible in Print Assumptions rather than in provability. *)
 Definition realises_expected (oe : OE.ObservedExecution)

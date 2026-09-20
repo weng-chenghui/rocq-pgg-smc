@@ -61,7 +61,7 @@
 (* constrains the layout and not the run, and it is what makes the row's      *)
 (* recon clause a bare lemma name.                                            *)
 (*                                                                            *)
-(* The surface spends nineteen identifiers as global keywords in every file   *)
+(* The surface reserves nineteen identifiers as global keywords in every file *)
 (* that requires this one: dealt, functionality, execute, endpoints, recon,   *)
 (* sample, certify, leaks, tied, ideal, mixing, invariant, encoded, supplied, *)
 (* layout, decoded_by, committed_by, expecting and fuel. Each follows a slot  *)
@@ -76,8 +76,8 @@
 (* in the other, and was a keyword of Rocq before this file. by follows the   *)
 (* slot L of the encoded rule, the slot k of the leaks rule and the slot c of *)
 (* the conclude rule, so it would be a twentieth, and it is not one only      *)
-(* because ssreflect already spends it, measured on 2026-09-19 by binding it  *)
-(* in a file that requires nothing but ssreflect.                             *)
+(* because ssreflect already reserves it, measured on 2026-09-19 by binding   *)
+(* it in a file that requires nothing but ssreflect.                          *)
 (*                                                                            *)
 (* One of the nineteen shadows a framework definition: endpoints is also the  *)
 (* verifier's endpoint tuple in pgg_interface.v. A file requiring this        *)
@@ -150,8 +150,9 @@ Arguments obs_payload : clear implicits.
    between that bound's law and the law the model draws its cut from, the
    ideal cut, the distance of the drawn cut from the ideal, and the constancy
    of a coalition's view of the ideal cut in the run argument. The split is
-   what makes the two currencies of the port visible where it is written: the
-   fourth component is the only inexact one, and the fifth is exact. *)
+   what makes the port's perfect and statistical halves visible where it is
+   written: the fourth component is an inequality at the first component's
+   epsilon, and the fifth is an equation. *)
 Definition mk_indistinguishability (x : StackAt Sampled)
     (b : forall (R : realType) (idx : amf_index (sp_f x) R),
            ShuffleMarginalBound R (instance_M (projT1 x)))
@@ -280,8 +281,8 @@ Definition ExactLeakAt (k : nat) (x : StackAt Sampled) (p : ExactPayload x)
 Arguments ExactLeakAt : clear implicits.
 
 (* The exact arm's witness, with a tightness annotation checked against it and
-   then dropped. The result is the witness itself, so the annotation costs
-   nothing in the term a row builds and everything proved about an annotated
+   then dropped. The result is the witness itself, so the annotation leaves
+   the term a row builds unchanged and everything proved about an annotated
    program is proved about the unannotated one. *)
 Definition exact_leaks (x : StackAt Sampled) (p : ExactPayload x)
     (k : nat) (H : ExactLeakAt k x p) : ExactPayload x := p.

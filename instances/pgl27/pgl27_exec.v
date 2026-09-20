@@ -16,7 +16,7 @@
 (* pgl27_observed is the derived value. Of its three run facts the instance   *)
 (* decides two by reduction, termination at its own plug and the endpoint     *)
 (* equation once at its profile with the content readout left a variable, and *)
-(* owes no proof at all for the third: reconstruction follows from the        *)
+(* needs no proof at all for the third: reconstruction follows from the       *)
 (* coordinate law, which for an instance whose seats start at the deck        *)
 (* positions in order is the framework's own ord_coordE.                      *)
 (*                                                                            *)
@@ -348,9 +348,9 @@ Definition pgl27_algebra : PGGAlgebraic := algebra {
 
 (** pgl27_dealt_params — the run-level data of a run that deals the orbit
     secret and recovers it: the run argument is the secret itself, no party
-    commits an input, and the interpreter budget is pgl27_fuel.  The
-    dealer-dealt mode is what leaves the instance owing termination alone
-    among the three run facts. *)
+    commits an input, and the interpreter fuel is pgl27_fuel.  The dealer-dealt
+    mode is what leaves termination as the instance's only obligation among the
+    three run facts. *)
 Definition pgl27_dealt_params : ExecutionParams pgl27_algebra :=
   dealt_secret_params pgl27_algebra pgl27_fuel.
 
@@ -369,9 +369,9 @@ Proof. by []. Qed.
 
 (** pgl27_dealt_terminates — every process of the dealt run reaches Finish
     within pgl27_fuel.  The one run fact that has no route through the
-    algebra: it depends on the interpreter and on the budget, and is decided
+    algebra: it depends on the interpreter and on the fuel, and is decided
     by reduction.  The statement is convertible with pgl27_exec_terminates,
-    which states the same reduction at the hand-written plug; both spend the
+    which states the same reduction at the hand-written plug; both use the
     instance's own vm_compute, and this one is stated on the plug the
     framework derives from pgl27_algebra. *)
 Lemma pgl27_dealt_terminates : instance_terminates_stmt pgl27_dealt_params.
@@ -389,7 +389,7 @@ Proof. by vm_compute. Qed.
 (** pgl27_dealt_endpoints — the endpoint obligation of the dealt run.  The
     statement is convertible with pgl27_exec_endpoints, which proves it
     directly from the interpreter; this one instantiates the profile's
-    abstract-readout equation at the dealt readout, so the instance pays no
+    abstract-readout equation at the dealt readout, so the instance uses no
     reduction of its own for it. *)
 Definition pgl27_dealt_endpoints : instance_endpoints_stmt pgl27_dealt_params :=
   profile_endpointsE pgl27_profile_endpoints.
@@ -399,7 +399,7 @@ Definition pgl27_dealt_endpoints : instance_endpoints_stmt pgl27_dealt_params :=
     pgl27_exec_recon, which proves it through the interpreter; this one is
     dealt_static_recon, which the framework derives from the algebra's
     coordinate law alone, so reconstruction correctness of this instance is a
-    consequence of that law and costs no further proof. *)
+    consequence of that law and needs no further proof. *)
 Definition pgl27_dealt_recon : instance_recon_stmt pgl27_dealt_params :=
   dealt_static_recon pgl27_algebra pgl27_fuel.
 

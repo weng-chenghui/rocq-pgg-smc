@@ -19,7 +19,7 @@
 (* supplies the available secret-encoding dimensions; the cs_gap_feasible gate *)
 (* rejects an instance when the two are disjoint. The Maschke lemma records     *)
 (* the regime (coprime characteristic) in which the available dimensions are    *)
-(* closed under complementation, i.e. the cheap subset-sum reasoning is valid;  *)
+(* closed under complementation, i.e. the simple subset-sum reasoning is valid; *)
 (* the s5_nogo.v instance is precisely the MODULAR regime where it fails.       *)
 (******************************************************************************)
 
@@ -78,7 +78,7 @@ Definition feasible (window : seq nat) : Prop :=
     hypothesis pgroup [pchar F]^' G), the regular module 1%:M of rG is
     completely reducible; this is a direct specialisation of
     mx_Maschke_pchar. This documents the regime in which the available
-    invariant dimensions are closed under taking complements, so the cheap
+    invariant dimensions are closed under taking complements, so the simple
     subset-sum reasoning over the dimension profile is sound. The
     S_5-on-GF(5)^6 instance violates this hypothesis, since 5 divides both
     the number of permuted points and the characteristic of GF(5), which is

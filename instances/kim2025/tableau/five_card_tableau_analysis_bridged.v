@@ -8,7 +8,7 @@
 (* the proposition it carries is that arm's own, on top of run correctness    *)
 (* and of the identification of the two readings of a coalition. A publish    *)
 (* terminal then turns the value into a PublishedRow. Every payload this      *)
-(* instance owes an arm is here, every row it publishes is here, and every    *)
+(* instance gives an arm is here, every row it publishes is here, and every   *)
 (* statement whose subject is a payload or a row is here. Of the statements   *)
 (* this directory makes, the one whose subject is neither a payload nor a row *)
 (* is Kim's input-privacy bound, which is in five_card_tableau_sampled.v; the *)
@@ -477,8 +477,7 @@ Qed.
     carry no information about the conjunction at all rather than a small
     amount. The framework derives the zero mutual information, the unchanged
     conditional entropy and the closure under post-processing from this one
-    field, so the witness is the whole of what this instance owes the exact
-    arm. *)
+    field, so the witness is all the exact arm requires of this instance. *)
 Definition five_card_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample five_card_uniform_family R idx) :=
   @MkExactWitness R five_card_algebra five_card_params
@@ -524,9 +523,8 @@ Proof. by []. Qed.
 
 (** The arm this row carries, at every real field and index: independence of
     the coalition's view from the conjunction of the committed bits, and not a
-    distance between two readings. This is the value a paper's table prints in
-    the arm column for this row, settled by the certify statement the program
-    wrote. *)
+    distance between two readings. The certify statement the program wrote
+    settles which arm that is. *)
 Lemma five_card_row_uniform_armE (R : realType)
     (idx : amf_index (ab_f (published_at five_card_row_uniform_tableau)) R) :
   security_arm_of five_card_row_uniform_tableau R idx = ExactIndependenceArm.
@@ -567,8 +565,9 @@ Proof. exact: (view_secrecy_of five_card_row_uniform_tableau R tt C HC). Qed.
 (******************************************************************************)
 
 (** The one-cut bundle's marginal bound is sqrt 5 over eighty. A row built on
-    it publishes twice that, because the comparison through the ideal cut
-    spends the number once for each of the two committed pairs. *)
+    it publishes twice that, because the comparison through the ideal cut is a
+    two-hop hybrid, one hop for each of the two committed pairs, and each hop
+    loses that number. *)
 Lemma kim_biased_epsE (R : realType) :
   sw_bound_eps (kim_biased_marginal_bound R) = Num.sqrt 5%:R * (1 / 80).
 Proof. by rewrite /kim_biased_marginal_bound /= kim_lambda2_at_centi expr1. Qed.
@@ -576,9 +575,9 @@ Proof. by rewrite /kim_biased_marginal_bound /= kim_lambda2_at_centi expr1. Qed.
 (** The exact one-cut distance of kim_one_cut_centiE, one fiftieth, is at
     most the one-cut bundle's spectral number sqrt 5 over eighty, the epsilon
     of the marginal bound the certificate carries and half the number a row
-    built on it publishes. The certificate therefore overstates the distance
-    it certifies by about two fifths, and the gap is the price of quoting the
-    bundle's number rather than the exact one. *)
+    built on it publishes. The certificate's number is therefore not tight: it
+    exceeds the distance it certifies by about two fifths, the slack left by
+    quoting the bundle's number rather than the exact one. *)
 Lemma kim_biased_exact_le_eps (R : realType) :
   1 / 50 <= sw_bound_eps (kim_biased_marginal_bound R) :> R.
 Proof.
@@ -690,9 +689,8 @@ Proof. by []. Qed.
 (** The arm the repeated row's certified program carries, at every real field
     and index: a variation distance between the readings of the cut at two
     committed pairs, and not independence of the view from the conjunction of
-    the committed bits. This is the value a paper's table prints in the arm
-    column for this row, settled by the certify statement the program
-    wrote. *)
+    the committed bits. The certify statement the program wrote settles which
+    arm that is. *)
 Lemma five_card_row_repeated_indistinguishability_armE (R : realType)
     (idx : amf_index
              (ab_f (published_at
@@ -846,8 +844,8 @@ Proof. exact: erefl. Qed.
     certificate proved are two readings of one security claim and not two
     claims a reader must reconcile. *)
 (* reflexivity and not exact: erefl. Both close this goal by the kernel's
-   conversion, and only reflexivity reaches it: the refine path ssreflect's
-   erefl takes spent 147 s here against reflexivity's 0.07 s. Measured on
+   conversion, and only reflexivity reaches it: the refine path that ssreflect's
+   erefl takes costs 147 s here against reflexivity's 0.07 s. Measured on
    2026-09-19; the numbers are in
    notes/probes/2026-09-19-tableau-extensions/STATUS.md, section F2. *)
 Lemma five_card_row_repeated39_atE :
@@ -858,7 +856,7 @@ Proof. reflexivity. Qed.
 (** The arm the concluded repeated row carries. Concluding at a number at or
     above the certificate's own leaves the port where the certify statement
     put it, so the row at 2^-39 and the row at the bundle's spectral number
-    print one arm column. *)
+    carry the same arm. *)
 Lemma five_card_row_repeated39_armE (R : realType)
     (idx : amf_index (ab_f (published_at five_card_row_repeated39)) R) :
   security_arm_of five_card_row_repeated39 R idx
@@ -888,7 +886,7 @@ Definition five_card_bound_inv25 : ConcludedBound := fun R => Some (1 / 25 : R).
 (** The one-cut row concluded at the exact constant, at the same transfer
     status as the row at the spectral number. The certificate it carries
     compares the same cut with the same ideal, so the number it publishes
-    changes and the status it earns does not. It continues from the exact
+    changes and its transfer status does not. It continues from the exact
     certificate and not from kim_biased_cert, because a row publishes a number
     at least its certificate's, and the bound kim_biased_cert publishes is
     twice the bundle's number, sqrt 5 over forty, which is above one
@@ -994,12 +992,12 @@ Proof. exact: erefl. Qed.
 (** The number kim_biased_cert_exact carries at this model is twice the
     number kim_biased_proximity_cert carries. Both are read off
     kim_biased_cut_mixing_exact, the one distance on the cut group; the
-    input-indistinguishability arm spends it once for each of the two
-    committed pairs it compares and the proximity arm compares one law with
-    one law. The relation is between these two certificates and not between
-    the two arms: the same model also carries kim_biased_cert, whose marginal
-    bound is sqrt 5 over eighty and which therefore publishes sqrt 5 over
-    forty, so neither arm determines the number of the other. *)
+    input-indistinguishability arm loses that distance at one hop for each
+    of the two committed pairs it compares, and the proximity arm compares
+    one law with one law. The relation is between these two certificates and
+    not between the two arms: the same model also carries kim_biased_cert,
+    whose marginal bound is sqrt 5 over eighty and which therefore publishes
+    sqrt 5 over forty, so neither arm determines the number of the other. *)
 Lemma kim_biased_proximity_eps_halfE (idx : unit) :
   cert_eps (kim_biased_cert_exact R idx)
   = ipc_eps (kim_biased_proximity_cert R idx)
@@ -1032,8 +1030,8 @@ Definition five_card_row_biased_branch_indistinguishability : PublishedRow :=
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The branch and the program written out from the prefix hold one
-    AnalysisBridged coordinate, so naming the Sampled value costs the
-    input-indistinguishability row nothing. *)
+    AnalysisBridged coordinate, so naming the Sampled value leaves the
+    input-indistinguishability row's coordinate unchanged. *)
 (* exact: erefl and not by [], because done does not return on an equation
    between two rows' coordinates. *)
 Lemma five_card_row_biased_branch_indistinguishability_atE :
@@ -1051,11 +1049,12 @@ Proof. exact: erefl. Qed.
     certificate's own number, one fiftieth. What a coalition of fewer than
     two seats is shown is that the joint law of its reading with the
     conjunction of the committed bits is within that number of the product of
-    the two marginals the den Boer uniform execution has, where the reading
-    and the conjunction are independent outright. The number is spent once,
-    against the input-indistinguishability row's twice. Its transfer status is
-    IdealFinite, the same the input-indistinguishability row carries, and the
-    two certificates compare against the same ideal cut. *)
+    the two marginals the den Boer uniform execution has, where the reading and
+    the conjunction are independent outright. The certificate hops to the ideal
+    once and so loses that number once, where the input-indistinguishability row
+    hops twice. Its transfer status is IdealFinite, the same the
+    input-indistinguishability row carries, and the two certificates compare
+    against the same ideal cut. *)
 Definition five_card_row_biased_proximity : PublishedRow :=
   five_card_row_biased_tableau
     certify IdealProximity kim_biased_proximity_cert

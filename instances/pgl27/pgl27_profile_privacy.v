@@ -114,7 +114,7 @@ Local Notation ord8_2 := (@Ordinal 8 2 isT).
 (** pgl27_view_indep_via_profile == the eight-card orbit scheme discharges the
     record-level theorem, reproving pgl27_view_indep.  The statement is
     pgl27_view_indep verbatim; only the route differs, so the record-level
-    theorem costs the instance nothing beyond its two premises. *)
+    theorem needs nothing of the instance beyond its two premises. *)
 Lemma pgl27_view_indep_via_profile (C : {set 'I_8}) : (#|C| <= 3)%N ->
   pgl27P R |= pgl27_view R C _|_ pgl27_secret R.
 Proof.

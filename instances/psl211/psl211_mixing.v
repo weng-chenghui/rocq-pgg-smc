@@ -541,7 +541,7 @@ Qed.
     unconditional and information-theoretic, a counting fact about the 3^584
     words with no computational assumption anywhere, so any statement proved
     of the idealised uniform shuffle transfers to the shuffle a dealer can
-    actually perform at a cost of 2^-40. *)
+    actually perform, losing at most 2^-40. *)
 Lemma psl211_word_mixing :
   var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves psl211_Wuni)
            (`U psl211_G_pos)
@@ -559,7 +559,7 @@ Qed.
     What a single position receives after the realistic word shuffle, the
     deck slot sigma s that position s reads, is uniform over the twelve
     slots to within 2^-40, and the exact shuffle makes the same marginal
-    exactly uniform, so the 2^-40 is the whole price of replacing the exact
+    exactly uniform, so 2^-40 bounds the whole loss of replacing the exact
     shuffle by a finite word. *)
 Lemma psl211_endpoint_mixing (s : 'I_12) :
   var_dist (@endpoint_dist_weighted R 10 2 584 psl211_moves psl211_Wuni s)
@@ -589,7 +589,7 @@ Qed.
 
 (** psl211_joint_mixing — the joint secret-and-shuffle law of the 584-letter
     word run is within 2^-40 of the exact-shuffle joint law.  Tensoring with
-    an independent binary secret prior costs nothing, so every observable of
+    an independent binary secret prior loses nothing, so every observable of
     the word run is within 2^-40 in variation distance of the same observable
     of the exact-shuffle run. *)
 Lemma psl211_joint_mixing (secretP : R.-fdist bool) :

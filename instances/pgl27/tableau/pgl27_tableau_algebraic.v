@@ -54,8 +54,8 @@ Local Open Scope ring_scope.
     under True, the proposition that level carries. One run mode is built on
     this value, the dealer-dealt one, and pgl27_dealt_executableE is where
     the prefix all seven published rows continue from is identified with
-    that mode. The three probability models the instance analyses part three
-    levels above, so what this file fixes is shared by every row the
-    instance publishes. *)
+    that mode. The three analyses part three levels above, at Sampled, where
+    each names its own family, so what this file fixes is shared by every
+    row the instance publishes. *)
 Definition pgl27_algebraic_start : Tableau Algebraic :=
   tableau_start pgl27_algebra.

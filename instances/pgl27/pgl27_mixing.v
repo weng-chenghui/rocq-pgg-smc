@@ -1044,7 +1044,7 @@ Qed.
     unconditional and information-theoretic, a counting fact about the 5^200
     words with no computational assumption anywhere, so any statement proved
     of the idealised uniform shuffle transfers to the shuffle a dealer can
-    actually perform at a cost of 2^-40. *)
+    actually perform, losing at most 2^-40. *)
 Lemma pgl27_word_mixing :
   var_dist (@rho_from_words_weighted R 6 4 200 pgl27_moves Wuni)
            (`U pgl27_G_pos)
@@ -1059,7 +1059,7 @@ Qed.
 (** pgl27_endpoint_mixing — each single-card marginal of the 200-letter word
     shuffle is within 2^-40 of uniform.  What one seat holds after the
     realistic shuffle is a uniformly dealt card to within 2^-40; the exact
-    shuffle makes that marginal exactly uniform, and this is the price of
+    shuffle makes that marginal exactly uniform, and 2^-40 bounds the loss of
     replacing it by a finite word. *)
 Lemma pgl27_endpoint_mixing (s : 'I_8) :
   var_dist (@endpoint_dist_weighted R 6 4 200 pgl27_moves Wuni s)

@@ -41,8 +41,8 @@
 (*                      on the underlying sequence                            *)
 (*   fc_sigma_pow_point_inj == two rotations agreeing at one card position    *)
 (*                             are equal                                      *)
-(*   fc_kim_rho_supp_pow == every cut a Kim word shuffle charges is a         *)
-(*                          rotation                                          *)
+(*   fc_kim_rho_supp_pow == every cut in the support of a Kim word shuffle    *)
+(*                          is a rotation                                     *)
 (*   five_card_ideal_point_uniform == one card position of the ideal cut      *)
 (*                                    carries the uniform law                 *)
 (*   five_card_cut_mixing_of_supp_pow == a cut law carried by the rotations   *)
@@ -298,7 +298,7 @@ Qed.
     committed pairs. One seat reads one card of a deck whose colour census
     den Boer's encoding fixes at three hearts and two clubs, so the reading
     cannot separate the pairs. This is the constancy field of the spectral
-    certificate, and it is exact. It spends no mixing bound. *)
+    certificate, and it is exact. It appeals to no mixing bound. *)
 Lemma five_card_static_obs_const
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   (#|C| < profile_k (instance_profile five_card_algebra))%N ->
@@ -403,8 +403,8 @@ Qed.
     and it is what the two premises above are for: the attacker is that
     coalition, seeing only static endpoint colours, and the number bounds every
     advantage it has in telling the two pairs apart. The number is the bundle's
-    spectral one spent once for each pair, so the only inexact quantity is that
-    mixing distance; the constancy of the ideal reading is exact and costs
+    spectral one lost at one hop for each pair, so the only inexact quantity is
+    that mixing distance; the constancy of the ideal reading is exact and adds
     nothing. *)
 Lemma kim_centi_static_obs_indistinguishability
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :

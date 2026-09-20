@@ -144,8 +144,8 @@ Qed.
     secret at all rather than a small amount, and it is exact for a reason no
     shuffle takes part in. The framework derives the zero mutual information,
     the unchanged conditional entropy and the closure under post-processing
-    from this one field, so the witness is the whole of what this instance
-    owes the exact arm. *)
+    from this one field, so the witness is all the exact arm requires of this
+    instance. *)
 Definition s5_rand_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample s5_rand_family R idx) :=
   @MkExactWitness R s5_algebra s5_supplied_params
@@ -181,8 +181,8 @@ Proof. by []. Qed.
 
 (** The arm this row carries, at every real field and index: independence of
     the coalition's view from the tape secret, and not a distance between two
-    readings. This is the value a paper's table prints in the arm column for
-    this row, settled by the certify statement the program wrote. *)
+    readings. The certify statement the program wrote settles which arm that
+    is. *)
 Lemma s5_row_rand_armE (R : realType)
     (idx : amf_index (ab_f (published_at s5_row_rand_tableau)) R) :
   security_arm_of s5_row_rand_tableau R idx = ExactIndependenceArm.

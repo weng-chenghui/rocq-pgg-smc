@@ -14,7 +14,7 @@
 (* is the instance's algebraic record and five_card_params drives it in the   *)
 (* encoded-run mode, and the observed execution below is what the             *)
 (* framework builds from those two and the three run facts, rather than a     *)
-(* record assembled here. The instance pays two reductions for them:          *)
+(* record assembled here. The instance needs two reductions for them:         *)
 (* termination at the run, and the endpoint equation at the profile, where    *)
 (* the readout stays a variable but the two commit processes are run. The     *)
 (* endpoint obligation of the run is that profile equation instantiated, and  *)
@@ -461,7 +461,7 @@ Definition five_card_payload (ab : bool * bool)
 (** five_card_params — the run-level data of the encoded run: the run
     argument is the pair of committed bits, the two parties above commit it,
     the dealer assembles the den Boer layout from what they sent, the value
-    the run recovers is the conjunction, and the interpreter budget is 100.
+    the run recovers is the conjunction, and the interpreter fuel is 100.
     The argument between the layout and the decoder is the sharing claim,
     den_boer_assemble_valid, so the reconstruction obligation below is read
     back from this term rather than proved again. *)
@@ -478,8 +478,8 @@ Lemma five_card_execE : instance_exec five_card_params = five_card_exec_plug.
 Proof. by []. Qed.
 
 (** five_card_terminates — every process of the encoded run reaches Finish
-    within the budget. The one run fact that has no route through the
-    algebra: it depends on the interpreter and on the budget, and is decided
+    within the fuel. The one run fact that has no route through the
+    algebra: it depends on the interpreter and on the fuel, and is decided
     by reduction. The statement is convertible with five_card_oe_terminates,
     which states the same reduction at the hand-written plug. *)
 Lemma five_card_terminates : instance_terminates_stmt five_card_params.
@@ -507,7 +507,7 @@ Proof. by case: ab => a b; exact: den_boer_decodeK. Qed.
     The statement is convertible with five_card_oe_endpoints, which proves it
     directly from the interpreter; this one turns the layout the dealer
     assembled from the payloads into the layout the direct computation reads,
-    and spends the reduction once at the profile. *)
+    and uses one reduction, at the profile. *)
 Definition five_card_endpoints : instance_endpoints_stmt five_card_params :=
   encoded_endpointsE five_card_commit_endpoints five_card_decodeK.
 
@@ -516,7 +516,7 @@ Definition five_card_endpoints : instance_endpoints_stmt five_card_params :=
     convertible with five_card_oe_static_recon, which proves it through the
     interpreter; this one is encoded_static_recon, which the framework
     derives from the sharing claim already written into five_card_params, so
-    reconstruction correctness of this instance costs no further proof. *)
+    reconstruction correctness of this instance needs no further proof. *)
 Definition five_card_recon : instance_recon_stmt five_card_params :=
   encoded_static_recon.
 

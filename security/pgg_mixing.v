@@ -267,7 +267,7 @@ Qed.
 (** symm_ds_power_norm_sq_bound — L applications of Q contract the squared
     norm on the mean-zero subspace by at most alpha^{2L}:
     <Q^L v, Q^L v> <= alpha^{2L} <v, v> whenever sum_i v_i = 0. Each of the
-    L walk steps costs one factor of alpha^2, unconditional on any
+    L walk steps contributes one factor of alpha^2, unconditional on any
     assumption beyond the Rayleigh hypothesis on Q^2. *)
 Lemma symm_ds_power_norm_sq_bound (L : nat) (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
@@ -883,9 +883,9 @@ by rewrite mulrA [v i ord0 * _]mulrC.
 Qed.
 
 (** big_offdiag_exchange — an off-diagonal double sum is unchanged when the
-    two indices are exchanged.  It turns a row-indexed dominance budget into
-    a column-indexed one, which is why a dominance certificate has to supply
-    both the row sums and the column sums. *)
+    two indices are exchanged.  It turns a row-indexed dominance condition
+    into a column-indexed one, which is why a dominance certificate has to
+    supply both the row sums and the column sums. *)
 Lemma big_offdiag_exchange (F : 'I_n -> 'I_n -> R) :
   \sum_i \sum_(j | j != i) F i j = \sum_j \sum_(i | i != j) F i j.
 Proof.
@@ -898,9 +898,8 @@ by apply: eq_bigl => i; rewrite eq_sym.
 Qed.
 
 (** abs_prod_le_sqr — twice the absolute value of a product is at most the
-    sum of the two squares.  The elementary inequality that lets an
-    off-diagonal entry pay for itself out of the two diagonal entries it
-    sits between. *)
+    sum of the two squares.  The elementary inequality that lets the two
+    diagonal entries an off-diagonal entry sits between dominate it. *)
 Lemma abs_prod_le_sqr (a b : R) : 2%:R * `|a * b| <= a ^+ 2 + b ^+ 2.
 Proof.
 rewrite normrM -[a ^+ 2]real_normK ?num_real// -[b ^+ 2]real_normK ?num_real//.
@@ -912,8 +911,8 @@ Qed.
 
 (** pointwise_dom — an off-diagonal entry e bounded in absolute value by al
     contributes at least -al (a^2 + b^2) / 2 to the quadratic form.  The
-    per-entry step of the diagonal-dominance argument: the budget al is
-    spent half on each of the two coordinates the entry couples. *)
+    per-entry step of the diagonal-dominance argument: al is split half onto
+    each of the two coordinates the entry couples. *)
 Lemma pointwise_dom (e al a b : R) : e <= al -> - e <= al ->
   - (al * (a ^+ 2 + b ^+ 2) / 2%:R) <= e * (a * b).
 Proof.

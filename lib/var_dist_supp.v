@@ -12,7 +12,7 @@
 (* which a per-position number becomes a number about the group. Beside it    *)
 (* sit the scale a published variation distance is read against, the          *)
 (* invariance of a uniform law under an injective endomap, the fact that a    *)
-(* pushforward charges only the image, and the distance between the point     *)
+(* pushforward is supported in the image, and the distance between the point  *)
 (* mass at true on the booleans and the uniform law there.                    *)
 (* security/var_dist_joint_law.v carries the distance between two joint laws  *)
 (* of a reading and a secret.                                                 *)
@@ -22,7 +22,7 @@
 (*   var_dist_fdistmap_supp_inj == a reader separating the points that carry  *)
 (*                                 mass transports the distance exactly       *)
 (*   fdistmap_inj_uniform_id    == an injective endomap fixes the uniform law *)
-(*   fdistmap_neq0_codom        == a pushforward charges only the image       *)
+(*   fdistmap_neq0_codom        == a pushforward is supported in the image    *)
 (*   var_dist_fdist1_uniform    == the point mass at true and the uniform law *)
 (*                                 on the booleans are one apart              *)
 (******************************************************************************)
@@ -77,7 +77,7 @@ Variable R : realType.
     injectivity weakened from the whole domain to the union of the two
     supports. The weakening is what a cut law needs: the inequality runs from
     the group to the reading, and a certificate states its bound on the
-    reading and owes it on the group. *)
+    reading and must establish it on the group. *)
 Lemma var_dist_fdistmap_supp_inj (A B : finType) (f : A -> B)
     (P Q : R.-fdist A) :
   (forall a b : A, (P a != 0) || (Q a != 0) ->
