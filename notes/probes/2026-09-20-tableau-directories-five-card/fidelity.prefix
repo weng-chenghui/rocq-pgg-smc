@@ -1,0 +1,853 @@
+five_card_committed
+     : Tableau Observed
+five_card_committed_paramsE
+     : projT1 (projT2 (tableau_at five_card_committed)) = five_card_params
+five_card_colour_fill
+     : forall C : {set 'I_5}, #|C|.-tuple bool -> {ffun 'I_5 -> 'I_5}
+five_card_viewS_nth
+     : forall (R : realType) (C : {set 'I_5}) (u : Omega) (i : 'I_5),
+       i \in C ->
+       nth false (ViewS R C u) (index i (enum C)) = nth false (arr u) i
+five_card_static_obsE
+     : forall (R : realType) (C : {set 'I_5}) (u : Omega),
+       static_coalition_obs C u.1 (fc_sigma ^+ u.2) =
+       five_card_colour_fill C (ViewS R C u)
+five_card_viewS_indep
+     : forall (R : realType) (C : {set 'I_5}),
+       (#|C| < 2)%N -> P R |= ViewS R C _|_ Secret R
+five_card_exact_viewE
+     : forall (R : realType) (idx : unit)
+         (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}),
+       (fun u : sa_sampleT (amf_sample five_card_uniform_family R idx) =>
+        static_coalition_obs C (sa_arg u) (sa_cut u)) =
+       five_card_colour_fill C `o ViewS R C
+five_card_static_obs_indep
+     : forall (R : realType) (idx : unit)
+         (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}),
+       (#|C| < profile_k (instance_profile five_card_algebra))%N ->
+       sa_sampleP (amf_sample five_card_uniform_family R idx) |= 
+       (fun u : sa_sampleT (amf_sample five_card_uniform_family R idx) =>
+        static_coalition_obs C (sa_arg u) (sa_cut u)) _|_ 
+       Secret R
+five_card_exact_witness
+     : forall (R : realType) (idx : unit),
+       ExactWitness (amf_sample five_card_uniform_family R idx)
+five_card_row_uniform_tableau
+     : PublishedRow
+five_card_row_uniform_rowE
+     : published_row five_card_row_uniform_tableau = five_card_row_uniform
+five_card_row_uniform_armE
+     : forall (R : realType)
+         (idx : amf_index (ab_f (published_at five_card_row_uniform_tableau))
+                  R),
+       security_arm_of five_card_row_uniform_tableau R idx =
+       ExactIndependenceArm
+five_card_exact_view_secrecy
+     : forall (R : realType) (C : {set 'I_5}),
+       (#|C| < 2)%N ->
+       [/\ P R |= sa_coalition_view 0 C _|_ Secret R,
+           `I(Secret R; sa_coalition_view 0 C) = 0,
+           `H( (Secret R) | (sa_coalition_view 0 C)) = `H `p_ (Secret R)
+         & forall (W : finType) (h : {ffun 'I_5 -> 'I_5} -> W),
+           P R |= (h `o sa_coalition_view 0 C) _|_ 
+           Secret R]
+five_card_row_repeated_tableau
+     : Tableau Sampled
+five_card_row_biased_tableau
+     : Tableau Sampled
+five_card_row_repeated_prefixE
+     : [/\ projT1 (tableau_at five_card_row_repeated_tableau) =
+           projT1 (tableau_at five_card_committed),
+           projT1 (projT2 (tableau_at five_card_row_repeated_tableau)) =
+           projT1 (projT2 (tableau_at five_card_committed))
+         & sp_obs (tableau_at five_card_row_repeated_tableau) =
+           ob_obs (tableau_at five_card_committed)]
+five_card_row_biased_prefixE
+     : [/\ projT1 (tableau_at five_card_row_biased_tableau) =
+           projT1 (tableau_at five_card_committed),
+           projT1 (projT2 (tableau_at five_card_row_biased_tableau)) =
+           projT1 (projT2 (tableau_at five_card_committed))
+         & sp_obs (tableau_at five_card_row_biased_tableau) =
+           ob_obs (tableau_at five_card_committed)]
+five_card_row_repeated_modelE
+     : sp_f (tableau_at five_card_row_repeated_tableau) =
+       apr_model five_card_row_repeated
+five_card_row_biased_modelE
+     : sp_f (tableau_at five_card_row_biased_tableau) =
+       apr_model five_card_row_biased
+five_card_row_biased_levelE
+     : apr_completion five_card_row_biased = AnalysisBridged
+kim_biased_epsE
+     : forall R : realType,
+       sw_bound_eps (kim_biased_marginal_bound R) =
+       Num.ExtraDef.sqrtr 5 * (1 / 80)
+kim_biased_exact_le_eps
+     : forall R : realType,
+       1 / 50 <= sw_bound_eps (kim_biased_marginal_bound R)
+kim_centi_cert
+     : forall (R : realType) (idx : unit),
+       IndistinguishabilityCert (amf_sample kim_centi_family R idx)
+kim_biased_cert
+     : forall (R : realType) (idx : unit),
+       IndistinguishabilityCert (amf_sample kim_biased_family R idx)
+five_card_row_repeated_indistinguishability_tableau
+     : PublishedRow
+five_card_row_biased_indistinguishability_tableau
+     : PublishedRow
+five_card_row_repeated_indistinguishability_rowE
+     : published_row five_card_row_repeated_indistinguishability_tableau =
+       five_card_row_repeated
+five_card_row_biased_indistinguishability_rowE
+     : published_row five_card_row_biased_indistinguishability_tableau =
+       five_card_row_biased
+five_card_row_repeated_indistinguishability_armE
+     : forall (R : realType)
+         (idx : amf_index
+                  (ab_f
+                     (published_at
+                        five_card_row_repeated_indistinguishability_tableau))
+                  R),
+       security_arm_of five_card_row_repeated_indistinguishability_tableau R
+         idx =
+       InputIndistinguishabilityArm
+five_card_row_biased_indistinguishability_armE
+     : forall (R : realType)
+         (idx : amf_index
+                  (ab_f
+                     (published_at
+                        five_card_row_biased_indistinguishability_tableau))
+                  R),
+       security_arm_of five_card_row_biased_indistinguishability_tableau R
+         idx =
+       InputIndistinguishabilityArm
+five_card_row_repeated_indistinguishability_publishedE
+     : apr_completion
+         (published_row five_card_row_repeated_indistinguishability_tableau) =
+       AnalysisBridged /\
+       apr_transfer
+         (published_row five_card_row_repeated_indistinguishability_tableau) =
+       IdealFinite /\
+       apr_assumptions
+         (published_row five_card_row_repeated_indistinguishability_tableau) =
+       BaselineClassicalOnly
+five_card_row_biased_indistinguishability_publishedE
+     : apr_completion
+         (published_row five_card_row_biased_indistinguishability_tableau) =
+       AnalysisBridged /\
+       apr_transfer
+         (published_row five_card_row_biased_indistinguishability_tableau) =
+       IdealFinite /\
+       apr_assumptions
+         (published_row five_card_row_biased_indistinguishability_tableau) =
+       BaselineClassicalOnly
+five_card_pow2_39_split
+     : forall R : realType, 2 ^- 40 + 2 ^- 40 = 2 ^- 39
+kim_centi_cert_epsE
+     : forall (R : realType) (idx : unit),
+       cert_eps (kim_centi_cert R idx) =
+       Num.ExtraDef.sqrtr 5 * (1 / 80) ^+ 7 +
+       Num.ExtraDef.sqrtr 5 * (1 / 80) ^+ 7
+kim_centi_cert_eps_lt
+     : forall (R : realType) (idx : unit),
+       cert_eps (kim_centi_cert R idx) < 2 ^- 39
+kim_biased_cert_epsE
+     : forall (R : realType) (idx : unit),
+       cert_eps (kim_biased_cert R idx) =
+       Num.ExtraDef.sqrtr 5 * (1 / 80) + Num.ExtraDef.sqrtr 5 * (1 / 80)
+kim_biased_cert_eps_lt2
+     : forall (R : realType) (idx : unit),
+       cert_eps (kim_biased_cert R idx) < 2
+five_card_reprice39
+     : Reprice
+five_card_row_repeated39
+     : PublishedRowAt five_card_reprice39
+five_card_row_repeated39_atE
+     : published_at five_card_row_repeated39 =
+       published_at five_card_row_repeated_indistinguishability_tableau
+five_card_row_repeated39_armE
+     : forall (R : realType)
+         (idx : amf_index (ab_f (published_at five_card_row_repeated39)) R),
+       security_arm_of five_card_row_repeated39 R idx =
+       InputIndistinguishabilityArm
+kim_biased_cert_exact
+     : forall (R : realType) (idx : unit),
+       IndistinguishabilityCert (amf_sample kim_biased_family R idx)
+five_card_inv50_split
+     : forall R : realType, 1 / 50 + 1 / 50 = 1 / 25
+five_card_reprice_inv25
+     : Reprice
+five_card_row_biased_inv25
+     : PublishedRowAt five_card_reprice_inv25
+five_card_row_biased_forms_publishedE
+     : published_row five_card_row_biased_indistinguishability_tableau =
+       published_row five_card_row_biased_inv25
+five_card_row_biased_inv25_armE
+     : forall (R : realType)
+         (idx : amf_index (ab_f (published_at five_card_row_biased_inv25)) R),
+       security_arm_of five_card_row_biased_inv25 R idx =
+       InputIndistinguishabilityArm
+five_card_reprice_inv25_lt2
+     : forall R : realType, 1 / 25 < 2
+five_card_row_repeated_endpoint_lt
+     : forall (R : realType) (s : 'I_5),
+       var_dist
+         (fdistmap ((fun_of_perm (T:='I_5))^~ s)
+            (sa_cut_dist (amf_sample kim_centi_family R tt)))
+         (fdist_uniform (card_ord 5)) <
+       2 ^- 40
+kim_centi_small
+     : forall R : realType, 0 < 5^-1 - `|1 / 100|
+five_card_row_biased_leak_bound
+     : forall (R : realType) (A : seq nat),
+       cond_mutual_info
+         `p_ [% kim_inputs (kim_centi_lt R) (kim_centi_gt R), 
+         fun w : Omega => five_card_exec_colour_view A w.1 (fc_sigma ^+ w.2), 
+         kim_secret (kim_centi_lt R) (kim_centi_gt R)] <=
+       kim_leak_bound (1 / 100)
+five_card_target
+     : Targeted
+five_card_F
+     : Functionality (oe_inputT five_card_observed)
+         (oe_outT five_card_observed)
+five_card_FE
+     : five_card_F =
+       {| fn_f := fun ab : bool * bool => ab.1 && ab.2; fn_threshold := 1 |}
+five_card_F_ite
+     : fn_f five_card_F =
+       (fun ab : bool * bool => if ab.1 then ab.2 else false)
+five_card_realises_expected
+     : realises_expected five_card_observed five_card_F
+five_card_uniform_pairE
+     : forall R : realType,
+       fdist_uniform card_bool2 = fdist_uniform five_card_card_bool2
+five_card_reading_secretE
+     : forall (R : realType)
+         (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1})
+         (d : {fdist Omega}),
+       fdistmap
+         (fun u : Omega =>
+          (static_coalition_obs C (five_card_sample_arg u)
+             (five_card_sample_cut u),
+           Secret R u))
+         d =
+       fdistmap
+         (fun
+            ag : bool * bool *
+                 pgg_gT (mp_M (instance_profile five_card_algebra)) =>
+          (static_coalition_obs C ag.1 ag.2, ag.1.1 && ag.1.2))
+         (fdistmap (fun u : Omega => (u.1, five_card_sample_cut u)) d)
+five_card_arg_cut_prodE
+     : forall (R : realType) (W : {fdist 'I_5}),
+       fdistmap (fun u : Omega => (u.1, five_card_sample_cut u))
+         (fdist_uniform five_card_card_bool2) `x W =
+       (fdist_uniform five_card_card_bool2)
+       `x (fdistmap (fun k : 'I_5 => (fc_sigma ^+ k)%g) W)
+kim_biased_proximity_close
+     : forall (R : realType)
+         (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}),
+       var_dist
+         (fdistmap
+            (fun u : Omega =>
+             (static_coalition_obs C (five_card_sample_arg u)
+                (five_card_sample_cut u),
+              Secret R u))
+            (kim_input_dist (kim_centi_lt R) (kim_centi_gt R)))
+         (fdistmap
+            (fun u : Omega =>
+             (static_coalition_obs C (five_card_sample_arg u)
+                (five_card_sample_cut u),
+              Secret R u))
+            (P R)) <=
+       1 / 50
+kim_biased_proximity_cert
+     : forall (R : realType) (idx : unit),
+       IdealProximityCert (amf_sample kim_biased_family R idx)
+kim_biased_proximity_cert_idealE
+     : forall (R : realType) (idx : unit),
+       ipc_ideal (kim_biased_proximity_cert R idx) =
+       amf_sample (ab_f (published_at five_card_row_uniform_tableau)) R idx /\
+       ExactIndependence (ipc_witness (kim_biased_proximity_cert R idx)) =
+       ab_port (published_at five_card_row_uniform_tableau) R idx
+kim_biased_proximity_cert_epsE
+     : forall (R : realType) (idx : unit),
+       ipc_eps (kim_biased_proximity_cert R idx) = 1 / 50
+kim_biased_proximity_eps_halfE
+     : forall (R : realType) (idx : unit),
+       cert_eps (kim_biased_cert_exact R idx) =
+       ipc_eps (kim_biased_proximity_cert R idx) +
+       ipc_eps (kim_biased_proximity_cert R idx)
+kim_biased_proximity_cert_eps_lt2
+     : forall (R : realType) (idx : unit),
+       ipc_eps (kim_biased_proximity_cert R idx) < 2
+five_card_row_biased_branch_indistinguishability
+     : PublishedRow
+five_card_row_biased_branch_indistinguishability_atE
+     : published_at five_card_row_biased_branch_indistinguishability =
+       published_at five_card_row_biased_indistinguishability_tableau
+five_card_row_biased_branch_indistinguishability_rowE
+     : published_row five_card_row_biased_branch_indistinguishability =
+       five_card_row_biased
+five_card_row_biased_proximity
+     : PublishedRow
+five_card_row_biased_proximity_rowE
+     : published_row five_card_row_biased_proximity = five_card_row_biased
+five_card_row_biased_proximity_publishedE
+     : apr_completion (published_row five_card_row_biased_proximity) =
+       AnalysisBridged /\
+       apr_transfer (published_row five_card_row_biased_proximity) =
+       IdealFinite /\
+       apr_assumptions (published_row five_card_row_biased_proximity) =
+       BaselineClassicalOnly
+five_card_row_biased_branch_indistinguishability_armE
+     : forall (R : realType)
+         (idx : amf_index
+                  (ab_f
+                     (published_at
+                        five_card_row_biased_branch_indistinguishability))
+                  R),
+       security_arm_of five_card_row_biased_branch_indistinguishability R idx =
+       InputIndistinguishabilityArm
+five_card_row_biased_proximity_armE
+     : forall (R : realType)
+         (idx : amf_index
+                  (ab_f (published_at five_card_row_biased_proximity)) R),
+       security_arm_of five_card_row_biased_proximity R idx =
+       IdealProximityArm
+five_card_row_biased_arm_neq
+     : forall (R : realType)
+         (idx : amf_index
+                  (ab_f (published_at five_card_row_biased_proximity)) R),
+       security_arm_of five_card_row_biased_proximity R idx <>
+       security_arm_of five_card_row_biased_branch_indistinguishability R idx
+five_card_biased_view_proximity
+     : forall (R : realType) (C : {set 'I_5}),
+       (#|C| < 2)%N ->
+       var_dist
+         (fdistmap
+            (fun u : sa_sampleT (amf_sample kim_biased_family R tt) =>
+             (sa_coalition_view 0 C u, Secret R u))
+            (sa_sampleP (amf_sample kim_biased_family R tt)))
+         (fdistmap (sa_coalition_view 0 C) (P R))
+         `x (fdistmap (Secret R) (P R)) <=
+       1 / 50
+five_card_biased_view_own_marginals
+     : forall (R : realType) (C : {set 'I_5}),
+       (#|C| < 2)%N ->
+       var_dist
+         (fdistmap
+            (fun u : sa_sampleT (amf_sample kim_biased_family R tt) =>
+             (sa_coalition_view 0 C u, Secret R u))
+            (sa_sampleP (amf_sample kim_biased_family R tt)))
+         (fdistmap fst
+            (fdistmap
+               (fun u : sa_sampleT (amf_sample kim_biased_family R tt) =>
+                (sa_coalition_view 0 C u, Secret R u))
+               (sa_sampleP (amf_sample kim_biased_family R tt))))
+         `x (fdistmap snd
+               (fdistmap
+                  (fun u : sa_sampleT (amf_sample kim_biased_family R tt) =>
+                   (sa_coalition_view 0 C u, Secret R u))
+                  (sa_sampleP (amf_sample kim_biased_family R tt)))) <=
+       3 * (1 / 50)
+five_card_reprice_inv100
+     : Reprice
+kim_biased_conclude_below_false
+     : forall (R : realType) (idx : unit),
+       ~
+       ipc_eps (kim_biased_proximity_cert R idx) <=
+       odflt (ipc_eps (kim_biased_proximity_cert R idx))
+         (five_card_reprice_inv100 R)
+five_card_singleton_below_threshold
+     : forall i : 'I_5,
+       (#|[set i]| < profile_k (instance_profile five_card_algebra))%N
+five_card_biased_proximity_at_singleton
+     : forall (R : realType) (i : 'I_5),
+       var_dist
+         (fdistmap
+            (fun u : sa_sampleT (amf_sample kim_biased_family R tt) =>
+             (sa_coalition_view 0 [set i] u, Secret R u))
+            (sa_sampleP (amf_sample kim_biased_family R tt)))
+         (fdistmap (sa_coalition_view 0 [set i]) (P R))
+         `x (fdistmap (Secret R) (P R)) <=
+       1 / 50
+five_card_biased_proximity_prop_holds
+     : forall R : realType,
+       IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50)
+five_card_biased_indistinguishability_implies_proximity
+     : forall (R : realType) (c : R),
+       IndistinguishabilityPropAt (kim_biased_cert R tt) c ->
+       IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50)
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Closed under the global context
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Closed under the global context
+Closed under the global context
+Closed under the global context
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Closed under the global context
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+five_card_reprice39 = fun R : realType => Some (2 ^- 39 : R)
+     : Reprice
+
+Arguments five_card_reprice39 R
+five_card_reprice_inv25 = fun R : realType => Some (1 / 25 : R)
+     : Reprice
+
+Arguments five_card_reprice_inv25 R
+five_card_reprice_inv100 =
+fun R : realType => Some (1 / 100 : R)
+     : Reprice
+
+Arguments five_card_reprice_inv100 R
+kim_biased_proximity_cert =
+fun (R : realType) (idx : unit) =>
+{|
+  ipc_ideal := amf_sample five_card_uniform_family R idx;
+  ipc_witness := five_card_exact_witness R idx;
+  ipc_secret := Secret R;
+  ipc_eps := 1 / 50;
+  ipc_close :=
+    fun C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1} =>
+    fun=> kim_biased_proximity_close R C
+|}
+     : forall (R : realType) (idx : unit),
+       IdealProximityCert (amf_sample kim_biased_family R idx)
+
+Arguments kim_biased_proximity_cert R idx
