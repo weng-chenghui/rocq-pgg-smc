@@ -66,7 +66,6 @@ Design with the decisions: `notes/2026-09-20-060000-instance-tableau-directory-d
 |---|---|---|
 | 2.6a | `Reprice` -> `ConcludedBound`, `no_reprice` -> `no_concluded_bound`, `*_reprice39` -> `*_bound39` and the rest (owner: "1A: go as you suggested") | open |
 | 2.6b | The economic words for a relation ("spends", "price", "currencies", "pays", "buys") replaced by the field's terms: a hop of a hybrid and the loss it adds ("loses at most"), perfect against statistical security, tight against slack; literal compile costs stay. Owner proposed "loss". About 36 files; four of them are in the forward closure of `psl211_endpoints.v` and stay as they are | open |
-
 | 2.6c | A name for `PublishedRow` that a paper can show without explaining "row" (owner, 2026-09-20). Plan with three candidate names and three depths: `notes/2026-09-20-111257-published-row-rename-plan.md`. Waits for the owner's choice of name and depth; runs after 2.6a and 2.6b | planned |
 
 ## Step 3. Recorded small items
