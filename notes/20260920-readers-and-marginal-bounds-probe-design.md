@@ -201,3 +201,92 @@ decisions are the main session's.
    reports; no new import into a mathematics file from the framework).
 5. Fidelity file in the probe directory; names checked free; one naming and
    comment audit of the landing; closure recompiled by the main session.
+
+## Second probe, its audit, and the landing plan for tracker 4.1 and 4.4 (2026-09-21)
+
+Second probe: `notes/probes/2026-09-21-psl211-colour-reader/` (`LEDGER.md`), all
+rows compiled, recompiled from source by the main session. Audit of it and of
+both probes' names and placement: `audit.md` in that directory (GO for one
+landing plan). The owner is away; the decisions are the main session's.
+
+What the second probe established: over one adapter on the fixed-dealer colour
+model of PSL(2,11) (the law `psl211P`, over the existing dealer-dealt
+parameters), exact independence of a coalition's COLOUR reading from the
+chirality holds below the threshold of six, and exact independence of its
+card-identity reading is FALSE at one coalition of three seats. The colour
+reading is a non-injective function of the card-identity reading, and the
+post-processing law is discharged at it. So a proposition stated at a reading
+has an instance that is not the framework's own under a second name, and the
+framework of the first probe is landed with it.
+
+### Decisions (the audit's, accepted; two amendments)
+
+1. **The concept word is "reading", never a second word for it.** The tree
+   already says "a coalition's static reading" and names
+   `coalition_reading_constancy`. The record is `StaticReading` (fields
+   `sr_readT`, `sr_read`), the framework's own is `static_coalition_reading`,
+   the propositions are `ReadingIndistinguishabilityPropAt` and
+   `ReadingExactIndependence` (no `At`: in this tree `At` marks a number, and
+   this proposition takes none). Full name list and the `Arguments` lines that
+   the second probe depends on: the audit's sections "Names" and Q11.
+2. **Two leaf files in `manifest/`, kept apart on purpose:**
+   `manifest/pgg_tableau_reading.v` (the record, the framework's own reading and
+   its equations, the two propositions, the post-processing law, the two lemmas
+   from a witness) and `manifest/pgg_tableau_marginal_bounds.v`
+   (`SeatMarginalPropAt`, `CutMarginalPropAt`, `seat_marginal_prop_at2`,
+   `cut_marginal_prop_at2`). A marginal bound is about one seat or one
+   position, no coalition, no second run argument, no secret; it is not a
+   statement at a reading and its file does not require the reading file.
+3. **Instances:** `s5_word_seat_marginal` in
+   `instances/s5/tableau/s5_tableau_sampled.v` (comment: the factor two, and the
+   axiom `s5_group_order_eq` the cited theorem carries);
+   `five_card_repeated_cut_marginal` in
+   `instances/kim2025/tableau/five_card_tableau_sampled.v` (comment: the cited
+   theorem is strict, the proposition is at `<=`; the factor two);
+   `pgl27_coalition_trace_static_obsE` in `instances/pgl27/pgl27_proximity.v`
+   right after `pgl27_static_obsE` (no new import; its comment says the
+   instance's trace theorems and reading theorems are therefore one statement
+   each); a new file `instances/psl211/psl211_colour_reading.v` with the
+   adapter `psl211_dealt_sample` and its equations, `psl211_colour_reading` and
+   everything at it, `psl211_colour_reading_indep`,
+   `psl211_colour_reading_dep_k6`, `psl211_dealt_reading_indep_false`. Nothing
+   goes under `instances/psl211/tableau/`: the dealer-dealt parameters carry no
+   endpoints statement, so there is no Observed or Sampled level over them, no
+   program and no path, and every statement in the new file is about the
+   model's law and the static reading, not about an executed run; three
+   statement comments say so (audit Q2).
+4. **Two production sentences become false when the adapter lands** and are
+   rewritten in the same commit: `instances/psl211/psl211_reading_constancy.v`
+   at about lines 57 and 967 ("this tree carrying no dealt-mode sample
+   adapter"). `psl211_dealt_reading_indep_false`'s comment places it beside
+   `psl211_dealt_constancy_false`: same coalition, same fibers, the
+   probabilistic form (audit Q9).
+5. **Comments:** the audit's S1 to S17 and Q3, Q5, Q6, Q7 with its
+   replacements, each checked against its statement at the landing. The
+   record's statement comment claims only what the type enforces: a function of
+   the coalition, the run argument and the cut.
+6. **Amendment (main session):** S4's uncompiled claim about entropy forms is
+   reworded, not compiled (no new mathematics in this landing). The first
+   probe's PGL(2,7) trace instance of the propositions is NOT landed (it is the
+   framework's own reading under a second name); only the identification lemma
+   is.
+7. **Not in this landing:** a program or a path over the fixed-dealer colour
+   model (needs an executed link lemma the dealt mode does not carry); the S_5
+   countermodel as a theorem; a post-processing law for the exact form.
+
+### Order of work
+
+1. Probe directory `notes/probes/2026-09-21-psl211-colour-reader/`: the renamed
+   text compiled first as `landing_draft_*.v` (framework, marginal bounds,
+   colour reading), so that every new name and every `Arguments` line is
+   compiled before production is touched.
+2. The two `manifest/` leaves with boxed headers and indexes; `_CoqProject`
+   lines; compile.
+3. The four instance additions and the new psl211 file (`_CoqProject` line);
+   the two rewritten sentences; compile each edited file in dependency order.
+4. `landing_fidelity.v` (production only; every landed declaration at its full
+   statement; `Print Assumptions` of the colour pair, the refuted reading, the
+   two marginal instances).
+5. Main session: reverse closure recompiled single-file, fidelity recompiled,
+   one combined audit of the landing (soundness of comments, names, layout),
+   fix pass, commit.
