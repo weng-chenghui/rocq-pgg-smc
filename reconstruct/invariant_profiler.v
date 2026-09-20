@@ -13,14 +13,15 @@
 (*   secret_inv_dim d  : some G-invariant submodule of dimension d actually    *)
 (*                       carries the secret coordinate e0 (e0 lies in its row  *)
 (*                       space);                                               *)
-(*   feasible window   : some dimension required by the gate (a member of      *)
+(*   feasible window   : some dimension the condition requires (a member of   *)
 (*                       window) is achievable as a secret-encoding invariant. *)
 (* The gap_dimension.v window supplies the required dimensions; this profiler  *)
-(* supplies the available secret-encoding dimensions; the cs_gap_feasible gate *)
-(* rejects an instance when the two are disjoint. The Maschke lemma records     *)
-(* the regime (coprime characteristic) in which the available dimensions are    *)
-(* closed under complementation, i.e. the simple subset-sum reasoning is valid; *)
-(* the s5_nogo.v instance is precisely the MODULAR regime where it fails.       *)
+(* supplies the available secret-encoding dimensions; the condition feasible  *)
+(* rejects an instance when the two are disjoint. The Maschke lemma records   *)
+(* the regime (coprime characteristic) in which the available dimensions are  *)
+(* closed under complementation, i.e. the simple subset-sum reasoning is      *)
+(* valid; the s5_nogo.v instance is precisely the MODULAR regime where it     *)
+(* fails.                                                                     *)
 (******************************************************************************)
 
 From mathcomp Require Import all_ssreflect all_fingroup all_algebra all_solvable.
@@ -46,7 +47,7 @@ Variable e0 : 'rV[F]_n.
     invariant subspace of dimension d. This is the unguarded "available
     dimensions" profile of the representation, the substrate the
     secret-encoding refinement secret_inv_dim narrows and, through it, the
-    feasibility gate consumes. *)
+    feasibility condition consumes. *)
 Definition inv_dim (d : nat) : Prop :=
   exists m (U : 'M[F]_(m, n)), mxmodule rG U /\ \rank U = d.
 
@@ -54,7 +55,7 @@ Definition inv_dim (d : nat) : Prop :=
     carries the secret coordinate e0, namely (e0 <= U)%MS: e0 lies in the
     row space of U. Only invariant submodules containing the secret
     direction can encode the secret; the no-go theorem (s5_nogo.v) refutes
-    this at the gate's required dimensions, proving the wired instance
+    this at the dimensions the condition requires, proving the wired instance
     impossible. The membership form (e0 <= U)%MS is chosen over the "not
     inside the secret-zero hyperplane" form because the no-go reduction
     works directly with "U contains e0": such a U decomposes as
@@ -65,12 +66,12 @@ Definition secret_inv_dim (d : nat) : Prop :=
     [/\ mxmodule rG U, \rank U = d & (e0 <= U)%MS].
 
 (** feasible window holds when there is a dimension d in the list window for
-    which secret_inv_dim d holds. This is the gate side of early rejection:
-    gap_dimension.v computes the window of dimensions a feasible covering
-    scheme would need, and feasible window asserts at least one of them is
-    realised by a secret-encoding invariant submodule. The no-go theorem
-    proves ~ feasible rG e0 [:: 3; 4] for the S_5 instance, so the gate
-    rejects it before any code is built. *)
+    which secret_inv_dim d holds. This is the condition's side of early
+    rejection: gap_dimension.v computes the window of dimensions a feasible
+    covering scheme would need, and feasible window asserts at least one of
+    them is realised by a secret-encoding invariant submodule. The no-go
+    theorem proves ~ feasible rG e0 [:: 3; 4] for the S_5 instance, so the
+    condition rejects it before any code is built. *)
 Definition feasible (window : seq nat) : Prop :=
   exists d, d \in window /\ secret_inv_dim d.
 

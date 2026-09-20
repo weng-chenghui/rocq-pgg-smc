@@ -435,7 +435,7 @@ Qed.
    the gap-to-dimension window (gap_dimension.v, the required dimensions)
    with the representation-theoretic no-go (the available dimensions) to
    prove the wired S_5 gap mathematically impossible, the dead end the
-   cs_gap_feasible gate is meant to reject before any code is built. *)
+   condition feasible is meant to reject before any code is built. *)
 Theorem s5_gap_infeasible (k g : nat) :
   (g < k)%N -> (k + g < 6)%N -> (6 <= k + g + 1)%N -> (k - g < 6 - 1)%N ->
   ~ secret_inv_dim rG_secret e0 k.

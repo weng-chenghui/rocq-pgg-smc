@@ -686,9 +686,10 @@ rewrite /sumn /= -/(sumn _) -/(sumn _).
 by rewrite H // IH // => k /ltnW /H.
 Qed.
 
-(** Shifting the index down by one turns an even-gated sum into an odd-gated
-    one.  Parity alternates under k |-> k-1, which is how the second summand
-    produced by Pascal's rule lands in the opposite half. *)
+(** Shifting the index down by one turns a sum restricted to even indices
+    into one restricted to odd indices.  Parity alternates under k |-> k-1,
+    which is how the second summand produced by Pascal's rule lands in the
+    opposite half. *)
 Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :
   sumn [seq (if ~~ odd k then g k.-1 else 0) | k <- iota m.+1 M] =
   sumn [seq (if odd j then g j else 0) | j <- iota m M].
@@ -697,7 +698,8 @@ by elim: M m => [|M IH] m //;
   rewrite /sumn /= -/(sumn _) -/(sumn _) (IH m.+1) negbK.
 Qed.
 
-(** The same index shift in the other direction, odd-gated to even-gated. *)
+(** The same index shift in the other direction, from odd indices to
+    even ones. *)
 Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :
   sumn [seq (if odd k then g k.-1 else 0) | k <- iota m.+1 M] =
   sumn [seq (if ~~ odd j then g j else 0) | j <- iota m M].

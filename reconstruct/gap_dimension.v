@@ -12,8 +12,8 @@
 (* ts_k = k-g. The section constraints g < k and k+g < n together with the     *)
 (* gap bound n <= k+g+1 pin n = k+g+1, so a strict gap ts_k < ts_T equals 2g.  *)
 (* This file isolates the resulting dimension window as reusable nat           *)
-(* arithmetic; the invariant-submodule profiler and the cs_gap_feasible gate   *)
-(* intersect this band with the available invariant dimensions to reject       *)
+(* arithmetic; the invariant-submodule profiler's condition feasible          *)
+(* intersects this band with the available invariant dimensions to reject     *)
 (* mathematically impossible instances before any code is constructed.        *)
 (******************************************************************************)
 

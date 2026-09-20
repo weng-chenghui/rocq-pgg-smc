@@ -271,11 +271,11 @@ Definition exec_coalition_secrecy := @s5_exec_coalition_secrecy.
 (*                                                                            *)
 (* The alias below is an endpoint marginal mixing bound: it bounds the        *)
 (* distance from uniform of ONE seat's endpoint distribution after a word of  *)
-(* L cuts, in the repository's full-L1 convention. It quantifies over one     *)
-(* position, mentions no coalition view and no second secret, and is          *)
-(* rests on the in-kernel Rayleigh certificate s5_rayleigh_Q2_R. It is        *)
-(* neither exact nor approximate privacy, and is recorded as an endpoint      *)
-(* marginal bound in the analysis manifest.                                   *)
+(* L cuts, in the repository's convention, the sum of absolute differences    *)
+(* with no factor one half. It quantifies over one position, mentions no      *)
+(* coalition view and no second secret, and rests on the in-kernel Rayleigh   *)
+(* certificate s5_rayleigh_Q2_R. It is neither exact nor approximate privacy, *)
+(* and is recorded as an endpoint marginal bound in the analysis manifest.    *)
 (******************************************************************************)
 
 (** word_endpoint_bound — cut-level endpoint marginal mixing of the
@@ -285,7 +285,8 @@ Definition exec_coalition_secrecy := @s5_exec_coalition_secrecy.
 Definition word_endpoint_bound := @s5_word_endpoint_bound.
 
 (** exec_endpoint_bound — executed endpoint marginal mixing, conditional on
-    s5_rayleigh_Q2_R: the variation distance, in the full-L1 convention,
+    s5_rayleigh_Q2_R: the variation distance, in the repository's
+    convention, the sum of absolute differences with no factor one half,
     between sa_seat_dist of the interpreter-executed finite-word adapter at
     one seat and the encoder-image ideal reading is at most sqrt 5 times
     alpha to the power L. One endpoint marginal; the ideal is neither

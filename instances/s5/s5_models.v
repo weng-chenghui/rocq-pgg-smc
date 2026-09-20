@@ -290,10 +290,11 @@ Qed.
 (** s5_word_endpoint_bound — at the finite-word adapter's own cut
     distribution, one seat's position marginal sits within
     sqrt 5 * alpha^L of uniform, in variation distance under the
-    repository's full-L1 convention. This is the S_5 spectral mixing
-    bound (s5_spectral_convergence_proved) transported to the sample
-    layer; it rests on the in-kernel Rayleigh certificate s5_rayleigh_Q2_R
-    and bounds one seat's endpoint marginal only, not a coalition view. *)
+    repository's convention, the sum of absolute differences with no factor
+    one half. This is the S_5 spectral mixing bound
+    (s5_spectral_convergence_proved) transported to the sample layer; it
+    rests on the in-kernel Rayleigh certificate s5_rayleigh_Q2_R and bounds
+    one seat's endpoint marginal only, not a coalition view. *)
 Lemma s5_word_endpoint_bound (s : 'I_5) :
   (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
                (@sa_cut_dist R mpS s5_exec_plug s5_word_sample))
@@ -306,23 +307,24 @@ Proof. by rewrite s5_word_cut_distE; exact: s5_spectral_convergence_proved. Qed.
 (******************************************************************************)
 
 (** s5_word_base_premise — a variation-distance bound, in the
-    repository's full-L1 convention, between the finite-word adapter's
-    cut distribution on the group carrier {perm 'I_5} and a reference
-    distribution on that same carrier. The landed spectral theorem
-    (s5_spectral_convergence_proved) bounds a position pushforward on
-    'I_5, a different carrier, so it does not discharge this premise:
-    s5_word_transfer_conditional below stays conditional on a hypothesis
-    this file supplies no proof of. *)
+    repository's convention, the sum of absolute differences with no factor
+    one half, between the finite-word adapter's cut distribution on the
+    group carrier {perm 'I_5} and a reference distribution on that same
+    carrier. The landed spectral theorem (s5_spectral_convergence_proved)
+    bounds a position pushforward on 'I_5, a different carrier, so it does
+    not discharge this premise: s5_word_transfer_conditional below stays
+    conditional on a hypothesis this file supplies no proof of. *)
 Definition s5_word_base_premise (Q : R.-fdist {perm 'I_5}) (delta : R) : Prop :=
   (var_dist (@sa_cut_dist R mpS s5_exec_plug s5_word_sample) Q <= delta)%R.
 
 (** s5_word_transfer_conditional — given s5_word_base_premise Q delta,
     any two readers of the finite-word cut distribution whose
     pushforwards along Q agree have pushforwards within delta + delta of
-    each other, in the repository's full-L1 convention. The premise is a
-    hypothesis, not a fact this file proves (see s5_word_base_premise):
-    this lemma is the generic transfer machinery kept ready for whichever
-    future proof discharges that premise. *)
+    each other, in the repository's convention, the sum of absolute
+    differences with no factor one half. The premise is a hypothesis, not a
+    fact this file proves (see s5_word_base_premise): this lemma is the
+    generic transfer machinery kept ready for whichever future proof
+    discharges that premise. *)
 Lemma s5_word_transfer_conditional
     (Q : R.-fdist {perm 'I_5}) (delta : R) (B : finType)
     (fx fy : {perm 'I_5} -> B) :
@@ -380,12 +382,12 @@ Definition s5_ideal_reading (secretP : R.-fdist 'I_5) : R.-fdist 'I_5 :=
 (** s5_exec_endpoint_bound — one seat's interpreter-executed reading,
     under the finite-word adapter, sits within sqrt 5 * alpha^L of the
     encoder-image ideal reading s5_ideal_reading, in variation distance
-    under the repository's full-L1 convention. This is
-    s5_spectral_convergence_proved transported through the executed
-    interpreter, so it rests on the in-kernel Rayleigh certificate
-    s5_rayleigh_Q2_R. It bounds one seat's endpoint marginal only: the
-    ideal reading is neither uniform nor secret-independent, and no
-    coalition, privacy, secrecy, or leakage conclusion follows from it. *)
+    under the repository's convention, the sum of absolute differences with
+    no factor one half. This is s5_spectral_convergence_proved transported
+    through the executed interpreter, so it rests on the in-kernel Rayleigh
+    certificate s5_rayleigh_Q2_R. It bounds one seat's endpoint marginal
+    only: the ideal reading is neither uniform nor secret-independent, and
+    no coalition, privacy, secrecy, or leakage conclusion follows from it. *)
 Lemma s5_exec_endpoint_bound (secretP : R.-fdist 'I_5) (L : nat)
     (i : 'I_(pi_T' (mp_PI mpS)).+1) :
   var_dist

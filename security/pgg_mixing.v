@@ -27,7 +27,8 @@
 (* Cauchy-Schwarz over finite index sums:                                     *)
 (*   cauchy_schwarz_bigR                                                      *)
 (*                                                                            *)
-(* Bridge from variation distance (L1) to L2 norm:                            *)
+(* Bridge from variation distance (the sum of absolute differences) to the    *)
+(* Euclidean norm:                                                            *)
 (*   var_dist_le_sqrtN_norm2                                                  *)
 (*                                                                            *)
 (* Power-norm contraction under Rayleigh-on-Q^2:                              *)
@@ -437,8 +438,8 @@ Proof. exact: sqrtr_ge0. Qed.
 
 (** symm_ds_power_norm2_bound — the square root of
     symm_ds_power_norm_sq_bound: ||Q^L v|| <= alpha^L ||v|| whenever
-    sum_i v_i = 0, the L2-norm form the L1-to-L2 bridge composes with to
-    reach the total-variation bound. *)
+    sum_i v_i = 0, the Euclidean-norm form the bridge from the sum of
+    absolute values composes with to reach the total-variation bound. *)
 Lemma symm_ds_power_norm2_bound (L : nat) (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
   vec_norm2 (Q ^+ L *m v) <= alpha ^+ L * vec_norm2 v.
@@ -468,7 +469,8 @@ elim: L => [|L IH].
 by rewrite exprS -mulmxA IH Q_fixes_uniform.
 Qed.
 
-(* L^1 to L^2 bridge for column vectors. *)
+(* Bridge from the sum of absolute values to the Euclidean norm, for
+   column vectors. *)
 Lemma cV_l1_le_sqrtN_norm2 (w : 'cV[R]_N) :
   \sum_a `|w a ord0| <= Num.sqrt (#|'I_N|%:R) * vec_norm2 w.
 Proof.
@@ -506,16 +508,17 @@ apply: ler_wsqrtr.
 exact: es_minus_U_norm_sq_le1.
 Qed.
 
-(* The mixing bound in raw column-vector form: the L1 distance between the
-   Q^L-iterated point mass at s and the uniform column is at most
-   sqrt(N) * alpha^L. The fdist-level statement (symm_ds_TV_bound, Section
-   7) is this same bound read through fdistmap and var_dist. *)
+(* The mixing bound in raw column-vector form: the sum of absolute differences
+   between the Q^L-iterated point mass at s and the uniform column is at most
+   sqrt(N) * alpha^L. The fdist-level statement (symm_ds_TV_bound, Section 7)
+   is this same bound read through fdistmap and var_dist. *)
 Lemma symm_ds_TV_bound_cV (L : nat) (s : 'I_N) :
   \sum_a `|(Q ^+ L *m e_cV s) a ord0 - uniform_cV a ord0|
   <= Num.sqrt (#|'I_N|%:R) * alpha ^+ L.
 Proof.
-(* Chains the L1-to-L2 bridge (cV_l1_le_sqrtN_norm2), the sqrt'd spectral
-   power bound (symm_ds_power_norm2_bound), and ||e_s - U||_2 <= 1
+(* Chains the bridge from the sum of absolute values to the Euclidean
+   norm (cV_l1_le_sqrtN_norm2), the sqrt'd spectral power bound
+   (symm_ds_power_norm2_bound), and ||e_s - U||_2 <= 1
    (es_minus_U_norm2_le1). *)
 have HQU : Q ^+ L *m uniform_cV = uniform_cV by exact: Q_power_fixes_uniform.
 set w := Q ^+ L *m (e_cV s - uniform_cV).
@@ -664,9 +667,9 @@ Hypothesis sigmas_invol :
     after L Schreier-walk steps from starting card position s is within
     sqrt(N) * alpha^L of the fully uniform distribution. The spectral gap
     alpha drives the endpoint toward uniform exponentially in L, with the
-    sqrt(N) prefactor coming from the L1-to-L2 bridge rather than the
-    sqrt(|G|) blowup a group-level DPI bound would incur
-    (pgg_collusion_bound.v Section 2). *)
+    sqrt(N) prefactor coming from the bridge from the sum of absolute
+    values to the Euclidean norm rather than the sqrt(|G|) blowup a
+    group-level DPI bound would incur (pgg_collusion_bound.v Section 2). *)
 Lemma symm_ds_TV_bound (alpha : R) (L : nat) (s : 'I_N) :
   0 <= alpha ->
   alpha <= 1 ->
