@@ -57,8 +57,8 @@ Local Open Scope ring_scope.
     is uniform over the shuffle group. This is the model the exact arm is
     certified over, and the one a word row is measured against: an execution
     whose own privacy below the six-seat threshold is a theorem rather than a
-    number. The value is what psl211_row_alldecks_sampledE continues, so the
-    row and the model are named apart. *)
+    number. The value is what psl211_alldecks_published_sampledE continues,
+    so the row and the model are named apart. *)
 Definition psl211_exact_sampled : Tableau Sampled :=
   psl211_alldecks_prefix sample psl211_exact_family.
 
@@ -72,7 +72,7 @@ Definition psl211_exact_sampled : Tableau Sampled :=
     and the execution are the same in both. A row over this model publishes a
     distance to the model above rather than an independence, because the
     finite word leaves the cut short of uniform by an amount the mixing
-    theorem bounds. The value is what psl211_row_word_proximity_sampledE
+    theorem bounds. The value is what psl211_word_proximity_published_sampledE
     continues. *)
 Definition psl211_word_sampled : Tableau Sampled :=
   psl211_alldecks_prefix sample psl211_word_family.

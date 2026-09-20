@@ -1,0 +1,153 @@
+Require Import Lia.
+From HB Require Import structures.
+From mathcomp Require Import zify.
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import morphism action bigop order ssrnum ssralg.
+From mathcomp Require Import boolp reals lra.
+From infotheo Require Import realType_ext fdist proba variation_dist entropy.
+From pgg_smc Require Import smc_interpreter pismc smc_session_types.
+From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
+From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
+From pgg_smc Require Import pgg_execution_plug pgg_weighted_words.
+From pgg_smc Require Import pgg_observed_execution pgg_sample_adapter.
+From pgg_smc Require Import pgg_leakage_witness pgg_trace_secrecy.
+From pgg_smc Require Import pgg_collusion_bound pgg_analysis_status.
+From pgg_smc Require Import var_dist_supp var_dist_joint_law.
+From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
+                                    algebraic_rigidity input_encoding.
+From pgg_smc Require Import pgg_instance pgg_functionality.
+From pgg_smc Require Import five_card_group five_card_program.
+From pgg_smc Require Import five_card_kim five_card_family.
+From pgg_smc Require Import den_boer_encoding den_boer_run.
+From pgg_smc Require Import five_card_leakage five_card_exec five_card_models.
+From pgg_smc Require Import kim_input_privacy five_card_mixing.
+From pgg_smc Require Export pgl27_analysis five_card_analysis s5_analysis
+                            psl211_analysis.
+From pgg_smc Require Import pgg_analysis_manifest.
+From pgg_smc Require Import pgg_tableau pgg_tableau_syntax.
+From pgg_smc Require Import five_card_proximity.
+From pgg_smc Require Import five_card_tableau_observed.
+From pgg_smc Require Import five_card_tableau_sampled.
+From pgg_smc Require Import five_card_tableau_analysis_bridged.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+Import GRing.Theory Num.Theory.
+
+Local Open Scope fdist_scope.
+Local Open Scope proba_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+
+Locate AnalysisPath.
+Locate MkAnalysisPath.
+Locate MkPublished.
+Locate Published.
+Locate PublishedAt.
+Locate ap_assumptions.
+Locate ap_completion.
+Locate ap_model.
+Locate ap_observed.
+Locate ap_transfer.
+Locate five_card_biased_path.
+Locate five_card_biased_published_arm_neq.
+Locate five_card_biased_sampled_at_manifest_level.
+Locate five_card_biased_branch_indistinguishability_published.
+Locate five_card_biased_branch_indistinguishability_published_armE.
+Locate five_card_biased_branch_indistinguishability_published_atE.
+Locate five_card_biased_branch_indistinguishability_published_pathE.
+Locate five_card_biased_forms_pathE.
+Locate five_card_biased_indistinguishability_published_armE.
+Locate five_card_biased_indistinguishability_published_path_fieldsE.
+Locate five_card_biased_indistinguishability_published_pathE.
+Locate five_card_biased_indistinguishability_published_sampledE.
+Locate five_card_biased_indistinguishability_published.
+Locate five_card_biased_published_inv25.
+Locate five_card_biased_published_inv25_armE.
+Locate five_card_biased_published_inv25_sampledE.
+Locate five_card_biased_leak_bound.
+Locate five_card_biased_path_levelE.
+Locate five_card_biased_sampled_modelE.
+Locate five_card_biased_sampled_prefixE.
+Locate five_card_biased_proximity_published.
+Locate five_card_biased_proximity_published_armE.
+Locate five_card_biased_proximity_published_path_fieldsE.
+Locate five_card_biased_proximity_published_pathE.
+Locate five_card_biased_sampled.
+Locate five_card_repeated_path.
+Locate five_card_repeated_published39.
+Locate five_card_repeated_published39_armE.
+Locate five_card_repeated_published39_atE.
+Locate five_card_repeated_published39_sampledE.
+Locate five_card_repeated_published39_unindexed.
+Locate five_card_repeated_endpoint_lt.
+Locate five_card_repeated_indistinguishability_published_armE.
+Locate five_card_repeated_indistinguishability_published_path_fieldsE.
+Locate five_card_repeated_indistinguishability_published_pathE.
+Locate five_card_repeated_indistinguishability_published_sampledE.
+Locate five_card_repeated_indistinguishability_published.
+Locate five_card_repeated_indistinguishability_published_uniform_pathE.
+Locate five_card_repeated_sampled_modelE.
+Locate five_card_repeated_sampled_prefixE.
+Locate five_card_repeated_proximity.
+Locate five_card_repeated_sampled.
+Locate five_card_s5_family_sampled.
+Locate five_card_uniform_path.
+Locate five_card_uniform_published_armE.
+Locate five_card_uniform_published_pathE.
+Locate five_card_uniform_published_sampledE.
+Locate five_card_uniform_published.
+Locate pgl27_exact_path.
+Locate pgl27_exact_published_armE.
+Locate pgl27_exact_published_leak7.
+Locate pgl27_exact_published_pathE.
+Locate pgl27_exact_published_sampledE.
+Locate pgl27_exact_published.
+Locate pgl27_prior_exact_path.
+Locate pgl27_prior_exact_published_armE.
+Locate pgl27_prior_exact_published_pathE.
+Locate pgl27_prior_exact_published_sampledE.
+Locate pgl27_prior_exact_published.
+Locate pgl27_word_path.
+Locate pgl27_word_published39.
+Locate pgl27_word_published39_armE.
+Locate pgl27_word_published39_bind.
+Locate pgl27_word_published39_bindE.
+Locate pgl27_word_published39_unindexed.
+Locate pgl27_word_published39_unindexed_bind.
+Locate pgl27_word_published41.
+Locate pgl27_word_published_armE.
+Locate pgl27_word_published_arm_neq.
+Locate pgl27_word_branch_published39.
+Locate pgl27_word_branch_published39_armE.
+Locate pgl27_word_published_certE.
+Locate pgl27_word_published_families_sampledE.
+Locate pgl27_word_published_obs_sampledE.
+Locate pgl27_word_proximity_published.
+Locate pgl27_word_proximity_published_armE.
+Locate pgl27_word_proximity_published_pathE.
+Locate pgl27_word_published_pathE.
+Locate pgl27_word_published_sampledE.
+Locate pgl27_word_published.
+Locate psl211_alldecks_path.
+Locate psl211_alldecks_published_armE.
+Locate psl211_alldecks_published_pathE.
+Locate psl211_alldecks_published_sampledE.
+Locate psl211_alldecks_published.
+Locate psl211_vm_reuse_sampled.
+Locate psl211_word_path.
+Locate psl211_word_proximity_published.
+Locate psl211_word_proximity_published_armE.
+Locate psl211_word_proximity_published_pathE.
+Locate psl211_word_proximity_published_sampledE.
+Locate published_path.
+Locate s5_dealt_path_observedE.
+Locate s5_det_path.
+Locate s5_rand_path.
+Locate s5_rand_published_armE.
+Locate s5_rand_published_pathE.
+Locate s5_rand_published_sampledE.
+Locate s5_rand_published.
+Locate s5_word_path.

@@ -7,7 +7,7 @@
 (* The AnalysisBridged level adjoins one security arm to a Sampled value, and *)
 (* the proposition it carries is that arm's own, on top of run correctness    *)
 (* and of the identification of the two readings of a coalition. A publish    *)
-(* terminal then turns the value into a PublishedRow. Every payload this      *)
+(* terminal then turns the value into a Published. Every payload this         *)
 (* instance gives an arm is here, every row it publishes is here, and every   *)
 (* statement whose subject is a payload or a row is here. Of the statements   *)
 (* this directory makes, the one whose subject is neither a payload nor a row *)
@@ -39,18 +39,18 @@
 (* what its row publishes.                                                    *)
 (*                                                                            *)
 (* Two terminals restate a certificate's number as a constant a text quotes.  *)
-(* five_card_row_repeated39 concludes the repeated row at two to the minus    *)
-(* thirty-ninth, and kim_centi_cert_eps_lt is strict, so the number the row   *)
-(* publishes is strictly above the number the certificate proved.             *)
-(* five_card_row_biased_inv25 concludes the one-cut row at one twenty-fifth,  *)
-(* and five_card_inv50_split is an equality, so there the two numbers are the *)
-(* same. Each of these numbers bounds a sum of absolute differences, twice a  *)
-(* total variation distance, so a distinguisher's advantage against a row is  *)
-(* at most half the number that row publishes: one hundredth at the proximity *)
-(* row, one fiftieth at the one-cut row concluded at one twenty-fifth.        *)
-(* five_card_biased_view_own_marginals removes the ideal from the proximity   *)
-(* row's statement, at three fiftieths, which leaves an advantage of at most  *)
-(* three hundredths.                                                          *)
+(* five_card_repeated_published39 concludes the repeated row at two to the    *)
+(* minus thirty-ninth, and kim_centi_cert_eps_lt is strict, so the number the *)
+(* row publishes is strictly above the number the certificate proved.         *)
+(* five_card_biased_published_inv25 concludes the one-cut row at one          *)
+(* twenty-fifth, and five_card_inv50_split is an equality, so there the two   *)
+(* numbers are the same. Each of these numbers bounds a sum of absolute       *)
+(* differences, twice a total variation distance, so a distinguisher's        *)
+(* advantage against a row is at most half the number that row publishes: one *)
+(* hundredth at the proximity row, one fiftieth at the one-cut row concluded  *)
+(* at one twenty-fifth. five_card_biased_view_own_marginals removes the ideal *)
+(* from the proximity row's statement, at three fiftieths, which leaves an    *)
+(* advantage of at most three hundredths.                                     *)
 (*                                                                            *)
 (* Two is the threshold the derived profile declares, so every statement here *)
 (* that quantifies over a coalition quantifies over at most one of the five   *)
@@ -60,12 +60,12 @@
 (* nowhere.                                                                   *)
 (*                                                                            *)
 (* Seven rows are published, and the three the manifest carries for this      *)
-(* instance are among them: five_card_row_uniform_rowE,                       *)
-(* five_card_row_repeated_indistinguishability_rowE and                       *)
-(* five_card_row_biased_indistinguishability_rowE discharge                   *)
-(* five_card_row_uniform, five_card_row_repeated and five_card_row_biased of  *)
-(* pgg_analysis_manifest.v by conversion, and those three are all the         *)
-(* AnalysisPathRows the manifest carries over the five-card instance. Of the  *)
+(* instance are among them: five_card_uniform_published_pathE,                *)
+(* five_card_repeated_indistinguishability_published_pathE and                *)
+(* five_card_biased_indistinguishability_published_pathE discharge            *)
+(* five_card_uniform_path, five_card_repeated_path and five_card_biased_path  *)
+(* of pgg_analysis_manifest.v by conversion, and those three are all the      *)
+(* AnalysisPaths the manifest carries over the five-card instance. Of the     *)
 (* three, the repeated row is the one whose route the programs here share:    *)
 (* the manifest reaches AnalysisBridged for it by the transfer whose base     *)
 (* premise is kim_centi_cut_mixing, with five_card_static_obs_const for the   *)
@@ -81,41 +81,40 @@
 (* already carries a second way: the repeated row and the one-cut row         *)
 (* concluded at the constants a text quotes, and the one-cut row continued    *)
 (* from its named Sampled value. The fourth is the proximity row, which       *)
-(* publishes that same AnalysisPathRow under a different arm. A published row *)
-(* is a program, and an AnalysisPathRow holds descriptive metadata and no     *)
-(* Prop, so two rows publishing one AnalysisPathRow say nothing about each    *)
-(* other's claim.                                                             *)
+(* publishes that same AnalysisPath under a different arm. A published row is *)
+(* a program, and an AnalysisPath holds descriptive metadata and no Prop, so  *)
+(* two rows publishing one AnalysisPath say nothing about each other's claim. *)
 (*                                                                            *)
 (* Where each published row's chain is, one entry per row.                    *)
-(* five_card_row_uniform_tableau, under The uniform row:                      *)
-(*     five_card_row_uniform_sampledE, five_card_row_uniform_rowE,            *)
-(*     five_card_row_uniform_armE, and, under The exact arm's four            *)
-(*     conjuncts at this instance, the reading                                *)
-(*     five_card_exact_view_secrecy.                                          *)
-(* five_card_row_repeated_indistinguishability_tableau, under Kim's two       *)
-(*     rows, certified against the uniform rotation law:                      *)
-(*     five_card_row_repeated_indistinguishability_sampledE, _rowE, _armE     *)
-(*     and _publishedE, and no reading of its own.                            *)
-(* five_card_row_biased_indistinguishability_tableau, under the same          *)
-(*     banner: five_card_row_biased_indistinguishability_sampledE, _rowE,     *)
+(* five_card_uniform_published, under The uniform row:                        *)
+(*     five_card_uniform_published_sampledE,                                  *)
+(*     five_card_uniform_published_pathE, five_card_uniform_published_armE,   *)
+(*     and, under The exact arm's four conjuncts at this instance, the        *)
+(*     reading five_card_exact_view_secrecy.                                  *)
+(* five_card_repeated_indistinguishability_published, under Kim's two rows,   *)
+(*     certified against the uniform rotation law:                            *)
+(*     five_card_repeated_indistinguishability_published_sampledE, _pathE,    *)
 (*     _armE and _publishedE, and no reading of its own.                      *)
-(* five_card_row_repeated39, under The same two rows at the constants         *)
-(*     they publish: five_card_row_repeated39_sampledE,                       *)
-(*     five_card_row_repeated39_atE, five_card_row_repeated39_armE, no        *)
-(*     _rowE of its own, and no reading of its own.                           *)
-(* five_card_row_biased_inv25, under the same banner:                         *)
-(*     five_card_row_biased_inv25_sampledE,                                   *)
-(*     five_card_row_biased_inv25_armE,                                       *)
-(*     five_card_row_biased_forms_publishedE in place of a _rowE of its       *)
-(*     own, and no reading of its own.                                        *)
-(* five_card_row_biased_branch_indistinguishability, under One model, two     *)
-(*     claims, two rows: written from five_card_row_biased_tableau, so no     *)
-(*     _sampledE, then _atE, _rowE and _armE, and no reading of its own.      *)
-(* five_card_row_biased_proximity, under the same banner: written from        *)
-(*     five_card_row_biased_tableau, so no _sampledE,                         *)
-(*     five_card_row_biased_proximity_rowE, _publishedE and _armE, and,       *)
-(*     under What the proximity row states at this instance, the readings     *)
-(*     five_card_biased_view_proximity and                                    *)
+(* five_card_biased_indistinguishability_published, under the same banner:    *)
+(*     five_card_biased_indistinguishability_published_sampledE, _pathE,      *)
+(*     _armE and _publishedE, and no reading of its own.                      *)
+(* five_card_repeated_published39, under The same two rows at the constants   *)
+(*     they publish: five_card_repeated_published39_sampledE,                 *)
+(*     five_card_repeated_published39_atE,                                    *)
+(*     five_card_repeated_published39_armE, no _pathE of its own, and no      *)
+(*     reading of its own.                                                    *)
+(* five_card_biased_published_inv25, under the same banner:                   *)
+(*     five_card_biased_published_inv25_sampledE,                             *)
+(*     five_card_biased_published_inv25_armE, five_card_biased_forms_pathE in *)
+(*     place of a _pathE of its own, and no reading of its own.               *)
+(* five_card_biased_branch_indistinguishability_published, under One model,   *)
+(*     two claims, two rows: written from five_card_biased_sampled, so no     *)
+(*     _sampledE, then _atE, _pathE and _armE, and no reading of its own.     *)
+(* five_card_biased_proximity_published, under the same banner: written from  *)
+(*     five_card_biased_sampled, so no _sampledE,                             *)
+(*     five_card_biased_proximity_published_pathE, _publishedE and _armE,     *)
+(*     and, under What the proximity row states at this instance, the         *)
+(*     readings five_card_biased_view_proximity and                           *)
 (*     five_card_biased_view_own_marginals.                                   *)
 (*                                                                            *)
 (* An importer of this instance names one module per kind of name. The        *)
@@ -144,33 +143,33 @@
 (*                              positions                                     *)
 (*   five_card_exact_witness == the exact arm's witness at every field and    *)
 (*                              index                                         *)
-(*   five_card_row_uniform_tableau                                            *)
+(*   five_card_uniform_published                                              *)
 (*                           == the uniform row as a program                  *)
 (*   kim_centi_cert          == the repeated row's certificate at its         *)
 (*                              bundle's number                               *)
 (*   kim_biased_cert         == the one-cut row's certificate at its bundle's *)
 (*                              number                                        *)
-(*   five_card_row_repeated_indistinguishability_tableau                      *)
+(*   five_card_repeated_indistinguishability_published                        *)
 (*                           == the repeated row as a program at the input-   *)
 (*                              indistinguishability arm                      *)
-(*   five_card_row_biased_indistinguishability_tableau                        *)
+(*   five_card_biased_indistinguishability_published                          *)
 (*                           == the one-cut row as a program at that same arm *)
 (*   five_card_bound39       == the name two to the minus thirty-ninth for a  *)
 (*                              bound                                         *)
-(*   five_card_row_repeated39                                                 *)
+(*   five_card_repeated_published39                                           *)
 (*                           == the repeated row concluded at that number     *)
 (*   kim_biased_cert_exact   == the one-cut row's certificate at the exact    *)
 (*                              number one fiftieth                           *)
 (*   five_card_bound_inv25   == the name one twenty-fifth for a bound         *)
-(*   five_card_row_biased_inv25                                               *)
+(*   five_card_biased_published_inv25                                         *)
 (*                           == the one-cut row concluded at that number      *)
 (*   kim_biased_proximity_cert                                                *)
 (*                           == the one-cut model's proximity certificate     *)
-(*   five_card_row_biased_branch_indistinguishability                         *)
+(*   five_card_biased_branch_indistinguishability_published                   *)
 (*                           == the one-cut row at the input-                 *)
 (*                              indistinguishability arm, continued from the  *)
 (*                              named model                                   *)
-(*   five_card_row_biased_proximity                                           *)
+(*   five_card_biased_proximity_published                                     *)
 (*                           == the one-cut row as a program at the proximity *)
 (*                              arm, published at one fiftieth                *)
 (*   five_card_bound_inv100  == the name one hundredth for a bound            *)
@@ -193,13 +192,13 @@
 (*                              coalition of at most one of the five seats,   *)
 (*                              the direct computation is independent of the  *)
 (*                              conjunction                                   *)
-(*   five_card_row_uniform_sampledE                                           *)
+(*   five_card_uniform_published_sampledE                                     *)
 (*                           == the uniform row continues the named uniform   *)
 (*                              model                                         *)
-(*   five_card_row_uniform_rowE                                               *)
+(*   five_card_uniform_published_pathE                                        *)
 (*                           == the uniform program publishes the manifest's  *)
 (*                              row                                           *)
-(*   five_card_row_uniform_armE                                               *)
+(*   five_card_uniform_published_armE                                         *)
 (*                           == the uniform row carries the exact arm         *)
 (*   five_card_exact_view_secrecy                                             *)
 (*                           == at a coalition of at most one of the five     *)
@@ -209,28 +208,28 @@
 (*                              form                                          *)
 (*   kim_biased_exact_le_eps == the exact one-cut distance is under that      *)
 (*                              bound                                         *)
-(*   five_card_row_repeated_indistinguishability_sampledE                     *)
+(*   five_card_repeated_indistinguishability_published_sampledE               *)
 (*                           == the repeated certified row continues the      *)
 (*                              named repeated model                          *)
-(*   five_card_row_biased_indistinguishability_sampledE                       *)
+(*   five_card_biased_indistinguishability_published_sampledE                 *)
 (*                           == the one-cut certified row continues the named *)
 (*                              one-cut model                                 *)
-(*   five_card_row_repeated_indistinguishability_rowE                         *)
+(*   five_card_repeated_indistinguishability_published_pathE                  *)
 (*                           == the repeated certified program publishes the  *)
 (*                              manifest's row                                *)
-(*   five_card_row_biased_indistinguishability_rowE                           *)
+(*   five_card_biased_indistinguishability_published_pathE                    *)
 (*                           == the one-cut certified program publishes the   *)
 (*                              manifest's row                                *)
-(*   five_card_row_repeated_indistinguishability_armE                         *)
+(*   five_card_repeated_indistinguishability_published_armE                   *)
 (*                           == the repeated certified row carries the input- *)
 (*                              indistinguishability arm                      *)
-(*   five_card_row_biased_indistinguishability_armE                           *)
+(*   five_card_biased_indistinguishability_published_armE                     *)
 (*                           == the one-cut certified row carries that same   *)
 (*                              arm                                           *)
-(*   five_card_row_repeated_indistinguishability_publishedE                   *)
+(*   five_card_repeated_indistinguishability_published_path_fieldsE           *)
 (*                           == the three coordinates the repeated certified  *)
 (*                              program publishes                             *)
-(*   five_card_row_biased_indistinguishability_publishedE                     *)
+(*   five_card_biased_indistinguishability_published_path_fieldsE             *)
 (*                           == the three coordinates the one-cut certified   *)
 (*                              program publishes                             *)
 (*   five_card_pow2_39_split == two to the minus thirty-ninth as a sum of two *)
@@ -241,25 +240,25 @@
 (*   kim_biased_cert_epsE    == the one-cut row's number in closed form       *)
 (*   kim_biased_cert_eps_lt2 == that number is under two, the bound           *)
 (*                              var_dist_le2 gives                            *)
-(*   five_card_row_repeated39_sampledE                                        *)
+(*   five_card_repeated_published39_sampledE                                  *)
 (*                           == the concluded repeated row continues the      *)
 (*                              named repeated model                          *)
-(*   five_card_row_repeated39_atE                                             *)
+(*   five_card_repeated_published39_atE                                       *)
 (*                           == the repeated row at two to the minus thirty-  *)
 (*                              ninth and at its own number carry one         *)
 (*                              accumulated stack                             *)
-(*   five_card_row_repeated39_armE                                            *)
+(*   five_card_repeated_published39_armE                                      *)
 (*                           == the concluded repeated row carries that same  *)
 (*                              arm                                           *)
 (*   five_card_inv50_split   == one twenty-fifth as a sum of two per-pair     *)
 (*                              bounds                                        *)
-(*   five_card_row_biased_inv25_sampledE                                      *)
+(*   five_card_biased_published_inv25_sampledE                                *)
 (*                           == the concluded one-cut row continues the named *)
 (*                              one-cut model                                 *)
-(*   five_card_row_biased_forms_publishedE                                    *)
+(*   five_card_biased_forms_pathE                                             *)
 (*                           == the two one-cut certified programs publish    *)
 (*                              one row                                       *)
-(*   five_card_row_biased_inv25_armE                                          *)
+(*   five_card_biased_published_inv25_armE                                    *)
 (*                           == the concluded one-cut row carries that same   *)
 (*                              arm                                           *)
 (*   five_card_bound_inv25_lt2                                                *)
@@ -277,21 +276,21 @@
 (*   kim_biased_proximity_cert_eps_lt2                                        *)
 (*                           == that number is under two, the bound           *)
 (*                              var_dist_le2 gives                            *)
-(*   five_card_row_biased_branch_indistinguishability_atE                     *)
+(*   five_card_biased_branch_indistinguishability_published_atE               *)
 (*                           == the branch and the program written out from   *)
 (*                              the prefix hold one coordinate                *)
-(*   five_card_row_biased_branch_indistinguishability_rowE                    *)
+(*   five_card_biased_branch_indistinguishability_published_pathE             *)
 (*                           == the branch publishes the manifest's row for   *)
 (*                              the one-cut path                              *)
-(*   five_card_row_biased_proximity_rowE                                      *)
+(*   five_card_biased_proximity_published_pathE                               *)
 (*                           == the proximity row publishes that same row     *)
-(*   five_card_row_biased_proximity_publishedE                                *)
+(*   five_card_biased_proximity_published_path_fieldsE                        *)
 (*                           == the three coordinates the proximity row       *)
 (*                              publishes                                     *)
-(*   five_card_row_biased_branch_indistinguishability_armE                    *)
+(*   five_card_biased_branch_indistinguishability_published_armE              *)
 (*                           == the branch carries the input-                 *)
 (*                              indistinguishability arm                      *)
-(*   five_card_row_biased_proximity_armE                                      *)
+(*   five_card_biased_proximity_published_armE                                *)
 (*                           == the proximity row carries the proximity arm   *)
 (*   five_card_biased_view_proximity                                          *)
 (*                           == at a coalition of at most one of the five     *)
@@ -496,7 +495,7 @@ Definition five_card_exact_witness (R : realType) (idx : unit)
     is being compared with a real one. What the finished row carries about a
     coalition of fewer than two seats is independence of the conjunction, at
     every real field, with no numeric bound anywhere in it. *)
-Definition five_card_row_uniform_tableau : PublishedRow :=
+Definition five_card_uniform_published : Published :=
   five_card_committed
     sample  five_card_uniform_family
     certify ExactIndependence five_card_exact_witness
@@ -507,27 +506,27 @@ Definition five_card_row_uniform_tableau : PublishedRow :=
     the Sampled file names the value between them, so this equation is what
     lets a statement made at five_card_uniform_sampled be read as a
     statement about the row. *)
-Lemma five_card_row_uniform_sampledE :
+Lemma five_card_uniform_published_sampledE :
   (five_card_uniform_sampled
      certify ExactIndependence five_card_exact_witness
      |> publish StaticExecutedOnly BaselineClassicalOnly)
-  = five_card_row_uniform_tableau.
+  = five_card_uniform_published.
 Proof. exact: erefl. Qed.
 
 (** The row the program publishes is the manifest's own row for the five-card
     development under the uniform cut. Conversion decides it, so the
     descriptive row and the theorem proved about it cannot drift apart. *)
-Lemma five_card_row_uniform_rowE :
-  published_row five_card_row_uniform_tableau = five_card_row_uniform.
+Lemma five_card_uniform_published_pathE :
+  published_path five_card_uniform_published = five_card_uniform_path.
 Proof. by []. Qed.
 
 (** The arm this row carries, at every real field and index: independence of
     the coalition's view from the conjunction of the committed bits, and not a
     distance between two readings. The certify statement the program wrote
     settles which arm that is. *)
-Lemma five_card_row_uniform_armE (R : realType)
-    (idx : amf_index (ab_f (published_at five_card_row_uniform_tableau)) R) :
-  security_arm_of five_card_row_uniform_tableau R idx = ExactIndependenceArm.
+Lemma five_card_uniform_published_armE (R : realType)
+    (idx : amf_index (ab_f (published_at five_card_uniform_published)) R) :
+  security_arm_of five_card_uniform_published R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
 
@@ -557,7 +556,7 @@ Theorem five_card_exact_view_secrecy (R : realType) (C : {set 'I_5})
         P R |= (h `o (@sa_coalition_view R five_card_profile
                         five_card_exec_plug (five_card_sample R) 0 C))
                _|_ (Secret R)].
-Proof. exact: (view_secrecy_of five_card_row_uniform_tableau R tt C HC). Qed.
+Proof. exact: (view_secrecy_of five_card_uniform_published R tt C HC). Qed.
 
 
 (******************************************************************************)
@@ -636,7 +635,7 @@ Definition kim_biased_cert (R : realType) (idx : unit)
     pgg_analysis_status.v states for IdealFinite: a cut-carrier transfer
     whose base premise is discharged, which is what a certificate comparing a
     finite shuffle with a named ideal cut supplies. *)
-Definition five_card_row_repeated_indistinguishability_tableau : PublishedRow :=
+Definition five_card_repeated_indistinguishability_published : Published :=
   five_card_committed
     sample kim_centi_family
     certify InputIndistinguishability kim_centi_cert
@@ -645,45 +644,45 @@ Definition five_card_row_repeated_indistinguishability_tableau : PublishedRow :=
 (** The repeated certified row continues the named repeated model, so the
     model a reader of the row meets and the model the Sampled file names are
     one name and not two spellings. *)
-Lemma five_card_row_repeated_indistinguishability_sampledE :
-  (five_card_row_repeated_tableau
+Lemma five_card_repeated_indistinguishability_published_sampledE :
+  (five_card_repeated_sampled
      certify InputIndistinguishability kim_centi_cert
      |> publish IdealFinite BaselineClassicalOnly)
-  = five_card_row_repeated_indistinguishability_tableau.
+  = five_card_repeated_indistinguishability_published.
 Proof. exact: erefl. Qed.
 
 (** Kim's one-cut row certified by the same arm and published at the same
     transfer status. Its certificate has the shape the repeated row's has,
     over the same ideal cut and with the same constancy field, so the same
     status is the honest one for it. *)
-Definition five_card_row_biased_indistinguishability_tableau : PublishedRow :=
+Definition five_card_biased_indistinguishability_published : Published :=
   five_card_committed
     sample kim_biased_family
     certify InputIndistinguishability kim_biased_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The same for the one-cut row and the named one-cut model. *)
-Lemma five_card_row_biased_indistinguishability_sampledE :
-  (five_card_row_biased_tableau
+Lemma five_card_biased_indistinguishability_published_sampledE :
+  (five_card_biased_sampled
      certify InputIndistinguishability kim_biased_cert
      |> publish IdealFinite BaselineClassicalOnly)
-  = five_card_row_biased_indistinguishability_tableau.
+  = five_card_biased_indistinguishability_published.
 Proof. exact: erefl. Qed.
 
 (** The repeated row's certified program publishes the manifest's row for that
     path. Conversion decides it, as it does for the uniform row. An
-    AnalysisPathRow stores descriptive metadata and no Prop, so this equation
+    AnalysisPath stores descriptive metadata and no Prop, so this equation
     fixes which path the program is written for and asserts nothing about the
     certificate the program carries. *)
-Lemma five_card_row_repeated_indistinguishability_rowE :
-  published_row five_card_row_repeated_indistinguishability_tableau
-  = five_card_row_repeated.
+Lemma five_card_repeated_indistinguishability_published_pathE :
+  published_path five_card_repeated_indistinguishability_published
+  = five_card_repeated_path.
 Proof. by []. Qed.
 
 (** The same for the one-cut row and the manifest's biased row. *)
-Lemma five_card_row_biased_indistinguishability_rowE :
-  published_row five_card_row_biased_indistinguishability_tableau
-  = five_card_row_biased.
+Lemma five_card_biased_indistinguishability_published_pathE :
+  published_path five_card_biased_indistinguishability_published
+  = five_card_biased_path.
 Proof. by []. Qed.
 
 (** The arm the repeated row's certified program carries, at every real field
@@ -691,48 +690,48 @@ Proof. by []. Qed.
     committed pairs, and not independence of the view from the conjunction of
     the committed bits. The certify statement the program wrote settles which
     arm that is. *)
-Lemma five_card_row_repeated_indistinguishability_armE (R : realType)
+Lemma five_card_repeated_indistinguishability_published_armE (R : realType)
     (idx : amf_index
              (ab_f (published_at
-                      five_card_row_repeated_indistinguishability_tableau)) R) :
-  security_arm_of five_card_row_repeated_indistinguishability_tableau R idx
+                      five_card_repeated_indistinguishability_published)) R) :
+  security_arm_of five_card_repeated_indistinguishability_published R idx
   = InputIndistinguishabilityArm.
 Proof. exact: erefl. Qed.
 
 (** The arm the one-cut row's certified program carries. The two Kim rows
     publish different manifest rows, and a reader of the manifest alone could
     not tell which arm either committed to. *)
-Lemma five_card_row_biased_indistinguishability_armE (R : realType)
+Lemma five_card_biased_indistinguishability_published_armE (R : realType)
     (idx : amf_index
              (ab_f (published_at
-                      five_card_row_biased_indistinguishability_tableau)) R) :
-  security_arm_of five_card_row_biased_indistinguishability_tableau R idx
+                      five_card_biased_indistinguishability_published)) R) :
+  security_arm_of five_card_biased_indistinguishability_published R idx
   = InputIndistinguishabilityArm.
 Proof. exact: erefl. Qed.
 
 (** The three coordinates the repeated row's certified program publishes. *)
-Lemma five_card_row_repeated_indistinguishability_publishedE :
-  apr_completion
-    (published_row five_card_row_repeated_indistinguishability_tableau)
+Lemma five_card_repeated_indistinguishability_published_path_fieldsE :
+  ap_completion
+    (published_path five_card_repeated_indistinguishability_published)
     = AnalysisBridged
-  /\ apr_transfer
-       (published_row five_card_row_repeated_indistinguishability_tableau)
+  /\ ap_transfer
+       (published_path five_card_repeated_indistinguishability_published)
      = IdealFinite
-  /\ apr_assumptions
-       (published_row five_card_row_repeated_indistinguishability_tableau)
+  /\ ap_assumptions
+       (published_path five_card_repeated_indistinguishability_published)
      = BaselineClassicalOnly.
 Proof. by []. Qed.
 
 (** The three coordinates the one-cut row's certified program publishes. *)
-Lemma five_card_row_biased_indistinguishability_publishedE :
-  apr_completion
-    (published_row five_card_row_biased_indistinguishability_tableau)
+Lemma five_card_biased_indistinguishability_published_path_fieldsE :
+  ap_completion
+    (published_path five_card_biased_indistinguishability_published)
     = AnalysisBridged
-  /\ apr_transfer
-       (published_row five_card_row_biased_indistinguishability_tableau)
+  /\ ap_transfer
+       (published_path five_card_biased_indistinguishability_published)
      = IdealFinite
-  /\ apr_assumptions
-       (published_row five_card_row_biased_indistinguishability_tableau)
+  /\ ap_assumptions
+       (published_path five_card_biased_indistinguishability_published)
      = BaselineClassicalOnly.
 Proof. by []. Qed.
 
@@ -818,7 +817,7 @@ Definition five_card_bound39 : ConcludedBound := fun R => Some (2%:R ^- 39 : R).
     certificate proved and the row asserts about a coalition of at most one
     seat no more than that certificate did, at the number a reader cites. *)
 (* The terminal's payload is kim_centi_cert_eps_lt weakened by ltW. *)
-Definition five_card_row_repeated39 : PublishedRowAt five_card_bound39 :=
+Definition five_card_repeated_published39 : PublishedAt five_card_bound39 :=
   five_card_committed
     sample  kim_centi_family
     certify InputIndistinguishability kim_centi_cert
@@ -829,14 +828,14 @@ Definition five_card_row_repeated39 : PublishedRowAt five_card_bound39 :=
 (** The concluded repeated row continues the named repeated model as well,
     so the row at the constant a text quotes and the row at the
     certificate's own number read their model off one name. *)
-Lemma five_card_row_repeated39_sampledE :
-  (five_card_row_repeated_tableau
+Lemma five_card_repeated_published39_sampledE :
+  (five_card_repeated_sampled
      certify InputIndistinguishability kim_centi_cert
      |> conclude five_card_bound39
         by (fun R idx =>
               Order.POrderTheory.ltW (kim_centi_cert_eps_lt R idx))
      |> publish IdealFinite BaselineClassicalOnly)
-  = five_card_row_repeated39.
+  = five_card_repeated_published39.
 Proof. exact: erefl. Qed.
 
 (** The repeated row concluded at 2^-39 and the row at the bundle's own number
@@ -848,18 +847,18 @@ Proof. exact: erefl. Qed.
    erefl takes costs 147 s here against reflexivity's 0.07 s. Measured on
    2026-09-19; the numbers are in
    notes/probes/2026-09-19-tableau-extensions/STATUS.md, section F2. *)
-Lemma five_card_row_repeated39_atE :
-  published_at five_card_row_repeated39
-  = published_at five_card_row_repeated_indistinguishability_tableau.
+Lemma five_card_repeated_published39_atE :
+  published_at five_card_repeated_published39
+  = published_at five_card_repeated_indistinguishability_published.
 Proof. reflexivity. Qed.
 
 (** The arm the concluded repeated row carries. Concluding at a number at or
     above the certificate's own leaves the port where the certify statement
     put it, so the row at 2^-39 and the row at the bundle's spectral number
     carry the same arm. *)
-Lemma five_card_row_repeated39_armE (R : realType)
-    (idx : amf_index (ab_f (published_at five_card_row_repeated39)) R) :
-  security_arm_of five_card_row_repeated39 R idx
+Lemma five_card_repeated_published39_armE (R : realType)
+    (idx : amf_index (ab_f (published_at five_card_repeated_published39)) R) :
+  security_arm_of five_card_repeated_published39 R idx
   = InputIndistinguishabilityArm.
 Proof. exact: erefl. Qed.
 
@@ -891,8 +890,8 @@ Definition five_card_bound_inv25 : ConcludedBound := fun R => Some (1 / 25 : R).
     at least its certificate's, and the bound kim_biased_cert publishes is
     twice the bundle's number, sqrt 5 over forty, which is above one
     twenty-fifth. *)
-Definition five_card_row_biased_inv25
-  : PublishedRowAt five_card_bound_inv25 :=
+Definition five_card_biased_published_inv25
+  : PublishedAt five_card_bound_inv25 :=
   five_card_committed
     sample  kim_biased_family
     certify InputIndistinguishability kim_biased_cert_exact
@@ -901,32 +900,32 @@ Definition five_card_row_biased_inv25
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The concluded one-cut row continues the named one-cut model. *)
-Lemma five_card_row_biased_inv25_sampledE :
-  (five_card_row_biased_tableau
+Lemma five_card_biased_published_inv25_sampledE :
+  (five_card_biased_sampled
      certify InputIndistinguishability kim_biased_cert_exact
      |> conclude five_card_bound_inv25
         by (fun R _ => ssr_ext.eqW (five_card_inv50_split R))
      |> publish IdealFinite BaselineClassicalOnly)
-  = five_card_row_biased_inv25.
+  = five_card_biased_published_inv25.
 Proof. exact: erefl. Qed.
 
 (** The two one-cut programs publish one row, although their certificates
     carry different numbers, sqrt 5 over forty against one twenty-fifth. An
-    AnalysisPathRow holds descriptive metadata and no Prop, so an equation
+    AnalysisPath holds descriptive metadata and no Prop, so an equation
     between two published rows says nothing about either certificate, and in
     particular cannot say which transfer status is the honest one. *)
-Lemma five_card_row_biased_forms_publishedE :
-  published_row five_card_row_biased_indistinguishability_tableau
-  = published_row five_card_row_biased_inv25.
+Lemma five_card_biased_forms_pathE :
+  published_path five_card_biased_indistinguishability_published
+  = published_path five_card_biased_published_inv25.
 Proof. exact: erefl. Qed.
 
 (** The arm the concluded one-cut row carries. It carries the exact
-    certificate where five_card_row_biased_indistinguishability_tableau
+    certificate where five_card_biased_indistinguishability_published
     carries the spectral one, so the two rows differ in the number they
     publish and not in what kind of fact they state about a coalition. *)
-Lemma five_card_row_biased_inv25_armE (R : realType)
-    (idx : amf_index (ab_f (published_at five_card_row_biased_inv25)) R) :
-  security_arm_of five_card_row_biased_inv25 R idx
+Lemma five_card_biased_published_inv25_armE (R : realType)
+    (idx : amf_index (ab_f (published_at five_card_biased_published_inv25)) R) :
+  security_arm_of five_card_biased_published_inv25 R idx
   = InputIndistinguishabilityArm.
 Proof. exact: erefl. Qed.
 
@@ -969,9 +968,9 @@ Definition kim_biased_proximity_cert (R : realType) (idx : unit)
     description of it. *)
 Lemma kim_biased_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (kim_biased_proximity_cert R idx)
-  = amf_sample (ab_f (published_at five_card_row_uniform_tableau)) R idx
+  = amf_sample (ab_f (published_at five_card_uniform_published)) R idx
   /\ ExactIndependence (ipc_witness (kim_biased_proximity_cert R idx))
-     = ab_port (published_at five_card_row_uniform_tableau) R idx.
+     = ab_port (published_at five_card_uniform_published) R idx.
 Proof. by split. Qed.
 
 
@@ -1024,8 +1023,8 @@ End kim_biased_proximity_numbers.
     prefix. It is the sibling of the proximity row below: the two continue
     one term, so what separates them is the arm and nothing about the
     algebra, the run or the law. *)
-Definition five_card_row_biased_branch_indistinguishability : PublishedRow :=
-  five_card_row_biased_tableau
+Definition five_card_biased_branch_indistinguishability_published : Published :=
+  five_card_biased_sampled
     certify InputIndistinguishability kim_biased_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
@@ -1034,15 +1033,15 @@ Definition five_card_row_biased_branch_indistinguishability : PublishedRow :=
     input-indistinguishability row's coordinate unchanged. *)
 (* exact: erefl and not by [], because done does not return on an equation
    between two rows' coordinates. *)
-Lemma five_card_row_biased_branch_indistinguishability_atE :
-  published_at five_card_row_biased_branch_indistinguishability
-  = published_at five_card_row_biased_indistinguishability_tableau.
+Lemma five_card_biased_branch_indistinguishability_published_atE :
+  published_at five_card_biased_branch_indistinguishability_published
+  = published_at five_card_biased_indistinguishability_published.
 Proof. exact: erefl. Qed.
 
 (** The branch publishes the manifest's own row for the biased path. *)
-Lemma five_card_row_biased_branch_indistinguishability_rowE :
-  published_row five_card_row_biased_branch_indistinguishability
-  = five_card_row_biased.
+Lemma five_card_biased_branch_indistinguishability_published_pathE :
+  published_path five_card_biased_branch_indistinguishability_published
+  = five_card_biased_path.
 Proof. exact: erefl. Qed.
 
 (** Kim's one-cut model certified by the proximity arm and published at its
@@ -1055,46 +1054,49 @@ Proof. exact: erefl. Qed.
     hops twice. Its transfer status is IdealFinite, the same the
     input-indistinguishability row carries, and the two certificates compare
     against the same ideal cut. *)
-Definition five_card_row_biased_proximity : PublishedRow :=
-  five_card_row_biased_tableau
+Definition five_card_biased_proximity_published : Published :=
+  five_card_biased_sampled
     certify IdealProximity kim_biased_proximity_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
 (** The proximity row publishes the manifest's row for the biased path, as
-    its input-indistinguishability sibling does. An AnalysisPathRow holds
+    its input-indistinguishability sibling does. An AnalysisPath holds
     descriptive metadata and no Prop, so one manifest row carrying an
     input-indistinguishability row and a proximity row says nothing about
     either claim. *)
-Lemma five_card_row_biased_proximity_rowE :
-  published_row five_card_row_biased_proximity = five_card_row_biased.
+Lemma five_card_biased_proximity_published_pathE :
+  published_path five_card_biased_proximity_published = five_card_biased_path.
 Proof. exact: erefl. Qed.
 
 (** The three coordinates the proximity row publishes. *)
-Lemma five_card_row_biased_proximity_publishedE :
-  apr_completion (published_row five_card_row_biased_proximity)
+Lemma five_card_biased_proximity_published_path_fieldsE :
+  ap_completion (published_path five_card_biased_proximity_published)
     = AnalysisBridged
-  /\ apr_transfer (published_row five_card_row_biased_proximity) = IdealFinite
-  /\ apr_assumptions (published_row five_card_row_biased_proximity)
+  /\ ap_transfer (published_path five_card_biased_proximity_published)
+     = IdealFinite
+  /\ ap_assumptions (published_path five_card_biased_proximity_published)
      = BaselineClassicalOnly.
 Proof. by []. Qed.
 
 (** The arm the input-indistinguishability branch carries, at every real
     field and index. *)
-Lemma five_card_row_biased_branch_indistinguishability_armE (R : realType)
+Lemma five_card_biased_branch_indistinguishability_published_armE (R : realType)
     (idx : amf_index
              (ab_f (published_at
-                      five_card_row_biased_branch_indistinguishability))
+                      five_card_biased_branch_indistinguishability_published))
              R) :
-  security_arm_of five_card_row_biased_branch_indistinguishability R idx
+  security_arm_of five_card_biased_branch_indistinguishability_published R idx
   = InputIndistinguishabilityArm.
 Proof. by []. Qed.
 
 (** The arm the proximity row carries, at every real field and index: the
     distance to a private ideal model, and not the distance between two
     readings of one model. *)
-Lemma five_card_row_biased_proximity_armE (R : realType)
-    (idx : amf_index (ab_f (published_at five_card_row_biased_proximity)) R) :
-  security_arm_of five_card_row_biased_proximity R idx = IdealProximityArm.
+Lemma five_card_biased_proximity_published_armE (R : realType)
+    (idx : amf_index
+             (ab_f (published_at five_card_biased_proximity_published)) R) :
+  security_arm_of five_card_biased_proximity_published R idx
+  = IdealProximityArm.
 Proof. by []. Qed.
 
 
@@ -1120,7 +1122,9 @@ Theorem five_card_biased_view_proximity (R : realType) (C : {set 'I_5})
                   (five_card_sample R) 0 C) (P R))
      `x (fdistmap (five_card_leakage.Secret R) (P R)))
   <= 1 / 50.
-Proof. exact: (view_proximity_of five_card_row_biased_proximity R tt C HC). Qed.
+Proof.
+exact: (view_proximity_of five_card_biased_proximity_published R tt C HC).
+Qed.
 
 (** The one-cut row's bound restated against the executed law's own two
     marginals: at fewer than two colluding seats, the joint law of the
@@ -1206,7 +1210,9 @@ Definition five_card_biased_proximity_at_singleton (R : realType) (i : 'I_5) :=
     standing on its own at this instance. *)
 Lemma five_card_biased_proximity_prop_holds (R : realType) :
   IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50).
-Proof. exact: (view_proximity_of five_card_row_biased_proximity R tt). Qed.
+Proof.
+exact: (view_proximity_of five_card_biased_proximity_published R tt).
+Qed.
 
 (** The input-indistinguishability proposition implies the proximity
     proposition at the five-card instance, at every constant the

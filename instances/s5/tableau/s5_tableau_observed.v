@@ -12,13 +12,13 @@
 (*                                                                            *)
 (* Both sharing-family runs of the instance reach this level, and each is     *)
 (* named once. The dealer-dealt run's program stops here: the manifest row    *)
-(* s5_row_det it answers carries no model and no security payload, because    *)
+(* s5_det_path it answers carries no model and no security payload, because   *)
 (* the canonical encoding it deals puts the whole secret on one card, so the  *)
 (* single seat the cut sends that card to reads the secret, as does every     *)
 (* coalition containing that seat. The manifest carries a second row over     *)
-(* this run, s5_row_word, under a finite-word model; the Sampled file records *)
-(* why no program of this instance continues from that model. The supplied    *)
-(* run continues, through the tape model of the level above.                  *)
+(* this run, s5_word_path, under a finite-word model; the Sampled file        *)
+(* records why no program of this instance continues from that model. The     *)
+(* supplied run continues, through the tape model of the level above.         *)
 (*                                                                            *)
 (* Each run's specification sits here too. A specification is an ideal        *)
 (* function with a tolerated coalition size, and realising one is a statement *)
@@ -33,7 +33,7 @@
 (*   s5_rand_F            == the specification the supplied run realises      *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   s5_dealt_row_observedE                                                   *)
+(*   s5_dealt_path_observedE                                                  *)
 (*                        == the dealt program reaches the observed execution *)
 (*                           the manifest's deterministic row describes       *)
 (*   s5_dealt_executableE == the dealt program is its Executable value with   *)
@@ -92,8 +92,8 @@ Definition s5_dealt : Tableau Observed :=
     deterministic row describes. Conversion decides it, so the row's
     description of the run and the proof of run correctness for it are one
     term, which is the whole of what this path publishes. *)
-Lemma s5_dealt_row_observedE :
-  ob_obs (tableau_at s5_dealt) = apr_observed s5_row_det.
+Lemma s5_dealt_path_observedE :
+  ob_obs (tableau_at s5_dealt) = ap_observed s5_det_path.
 Proof. by []. Qed.
 
 (** The dealer-dealt program is its own Executable value with the three run

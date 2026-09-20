@@ -43,7 +43,7 @@
 (* reject the term for an occupied name and not for the arm the term asserts. *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   pgl27_row_word_arm_neq  == the two rows over the word model carry        *)
+(*   pgl27_word_published_arm_neq  == the two rows over the word model carry  *)
 (*                              different arms                                *)
 (******************************************************************************)
 
@@ -85,7 +85,7 @@ Local Open Scope ring_scope.
     Writing seven where the coalition has four seats fails on unification of
     #|C| = 4 with #|C| = 7, so the clause records a size the kernel decided
     rather than a size a reader is asked to believe. *)
-Fail Definition pgl27_row_exact_leak7 : PublishedRow :=
+Fail Definition pgl27_exact_published_leak7 : Published :=
   pgl27_dealt
     sample  pgl27_exact_family
     certify ExactIndependence pgl27_exact_witness
@@ -99,17 +99,17 @@ Fail Definition pgl27_row_exact_leak7 : PublishedRow :=
 
 (** Recording the word row at the exact arm is rejected by conversion, so the
     row carries the arm its certify statement wrote and no other. *)
-Fail Definition pgl27_row_word_arm_neq (R : realType)
-    (idx : amf_index (ab_f (published_at pgl27_row_word_tableau)) R) :=
-  (erefl : security_arm_of pgl27_row_word_tableau R idx
+Fail Definition pgl27_word_published_arm_neq (R : realType)
+    (idx : amf_index (ab_f (published_at pgl27_word_published)) R) :=
+  (erefl : security_arm_of pgl27_word_published R idx
            = ExactIndependenceArm).
 
 (** The two rows over the one model carry different arms, so the pair is two
     statements about one probability model and not one statement published
     twice. *)
-Lemma pgl27_row_word_arm_neq (R : realType) (secretP : R.-fdist bool) :
-  security_arm_of pgl27_row_word_proximity R secretP
-  <> security_arm_of pgl27_row_word_branch39 R secretP.
+Lemma pgl27_word_published_arm_neq (R : realType) (secretP : R.-fdist bool) :
+  security_arm_of pgl27_word_proximity_published R secretP
+  <> security_arm_of pgl27_word_branch_published39 R secretP.
 Proof.
 (* Three timings are each why one line reads as it does. Binding the prior as
    an index of the proximity row costs 78.7 s in the statement alone,
@@ -121,9 +121,9 @@ Proof.
    goal and so converts one row against the other. The equation between the
    arms is therefore assumed first, and each rewrite then runs on a goal that
    mentions one row. *)
-have Hp : security_arm_of pgl27_row_word_proximity R secretP
+have Hp : security_arm_of pgl27_word_proximity_published R secretP
   = IdealProximityArm by [].
-have Hs : security_arm_of pgl27_row_word_branch39 R secretP
+have Hs : security_arm_of pgl27_word_branch_published39 R secretP
   = InputIndistinguishabilityArm by [].
 move=> Harm; move: Hp; rewrite Harm Hs => Hf; discriminate Hf.
 Qed.
@@ -152,7 +152,7 @@ Fail Definition pgl27_inline_reuse : Tableau Sampled :=
     of the family. A payload with the right relation but no index binder is
     rejected, which is what keeps a row from publishing a bound that holds
     only at the index a reader happened to pick. *)
-Fail Definition pgl27_row_word39_unindexed : PublishedRowAt pgl27_bound39 :=
+Fail Definition pgl27_word_published39_unindexed : PublishedAt pgl27_bound39 :=
   pgl27_dealt
     sample  pgl27_word_family
     certify InputIndistinguishability pgl27_word_cert
@@ -161,8 +161,8 @@ Fail Definition pgl27_row_word39_unindexed : PublishedRowAt pgl27_bound39 :=
 
 (** The same rejection through the bind, so the surface is not what rejects
     it. *)
-Fail Definition pgl27_row_word39_unindexed_bind
-  : PublishedRowAt pgl27_bound39 :=
+Fail Definition pgl27_word_published39_unindexed_bind
+  : PublishedAt pgl27_bound39 :=
   pgl27_dealt
     ;;; sample_step of pgl27_word_family
     ;;; certify_indistinguishability of pgl27_word_cert
@@ -175,7 +175,7 @@ Fail Definition pgl27_row_word39_unindexed_bind
 (******************************************************************************)
 
 (** The row at that number is rejected where its terminal is written. *)
-Fail Definition pgl27_row_word41 : PublishedRowAt pgl27_bound41 :=
+Fail Definition pgl27_word_published41 : PublishedAt pgl27_bound41 :=
   pgl27_dealt
     sample  pgl27_word_family
     certify InputIndistinguishability pgl27_word_cert
@@ -195,7 +195,7 @@ Fail Definition pgl27_row_word41 : PublishedRowAt pgl27_bound41 :=
     two secrets, so the two secrets come before the threshold proof. *)
 Fail Definition pgl27_word_arm_is_not_exact (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (HC : (#|C| < 4)%N) :=
-  view_secrecy_of pgl27_row_word_tableau R secretP C HC.
+  view_secrecy_of pgl27_word_published R secretP C HC.
 
 
 (******************************************************************************)

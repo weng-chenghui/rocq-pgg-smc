@@ -77,8 +77,8 @@
 (* Definitions:                                                               *)
 (*   ExactWitness           == the exact arm's security witness               *)
 (*   IndistinguishabilityCert                                                 *)
-(*                          == the input-indistinguishability arm's           *)
-(*                             security certificate                           *)
+(*                          == the input-indistinguishability arm's security  *)
+(*                             certificate                                    *)
 (*   IdealProximityCert     == the proximity arm's security certificate       *)
 (*   SecurityPort           == the arm an instance certifies                  *)
 (*   SecurityArm            == which arm, with no witness or certificate      *)
@@ -100,10 +100,10 @@
 (*                             accumulated bound                              *)
 (*   restate                == the terminal handing over a chosen proposition *)
 (*   publish                == the terminal attaching the row's manifest row  *)
-(*   PublishedRowAt         == a row's data, its manifest row and its theorem *)
+(*   PublishedAt            == a row's data, its manifest row and its theorem *)
 (*   run_correct_of         == run correctness of a published row             *)
-(*   view_identification_of == its link lemma, the view as the                *)
-(*                             direct computation                             *)
+(*   view_identification_of == its link lemma, the view as the direct         *)
+(*                             computation                                    *)
 (*   view_secrecy_of        == its security statement, exact-arm name         *)
 (*   view_indistinguishability_of                                             *)
 (*                          == the same statement, under the                  *)
@@ -924,42 +924,42 @@ Arguments restate : clear implicits.
    reached. The manifest already publishes the descriptive row; a published
    row is that same value with its theorem attached, so the manifest's claim
    about an instance and the proof of it are one term. *)
-Record PublishedRowAt (c : ConcludedBound) := MkPublishedRow {
-  published_at  : StackAt AnalysisBridged ;
-  published_row : AnalysisPathRow ;
-  published_thm : BridgedProp c published_at }.
-Arguments PublishedRowAt : clear implicits.
+Record PublishedAt (c : ConcludedBound) := MkPublished {
+  published_at   : StackAt AnalysisBridged ;
+  published_path : AnalysisPath ;
+  published_thm  : BridgedProp c published_at }.
+Arguments PublishedAt : clear implicits.
 
 (* A published row at the program's own bound: what a row whose coordinate
    names no number publishes. *)
-Notation PublishedRow := (PublishedRowAt no_concluded_bound).
+Notation Published := (PublishedAt no_concluded_bound).
 
 (* The terminal pairing the accumulated proposition with the manifest row for
    it. The assumption status precedes the coordinate because the sequencing
    carries one payload per line and the transfer status is that payload. *)
 Definition publish (a : AssumptionStatus) (c : ConcludedBound)
     (q : StackAt AnalysisBridged) (pf : BridgedProp c q)
-    (t : TransferStatus) : PublishedRowAt c :=
-  @MkPublishedRow c q
-    (@MkAnalysisPathRow (ab_obs q) AnalysisBridged (ab_f q) t a) pf.
+    (t : TransferStatus) : PublishedAt c :=
+  @MkPublished c q
+    (@MkAnalysisPath (ab_obs q) AnalysisBridged (ab_f q) t a) pf.
 Arguments publish a {c} q pf t.
 
 (* Run correctness of a published row: every process finishes, the endpoints
    number one per seat, and decoding them returns the dealt value. *)
-Definition run_correct_of (c : ConcludedBound) (r : PublishedRowAt c) :=
+Definition run_correct_of (c : ConcludedBound) (r : PublishedAt c) :=
   proj1 (proj1 (published_thm r)).
 Arguments run_correct_of {c} r.
 
 (* The link lemma of a published row, identifying its view with the direct
    computation, the fact on which its security statement is stated
    about a group action. *)
-Definition view_identification_of (c : ConcludedBound) (r : PublishedRowAt c) :=
+Definition view_identification_of (c : ConcludedBound) (r : PublishedAt c) :=
   proj2 (proj1 (published_thm r)).
 Arguments view_identification_of {c} r.
 
 (* The security statement of a published row, under the name a reader of the
    exact arm expects. *)
-Definition view_secrecy_of (c : ConcludedBound) (r : PublishedRowAt c) :=
+Definition view_secrecy_of (c : ConcludedBound) (r : PublishedAt c) :=
   proj2 (published_thm r).
 Arguments view_secrecy_of {c} r.
 
@@ -968,7 +968,7 @@ Arguments view_secrecy_of {c} r.
    result is applied, so naming the one that does not match a row fails at
    the next application rather than here. *)
 Definition view_indistinguishability_of (c : ConcludedBound)
-    (r : PublishedRowAt c) :=
+    (r : PublishedAt c) :=
   proj2 (published_thm r).
 Arguments view_indistinguishability_of {c} r.
 
@@ -976,14 +976,14 @@ Arguments view_indistinguishability_of {c} r.
    The three names are one term and differ in what a reader is told to expect
    of it, which is the arm's own proposition and is selected only when the
    result is applied. *)
-Definition view_proximity_of (c : ConcludedBound) (r : PublishedRowAt c) :=
+Definition view_proximity_of (c : ConcludedBound) (r : PublishedAt c) :=
   proj2 (published_thm r).
 Arguments view_proximity_of {c} r.
 
 (* Which arm a published row carries, at one real field and one index of its
    family. It reads ab_arm past the publish statement, and publish_armE is
    why the publish statement does not change the answer. *)
-Definition security_arm_of (c : ConcludedBound) (r : PublishedRowAt c)
+Definition security_arm_of (c : ConcludedBound) (r : PublishedAt c)
     (R : realType) (idx : amf_index (ab_f (published_at r)) R)
   : SecurityArm :=
   ab_arm (published_at r) R idx.

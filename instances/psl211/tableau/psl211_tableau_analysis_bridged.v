@@ -52,17 +52,19 @@
 (* Definitions:                                                               *)
 (*   psl211_exact_witness    == the exact arm's witness at every field and    *)
 (*                              index                                         *)
-(*   psl211_row_alldecks_tableau                                              *)
+(*   psl211_alldecks_published                                                *)
 (*                           == the all-decks row as a program                *)
 (*   psl211_word_proximity_cert                                               *)
 (*                           == the word model's proximity certificate        *)
-(*   psl211_row_word_proximity == the word row as a program, published at     *)
-(*                              2^-40                                         *)
+(*   psl211_word_proximity_published                                          *)
+(*                           == the word row as a program, published at 2^-40 *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   psl211_row_alldecks_rowE == the program publishes the manifest's row     *)
-(*   psl211_row_alldecks_armE == the row carries the exact arm                *)
-(*   psl211_row_alldecks_sampledE                                             *)
+(*   psl211_alldecks_published_pathE                                          *)
+(*                           == the program publishes the manifest's row      *)
+(*   psl211_alldecks_published_armE                                           *)
+(*                           == the row carries the exact arm                 *)
+(*   psl211_alldecks_published_sampledE                                       *)
 (*                           == the row is the named Sampled value with the   *)
 (*                              payload and the terminal adjoined             *)
 (*   psl211_alldecks_view_secrecy                                             *)
@@ -82,11 +84,11 @@
 (*   psl211_word_proximity_cert_eps_lt2                                       *)
 (*                           == the certificate's number is below the bound   *)
 (*                              two var_dist_le2 gives                        *)
-(*   psl211_row_word_proximity_armE                                           *)
+(*   psl211_word_proximity_published_armE                                     *)
 (*                           == the row carries the proximity arm             *)
-(*   psl211_row_word_proximity_rowE                                           *)
-(*                           == the row publishes psl211_row_word             *)
-(*   psl211_row_word_proximity_sampledE                                       *)
+(*   psl211_word_proximity_published_pathE                                    *)
+(*                           == the row publishes psl211_word_path            *)
+(*   psl211_word_proximity_published_sampledE                                 *)
 (*                           == that row too is its named Sampled value with  *)
 (*                              the payload and the terminal adjoined         *)
 (*   psl211_word_view_proximity                                               *)
@@ -162,7 +164,7 @@ Definition psl211_exact_witness (R : realType) (idx : unit)
 (*     The row program                                                        *)
 (******************************************************************************)
 
-(** psl211_row_alldecks_tableau — the published row. What the finished row
+(** psl211_alldecks_published — the published row. What the finished row
     carries about a coalition of fewer than six of the twelve seats is
     independence of the chirality, at every real field, with no numeric bound
     in it; the independence is exact, not small, because both the deck
@@ -171,38 +173,38 @@ Definition psl211_exact_witness (R : realType) (idx : unit)
     Its last line publishes a row whose transfer status is StaticExecutedOnly,
     because the cut this model draws is already the uniform one and no
     idealized shuffle is being compared with a real one. *)
-Definition psl211_row_alldecks_tableau : PublishedRow :=
+Definition psl211_alldecks_published : Published :=
   psl211_alldecks_prefix
     sample  psl211_exact_family
     certify ExactIndependence psl211_exact_witness
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
-(** psl211_row_alldecks_rowE — the row this program publishes is the
+(** psl211_alldecks_published_pathE — the row this program publishes is the
     manifest's own row for this instance. Conversion decides it, so the
     descriptive row and the theorem proved about it cannot drift apart. *)
-Lemma psl211_row_alldecks_rowE :
-  published_row psl211_row_alldecks_tableau = psl211_row_alldecks.
+Lemma psl211_alldecks_published_pathE :
+  published_path psl211_alldecks_published = psl211_alldecks_path.
 Proof. by []. Qed.
 
 (** The arm this row carries, at every real field and index: independence of
     the coalition's view from the chirality, and not a distance between two
     readings. The certify statement the program wrote settles which arm that
     is. *)
-Lemma psl211_row_alldecks_armE (R : realType)
-    (idx : amf_index (ab_f (published_at psl211_row_alldecks_tableau)) R) :
-  security_arm_of psl211_row_alldecks_tableau R idx = ExactIndependenceArm.
+Lemma psl211_alldecks_published_armE (R : realType)
+    (idx : amf_index (ab_f (published_at psl211_alldecks_published)) R) :
+  security_arm_of psl211_alldecks_published R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
-(** psl211_row_alldecks_sampledE — the row is the named Sampled value with
-    the payload and the terminal adjoined. The program above writes the run
-    and the model in one chain and the Sampled file names the value they
-    build, so this equation is what keeps the two spellings of the row's
-    prefix from parting. *)
-Lemma psl211_row_alldecks_sampledE :
+(** psl211_alldecks_published_sampledE — the row is the named Sampled
+    value with the payload and the terminal adjoined. The program above
+    writes the run and the model in one chain and the Sampled file names
+    the value they build, so this equation is what keeps the two spellings
+    of the row's prefix from parting. *)
+Lemma psl211_alldecks_published_sampledE :
   (psl211_exact_sampled
      certify ExactIndependence psl211_exact_witness
      |> publish StaticExecutedOnly BaselineClassicalOnly)
-  = psl211_row_alldecks_tableau.
+  = psl211_alldecks_published.
 Proof. exact: erefl. Qed.
 
 (******************************************************************************)
@@ -238,7 +240,7 @@ Theorem psl211_alldecks_view_secrecy (R : realType) (C : {set seatT})
                     (instance_exec psl211_alldecks_params)
                     (psl211_alldecks_sample R) 0 C))
            _|_ (psl211_alldecks_secret R)].
-Proof. exact: (view_secrecy_of psl211_row_alldecks_tableau R tt C HC). Qed.
+Proof. exact: (view_secrecy_of psl211_alldecks_published R tt C HC). Qed.
 
 (******************************************************************************)
 (*     The certificate, and its ideal                                         *)
@@ -270,9 +272,9 @@ Definition psl211_word_proximity_cert (R : realType) (idx : unit)
     second description of it. *)
 Lemma psl211_word_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (psl211_word_proximity_cert R idx)
-  = amf_sample (ab_f (published_at psl211_row_alldecks_tableau)) R idx
+  = amf_sample (ab_f (published_at psl211_alldecks_published)) R idx
   /\ ExactIndependence (ipc_witness (psl211_word_proximity_cert R idx))
-     = ab_port (published_at psl211_row_alldecks_tableau) R idx.
+     = ab_port (published_at psl211_alldecks_published) R idx.
 Proof.
 (* exact: erefl and not by []: done does not return on an equation between two
    rows' coordinates, where exact: erefl decides it at once. *)
@@ -350,8 +352,8 @@ Qed.
     dealer-dealt run, a different execution. Each is witnessed at a coalition
     of three seats, and all three stay true beside this row. Its transfer
     status is IdealFinite: the cut is a shuffle of 584 letters where
-    the model of psl211_row_alldecks draws it uniformly from the group. *)
-Definition psl211_row_word_proximity : PublishedRow :=
+    the model of psl211_alldecks_path draws it uniformly from the group. *)
+Definition psl211_word_proximity_published : Published :=
   psl211_alldecks_prefix
     sample  psl211_word_family
     certify IdealProximity psl211_word_proximity_cert
@@ -360,9 +362,9 @@ Definition psl211_row_word_proximity : PublishedRow :=
 (** The arm the row carries, at every real field and index: the distance to a
     private ideal model, and not the distance between two readings of one
     model. *)
-Lemma psl211_row_word_proximity_armE (R : realType)
-    (idx : amf_index (ab_f (published_at psl211_row_word_proximity)) R) :
-  security_arm_of psl211_row_word_proximity R idx = IdealProximityArm.
+Lemma psl211_word_proximity_published_armE (R : realType)
+    (idx : amf_index (ab_f (published_at psl211_word_proximity_published)) R) :
+  security_arm_of psl211_word_proximity_published R idx = IdealProximityArm.
 Proof. exact: erefl. Qed.
 
 (** The manifest row the program publishes: the row of the twelve-card
@@ -373,21 +375,22 @@ Proof. exact: erefl. Qed.
     in the facade's vocabulary and the program in this file's, and conversion
     decides the equation, so the manifest's row for this path is a claim this
     equation discharges rather than a table maintained beside the program. It
-    differs from psl211_row_alldecks in the model family and in the transfer
+    differs from psl211_alldecks_path in the model family and in the transfer
     status, the all-decks row comparing no idealized model where this one
     replaces an idealized shuffle by a finite word. *)
-Lemma psl211_row_word_proximity_rowE :
-  published_row psl211_row_word_proximity = psl211_row_word.
+Lemma psl211_word_proximity_published_pathE :
+  published_path psl211_word_proximity_published = psl211_word_path.
 Proof. exact: erefl. Qed.
 
-(** psl211_row_word_proximity_sampledE — the proximity row too is its named
-    Sampled value with the payload and the terminal adjoined, so the two rows
-    of this instance are each written once above the model they branch at. *)
-Lemma psl211_row_word_proximity_sampledE :
+(** psl211_word_proximity_published_sampledE — the proximity row too is its
+    named Sampled value with the payload and the terminal adjoined, so the
+    two rows of this instance are each written once above the model they
+    branch at. *)
+Lemma psl211_word_proximity_published_sampledE :
   (psl211_word_sampled
      certify IdealProximity psl211_word_proximity_cert
      |> publish IdealFinite BaselineClassicalOnly)
-  = psl211_row_word_proximity.
+  = psl211_word_proximity_published.
 Proof. exact: erefl. Qed.
 
 (******************************************************************************)
@@ -414,4 +417,6 @@ Theorem psl211_word_view_proximity (R : realType) (C : {set seatT})
                   (psl211_alldecks_sample R) 0 C) (psl211_alldecksP R))
      `x (fdistmap (psl211_alldecks_secret R) (psl211_alldecksP R)))
   <= 2%:R^-40.
-Proof. exact: (view_proximity_of psl211_row_word_proximity R tt C HC). Qed.
+Proof.
+exact: (view_proximity_of psl211_word_proximity_published R tt C HC).
+Qed.

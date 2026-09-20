@@ -31,7 +31,7 @@
 (* Identifiers follow the instance rather than the framework wherever the     *)
 (* instance already named the object: what the framework calls the supplied   *)
 (* mode this instance spells rand in s5_rand_exec_plug, s5_rand_family,       *)
-(* s5_rand_observed and the manifest's s5_row_rand, so every name here from   *)
+(* s5_rand_observed and the manifest's s5_rand_path, so every name here from  *)
 (* the model onward carries rand.                                             *)
 (*                                                                            *)
 (* The phase files are required and imported one by one and export nothing of *)
@@ -44,7 +44,7 @@
 (* Definitions:                                                               *)
 (*   s5_rand_exact_witness                                                    *)
 (*                        == the exact arm's witness at every field and index *)
-(*   s5_row_rand_tableau  == the randomized row as a program                  *)
+(*   s5_rand_published    == the randomized row as a program                  *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   s5_rand_static_obsE  == the framework's direct computation of a          *)
@@ -53,10 +53,13 @@
 (*   s5_rand_static_obs_indep                                                 *)
 (*                        == below five seats that computation is independent *)
 (*                           of the tape secret                               *)
-(*   s5_row_rand_rowE     == the randomized program publishes the manifest's  *)
+(*   s5_rand_published_pathE                                                  *)
+(*                        == the randomized program publishes the manifest's  *)
 (*                           row                                              *)
-(*   s5_row_rand_armE     == the row carries the exact arm                    *)
-(*   s5_row_rand_sampledE == the row is the named Sampled value with the      *)
+(*   s5_rand_published_armE                                                   *)
+(*                        == the row carries the exact arm                    *)
+(*   s5_rand_published_sampledE                                               *)
+(*                        == the row is the named Sampled value with the      *)
 (*                           payload and the terminal adjoined                *)
 (*   s5_rand_view_secrecy == the exact arm's four conjuncts at this instance  *)
 (******************************************************************************)
@@ -166,7 +169,7 @@ Definition s5_rand_exact_witness (R : realType) (idx : unit)
     algebra's profile carries. What the finished row carries about a
     coalition of fewer than five seats is independence of the tape secret, at
     every real field, with no numeric bound anywhere in it. *)
-Definition s5_row_rand_tableau : PublishedRow :=
+Definition s5_rand_published : Published :=
   s5_supplied
     sample  s5_rand_family
     certify ExactIndependence s5_rand_exact_witness
@@ -175,28 +178,28 @@ Definition s5_row_rand_tableau : PublishedRow :=
 (** The row the program publishes is the manifest's own row for this instance
     under the uniform tape. Conversion decides it, so the descriptive row and
     the theorem proved about it cannot drift apart. *)
-Lemma s5_row_rand_rowE :
-  published_row s5_row_rand_tableau = s5_row_rand.
+Lemma s5_rand_published_pathE :
+  published_path s5_rand_published = s5_rand_path.
 Proof. by []. Qed.
 
 (** The arm this row carries, at every real field and index: independence of
     the coalition's view from the tape secret, and not a distance between two
     readings. The certify statement the program wrote settles which arm that
     is. *)
-Lemma s5_row_rand_armE (R : realType)
-    (idx : amf_index (ab_f (published_at s5_row_rand_tableau)) R) :
-  security_arm_of s5_row_rand_tableau R idx = ExactIndependenceArm.
+Lemma s5_rand_published_armE (R : realType)
+    (idx : amf_index (ab_f (published_at s5_rand_published)) R) :
+  security_arm_of s5_rand_published R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
 (** The row is the named Sampled value with the payload and the terminal
     adjoined. The program above writes the run and the model in one chain and
     the Sampled file names the value they build, so this equation is what
     keeps the two spellings of the row's prefix from parting. *)
-Lemma s5_row_rand_sampledE :
+Lemma s5_rand_published_sampledE :
   (s5_rand_sampled
      certify ExactIndependence s5_rand_exact_witness
      |> publish StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder]))
-  = s5_row_rand_tableau.
+  = s5_rand_published.
 Proof. exact: erefl. Qed.
 
 (******************************************************************************)
@@ -229,4 +232,4 @@ Theorem s5_rand_view_secrecy (R : realType) (C : {set 'I_5})
         |= (h `o (@sa_coalition_view R s5_profile s5_rand_exec_plug
                     (s5_rand_sample R) 0 C))
            _|_ (rsh_secret (@unif_randomized_sharing R 3 4))].
-Proof. exact: (view_secrecy_of s5_row_rand_tableau R tt C HC). Qed.
+Proof. exact: (view_secrecy_of s5_rand_published R tt C HC). Qed.

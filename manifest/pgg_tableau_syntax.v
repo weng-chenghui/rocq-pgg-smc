@@ -362,7 +362,7 @@ Notation "A 'supplied' 'inputs' T 'layout' L 'expecting' e 'fuel' n" :=
    termination and the endpoint equation are both stated over it.
 
    What this statement builds is the observed execution, and publish writes it
-   unchanged into the row's apr_observed. A row therefore describes the run
+   unchanged into the row's ap_observed. A row therefore describes the run
    these three obligations were proved about, and not a second run that
    resembles it. *)
 Notation "s 'execute' 'terminates' 'by' t 'endpoints' 'by' e 'recon' 'by' r" :=

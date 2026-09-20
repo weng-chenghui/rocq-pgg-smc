@@ -138,28 +138,28 @@ Check CompletionLevel.
 Check TransferStatus.
 Check PggAxiom.
 Check AssumptionStatus.
-Check AnalysisPathRow.
+Check AnalysisPath.
 Check AnalysisModelFamily.
 Check AnalysisModelSlot.
 Check amf_index.
 Check amf_sample.
 Check BaselineClassicalOnly.
 Check AcceptsAxioms.
-Check apr_observed.
-Check apr_model.
-Check apr_completion.
-Check apr_transfer.
-Check apr_assumptions.
+Check ap_observed.
+Check ap_model.
+Check ap_completion.
+Check ap_transfer.
+Check ap_assumptions.
 
-Check pgl27_row_exact.
-Check pgl27_row_word.
-Check five_card_row_uniform.
-Check five_card_row_biased.
-Check five_card_row_repeated.
-Check s5_row_det.
-Check s5_row_rand.
-Check s5_row_word.
-Check psl211_row_alldecks.
+Check pgl27_exact_path.
+Check pgl27_word_path.
+Check five_card_uniform_path.
+Check five_card_biased_path.
+Check five_card_repeated_path.
+Check s5_det_path.
+Check s5_rand_path.
+Check s5_word_path.
+Check psl211_alldecks_path.
 
 (******************************************************************************)
 (*     What one import actually reaches                                       *)

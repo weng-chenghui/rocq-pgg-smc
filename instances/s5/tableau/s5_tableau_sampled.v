@@ -18,7 +18,7 @@
 (*                                                                            *)
 (* The instance's other model, the finite word over the four adjacent         *)
 (* transpositions, is not named at this level. It is a model of the           *)
-(* dealer-dealt run, and the manifest's row over it, s5_row_word, is          *)
+(* dealer-dealt run, and the manifest's row over it, s5_word_path, is         *)
 (* published from a mixing theorem rather than from a program: two of the     *)
 (* five parts of an input-indistinguishability certificate over that model    *)
 (* are out of reach. Missing is the distance from the walk to an ideal cut, a *)
@@ -66,7 +66,7 @@ Local Open Scope ring_scope.
     family is indexed by the unit type, so one member at each real field, and
     its cut is the identity: what a coalition reads is decided by how the
     shares were drawn and not by how the deck was shuffled. The value is what
-    s5_row_rand_sampledE continues, so the row and the model are named
+    s5_rand_published_sampledE continues, so the row and the model are named
     apart. *)
 Definition s5_rand_sampled : Tableau Sampled :=
   s5_supplied sample s5_rand_family.

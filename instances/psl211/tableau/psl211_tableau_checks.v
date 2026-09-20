@@ -84,7 +84,7 @@ Fail Definition psl211_alldecks_prefix_vm_neq :
     executions are different terms and no typed evidence crosses between them.
     This is the fork made visible, and the reason the row names its
     termination lemma. *)
-Fail Definition psl211_row_vm_reuse : Tableau Sampled :=
+Fail Definition psl211_vm_reuse_sampled : Tableau Sampled :=
   psl211_alldecks_prefix_vm sample psl211_exact_family.
 
 (******************************************************************************)

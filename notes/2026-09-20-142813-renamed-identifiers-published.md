@@ -1,8 +1,20 @@
 # Renamed identifiers: `PublishedRow` becomes `Published` (2026-09-20)
 
-Status: PLANNED map, to be confirmed as built when tracker step 2.6c lands. The
+Status: AS BUILT for the identifiers (tracker step 2.6c, first commit). The
 list is for the owner's own edits of texts that cite the code. No `.tex` file
-was edited.
+was edited. The word "row" in comments is a separate, audited pass (second
+commit; `notes/probes/2026-09-20-published-rename/prose_sheet.md`).
+
+How it was checked: all 110 new names answered "No object of basename" to
+`Locate` under the union of the renamed files' imports before any edit; the map
+was applied as a whole-identifier substitution by an Opus `rocq-prover`;
+`check_rename.py` (code tokens and comment words of every tracked file equal to
+the parent commit's under the map, no old name left) says ALL OK, run by the
+prover and again by the main session; the reverse closure of 30 files was
+recompiled single-file, all rc=0; the 16 recorded `Fail` commands that hold a
+renamed name were each recompiled without `Fail` under their own file's prefix
+and all 16 still fail inside the term with the rejection their comment
+describes (`fail_recheck.md`).
 
 Decision: `notes/2026-09-20-111257-published-row-rename-plan.md` (the owner chose
 `Published`, all six layers). The machine-readable map with its checks is

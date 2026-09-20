@@ -44,9 +44,8 @@
 (* about one probability model and not one statement published twice.         *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   five_card_row_biased_arm_neq                                             *)
-(*                           == the two rows over the one-cut model carry     *)
-(*                              different arms                                *)
+(*   five_card_biased_published_arm_neq                                       *)
+(* == the two rows over the one-cut model carry different arms                *)
 (******************************************************************************)
 
 Require Import Lia.
@@ -96,7 +95,7 @@ Local Open Scope ring_scope.
     named at Sampled, are typed over this prefix's observed execution, so
     the two statements hold; a family typed over a different instance's
     observed execution is rejected where it is written. *)
-Fail Definition five_card_row_s5_family : Tableau Sampled :=
+Fail Definition five_card_s5_family_sampled : Tableau Sampled :=
   five_card_committed
     sample S5Analysis.rand_family.
 
@@ -105,16 +104,16 @@ Fail Definition five_card_row_s5_family : Tableau Sampled :=
 (*     The level a program reaches                                            *)
 (******************************************************************************)
 
-(** five_card_row_biased_tableau admits no ascription at the manifest's
+(** five_card_biased_sampled admits no ascription at the manifest's
     level: that program reaches Sampled and the manifest records
     AnalysisBridged for the row. The two levels differ, and the difference is
     rejected by the kernel here rather than asserted in prose. It is a fact
     about this one program and not about the biased path, which
-    five_card_row_biased_indistinguishability_tableau carries to
+    five_card_biased_indistinguishability_published carries to
     AnalysisBridged. *)
-Fail Definition five_card_row_biased_at_manifest_level
-  : Tableau (apr_completion five_card_row_biased) :=
-  five_card_row_biased_tableau.
+Fail Definition five_card_biased_sampled_at_manifest_level
+  : Tableau (ap_completion five_card_biased_path) :=
+  five_card_biased_sampled.
 
 
 (******************************************************************************)
@@ -126,9 +125,9 @@ Fail Definition five_card_row_biased_at_manifest_level
     IdealFinite and the uniform row holds the uniform family at
     StaticExecutedOnly, so the two rows differ in two of their five fields
     and the equation is refused. *)
-Fail Definition five_card_row_repeated_indistinguishability_uniform_rowE
-  : published_row five_card_row_repeated_indistinguishability_tableau
-    = five_card_row_uniform
+Fail Definition five_card_repeated_indistinguishability_published_uniform_pathE
+  : published_path five_card_repeated_indistinguishability_published
+    = five_card_uniform_path
   := erefl.
 
 
@@ -140,8 +139,8 @@ Fail Definition five_card_row_repeated_indistinguishability_uniform_rowE
     of the family. A payload with the right relation but no index binder is
     rejected, which is what keeps a row from publishing a bound that holds
     only at the index a reader happened to pick. *)
-Fail Definition five_card_row_repeated39_unindexed
-  : PublishedRowAt five_card_bound39 :=
+Fail Definition five_card_repeated_published39_unindexed
+  : PublishedAt five_card_bound39 :=
   five_card_committed
     sample  kim_centi_family
     certify InputIndistinguishability kim_centi_cert
@@ -212,8 +211,8 @@ Fail Definition kim_centi_proximity_from_biased (R : realType) (idx : unit)
 
 (** The same rejection where it is written in a row: the seven-cut model's
     named Sampled value does not take the one-cut model's certificate. *)
-Fail Definition five_card_row_repeated_proximity : Tableau AnalysisBridged :=
-  five_card_row_repeated_tableau
+Fail Definition five_card_repeated_proximity : Tableau AnalysisBridged :=
+  five_card_repeated_sampled
     certify IdealProximity kim_biased_proximity_cert.
 
 (** The converse direction, at the arm the tree already carries: the
@@ -235,8 +234,10 @@ Fail Definition kim_biased_indistinguishability_from_centi
 (** The two rows over the one model carry different arms, so the pair is two
     statements about one probability model and not one statement published
     twice. *)
-Lemma five_card_row_biased_arm_neq (R : realType)
-    (idx : amf_index (ab_f (published_at five_card_row_biased_proximity)) R) :
-  security_arm_of five_card_row_biased_proximity R idx
-  <> security_arm_of five_card_row_biased_branch_indistinguishability R idx.
+Lemma five_card_biased_published_arm_neq (R : realType)
+    (idx : amf_index
+             (ab_f (published_at five_card_biased_proximity_published)) R) :
+  security_arm_of five_card_biased_proximity_published R idx
+  <> security_arm_of
+       five_card_biased_branch_indistinguishability_published R idx.
 Proof. by []. Qed.

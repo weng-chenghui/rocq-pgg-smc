@@ -20,12 +20,12 @@
 (* which arm a path carries is told from the certificate its table names and  *)
 (* not from a field of the record.                                            *)
 (*                                                                            *)
-(* Each row is also a typed value of AnalysisPathRow below, carrying the      *)
-(* observed execution of the path, its typed model slot apr_model, an         *)
+(* Each row is also a typed value of AnalysisPath below, carrying the         *)
+(* observed execution of the path, its typed model slot ap_model, an          *)
 (* AnalysisModelFamily witness mandatory at Sampled and AnalysisBridged and   *)
-(* optional below, and the three typed statuses of pgg_analysis_status.v.     *)
-(* The record stores no theorem: theorems stay facade aliases and are pinned  *)
-(* by spelled type in the checker at the end of this file.                    *)
+(* optional below, and the three typed statuses of pgg_analysis_status.v. The *)
+(* record stores no theorem: theorems stay facade aliases and are pinned by   *)
+(* spelled type in the checker at the end of this file.                       *)
 (*                                                                            *)
 (* Completion levels are the constructors of CompletionLevel. They are        *)
 (* cumulative and are read off the typed witnesses this manifest names, never *)
@@ -71,7 +71,7 @@
 (*                                                                            *)
 (* Every identifier in the tables below is checked at the end of this file by *)
 (* one Timeout-guarded Check against its spelled type, and every row by one   *)
-(* Check against AnalysisPathRow together with three erefl pins on its status *)
+(* Check against AnalysisPath together with three erefl pins on its status    *)
 (* fields. Deleting an alias makes its line fail with a reference-not-found   *)
 (* message, retyping one makes it fail with a type mismatch and restatusing a *)
 (* row makes its pin fail, so the tables cannot drift away from the code.     *)
@@ -125,7 +125,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | pgl27_row_exact |                                 *)
+(* | typed row            | pgl27_exact_path |                                *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
@@ -190,7 +190,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | pgl27_row_word |                                  *)
+(* | typed row            | pgl27_word_path |                                 *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -215,10 +215,11 @@ Local Open Scope ring_scope.
 (* three aliases as row 1. fixed_word_sample is a SampleAdapter over that     *)
 (* plug and fixed_word_coalition_distE identifies its executed coalition      *)
 (* distribution with the pushforward of rho_word along static_view, giving    *)
-(* Sampled. exec_view_indistinguishability and exec_trace_indistinguishability*)
-(* are stated directly at that sample layer, at the executed coalition        *)
-(* observation and at the executed content reader, giving AnalysisBridged at  *)
-(* both executed observers rather than at the static layer alone.             *)
+(* Sampled. exec_view_indistinguishability and                                *)
+(* exec_trace_indistinguishability are stated directly at that sample layer,  *)
+(* at the executed coalition observation and at the executed content reader,  *)
+(* giving AnalysisBridged at both executed observers rather than at the       *)
+(* static layer alone.                                                        *)
 (*                                                                            *)
 (*     Row 3: five-card development, uniform cut (den Boer)                   *)
 (*                                                                            *)
@@ -258,7 +259,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | five_card_row_uniform |                           *)
+(* | typed row            | five_card_uniform_path |                          *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -331,7 +332,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | five_card_row_biased |                            *)
+(* | typed row            | five_card_biased_path |                           *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -339,8 +340,8 @@ Local Open Scope ring_scope.
 (*   the distribution of single_biased_sample | colour_view A, executed       *)
 (*   | mutual information, at most kim_leak_bound eps |                       *)
 (* | biased_static_obs_indistinguishability | the cut distribution of         *)
-(*   single_biased_sample at bias one hundredth, by biased_sample_cut_witnessE*)
-(*   | static_obs                                                             *)
+(*   single_biased_sample at bias one hundredth, by                           *)
+(*   biased_sample_cut_witnessE | static_obs                                  *)
 (*   | approximate privacy at twice the length-one bundle's number, derived   *)
 (*     from var_dist_fdistmap_transfer and biased_cut_mixing |                *)
 (*                                                                            *)
@@ -405,8 +406,8 @@ Local Open Scope ring_scope.
 (* | final bridge theorem |                                                   *)
 (*     FiveCardAnalysis.centi_static_obs_indistinguishability, the coalition  *)
 (*     bound var_dist_fdistmap_transfer concludes at this row from            *)
-(*     FiveCardAnalysis.centi_cut_mixing and FiveCardAnalysis.static_obs_const*)
-(*     |                                                                      *)
+(*     FiveCardAnalysis.centi_cut_mixing and                                  *)
+(*     FiveCardAnalysis.static_obs_const |                                    *)
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
 (* | model transfer       | the cut-carrier transfer of                       *)
 (*                          var_dist_fdistmap_transfer: its first hypothesis  *)
@@ -418,7 +419,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | five_card_row_repeated |                          *)
+(* | typed row            | five_card_repeated_path |                         *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -433,21 +434,20 @@ Local Open Scope ring_scope.
 (*   var_dist_fdistmap_transfer and centi_cut_mixing |                        *)
 (*                                                                            *)
 (* Level justification. Both models are sample adapters over the plug and     *)
-(* both cut distributions are named, giving Sampled. centi_cut_mixing         *)
-(* bounds the distance of the seven-cut distribution from the uniform         *)
-(* rotation law on the cut carrier itself, and with static_obs_const it       *)
-(* discharges both hypotheses of var_dist_fdistmap_transfer, giving           *)
-(* IdealFinite. The conclusion of that transfer,                              *)
-(* centi_static_obs_indistinguishability, is a bound on the variation distance*)
-(* between the static readings of a coalition of at most one seat at two      *)
-(* committed pairs. Its distribution is this row's cut law, by                *)
-(* centi_cut_distE, and its observer is static_obs, which the row declares,   *)
-(* and that is what gives AnalysisBridged. endpoint_bound and deal_centi_lt   *)
-(* stay in the row for what they are: they bound the distance from uniform of *)
-(* ONE seat's endpoint distribution, neither quantifies over a coalition and  *)
-(* neither mentions a second secret. A ShuffleCertificateBundle exists for    *)
-(* both models, and centi_cut_mixing is proved from the marginal bound that   *)
-(* bundle carries.                                                            *)
+(* both cut distributions are named, giving Sampled. centi_cut_mixing bounds  *)
+(* the distance of the seven-cut distribution from the uniform rotation law   *)
+(* on the cut carrier itself, and with static_obs_const it discharges both    *)
+(* hypotheses of var_dist_fdistmap_transfer, giving IdealFinite. The          *)
+(* conclusion of that transfer, centi_static_obs_indistinguishability, is a   *)
+(* bound on the variation distance between the static readings of a coalition *)
+(* of at most one seat at two committed pairs. Its distribution is this row's *)
+(* cut law, by centi_cut_distE, and its observer is static_obs, which the row *)
+(* declares, and that is what gives AnalysisBridged. endpoint_bound and       *)
+(* deal_centi_lt stay in the row for what they are: they bound the distance   *)
+(* from uniform of ONE seat's endpoint distribution, neither quantifies over  *)
+(* a coalition and neither mentions a second secret. A                        *)
+(* ShuffleCertificateBundle exists for both models, and centi_cut_mixing is   *)
+(* proved from the marginal bound that bundle carries.                        *)
 (*                                                                            *)
 (*     Row 6: five-seat S_5 instance, deterministic dealt position            *)
 (*                                                                            *)
@@ -469,7 +469,8 @@ Local Open Scope ring_scope.
 (*                            navigation only, not random variables |         *)
 (* | distribution-to-observer bridges | none: the path has no sample layer |  *)
 (* | bound or certificate | none |                                            *)
-(* | correctness theorem  | S5Analysis.exec_correct, S5Analysis.exec_recovers,*)
+(* | correctness theorem  | S5Analysis.exec_correct,                          *)
+(*                          S5Analysis.exec_recovers,                         *)
 (*                          S5Analysis.observed_recovers |                    *)
 (* | security, leakage, mixing or limitation theorem | none |                 *)
 (* | final bridge theorem | NONE |                                            *)
@@ -480,7 +481,7 @@ Local Open Scope ring_scope.
 (* | completion level     | Observed |                                        *)
 (* | transfer status      | NoModelComparison |                               *)
 (* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
-(* | typed row            | s5_row_det |                                      *)
+(* | typed row            | s5_det_path |                                     *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -534,7 +535,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
-(* | typed row            | s5_row_rand |                                     *)
+(* | typed row            | s5_rand_path |                                    *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -608,7 +609,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
-(* | typed row            | s5_row_word |                                     *)
+(* | typed row            | s5_word_path |                                    *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -673,7 +674,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | psl211_row_alldecks |                             *)
+(* | typed row            | psl211_alldecks_path |                            *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
@@ -740,7 +741,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | pgl27_row_prior_exact |                           *)
+(* | typed row            | pgl27_prior_exact_path |                          *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
@@ -822,7 +823,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | psl211_row_word |                                 *)
+(* | typed row            | psl211_word_path |                                *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
@@ -928,58 +929,58 @@ Local Open Scope ring_scope.
 (******************************************************************************)
 
 (** A record bundling, per analysis path, its observed execution
-    apr_observed (which carries the path's profile and execution plug as
-    projections), its completion level apr_completion, its model slot
-    apr_model of dependent type AnalysisModelSlot apr_observed
-    apr_completion, and the two remaining statuses apr_transfer and
-    apr_assumptions. It stores no theorem: theorems stay facade aliases,
+    ap_observed (which carries the path's profile and execution plug as
+    projections), its completion level ap_completion, its model slot
+    ap_model of dependent type AnalysisModelSlot ap_observed
+    ap_completion, and the two remaining statuses ap_transfer and
+    ap_assumptions. It stores no theorem: theorems stay facade aliases,
     named separately and pinned by spelled type in the checker below. This
     is the manifest's row type; each value below is read off the path's
     typed witnesses rather than asserted, so a row cannot silently drift
     from the code it describes. *)
-Record AnalysisPathRow := MkAnalysisPathRow {
-  (* apr_observed is the executed run of the path together with its static
+Record AnalysisPath := MkAnalysisPath {
+  (* ap_observed is the executed run of the path together with its static
      observation and the value it recovers. *)
-  apr_observed    : OE.ObservedExecution ;
-  (* apr_completion is the level the path's theorems actually reach. *)
-  apr_completion  : CompletionLevel ;
-  (* apr_model is the path's typed model evidence: an AnalysisModelFamily
+  ap_observed    : OE.ObservedExecution ;
+  (* ap_completion is the level the path's theorems actually reach. *)
+  ap_completion  : CompletionLevel ;
+  (* ap_model is the path's typed model evidence: an AnalysisModelFamily
      over the row's own observed execution, mandatory at Sampled and
      AnalysisBridged, optional at the three lower levels. A parameterized
      model is carried as a family with its real index type, never as an
      empty slot. *)
-  apr_model       : AnalysisModelSlot apr_observed apr_completion ;
-  (* apr_transfer is the relation the path establishes between its executed
+  ap_model       : AnalysisModelSlot ap_observed ap_completion ;
+  (* ap_transfer is the relation the path establishes between its executed
      model and an idealized one. *)
-  apr_transfer    : TransferStatus ;
-  (* apr_assumptions is the assumption status of the path's public results,
+  ap_transfer    : TransferStatus ;
+  (* ap_assumptions is the assumption status of the path's public results,
      the classical trio of the repository baseline excluded. *)
-  apr_assumptions : AssumptionStatus ;
+  ap_assumptions : AssumptionStatus ;
 }.
 
-(** The AnalysisPathRow for the eight-card orbit instance under its exact
+(** The AnalysisPath for the eight-card orbit instance under its exact
     uniform shuffle: PGL27Analysis.observed paired with the exact-uniform
     model family PGL27Analysis.exact_family, AnalysisBridged,
     StaticExecutedOnly, BaselineClassicalOnly. exact_view_indep is proved at
     this row's own sample distribution and observer, which is what reaches
     AnalysisBridged; the shuffle is already the exact uniform distribution
     on the group, so no idealized model is compared. *)
-Definition pgl27_row_exact : AnalysisPathRow :=
-  @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
+Definition pgl27_exact_path : AnalysisPath :=
+  @MkAnalysisPath PGL27Analysis.observed AnalysisBridged
     PGL27Analysis.exact_family StaticExecutedOnly BaselineClassicalOnly.
 
-(** The AnalysisPathRow for the same instance under its two-hundred-letter
+(** The AnalysisPath for the same instance under its two-hundred-letter
     word shuffle: PGL27Analysis.observed paired with the word model family
     indexed by the secret prior, AnalysisBridged, IdealFinite,
     BaselineClassicalOnly. word_mixing supplies the base-distribution bound
     the generic transfer inequality needs on the cut carrier itself, which
     is what makes the transfer status IdealFinite rather than merely
     StaticExecutedOnly. *)
-Definition pgl27_row_word : AnalysisPathRow :=
-  @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
+Definition pgl27_word_path : AnalysisPath :=
+  @MkAnalysisPath PGL27Analysis.observed AnalysisBridged
     PGL27Analysis.word_family IdealFinite BaselineClassicalOnly.
 
-(** The AnalysisPathRow for the five-card development under the uniform
+(** The AnalysisPath for the five-card development under the uniform
     rotation cut: FiveCardAnalysis.observed paired with the uniform model
     family, AnalysisBridged, StaticExecutedOnly, BaselineClassicalOnly.
     exec_trace_secrecy is stated at this row's own random variable
@@ -988,11 +989,11 @@ Definition pgl27_row_word : AnalysisPathRow :=
     ideal distribution is FiveCardAnalysis.static_obs_const, so no premise
     is absent; this row's cut law is the uniform rotation itself, so it has
     no finite model to compare with an ideal one and claims no transfer. *)
-Definition five_card_row_uniform : AnalysisPathRow :=
-  @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
+Definition five_card_uniform_path : AnalysisPath :=
+  @MkAnalysisPath FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.uniform_family StaticExecutedOnly BaselineClassicalOnly.
 
-(** The AnalysisPathRow for the same development under one biased cut at
+(** The AnalysisPath for the same development under one biased cut at
     Kim's input distribution: FiveCardAnalysis.observed paired with the
     single-biased model family at bias one hundredth, AnalysisBridged,
     IdealFinite, BaselineClassicalOnly. colour_view_leak_bound bounds
@@ -1007,11 +1008,11 @@ Definition five_card_row_uniform : AnalysisPathRow :=
     coalition of at most one seat has on telling two committed pairs apart by
     what it reads, which is a second theorem reaching AnalysisBridged at this
     row. *)
-Definition five_card_row_biased : AnalysisPathRow :=
-  @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
+Definition five_card_biased_path : AnalysisPath :=
+  @MkAnalysisPath FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.biased_family IdealFinite BaselineClassicalOnly.
 
-(** The AnalysisPathRow for the same development under repeated biased
+(** The AnalysisPath for the same development under repeated biased
     cuts: FiveCardAnalysis.observed paired with the seven-cut model family
     at bias one hundredth, AnalysisBridged, IdealFinite,
     BaselineClassicalOnly. The ideal the transfer names is the uniform
@@ -1026,44 +1027,44 @@ Definition five_card_row_biased : AnalysisPathRow :=
     endpoint_bound and deal_centi_lt stay in the row as endpoint marginal
     bounds: each bounds one seat's endpoint distribution and neither quantifies
     over a coalition. *)
-Definition five_card_row_repeated : AnalysisPathRow :=
-  @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
+Definition five_card_repeated_path : AnalysisPath :=
+  @MkAnalysisPath FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.centi_family IdealFinite BaselineClassicalOnly.
 
-(** The AnalysisPathRow for the five-seat S_5 instance dealing a position
+(** The AnalysisPath for the five-seat S_5 instance dealing a position
     deterministically: S5Analysis.observed, Observed, no model witness,
     NoModelComparison, AcceptsAxioms [:: AxS5GroupOrder]. The path names no
     sample layer, so the model slot is None; the axiom is the instance's
     group-order fact, which enters through the reconstruction plug the
     profile carries. *)
-Definition s5_row_det : AnalysisPathRow :=
-  @MkAnalysisPathRow S5Analysis.observed Observed None
+Definition s5_det_path : AnalysisPath :=
+  @MkAnalysisPath S5Analysis.observed Observed None
     NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder]).
 
-(** The AnalysisPathRow for the same instance dealing an additive sharing:
+(** The AnalysisPath for the same instance dealing an additive sharing:
     S5Analysis.rand_observed paired with the randomized model family
     S5Analysis.rand_family, AnalysisBridged, StaticExecutedOnly,
     AcceptsAxioms [:: AxS5GroupOrder]. exec_coalition_secrecy is stated at
     sa_coalition_view of rand_sample itself, the row's own distribution and
     observer, reaching AnalysisBridged; no idealized model is compared. *)
-Definition s5_row_rand : AnalysisPathRow :=
-  @MkAnalysisPathRow S5Analysis.rand_observed AnalysisBridged
+Definition s5_rand_path : AnalysisPath :=
+  @MkAnalysisPath S5Analysis.rand_observed AnalysisBridged
     S5Analysis.rand_family StaticExecutedOnly
     (AcceptsAxioms [:: AxS5GroupOrder]).
 
-(** The AnalysisPathRow for the same instance under a finite generator
+(** The AnalysisPath for the same instance under a finite generator
     word: S5Analysis.observed paired with the word model family indexed by
     a secret prior and a word length, AnalysisBridged, IdealFinite,
     AcceptsAxioms [:: AxS5GroupOrder]. exec_endpoint_bound is a mixing
     theorem at the row's own executed observer against the encoder-image
     ideal, resting on the in-kernel Rayleigh certificate of s5_mixing.v
     and on no named assumption beyond the group-order one. *)
-Definition s5_row_word : AnalysisPathRow :=
-  @MkAnalysisPathRow S5Analysis.observed AnalysisBridged
+Definition s5_word_path : AnalysisPath :=
+  @MkAnalysisPath S5Analysis.observed AnalysisBridged
     S5Analysis.word_family IdealFinite
     (AcceptsAxioms [:: AxS5GroupOrder]).
 
-(** The AnalysisPathRow for the twelve-card chirality instance under its
+(** The AnalysisPath for the twelve-card chirality instance under its
     all-decks dealer: PSL211Analysis.observed paired with the unit-indexed
     exact-uniform family, AnalysisBridged, StaticExecutedOnly,
     BaselineClassicalOnly.  exact_view_indep is proved at this row's own
@@ -1072,38 +1073,38 @@ Definition s5_row_word : AnalysisPathRow :=
     model is compared, and the deck description is drawn uniformly too, which
     is what distinguishes this row from the fixed-dealer colour result the
     same instance also carries. *)
-Definition psl211_row_alldecks : AnalysisPathRow :=
-  @MkAnalysisPathRow PSL211Analysis.observed AnalysisBridged
+Definition psl211_alldecks_path : AnalysisPath :=
+  @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
     PSL211Analysis.exact_family StaticExecutedOnly BaselineClassicalOnly.
 
-(** The AnalysisPathRow for the eight-card orbit instance under its exact
+(** The AnalysisPath for the eight-card orbit instance under its exact
     uniform shuffle at a law of the dealt secret left free:
     PGL27Analysis.observed paired with the prior-indexed exact family,
     AnalysisBridged, StaticExecutedOnly, BaselineClassicalOnly.
     pgl27_view_indep_gen is proved at this row's own sample distribution and
     observer, which is what reaches AnalysisBridged; the shuffle is already
     the exact uniform distribution on the group, so no idealized model is
-    compared. It differs from pgl27_row_exact in its model family, whose
+    compared. It differs from pgl27_exact_path in its model family, whose
     index is the law of the dealt secret where the other's is the unit type,
     and that index is what lets a row over the word model and a row over this
     one be read at one law of the secret. *)
-Definition pgl27_row_prior_exact : AnalysisPathRow :=
-  @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
+Definition pgl27_prior_exact_path : AnalysisPath :=
+  @MkAnalysisPath PGL27Analysis.observed AnalysisBridged
     PGL27Analysis.prior_exact_family StaticExecutedOnly BaselineClassicalOnly.
 
-(** The AnalysisPathRow for the twelve-card chirality instance under a
+(** The AnalysisPath for the twelve-card chirality instance under a
     shuffle of 584 letters: PSL211Analysis.observed paired with the
     unit-indexed word family, AnalysisBridged, IdealFinite,
     BaselineClassicalOnly.  psl211_word_view_proximity is proved at this
     row's own sample distribution and at that distribution's coalition
     reader, which is what reaches AnalysisBridged; the cut is a word a dealer
-    can perform where the model of psl211_row_alldecks draws it uniformly
+    can perform where the model of psl211_alldecks_path draws it uniformly
     from the group, so an idealized shuffle is replaced by a finite one,
-    which is the IdealFinite status. It differs from psl211_row_alldecks in
+    which is the IdealFinite status. It differs from psl211_alldecks_path in
     the model family and in the transfer status, and the model of that row is
     the ideal the certificate behind this one is measured against. *)
-Definition psl211_row_word : AnalysisPathRow :=
-  @MkAnalysisPathRow PSL211Analysis.observed AnalysisBridged
+Definition psl211_word_path : AnalysisPath :=
+  @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
     PSL211Analysis.word_family IdealFinite BaselineClassicalOnly.
 
 (******************************************************************************)
@@ -2102,108 +2103,108 @@ Timeout 60 Check
 (******************************************************************************)
 (*     The deterministic checker: the eleven typed rows                       *)
 (*                                                                            *)
-(* One Check per row against AnalysisPathRow, one erefl pin per status       *)
-(* field, and one typed check on the model slot: a mandatory family at        *)
-(* Sampled and AnalysisBridged, an optional one below. A row whose status or  *)
-(* model witness is edited away from the table above fails at its own pin.    *)
+(* One Check per row against AnalysisPath, one erefl pin per status field,    *)
+(* and one typed check on the model slot: a mandatory family at Sampled and   *)
+(* AnalysisBridged, an optional one below. A row whose status or model        *)
+(* witness is edited away from the table above fails at its own pin.          *)
 (******************************************************************************)
 
-Timeout 60 Check (pgl27_row_exact : AnalysisPathRow).
-Timeout 60 Check (apr_model pgl27_row_exact
+Timeout 60 Check (pgl27_exact_path : AnalysisPath).
+Timeout 60 Check (ap_model pgl27_exact_path
   : AnalysisModelFamily PGL27Analysis.observed).
-Timeout 60 Check (erefl : apr_completion pgl27_row_exact = AnalysisBridged).
-Timeout 60 Check (erefl : apr_transfer pgl27_row_exact = StaticExecutedOnly).
+Timeout 60 Check (erefl : ap_completion pgl27_exact_path = AnalysisBridged).
+Timeout 60 Check (erefl : ap_transfer pgl27_exact_path = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : apr_assumptions pgl27_row_exact = BaselineClassicalOnly).
+  (erefl : ap_assumptions pgl27_exact_path = BaselineClassicalOnly).
 
-Timeout 60 Check (pgl27_row_word : AnalysisPathRow).
-Timeout 60 Check (apr_model pgl27_row_word
+Timeout 60 Check (pgl27_word_path : AnalysisPath).
+Timeout 60 Check (ap_model pgl27_word_path
   : AnalysisModelFamily PGL27Analysis.observed).
-Timeout 60 Check (erefl : apr_completion pgl27_row_word = AnalysisBridged).
-Timeout 60 Check (erefl : apr_transfer pgl27_row_word = IdealFinite).
+Timeout 60 Check (erefl : ap_completion pgl27_word_path = AnalysisBridged).
+Timeout 60 Check (erefl : ap_transfer pgl27_word_path = IdealFinite).
 Timeout 60 Check
-  (erefl : apr_assumptions pgl27_row_word = BaselineClassicalOnly).
+  (erefl : ap_assumptions pgl27_word_path = BaselineClassicalOnly).
 
-Timeout 60 Check (five_card_row_uniform : AnalysisPathRow).
-Timeout 60 Check (apr_model five_card_row_uniform
+Timeout 60 Check (five_card_uniform_path : AnalysisPath).
+Timeout 60 Check (ap_model five_card_uniform_path
   : AnalysisModelFamily FiveCardAnalysis.observed).
 Timeout 60 Check
-  (erefl : apr_completion five_card_row_uniform = AnalysisBridged).
+  (erefl : ap_completion five_card_uniform_path = AnalysisBridged).
 Timeout 60 Check
-  (erefl : apr_transfer five_card_row_uniform = StaticExecutedOnly).
+  (erefl : ap_transfer five_card_uniform_path = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : apr_assumptions five_card_row_uniform = BaselineClassicalOnly).
+  (erefl : ap_assumptions five_card_uniform_path = BaselineClassicalOnly).
 
-Timeout 60 Check (five_card_row_biased : AnalysisPathRow).
-Timeout 60 Check (apr_model five_card_row_biased
+Timeout 60 Check (five_card_biased_path : AnalysisPath).
+Timeout 60 Check (ap_model five_card_biased_path
   : AnalysisModelFamily FiveCardAnalysis.observed).
 Timeout 60 Check
-  (erefl : apr_completion five_card_row_biased = AnalysisBridged).
+  (erefl : ap_completion five_card_biased_path = AnalysisBridged).
 Timeout 60 Check
-  (erefl : apr_transfer five_card_row_biased = IdealFinite).
+  (erefl : ap_transfer five_card_biased_path = IdealFinite).
 Timeout 60 Check
-  (erefl : apr_assumptions five_card_row_biased = BaselineClassicalOnly).
+  (erefl : ap_assumptions five_card_biased_path = BaselineClassicalOnly).
 
-Timeout 60 Check (five_card_row_repeated : AnalysisPathRow).
-Timeout 60 Check (apr_model five_card_row_repeated
+Timeout 60 Check (five_card_repeated_path : AnalysisPath).
+Timeout 60 Check (ap_model five_card_repeated_path
   : AnalysisModelFamily FiveCardAnalysis.observed).
 Timeout 60 Check
-  (erefl : apr_completion five_card_row_repeated = AnalysisBridged).
+  (erefl : ap_completion five_card_repeated_path = AnalysisBridged).
 Timeout 60 Check
-  (erefl : apr_transfer five_card_row_repeated = IdealFinite).
+  (erefl : ap_transfer five_card_repeated_path = IdealFinite).
 Timeout 60 Check
-  (erefl : apr_assumptions five_card_row_repeated = BaselineClassicalOnly).
+  (erefl : ap_assumptions five_card_repeated_path = BaselineClassicalOnly).
 
-Timeout 60 Check (s5_row_det : AnalysisPathRow).
-Timeout 60 Check (apr_model s5_row_det
+Timeout 60 Check (s5_det_path : AnalysisPath).
+Timeout 60 Check (ap_model s5_det_path
   : option (AnalysisModelFamily S5Analysis.observed)).
-Timeout 60 Check (erefl : apr_completion s5_row_det = Observed).
-Timeout 60 Check (erefl : apr_transfer s5_row_det = NoModelComparison).
+Timeout 60 Check (erefl : ap_completion s5_det_path = Observed).
+Timeout 60 Check (erefl : ap_transfer s5_det_path = NoModelComparison).
 Timeout 60 Check
-  (erefl : apr_assumptions s5_row_det = AcceptsAxioms [:: AxS5GroupOrder]).
+  (erefl : ap_assumptions s5_det_path = AcceptsAxioms [:: AxS5GroupOrder]).
 
-Timeout 60 Check (s5_row_rand : AnalysisPathRow).
-Timeout 60 Check (apr_model s5_row_rand
+Timeout 60 Check (s5_rand_path : AnalysisPath).
+Timeout 60 Check (ap_model s5_rand_path
   : AnalysisModelFamily S5Analysis.rand_observed).
-Timeout 60 Check (erefl : apr_completion s5_row_rand = AnalysisBridged).
-Timeout 60 Check (erefl : apr_transfer s5_row_rand = StaticExecutedOnly).
+Timeout 60 Check (erefl : ap_completion s5_rand_path = AnalysisBridged).
+Timeout 60 Check (erefl : ap_transfer s5_rand_path = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : apr_assumptions s5_row_rand = AcceptsAxioms [:: AxS5GroupOrder]).
+  (erefl : ap_assumptions s5_rand_path = AcceptsAxioms [:: AxS5GroupOrder]).
 
-Timeout 60 Check (s5_row_word : AnalysisPathRow).
-Timeout 60 Check (apr_model s5_row_word
+Timeout 60 Check (s5_word_path : AnalysisPath).
+Timeout 60 Check (ap_model s5_word_path
   : AnalysisModelFamily S5Analysis.observed).
-Timeout 60 Check (erefl : apr_completion s5_row_word = AnalysisBridged).
-Timeout 60 Check (erefl : apr_transfer s5_row_word = IdealFinite).
-Timeout 60 Check (erefl : apr_assumptions s5_row_word
+Timeout 60 Check (erefl : ap_completion s5_word_path = AnalysisBridged).
+Timeout 60 Check (erefl : ap_transfer s5_word_path = IdealFinite).
+Timeout 60 Check (erefl : ap_assumptions s5_word_path
   = AcceptsAxioms [:: AxS5GroupOrder]).
 
-Timeout 60 Check (psl211_row_alldecks : AnalysisPathRow).
-Timeout 60 Check (apr_model psl211_row_alldecks
+Timeout 60 Check (psl211_alldecks_path : AnalysisPath).
+Timeout 60 Check (ap_model psl211_alldecks_path
   : AnalysisModelFamily PSL211Analysis.observed).
-Timeout 60 Check (erefl : apr_completion psl211_row_alldecks = AnalysisBridged).
+Timeout 60 Check (erefl : ap_completion psl211_alldecks_path = AnalysisBridged).
 Timeout 60 Check
-  (erefl : apr_transfer psl211_row_alldecks = StaticExecutedOnly).
+  (erefl : ap_transfer psl211_alldecks_path = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : apr_assumptions psl211_row_alldecks = BaselineClassicalOnly).
+  (erefl : ap_assumptions psl211_alldecks_path = BaselineClassicalOnly).
 
-Timeout 60 Check (pgl27_row_prior_exact : AnalysisPathRow).
-Timeout 60 Check (apr_model pgl27_row_prior_exact
+Timeout 60 Check (pgl27_prior_exact_path : AnalysisPath).
+Timeout 60 Check (ap_model pgl27_prior_exact_path
   : AnalysisModelFamily PGL27Analysis.observed).
 Timeout 60 Check
-  (erefl : apr_completion pgl27_row_prior_exact = AnalysisBridged).
+  (erefl : ap_completion pgl27_prior_exact_path = AnalysisBridged).
 Timeout 60 Check
-  (erefl : apr_transfer pgl27_row_prior_exact = StaticExecutedOnly).
+  (erefl : ap_transfer pgl27_prior_exact_path = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : apr_assumptions pgl27_row_prior_exact = BaselineClassicalOnly).
+  (erefl : ap_assumptions pgl27_prior_exact_path = BaselineClassicalOnly).
 
-Timeout 60 Check (psl211_row_word : AnalysisPathRow).
-Timeout 60 Check (apr_model psl211_row_word
+Timeout 60 Check (psl211_word_path : AnalysisPath).
+Timeout 60 Check (ap_model psl211_word_path
   : AnalysisModelFamily PSL211Analysis.observed).
-Timeout 60 Check (erefl : apr_completion psl211_row_word = AnalysisBridged).
-Timeout 60 Check (erefl : apr_transfer psl211_row_word = IdealFinite).
+Timeout 60 Check (erefl : ap_completion psl211_word_path = AnalysisBridged).
+Timeout 60 Check (erefl : ap_transfer psl211_word_path = IdealFinite).
 Timeout 60 Check
-  (erefl : apr_assumptions psl211_row_word = BaselineClassicalOnly).
+  (erefl : ap_assumptions psl211_word_path = BaselineClassicalOnly).
 
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)
@@ -2217,28 +2218,28 @@ Timeout 60 Check
 (******************************************************************************)
 
 Timeout 60 Check (fun (R : realType) (p : R.-fdist bool) =>
-  amf_sample (apr_model pgl27_row_word) R p).
+  amf_sample (ap_model pgl27_word_path) R p).
 
 Timeout 60 Check (fun (R : realType) (p : R.-fdist bool) =>
-  amf_sample (apr_model pgl27_row_prior_exact) R p).
+  amf_sample (ap_model pgl27_prior_exact_path) R p).
 
 Timeout 60 Check (fun (R : realType) (secretP : R.-fdist 'I_5) (L : nat) =>
-  amf_sample (apr_model s5_row_word) R (secretP, L)).
+  amf_sample (ap_model s5_word_path) R (secretP, L)).
 
 Timeout 60 Check (fun R : realType =>
-  amf_sample (apr_model s5_row_rand) R tt).
+  amf_sample (ap_model s5_rand_path) R tt).
 
 Timeout 60 Check (fun R : realType =>
-  amf_sample (apr_model psl211_row_alldecks) R tt).
+  amf_sample (ap_model psl211_alldecks_path) R tt).
 
 Timeout 60 Check (fun R : realType =>
-  amf_sample (apr_model psl211_row_word) R tt).
+  amf_sample (ap_model psl211_word_path) R tt).
 
-Timeout 60 Check (fun (row : AnalysisPathRow)
-    (fam : AnalysisModelFamily (apr_observed row)) (R : realType)
+Timeout 60 Check (fun (row : AnalysisPath)
+    (fam : AnalysisModelFamily (ap_observed row)) (R : realType)
     (x : amf_index fam R) =>
   amf_sample fam R x
-    : @SampleAdapter R _ (OE.oe_execution (apr_observed row))).
+    : @SampleAdapter R _ (OE.oe_execution (ap_observed row))).
 
 (******************************************************************************)
 (*     The executed finite-word theorem family at its spelled types           *)
@@ -2268,16 +2269,16 @@ Timeout 60 Check (S5Analysis.exec_endpoint_bound :
 (* not a vacuous check.                                                      *)
 (******************************************************************************)
 
-Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled None
+Fail Check (@MkAnalysisPath S5Analysis.observed Sampled None
   NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder])).
 
-Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled tt
+Fail Check (@MkAnalysisPath S5Analysis.observed Sampled tt
   NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder])).
 
-Fail Check (@MkAnalysisPathRow S5Analysis.rand_observed AnalysisBridged None
+Fail Check (@MkAnalysisPath S5Analysis.rand_observed AnalysisBridged None
   StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder])).
 
-Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled
+Fail Check (@MkAnalysisPath S5Analysis.observed Sampled
   PGL27Analysis.word_family NoModelComparison
   (AcceptsAxioms [:: AxS5GroupOrder])).
 
