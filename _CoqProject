@@ -221,7 +221,13 @@ manifest/pgg_analysis_manifest.v
 manifest/pgg_tableau.v
 manifest/pgg_tableau_syntax.v
 manifest/pgg_tableau_arm_relations.v
-instances/pgl27/pgl27_rows.v
+instances/pgl27/pgl27_proximity.v
+instances/pgl27/tableau/pgl27_tableau_algebraic.v
+instances/pgl27/tableau/pgl27_tableau_executable.v
+instances/pgl27/tableau/pgl27_tableau_observed.v
+instances/pgl27/tableau/pgl27_tableau_sampled.v
+instances/pgl27/tableau/pgl27_tableau_analysis_bridged.v
+instances/pgl27/tableau/pgl27_tableau_checks.v
 instances/kim2025/five_card_rows.v
 instances/s5/tableau/s5_tableau_algebraic.v
 instances/s5/tableau/s5_tableau_executable.v
@@ -230,7 +236,6 @@ instances/s5/tableau/s5_tableau_sampled.v
 instances/s5/tableau/s5_tableau_analysis_bridged.v
 instances/s5/tableau/s5_tableau_checks.v
 instances/kim2025/five_card_proximity.v
-instances/pgl27/pgl27_proximity.v
 instances/psl211/psl211_reading_constancy.v
 instances/psl211/psl211_word_proximity.v
 instances/psl211/tableau/psl211_tableau_algebraic.v

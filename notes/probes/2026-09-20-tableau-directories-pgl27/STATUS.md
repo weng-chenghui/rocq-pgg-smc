@@ -625,3 +625,30 @@ statement is printed. The token identity of the sources closes the rest.
 
 At five-card, if a re-scoped `Definition` does hold a literal, add `Print` for
 it to both files.
+
+## As built (2026-09-20)
+
+Fix pass 1 was audited by the main session: `verify.py` green (75 of 75
+declarations token-identical, 70 of 73 docstrings word-identical with the three
+intended differences, the one-content-line banner assertion, eleven recorded
+rejections equal to production's), the final texts of F1 to F9 and the locator
+table read, and the staged repoint of
+`instances/psl211/psl211_reading_constancy.v` confirmed comment-only against
+production's current text by script.
+
+The six staged files were copied with `cp` to `instances/pgl27/tableau/`
+(`cmp`: byte-identical), `instances/pgl27/pgl27_proximity.v` was replaced by
+its reduced text (289 lines, no tableau, framework or manifest import),
+`psl211_reading_constancy.v` received its comment repoint, and `_CoqProject`
+lists the reduced proximity file and the six phase files in place of
+`instances/pgl27/pgl27_rows.v`, with no `-R` line. The eight files compiled
+single-file, all rc=0. `instances/pgl27/pgl27_rows.v` was then removed together
+with its build outputs, and `fidelity.v`, unchanged, was compiled from a scratch
+directory against production's load path alone: rc=0, and its 708 lines of
+output (the printed types of every non-`Fail` declaration and 56 assumption
+reports) are byte-identical to the staged run's, whose first 614 lines are
+byte-identical to production's before the move.
+
+Deferred to one pass after the four instances: the comment repoints of
+`manifest/pgg_analysis_manifest.v` and `instances/pgl27/pgl27_encoding_r5.v`,
+which still cite `instances/pgl27/pgl27_rows.v`.
