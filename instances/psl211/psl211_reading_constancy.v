@@ -11,8 +11,8 @@
 (* whatever the run argument. This file restates that field as a standalone   *)
 (* proposition, checks the restatement against the record, and refutes it at  *)
 (* PSL(2,11) in the two run modes the instance carries. The instance          *)
-(* publishes its all-decks row through the exact arm and its word row through *)
-(* the proximity arm, in                                                      *)
+(* publishes its all-decks program through the exact arm and its word program *)
+(* through the proximity arm, in                                              *)
 (* instances/psl211/tableau/psl211_tableau_analysis_bridged.v, and this file  *)
 (* is what the input-indistinguishability arm would require of it.            *)
 (*                                                                            *)
@@ -28,23 +28,23 @@
 (* alone. What a coalition of at most five of the twelve seats reads about    *)
 (* the chirality under the all-decks law is psl211_alldecks_static_indep of   *)
 (* instances/psl211/psl211_models.v, which says it reads nothing, exactly, at *)
-(* every real field, and that is the theorem the published row carries.       *)
+(* every real field, and that is the theorem the published program carries.   *)
 (*                                                                            *)
-(* The quantitative form fixes what an input-indistinguishability row would   *)
-(* have to publish. A certificate over the all-decks model states its         *)
+(* The quantitative form fixes what an input-indistinguishability program     *)
+(* would have to publish. A certificate over the all-decks model states its   *)
 (* distance against the group-uniform law, its identification field pinning   *)
 (* its shuffle law to the adapter's cut, so no certificate carries a shuffle  *)
 (* bound epsilon strictly below 1/1320. The obligation of conclude bounds the *)
 (* published number below by cert_eps cert, which is that epsilon twice, so   *)
-(* every row over this model that publishes its certificate's own number      *)
+(* every program over this model that publishes its certificate's own number  *)
 (* publishes at least 1/660. psl211_alldecks_no_zero_eps_cert states the same *)
 (* at epsilon zero, which is the epsilon profile_eps_psl211 of                *)
 (* instances/psl211/psl211_profile.v gives this instance's single-card        *)
 (* marginal bound. The exclusion covers the input-indistinguishability arm    *)
 (* alone: a proximity certificate carries no shuffle bound and no constancy   *)
-(* field, and the row of                                                      *)
-(* instances/psl211/tableau/psl211_tableau_analysis_bridged.v publishes       *)
-(* 2^-40 over the word model through the proximity arm.                       *)
+(* field, and the program of                                                  *)
+(* instances/psl211/tableau/psl211_tableau_analysis_bridged.v publishes 2^-40 *)
+(* over the word model through the proximity arm.                             *)
 (*                                                                            *)
 (* Dealt mode. The run argument is the chirality itself, so here the field    *)
 (* is exactly constancy in the secret, and it still fails: three seats see a  *)
@@ -65,19 +65,18 @@
 (* psl211_G_pos is 2 * (1 - 660/12!), so a certificate at that ideal exists   *)
 (* with an epsilon near 2. Its cert_eps is that epsilon twice, near 4, while  *)
 (* infotheo's var_dist sums the absolute differences of two laws and so never *)
-(* exceeds 2, and the row such a certificate gives publishes a number no pair *)
-(* of laws can exceed and bounds nothing. That occupancy is argued and not    *)
-(* compiled. Its premise is compiled: every deck description lays a deck of   *)
-(* twelve distinct cards, psl211_alldecks_uniq of                             *)
+(* exceeds 2, and the program such a certificate gives publishes a number no  *)
+(* pair of laws can exceed and bounds nothing. That occupancy is argued and   *)
+(* not compiled. Its premise is compiled: every deck description lays a deck  *)
+(* of twelve distinct cards, psl211_alldecks_uniq of                          *)
 (* instances/psl211/psl211_alldecks.v. What is not compiled there is the      *)
 (* separate step that the parametrization enumerates the valid decks once     *)
-(* each. Nothing here says the word row is excluded outright:                 *)
+(* each. Nothing here says the word program is excluded outright:             *)
 (* psl211_alldecks_constancy_false_word584 reaches eps < 1/1320 - 2^-40, and  *)
-(* the row published over the weighted-word adapter psl211_word_sample in     *)
+(* the program published over the weighted-word adapter psl211_word_sample in *)
 (* instances/psl211/tableau/psl211_tableau_analysis_bridged.v carries a       *)
-(* proximity certificate,                                                     *)
-(* which has no constancy field to refute. How wide each                      *)
-(* failure is stays measured and not proved; the reading multiplicity         *)
+(* proximity certificate, which has no constancy field to refute. How wide    *)
+(* each failure is stays measured and not proved; the reading multiplicity    *)
 (* diagnostics are recorded in notes/probes/2026-09-19-psl211-sc-const/.      *)
 (*                                                                            *)
 (* Names. The first two declarations are framework-level: they are stated for *)
@@ -567,9 +566,9 @@ Qed.
 
 (** psl211_perdeck_fiber_true0 — no cut of the shuffle group carries the
     chirality-true deck of psl211_perdeck_deal to the reading
-    psl211_perdeck_view. The false chirality reaches that reading under
-    exactly one cut, so one reading already tells the two chiralities apart
-    at this fixed deal, which is not the law the row is about. *)
+    psl211_perdeck_view. The false chirality reaches that reading under exactly
+    one cut, so one reading already tells the two chiralities apart at this
+    fixed deal, which is not the law the program is about. *)
 Lemma psl211_perdeck_fiber_true0 : psl211_perdeck_fiber true = set0.
 Proof.
 have [Ht _] := psl211_perdeck_raw_countE.
@@ -697,18 +696,18 @@ Qed.
     certificate over the all-decks run of the twelve-card chirality instance has
     its shuffle bound epsilon added to itself strictly below the reciprocal
     1/660 of the group order, so every such certificate has an epsilon of at
-    least 1/1320, the value 1/1320 itself not excluded. A row publishes
-    odflt (cert_eps cert) (c R) at its own coordinate c, and cert_eps
-    cert is the shuffle bound epsilon twice, so a row over this model that
-    publishes its certificate's own number publishes at least 1/660. The
-    obligation of conclude bounds the published number below by cert_eps
-    cert, so no row over this model publishes less. This fixes from below what
-    the input-indistinguishability arm can publish at this model. It says
-    neither that the arm is unavailable here nor anything about what a coalition
-    of at most five seats reads. *)
-(* The obligation of conclude at an input-indistinguishability port is
-   cert_eps cert <= odflt (cert_eps cert) (c R), and the proposition the row
-   carries is IndistinguishabilityPropAt cert (odflt (cert_eps cert) (c R)). *)
+    least 1/1320, the value 1/1320 itself not excluded. A program publishes
+    odflt (cert_eps cert) (c R) at its own coordinate c, and cert_eps cert is
+    the shuffle bound epsilon twice, so a program over this model that publishes
+    its certificate's own number publishes at least 1/660. The obligation of
+    conclude bounds the published number below by cert_eps cert, so no program
+    over this model publishes less. This fixes from below what the
+    input-indistinguishability arm can publish at this model. It says neither
+    that the arm is unavailable here nor anything about what a coalition of at
+    most five seats reads. *)
+(* The obligation of conclude at an input-indistinguishability port is cert_eps
+   cert <= odflt (cert_eps cert) (c R), and the proposition the program carries
+   is IndistinguishabilityPropAt cert (odflt (cert_eps cert) (c R)). *)
 (* The excluded range of epsilon is bounded above. The header records why the
    larger range is occupied and that the occupancy is argued and not
    compiled. *)
@@ -780,11 +779,10 @@ Qed.
     this cut is reached at its own shuffle bound, through ic_close read with
     ic_Hd, and no adapter has to be named here. The weighted-word adapter
     psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut,
-    and the row published over it in
+    and the program published over it in
     instances/psl211/tableau/psl211_tableau_analysis_bridged.v carries a
-    proximity certificate,
-    and IdealProximityCert has no constancy field, so this refutation denies
-    no field of that row's certificate. *)
+    proximity certificate, and IdealProximityCert has no constancy field, so
+    this refutation denies no field of that program's certificate. *)
 Lemma psl211_alldecks_constancy_false_word584 (R : realType)
     (ideal : R.-fdist cutT) (eps : R) :
   var_dist (@rho_from_words_weighted R 10 2 584 psl211_moves (psl211_Wuni R))

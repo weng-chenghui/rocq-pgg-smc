@@ -4,18 +4,18 @@
 (* s5_tableau_observed: the five-seat instance at the Observed level          *)
 (*                                                                            *)
 (* The Observed level adjoins the three run facts to the run parameters, and  *)
-(* it is the first level at which a row proves anything. What it carries is   *)
-(* run correctness: the interpreter finishes within the fuel, every seat      *)
+(* it is the first level at which a program proves anything. What it carries  *)
+(* is run correctness: the interpreter finishes within the fuel, every seat   *)
 (* reaches an endpoint, and the endpoints decode to the value the run was     *)
 (* built to recover. Nothing about a coalition is proved at this level, at    *)
 (* any coalition size, under either run mode.                                 *)
 (*                                                                            *)
 (* Both sharing-family runs of the instance reach this level, and each is     *)
-(* named once. The dealer-dealt run's program stops here: the manifest row    *)
+(* named once. The dealer-dealt run's program stops here: the manifest path   *)
 (* s5_det_path it answers carries no model and no security payload, because   *)
 (* the canonical encoding it deals puts the whole secret on one card, so the  *)
 (* single seat the cut sends that card to reads the secret, as does every     *)
-(* coalition containing that seat. The manifest carries a second row over     *)
+(* coalition containing that seat. The manifest carries a second path over    *)
 (* this run, s5_word_path, under a finite-word model; the Sampled file        *)
 (* records why no program of this instance continues from that model. The     *)
 (* supplied run continues, through the tape model of the level above.         *)
@@ -35,7 +35,7 @@
 (* Key results:                                                               *)
 (*   s5_dealt_path_observedE                                                  *)
 (*                        == the dealt program reaches the observed execution *)
-(*                           the manifest's deterministic row describes       *)
+(*                           the manifest's deterministic path describes      *)
 (*   s5_dealt_executableE == the dealt program is its Executable value with   *)
 (*                           the three run facts adjoined                     *)
 (*   s5_supplied_paramsE  == the supplied program drives the run              *)
@@ -89,9 +89,9 @@ Definition s5_dealt : Tableau Observed :=
             recon by s5_dealt_recon.
 
 (** The observed execution this program reaches is the one the manifest's
-    deterministic row describes. Conversion decides it, so the row's
-    description of the run and the proof of run correctness for it are one
-    term, which is the whole of what this path publishes. *)
+    deterministic path describes. Conversion decides it, so the path's
+    description of the run and the proof of run correctness for it are one term,
+    which is the whole of what this path says about the run. *)
 Lemma s5_dealt_path_observedE :
   ob_obs (tableau_at s5_dealt) = ap_observed s5_det_path.
 Proof. by []. Qed.
@@ -129,11 +129,10 @@ Definition s5_supplied : Tableau Observed :=
           endpoints by s5_supplied_endpoints
           recon by s5_supplied_recon.
 
-(** The run the program builds is the one s5_supplied_params names. The
-    clauses above spell the parameter record out a second time, and this
-    equation is what keeps the two spellings from parting: every statement
-    below is made at s5_supplied_params, and the row is made at the
-    clauses. *)
+(** The run the program builds is the one s5_supplied_params names. The clauses
+    above spell the parameter record out a second time, and this equation is
+    what keeps the two spellings from parting: every statement below is made at
+    s5_supplied_params, and the program is made at the clauses. *)
 Lemma s5_supplied_paramsE :
   projT1 (projT2 (tableau_at s5_supplied)) = s5_supplied_params.
 Proof. by []. Qed.

@@ -11,7 +11,7 @@
 (* claim about the messages a run exchanges into a claim about a group        *)
 (* action, and it is the last thing proved before an arm is named.            *)
 (*                                                                            *)
-(* Three families are named here, one per model a published row continues     *)
+(* Three families are named here, one per model a published program continues *)
 (* from, and all three sit over the one dealer-dealt run. The exact family    *)
 (* draws the cut uniformly from PGL(2,7) at the uniform secret, and its index *)
 (* is the unit type. The word family draws the cut by evaluating a sampled    *)
@@ -24,10 +24,10 @@
 (* cut, and they differ in whether the law of the secret is fixed at the      *)
 (* uniform one or carried as an index.                                        *)
 (*                                                                            *)
-(* pgl27_word_sampled is a name the instance already had, and the two rows    *)
-(* over the word model are written from it. The other two values are named    *)
-(* the same way so that a row over any of the three models can be continued   *)
-(* from a name rather than from the prefix.                                   *)
+(* pgl27_word_sampled is a name the instance already had, and the two         *)
+(* programs over the word model are written from it. The other two values are *)
+(* named the same way so that a program over any of the three models can be   *)
+(* continued from a name rather than from the prefix.                         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_exact_sampled     == the dealer-dealt run under the uniform cut at *)
@@ -64,11 +64,11 @@ Local Open Scope ring_scope.
 (*     The exact shuffle at the uniform secret                                *)
 (******************************************************************************)
 
-(** The dealer-dealt run under the exact shuffle, named at Sampled. The
-    family is indexed by the unit type, so one member at each real field,
-    and that member fixes the uniform law of the dealt secret. The cut it
-    draws is already the uniform one on PGL(2,7), so a row over this model
-    compares no finite walk with an ideal. *)
+(** The dealer-dealt run under the exact shuffle, named at Sampled. The family
+    is indexed by the unit type, so one member at each real field, and that
+    member fixes the uniform law of the dealt secret. The cut it draws is
+    already the uniform one on PGL(2,7), so a program over this model compares
+    no finite walk with an ideal. *)
 Definition pgl27_exact_sampled : Tableau Sampled :=
   pgl27_dealt sample pgl27_exact_family.
 

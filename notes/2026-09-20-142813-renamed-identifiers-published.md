@@ -2,8 +2,15 @@
 
 Status: AS BUILT for the identifiers (tracker step 2.6c, first commit). The
 list is for the owner's own edits of texts that cite the code. No `.tex` file
-was edited. The word "row" in comments is a separate, audited pass (second
-commit; `notes/probes/2026-09-20-published-rename/prose_sheet.md`).
+was edited. The word "row" in comments went in a second, audited commit:
+where it meant a Tableau program it reads "program", where it meant the
+manifest's record it reads "path", in `instances/pgl27/pgl27_profile_privacy.v`,
+where it meant one of two probability laws with their view and secret, it reads
+"analysis", and a row of a matrix, table or trace keeps the word
+(`notes/probes/2026-09-20-published-rename/prose_sheet.md`, `prose_rulings.md`).
+In a paper's prose: a value of `Published` is "a published program" (or "a
+published claim", the owner's earlier noun), the manifest's record "an analysis
+path".
 
 How it was checked: all 110 new names answered "No object of basename" to
 `Locate` under the union of the renamed files' imports before any edit; the map

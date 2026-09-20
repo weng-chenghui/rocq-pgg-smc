@@ -11,6 +11,7 @@ scans changed lines for length, box shape and the project's barred words.
 
 usage: check_prose.py [BASE] [-v]     (-v lists every replacement in context)
 """
+import difflib
 import os
 import re
 import subprocess
@@ -23,6 +24,8 @@ BARRED = re.compile(
     r"\b(apex|gate|gates|gated|gating|posit|posits|posited|positing)\b"
     r"|\bL[0-9]", re.I)
 ROW = re.compile(r"(?<![A-Za-z0-9_])([Rr])ow(s?)(?![A-Za-z0-9_])")
+NOUN = re.compile(r"(?<![A-Za-z0-9_])(?:[Rr]ows?|[Pp]rograms?|[Pp]aths?)"
+                  r"(?![A-Za-z0-9_])")
 FROZEN = set("""algebraic_rigidity card_exchange_pismc cover_tradeoff
 covering_scheme graded_resource input_encoding perm_exchange perm_uniform
 pgg_algebra_syntax pgg_collusion_bound pgg_execution_plug
@@ -75,6 +78,7 @@ def main():
     files = [f for f in files if f.endswith(".v")
              and not f.startswith(("notes/", "legacy/"))]
     ok, changed, total = True, 0, {"program": 0, "path": 0}
+    regions = 0
     for f in files:
         old = subprocess.run(["git", "-C", REPO, "show", f"{base}:{f}"],
                              capture_output=True, text=True, check=True).stdout
@@ -89,31 +93,34 @@ def main():
         nc, nm = split(new)
         a, b = oc.split(), nc.split()
         c, d = om.split(), nm.split()
-        good = a == b and len(c) == len(d)
+        good = a == b
         n = {"program": 0, "path": 0}
         if a != b:
             print(f"   code tokens differ in {f}")
-        if len(c) != len(d):
-            print(f"   comment word counts differ in {f}: {len(c)} / {len(d)}")
-            for k, (x, y) in enumerate(zip(c, d)):
-                if y not in variants(x):
-                    print("   first at:", " ".join(c[max(0, k - 6):k + 6]))
-                    print("   found   :", " ".join(d[max(0, k - 6):k + 6]))
-                    break
-        else:
-            for k, (x, y) in enumerate(zip(c, d)):
-                if x == y:
-                    continue
-                if y in variants(x):
-                    n["program" if "rogram" in y and "rogram" not in x
-                      else "path"] += 1
-                    if verbose:
-                        print("     ", " ".join(d[max(0, k - 5):k + 4]))
-                else:
-                    good = False
-                    print(f"   OTHER CHANGE {f}: "
-                          f"{' '.join(c[max(0, k - 4):k + 4])}  ->  "
-                          f"{' '.join(d[max(0, k - 4):k + 4])}")
+        # Align the two word streams with the nouns made equal, then inside
+        # the aligned stretches allow only row -> program | path, and print
+        # every other stretch once, as a region.
+        canon = lambda w: NOUN.sub("\u00a7", w)
+        sm = difflib.SequenceMatcher(None, [canon(w) for w in c],
+                                     [canon(w) for w in d], autojunk=False)
+        for tag, i1, i2, j1, j2 in sm.get_opcodes():
+            if tag == "equal":
+                for x, y in zip(c[i1:i2], d[j1:j2]):
+                    if x == y:
+                        continue
+                    if y in variants(x):
+                        n["program" if "rogram" in y and "rogram" not in x
+                          else "path"] += 1
+                        if verbose:
+                            print("     ", x, "->", y)
+                    else:
+                        good = False
+                        print(f"   NOUN SWAP {f}: {x} -> {y}")
+            else:
+                regions += 1
+                print(f"   OTHER CHANGE {f}:\n"
+                      f"      old: {' '.join(c[max(0, i1 - 3):i2 + 3])}\n"
+                      f"      new: {' '.join(d[max(0, j1 - 3):j2 + 3])}")
         left = len(ROW.findall(nm))
         ok &= good
         for key in n:
@@ -137,7 +144,7 @@ def main():
                 ok = False
                 print(f"   BARRED {f}:{ln}: {line.strip()}")
     print(f"{changed} files changed; program {total['program']}, "
-          f"path {total['path']}")
+          f"path {total['path']}; other changed regions {regions}")
     print("ALL OK" if ok else "PROBLEMS")
     sys.exit(0 if ok else 1)
 

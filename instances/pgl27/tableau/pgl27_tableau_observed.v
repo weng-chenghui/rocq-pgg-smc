@@ -5,19 +5,19 @@
 (* level                                                                      *)
 (*                                                                            *)
 (* The Observed level adjoins the three run facts to the run parameters, and  *)
-(* it is the first level at which a row proves anything. What it carries is   *)
-(* run correctness: the interpreter finishes within pgl27_fuel, each of the   *)
-(* eight seats reaches an endpoint, and the endpoints decode to the orbit     *)
+(* it is the first level at which a program proves anything. What it carries  *)
+(* is run correctness: the interpreter finishes within pgl27_fuel, each of    *)
+(* the eight seats reaches an endpoint, and the endpoints decode to the orbit *)
 (* class the run was built to recover. Nothing about a coalition is proved at *)
 (* this level, at any coalition size.                                         *)
 (*                                                                            *)
 (* One run parameter record reaches this level and two values name it.        *)
-(* pgl27_dealt is the one all seven published rows of the instance continue   *)
-(* from, and it names its termination proof. pgl27_inline_dealt writes that   *)
-(* proof a different way, and it is here because the difference it makes is a *)
-(* fact about the tree and not about the mathematics: an opaque termination   *)
-(* lemma is convertible with nothing, so a prefix that builds its own         *)
-(* obligation reaches a second observed execution, and every value typed      *)
+(* pgl27_dealt is the one all seven published programs of the instance        *)
+(* continue from, and it names its termination proof. pgl27_inline_dealt      *)
+(* writes that proof a different way, and it is here because the difference   *)
+(* it makes is a fact about the tree and not about the mathematics: an opaque *)
+(* termination lemma is convertible with nothing, so a prefix that builds its *)
+(* own obligation reaches a second observed execution, and every value typed  *)
 (* against the first, the instance's three model families before anything     *)
 (* else, would have to be built again over it. The checks file records the    *)
 (* two terms the kernel refuses that make the fork visible.                   *)
@@ -29,7 +29,7 @@
 (* coalition and neither mentions a probability model.                        *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   pgl27_dealt             == the prefix all seven rows share               *)
+(*   pgl27_dealt             == the prefix all seven programs share           *)
 (*   pgl27_inline_dealt      == the prefix with the termination reduction     *)
 (*                              written inline                                *)
 (*   pgl27_F                 == the ideal functionality the run realises      *)
@@ -65,12 +65,12 @@ Local Open Scope ring_scope.
 
 
 (******************************************************************************)
-(*     The prefix all seven rows share                                        *)
+(*     The prefix all seven programs share                                    *)
 (******************************************************************************)
 
-(** The first three lines of every eight-card orbit row: the algebra, the
+(** The first three lines of every eight-card orbit program: the algebra, the
     secret dealt at pgl27_fuel, and the three run facts. Sequencing stops here
-    because the two rows part at the next line, where each adjoins its own
+    because the two programs part at the next line, where each adjoins its own
     probability model; everything up to this point is common to both, and what
     has been proved at this point is run correctness and nothing about a
     coalition. *)
@@ -101,11 +101,11 @@ Proof. exact: erefl. Qed.
 (** The shared prefix again, with the termination obligation built where the
     statement is written instead of named. The proposition proved is the one
     pgl27_dealt proves and the run is the same run, but the term is not
-    pgl27_dealt_terminates, and an opaque lemma is convertible with nothing;
-    so the observed execution this prefix reaches is a second value, equal to
-    pgl27_observed only up to the irrelevance of an obligation. Everything
-    typed against pgl27_observed, the instance's models first of all, would
-    have to be built again over it, which is why no row is written here. *)
+    pgl27_dealt_terminates, and an opaque lemma is convertible with nothing; so
+    the observed execution this prefix reaches is a second value, equal to
+    pgl27_observed only up to the irrelevance of an obligation. Everything typed
+    against pgl27_observed, the instance's models first of all, would have to be
+    built again over it, which is why no program is written here. *)
 Definition pgl27_inline_dealt : Tableau Observed :=
   pgl27_algebra
     dealt   fuel pgl27_fuel

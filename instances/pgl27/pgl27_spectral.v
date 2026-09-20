@@ -534,7 +534,7 @@ Qed.
     not a technicality: the matrix fixes the all-ones vector and contracts
     nothing there, and the rate at which the shuffle forgets the deck it
     started from is decided by what it does to the complement.  This is the
-    one spectral input of the PGL(2,7) row and the only place the
+    one spectral input of the PGL(2,7) word analysis and the only place the
     certificate tables are used. *)
 Lemma pgl27_rayleigh_Q2 (R : realType) (v : 'cV[R]_8) :
   \sum_i v i ord0 = 0 ->

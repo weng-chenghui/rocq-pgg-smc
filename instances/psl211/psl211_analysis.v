@@ -158,7 +158,7 @@ Definition secret := @psl211_alldecks_secret.
 (* distribution can be attached to a named executed observer. The word model  *)
 (* carries its own cut equation psl211_word_cut_distE at                      *)
 (* instances/psl211/psl211_word_model.v, and is aliased here for the sample   *)
-(* and model slots of its own manifest row.                                   *)
+(* and model slots of its own manifest path.                                  *)
 (******************************************************************************)
 
 (** exact_sample — the all-decks model as a sample adapter: one sample point
@@ -176,7 +176,7 @@ Definition word_sample := @psl211_word_sample.
 Definition exact_family := psl211_exact_family.
 
 (** word_family — the word model as a unit-indexed typed family, carrying the
-    index type exact_family carries, so a row over each of the two models is
+    index type exact_family carries, so a program over each of the two models is
     read at one index. *)
 Definition word_family := psl211_word_family.
 

@@ -58,7 +58,7 @@
 (* The three run obligations at execute are the only proofs whose statements  *)
 (* mention the interpreter. The by clause of encoded is a proof too, but      *)
 (* ts_valid takes a secret and a share tuple and nothing else, so it          *)
-(* constrains the layout and not the run, and it is what makes the row's      *)
+(* constrains the layout and not the run, and it is what makes the program's  *)
 (* recon clause a bare lemma name.                                            *)
 (*                                                                            *)
 (* The surface reserves nineteen identifiers as global keywords in every file *)
@@ -97,7 +97,7 @@
 (*   ExactLeakAt  == some coalition of k seats has a view of positive mutual  *)
 (*                   information with the secret                              *)
 (*   exact_leaks  == the witness again, with such an annotation checked       *)
-(*   params_step  == the statement raising a row to Executable at given       *)
+(*   params_step  == the statement raising a program to Executable at given   *)
 (*                   parameters                                               *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -179,23 +179,22 @@ Arguments mk_indistinguishability : clear implicits.
 (*     The ideal function a run computes                                      *)
 (******************************************************************************)
 
-(* An algebra together with the ideal function a run of it is meant to
-   compute, from whatever a run takes as argument to the value it
-   reconstructs. The record exists because the completion-level stack carries
-   no functionality: the accumulated proposition is about a coalition's view
-   and never mentions the ideal function, so naming one happens beside the
-   program rather than inside it. For a dealer-dealt run the ideal function is
-   forced to be the identity, and the record is written only for an input
-   family, where it is not.
+(* An algebra together with the ideal function a run of it is meant to compute,
+   from whatever a run takes as argument to the value it reconstructs. The
+   record exists because the completion-level stack carries no functionality:
+   the accumulated proposition is about a coalition's view and never mentions
+   the ideal function, so naming one happens beside the program rather than
+   inside it. For a dealer-dealt run the ideal function is forced to be the
+   identity, and the record is written only for an input family, where it is
+   not.
 
    targeted_F is what such a run is measured against: a run whose recovered
-   value ex_expected is written as this ideal function meets
-   realises_expected by conversion, which is the whole obligation of the
-   functionality statement.
+   value ex_expected is written as this ideal function meets realises_expected
+   by conversion, which is the whole obligation of the functionality statement.
 
-   The consumer is the encoded statement below: it reads the algebra, the
-   input carrier and the ideal function off this record and writes them into
-   the parameter record the run is driven by, so the function a row names and
+   The consumer is the encoded statement below: it reads the algebra, the input
+   carrier and the ideal function off this record and writes them into the
+   parameter record the run is driven by, so the function a program names and
    the value its run recovers are one term and not two that agree. *)
 Record Targeted := MkTargeted {
   tg_algebra : PGGAlgebraic ;
@@ -219,16 +218,16 @@ Notation "A 'functionality' f" := (@MkTargeted A _ f)
   (at level 90, left associativity, f at level 0).
 
 (* An input-family run whose parameters take the ideal function from the
-   Targeted itself meets that specification. The two sides are the same term,
-   so the identification realises_expected asks for is conversion and the
-   correctness half of such a row is discharged by reflexivity.
+   Targeted itself meets that specification. The two sides are the same term, so
+   the identification realises_expected asks for is conversion and the
+   correctness half of such a program is discharged by reflexivity.
 
-   A row therefore closes this obligation by by [] and never cites the lemma.
-   Where the lemma is applied instead, every argument is written through @:
-   each one before the three run facts occurs in their types and is implicit,
-   and leaving them to unification does not close the goal, because
-   apply-style unification will not reduce the definition a goal names to the
-   parameter record this conclusion builds. *)
+   A program therefore closes this obligation by by [] and never cites the
+   lemma. Where the lemma is applied instead, every argument is written through
+   @: each one before the three run facts occurs in their types and is implicit,
+   and leaving them to unification does not close the goal, because apply-style
+   unification will not reduce the definition a goal names to the parameter
+   record this conclusion builds. *)
 Lemma encoded_realises_expected (t : Targeted) L Hv d procs n Ht He Hr :
   realises_expected
     (@instance_observed (tg_algebra t)
@@ -239,10 +238,10 @@ Proof. by []. Qed.
 
 (* The same for a sharing-family run at a supplied layout. Such a statement
    writes the value the run recovers in its own expecting clause rather than
-   taking it from a Targeted, so a row that also names a functionality meets
+   taking it from a Targeted, so a program that also names a functionality meets
    it when the two are convertible, which is what this lemma asks of them.
 
-   It is closed by by [] in a row and applied with every argument written
+   It is closed by by [] in a program and applied with every argument written
    elsewhere, for the reason above. *)
 Lemma supplied_realises_expected (t : Targeted) L n Ht He Hr :
   realises_expected
@@ -282,23 +281,23 @@ Arguments ExactLeakAt : clear implicits.
 
 (* The exact arm's witness, with a tightness annotation checked against it and
    then dropped. The result is the witness itself, so the annotation leaves
-   the term a row builds unchanged and everything proved about an annotated
+   the term a program builds unchanged and everything proved about an annotated
    program is proved about the unannotated one. *)
 Definition exact_leaks (x : StackAt Sampled) (p : ExactPayload x)
     (k : nat) (H : ExactLeakAt k x p) : ExactPayload x := p.
 Arguments exact_leaks : clear implicits.
 
 (******************************************************************************)
-(*     The row statements                                                     *)
+(*     The program statements                                                 *)
 (******************************************************************************)
 
 Notation "A 'dealt' 'fuel' n" := (tableau_start A ;;; dealt_step of n)
   (at level 90, left associativity, n at level 0).
 
-(* From an algebra and a parameter record, the statement that raises a row to
-   Executable at those parameters. The encoded and supplied rules below differ
-   only in the record their clauses build, and dealt_step is this statement at
-   dealt_secret_params. *)
+(* From an algebra and a parameter record, the statement that raises a program
+   to Executable at those parameters. The encoded and supplied rules below
+   differ only in the record their clauses build, and dealt_step is this
+   statement at dealt_secret_params. *)
 Definition params_step (x : StackAt Algebraic) (_ : StackProp Algebraic x)
     (E : ExecutionParams x) : Tableau Executable :=
   @MkTableau Executable (StackProp Executable)
@@ -311,26 +310,25 @@ Definition params_step (x : StackAt Algebraic) (_ : StackProp Algebraic x)
 Arguments params_step : clear implicits.
 
 (* The dealer-dealt statement is this one at the dealer-dealt parameters. The
-   two are the same term, so a row written with either reaches the same
+   two are the same term, so a program written with either reaches the same
    completion level. *)
 Lemma dealt_params_stepE (x : StackAt Algebraic) (q : StackProp Algebraic x)
     (n : nat) :
   dealt_step q n = params_step x q (dealt_secret_params x n).
 Proof. by []. Qed.
 
-(* The input family. The committers named in committed_by hand over
-   their inputs, decoded_by reads the joint input back out of the payload list
-   they committed, and layout turns that input into the sharing the dealer
-   deals.
+(* The input family. The committers named in committed_by hand over their
+   inputs, decoded_by reads the joint input back out of the payload list they
+   committed, and layout turns that input into the sharing the dealer deals.
 
    The by clause is the sharing claim of the encoding, that the layout is a
-   valid sharing of the ideal function's value at the same input. It is
-   checked where it is written and read back from the parameter term by
-   encoded_static_recon, so the reconstruction obligation of such a row is
+   valid sharing of the ideal function's value at the same input. It is checked
+   where it is written and read back from the parameter term by
+   encoded_static_recon, so the reconstruction obligation of such a program is
    that lemma's name and nothing else.
 
-   The algebra and the ideal function come from the Targeted on the left, so
-   the value the run recovers is the one functionality named, and a row cannot
+   The algebra and the ideal function come from the Targeted on the left, so the
+   value the run recovers is the one functionality named, and a program cannot
    name one function and recover another. *)
 Notation "t 'encoded' 'inputs' T 'layout' L 'by' enc 'decoded_by' d 'committed_by' procs 'fuel' n" :=
   (tableau_start (tg_algebra t) ;;; params_step
@@ -346,7 +344,7 @@ Notation "t 'encoded' 'inputs' T 'layout' L 'by' enc 'decoded_by' d 'committed_b
    expecting is the value the run recovers, a reading of the run argument
    rather than an ideal function of committed inputs, which is why the
    statement begins at an algebra and not at a Targeted. The sharing claim is
-   not written here, so such a row discharges its reconstruction
+   not written here, so such a program discharges its reconstruction
    obligation through supplied_static_recon at its own algebra and validity
    lemma, or through the interpreter. *)
 Notation "A 'supplied' 'inputs' T 'layout' L 'expecting' e 'fuel' n" :=
@@ -362,7 +360,7 @@ Notation "A 'supplied' 'inputs' T 'layout' L 'expecting' e 'fuel' n" :=
    termination and the endpoint equation are both stated over it.
 
    What this statement builds is the observed execution, and publish writes it
-   unchanged into the row's ap_observed. A row therefore describes the run
+   unchanged into the path's ap_observed. A program therefore describes the run
    these three obligations were proved about, and not a second run that
    resembles it. *)
 Notation "s 'execute' 'terminates' 'by' t 'endpoints' 'by' e 'recon' 'by' r" :=
@@ -409,16 +407,16 @@ Notation "s 'certify' 'InputIndistinguishability' 'at' R idx b 'tied' 'by' Hd 'i
    b at level 10, Hd at level 10, u at level 10, Hc at level 10,
    Hk at level 10, only parsing).
 
-(* The number a row publishes, and the proof that the row's own bound is at
-   most that number. The terminal is written in the same surface as the
-   statements of a row, so a row that publishes a constant a paper cites is
-   one program in one language and not a program that falls back to the bind
+(* The number a program publishes, and the proof that the program's own bound is
+   at most that number. The terminal is written in the same surface as the
+   statements of a program, so a program that publishes a constant a paper cites
+   is one program in one language and not a program that falls back to the bind
    at its last two lines. *)
 Notation "s |> 'conclude' c 'by' p" := (s ;;; conclude c of p)
   (at level 90, left associativity, c at level 0, p at level 0).
 
 (* The two statuses are written transfer first, against the argument order of
-   publish itself, so that a row's last statement reads in the order the
+   publish itself, so that a program's last statement reads in the order the
    manifest column headings run. *)
 Notation "s |> 'publish' t a" := (s ;;; publish a of t)
   (at level 90, left associativity, t at level 0, a at level 0).

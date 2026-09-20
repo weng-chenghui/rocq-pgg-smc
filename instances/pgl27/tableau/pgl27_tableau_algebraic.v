@@ -4,13 +4,14 @@
 (* pgl27_tableau_algebraic: the eight-card orbit instance at the Algebraic    *)
 (* level                                                                      *)
 (*                                                                            *)
-(* The Algebraic level of a row holds an algebra and nothing besides, and the *)
-(* proposition it carries is True. A reader shown only this file has been     *)
+(* The Algebraic level of a program holds an algebra and nothing besides, and *)
+(* the proposition it carries is True. A reader shown only this file has been *)
 (* shown which group shuffles the deck, which scheme the dealer shares and    *)
 (* which seats read, and no claim about a coalition, a run or a probability   *)
-(* model. All seven published rows of this instance begin at that algebra,    *)
-(* and the exact, the word and the prior-indexed exact analyses first differ  *)
-(* three levels above, at Sampled, where each names its own family.           *)
+(* model. All seven published programs of this instance begin at that         *)
+(* algebra, and the exact, the word and the prior-indexed exact analyses      *)
+(* first differ three levels above, at Sampled, where each names its own      *)
+(* family.                                                                    *)
 (*                                                                            *)
 (* The algebra is pgl27_algebra of pgl27_exec.v and is not restated here:     *)
 (* PGL(2,7) acts on the eight card positions, the orbit scheme deals one of   *)
@@ -47,15 +48,15 @@ Local Open Scope ring_scope.
 
 
 (******************************************************************************)
-(*     The algebra as the first line of a row                                 *)
+(*     The algebra as the first line of a program                             *)
 (******************************************************************************)
 
 (** The eight-card orbit instance at the Algebraic level: the algebra alone,
     under True, the proposition that level carries. One run mode is built on
-    this value, the dealer-dealt one, and pgl27_dealt_executableE is where
-    the prefix all seven published rows continue from is identified with
-    that mode. The three analyses part three levels above, at Sampled, where
-    each names its own family, so what this file fixes is shared by every
-    row the instance publishes. *)
+    this value, the dealer-dealt one, and pgl27_dealt_executableE is where the
+    prefix all seven published programs continue from is identified with that
+    mode. The three analyses part three levels above, at Sampled, where each
+    names its own family, so what this file fixes is shared by every program the
+    instance publishes. *)
 Definition pgl27_algebraic_start : Tableau Algebraic :=
   tableau_start pgl27_algebra.

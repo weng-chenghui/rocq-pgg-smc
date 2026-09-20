@@ -3,12 +3,12 @@
 (******************************************************************************)
 (* s5_tableau_algebraic: the five-seat instance at the Algebraic level        *)
 (*                                                                            *)
-(* The Algebraic level of a row holds an algebra and nothing besides, and the *)
-(* proposition it carries is True. A reader shown only this file has been     *)
+(* The Algebraic level of a program holds an algebra and nothing besides, and *)
+(* the proposition it carries is True. A reader shown only this file has been *)
 (* shown which group shuffles the deck, which scheme the dealer shares and    *)
 (* which seats read, and no claim about a coalition, a run or a probability   *)
-(* model. Every five-seat row begins at that algebra, and the instance's two  *)
-(* sharing-family runs first differ one level above, at Executable, where     *)
+(* model. Every five-seat program begins at that algebra, and the instance's  *)
+(* two sharing-family runs first differ one level above, at Executable, where *)
 (* each names its own run mode.                                               *)
 (*                                                                            *)
 (* The algebra is s5_algebra of s5_exec.v and is not restated here: the four  *)
@@ -38,7 +38,7 @@ Import GRing.Theory Num.Theory.
 Local Open Scope ring_scope.
 
 (******************************************************************************)
-(*     The algebra as the first line of a row                                 *)
+(*     The algebra as the first line of a program                             *)
 (******************************************************************************)
 
 (** The five-seat instance at the Algebraic level: the algebra alone, under

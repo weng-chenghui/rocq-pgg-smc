@@ -13,12 +13,12 @@
 (* A bound sub-block sits beside section 6 and carries the endpoint marginal  *)
 (* bounds of the repeated and seven-cut models. Those are not privacy or      *)
 (* security statements and are not aliased under the security heading.        *)
-(* Section 7 carries the base premises Kim's one-cut and seven-cut rows rest  *)
-(* on, the distance of each cut law from the uniform rotation law and the     *)
-(* constancy, at every coalition of at most one of the five seats, of that    *)
-(* coalition's reading of the uniform rotation law. Beside them it carries    *)
-(* the coalition bound each pair of premises gives, and one typed transfer    *)
-(* status per analysis path.                                                  *)
+(* Section 7 carries the base premises Kim's one-cut and seven-cut programs   *)
+(* rest on, the distance of each cut law from the uniform rotation law and    *)
+(* the constancy, at every coalition of at most one of the five seats, of     *)
+(* that coalition's reading of the uniform rotation law. Beside them it       *)
+(* carries the coalition bound each pair of premises gives, and one typed     *)
+(* transfer status per analysis path.                                         *)
 (*                                                                            *)
 (* The facade contract:                                                       *)
 (*                                                                            *)
@@ -191,8 +191,8 @@ Definition colour_view := @five_card_exec_colour_view.
     coalition's own seats read the card position at their own start and
     every other seat reads ord0, carrier {ffun 'I_5 -> 'I_5}. It is the
     reader the two cut-carrier transfers of section 7 compare at two
-    committed pairs, and the reader Kim's two certified rows state their
-    bound at. *)
+    committed pairs, and the reader Kim's two certified programs state
+    their bound at. *)
 Definition static_obs :=
   @pgg_instance.static_coalition_obs five_card_algebra five_card_params.
 

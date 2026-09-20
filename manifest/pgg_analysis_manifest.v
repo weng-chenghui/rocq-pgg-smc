@@ -6,21 +6,21 @@
 (* The manifest re-exports the four instance facades, so that one import      *)
 (* reaches every public alias of the eight-card orbit instance, the five-card *)
 (* development of den Boer and Kim, the five-seat S_5 instance and the        *)
-(* twelve-card chirality instance, and records one row per analysis path.     *)
-(* Each row names its protocol instance, probability model, profile,          *)
-(* execution, observed-execution and sample aliases, its observers with       *)
-(* their carriers, its correctness theorem, its security, leakage, mixing or  *)
-(* limitation theorem, its static-to-executed bridge and model-transfer       *)
-(* theorem when present, the missing model-transfer premise when none is      *)
-(* claimed, its exact capability, its completion level and its assumption     *)
-(* status.                                                                    *)
+(* twelve-card chirality instance, and records each analysis path as one      *)
+(* typed value. Each path names its protocol instance, probability model,     *)
+(* profile, execution, observed-execution and sample aliases, its observers   *)
+(* with their carriers, its correctness theorem, its security, leakage,       *)
+(* mixing or limitation theorem, its static-to-executed bridge and            *)
+(* model-transfer theorem when present, the missing model-transfer premise    *)
+(* when none is claimed, its exact capability, its completion level and its   *)
+(* assumption status.                                                         *)
 (*                                                                            *)
-(* A row records no security arm. Which arm a published program carries is    *)
+(* A path records no security arm. Which arm a published program carries is   *)
 (* read off that program by security_arm_of of manifest/pgg_tableau.v, so     *)
 (* which arm a path carries is told from the certificate its table names and  *)
 (* not from a field of the record.                                            *)
 (*                                                                            *)
-(* Each row is also a typed value of AnalysisPath below, carrying the         *)
+(* Each path is also a typed value of AnalysisPath below, carrying the        *)
 (* observed execution of the path, its typed model slot ap_model, an          *)
 (* AnalysisModelFamily witness mandatory at Sampled and AnalysisBridged and   *)
 (* optional below, and the three typed statuses of pgg_analysis_status.v. The *)
@@ -41,27 +41,27 @@
 (*                    same observer                                           *)
 (*                                                                            *)
 (* AnalysisBridged is the typed form of the prose label Security-bridged of   *)
-(* the earlier banner. The neutral name is what lets a row classify           *)
+(* the earlier banner. The neutral name is what lets a path classify          *)
 (* accurately when its bridged theorem is an endpoint marginal mixing bound   *)
 (* and not a privacy claim, as on the S_5 finite-word path.                   *)
 (*                                                                            *)
-(* Three conventions hold throughout the rows.                                *)
+(* Three conventions hold throughout the paths.                               *)
 (*                                                                            *)
 (* (1) The classical trio propositional_extensionality,                       *)
 (* functional_extensionality_dep and constructive_indefinite_description is   *)
 (* the repository baseline, inherited from boolp through the infotheo         *)
-(* probability layer. It is NOT listed in an assumption status. A row is      *)
-(* BaselineClassicalOnly when Print Assumptions reports the trio and        *)
-(* nothing else, and                                                          *)
-(* AcceptsAxioms when it reports named repository assumptions beyond it. The  *)
-(* two constructors of PggAxiom are the only such assumptions, and a status   *)
-(* covers the public results of the path, not only the values the row stores. *)
+(* probability layer. It is NOT listed in an assumption status. A path is     *)
+(* BaselineClassicalOnly when Print Assumptions reports the trio and nothing  *)
+(* else, and AcceptsAxioms when it reports named repository assumptions       *)
+(* beyond it. The two constructors of PggAxiom are the only such assumptions, *)
+(* and a status covers the public results of the path, not only the values    *)
+(* the path stores.                                                           *)
 (*                                                                            *)
 (* (2) Completion levels are cumulative and are stated at the level the       *)
-(* theorems actually reach. The S_5 word row is AnalysisBridged: its executed *)
-(* theorem is stated at sa_seat_dist of the interpreter-executed finite-word  *)
-(* adapter, against the encoder-image ideal, next to the kept cut-level       *)
-(* result at the card position's endpoint reader of the word-cut              *)
+(* theorems actually reach. The S_5 word path is AnalysisBridged: its         *)
+(* executed theorem is stated at sa_seat_dist of the interpreter-executed     *)
+(* finite-word adapter, against the encoder-image ideal, next to the kept     *)
+(* cut-level result at the card position's endpoint reader of the word-cut    *)
 (* distribution.                                                              *)
 (*                                                                            *)
 (* (3) A capability line uses the narrowest label the theorem statement       *)
@@ -70,11 +70,11 @@
 (* information or endpoint marginal mixing.                                   *)
 (*                                                                            *)
 (* Every identifier in the tables below is checked at the end of this file by *)
-(* one Timeout-guarded Check against its spelled type, and every row by one   *)
+(* one Timeout-guarded Check against its spelled type, and every path by one  *)
 (* Check against AnalysisPath together with three erefl pins on its status    *)
 (* fields. Deleting an alias makes its line fail with a reference-not-found   *)
 (* message, retyping one makes it fail with a type mismatch and restatusing a *)
-(* row makes its pin fail, so the tables cannot drift away from the code.     *)
+(* path makes its pin fail, so the tables cannot drift away from the code.    *)
 (******************************************************************************)
 
 From pgg_smc Require Export pgl27_analysis five_card_analysis s5_analysis
@@ -91,7 +91,7 @@ Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 
 (******************************************************************************)
-(*     Row 1: eight-card orbit instance, exact uniform shuffle                *)
+(*     Path 1: eight-card orbit instance, exact uniform shuffle               *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -125,7 +125,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | pgl27_exact_path |                                *)
+(* | typed path           | pgl27_exact_path |                                *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
@@ -146,10 +146,9 @@ Local Open Scope ring_scope.
 (* distribution with the pushforward of prior along static_view, giving       *)
 (* Sampled; exact_view_indep is a security theorem whose right-hand side      *)
 (* names sa_coalition_dist (exact_sample R) 0 C itself, so the theorem, the   *)
-(* distribution and the observer are this row's own, giving                   *)
-(* AnalysisBridged.                                                           *)
+(* distribution and the observer are this path's own, giving AnalysisBridged. *)
 (*                                                                            *)
-(*     Row 2: eight-card orbit instance, finite two-hundred-letter word       *)
+(*     Path 2: eight-card orbit instance, finite two-hundred-letter word      *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -190,7 +189,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | pgl27_word_path |                                 *)
+(* | typed path           | pgl27_word_path |                                 *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -212,7 +211,7 @@ Local Open Scope ring_scope.
 (*     word_mixing |                                                          *)
 (*                                                                            *)
 (* Level justification. The first three levels are witnessed by the same      *)
-(* three aliases as row 1. fixed_word_sample is a SampleAdapter over that     *)
+(* three aliases as path 1. fixed_word_sample is a SampleAdapter over that    *)
 (* plug and fixed_word_coalition_distE identifies its executed coalition      *)
 (* distribution with the pushforward of rho_word along static_view, giving    *)
 (* Sampled. exec_view_indistinguishability and                                *)
@@ -221,7 +220,7 @@ Local Open Scope ring_scope.
 (* giving AnalysisBridged at both executed observers rather than at the       *)
 (* static layer alone.                                                        *)
 (*                                                                            *)
-(*     Row 3: five-card development, uniform cut (den Boer)                   *)
+(*     Path 3: five-card development, uniform cut (den Boer)                  *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -252,14 +251,14 @@ Local Open Scope ring_scope.
 (*                          of var_dist_fdistmap_transfer, an equality of     *)
 (*                          two reader pushforwards under an ideal            *)
 (*                          distribution, is                                  *)
-(*                          FiveCardAnalysis.static_obs_const. What this row  *)
+(*                          FiveCardAnalysis.static_obs_const. What this path *)
 (*                          lacks is a second model: its cut law is the       *)
 (*                          uniform rotation itself, so it has no             *)
 (*                          finite model to compare with an ideal one |       *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | five_card_uniform_path |                          *)
+(* | typed path           | five_card_uniform_path |                          *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -274,7 +273,7 @@ Local Open Scope ring_scope.
 (* | observed_recovers | none, the statement is distribution-free             *)
 (*   | verifier_endpoints | correctness |                                     *)
 (*                                                                            *)
-(* Level justification, stated explicitly because this row is the one whose   *)
+(* Level justification, stated explicitly because this path is the one whose  *)
 (* level depends on an identity rather than on a named bridge lemma.          *)
 (* uniform_sample is the sample adapter whose carrier is the den Boer sample  *)
 (* space, whose distribution is prior R, whose argument map is the first      *)
@@ -282,16 +281,16 @@ Local Open Scope ring_scope.
 (* content_trace R ord0 is a random variable on that same prior R whose value *)
 (* is the content of the executed seat row at exactly that argument and that  *)
 (* cut. exec_trace_secrecy is stated at that random variable. So the          *)
-(* theorem's distribution is the row's sample distribution, its observer is   *)
-(* an aliased executed observer of the row, and sample_cut_distE names the    *)
-(* row's cut distribution; the row is AnalysisBridged with the trace          *)
+(* theorem's distribution is the path's sample distribution, its observer is  *)
+(* an aliased executed observer of the path, and sample_cut_distE names the   *)
+(* path's cut distribution; the path is AnalysisBridged with the trace        *)
 (* privacy capability. input_trace_secrecy is NOT counted towards that level: *)
 (* the input rows of the executed trace are empty, so its conditioning        *)
 (* variable is constant and it is recorded as conditional entropy under       *)
 (* constant conditioning, an architecture statement rather than a privacy     *)
 (* bound.                                                                     *)
 (*                                                                            *)
-(*     Row 4: five-card development, single biased cut                        *)
+(*     Path 4: five-card development, single biased cut                       *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -319,7 +318,7 @@ Local Open Scope ring_scope.
 (*                          not a shuffle certificate |                       *)
 (* | final bridge theorem | FiveCardAnalysis.colour_view_leak_bound, and      *)
 (*     FiveCardAnalysis.biased_static_obs_indistinguishability, the coalition *)
-(*     bound the cut-carrier transfer concludes at this row |                 *)
+(*     bound the cut-carrier transfer concludes at this path |                *)
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
 (* | model transfer       | the cut-carrier transfer of                       *)
 (*                          var_dist_fdistmap_transfer: its first hypothesis  *)
@@ -332,7 +331,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | five_card_biased_path |                           *)
+(* | typed path           | five_card_biased_path |                           *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -359,20 +358,20 @@ Local Open Scope ring_scope.
 (* colour_view_leak_bound bounds a conditional mutual information of a joint  *)
 (* distribution whose middle component is the executed reader colour_view     *)
 (* itself, over that same biased distribution, giving AnalysisBridged.        *)
-(* biased_cut_mixing bounds the distance of that cut distribution from        *)
-(* the uniform rotation law on the cut carrier itself, and static_obs_const   *)
-(* is the equality of two readings of that law, so both hypotheses of         *)
+(* biased_cut_mixing bounds the distance of that cut distribution from the    *)
+(* uniform rotation law on the cut carrier itself, and static_obs_const is    *)
+(* the equality of two readings of that law, so both hypotheses of            *)
 (* var_dist_fdistmap_transfer are discharged and the transfer status is       *)
 (* IdealFinite rather than StaticExecutedOnly. The conclusion of that         *)
 (* transfer is biased_static_obs_indistinguishability, a bound on the         *)
 (* variation distance between the static readings of a coalition of at most   *)
-(* one seat at two committed pairs. Its distribution is this row's cut law at *)
-(* bias one hundredth, by biased_sample_cut_witnessE, and its observer is     *)
-(* static_obs, the second observer this row declares, so it reaches           *)
+(* one seat at two committed pairs. Its distribution is this path's cut law   *)
+(* at bias one hundredth, by biased_sample_cut_witnessE, and its observer is  *)
+(* static_obs, the second observer this path declares, so it reaches          *)
 (* AnalysisBridged beside colour_view_leak_bound, which reaches it at the     *)
 (* executed reader colour_view.                                               *)
 (*                                                                            *)
-(*     Row 5: five-card development, repeated biased cuts and seven cuts      *)
+(*     Path 5: five-card development, repeated biased cuts and seven cuts     *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -405,7 +404,7 @@ Local Open Scope ring_scope.
 (*                          FiveCardAnalysis.deal_centi_lt |                  *)
 (* | final bridge theorem |                                                   *)
 (*     FiveCardAnalysis.centi_static_obs_indistinguishability, the coalition  *)
-(*     bound var_dist_fdistmap_transfer concludes at this row from            *)
+(*     bound var_dist_fdistmap_transfer concludes at this path from           *)
 (*     FiveCardAnalysis.centi_cut_mixing and                                  *)
 (*     FiveCardAnalysis.static_obs_const |                                    *)
 (* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
@@ -419,7 +418,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | five_card_repeated_path |                         *)
+(* | typed path           | five_card_repeated_path |                         *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -440,16 +439,16 @@ Local Open Scope ring_scope.
 (* hypotheses of var_dist_fdistmap_transfer, giving IdealFinite. The          *)
 (* conclusion of that transfer, centi_static_obs_indistinguishability, is a   *)
 (* bound on the variation distance between the static readings of a coalition *)
-(* of at most one seat at two committed pairs. Its distribution is this row's *)
-(* cut law, by centi_cut_distE, and its observer is static_obs, which the row *)
-(* declares, and that is what gives AnalysisBridged. endpoint_bound and       *)
-(* deal_centi_lt stay in the row for what they are: they bound the distance   *)
-(* from uniform of ONE seat's endpoint distribution, neither quantifies over  *)
-(* a coalition and neither mentions a second secret. A                        *)
+(* of at most one seat at two committed pairs. Its distribution is this       *)
+(* path's cut law, by centi_cut_distE, and its observer is static_obs, which  *)
+(* the path declares, and that is what gives AnalysisBridged. endpoint_bound  *)
+(* and deal_centi_lt stay named in the path for what they are: they bound the *)
+(* distance from uniform of ONE seat's endpoint distribution, neither         *)
+(* quantifies over a coalition and neither mentions a second secret. A        *)
 (* ShuffleCertificateBundle exists for both models, and centi_cut_mixing is   *)
 (* proved from the marginal bound that bundle carries.                        *)
 (*                                                                            *)
-(*     Row 6: five-seat S_5 instance, deterministic dealt position            *)
+(*     Path 6: five-seat S_5 instance, deterministic dealt position           *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -481,7 +480,7 @@ Local Open Scope ring_scope.
 (* | completion level     | Observed |                                        *)
 (* | transfer status      | NoModelComparison |                               *)
 (* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
-(* | typed row            | s5_det_path |                                     *)
+(* | typed path           | s5_det_path |                                     *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -491,13 +490,13 @@ Local Open Scope ring_scope.
 (* Level justification. profile gives Algebraic; exec_plug is indexed by that *)
 (* profile, giving Executable; observed is the ObservedExecution over that    *)
 (* profile and plug, giving Observed. No sample adapter stands over this      *)
-(* plug, so the row stops at Observed with an empty optional model slot. The  *)
-(* assumption status is the group-order assumption of the instance:           *)
-(* Print Assumptions on the row reports s5_group_order_eq beyond the          *)
-(* classical trio, because the profile's threshold data is proved from the    *)
-(* order of the generated group.                                              *)
+(* plug, so the path stops at Observed with an empty optional model slot. The *)
+(* assumption status is the group-order assumption of the instance: Print     *)
+(* Assumptions on the path reports s5_group_order_eq beyond the classical     *)
+(* trio, because the profile's threshold data is proved from the order of the *)
+(* generated group.                                                           *)
 (*                                                                            *)
-(*     Row 7: five-seat S_5 instance, randomized additive sharing             *)
+(*     Path 7: five-seat S_5 instance, randomized additive sharing            *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -535,7 +534,7 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
-(* | typed row            | s5_rand_path |                                    *)
+(* | typed path           | s5_rand_path |                                    *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -552,15 +551,14 @@ Local Open Scope ring_scope.
 (* first three levels. rand_sample is a SampleAdapter over rand_exec_plug and *)
 (* rand_cut_distE names its cut distribution, giving Sampled.                 *)
 (* exec_coalition_secrecy is stated at sa_coalition_view of rand_sample       *)
-(* itself, so the theorem's distribution and observer are the row's own,      *)
+(* itself, so the theorem's distribution and observer are the path's own,     *)
 (* giving AnalysisBridged. The two reader equalities rand_content_traceE and  *)
 (* rand_coalition_viewE identify those executed observers with the static     *)
 (* readers of s5_trace and s5_secrecy, which is the content of the            *)
-(* StaticExecutedOnly status:                                                 *)
-(* results travel from the static layer to the executed one, and no           *)
-(* idealized model is compared.                                               *)
+(* StaticExecutedOnly status: results travel from the static layer to the     *)
+(* executed one, and no idealized model is compared.                          *)
 (*                                                                            *)
-(*     Row 8: five-seat S_5 instance, finite generator word                   *)
+(*     Path 8: five-seat S_5 instance, finite generator word                  *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -572,7 +570,7 @@ Local Open Scope ring_scope.
 (* | execution alias      | S5Analysis.exec_plug |                            *)
 (* | observed alias       | S5Analysis.observed |                             *)
 (* | sample alias         | S5Analysis.word_sample at a secret prior and a    *)
-(*                          word length; the row's typed model witness is     *)
+(*                          word length; the path's typed model witness is    *)
 (*                          S5Analysis.word_family, the family indexed by     *)
 (*                          exactly that prior and that length |              *)
 (* | observers            | one position's endpoint distribution (cut level,  *)
@@ -586,7 +584,7 @@ Local Open Scope ring_scope.
 (* | bound or certificate | S5Analysis.word_endpoint_bound (cut level) and    *)
 (*                          S5Analysis.exec_endpoint_bound (executed, against *)
 (*                          the encoder-image ideal) |                        *)
-(* | correctness theorem  | S5Analysis.observed_recovers, shared with row 6:  *)
+(* | correctness theorem  | S5Analysis.observed_recovers, shared with path 6: *)
 (*                          the model stands over the same plug |             *)
 (* | security, leakage, mixing or limitation theorem                          *)
 (*                        | S5Analysis.exec_endpoint_bound, endpoint marginal *)
@@ -602,14 +600,14 @@ Local Open Scope ring_scope.
 (*                          var_dist (sa_cut_dist (word_sample secretP L)) Q  *)
 (*                          <= delta on the cut carrier {perm 'I_5}, against  *)
 (*                          a named reference distribution Q. The transfer of *)
-(*                          this row is observer-level and does NOT discharge *)
-(*                          it: the encoder-image ideal is not the            *)
+(*                          this path is observer-level and does NOT          *)
+(*                          discharge it: the encoder-image ideal is not the  *)
 (*                          group-uniform ideal, and no bound against group   *)
 (*                          uniform on any carrier is stated or implied |     *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
-(* | typed row            | s5_word_path |                                    *)
+(* | typed path           | s5_word_path |                                    *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -622,17 +620,17 @@ Local Open Scope ring_scope.
 (*                                                                            *)
 (* Level justification. word_sample is a SampleAdapter over exec_plug and     *)
 (* word_cut_distE names its cut distribution, giving Sampled;                 *)
-(* exec_endpoint_bound is a mixing theorem at the row's own executed          *)
+(* exec_endpoint_bound is a mixing theorem at the path's own executed         *)
 (* observer, giving AnalysisBridged. It bounds ONE seat's endpoint marginal   *)
 (* against the encoder-image ideal, which is neither uniform nor              *)
 (* secret-independent; it quantifies over no coalition, mentions no second    *)
 (* secret and has neither the shape of an indistinguishability statement nor  *)
 (* that of a leakage statement. No finite-word coalition claim is made        *)
 (* anywhere on this path. Both bounds descend from the in-kernel Rayleigh     *)
-(* certificate of s5_mixing.v, so the only named assumption of this row is    *)
+(* certificate of s5_mixing.v, so the only named assumption of this path is   *)
 (* the instance's group-order one.                                            *)
 (*                                                                            *)
-(*     Row 9: twelve-card chirality instance, all-decks dealer                *)
+(*     Path 9: twelve-card chirality instance, all-decks dealer               *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -644,7 +642,7 @@ Local Open Scope ring_scope.
 (* | profile alias      | PSL211Analysis.profile |                            *)
 (* | execution alias    | PSL211Analysis.exec_plug |                          *)
 (* | observed alias     | PSL211Analysis.observed |                           *)
-(* | sample alias       | PSL211Analysis.exact_sample; the row's typed model  *)
+(* | sample alias       | PSL211Analysis.exact_sample; the path's typed model *)
 (*                        witness is PSL211Analysis.exact_family, the family  *)
 (*                        indexed by unit |                                   *)
 (* | observers          | PSL211Analysis.coalition_endpoints                  *)
@@ -669,12 +667,12 @@ Local Open Scope ring_scope.
 (* | missing premise      | none: the cut this model draws is the uniform     *)
 (*                          distribution on the group already, so the path    *)
 (*                          compares no idealized model. It is the model the  *)
-(*                          proximity certificate of Row 11 names as its      *)
+(*                          proximity certificate of Path 11 names as its     *)
 (*                          ideal |                                           *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | psl211_alldecks_path |                            *)
+(* | typed path           | psl211_alldecks_path |                            *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
@@ -697,14 +695,14 @@ Local Open Scope ring_scope.
 (* distribution with the pushforward of prior along static_view, giving       *)
 (* Sampled; exact_view_indep is a security theorem whose right-hand side      *)
 (* names sa_coalition_dist (exact_sample R) 0 C itself, so the theorem, the   *)
-(* distribution and the observer are this row's own, giving AnalysisBridged.  *)
+(* distribution and the observer are this path's own, giving AnalysisBridged. *)
 (* Both privacy lines quantify over coalitions of at most five of the twelve  *)
 (* seats, the profile's own privacy threshold being six. The independence is  *)
 (* exact and is an average over deck descriptions and cuts; the fixed-dealer  *)
 (* colour results of the same instance are about a different dealer and a     *)
-(* different observer and are no part of this row.                            *)
+(* different observer and are no part of this path.                           *)
 (*                                                                            *)
-(*     Row 10: eight-card orbit instance, exact uniform cut at a free prior   *)
+(*     Path 10: eight-card orbit instance, exact uniform cut at a free prior  *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -713,19 +711,19 @@ Local Open Scope ring_scope.
 (* | profile alias      | PGL27Analysis.profile |                             *)
 (* | execution alias    | PGL27Analysis.exec_plug |                           *)
 (* | observed alias     | PGL27Analysis.observed |                            *)
-(* | sample alias       | PGL27Analysis.prior_sample; the row's typed model   *)
+(* | sample alias       | PGL27Analysis.prior_sample; the path's typed model  *)
 (*                        witness is PGL27Analysis.prior_exact_family, the    *)
 (*                        family indexed by the secret prior |                *)
 (* | observers          | PGL27Analysis.static_view                           *)
 (*                          : {ffun 'I_8 -> 'I_8}, random variable on the     *)
-(*                            law of prior_sample at the row's index;         *)
+(*                            law of prior_sample at the path's index;        *)
 (*                        PGL27Analysis.secret : bool, on the same law |      *)
 (* | distribution-to-observer bridges | pgl27_prior_viewE of                  *)
 (*                        pgl27_tableau_analysis_bridged.v in                 *)
 (*                        instances/pgl27/tableau/, which identifies the      *)
 (*                        framework's reading of a coalition at this model    *)
 (*                        with PGL27Analysis.static_view |                    *)
-(* | bound or certificate | none: this row is published through the exact     *)
+(* | bound or certificate | none: this program is published through the exact *)
 (*                          arm, whose witness carries independence and no    *)
 (*                          number |                                          *)
 (* | final bridge theorem | pgl27_prior_exact_witness of                      *)
@@ -741,13 +739,13 @@ Local Open Scope ring_scope.
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | pgl27_prior_exact_path |                          *)
+(* | typed path           | pgl27_prior_exact_path |                          *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
-(* | pgl27_view_indep_gen | the law of prior_sample at the row's index        *)
+(* | pgl27_view_indep_gen | the law of prior_sample at the path's index       *)
 (*   | static_view, through pgl27_prior_viewE | exact privacy |               *)
 (* | observed_recovers | none, the statement is distribution-free             *)
 (*   | the executed endpoint list | correctness |                             *)
@@ -763,13 +761,13 @@ Local Open Scope ring_scope.
 (* The privacy line quantifies over coalitions of at most three of the eight  *)
 (* seats, the profile's own privacy threshold being four, and it holds at     *)
 (* every law of the dealt secret, three-transitivity of the group saying      *)
-(* nothing about how that secret is drawn. Row 1 records the same instance    *)
+(* nothing about how that secret is drawn. Path 1 records the same instance   *)
 (* and the same cut at the uniform secret alone, its family being indexed by  *)
-(* the unit type. The two rows agree in their other four coordinates and      *)
-(* differ in the model family, and the member of this row's family at the     *)
-(* uniform prior is the member of Row 1's at tt.                              *)
+(* the unit type. The two paths agree in their other four coordinates and     *)
+(* differ in the model family, and the member of this path's family at the    *)
+(* uniform prior is the member of Path 1's at tt.                             *)
 (*                                                                            *)
-(*     Row 11: twelve-card chirality instance, 584-letter word dealer         *)
+(*     Path 11: twelve-card chirality instance, 584-letter word dealer        *)
 (*                                                                            *)
 (* | field | value |                                                          *)
 (* |---|---|                                                                  *)
@@ -781,7 +779,7 @@ Local Open Scope ring_scope.
 (* | profile alias      | PSL211Analysis.profile |                            *)
 (* | execution alias    | PSL211Analysis.exec_plug |                          *)
 (* | observed alias     | PSL211Analysis.observed |                           *)
-(* | sample alias       | PSL211Analysis.word_sample; the row's typed model   *)
+(* | sample alias       | PSL211Analysis.word_sample; the path's typed model  *)
 (*                        witness is PSL211Analysis.word_family, the family   *)
 (*                        indexed by unit |                                   *)
 (* | observers          | sa_coalition_view of                                *)
@@ -795,7 +793,7 @@ Local Open Scope ring_scope.
 (* | distribution-to-observer bridges | psl211_word_sampleP_E and             *)
 (*                        psl211_word_cut_distE of                            *)
 (*                        instances/psl211/psl211_word_model.v, which name    *)
-(*                        the adapter's own law and its cut law; the row's    *)
+(*                        the adapter's own law and its cut law; the path's   *)
 (*                        reading is the framework's own sa_coalition_view at *)
 (*                        word_sample, which the adapter's projections make   *)
 (*                        the all-decks reading, so no facade-level reading   *)
@@ -818,12 +816,12 @@ Local Open Scope ring_scope.
 (*                          to the joint law of a coalition's reading with    *)
 (*                          the chirality, in the sum of absolute             *)
 (*                          differences |                                     *)
-(* | missing premise      | none: the row's certificate carries its own       *)
+(* | missing premise      | none: the program's certificate carries its own   *)
 (*                          distance field |                                  *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | BaselineClassicalOnly |                           *)
-(* | typed row            | psl211_word_path |                                *)
+(* | typed path           | psl211_word_path |                                *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
@@ -847,25 +845,26 @@ Local Open Scope ring_scope.
 (* over coalitions of at most five of the twelve seats, the profile's own     *)
 (* privacy threshold being six. Its number bounds a sum of absolute           *)
 (* differences, which is twice the total variation distance of the            *)
-(* literature, so a distinguisher's advantage against this row is at most     *)
-(* 2^-41. Row 9 records the same instance and the same execution at the       *)
-(* uniform cut, and the model of Row 9 is the ideal this row's certificate    *)
-(* is measured against. The two models differ in the law of the cut alone.    *)
-(* The two rows differ in the model family and in the transfer status, and    *)
-(* they carry different statements, Row 9 exact independence and this row a   *)
-(* bound on the distance to that independent model. The propositions refuted  *)
-(* in instances/psl211/psl211_reading_constancy.v are instances of            *)
+(* literature, so a distinguisher's advantage against this program is at most *)
+(* 2^-41. Path 9 records the same instance and the same execution at the      *)
+(* uniform cut, and the model of Path 9 is the ideal this program's           *)
+(* certificate is measured against. The two models differ in the law of the   *)
+(* cut alone. The two paths differ in the model family and in the transfer    *)
+(* status, and the programs published over them prove different statements:   *)
+(* exact independence over Path 9, and over this path a bound on the distance *)
+(* to that independent model. The propositions refuted in                     *)
+(* instances/psl211/psl211_reading_constancy.v are instances of               *)
 (* coalition_reading_constancy, which                                         *)
 (* indistinguishability_cert_reading_constancy reads as ic_const, the fifth   *)
 (* field of an input-indistinguishability certificate and a field a proximity *)
 (* certificate has no counterpart of. Those refutations stay true beside this *)
-(* row.                                                                       *)
+(* path.                                                                      *)
 (*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
 (* These are public observers and correctness statements of the four facades  *)
-(* that no row above attaches a security notion to. They are named here so    *)
-(* that the checker pins the whole facade surface, not only the rows.         *)
+(* that no path above attaches a security notion to. They are named here so   *)
+(* that the checker pins the whole facade surface, not only the paths.        *)
 (*                                                                            *)
 (* | facade | aliases |                                                       *)
 (* |---|---|                                                                  *)
@@ -889,35 +888,35 @@ Local Open Scope ring_scope.
 (*                                                                            *)
 (*     Absent capabilities                                                    *)
 (*                                                                            *)
-(* No row is filled with a dummy theorem, an option-valued proof, an axiom or *)
-(* a placeholder, no endpoint marginal bound is recorded as a privacy or      *)
+(* No path names a dummy theorem, an option-valued proof, an axiom or a       *)
+(* placeholder, no endpoint marginal bound is recorded as a privacy or        *)
 (* security capability, and every path whose transfer status is               *)
-(* NoModelComparison or StaticExecutedOnly states in its missing-premise      *)
-(* cell either the premise it lacks or why none is absent. The                *)
-(* IdealFinite word row 8 also keeps naming the absent cut-carrier premise    *)
-(* below: its transfer is observer-level and never discharges it.             *)
+(* NoModelComparison or StaticExecutedOnly states in its missing-premise cell *)
+(* either the premise it lacks or why none is absent. The IdealFinite word    *)
+(* path 8 also keeps naming the absent cut-carrier premise below: its         *)
+(* transfer is observer-level and never discharges it.                        *)
 (*                                                                            *)
-(* Five-card development. Section 7 of its facade carries the distance        *)
-(* of each of Kim's two cut laws from the uniform rotation law on the cut     *)
-(* carrier and the constancy of the reading of that law at every coalition    *)
-(* of at most one of the five seats, so rows 4 and 5 claim a cut-carrier      *)
-(* transfer and name no absent premise. Row 3's own cut law is the uniform    *)
-(* rotation, so that row has no finite model to compare with an ideal one     *)
+(* Five-card development. Section 7 of its facade carries the distance of     *)
+(* each of Kim's two cut laws from the uniform rotation law on the cut        *)
+(* carrier and the constancy of the reading of that law at every coalition of *)
+(* at most one of the five seats, so paths 4 and 5 claim a cut-carrier        *)
+(* transfer and name no absent premise. Path 3's own cut law is the uniform   *)
+(* rotation, so that path has no finite model to compare with an ideal one    *)
 (* and claims no transfer.                                                    *)
 (*                                                                            *)
-(* S_5 finite-word path (row 8). The absent premise is                        *)
-(* S5Analysis.word_missing_premise, that is                                   *)
-(* var_dist (sa_cut_dist (S5Analysis.word_sample secretP L)) Q <= delta on    *)
-(* the cut carrier {perm 'I_5}, against a named reference distribution Q.     *)
+(* S_5 finite-word path (path 8). The absent premise is                       *)
+(* S5Analysis.word_missing_premise, that is var_dist (sa_cut_dist             *)
+(* (S5Analysis.word_sample secretP L)) Q <= delta on the cut carrier {perm    *)
+(* 'I_5}, against a named reference distribution Q.                           *)
 (* S5Analysis.word_endpoint_bound bounds a pushforward on the carrier 'I_5    *)
 (* instead, and the executed transfer S5Analysis.exec_endpoint_bound compares *)
 (* the executed reading with the encoder-image ideal, the content one seat    *)
 (* reads when the dealt position is exactly uniform mixed over the secret     *)
 (* prior, on the carrier 'I_5; neither discharges it. That ideal is not the   *)
-(* group-uniform ideal. For Q the uniform distribution on the generated       *)
-(* group the premise is moreover UNSATISFIABLE at every delta below one:      *)
-(* every generator of this instance is a transposition, so a word of length   *)
-(* L evaluates into the coset of the alternating subgroup determined by the   *)
+(* group-uniform ideal. For Q the uniform distribution on the generated group *)
+(* the premise is moreover UNSATISFIABLE at every delta below one: every      *)
+(* generator of this instance is a transposition, so a word of length L       *)
+(* evaluates into the coset of the alternating subgroup determined by the     *)
 (* parity of L, and the sum of the absolute differences between the cut       *)
 (* distribution and group uniform is at least one. That sign-coset            *)
 (* confinement is not formalized at S_5, and no theorem of this repository    *)
@@ -925,7 +924,7 @@ Local Open Scope ring_scope.
 (******************************************************************************)
 
 (******************************************************************************)
-(*     The typed rows                                                         *)
+(*     The typed paths                                                        *)
 (******************************************************************************)
 
 (** A record bundling, per analysis path, its observed execution
@@ -935,8 +934,8 @@ Local Open Scope ring_scope.
     ap_completion, and the two remaining statuses ap_transfer and
     ap_assumptions. It stores no theorem: theorems stay facade aliases,
     named separately and pinned by spelled type in the checker below. This
-    is the manifest's row type; each value below is read off the path's
-    typed witnesses rather than asserted, so a row cannot silently drift
+    is the manifest's path type; each value below is read off the path's
+    typed witnesses rather than asserted, so a path cannot silently drift
     from the code it describes. *)
 Record AnalysisPath := MkAnalysisPath {
   (* ap_observed is the executed run of the path together with its static
@@ -945,7 +944,7 @@ Record AnalysisPath := MkAnalysisPath {
   (* ap_completion is the level the path's theorems actually reach. *)
   ap_completion  : CompletionLevel ;
   (* ap_model is the path's typed model evidence: an AnalysisModelFamily
-     over the row's own observed execution, mandatory at Sampled and
+     over the path's own observed execution, mandatory at Sampled and
      AnalysisBridged, optional at the three lower levels. A parameterized
      model is carried as a family with its real index type, never as an
      empty slot. *)
@@ -962,7 +961,7 @@ Record AnalysisPath := MkAnalysisPath {
     uniform shuffle: PGL27Analysis.observed paired with the exact-uniform
     model family PGL27Analysis.exact_family, AnalysisBridged,
     StaticExecutedOnly, BaselineClassicalOnly. exact_view_indep is proved at
-    this row's own sample distribution and observer, which is what reaches
+    this path's own sample distribution and observer, which is what reaches
     AnalysisBridged; the shuffle is already the exact uniform distribution
     on the group, so no idealized model is compared. *)
 Definition pgl27_exact_path : AnalysisPath :=
@@ -983,11 +982,11 @@ Definition pgl27_word_path : AnalysisPath :=
 (** The AnalysisPath for the five-card development under the uniform
     rotation cut: FiveCardAnalysis.observed paired with the uniform model
     family, AnalysisBridged, StaticExecutedOnly, BaselineClassicalOnly.
-    exec_trace_secrecy is stated at this row's own random variable
+    exec_trace_secrecy is stated at this path's own random variable
     content_trace R ord0 over its own sample distribution, reaching
     AnalysisBridged. The equality of two reader pushforwards under an
     ideal distribution is FiveCardAnalysis.static_obs_const, so no premise
-    is absent; this row's cut law is the uniform rotation itself, so it has
+    is absent; this path's cut law is the uniform rotation itself, so it has
     no finite model to compare with an ideal one and claims no transfer. *)
 Definition five_card_uniform_path : AnalysisPath :=
   @MkAnalysisPath FiveCardAnalysis.observed AnalysisBridged
@@ -998,16 +997,16 @@ Definition five_card_uniform_path : AnalysisPath :=
     single-biased model family at bias one hundredth, AnalysisBridged,
     IdealFinite, BaselineClassicalOnly. colour_view_leak_bound bounds
     a conditional mutual information over that same biased distribution at
-    the row's own executed reader colour_view, reaching AnalysisBridged. The
+    the path's own executed reader colour_view, reaching AnalysisBridged. The
     ideal the transfer names is the uniform rotation law on the cut group,
     and its base premise is FiveCardAnalysis.biased_cut_mixing, the distance
-    of this row's cut law from that ideal on the cut carrier itself, with
+    of this path's cut law from that ideal on the cut carrier itself, with
     FiveCardAnalysis.static_obs_const for the reading equality; those two
     give IdealFinite. Their transfer concludes
     FiveCardAnalysis.biased_static_obs_indistinguishability, the bound a
     coalition of at most one seat has on telling two committed pairs apart by
     what it reads, which is a second theorem reaching AnalysisBridged at this
-    row. *)
+    path. *)
 Definition five_card_biased_path : AnalysisPath :=
   @MkAnalysisPath FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.biased_family IdealFinite BaselineClassicalOnly.
@@ -1017,16 +1016,16 @@ Definition five_card_biased_path : AnalysisPath :=
     at bias one hundredth, AnalysisBridged, IdealFinite,
     BaselineClassicalOnly. The ideal the transfer names is the uniform
     rotation law on the cut group, and its base premise is
-    FiveCardAnalysis.centi_cut_mixing, the distance of this row's seven-cut
+    FiveCardAnalysis.centi_cut_mixing, the distance of this path's seven-cut
     law from that ideal on the cut carrier itself, with
     FiveCardAnalysis.static_obs_const for the reading equality; those two
     give IdealFinite. Their transfer concludes
     FiveCardAnalysis.centi_static_obs_indistinguishability, the bound a
     coalition of at most one seat has on telling two committed pairs apart by
     what it reads, and that conclusion is what reaches AnalysisBridged.
-    endpoint_bound and deal_centi_lt stay in the row as endpoint marginal
-    bounds: each bounds one seat's endpoint distribution and neither quantifies
-    over a coalition. *)
+    endpoint_bound and deal_centi_lt are listed for this path as endpoint
+    marginal bounds: each bounds one seat's endpoint distribution and neither
+    quantifies over a coalition. *)
 Definition five_card_repeated_path : AnalysisPath :=
   @MkAnalysisPath FiveCardAnalysis.observed AnalysisBridged
     FiveCardAnalysis.centi_family IdealFinite BaselineClassicalOnly.
@@ -1045,7 +1044,7 @@ Definition s5_det_path : AnalysisPath :=
     S5Analysis.rand_observed paired with the randomized model family
     S5Analysis.rand_family, AnalysisBridged, StaticExecutedOnly,
     AcceptsAxioms [:: AxS5GroupOrder]. exec_coalition_secrecy is stated at
-    sa_coalition_view of rand_sample itself, the row's own distribution and
+    sa_coalition_view of rand_sample itself, the path's own distribution and
     observer, reaching AnalysisBridged; no idealized model is compared. *)
 Definition s5_rand_path : AnalysisPath :=
   @MkAnalysisPath S5Analysis.rand_observed AnalysisBridged
@@ -1056,7 +1055,7 @@ Definition s5_rand_path : AnalysisPath :=
     word: S5Analysis.observed paired with the word model family indexed by
     a secret prior and a word length, AnalysisBridged, IdealFinite,
     AcceptsAxioms [:: AxS5GroupOrder]. exec_endpoint_bound is a mixing
-    theorem at the row's own executed observer against the encoder-image
+    theorem at the path's own executed observer against the encoder-image
     ideal, resting on the in-kernel Rayleigh certificate of s5_mixing.v
     and on no named assumption beyond the group-order one. *)
 Definition s5_word_path : AnalysisPath :=
@@ -1067,11 +1066,11 @@ Definition s5_word_path : AnalysisPath :=
 (** The AnalysisPath for the twelve-card chirality instance under its
     all-decks dealer: PSL211Analysis.observed paired with the unit-indexed
     exact-uniform family, AnalysisBridged, StaticExecutedOnly,
-    BaselineClassicalOnly.  exact_view_indep is proved at this row's own
+    BaselineClassicalOnly.  exact_view_indep is proved at this path's own
     sample distribution and observer, which is what reaches AnalysisBridged;
     the cut is already the uniform distribution on the group, so no idealized
     model is compared, and the deck description is drawn uniformly too, which
-    is what distinguishes this row from the fixed-dealer colour result the
+    is what distinguishes this path from the fixed-dealer colour result the
     same instance also carries. *)
 Definition psl211_alldecks_path : AnalysisPath :=
   @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
@@ -1081,13 +1080,13 @@ Definition psl211_alldecks_path : AnalysisPath :=
     uniform shuffle at a law of the dealt secret left free:
     PGL27Analysis.observed paired with the prior-indexed exact family,
     AnalysisBridged, StaticExecutedOnly, BaselineClassicalOnly.
-    pgl27_view_indep_gen is proved at this row's own sample distribution and
+    pgl27_view_indep_gen is proved at this path's own sample distribution and
     observer, which is what reaches AnalysisBridged; the shuffle is already
     the exact uniform distribution on the group, so no idealized model is
     compared. It differs from pgl27_exact_path in its model family, whose
-    index is the law of the dealt secret where the other's is the unit type,
-    and that index is what lets a row over the word model and a row over this
-    one be read at one law of the secret. *)
+    index is the law of the dealt secret where the other's is the unit type, and
+    that index is what lets a program over the word model and a program over
+    this one be read at one law of the secret. *)
 Definition pgl27_prior_exact_path : AnalysisPath :=
   @MkAnalysisPath PGL27Analysis.observed AnalysisBridged
     PGL27Analysis.prior_exact_family StaticExecutedOnly BaselineClassicalOnly.
@@ -1096,12 +1095,12 @@ Definition pgl27_prior_exact_path : AnalysisPath :=
     shuffle of 584 letters: PSL211Analysis.observed paired with the
     unit-indexed word family, AnalysisBridged, IdealFinite,
     BaselineClassicalOnly.  psl211_word_view_proximity is proved at this
-    row's own sample distribution and at that distribution's coalition
+    path's own sample distribution and at that distribution's coalition
     reader, which is what reaches AnalysisBridged; the cut is a word a dealer
     can perform where the model of psl211_alldecks_path draws it uniformly
     from the group, so an idealized shuffle is replaced by a finite one,
     which is the IdealFinite status. It differs from psl211_alldecks_path in
-    the model family and in the transfer status, and the model of that row is
+    the model family and in the transfer status, and the model of that path is
     the ideal the certificate behind this one is measured against. *)
 Definition psl211_word_path : AnalysisPath :=
   @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
@@ -1679,7 +1678,7 @@ Timeout 60 Check (FiveCardAnalysis.deal_centi_lt :
       (fdist_uniform (card_ord 5))
     < 2%:R^-40).
 
-(* --- 7 Transfer: the base premises of rows 4 and 5 by spelled type, then
+(* --- 7 Transfer: the base premises of paths 4 and 5 by spelled type, then
    the coalition bound each pair of them concludes, then the three typed
    statuses at their constructors. --- *)
 
@@ -2101,11 +2100,11 @@ Timeout 60 Check
   (erefl : PSL211Analysis.exact_transfer_status = StaticExecutedOnly).
 
 (******************************************************************************)
-(*     The deterministic checker: the eleven typed rows                       *)
+(*     The deterministic checker: the eleven typed paths                      *)
 (*                                                                            *)
-(* One Check per row against AnalysisPath, one erefl pin per status field,    *)
+(* One Check per path against AnalysisPath, one erefl pin per status field,   *)
 (* and one typed check on the model slot: a mandatory family at Sampled and   *)
-(* AnalysisBridged, an optional one below. A row whose status or model        *)
+(* AnalysisBridged, an optional one below. A path whose status or model       *)
 (* witness is edited away from the table above fails at its own pin.          *)
 (******************************************************************************)
 
@@ -2209,12 +2208,11 @@ Timeout 60 Check
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)
 (*                                                                            *)
-(* One application per parameterized family pins each family's own index     *)
-(* type (a wrong index type is a compile error at the pair), and one         *)
-(* application at tt pins a unit family. The generic check below them        *)
-(* establishes that every family's adapter is typed at the execution         *)
-(* projected from its own row's observed execution, for every row and every  *)
-(* family.                                                                   *)
+(* One application per parameterized family pins each family's own index type *)
+(* (a wrong index type is a compile error at the pair), and one application   *)
+(* at tt pins a unit family. The generic check below them establishes that    *)
+(* every family's adapter is typed at the execution projected from its own    *)
+(* path's observed execution, for every path and every family.                *)
 (******************************************************************************)
 
 Timeout 60 Check (fun (R : realType) (p : R.-fdist bool) =>
@@ -2235,16 +2233,16 @@ Timeout 60 Check (fun R : realType =>
 Timeout 60 Check (fun R : realType =>
   amf_sample (ap_model psl211_word_path) R tt).
 
-Timeout 60 Check (fun (row : AnalysisPath)
-    (fam : AnalysisModelFamily (ap_observed row)) (R : realType)
+Timeout 60 Check (fun (p : AnalysisPath)
+    (fam : AnalysisModelFamily (ap_observed p)) (R : realType)
     (x : amf_index fam R) =>
   amf_sample fam R x
-    : @SampleAdapter R _ (OE.oe_execution (ap_observed row))).
+    : @SampleAdapter R _ (OE.oe_execution (ap_observed p))).
 
 (******************************************************************************)
 (*     The executed finite-word theorem family at its spelled types           *)
 (*                                                                            *)
-(* The S_5 word row names an executed theorem alias, pinned here at its full  *)
+(* The S_5 word path names an executed theorem alias, pinned here at its full *)
 (* spelled type, the observer being sa_seat_dist of the interpreter-executed  *)
 (* finite-word adapter and the ideal the encoder-image reading.               *)
 (******************************************************************************)
@@ -2260,13 +2258,13 @@ Timeout 60 Check (S5Analysis.exec_endpoint_bound :
 (******************************************************************************)
 (*     Mutation guards: the states the dependent model slot must reject       *)
 (*                                                                            *)
-(* A Sampled or AnalysisBridged row with no model witness, a family over the *)
-(* wrong execution, and an executed word theorem alias reverted to the       *)
-(* cut-level type are compile errors, demonstrated by Fail. The fourth guard *)
-(* is satisfiable because the executed theorem family exists at the          *)
-(* seat-indexed executed type, so reverting it to the cut-level pushforward  *)
-(* shape (an ordinary fdistmap of sa_cut_dist) is a real type mismatch and   *)
-(* not a vacuous check.                                                      *)
+(* A Sampled or AnalysisBridged path with no model witness, a family over the *)
+(* wrong execution, and an executed word theorem alias reverted to the        *)
+(* cut-level type are compile errors, demonstrated by Fail. The fourth guard  *)
+(* is satisfiable because the executed theorem family exists at the           *)
+(* seat-indexed executed type, so reverting it to the cut-level pushforward   *)
+(* shape (an ordinary fdistmap of sa_cut_dist) is a real type mismatch and    *)
+(* not a vacuous check.                                                       *)
 (******************************************************************************)
 
 Fail Check (@MkAnalysisPath S5Analysis.observed Sampled None

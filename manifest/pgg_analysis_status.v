@@ -7,7 +7,7 @@
 (* the path is developed (CompletionLevel), what it proves about the relation *)
 (* between its executed model and an idealized one (TransferStatus), and      *)
 (* which named assumptions its results accept (AssumptionStatus over the      *)
-(* closed set PggAxiom). A manifest row carries one value of each, and an     *)
+(* closed set PggAxiom). A manifest path carries one value of each, and an    *)
 (* instance facade exposes the values of its own paths as typed aliases.      *)
 (*                                                                            *)
 (* AnalysisBridged is the typed form of the prose label Security-bridged of   *)
@@ -32,7 +32,7 @@
 (*   AnalysisModelFamily == a family of sample adapters over one observed     *)
 (*                          execution, indexed per real field                 *)
 (*   AnalysisModelSlot   == the completion-indexed model slot of a manifest   *)
-(*                          row: mandatory family at Sampled and              *)
+(*                          path: mandatory family at Sampled and             *)
 (*                          AnalysisBridged, optional family below           *)
 (******************************************************************************)
 
@@ -62,13 +62,13 @@ Inductive CompletionLevel : Set :=
 
 (* Relation an analysis path establishes between its executed model and an
    idealized one. IdealFinite is a public model-transfer theorem, and the
-   row's prose names the ideal and the carrier of the transfer: the
+   path's prose names the ideal and the carrier of the transfer: the
    constructor covers both a cut-carrier transfer whose base premise is
    discharged and an observer-level transfer to a named ideal at the
    endpoint carrier. NegativeTransfer is a theorem transporting an
    obstruction to the path's observer. StaticExecutedOnly and
-   NoModelComparison carry no such theorem, and the manifest row of such a
-   path names the absent premise instead. *)
+   NoModelComparison carry no such theorem, and a path with such a status
+   names the absent premise instead. *)
 Inductive TransferStatus : Set :=
   | NoModelComparison | StaticExecutedOnly | IdealFinite | NegativeTransfer.
 
@@ -95,7 +95,7 @@ Inductive AssumptionStatus : Set :=
     projects out. A fixed model is the unit-indexed case, one witness; a
     parameterized model uses a genuine index type ranging over several.
     This is the model witness AnalysisModelSlot below attaches to a
-    manifest row at the levels where a typed sample adapter is required. *)
+    manifest path at the levels where a typed sample adapter is required. *)
 Record AnalysisModelFamily (observed : OE.ObservedExecution) :=
   MkAnalysisModelFamily {
     amf_index  : realType -> Type ;
@@ -113,8 +113,8 @@ Arguments amf_sample {observed} f R x : rename.
     and AnalysisBridged, and option (AnalysisModelFamily observed) at the
     three lower levels. The dependency on c makes the model witness
     mandatory exactly where CompletionLevel records a distribution-to-
-    observer bridge: a row cannot reach Sampled or AnalysisBridged without
-    producing a typed sample-adapter family, while a row still at Algebraic,
+    observer bridge: a path cannot reach Sampled or AnalysisBridged without
+    producing a typed sample-adapter family, while a path still at Algebraic,
     Executable or Observed may leave the slot empty. *)
 Definition AnalysisModelSlot (observed : OE.ObservedExecution)
     (c : CompletionLevel) : Type :=

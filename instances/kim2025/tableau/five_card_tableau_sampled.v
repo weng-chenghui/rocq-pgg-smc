@@ -11,7 +11,7 @@
 (* claim about the messages a run exchanges into a claim about a group        *)
 (* action, and it is the last thing proved before an arm is named.            *)
 (*                                                                            *)
-(* Three programs are named here, one per model a published row continues     *)
+(* Three programs are named here, one per model a published program continues *)
 (* from, and the three model families they sample are those of                *)
 (* five_card_models.v: all three sit over the one committed run and are       *)
 (* indexed by the unit type. five_card_uniform_family draws the cut uniformly *)
@@ -21,15 +21,13 @@
 (* rotation and in nothing else: the committed pair is drawn uniformly and    *)
 (* independently of the cut in all three.                                     *)
 (*                                                                            *)
-(* five_card_repeated_sampled and five_card_biased_sampled are names the      *)
-(* instance already had, and they carry the published-row suffix although     *)
-(* both are Tableau Sampled values and neither is a published row. They are   *)
-(* existing names and they stay. five_card_uniform_sampled follows the naming *)
-(* scheme, and the five rows written out from the prefix are identified with  *)
-(* these three values in five_card_tableau_analysis_bridged.v.                *)
+(* five_card_repeated_sampled, five_card_biased_sampled and                   *)
+(* five_card_uniform_sampled follow one naming scheme, and the five programs  *)
+(* written out from the prefix are identified with these three values         *)
+(* in five_card_tableau_analysis_bridged.v.                                   *)
 (*                                                                            *)
 (* Two of the statements here are about neither a program nor the manifest's  *)
-(* row for it, and no arm of certify takes a payload of either kind.          *)
+(* path for it, and no arm of certify takes a payload of either kind.         *)
 (* five_card_repeated_endpoint_lt is one starting position's endpoint         *)
 (* marginal under the repeated model's cut law, a statement about where a     *)
 (* single position is sent and not about what any set of seats reads.         *)
@@ -47,9 +45,9 @@
 (* kim_biased_proximity_close of five_card_proximity.v is at no level and is  *)
 (* not counted here.                                                          *)
 (*                                                                            *)
-(* The manifest records AnalysisBridged for both Kim rows, which              *)
-(* five_card_biased_path_levelE states for the one-cut row, and the two       *)
-(* programs named here reach Sampled. Each of the two rows also carries a     *)
+(* The manifest records AnalysisBridged for both Kim paths, which             *)
+(* five_card_biased_path_levelE states for the one-cut path, and the two      *)
+(* programs named here reach Sampled. Each of the two paths also has a        *)
 (* certified program that does reach AnalysisBridged, in                      *)
 (* five_card_tableau_analysis_bridged.v, and the ascription of the one-cut    *)
 (* Sampled program at the manifest's level is refused in                      *)
@@ -74,13 +72,13 @@
 (*                           == the one-cut model carries the same three      *)
 (*   five_card_repeated_sampled_modelE                                        *)
 (*                           == the repeated program samples the model the    *)
-(*                              manifest's row names                          *)
+(*                              manifest's path names                         *)
 (*   five_card_biased_sampled_modelE                                          *)
 (*                           == the one-cut program samples the model the     *)
-(*                              manifest's row names                          *)
+(*                              manifest's path names                         *)
 (*   five_card_biased_path_levelE                                             *)
 (*                           == the manifest's completion level for the one-  *)
-(*                              cut row is AnalysisBridged                    *)
+(*                              cut path is AnalysisBridged                   *)
 (*   five_card_repeated_endpoint_lt                                           *)
 (*                           == one starting position's endpoint marginal     *)
 (*                              under the repeated model's cut law is under   *)
@@ -128,7 +126,7 @@ Local Open Scope ring_scope.
 (** The committed run under the uniform rotation, named at Sampled. The
     family is indexed by the unit type, so one member at each real field,
     and the cut that member draws is already the uniform one on the five
-    rotations, so a row over this model compares no biased cut with an
+    rotations, so a program over this model compares no biased cut with an
     ideal. *)
 Definition five_card_uniform_sampled : Tableau Sampled :=
   five_card_committed
@@ -139,26 +137,26 @@ Definition five_card_uniform_sampled : Tableau Sampled :=
 (*     Kim's two models                                                       *)
 (******************************************************************************)
 
-(** The repeated row sampled and not certified: the prefix
+(** The repeated program sampled and not certified: the prefix
     five_card_committed and the seven-cut model at bias one hundredth. The
     program stops at Sampled, one level under the AnalysisBridged the
-    manifest records for this row. It names its model and nothing else, and
-    what is proved beside it is the law of one starting position's endpoint
-    under its cut, a statement about where a single starting position is
-    sent and not about what any set of seats reads, so no security payload
-    follows this program.
+    manifest records for this path. It names its model and nothing else,
+    and what is proved beside it is the law of one starting position's
+    endpoint under its cut, a statement about where a single starting
+    position is sent and not about what any set of seats reads, so no
+    security payload follows this program.
     five_card_repeated_indistinguishability_published is the certified
-    program for the same row. *)
+    program for the same path. *)
 Definition five_card_repeated_sampled : Tableau Sampled :=
   five_card_committed
     sample kim_centi_family.
 
-(** The biased row sampled and not certified: the same prefix and the single
-    cut at the same bias. The program stops at Sampled, one level under the
-    AnalysisBridged the manifest records for this row, because
+(** The biased program sampled and not certified: the same prefix and the
+    single cut at the same bias. The program stops at Sampled, one level
+    under the AnalysisBridged the manifest records for this path, because
     five_card_colour_view_leak_bound bounds a conditional mutual information
-    and no arm of certify takes a bound of that kind. The manifest's
-    level for this row rests on that theorem and on the certificate
+    and no arm of certify takes a bound of that kind. The manifest's level
+    for this path rests on that theorem and on the certificate
     five_card_biased_indistinguishability_published carries, and on no
     payload of this program. *)
 Definition five_card_biased_sampled : Tableau Sampled :=
@@ -170,11 +168,12 @@ Definition five_card_biased_sampled : Tableau Sampled :=
 (*     What the three models share with the prefix                            *)
 (******************************************************************************)
 
-(** The three rows are one prefix and three continuations: the algebra, the
-    run parameters and the observed execution of each Kim row are those of
-    five_card_committed, as terms, and the observed execution carries the
-    three run facts in its own fields. A reader comparing the three rows is
-    therefore comparing probability models and nothing else. *)
+(** The three programs are one prefix and three continuations: the algebra,
+    the run parameters and the observed execution of each Kim program are
+    those of five_card_committed, as terms, and the observed execution
+    carries the three run facts in its own fields. A reader comparing the
+    three programs is therefore comparing probability models and nothing
+    else. *)
 Lemma five_card_repeated_sampled_prefixE :
   [/\ projT1 (tableau_at five_card_repeated_sampled)
       = projT1 (tableau_at five_card_committed),
@@ -184,7 +183,7 @@ Lemma five_card_repeated_sampled_prefixE :
       = ob_obs (tableau_at five_card_committed)].
 Proof. by split. Qed.
 
-(** The same for the biased row. *)
+(** The same for the biased program. *)
 Lemma five_card_biased_sampled_prefixE :
   [/\ projT1 (tableau_at five_card_biased_sampled)
       = projT1 (tableau_at five_card_committed),
@@ -194,7 +193,7 @@ Lemma five_card_biased_sampled_prefixE :
       = ob_obs (tableau_at five_card_committed)].
 Proof. by split. Qed.
 
-(** The model each program samples is the model the manifest's row for it
+(** The model each program samples is the model the manifest's path for it
     names. Conversion decides both, so the manifest's description of these
     two five-card paths and the programs are one term, as
     five_card_uniform_published_pathE makes them for the uniform path. *)
@@ -203,18 +202,18 @@ Lemma five_card_repeated_sampled_modelE :
   = ap_model five_card_repeated_path.
 Proof. by []. Qed.
 
-(** The same for the biased row and the manifest's biased row. *)
+(** The same for the biased program and the manifest's biased path. *)
 Lemma five_card_biased_sampled_modelE :
   sp_f (tableau_at five_card_biased_sampled)
   = ap_model five_card_biased_path.
 Proof. by []. Qed.
 
-(** The manifest's completion level for the biased row is AnalysisBridged.
+(** The manifest's completion level for the biased path is AnalysisBridged.
     five_card_biased_sampled reaches Sampled, so this equation and the
     rejected ascription of five_card_tableau_checks.v are the two halves of
     that one program's level gap. The equation is a fact about the
-    manifest's row and not about anything any program proves, and the biased
-    path also carries a program that does reach AnalysisBridged. *)
+    manifest's path and not about anything any program proves, and the
+    biased path also has a program that does reach AnalysisBridged. *)
 Lemma five_card_biased_path_levelE :
   ap_completion five_card_biased_path = AnalysisBridged.
 Proof. by []. Qed.
@@ -225,9 +224,9 @@ Proof. by []. Qed.
 (******************************************************************************)
 
 (** The law of the image of one starting position under the cut the repeated
-    row samples is within two to the minus fortieth of the uniform law on the
-    five card positions, in variation distance, at every starting position and
-    every real field. Both laws are laws on card positions, so this is one
+    program samples is within two to the minus fortieth of the uniform law on
+    the five card positions, in variation distance, at every starting position
+    and every real field. Both laws are laws on card positions, so this is one
     position's endpoint marginal, and the statement names no seat, no set of
     seats and no secret. It is kim_deal_centi_lt read at the law the program
     names, through kim_centi_cut_distE. *)
@@ -252,13 +251,13 @@ Qed.
 (** The conditional mutual information between the two committed inputs and
     the executed colour reading at a list of card positions, given the
     conjunction the run computes, is at most kim_leak_bound at bias one
-    hundredth, under the law the biased row samples. It is
-    five_card_colour_view_leak_bound with every random variable typed at
-    that law, which is what sa_sampleP of the family's member is by
-    conversion. The statement is a numeric upper bound on that information and
-    not the assertion that the information vanishes, it is about a reading
-    at a list of card positions and not about a coalition of seats, and it
-    is carried beside the program above rather than by it. *)
+    hundredth, under the law the biased program samples. It is
+    five_card_colour_view_leak_bound with every random variable typed at that
+    law, which is what sa_sampleP of the family's member is by conversion. The
+    statement is a numeric upper bound on that information and not the
+    assertion that the information vanishes, it is about a reading at a list
+    of card positions and not about a coalition of seats, and it is carried
+    beside the program above rather than by it. *)
 Lemma five_card_biased_leak_bound (R : realType) (A : seq nat) :
   cond_mutual_info
     (`p_ [% (kim_inputs (kim_centi_lt R) (kim_centi_gt R)

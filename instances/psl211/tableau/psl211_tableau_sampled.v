@@ -17,8 +17,9 @@
 (* elements of the group; the word model draws it as a shuffle of 584         *)
 (* letters. A distance between the two laws is therefore a distance between   *)
 (* the models that two values of this level carry, which is the shape the     *)
-(* proximity arm compares, and it is the reason the two rows of the instance  *)
-(* part here and not lower. The deck description is drawn uniformly in both.  *)
+(* proximity arm compares, and it is the reason the two programs of the       *)
+(* instance part here and not lower. The deck description is drawn            *)
+(* uniformly in both.                                                         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_exact_sampled == the all-decks run under the uniform cut          *)
@@ -53,12 +54,12 @@ Local Open Scope ring_scope.
 (******************************************************************************)
 
 (** The all-decks run under the exact model, named at Sampled. The family is
-    indexed by the unit type, so one member at each real field, and its cut
-    is uniform over the shuffle group. This is the model the exact arm is
-    certified over, and the one a word row is measured against: an execution
-    whose own privacy below the six-seat threshold is a theorem rather than a
-    number. The value is what psl211_alldecks_published_sampledE continues,
-    so the row and the model are named apart. *)
+    indexed by the unit type, so one member at each real field, and its cut is
+    uniform over the shuffle group. This is the model the exact arm is certified
+    over, and the one a word program is measured against: an execution whose own
+    privacy below the six-seat threshold is a theorem rather than a number. The
+    value is what psl211_alldecks_published_sampledE continues, so the program
+    and the model are named apart. *)
 Definition psl211_exact_sampled : Tableau Sampled :=
   psl211_alldecks_prefix sample psl211_exact_family.
 
@@ -67,12 +68,11 @@ Definition psl211_exact_sampled : Tableau Sampled :=
 (******************************************************************************)
 
 (** The all-decks run under the word model, named at Sampled. The cut is the
-    product of 584 letters drawn from the instance's generators, where the
-    model above draws it uniformly from the group, and the deck description
-    and the execution are the same in both. A row over this model publishes a
-    distance to the model above rather than an independence, because the
-    finite word leaves the cut short of uniform by an amount the mixing
-    theorem bounds. The value is what psl211_word_proximity_published_sampledE
-    continues. *)
+    product of 584 letters drawn from the instance's generators, where the model
+    above draws it uniformly from the group, and the deck description and the
+    execution are the same in both. A program over this model publishes a
+    distance to the model above rather than an independence, because the finite
+    word leaves the cut short of uniform by an amount the mixing theorem bounds.
+    The value is what psl211_word_proximity_published_sampledE continues. *)
 Definition psl211_word_sampled : Tableau Sampled :=
   psl211_alldecks_prefix sample psl211_word_family.

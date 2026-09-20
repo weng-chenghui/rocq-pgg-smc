@@ -4,7 +4,7 @@
 (* pgg_analysis_client: the clean client of the analysis manifest             *)
 (*                                                                            *)
 (* One import reaches all four facades, the typed status vocabulary and the   *)
-(* eleven typed rows. The file has EXACTLY ONE Require of any kind, and       *)
+(* eleven typed paths. The file has EXACTLY ONE Require of any kind, and      *)
 (* every Check below is a bare Check on an alias, so no scope needs to be     *)
 (* open and no notation needs to be in scope: what is established here is     *)
 (* reachability of the aliases, not their spelling.                           *)
@@ -131,7 +131,7 @@ Check PSL211Analysis.static_view.
 Check PSL211Analysis.secret.
 
 (******************************************************************************)
-(*     The typed status vocabulary and the nine rows                          *)
+(*     The typed status vocabulary and the eleven paths                       *)
 (******************************************************************************)
 
 Check CompletionLevel.
@@ -160,6 +160,8 @@ Check s5_det_path.
 Check s5_rand_path.
 Check s5_word_path.
 Check psl211_alldecks_path.
+Check pgl27_prior_exact_path.
+Check psl211_word_path.
 
 (******************************************************************************)
 (*     What one import actually reaches                                       *)
@@ -173,7 +175,7 @@ Check psl211_alldecks_path.
 (*     FiveCardAnalysis.profile, S5Analysis.profile and                       *)
 (*     PSL211Analysis.profile coexist and none shadows another;               *)
 (*   - the exported type vocabulary, by short name (the lines below);         *)
-(*   - the manifest's own rows and record, by short name;                     *)
+(*   - the manifest's own paths and record, by short name;                    *)
 (*   - every instance-file constant by QUALIFIED name only, because those     *)
 (*     modules are loaded but never re-imported;                              *)
 (*   - no instance-file constant by short name.                               *)

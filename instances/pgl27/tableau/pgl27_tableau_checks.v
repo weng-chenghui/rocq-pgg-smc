@@ -12,20 +12,20 @@
 (*                                                                            *)
 (* Seven groups. Two are about what a clause records: the coalition size      *)
 (* written in a leaks clause is checked against the proof it names, and the   *)
-(* arm a row carries is the one its certify statement wrote, so recording the *)
-(* word row at the exact arm is refused. Beside the second sits the one       *)
-(* positive statement of this file, that the two rows over the word model     *)
-(* carry different arms, which is a comparison of two rows rather than a      *)
-(* statement about one; the sixth group turns the same point the other way,   *)
-(* refusing to read the exact arm's four conjuncts off the word row.          *)
+(* arm a program carries is the one its certify statement wrote, so recording *)
+(* the word program at the exact arm is refused. Beside the second sits the   *)
+(* one positive statement of this file, that the two programs over the word   *)
+(* model carry different arms, which is a comparison of two programs rather   *)
+(* than a statement about one; the sixth group turns the same point the other *)
+(* way, refusing to read the exact arm's four conjuncts off the word program. *)
 (*                                                                            *)
 (* One group is the fork the literal reduction makes: a prefix that builds    *)
 (* its own termination obligation is not the term pgl27_dealt is, and the     *)
 (* instance's own model family, typed against pgl27_observed, is refused over *)
 (* the forked execution. Two are about the terminal: a conclude payload with  *)
-(* no index binder is refused in both spellings of the row, and the row at    *)
-(* 2^-41 is refused where its terminal is written, the certificate's own      *)
-(* number being twice 2^-40.                                                  *)
+(* no index binder is refused in both spellings of the program, and the       *)
+(* program at 2^-41 is refused where its terminal is written, the             *)
+(* certificate's own number being twice 2^-40.                                *)
 (*                                                                            *)
 (* The last group is what a proximity certificate may name as its ideal, and  *)
 (* its three rejections have two causes. Two are refused at the index type,   *)
@@ -43,8 +43,8 @@
 (* reject the term for an occupied name and not for the arm the term asserts. *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   pgl27_word_published_arm_neq  == the two rows over the word model carry  *)
-(*                              different arms                                *)
+(*   pgl27_word_published_arm_neq  == the two programs over the word model    *)
+(*                              carry different arms                          *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -94,33 +94,32 @@ Fail Definition pgl27_exact_published_leak7 : Published :=
 
 
 (******************************************************************************)
-(*     The arm a row carries                                                  *)
+(*     The arm a program carries                                              *)
 (******************************************************************************)
 
-(** Recording the word row at the exact arm is rejected by conversion, so the
-    row carries the arm its certify statement wrote and no other. *)
+(** Recording the word program at the exact arm is rejected by conversion, so
+    the program carries the arm its certify statement wrote and no other. *)
 Fail Definition pgl27_word_published_arm_neq (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published)) R) :=
   (erefl : security_arm_of pgl27_word_published R idx
            = ExactIndependenceArm).
 
-(** The two rows over the one model carry different arms, so the pair is two
+(** The two programs over the one model carry different arms, so the pair is two
     statements about one probability model and not one statement published
     twice. *)
 Lemma pgl27_word_published_arm_neq (R : realType) (secretP : R.-fdist bool) :
   security_arm_of pgl27_word_proximity_published R secretP
   <> security_arm_of pgl27_word_branch_published39 R secretP.
 Proof.
-(* Three timings are each why one line reads as it does. Binding the prior as
-   an index of the proximity row costs 78.7 s in the statement alone,
-   because the branch row's index type is then reached by conversion through
-   both rows' observed executions, so it is bound at its own type. Rewriting
-   with the two armE lemmas applied to that prior costs 24.3 s, and
-   restating the two equations locally and rewriting with both in the
-   inequation costs 24.1 s, because a rewrite scans the other side of the
-   goal and so converts one row against the other. The equation between the
-   arms is therefore assumed first, and each rewrite then runs on a goal that
-   mentions one row. *)
+(* Three timings are each why one line reads as it does. Binding the prior as an
+   index of the proximity program costs 78.7 s in the statement alone, because
+   the branch program's index type is then reached by conversion through both
+   programs' observed executions, so it is bound at its own type. Rewriting with
+   the two armE lemmas applied to that prior costs 24.3 s, and restating the two
+   equations locally and rewriting with both in the inequation costs 24.1 s,
+   because a rewrite scans the other side of the goal and so converts one
+   program against the other. The equation between the arms is therefore assumed
+   first, and each rewrite then runs on a goal that mentions one program. *)
 have Hp : security_arm_of pgl27_word_proximity_published R secretP
   = IdealProximityArm by [].
 have Hs : security_arm_of pgl27_word_branch_published39 R secretP
@@ -148,9 +147,9 @@ Fail Definition pgl27_inline_reuse : Tableau Sampled :=
 (*     The terminal's index binder                                            *)
 (******************************************************************************)
 
-(** The terminal's obligation is one inequality per real field and per index
-    of the family. A payload with the right relation but no index binder is
-    rejected, which is what keeps a row from publishing a bound that holds
+(** The terminal's obligation is one inequality per real field and per index of
+    the family. A payload with the right relation but no index binder is
+    rejected, which is what keeps a program from publishing a bound that holds
     only at the index a reader happened to pick. *)
 Fail Definition pgl27_word_published39_unindexed : PublishedAt pgl27_bound39 :=
   pgl27_dealt
@@ -174,7 +173,7 @@ Fail Definition pgl27_word_published39_unindexed_bind
 (*     A number below the proved one                                          *)
 (******************************************************************************)
 
-(** The row at that number is rejected where its terminal is written. *)
+(** The program at that number is rejected where its terminal is written. *)
 Fail Definition pgl27_word_published41 : PublishedAt pgl27_bound41 :=
   pgl27_dealt
     sample  pgl27_word_family
@@ -187,12 +186,12 @@ Fail Definition pgl27_word_published41 : PublishedAt pgl27_bound41 :=
 (*     The arms are different statements                                      *)
 (******************************************************************************)
 
-(** The arms are different statements, and the difference is visible in what
-    a row's projection takes after the coalition. A row certifying input
+(** The arms are different statements, and the difference is visible in what a
+    program's projection takes after the coalition. A program certifying input
     indistinguishability is asked here for a threshold proof in the position
-    where it expects the first of two dealt secrets, and is rejected: what
-    the word row proves at a coalition is a distance between the readings of
-    two secrets, so the two secrets come before the threshold proof. *)
+    where it expects the first of two dealt secrets, and is rejected: what the
+    word program proves at a coalition is a distance between the readings of two
+    secrets, so the two secrets come before the threshold proof. *)
 Fail Definition pgl27_word_arm_is_not_exact (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (HC : (#|C| < 4)%N) :=
   view_secrecy_of pgl27_word_published R secretP C HC.

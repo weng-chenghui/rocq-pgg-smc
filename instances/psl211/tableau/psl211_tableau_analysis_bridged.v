@@ -7,9 +7,9 @@
 (* The AnalysisBridged level adjoins one security payload per real field and  *)
 (* per index of the model, and the proposition it carries is that payload's   *)
 (* arm on top of everything the levels below proved. This is the level at     *)
-(* which a row says something about a coalition, and the arm decides what it  *)
-(* says: the exact arm asserts independence, and the proximity arm a distance *)
-(* to a model whose own privacy is a theorem.                                 *)
+(* which a program says something about a coalition, and the arm decides what *)
+(* it says: the exact arm asserts independence, and the proximity arm a       *)
+(* distance to a model whose own privacy is a theorem.                        *)
 (*                                                                            *)
 (* Six is the threshold the derived profile declares, so every statement here *)
 (* that quantifies over a coalition quantifies over at most five of the       *)
@@ -20,31 +20,31 @@
 (* positions, one of the 720 labellings of the heart codes and one of the 720 *)
 (* labellings of the club codes.                                              *)
 (*                                                                            *)
-(* Two rows are published here and they part at the model. Over the uniform   *)
-(* cut, what a coalition is shown is independent of the chirality outright,   *)
-(* at every real field and with no number in the claim; that is the exact     *)
-(* arm, and the instance gives it one witness. Over the 584-letter word cut,  *)
-(* what a coalition is shown is within 2^-40, in the sum of absolute          *)
+(* Two programs are published here and they part at the model. Over the       *)
+(* uniform cut, what a coalition is shown is independent of the chirality     *)
+(* outright, at every real field and with no number in the claim; that is the *)
+(* exact arm, and the instance gives it one witness. Over the 584-letter word *)
+(* cut, what a coalition is shown is within 2^-40, in the sum of absolute     *)
 (* differences, of what the uniform-cut execution shows it, so a              *)
 (* distinguisher's advantage is at most 2^-41; that is the proximity arm, and *)
-(* the instance gives it a certificate whose ideal is the first row's own     *)
+(* the instance gives it a certificate whose ideal is the first program's own *)
 (* model. Both numbers are the certificate's, not a constant read from        *)
 (* elsewhere.                                                                 *)
 (*                                                                            *)
-(* No input-indistinguishability row is published over either model. A        *)
+(* No input-indistinguishability program is published over either model. A    *)
 (* certificate of that arm carries a constancy field, and                     *)
 (* instances/psl211/psl211_reading_constancy.v restates that field as         *)
 (* coalition_reading_constancy and refutes it in both run modes.              *)
 (*                                                                            *)
-(* The mathematics reaches these rows through the payloads alone, and through *)
-(* three named facts: psl211_alldecks_exact_viewE and                         *)
+(* The mathematics reaches these programs through the payloads alone, and     *)
+(* through three named facts: psl211_alldecks_exact_viewE and                 *)
 (* psl211_alldecks_view_indep of psl211_models.v, and                         *)
 (* psl211_word_proximity_close of psl211_word_proximity.v. No other security  *)
-(* statement of the instance enters either row.                               *)
+(* statement of the instance enters either program.                           *)
 (*                                                                            *)
 (* The phase files are required and imported one by one and export nothing of *)
 (* each other, so a file outside this directory names the phase that declares *)
-(* the name it wants: this file for a payload, a published row or a row       *)
+(* the name it wants: this file for a payload, a published program or a path  *)
 (* equation, psl211_tableau_sampled for a named model,                        *)
 (* psl211_tableau_observed for a run prefix, and psl211_tableau_executable    *)
 (* for a parameter record.                                                    *)
@@ -53,27 +53,28 @@
 (*   psl211_exact_witness    == the exact arm's witness at every field and    *)
 (*                              index                                         *)
 (*   psl211_alldecks_published                                                *)
-(*                           == the all-decks row as a program                *)
+(*                           == the all-decks path as a program               *)
 (*   psl211_word_proximity_cert                                               *)
 (*                           == the word model's proximity certificate        *)
 (*   psl211_word_proximity_published                                          *)
-(*                           == the word row as a program, published at 2^-40 *)
+(*                           == the word path as a program, published at      *)
+(*                              2^-40                                         *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_alldecks_published_pathE                                          *)
-(*                           == the program publishes the manifest's row      *)
+(*                           == the program publishes the manifest's path     *)
 (*   psl211_alldecks_published_armE                                           *)
-(*                           == the row carries the exact arm                 *)
+(*                           == the program carries the exact arm             *)
 (*   psl211_alldecks_published_sampledE                                       *)
-(*                           == the row is the named Sampled value with the   *)
-(*                              payload and the terminal adjoined             *)
+(*                           == the program is the named Sampled value with   *)
+(*                              the payload and the terminal adjoined         *)
 (*   psl211_alldecks_view_secrecy                                             *)
 (*                           == the exact arm's four conjuncts at this        *)
 (*                              instance                                      *)
 (*   psl211_word_proximity_cert_idealE                                        *)
 (*                           == the certificate's ideal is the all-decks      *)
-(*                              row's model, and the port built from its      *)
-(*                              witness is that row's port                    *)
+(*                              program's model, and the port built from its  *)
+(*                              witness is that program's port                *)
 (*   psl211_word_proximity_cert_secretE                                       *)
 (*                           == the certificate's secret and the secret its   *)
 (*                              witness carries are one term                  *)
@@ -85,15 +86,15 @@
 (*                           == the certificate's number is below the bound   *)
 (*                              two var_dist_le2 gives                        *)
 (*   psl211_word_proximity_published_armE                                     *)
-(*                           == the row carries the proximity arm             *)
+(*                           == the program carries the proximity arm         *)
 (*   psl211_word_proximity_published_pathE                                    *)
-(*                           == the row publishes psl211_word_path            *)
+(*                           == the program publishes psl211_word_path        *)
 (*   psl211_word_proximity_published_sampledE                                 *)
-(*                           == that row too is its named Sampled value with  *)
-(*                              the payload and the terminal adjoined         *)
+(*                           == that program too is its named Sampled value   *)
+(*                              with the payload and the terminal adjoined    *)
 (*   psl211_word_view_proximity                                               *)
-(*                           == the proximity row's security statement, at    *)
-(*                              2^-40                                         *)
+(*                           == the proximity program's security statement,   *)
+(*                              at 2^-40                                      *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -161,45 +162,45 @@ Definition psl211_exact_witness (R : realType) (idx : unit)
           (psl211_alldecks_exact_viewE C))).
 
 (******************************************************************************)
-(*     The row program                                                        *)
+(*     The all-decks program                                                  *)
 (******************************************************************************)
 
-(** psl211_alldecks_published — the published row. What the finished row
-    carries about a coalition of fewer than six of the twelve seats is
-    independence of the chirality, at every real field, with no numeric bound
-    in it; the independence is exact, not small, because both the deck
-    description and the cut are drawn uniformly and the two Steiner systems
-    are met in the same block patterns by every set of at most five positions.
-    Its last line publishes a row whose transfer status is StaticExecutedOnly,
-    because the cut this model draws is already the uniform one and no
-    idealized shuffle is being compared with a real one. *)
+(** psl211_alldecks_published — the published program. What the finished
+    program carries about a coalition of fewer than six of the twelve seats is
+    independence of the chirality, at every real field, with no numeric bound in
+    it; the independence is exact, not small, because both the deck description
+    and the cut are drawn uniformly and the two Steiner systems are met in the
+    same block patterns by every set of at most five positions. Its last line
+    publishes a path whose transfer status is StaticExecutedOnly, because the
+    cut this model draws is already the uniform one and no idealized shuffle is
+    being compared with a real one. *)
 Definition psl211_alldecks_published : Published :=
   psl211_alldecks_prefix
     sample  psl211_exact_family
     certify ExactIndependence psl211_exact_witness
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
-(** psl211_alldecks_published_pathE — the row this program publishes is the
-    manifest's own row for this instance. Conversion decides it, so the
-    descriptive row and the theorem proved about it cannot drift apart. *)
+(** psl211_alldecks_published_pathE — the path this program publishes is the
+    manifest's own path for this instance. Conversion decides it, so the
+    descriptive path and the theorem proved about it cannot drift apart. *)
 Lemma psl211_alldecks_published_pathE :
   published_path psl211_alldecks_published = psl211_alldecks_path.
 Proof. by []. Qed.
 
-(** The arm this row carries, at every real field and index: independence of
+(** The arm this program carries, at every real field and index: independence of
     the coalition's view from the chirality, and not a distance between two
-    readings. The certify statement the program wrote settles which arm that
-    is. *)
+    readings. The certify statement the program wrote settles which arm
+    that is. *)
 Lemma psl211_alldecks_published_armE (R : realType)
     (idx : amf_index (ab_f (published_at psl211_alldecks_published)) R) :
   security_arm_of psl211_alldecks_published R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
-(** psl211_alldecks_published_sampledE — the row is the named Sampled
-    value with the payload and the terminal adjoined. The program above
-    writes the run and the model in one chain and the Sampled file names
-    the value they build, so this equation is what keeps the two spellings
-    of the row's prefix from parting. *)
+(** psl211_alldecks_published_sampledE — the program is the named Sampled
+    value with the payload and the terminal adjoined. The program above writes
+    the run and the model in one chain and the Sampled file names the value they
+    build, so this equation is what keeps the two spellings of the program's
+    prefix from parting. *)
 Lemma psl211_alldecks_published_sampledE :
   (psl211_exact_sampled
      certify ExactIndependence psl211_exact_witness
@@ -211,14 +212,15 @@ Proof. exact: erefl. Qed.
 (*     The exact arm's four conjuncts at this instance                        *)
 (******************************************************************************)
 
-(** psl211_alldecks_view_secrecy — the row's view secrecy at this instance: at
-    fewer than six colluding seats the executed coalition reading is
-    independent of the chirality, carries zero mutual information with it,
+(** psl211_alldecks_view_secrecy — the program's view secrecy at this
+    instance: at fewer than six colluding seats the executed coalition reading
+    is independent of the chirality, carries zero mutual information with it,
     leaves the chirality's entropy unchanged under conditioning, and stays
     independent of it under every deterministic function of the seat-to-card
     map. The four conjuncts are the whole content of the exact arm here; the
-    proof is the row's security projection applied, so a reader who wants the
-    information-theoretic reading of the row needs no further derivation. *)
+    proof is the program's security projection applied, so a reader who wants
+    the information-theoretic reading of the program needs no further
+    derivation. *)
 Theorem psl211_alldecks_view_secrecy (R : realType) (C : {set seatT})
     (HC : (#|C| < 6)%N) :
   [/\ psl211_alldecksP R
@@ -246,15 +248,15 @@ Proof. exact: (view_secrecy_of psl211_alldecks_published R tt C HC). Qed.
 (*     The certificate, and its ideal                                         *)
 (******************************************************************************)
 
-(** The proximity certificate of the PSL(2,11) word row. Its five fields are
-    the all-decks model as the ideal; that model's exact witness, which is
-    what makes the ideal an execution whose coalitions of at most five seats
-    learn nothing at all; the chirality, which is the secret of the two models
-    as one term; the word walk's number 2^-40; and psl211_word_proximity_close
-    as the distance field, which bounds by that number the distance between
-    the two models' joint laws of a coalition's reading with the chirality.
-    The ideal, its witness and the secret are terms the all-decks row
-    publishes, and the number is this certificate's own. *)
+(** The proximity certificate of the PSL(2,11) word program. Its five fields are
+    the all-decks model as the ideal; that model's exact witness, which is what
+    makes the ideal an execution whose coalitions of at most five seats learn
+    nothing at all; the chirality, which is the secret of the two models as one
+    term; the word walk's number 2^-40; and psl211_word_proximity_close as the
+    distance field, which bounds by that number the distance between the two
+    models' joint laws of a coalition's reading with the chirality. The ideal,
+    its witness and the secret are terms the all-decks program publishes, and
+    the number is this certificate's own. *)
 Definition psl211_word_proximity_cert (R : realType) (idx : unit)
   : IdealProximityCert (amf_sample psl211_word_family R idx) :=
   @MkIdealProximityCert R psl211_algebra psl211_alldecks_params
@@ -265,10 +267,10 @@ Definition psl211_word_proximity_cert (R : realType) (idx : unit)
     (2%:R^-40)
     (fun C HC => @psl211_word_proximity_close R C HC).
 
-(** The model the certificate calls ideal is the model the published
-    all-decks row carries, and the port built from the witness the certificate
-    carries is that row's port. Conversion decides both, so the ideal a word
-    row is measured against is the model the all-decks row publishes and not a
+(** The model the certificate calls ideal is the model the published all-decks
+    program carries, and the port built from the witness the certificate carries
+    is that program's port. Conversion decides both, so the ideal a word program
+    is measured against is the model the all-decks program publishes and not a
     second description of it. *)
 Lemma psl211_word_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (psl211_word_proximity_cert R idx)
@@ -277,7 +279,7 @@ Lemma psl211_word_proximity_cert_idealE (R : realType) (idx : unit) :
      = ab_port (published_at psl211_alldecks_published) R idx.
 Proof.
 (* exact: erefl and not by []: done does not return on an equation between two
-   rows' coordinates, where exact: erefl decides it at once. *)
+   programs' coordinates, where exact: erefl decides it at once. *)
 split; exact: erefl.
 Qed.
 
@@ -331,60 +333,60 @@ rewrite psl211_word_proximity_cert_epsE; lra.
 Qed.
 
 (******************************************************************************)
-(*     The row                                                                *)
+(*     The program                                                            *)
 (******************************************************************************)
 
 (** The word model certified by the proximity arm and published at 2^-40, the
     number the certificate proves. What a static coalition of at most five of
     the twelve seats is shown is that the joint law of its reading with the
-    chirality is within that number, in the sum of absolute differences, of
-    the product of the two marginals the all-decks execution has, where the
-    reading and the chirality are independent outright; a distinguisher's
-    advantage is therefore at most 2^-41. The claim is an average over
-    the deck description and the cut and is not a statement at a fixed deck
-    description. That every coalition below the threshold reads an ideal cut
-    by the same law at every run argument is false at each cut named here:
+    chirality is within that number, in the sum of absolute differences, of the
+    product of the two marginals the all-decks execution has, where the reading
+    and the chirality are independent outright; a distinguisher's advantage is
+    therefore at most 2^-41. The claim is an average over the deck description
+    and the cut and is not a statement at a fixed deck description. That every
+    coalition below the threshold reads an ideal cut by the same law at every
+    run argument is false at each cut named here:
     psl211_alldecks_constancy_false refutes it at the group-uniform cut under
     the all-decks run, psl211_alldecks_constancy_false_word584 at every cut
-    within eps of the 584-letter word law this row's model draws, once twice
-    the sum of eps and 2^-40 stays below 1/660, and
-    psl211_dealt_constancy_false at the group-uniform cut under the
-    dealer-dealt run, a different execution. Each is witnessed at a coalition
-    of three seats, and all three stay true beside this row. Its transfer
-    status is IdealFinite: the cut is a shuffle of 584 letters where
-    the model of psl211_alldecks_path draws it uniformly from the group. *)
+    within eps of the 584-letter word law this program's model draws, once twice
+    the sum of eps and 2^-40 stays below 1/660, and psl211_dealt_constancy_false
+    at the group-uniform cut under the dealer-dealt run, a different execution.
+    Each is witnessed at a coalition of three seats, and all three stay true
+    beside this program. Its transfer status is IdealFinite: the cut is a
+    shuffle of 584 letters where the model of psl211_alldecks_path draws it
+    uniformly from the group. *)
 Definition psl211_word_proximity_published : Published :=
   psl211_alldecks_prefix
     sample  psl211_word_family
     certify IdealProximity psl211_word_proximity_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The arm the row carries, at every real field and index: the distance to a
-    private ideal model, and not the distance between two readings of one
+(** The arm the program carries, at every real field and index: the distance to
+    a private ideal model, and not the distance between two readings of one
     model. *)
 Lemma psl211_word_proximity_published_armE (R : realType)
     (idx : amf_index (ab_f (published_at psl211_word_proximity_published)) R) :
   security_arm_of psl211_word_proximity_published R idx = IdealProximityArm.
 Proof. exact: erefl. Qed.
 
-(** The manifest row the program publishes: the row of the twelve-card
+(** The manifest path the program publishes: the path of the twelve-card
     chirality instance at the 584-letter word model. Its five coordinates are
-    the observed execution the program runs on, the completion level the
-    publish terminal reaches, the model family the sample step named, and the
-    two statuses the terminal was given. The manifest writes those coordinates
-    in the facade's vocabulary and the program in this file's, and conversion
-    decides the equation, so the manifest's row for this path is a claim this
-    equation discharges rather than a table maintained beside the program. It
-    differs from psl211_alldecks_path in the model family and in the transfer
-    status, the all-decks row comparing no idealized model where this one
+    the observed execution the program runs on, the completion level the publish
+    terminal reaches, the model family the sample step named, and the two
+    statuses the terminal was given. The manifest writes those coordinates in
+    the facade's vocabulary and the program in this file's, and conversion
+    decides the equation, so the manifest's path for this program is a claim
+    this equation discharges rather than a table maintained beside the program.
+    It differs from psl211_alldecks_path in the model family and in the transfer
+    status, the all-decks path comparing no idealized model where this one
     replaces an idealized shuffle by a finite word. *)
 Lemma psl211_word_proximity_published_pathE :
   published_path psl211_word_proximity_published = psl211_word_path.
 Proof. exact: erefl. Qed.
 
-(** psl211_word_proximity_published_sampledE — the proximity row too is its
-    named Sampled value with the payload and the terminal adjoined, so the
-    two rows of this instance are each written once above the model they
+(** psl211_word_proximity_published_sampledE — the proximity program too is
+    its named Sampled value with the payload and the terminal adjoined, so the
+    two programs of this instance are each written once above the model they
     branch at. *)
 Lemma psl211_word_proximity_published_sampledE :
   (psl211_word_sampled
@@ -394,15 +396,15 @@ Lemma psl211_word_proximity_published_sampledE :
 Proof. exact: erefl. Qed.
 
 (******************************************************************************)
-(*     What the row states at this instance                                   *)
+(*     What the program states at this instance                               *)
 (******************************************************************************)
 
-(** The row's security statement at the twelve-card chirality instance: at a
+(** The program's security statement at the twelve-card chirality instance: at a
     static coalition of at most five of the twelve seats, the joint law of the
     executed coalition reading and the chirality under the 584-letter word
-    shuffle is within 2^-40, in the sum of absolute differences, of the
-    product of the two marginals of the all-decks execution. The proof is the
-    row's security projection applied, so the row and this statement are one
+    shuffle is within 2^-40, in the sum of absolute differences, of the product
+    of the two marginals of the all-decks execution. The proof is the program's
+    security projection applied, so the program and this statement are one
     theorem. *)
 Theorem psl211_word_view_proximity (R : realType) (C : {set seatT})
     (HC : (#|C| <= 5)%N) :

@@ -416,8 +416,8 @@ Qed.
     Restricting to mean-zero vectors is the content, not a technicality:
     Q fixes the all-ones vector, so no contraction holds on it, and the
     rate at which the walk forgets its starting deck is decided by what Q
-    does to the complement.  This is the one spectral input of the S_5 row,
-    and the only place the certificate tables are used.
+    does to the complement.  This is the one spectral input of the S_5 word
+    analysis, and the only place the certificate tables are used.
     symm_ds_TV_bound turns it into the variation-distance bound between the
     walk's endpoint law and uniform, which is how a dealer's word length
     becomes a security parameter for the five-card deck. *)

@@ -81,11 +81,11 @@ Definition psl211_wordP (R : realType)
   : R.-fdist (psl211_inputT * pgg_gT psl211_M)%type :=
   (`U psl211_alldecks_gt0) `x (psl211_word_cutP R).
 
-(** The word model as a sample adapter over the execution the all-decks row
+(** The word model as a sample adapter over the execution the all-decks program
     runs: one sample point is a deck description together with a cut, the run
-    argument the deck description and the cut the group element the run is
-    dealt at. Its sample space is the carrier psl211_alldecks_sample uses, so
-    the chirality is one random variable for the two models. *)
+    argument the deck description and the cut the group element the run is dealt
+    at. Its sample space is the carrier psl211_alldecks_sample uses, so the
+    chirality is one random variable for the two models. *)
 Definition psl211_word_sample (R : realType)
   : SampleAdapter R (instance_exec psl211_alldecks_params) :=
   @MkSampleAdapter R (instance_profile psl211_algebra)
@@ -108,10 +108,10 @@ Lemma psl211_word_cut_distE (R : realType) :
   = psl211_word_cutP R.
 Proof. exact: fdist_prod_snd. Qed.
 
-(** The word model as a unit-indexed family: one member at every real field,
-    the model having no parameter to range over. Its index type is the one
-    psl211_exact_family carries, so a row over this model and the all-decks
-    row are read at one index. *)
+(** The word model as a unit-indexed family: one member at every real field, the
+    model having no parameter to range over. Its index type is the one
+    psl211_exact_family carries, so a program over this model and the all-decks
+    program are read at one index. *)
 Definition psl211_word_family : AnalysisModelFamily psl211_alldecks_observed :=
   @MkAnalysisModelFamily psl211_alldecks_observed (fun _ => unit)
     (fun R _ => psl211_word_sample R).

@@ -18,22 +18,22 @@
 (*                                                                            *)
 (* The instance's other model, the finite word over the four adjacent         *)
 (* transpositions, is not named at this level. It is a model of the           *)
-(* dealer-dealt run, and the manifest's row over it, s5_word_path, is         *)
-(* published from a mixing theorem rather than from a program: two of the     *)
-(* five parts of an input-indistinguishability certificate over that model    *)
-(* are out of reach. Missing is the distance from the walk to an ideal cut, a *)
-(* variation distance on the shuffle group that s5_word_base_premise names as *)
-(* a premise nothing in the tree proves, the instance's spectral theorem      *)
-(* bounding one seat's endpoint marginal on 'I_5 instead. Missing too, and    *)
-(* for a reason no proof can remove, is the constancy of a coalition's        *)
-(* reading of the ideal cut in the secret, which the certificate's constancy  *)
-(* field asks for at every coalition below the threshold and so at every      *)
-(* singleton: under every cut exactly one seat holds the card carrying the    *)
-(* whole secret, so that seat's reading law moves with the secret, and no     *)
-(* choice of ideal avoids it, the seat in question varying with the cut while *)
-(* the ideal is fixed before any coalition is named. What the manifest        *)
-(* publishes for that path is an endpoint marginal bound against the          *)
-(* encoder-image ideal, with no claim about a coalition.                      *)
+(* dealer-dealt run, and the manifest's path over it, s5_word_path, is        *)
+(* justified by a mixing theorem and by no program: two of the five parts of  *)
+(* an input-indistinguishability certificate over that model are out of       *)
+(* reach. Missing is the distance from the walk to an ideal cut, a variation  *)
+(* distance on the shuffle group that s5_word_base_premise names as a premise *)
+(* nothing in the tree proves, the instance's spectral theorem bounding one   *)
+(* seat's endpoint marginal on 'I_5 instead. Missing too, and for a reason no *)
+(* proof can remove, is the constancy of a coalition's reading of the ideal   *)
+(* cut in the secret, which the certificate's constancy field asks for at     *)
+(* every coalition below the threshold and so at every singleton: under every *)
+(* cut exactly one seat holds the card carrying the whole secret, so that     *)
+(* seat's reading law moves with the secret, and no choice of ideal avoids    *)
+(* it, the seat in question varying with the cut while the ideal is fixed     *)
+(* before any coalition is named. What the manifest names for that path is an *)
+(* endpoint marginal bound against the encoder-image ideal, with no claim     *)
+(* about a coalition.                                                         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   s5_rand_sampled      == the supplied run under the uniform tape model    *)
@@ -62,11 +62,11 @@ Local Open Scope ring_scope.
 (*     The uniform tape model                                                 *)
 (******************************************************************************)
 
-(** The supplied run under the uniform tape model, named at Sampled. The
-    family is indexed by the unit type, so one member at each real field, and
-    its cut is the identity: what a coalition reads is decided by how the
-    shares were drawn and not by how the deck was shuffled. The value is what
-    s5_rand_published_sampledE continues, so the row and the model are named
+(** The supplied run under the uniform tape model, named at Sampled. The family
+    is indexed by the unit type, so one member at each real field, and its cut
+    is the identity: what a coalition reads is decided by how the shares were
+    drawn and not by how the deck was shuffled. The value is what
+    s5_rand_published_sampledE continues, so the program and the model are named
     apart. *)
 Definition s5_rand_sampled : Tableau Sampled :=
   s5_supplied sample s5_rand_family.

@@ -13,22 +13,22 @@
 (* and two clubs, so the card a coalition of at most one seat reads under     *)
 (* the ideal cut has the same law at both committed pairs.                    *)
 (*                                                                            *)
-(* Those two are the base premises of the certificates the analysis manifest  *)
-(* records for Kim's one-cut and seven-cut rows. The constancy is exact and   *)
-(* is quantified over every coalition below the privacy threshold and over    *)
-(* both committed pairs; the distance is where the two rows' published        *)
-(* numbers come from. The seven-cut law is given at the bundle's own spectral *)
-(* number, the one-cut law at that number and at the exact one fiftieth its   *)
-(* row publishes.                                                             *)
+(* Those two are the base premises of the certificates Kim's one-cut and      *)
+(* seven-cut programs carry. The constancy is exact and is quantified over    *)
+(* every coalition below the privacy threshold and over both committed pairs; *)
+(* the distance is where the two programs' published numbers come from. The   *)
+(* seven-cut law is given at the bundle's own spectral number, the one-cut    *)
+(* law at that number and at the exact one fiftieth its program publishes.    *)
 (*                                                                            *)
 (* Feeding those two premises to the generic transfer inequality gives, for   *)
 (* each of Kim's two cut laws, the statement the attack model asks for: a     *)
 (* coalition of at most one seat, reading static endpoint colours at two      *)
 (* committed pairs, sees laws within twice the bundle's number of each        *)
-(* other. That is the conclusion the analysis manifest's two Kim rows are     *)
-(* bridged by. The manifest sits below the file that certifies those rows     *)
-(* and holds no theorem of its own, so the theorem it names for a row's       *)
-(* level has to be a facade alias, and the facade sits above this file.       *)
+(* other. That is the conclusion the analysis manifest's two Kim paths are    *)
+(* bridged by. The manifest sits below the file whose programs publish those  *)
+(* paths and holds no theorem of its own, so the theorem it names for a       *)
+(* path's level has to be a facade alias, and the facade sits above this      *)
+(* file.                                                                      *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   kim_biased_marginal_bound == the one-cut law's marginal bound at the     *)
@@ -220,8 +220,8 @@ Lemma kim_single_cut_supp_pow (g : {perm 'I_5}) :
 Proof. exact: fc_kim_rho_supp_pow. Qed.
 
 (** kim_centi_cut_supp_pow — Kim's cut law at word length seven gives mass
-    only to powers of the five-cycle. The repeated row's distance to the
-    ideal is therefore a distance inside the rotation group. *)
+    only to powers of the five-cycle. The repeated program's distance to
+    the ideal is therefore a distance inside the rotation group. *)
 Lemma kim_centi_cut_supp_pow (g : {perm 'I_5}) :
   sw_rho_dist (scb_bound (kim_security_bundle_centi R)) g != 0 ->
   exists k : nat, g = (fc_sigma ^+ k)%g.
@@ -377,15 +377,15 @@ exact: (sw_bound b ord0).
 Qed.
 
 (******************************************************************************)
-(*     The repeated row, at the seven-cut bundle                              *)
+(*     The repeated program, at the seven-cut bundle                          *)
 (******************************************************************************)
 
-(** kim_centi_cut_mixing — the seven-cut law of Kim's repeated row is within
-    the bundle's own spectral number of the uniform rotation law, in
+(** kim_centi_cut_mixing — the seven-cut law of Kim's repeated program is
+    within the bundle's own spectral number of the uniform rotation law, in
     variation distance on the cut group. This is the mixing field of the
-    spectral certificate for that row. The number is the bundle's and no new
-    one is introduced, so the row's only inexact quantity is that spectral
-    number. *)
+    spectral certificate for that program. The number is the bundle's and no
+    new one is introduced, so the program's only inexact quantity is that
+    spectral number. *)
 Lemma kim_centi_cut_mixing :
   var_dist (sw_rho_dist (scb_bound (kim_security_bundle_centi R)))
            (sa_cut_dist (five_card_sample R))
@@ -429,7 +429,7 @@ apply: (@var_dist_fdistmap_transfer R _ _
 Qed.
 
 (******************************************************************************)
-(*     The biased row, at the word-length-one bundle                          *)
+(*     The biased program, at the word-length-one bundle                      *)
 (******************************************************************************)
 
 (** kim_biased_marginal_bound — the marginal bound Kim's bundle carries at
@@ -445,9 +445,9 @@ Definition kim_biased_marginal_bound
 (** kim_biased_sample_cut_witnessE — the cut law the one-cut adapter draws
     from is the law the length-one bundle bounds. It is the identification
     field of the spectral certificate: without it the bundle's number would
-    be a bound on some other shuffle than the one the row executes, and the
-    seven-cut row's counterpart kim_centi_cut_distE would have no analogue
-    here. *)
+    be a bound on some other shuffle than the one the program executes, and
+    the seven-cut program's counterpart kim_centi_cut_distE would have no
+    analogue here. *)
 Lemma kim_biased_sample_cut_witnessE :
   sw_rho_dist kim_biased_marginal_bound
   = sa_cut_dist (@kim_single_sample R (1 / 100)
@@ -461,8 +461,8 @@ Qed.
 (** kim_biased_cut_mixing — Kim's one-cut law is within the bundle's own
     spectral number of the uniform rotation law, in variation distance on the
     cut group. This is the mixing field of the spectral certificate for the
-    one-cut row, at a number of hundredth scale rather than a cryptographic
-    one. *)
+    one-cut program, at a number of hundredth scale rather than a
+    cryptographic one. *)
 Lemma kim_biased_cut_mixing :
   var_dist (sw_rho_dist kim_biased_marginal_bound)
            (sa_cut_dist (five_card_sample R))
@@ -503,12 +503,12 @@ Qed.
 End five_card_cut_mixing.
 
 (******************************************************************************)
-(*     The one-cut distance at the constant the row publishes                 *)
+(*     The one-cut distance at the constant the program publishes             *)
 (******************************************************************************)
 
 (** kim_one_cut_centi_le — one card position of Kim's one-cut law is within
     one fiftieth of the uniform law on card positions. kim_one_cut_centiE
-    makes this an equality, so the one-cut row can publish the distance
+    makes this an equality, so the one-cut program can publish the distance
     itself instead of the spectral overestimate. *)
 Lemma kim_one_cut_centi_le (R : realType) (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
@@ -528,7 +528,8 @@ Definition kim_biased_marginal_bound_exact (R : realType)
 
 (** kim_biased_cut_mixing_exact — Kim's one-cut law is within one fiftieth of
     the uniform rotation law, in variation distance on the cut group. It is
-    the mixing field of the one-cut row's certificate at the exact number. *)
+    the mixing field of the one-cut program's certificate at the exact
+    number. *)
 Lemma kim_biased_cut_mixing_exact (R : realType) :
   var_dist (sw_rho_dist (kim_biased_marginal_bound_exact R))
            (sa_cut_dist (five_card_sample R))

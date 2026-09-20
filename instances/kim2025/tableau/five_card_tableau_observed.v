@@ -4,15 +4,15 @@
 (* five_card_tableau_observed: the five-card instance at the Observed level   *)
 (*                                                                            *)
 (* The Observed level adjoins the three run facts to the run parameters, and  *)
-(* it is the first level at which a row proves anything. What it carries is   *)
-(* run correctness: the interpreter finishes within fuel 100, each of the     *)
+(* it is the first level at which a program proves anything. What it carries  *)
+(* is run correctness: the interpreter finishes within fuel 100, each of the  *)
 (* five seats reaches an endpoint, and the endpoints decode to the            *)
 (* conjunction of the two committed bits. Nothing about a coalition is proved *)
 (* at this level, at any coalition size.                                      *)
 (*                                                                            *)
 (* One run reaches this level and one value names it. five_card_committed is  *)
-(* the prefix all seven published rows and the three named Sampled values of  *)
-(* the instance continue from, and it names its three obligations, each an    *)
+(* the prefix all seven published programs and the three named Sampled values *)
+(* of the instance continue from, and it names its three obligations, each an *)
 (* existing lemma of five_card_exec.v.                                        *)
 (*                                                                            *)
 (* The ideal functionality sits here for the same reason. five_card_F is      *)
@@ -22,10 +22,10 @@
 (* coalition and neither mentions a probability model. five_card_FE reads off *)
 (* the two values a reader of five_card_F wants, the conjunction and the      *)
 (* tolerated coalition size of one seat, and targeted_F takes that size from  *)
-(* the scheme rather than from the row.                                       *)
+(* the scheme rather than from the program.                                   *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   five_card_committed     == the prefix all seven rows share               *)
+(*   five_card_committed     == the prefix all seven programs share           *)
 (*   five_card_F             == the ideal functionality the run realises      *)
 (*   five_card_F_ite         == the ideal function is its conditional         *)
 (*                              spelling, up to conversion                    *)
@@ -67,15 +67,15 @@ Local Open Scope ring_scope.
 
 
 (******************************************************************************)
-(*     The prefix all seven rows share                                        *)
+(*     The prefix all seven programs share                                    *)
 (******************************************************************************)
 
-(** The first three statements of the five-card row: the algebra with the
-    ideal function a run of it computes, the run driven in the
-    encoded-run mode at fuel 100, and the three run facts. What has been
-    proved at this point is run correctness, that the interpreter finishes,
-    collects one endpoint per seat and decodes them to the conjunction of the
-    two committed bits, and nothing about a coalition. *)
+(** The first three statements of the five-card program: the algebra with the
+    ideal function a run of it computes, the run driven in the encoded-run
+    mode at fuel 100, and the three run facts. What has been proved at this
+    point is run correctness, that the interpreter finishes, collects one
+    endpoint per seat and decodes them to the conjunction of the two
+    committed bits, and nothing about a coalition. *)
 Definition five_card_committed : Tableau Observed :=
   five_card_algebra functionality (fun ab : bool * bool => ab.1 && ab.2)
   encoded inputs (bool * bool)
@@ -91,7 +91,7 @@ Definition five_card_committed : Tableau Observed :=
 (** The run the prefix builds is the one five_card_params names. The clauses
     above spell the parameter record out a second time, and this equation is
     what keeps the two spellings from parting: every statement below is made
-    at five_card_params, and the row is made at the clauses. *)
+    at five_card_params, and the program is made at the clauses. *)
 Lemma five_card_committed_paramsE :
   projT1 (projT2 (tableau_at five_card_committed)) = five_card_params.
 Proof. by []. Qed.

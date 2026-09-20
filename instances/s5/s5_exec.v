@@ -896,12 +896,12 @@ Qed.
 (*     The randomized run as a supplied layout                                *)
 (******************************************************************************)
 
-(* Supplied is the framework's name for the mode this instance calls
-   randomized: no party commits, the dealer lays the cards itself from the
-   layout the run argument names, and the value the run recovers is a reading
-   of that argument rather than a function of anyone's input. The three
-   obligations below carry the mode word and the plug, the family and the row
-   keep the instance's own word. *)
+(* Supplied is the framework's name for the mode this instance calls randomized:
+   no party commits, the dealer lays the cards itself from the layout the run
+   argument names, and the value the run recovers is a reading of that argument
+   rather than a function of anyone's input. The three obligations below carry
+   the mode word and the plug, the family and the program keep the instance's
+   own word. *)
 
 (** s5_supplied_params — the run-level data of the randomized run: the run
     argument is a sampler tape, the dealer lays the probability-free additive

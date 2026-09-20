@@ -3,8 +3,8 @@
 (******************************************************************************)
 (* pgg_tableau_arm_relations: what separates the arms' propositions           *)
 (*                                                                            *)
-(* A Tableau row certifies one of three arms, and two of the three carry a    *)
-(* number. Both numbers can be read off one variation distance on the cut     *)
+(* A Tableau program certifies one of three arms, and two of the three carry  *)
+(* a number. Both numbers can be read off one variation distance on the cut   *)
 (* group, so a reader may take one arm's proposition for a restatement of the *)
 (* other's. The statements here separate the two that carry a number. Every   *)
 (* one of them is stated at an arbitrary algebra, arbitrary execution         *)
@@ -87,7 +87,7 @@ Local Open Scope proba_scope.
 
 (** Every proximity certificate satisfies the arm's proposition at two,
     whatever its model, its ideal and its own number, because a variation
-    distance between two laws on a finite carrier never exceeds two. A row
+    distance between two laws on a finite carrier never exceeds two. A program
     publishing two therefore rules nothing out, and a published number says
     something about a coalition exactly in so far as it is below two. *)
 Lemma idealproximity_prop_at2 (R : realType) (A : PGGAlgebraic)

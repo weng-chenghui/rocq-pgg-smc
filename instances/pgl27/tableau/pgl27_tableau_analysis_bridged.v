@@ -8,8 +8,8 @@
 (* the proposition it carries is that arm's own, on top of run correctness    *)
 (* and of the identification of the two readings of a coalition. A publish    *)
 (* terminal then turns the value into a Published. Every payload this         *)
-(* instance gives an arm is here, every row it publishes is here, and every   *)
-(* statement whose subject is a payload or a row is here.                     *)
+(* instance gives an arm is here, every program it publishes is here, and     *)
+(* every statement whose subject is a payload or a program is here.           *)
 (*                                                                            *)
 (* Three arms are used over the one dealer-dealt run. The exact arm takes an  *)
 (* ExactWitness, whose one field is independence of a coalition's reading     *)
@@ -27,32 +27,33 @@
 (* to the ideal cut once for each of the two dealt secrets it compares, so    *)
 (* its cert_eps is that number added to itself, 2^-39. The proximity          *)
 (* certificate compares one law with one law and carries the number itself,   *)
-(* 2^-40, and the proximity row concludes at 2^-39, the constant the other    *)
-(* row over the same model publishes, so the terminal's obligation is met     *)
-(* strictly. Each of these numbers bounds a sum of absolute differences,      *)
-(* twice a total variation distance, so a distinguisher's advantage against a *)
-(* row concluded at 2^-39 is at most 2^-40. Four is the threshold the derived *)
-(* profile declares, so every statement here that quantifies over a coalition *)
-(* quantifies over at most three of the eight seats, each seat reading the    *)
-(* card at the cut image of its own position, and pgl27_exact_leak4 records   *)
-(* that four already leak.                                                    *)
+(* 2^-40, and the proximity program concludes at 2^-39, the constant the      *)
+(* other program over the same model publishes, so the terminal's obligation  *)
+(* is met strictly. Each of these numbers bounds a sum of absolute            *)
+(* differences, twice a total variation distance, so a distinguisher's        *)
+(* advantage against a program concluded at 2^-39 is at most 2^-40. Four is   *)
+(* the threshold the derived profile declares, so every statement here that   *)
+(* quantifies over a coalition quantifies over at most three of the eight     *)
+(* seats, each seat reading the card at the cut image of its own position,    *)
+(* and pgl27_exact_leak4 records that four already leak.                      *)
 (*                                                                            *)
-(* Seven rows are published, and three of them publish the manifest's own.    *)
-(* pgl27_exact_published_pathE, pgl27_word_published_pathE and                *)
+(* Seven programs are published, and three of them publish the manifest's     *)
+(* own. pgl27_exact_published_pathE, pgl27_word_published_pathE and           *)
 (* pgl27_prior_exact_published_pathE discharge pgl27_exact_path,              *)
 (* pgl27_word_path and pgl27_prior_exact_path of pgg_analysis_manifest.v by   *)
 (* conversion, and those three are the AnalysisPaths the manifest carries for *)
-(* this instance. The other four are the word row concluded at 2^-39 in three *)
-(* spellings, through the surface, through the raw bind and from the named    *)
-(* Sampled value, and the proximity row, which publishes the same manifest    *)
-(* row under a different arm. An AnalysisPath holds descriptive metadata and  *)
-(* no Prop, so one manifest row carrying an input-indistinguishability row    *)
-(* and a proximity row says nothing about either claim. The manifest carries  *)
-(* no fourth row over this instance and publishes none of the three by a      *)
-(* route this development's programs do not take.                             *)
+(* this instance. The other four are the word program concluded at 2^-39 in   *)
+(* three spellings, through the surface, through the raw bind and from the    *)
+(* named Sampled value, and the proximity program, which publishes the same   *)
+(* manifest path under a different arm. An AnalysisPath holds descriptive     *)
+(* metadata and no Prop, so one manifest path published by an                 *)
+(* input-indistinguishability program and by a proximity program says nothing *)
+(* about either claim. The manifest carries no fourth path over this          *)
+(* instance, and none of the three is published by a route this development's *)
+(* programs do not take.                                                      *)
 (*                                                                            *)
-(* Where each published row's chain is, one entry per row.                    *)
-(* pgl27_exact_published, under The two row programs:                         *)
+(* Where each published program's chain is, one entry per program.            *)
+(* pgl27_exact_published, under The exact and the word program:               *)
 (*     pgl27_exact_published_sampledE, pgl27_exact_published_pathE,           *)
 (*     pgl27_exact_published_armE, and the readings                           *)
 (*     pgl27_exec_exact_view_indep_restated and pgl27_exact_view_secrecy.     *)
@@ -60,17 +61,17 @@
 (*     pgl27_word_published_sampledE, pgl27_word_published_pathE,             *)
 (*     pgl27_word_published_armE, and the reading                             *)
 (*     pgl27_word_view_indistinguishability_restated.                         *)
-(* pgl27_word_published39, under The word row concluded at 2^-39:             *)
+(* pgl27_word_published39, under The word program concluded at 2^-39:         *)
 (*     pgl27_word_published39_armE, and no reading of its own.                *)
-(* pgl27_word_published39_bind, under the same banner: tied to the row above  *)
-(*     by pgl27_word_published39_bindE.                                       *)
-(* pgl27_word_branch_published39, under The same row from the named word      *)
+(* pgl27_word_published39_bind, under the same banner: tied to the program    *)
+(*     above by pgl27_word_published39_bindE.                                 *)
+(* pgl27_word_branch_published39, under The same program from the named word  *)
 (*     model: written from pgl27_word_sampled, so no _sampledE, and           *)
 (*     pgl27_word_branch_published39_armE.                                    *)
 (* pgl27_prior_exact_published, under The ideal: the exact shuffle at every   *)
 (*     prior: pgl27_prior_exact_published_sampledE,                           *)
 (*     pgl27_prior_exact_published_pathE, pgl27_prior_exact_published_armE.   *)
-(* pgl27_word_proximity_published, under One model, two claims, two rows:     *)
+(* pgl27_word_proximity_published, under One model, two claims, two programs: *)
 (*     written from pgl27_word_sampled, so no _sampledE,                      *)
 (*     pgl27_word_proximity_published_pathE,                                  *)
 (*     pgl27_word_proximity_published_armE, and the reading                   *)
@@ -81,10 +82,10 @@
 (* Executable value and the parameter equation; the observed file the two     *)
 (* prefixes, the inline fork's parameter equation and the ideal               *)
 (* functionality; the sampled file the three named models; this file the      *)
-(* payloads, the rows, the row and arm equations, the bridges, the restated   *)
-(* theorems and the two arm statements; and the checks file the recorded      *)
-(* rejections and the comparison of the two word rows' arms. No file of the   *)
-(* six uses Require Export.                                                   *)
+(* payloads, the programs, the path and arm equations, the bridges, the       *)
+(* restated theorems and the two arm statements; and the checks file the      *)
+(* recorded rejections and the comparison of the two word programs' arms. No  *)
+(* file of the six uses Require Export.                                       *)
 (*                                                                            *)
 (* This file requires instances/pgl27/pgl27_proximity.v, which holds the      *)
 (* reading and the distance mathematics the certificates are built from: the  *)
@@ -98,26 +99,27 @@
 (*                              index                                         *)
 (*   pgl27_word_cert         == the input-indistinguishability arm's          *)
 (*                              certificate                                   *)
-(*   pgl27_exact_published   == the exact row as a program                    *)
-(*   pgl27_word_published    == the word row as a program                     *)
-(*   pgl27_bound39           == the name 2^-39 for the word row's bound       *)
-(*   pgl27_word_published39  == the word row concluded at that number         *)
+(*   pgl27_exact_published   == the exact path as a program                   *)
+(*   pgl27_word_published    == the word path as a program                    *)
+(*   pgl27_bound39           == the name 2^-39 for the word program's bound   *)
+(*   pgl27_word_published39  == the word program concluded at that number     *)
 (*   pgl27_word_published39_bind                                              *)
-(*                           == the same row written through the bind         *)
+(*                           == the same program written through the bind     *)
 (*   pgl27_word_branch_published39                                            *)
 (*                           == the continuation of the named word model      *)
 (*                              concluded at 2^-39                            *)
 (*   pgl27_bound41           == the name 2^-41 for a bound                    *)
-(*   pgl27_word_target       == the word row's published statement            *)
-(*   pgl27_exact_target      == the exact row's published statement           *)
-(*   pgl27_word_restated     == the word row through the restate terminal     *)
-(*   pgl27_exact_restated    == the exact row through the restate terminal    *)
+(*   pgl27_word_target       == the word program's published statement        *)
+(*   pgl27_exact_target      == the exact program's published statement       *)
+(*   pgl27_word_restated     == the word program through the restate terminal *)
+(*   pgl27_exact_restated    == the exact program through the restate         *)
+(*                              terminal                                      *)
 (*   pgl27_word_same_statement                                                *)
 (*                           == the published word statement and the word     *)
-(*                              row's restatement inhabit one type            *)
+(*                              program's restatement inhabit one type        *)
 (*   pgl27_exact_same_statement                                               *)
 (*                           == the published exact statement and the exact   *)
-(*                              row's restatement inhabit one type            *)
+(*                              program's restatement inhabit one type        *)
 (*   pgl27_prior_exact_witness                                                *)
 (*                           == the exact arm's witness at the prior-indexed  *)
 (*                              exact shuffle                                 *)
@@ -126,7 +128,7 @@
 (*   pgl27_word_proximity_cert                                                *)
 (*                           == the word model's proximity certificate        *)
 (*   pgl27_word_proximity_published                                           *)
-(*                           == the word row as a program at the proximity    *)
+(*                           == the word path as a program at the proximity   *)
 (*                              arm, concluded at 2^-39                       *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -137,37 +139,42 @@
 (*   pgl27_word_view_const   == below the four-seat threshold, two secrets    *)
 (*                              give one reading of the ideal cut             *)
 (*   pgl27_exact_published_sampledE                                           *)
-(*                           == the exact row continues the named exact model *)
+(*                           == the exact program continues the named exact   *)
+(*                              model                                         *)
 (*   pgl27_word_published_sampledE                                            *)
-(*                           == the word row continues the named word model   *)
+(*                           == the word program continues the named word     *)
+(*                              model                                         *)
 (*   pgl27_word_published_certE                                               *)
 (*                           == the five written clauses are pgl27_word_cert  *)
 (*   pgl27_exact_published_pathE                                              *)
 (*                           == the exact program publishes the manifest's    *)
-(*                              row                                           *)
+(*                              path                                          *)
 (*   pgl27_word_published_pathE                                               *)
-(*                           == the word program publishes the manifest's row *)
+(*                           == the word program publishes the manifest's     *)
+(*                              path                                          *)
 (*   pgl27_exact_published_armE                                               *)
-(*                           == the exact row carries the exact arm           *)
+(*                           == the exact program carries the exact arm       *)
 (*   pgl27_word_published_armE                                                *)
-(*                           == the word row carries the input-               *)
+(*                           == the word program carries the input-           *)
 (*                              indistinguishability arm                      *)
 (*   pgl27_word_published39_bindE                                             *)
 (*                           == the surface and the bind build one term       *)
 (*   pgl27_word_published39_armE                                              *)
-(*                           == the concluded row carries that same arm       *)
+(*                           == the concluded program carries that same arm   *)
 (*   pgl27_word_branch_published39_armE                                       *)
-(*                           == the branch row carries that arm as well       *)
+(*                           == the branch program carries that arm as well   *)
 (*   pgl27_word_bound41_false                                                 *)
 (*                           == the terminal's obligation at 2^-41 is false   *)
-(*   pgl27_word_bridge       == the word row's proposition gives its          *)
+(*   pgl27_word_bridge       == the word program's proposition gives its      *)
 (*                              published statement                           *)
-(*   pgl27_exact_bridge      == the exact row's proposition gives its         *)
+(*   pgl27_exact_bridge      == the exact program's proposition gives its     *)
 (*                              published statement                           *)
 (*   pgl27_word_view_indistinguishability_restated                            *)
-(*                           == the word statement, from the word row alone   *)
+(*                           == the word statement, from the word program     *)
+(*                              alone                                         *)
 (*   pgl27_exec_exact_view_indep_restated                                     *)
-(*                           == the exact statement, from the exact row alone *)
+(*                           == the exact statement, from the exact program   *)
+(*                              alone                                         *)
 (*   pgl27_exact_view_secrecy                                                 *)
 (*                           == below the four-seat threshold, the exact      *)
 (*                              arm's four conjuncts at this instance         *)
@@ -175,17 +182,17 @@
 (*                              prior-indexed exact shuffle is the instance's *)
 (*                              own reading pgl27_view                        *)
 (*   pgl27_prior_exact_published_sampledE                                     *)
-(*                           == the prior-indexed exact row continues the     *)
+(*                           == the prior-indexed exact program continues the *)
 (*                              named model                                   *)
 (*   pgl27_prior_exact_published_armE                                         *)
-(*                           == the ideal row carries the exact arm           *)
+(*                           == the ideal program carries the exact arm       *)
 (*   pgl27_prior_exact_published_pathE                                        *)
 (*                           == the ideal program publishes                   *)
 (*                              pgl27_prior_exact_path                        *)
 (*   pgl27_word_proximity_cert_idealE                                         *)
-(*                           == the certificate's ideal is the ideal row's    *)
-(*                              model, and the port built from its witness is *)
-(*                              that row's port                               *)
+(*                           == the certificate's ideal is the ideal          *)
+(*                              program's model, and the port built from its  *)
+(*                              witness is that program's port                *)
 (*   pgl27_word_proximity_cert_epsE                                           *)
 (*                           == the certificate's number is 2^-40             *)
 (*   pgl27_word_proximity_eps_halfE                                           *)
@@ -197,18 +204,19 @@
 (*                           == that number is below the bound two            *)
 (*                              var_dist_le2 gives                            *)
 (*   pgl27_word_proximity_published_pathE                                     *)
-(*                           == the proximity row publishes pgl27_word_path   *)
+(*                           == the proximity program publishes               *)
+(*                              pgl27_word_path                               *)
 (*   pgl27_word_proximity_published_armE                                      *)
-(*                           == that row carries the proximity arm            *)
+(*                           == that program carries the proximity arm        *)
 (*   pgl27_word_published_families_sampledE                                   *)
-(*                           == both rows over the word model read their      *)
+(*                           == both programs over the word model read their  *)
 (*                              model family off the one named Sampled value  *)
 (*   pgl27_word_published_obs_sampledE                                        *)
-(*                           == both rows read their observed execution off   *)
-(*                              that same value                               *)
+(*                           == both programs read their observed execution   *)
+(*                              off that same value                           *)
 (*   pgl27_word_view_proximity                                                *)
 (*                           == below the four-seat threshold, the proximity  *)
-(*                              row's security statement, at 2^-39            *)
+(*                              program's security statement, at 2^-39        *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -319,18 +327,17 @@ rewrite (pgl27_static_obs_funE R C x) (pgl27_static_obs_funE R C x').
 exact: (pgl27_view_law_const R x x' HC).
 Qed.
 
-(** The input-indistinguishability arm's certificate at each secret prior.
-    Its five fields are the two-hundred-letter walk's marginal bound; the
-    identification of that bound's law with the law the word adapter draws
-    its cut from, which is pgl27_word_cut_distE read backwards; the uniform
-    distribution on the group as the ideal cut; the distance
-    pgl27_word_mixing of the walk from that ideal, an unconditional theorem
-    about the walk whose bound is 2^-40; and the constancy of a coalition's
-    reading of the ideal cut in the dealt secret, which is
-    pgl27_word_view_const and is exact. Perfect and statistical security are
-    both visible in the fields: everything about the ideal cut is exact and
-    three-transitive, and the only statistical quantity anywhere in this row
-    is the walk's 2^-40. *)
+(** The input-indistinguishability arm's certificate at each secret prior. Its
+    five fields are the two-hundred-letter walk's marginal bound; the
+    identification of that bound's law with the law the word adapter draws its
+    cut from, which is pgl27_word_cut_distE read backwards; the uniform
+    distribution on the group as the ideal cut; the distance pgl27_word_mixing
+    of the walk from that ideal, an unconditional theorem about the walk whose
+    bound is 2^-40; and the constancy of a coalition's reading of the ideal cut
+    in the dealt secret, which is pgl27_word_view_const and is exact. Perfect
+    and statistical security are both visible in the fields: everything about
+    the ideal cut is exact and three-transitive, and the only statistical
+    quantity anywhere in this program is the walk's 2^-40. *)
 Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
   : IndistinguishabilityCert (amf_sample pgl27_word_family R secretP) :=
   @MkIndistinguishabilityCert R pgl27_algebra pgl27_dealt_params
@@ -343,16 +350,16 @@ Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
 
 
 (******************************************************************************)
-(*     The two row programs                                                   *)
+(*     The exact and the word program                                         *)
 (******************************************************************************)
 
-(** The exact row: the shared prefix, the exact-shuffle model, the witness
-    above, and the manifest row. Its last line publishes a row whose transfer
+(** The exact program: the shared prefix, the exact-shuffle model, the witness
+    above, and the manifest path. Its last line publishes a path whose transfer
     status is StaticExecutedOnly, because the cut this model draws is already
-    the uniform one and no idealized shuffle is being compared with a real
-    one. What the finished row carries about a coalition of fewer than four
-    seats is independence of the dealt secret, at every real field, with no
-    numeric bound anywhere in it, and beside that the record that four seats
+    the uniform one and no idealized shuffle is being compared with a real one.
+    What the finished program carries about a coalition of fewer than four seats
+    is independence of the dealt secret, at every real field, with no numeric
+    bound anywhere in it, and beside that the record that four seats
     already leak. *)
 Definition pgl27_exact_published : Published :=
   pgl27_dealt
@@ -361,11 +368,10 @@ Definition pgl27_exact_published : Published :=
             leaks at 4 by pgl27_exact_leak4
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
-(** The exact row continues the named exact model. The program above writes
-    the sample step and the certify statement in one term and the Sampled
-    file names the value between them, so this equation is what lets a
-    statement made at pgl27_exact_sampled be read as a statement about the
-    row. *)
+(** The exact program continues the named exact model. The program above writes
+    the sample step and the certify statement in one term and the Sampled file
+    names the value between them, so this equation is what lets a statement made
+    at pgl27_exact_sampled be read as a statement about the program. *)
 Lemma pgl27_exact_published_sampledE :
   (pgl27_exact_sampled
      certify ExactIndependence pgl27_exact_witness
@@ -374,10 +380,10 @@ Lemma pgl27_exact_published_sampledE :
   = pgl27_exact_published.
 Proof. exact: erefl. Qed.
 
-(** The word row: the same prefix, the two-hundred-letter word model, the
-    certificate above, and the manifest row at transfer status IdealFinite,
+(** The word program: the same prefix, the two-hundred-letter word model, the
+    certificate above, and the manifest path at transfer status IdealFinite,
     which records that a finite walk is being compared with the ideal uniform
-    cut. What the finished row carries is a variation distance between the
+    cut. What the finished program carries is a variation distance between the
     readings of two dealt secrets, bounded by 2^-40 + 2^-40: the framework's
     transfer inequality crosses from the walk to the ideal cut and back again,
     and each of the two hops loses the same mixing bound. *)
@@ -392,10 +398,10 @@ Definition pgl27_word_published : Published :=
             invariant by pgl27_word_view_const R
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The word row continues the named word model, with the certificate
-    written as one record. The five clauses of the program above and the
-    record are one term by pgl27_word_published_certE, so this equation carries
-    the naming of the model and nothing else. *)
+(** The word program continues the named word model, with the certificate
+    written as one record. The five clauses of the program above and the record
+    are one term by pgl27_word_published_certE, so this equation carries the
+    naming of the model and nothing else. *)
 Lemma pgl27_word_published_sampledE :
   (pgl27_word_sampled
      certify InputIndistinguishability pgl27_word_cert
@@ -413,33 +419,33 @@ Lemma pgl27_word_published_certE :
                  ;;; publish BaselineClassicalOnly of IdealFinite).
 Proof. by []. Qed.
 
-(** The row the exact program publishes is the manifest's own row for this
-    instance. Conversion decides it, so the descriptive row and the theorem
+(** The path the exact program publishes is the manifest's own path for this
+    instance. Conversion decides it, so the descriptive path and the theorem
     proved about it cannot drift apart. *)
 Lemma pgl27_exact_published_pathE :
   published_path pgl27_exact_published = pgl27_exact_path.
 Proof. by []. Qed.
 
-(** The same for the word program and the manifest's word row. The two pathE
+(** The same for the word program and the manifest's word path. The two pathE
     lemmas together are what makes the manifest a claim this file discharges
     rather than a table maintained beside it. *)
 Lemma pgl27_word_published_pathE :
   published_path pgl27_word_published = pgl27_word_path.
 Proof. by []. Qed.
 
-(** The arm the exact row carries, at every real field and index:
+(** The arm the exact program carries, at every real field and index:
     independence of the coalition's view from the secret, and not a distance
-    between two readings. The row's certify statement settles which arm that
+    between two readings. The program's certify statement settles which arm that
     is, through certify_exact_armE and publish_armE. *)
 Lemma pgl27_exact_published_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_exact_published)) R) :
   security_arm_of pgl27_exact_published R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
-(** The arm the word row carries. The two rows publish different manifest
-    rows here, but a reader of the manifest alone could not tell independence
-    of the view from a distance between two readings, and this pair of
-    equations is what separates them. *)
+(** The arm the word program carries. The two programs publish different
+    manifest paths here, but a reader of the manifest alone could not tell
+    independence of the view from a distance between two readings, and this pair
+    of equations is what separates them. *)
 Lemma pgl27_word_published_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published)) R) :
   security_arm_of pgl27_word_published R idx = InputIndistinguishabilityArm.
@@ -447,17 +453,17 @@ Proof. by []. Qed.
 
 
 (******************************************************************************)
-(*     The word row concluded at 2^-39                                        *)
+(*     The word program concluded at 2^-39                                    *)
 (******************************************************************************)
 
 (** The name 2^-39 for a bound, at every real field. A single real will not
     serve, because the security port quantifies over the field. *)
 Definition pgl27_bound39 : ConcludedBound := fun R => Some (2%:R^-39 : R).
 
-(** The word row concluded at the single constant 2^-39. The data, the model
-    and the certificate are untouched, so the published row asserts about a
-    coalition no more than pgl27_word_published, at the number a reader
-    expects to cite. *)
+(** The word program concluded at the single constant 2^-39. The data, the model
+    and the certificate are untouched, so the published program asserts about a
+    coalition no more than pgl27_word_published, at the number a reader expects
+    to cite. *)
 (* The accumulated bound is 2^-40 twice; pow2_split adds the two copies and
    eqW reads that identity as the inequality the terminal's obligation asks
    for. *)
@@ -468,7 +474,7 @@ Definition pgl27_word_published39 : PublishedAt pgl27_bound39 :=
     |> conclude pgl27_bound39 by (fun R _ => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The same row written through the bind and its payloads, with no surface
+(** The same program written through the bind and its payloads, with no surface
     notation between the statements. *)
 Definition pgl27_word_published39_bind : PublishedAt pgl27_bound39 :=
   pgl27_dealt
@@ -484,9 +490,9 @@ Lemma pgl27_word_published39_bindE :
   pgl27_word_published39 = pgl27_word_published39_bind.
 Proof. by []. Qed.
 
-(** The arm the concluded row carries. Concluding at an upper bound leaves the
-    port untouched, so the row at 2^-39 carries the arm the row at its own
-    sum carries. *)
+(** The arm the concluded program carries. Concluding at an upper bound leaves
+    the port untouched, so the program at 2^-39 carries the arm the program at
+    its own sum carries. *)
 Lemma pgl27_word_published39_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published39)) R) :
   security_arm_of pgl27_word_published39 R idx = InputIndistinguishabilityArm.
@@ -494,23 +500,23 @@ Proof. by []. Qed.
 
 
 (******************************************************************************)
-(*     The same row from the named word model                                 *)
+(*     The same program from the named word model                             *)
 (******************************************************************************)
 
-(** The word row built from the named value pgl27_word_sampled rather than
-    from the dealt prefix: the same certificate, the same terminal at 2^-39
-    and the same two statuses as pgl27_word_published39. Naming the Sampled
-    value is what lets a further row over this model be written without
-    repeating the prefix. *)
+(** The word program built from the named value pgl27_word_sampled rather than
+    from the dealt prefix: the same certificate, the same terminal at 2^-39 and
+    the same two statuses as pgl27_word_published39. Naming the Sampled value is
+    what lets a further program over this model be written without repeating the
+    prefix. *)
 Definition pgl27_word_branch_published39 : PublishedAt pgl27_bound39 :=
   pgl27_word_sampled
     certify InputIndistinguishability pgl27_word_cert
     |> conclude pgl27_bound39 by (fun R _ => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The arm the branch row carries. Naming the Sampled value before the
-    certify statement leaves the port where that statement put it, so the
-    branch row carries the arm pgl27_word_published39 carries. *)
+(** The arm the branch program carries. Naming the Sampled value before the
+    certify statement leaves the port where that statement put it, so the branch
+    program carries the arm pgl27_word_published39 carries. *)
 Lemma pgl27_word_branch_published39_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_branch_published39)) R) :
   security_arm_of pgl27_word_branch_published39 R idx
@@ -525,11 +531,10 @@ Proof. exact: erefl. Qed.
 (** The name 2^-41 for a bound, at every real field. *)
 Definition pgl27_bound41 : ConcludedBound := fun R => Some (2%:R^-41 : R).
 
-(** The word certificate's own bound is 2^-40 twice, and 2^-41 is strictly
-    below that, so the terminal's obligation at 2^-41 is refutable and not
-    merely unproved. It is what separates publishing an upper bound of the
-    distance a row proved from publishing a number the certificate does not
-    prove. *)
+(** The word certificate's own bound is 2^-40 twice, and 2^-41 is strictly below
+    that, so the terminal's obligation at 2^-41 is refutable and not merely
+    unproved. It is what separates publishing an upper bound of the distance a
+    program proved from publishing a number the certificate does not prove. *)
 Lemma pgl27_word_bound41_false (R : realType) (secretP : R.-fdist bool) :
   ~~ (cert_eps (@pgl27_word_cert R secretP)
       <= odflt (cert_eps (@pgl27_word_cert R secretP)) (pgl27_bound41 R)).
@@ -541,26 +546,26 @@ Qed.
 
 
 (******************************************************************************)
-(*     The word statement, from the word row                                  *)
+(*     The word statement, from the word program                              *)
 (******************************************************************************)
 
-(** The word family's published statement, as a proposition: at fewer than
-    four seats, the coalition-view laws of two dealt secrets under the word
-    shuffle are within 2^-39 in variation distance. This is the statement a
-    reader of this instance cites, written out so that a row can be handed
-    over as it. *)
+(** The word family's published statement, as a proposition: at fewer than four
+    seats, the coalition-view laws of two dealt secrets under the word shuffle
+    are within 2^-39 in variation distance. This is the statement a reader of
+    this instance cites, written out so that a program can be handed over as
+    it. *)
 Definition pgl27_word_target (R : realType) : Prop :=
   forall (C : {set 'I_8}) (s s' : bool), (#|C| <= 3)%N ->
     var_dist (fdistmap (fun g => pgl27_view R C (s, g)) (rho_word R))
              (fdistmap (fun g => pgl27_view R C (s', g)) (rho_word R))
     <= 2%:R^-39.
 
-(** The derivation from the word row's accumulated proposition to that
+(** The derivation from the word program's accumulated proposition to that
     statement. Three rewritings and nothing else: the published 2^-39 is
-    unfolded into the two copies of 2^-40 the row accumulated, the framework's
-    seat reader is replaced by the instance's at each of the two secrets, and
-    the adapter's cut law is replaced by rho_word. No step of the mathematics
-    is repeated here; the bound itself comes from the row. *)
+    unfolded into the two copies of 2^-40 the program accumulated, the
+    framework's seat reader is replaced by the instance's at each of the two
+    secrets, and the adapter's cut law is replaced by rho_word. No step of the
+    mathematics is repeated here; the bound itself comes from the program. *)
 Lemma pgl27_word_bridge (R : realType) (secretP : R.-fdist bool)
     (q : StackAt AnalysisBridged)
     (Hq : q = tableau_at (pgl27_dealt
@@ -575,9 +580,9 @@ rewrite -(pgl27_word_cut_distE secretP).
 exact: (proj2 pf R secretP C s s' HC).
 Qed.
 
-(** The word row handed over as its published statement. The restate terminal
-    keeps the row's data and replaces its accumulated conjunction by the
-    proposition the caller wrote out, proved by the bridge above. *)
+(** The word program handed over as its published statement. The restate
+    terminal keeps the program's data and replaces its accumulated conjunction
+    by the proposition the caller wrote out, proved by the bridge above. *)
 Definition pgl27_word_restated (R : realType) (secretP : R.-fdist bool)
     : RestatedTableau (pgl27_word_target R) :=
   pgl27_dealt
@@ -589,7 +594,7 @@ Definition pgl27_word_restated (R : realType) (secretP : R.-fdist bool)
 (** Two dealt secrets give coalition-view laws within 2^-39 under the word
     shuffle, at fewer than four seats. The statement is that of
     pgl27_word_view_indistinguishability, re-proved by reading the restated
-    row's theorem field and applying it, with no proof step of its own; the
+    program's theorem field and applying it, with no proof step of its own; the
     secret prior is an argument because the word model is a family indexed by
     it, and any one index witnesses a statement the prior does not appear in. *)
 Theorem pgl27_word_view_indistinguishability_restated (R : realType)
@@ -602,7 +607,7 @@ Proof. exact: (rq_thm (pgl27_word_restated secretP) C s s'). Qed.
 
 
 (******************************************************************************)
-(*     The exact statement, from the exact row                                *)
+(*     The exact statement, from the exact program                            *)
 (******************************************************************************)
 
 (** The exact family's published statement, as a proposition: at fewer than
@@ -616,11 +621,11 @@ Definition pgl27_exact_target (R : realType) : Prop :=
     = ((@sa_coalition_dist R pgl27_profile pgl27_exec_plug (pgl27_sample R)
           0 C) `x (fdistmap (pgl27_secret R) (pgl27P R)))%fdist.
 
-(** The derivation from the exact row's accumulated proposition to that
-    statement. The row's first conjunct of the arm is independence of the
+(** The derivation from the exact program's accumulated proposition to that
+    statement. The program's first conjunct of the arm is independence of the
     executed reader from the secret, which gives the product law directly; what
     remains is to rewrite the executed reader as the instance's view, using the
-    row's own view identification and then pgl27_static_obsE. *)
+    program's own view identification and then pgl27_static_obsE. *)
 Lemma pgl27_exact_bridge (R : realType) (q : StackAt AnalysisBridged)
     (Hq : q = tableau_at (pgl27_dealt
                          ;;; sample_step of pgl27_exact_family
@@ -638,8 +643,9 @@ apply: boolp.funext => u; congr (_, _).
 by rewrite (proj2 (proj1 pf) R tt C) (pgl27_static_obsE R C u.1 u.2).
 Qed.
 
-(** The exact row handed over as its published statement, by the bridge above.
-    The row's data is kept and only its accumulated conjunction is traded. *)
+(** The exact program handed over as its published statement, by the bridge
+    above. The program's data is kept and only its accumulated conjunction is
+    traded. *)
 Definition pgl27_exact_restated (R : realType)
     : RestatedTableau (pgl27_exact_target R) :=
   pgl27_dealt
@@ -648,10 +654,10 @@ Definition pgl27_exact_restated (R : realType)
     ;;; restate (pgl27_exact_target R)
         of (@pgl27_exact_bridge R _ erefl).
 
-(** At fewer than four seats the executed coalition reading of the exact
-    model and the dealt secret have a product joint law. The statement is
-    that of pgl27_exec_exact_view_indep, re-proved by reading the restated
-    row's theorem field and applying it. *)
+(** At fewer than four seats the executed coalition reading of the exact model
+    and the dealt secret have a product joint law. The statement is that of
+    pgl27_exec_exact_view_indep, re-proved by reading the restated program's
+    theorem field and applying it. *)
 Theorem pgl27_exec_exact_view_indep_restated (R : realType)
     (C : {set 'I_8}) (HC : (#|C| <= 3)%N) :
   fdistmap (fun u => (pgl27_view R C u, pgl27_secret R u)) (pgl27P R)
@@ -664,14 +670,14 @@ Proof. exact: (rq_thm (pgl27_exact_restated R) C HC). Qed.
 (*     The exact arm's four conjuncts at this instance                        *)
 (******************************************************************************)
 
-(** The exact row's view secrecy at this instance: at fewer than four colluding
-    seats the executed coalition reading is independent of the dealt secret,
-    carries zero mutual information with it, leaves the secret's entropy
+(** The exact program's view secrecy at this instance: at fewer than four
+    colluding seats the executed coalition reading is independent of the dealt
+    secret, carries zero mutual information with it, leaves the secret's entropy
     unchanged under conditioning, and stays independent of it under every
     deterministic function of the seat-to-card map. The four conjuncts are the
-    whole content of the exact arm at this instance; the proof is the row's
-    security projection applied, so a reader who wants the
-    information-theoretic reading of the row needs no further derivation. *)
+    whole content of the exact arm at this instance; the proof is the program's
+    security projection applied, so a reader who wants the information-theoretic
+    reading of the program needs no further derivation. *)
 Theorem pgl27_exact_view_secrecy (R : realType) (C : {set 'I_8})
     (HC : (#|C| < 4)%N) :
   [/\ pgl27P R |= (@sa_coalition_view R pgl27_profile pgl27_exec_plug
@@ -692,11 +698,11 @@ Proof. exact: (view_secrecy_of pgl27_exact_published R tt C HC). Qed.
 (*     Each published statement and its restatement are one statement         *)
 (******************************************************************************)
 
-(** The published word statement and the theorem the word row restates inhabit
-    one pair type, so the two are the same proposition and not merely two
-    propositions about the same objects. A row that reached a weaker bound, a
-    larger coalition or a different reader would fail here rather than pass
-    with a different theorem under the same name. *)
+(** The published word statement and the theorem the word program restates
+    inhabit one pair type, so the two are the same proposition and not merely
+    two propositions about the same objects. A program that reached a weaker
+    bound, a larger coalition or a different reader would fail here rather than
+    pass with a different theorem under the same name. *)
 Definition pgl27_word_same_statement (R : realType) (secretP : R.-fdist bool) :
   (forall (C : {set 'I_8}) (s s' : bool), (#|C| <= 3)%N ->
      var_dist (fdistmap (fun g => pgl27_view R C (s, g)) (rho_word R))
@@ -710,7 +716,7 @@ Definition pgl27_word_same_statement (R : realType) (secretP : R.-fdist bool) :
    @pgl27_word_view_indistinguishability_restated R secretP).
 
 (** The same check for the exact published statement and the theorem the exact
-    row restates. *)
+    program restates. *)
 Definition pgl27_exact_same_statement (R : realType) :
   (forall C : {set 'I_8}, (#|C| <= 3)%N ->
      fdistmap (fun u => (pgl27_view R C u, pgl27_secret R u)) (pgl27P R)
@@ -729,8 +735,8 @@ Definition pgl27_exact_same_statement (R : realType) :
 
 (** The framework's static reading of a coalition at this model is the
     instance's own reading pgl27_view, with the secret left inside the sample
-    point. Every security statement of a row is made about the left-hand side
-    and every theorem of the instance about the right, so this equation is
+    point. Every security statement of a program is made about the left-hand
+    side and every theorem of the instance about the right, so this equation is
     the whole of what carries one to the other at the prior-indexed model. *)
 Lemma pgl27_prior_viewE (R : realType) (secretP : R.-fdist bool)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
@@ -760,20 +766,20 @@ Definition pgl27_prior_exact_witness (R : realType) (secretP : R.-fdist bool)
           (pgl27_prior_viewE secretP C))).
 
 (** The prior-indexed exact shuffle, from the observed prefix the two existing
-    PGL(2,7) rows share, certified by the exact arm and published. Its
-    transfer status is StaticExecutedOnly, because this model draws the
-    uniform cut itself and no idealized shuffle is being compared with a real
-    one; what the row carries about a coalition of fewer than four seats is
-    independence of the dealt secret, at every real field and every prior,
-    with no numeric bound anywhere in it. *)
+    PGL(2,7) programs share, certified by the exact arm and published. Its
+    transfer status is StaticExecutedOnly, because this model draws the uniform
+    cut itself and no idealized shuffle is being compared with a real one; what
+    the program carries about a coalition of fewer than four seats is
+    independence of the dealt secret, at every real field and every prior, with
+    no numeric bound anywhere in it. *)
 Definition pgl27_prior_exact_published : Published :=
   pgl27_dealt
     sample  pgl27_prior_exact_family
     certify ExactIndependence pgl27_prior_exact_witness
     |> publish StaticExecutedOnly BaselineClassicalOnly.
 
-(** The prior-indexed exact row continues the named prior-indexed model, so
-    the ideal a proximity certificate measures against and the row that
+(** The prior-indexed exact program continues the named prior-indexed model, so
+    the ideal a proximity certificate measures against and the program that
     publishes it are read off one name. *)
 Lemma pgl27_prior_exact_published_sampledE :
   (pgl27_prior_exact_sampled
@@ -782,23 +788,22 @@ Lemma pgl27_prior_exact_published_sampledE :
   = pgl27_prior_exact_published.
 Proof. exact: erefl. Qed.
 
-(** The arm the ideal row carries, at every real field and prior:
-    independence of the dealt secret, and not a distance to some other
-    model. *)
+(** The arm the ideal program carries, at every real field and prior:
+    independence of the dealt secret, and not a distance to some other model. *)
 Lemma pgl27_prior_exact_published_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_prior_exact_published)) R) :
   security_arm_of pgl27_prior_exact_published R idx = ExactIndependenceArm.
 Proof. by []. Qed.
 
-(** The manifest's typed row for the eight-card orbit instance at the
-    prior-indexed exact shuffle is the row this program publishes. Its five
-    coordinates are the observed execution the program runs on, the
-    completion level the publish terminal reaches, the model family the
-    sample step named, and the two statuses the terminal was given. The
-    manifest writes those coordinates in the facade's vocabulary and the
-    program in this file's, and conversion decides the equation, so the
-    manifest's row for this path is a claim this equation discharges rather
-    than a table maintained beside the program. *)
+(** The manifest's typed path for the eight-card orbit instance at the
+    prior-indexed exact shuffle is the path this program publishes. Its five
+    coordinates are the observed execution the program runs on, the completion
+    level the publish terminal reaches, the model family the sample step named,
+    and the two statuses the terminal was given. The manifest writes those
+    coordinates in the facade's vocabulary and the program in this file's, and
+    conversion decides the equation, so the manifest's path for this program is
+    a claim this equation discharges rather than a table maintained beside the
+    program. *)
 Lemma pgl27_prior_exact_published_pathE :
   published_path pgl27_prior_exact_published = pgl27_prior_exact_path.
 Proof. exact: erefl. Qed.
@@ -808,15 +813,15 @@ Proof. exact: erefl. Qed.
 (*     The proximity certificate, and its ideal                               *)
 (******************************************************************************)
 
-(** The proximity certificate of the PGL(2,7) word row at every prior. Its
-    five fields are the prior-indexed exact shuffle as the ideal; that
-    model's exact witness, which is what makes the ideal an execution whose
-    coalitions below four seats learn nothing at all; the dealt secret of
-    the word model; the walk's marginal number 2^-40; and the distance
-    pgl27_word_proximity_close of pgl27_proximity.v. The only inexact
-    quantity is that number: the ideal and its witness are the terms the
-    ideal row already publishes, and the secret is the word model's own
-    first projection, typed at the carrier that witness names. *)
+(** The proximity certificate of the PGL(2,7) word program at every prior. Its
+    five fields are the prior-indexed exact shuffle as the ideal; that model's
+    exact witness, which is what makes the ideal an execution whose coalitions
+    below four seats learn nothing at all; the dealt secret of the word model;
+    the walk's marginal number 2^-40; and the distance
+    pgl27_word_proximity_close of pgl27_proximity.v. The only inexact quantity
+    is that number: the ideal and its witness are the terms the ideal program
+    already publishes, and the secret is the word model's own first projection,
+    typed at the carrier that witness names. *)
 Definition pgl27_word_proximity_cert (R : realType) (secretP : R.-fdist bool)
   : IdealProximityCert (amf_sample pgl27_word_family R secretP) :=
   @MkIdealProximityCert R pgl27_algebra pgl27_dealt_params
@@ -828,10 +833,10 @@ Definition pgl27_word_proximity_cert (R : realType) (secretP : R.-fdist bool)
     (fun C HC => pgl27_word_proximity_close secretP HC).
 
 (** The model the certificate calls ideal is the model the published ideal
-    row carries, and the port built from the certificate's witness is that
-    row's port. Conversion decides both, so the ideal a word row is measured
-    against is the model pgl27_prior_exact_published publishes and not a
-    second description of it. *)
+    program carries, and the port built from the certificate's witness is that
+    program's port. Conversion decides both, so the ideal a word program is
+    measured against is the model pgl27_prior_exact_published publishes and not
+    a second description of it. *)
 Lemma pgl27_word_proximity_cert_idealE (R : realType)
     (secretP : R.-fdist bool) :
   ipc_ideal (pgl27_word_proximity_cert secretP)
@@ -867,9 +872,9 @@ Lemma pgl27_word_proximity_eps_halfE (R : realType) (secretP : R.-fdist bool) :
     + ipc_eps (pgl27_word_proximity_cert secretP).
 Proof. by []. Qed.
 
-(** The certificate's number is at most 2^-39, the constant the word row
+(** The certificate's number is at most 2^-39, the constant the word program
     publishes for the input-indistinguishability arm. It is the obligation of
-    the terminal that concludes the proximity row at that constant, and the
+    the terminal that concludes the proximity program at that constant, and the
     obligation is met strictly, the certificate's number being half of the
     published one. *)
 Lemma pgl27_word_proximity_le39 (R : realType) (secretP : R.-fdist bool) :
@@ -896,52 +901,52 @@ Qed.
 
 
 (******************************************************************************)
-(*     One model, two claims, two rows                                        *)
+(*     One model, two claims, two programs                                    *)
 (******************************************************************************)
 
 (** The word model certified by the proximity arm and concluded at 2^-39, the
-    constant the input-indistinguishability row of the same model publishes and
-    the one the published reading statement pgl27_word_view_proximity carries.
-    The certificate's own number is 2^-40, half of that. Below four seats its
-    distance field, pgl27_word_proximity_close, puts the joint law of a
-    coalition's reading with the dealt secret within that number of the same
+    constant the input-indistinguishability program of the same model publishes
+    and the one the published reading statement pgl27_word_view_proximity
+    carries. The certificate's own number is 2^-40, half of that. Below four
+    seats its distance field, pgl27_word_proximity_close, puts the joint law of
+    a coalition's reading with the dealt secret within that number of the same
     joint law under the prior-indexed exact execution, where the reading and the
     secret are independent outright, so the ideal side is the product of its two
     marginals. The certificate hops to the ideal once and so loses that number
-    once, where the input-indistinguishability row hops twice. Its transfer
-    status is IdealFinite, the same the input-indistinguishability row carries,
-    and the two certificates compare against the same ideal cut. *)
+    once, where the input-indistinguishability program hops twice. Its transfer
+    status is IdealFinite, the same the input-indistinguishability program
+    carries, and the two certificates compare against the same ideal cut. *)
 Definition pgl27_word_proximity_published : PublishedAt pgl27_bound39 :=
   pgl27_word_sampled
     certify IdealProximity pgl27_word_proximity_cert
     |> conclude pgl27_bound39 by (fun R idx => pgl27_word_proximity_le39 idx)
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The proximity row publishes the manifest's row for the word path, as
+(** The proximity program publishes the manifest's word path, as
     pgl27_word_published_pathE says of the word program. An AnalysisPath holds
-    descriptive metadata and no Prop, so one manifest row carrying an input-
-    indistinguishability row and a proximity row says nothing about either
-    claim. *)
+    descriptive metadata and no Prop, so one manifest path published by an
+    input-indistinguishability program and by a proximity program says nothing
+    about either claim. *)
 Lemma pgl27_word_proximity_published_pathE :
   published_path pgl27_word_proximity_published = pgl27_word_path.
 Proof.
-(* exact: erefl and not by []: done does not return on an equation between
-   two rows' coordinates. *)
+(* exact: erefl and not by []: done does not return on an equation between two
+   paths' coordinates. *)
 exact: erefl.
 Qed.
 
-(** The arm the proximity row carries, at every real field and prior: the
-    distance to a private ideal model, and not the distance between two
-    readings of one model. *)
+(** The arm the proximity program carries, at every real field and prior: the
+    distance to a private ideal model, and not the distance between two readings
+    of one model. *)
 Lemma pgl27_word_proximity_published_armE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_proximity_published)) R) :
   security_arm_of pgl27_word_proximity_published R idx = IdealProximityArm.
 Proof. by []. Qed.
 
-(** Both rows over the word model read their analysis model family off the one
-    named Tableau Sampled value, so the pair differs in the arm and in nothing
-    about the algebra, the run or the law. The family is what a continuation
-    of a named value reads off the name. *)
+(** Both programs over the word model read their analysis model family off the
+    one named Tableau Sampled value, so the pair differs in the arm and in
+    nothing about the algebra, the run or the law. The family is what a
+    continuation of a named value reads off the name. *)
 Lemma pgl27_word_published_families_sampledE :
   ab_f (published_at pgl27_word_proximity_published)
   = sp_f (tableau_at pgl27_word_sampled)
@@ -949,35 +954,35 @@ Lemma pgl27_word_published_families_sampledE :
      = sp_f (tableau_at pgl27_word_sampled).
 Proof. split; exact: erefl. Qed.
 
-(** Both rows read their observed execution off that same named value, so the
-    two claims are made about one run and one static observation of it and
+(** Both programs read their observed execution off that same named value, so
+    the two claims are made about one run and one static observation of it and
     not about two executions that happen to agree. Together with the family
-    equation above, everything the two rows hold in common comes from the one
-    name. *)
+    equation above, everything the two programs hold in common comes from the
+    one name. *)
 Lemma pgl27_word_published_obs_sampledE :
   ab_obs (published_at pgl27_word_proximity_published)
   = sp_obs (tableau_at pgl27_word_sampled)
   /\ ab_obs (published_at pgl27_word_branch_published39)
      = sp_obs (tableau_at pgl27_word_sampled).
 Proof.
-(* Each row stated against the named value closes by exact: erefl in under
-   0.01 s. The row-against-row form is the slow one, 96.0 s by
+(* Each program stated against the named value closes by exact: erefl in under
+   0.01 s. The program-against-program form is the slow one, 96.0 s by
    exact: erefl and 48.1 s by reflexivity, and is not stated. *)
 split; exact: erefl.
 Qed.
 
 
 (******************************************************************************)
-(*     What the proximity row states at this instance                         *)
+(*     What the proximity program states at this instance                     *)
 (******************************************************************************)
 
-(** The proximity row's security statement at the eight-card orbit instance:
+(** The proximity program's security statement at the eight-card orbit instance:
     at fewer than four colluding seats and at every prior on the dealt secret,
     the joint law of the executed coalition reading and that secret under the
     two-hundred-letter word walk is within 2^-39 of the product of the two
-    marginals of the exact execution at the same prior. The proof is the row's
-    security projection applied, so the row and this statement are one
-    theorem. *)
+    marginals of the exact execution at the same prior. The proof is the
+    program's security projection applied, so the program and this statement are
+    one theorem. *)
 Theorem pgl27_word_view_proximity (R : realType) (secretP : R.-fdist bool)
     (C : {set 'I_8}) (HC : (#|C| <= 3)%N) :
   var_dist

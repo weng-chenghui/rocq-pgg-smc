@@ -9,9 +9,9 @@
 (* law of the cut alone. This file measures that difference and nothing else: *)
 (* it carries the bound the proximity arm of this instance takes as its       *)
 (* distance field, and the two arithmetic facts about the number that field   *)
-(* names. The certificate built on them, the row it certifies and the         *)
-(* statements about that row are at AnalysisBridged, in                       *)
-(* instances/psl211/tableau/.                                                 *)
+(* names. The certificate built on them, the program certified over it and    *)
+(* the statements about that program are at AnalysisBridged,                  *)
+(* in instances/psl211/tableau/.                                              *)
 (*                                                                            *)
 (* Every number below bounds a sum of absolute differences, which is twice    *)
 (* the total variation distance of the literature, so a bound of 2^-40 here   *)
@@ -115,11 +115,11 @@ Proof. by apply: exprn_ege1; rewrite ler1n. Qed.
 Fact psl211_pow2_40_gt0 (R : realType) : (0:R) < 2%:R^+40.
 Proof. by rewrite exprn_gt0 // ltr0n. Qed.
 
-(** The two models' laws are within two of each other by the bound every
-    pair of laws on one finite sample space meets, with no fact about the
-    twelve-card instance and no fact about the 584-letter walk. A proximity
-    certificate carrying two would be a certificate about nothing, which is
-    why the number a row publishes is what a reader of the arm must read. *)
+(** The two models' laws are within two of each other by the bound every pair of
+    laws on one finite sample space meets, with no fact about the twelve-card
+    instance and no fact about the 584-letter walk. A proximity certificate
+    carrying two would be a certificate about nothing, which is why the number a
+    program publishes is what a reader of the arm must read. *)
 Lemma psl211_word_law_le2 (R : realType) :
   var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R.
 Proof. exact: var_dist_le2. Qed.

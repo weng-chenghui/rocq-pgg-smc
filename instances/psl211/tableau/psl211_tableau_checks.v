@@ -18,12 +18,12 @@
 (* over the observed execution the named prefix builds and is refused over    *)
 (* the inline one, so no typed evidence crosses between them. The third is    *)
 (* which ideal the proximity arm admits. A certificate's ideal is a sample    *)
-(* adapter over the row's own execution, so the eight-card orbit instance's   *)
-(* model is refused at its type and no distance is reached. Beside it, the    *)
-(* ideal of the certificate this instance builds is refused as the word model *)
-(* the certificate is about; a certificate whose ideal were its own model     *)
-(* would hold its distance field at zero, the two sides of that field being   *)
-(* one term.                                                                  *)
+(* adapter over the program's own execution, so the eight-card orbit          *)
+(* instance's model is refused at its type and no distance is reached. Beside *)
+(* it, the ideal of the certificate this instance builds is refused as the    *)
+(* word model the certificate is about; a certificate whose ideal were its    *)
+(* own model would hold its distance field at zero, the two sides of that     *)
+(* field being one term.                                                      *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -78,12 +78,11 @@ Fail Definition psl211_alldecks_prefix_vm_neq :
 (*     A model belongs to the run it was built over                           *)
 (******************************************************************************)
 
-(** The analysis model family is typed against the observed execution the
-    named prefix builds, and is rejected over the inline-reduction one: the
-    two prefixes hold different termination proofs, so their observed
-    executions are different terms and no typed evidence crosses between them.
-    This is the fork made visible, and the reason the row names its
-    termination lemma. *)
+(** The analysis model family is typed against the observed execution the named
+    prefix builds, and is rejected over the inline-reduction one: the two
+    prefixes hold different termination proofs, so their observed executions are
+    different terms and no typed evidence crosses between them. This is the fork
+    made visible, and the reason the program names its termination lemma. *)
 Fail Definition psl211_vm_reuse_sampled : Tableau Sampled :=
   psl211_alldecks_prefix_vm sample psl211_exact_family.
 
@@ -92,8 +91,8 @@ Fail Definition psl211_vm_reuse_sampled : Tableau Sampled :=
 (******************************************************************************)
 
 (** The eight-card orbit instance's exact family cannot be the ideal of a
-    twelve-card word row. A certificate's ideal is a sample adapter over the
-    row's own execution, and the two instances run different executions, so
+    twelve-card word program. A certificate's ideal is a sample adapter over the
+    program's own execution, and the two instances run different executions, so
     the field is rejected at its type and no distance is reached. The
     rejection is a failure to unify the two executions:
 

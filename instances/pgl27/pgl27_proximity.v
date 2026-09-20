@@ -8,7 +8,7 @@
 (* cut: the exact shuffle, which draws it uniformly from PGL(2,7), and the    *)
 (* two-hundred-letter word walk, which draws it by evaluating a sampled       *)
 (* generator word. This file holds the mathematics that separates the two,    *)
-(* with no program and no published row in it.                                *)
+(* with no program in it, published or not.                                   *)
 (*                                                                            *)
 (* One bound is the certificate field of the proximity arm: below the         *)
 (* four-seat threshold, the joint law of a coalition's reading with the dealt *)
@@ -39,10 +39,10 @@
 (* at tnth (pi_starts _) i and the instance at i, and they agree because this *)
 (* instance's seats start at the eight card positions in order.               *)
 (*                                                                            *)
-(* The certificate itself, the row it publishes and the statements about them *)
-(* are in instances/pgl27/tableau/, whose AnalysisBridged file requires this  *)
-(* one. This file requires no tableau module, so the arrow between the        *)
-(* mathematics and the tableau runs one way, upward.                          *)
+(* The certificate itself, the program published over it and the statements   *)
+(* about them are in instances/pgl27/tableau/, whose AnalysisBridged file     *)
+(* requires this one. This file requires no tableau module, so the arrow      *)
+(* between the mathematics and the tableau runs one way, upward.              *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_word_secret       == the dealt secret on the word sample space     *)
@@ -94,7 +94,7 @@ Local Open Scope proba_scope.
     entry of the instance's coalition view. The two are not the same term: the
     framework reads seat i at tnth (pi_starts _) i and the instance reads it at
     i, and they agree because this instance's seats start at the eight card
-    positions in order. Every security statement of a row is made about the
+    positions in order. Every security statement of a program is made about the
     left-hand side and every theorem of this instance about the right, so this
     equation is the whole of what carries one to the other. *)
 Lemma pgl27_static_obsE (R : realType) (C : {set 'I_8}) (s : bool)

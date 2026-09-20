@@ -4,22 +4,21 @@
 (* psl211_tableau_observed: the twelve-card instance at the Observed level    *)
 (*                                                                            *)
 (* The Observed level adjoins the three run facts to the run parameters, and  *)
-(* it is the first level at which a row proves anything. What it carries is   *)
-(* run correctness: the interpreter finishes within the fuel of 220 steps,    *)
+(* it is the first level at which a program proves anything. What it carries  *)
+(* is run correctness: the interpreter finishes within the fuel of 220 steps, *)
 (* every one of the twelve seats reaches an endpoint, and the endpoints       *)
 (* decode to the chirality bit the run was built to recover. Nothing about a  *)
 (* coalition is proved at this level, at any coalition size.                  *)
 (*                                                                            *)
 (* One run reaches this level and three values name it.                       *)
-(* psl211_alldecks_prefix is the one both published rows of the instance      *)
+(* psl211_alldecks_prefix is the one both published programs of the instance  *)
 (* continue from, and it names its termination proof. The other two write     *)
 (* that proof a different way, and they are here because the difference they  *)
-(* make is a fact about the tree                                              *)
-(* and not about the mathematics: an opaque termination lemma is convertible  *)
-(* with nothing, so a prefix that builds its own obligation reaches a second  *)
-(* observed execution, and every value typed against the first would have to  *)
-(* be built again over it. The checks file records the two terms the kernel   *)
-(* refuses that make the fork visible.                                        *)
+(* make is a fact about the tree and not about the mathematics: an opaque     *)
+(* termination lemma is convertible with nothing, so a prefix that builds its *)
+(* own obligation reaches a second observed execution, and every value typed  *)
+(* against the first would have to be built again over it. The checks file    *)
+(* records the two terms the kernel refuses that make the fork visible.       *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_alldecks_prefix  == the algebra, the supplied-layout run and the  *)
@@ -65,13 +64,13 @@ Import GRing.Theory Num.Theory.
 Local Open Scope ring_scope.
 
 (******************************************************************************)
-(*     The prefix of the all-decks row                                        *)
+(*     The prefix of the all-decks program                                    *)
 (******************************************************************************)
 
-(** psl211_alldecks_prefix — the first three statements of the all-decks row:
-    the algebra, the run driven in the supplied-layout mode at the instance's
-    fuel, and the three run facts. What has been proved at this point is run
-    correctness and nothing about a coalition. *)
+(** psl211_alldecks_prefix — the first three statements of the all-decks
+    program: the algebra, the run driven in the supplied-layout mode at the
+    instance's fuel, and the three run facts. What has been proved at this point
+    is run correctness and nothing about a coalition. *)
 Definition psl211_alldecks_prefix : Tableau Observed :=
   psl211_algebra
     supplied inputs psl211_inputT
@@ -101,12 +100,12 @@ Proof. exact: erefl. Qed.
 (** psl211_alldecks_prefix_vm — the prefix again, with the termination
     obligation built where the statement is written instead of named. The
     proposition proved is the one psl211_alldecks_prefix proves and the run is
-    the same run, but the term is not psl211_alldecks_terminates, and an
-    opaque lemma is convertible with nothing; so the observed execution this
-    prefix reaches is a second value, equal to psl211_alldecks_observed only
-    up to the irrelevance of an obligation. Everything typed against
+    the same run, but the term is not psl211_alldecks_terminates, and an opaque
+    lemma is convertible with nothing; so the observed execution this prefix
+    reaches is a second value, equal to psl211_alldecks_observed only up to the
+    irrelevance of an obligation. Everything typed against
     psl211_alldecks_observed, the instance's model first of all, would have to
-    be built again over it, which is why no row is written here. *)
+    be built again over it, which is why no program is written here. *)
 Definition psl211_alldecks_prefix_vm : Tableau Observed :=
   psl211_algebra
     supplied inputs psl211_inputT
@@ -139,8 +138,8 @@ Definition psl211_alldecks_prefix_lit : Tableau Observed :=
             recon by psl211_alldecks_recon.
 
 (** psl211_alldecks_prefix_lit_paramsE — the prefix written with the fuel
-    literal drives the same run, so fuel 220 and fuel psl211_fuel name one
-    run. The row names the fuel, so that it is stated once. *)
+    literal drives the same run, so fuel 220 and fuel psl211_fuel name one run.
+    The program names the fuel, so that it is stated once. *)
 Lemma psl211_alldecks_prefix_lit_paramsE :
   projT1 (projT2 (tableau_at psl211_alldecks_prefix_lit))
   = psl211_alldecks_params.
