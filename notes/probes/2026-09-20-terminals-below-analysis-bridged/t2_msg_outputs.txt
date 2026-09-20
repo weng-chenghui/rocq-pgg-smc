@@ -1,0 +1,47 @@
+########## t2_msg_view_secrecy.v
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/t2_msg_view_secrecy.v", line 8, characters 0-50:
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/t2_msg_view_secrecy.v", line 16, characters 23-50:
+Error:
+The term "s5_dealt_observed_published" has type "PublishedObserved"
+while it is expected to have type "PublishedAt ?c".
+
+########## t2_msg_security_property.v
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/t2_msg_security_property.v", line 8, characters 0-50:
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/t2_msg_security_property.v", line 16, characters 28-55:
+Error:
+The term "s5_dealt_observed_published" has type "PublishedObserved"
+while it is expected to have type "PublishedAt ?c".
+
+########## t2_msg_not_published.v
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/t2_msg_not_published.v", line 8, characters 0-50:
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/t2_msg_not_published.v", line 16, characters 7-34:
+Error:
+The term "s5_dealt_observed_published" has type "PublishedObserved"
+while it is expected to have type "Published".
+
+########## t2_msg_baseline_path.v
+Error:
+The term "erefl" has type
+ "published_observed_path
+    (s5_dealt |> publish Observed BaselineClassicalOnly) =
+  published_observed_path
+    (s5_dealt |> publish Observed BaselineClassicalOnly)"
+while it is expected to have type
+ "published_observed_path
+    (s5_dealt |> publish Observed BaselineClassicalOnly) =
+  s5_det_path"
+(cannot unify "published_observed_path
+                 (s5_dealt |> publish Observed BaselineClassicalOnly)"
+and "s5_det_path").
+
+########## t2_msg_idealfinite.v
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/t2_msg_idealfinite.v", line 8, characters 0-50:
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/t2_msg_idealfinite.v", line 18, characters 32-43:
+Error:
+In environment
+a : AssumptionStatus
+q : StackAt Sampled
+pf : StackProp Sampled q
+The term "IdealFinite" has type "TransferStatus"
+while it is expected to have type "TransferStatusWithoutTheorem".
+

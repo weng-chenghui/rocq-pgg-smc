@@ -87,7 +87,7 @@ Design with the decisions: `notes/2026-09-20-060000-instance-tableau-directory-d
 |---|---|---|
 | 4.1 | Observers | open |
 | 4.2 | Refutation rows and NegativeTransfer | open |
-| 4.3 | Terminals below AnalysisBridged | open |
+| 4.3 | Terminals below AnalysisBridged | DONE. Spec, probe, two audits, landing plan of seven decisions: `notes/20260920-terminals-below-analysis-bridged-probe-design.md`; records in `notes/probes/2026-09-20-terminals-below-analysis-bridged/`. Landed by an Opus rocq-prover: in `manifest/pgg_tableau.v` two records `PublishedObserved`, `PublishedSampled` (two records and not a family indexed by the level), the bind-shaped terminals `publish_observed` (transfer status fixed at `NoModelComparison`) and `publish_sampled` (payload `TransferStatusWithoutTheorem`: only the two statuses that name an absent premise), six path equations by conversion, three readers; in `manifest/pgg_tableau_syntax.v` the rules `s \|> publish Observed a` and `s \|> publish Sampled t a`, no keyword reserved (measured); `s5_dealt_observed_published` with its path equal to `s5_det_path` by conversion and its recovery statement; four recorded rejections in `s5_tableau_checks.v`, each message read. Two Opus audits of the landing, one fix pass on the main session's rulings; reverse closure of 28 files and the fidelity file recompiled by the main session (`s5_group_order_eq` and the three classical axioms, as `s5_dealt`). Consequence for 4.2: `NegativeTransfer` is published only from a level whose proposition contains the obstruction |
 | 4.4 | One-position marginal bounds | open |
 
 ## Rename map (step 0.1)

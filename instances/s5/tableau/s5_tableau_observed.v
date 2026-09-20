@@ -12,13 +12,18 @@
 (*                                                                            *)
 (* Both sharing-family runs of the instance reach this level, and each is     *)
 (* named once. The dealer-dealt run's program stops here: the manifest path   *)
-(* s5_det_path it answers carries no model and no security payload, because   *)
-(* the canonical encoding it deals puts the whole secret on one card, so the  *)
-(* single seat the cut sends that card to reads the secret, as does every     *)
-(* coalition containing that seat. The manifest carries a second path over    *)
-(* this run, s5_word_path, under a finite-word model; the Sampled file        *)
-(* records why no program of this instance continues from that model. The     *)
-(* supplied run continues, through the tape model of the level above.         *)
+(* s5_det_path its published value builds carries no model and no security    *)
+(* payload, because the canonical encoding it deals puts the whole secret on  *)
+(* one card, so the single seat the cut sends that card to reads the secret,  *)
+(* as does every coalition containing that seat. The manifest carries a       *)
+(* second path over this run, s5_word_path, under a finite-word model; the    *)
+(* Sampled file records why no program of this instance continues from that   *)
+(* model. The supplied run continues, through the tape model of the level     *)
+(* above. The dealt program is handed over at this level with the manifest    *)
+(* path it builds. Such a value carries run correctness, the path, and        *)
+(* nothing above them: no security reader applies to it, and the assumption   *)
+(* status written into its path is the author's statement, checked against    *)
+(* the manifest's prose rather than by the term.                              *)
 (*                                                                            *)
 (* Each run's specification sits here too. A specification is an ideal        *)
 (* function with a tolerated coalition size, and realising one is a statement *)
@@ -31,6 +36,9 @@
 (*   s5_supplied          == the supplied run as a program                    *)
 (*   s5_F                 == the specification the dealer-dealt run realises  *)
 (*   s5_rand_F            == the specification the supplied run realises      *)
+(*   s5_dealt_observed_published                                              *)
+(*                        == the dealer-dealt program handed over with the    *)
+(*                           manifest path it builds                          *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   s5_dealt_path_observedE                                                  *)
@@ -48,12 +56,20 @@
 (*                           tolerates                                        *)
 (*   s5_realises_expected, s5_rand_realises_expected                          *)
 (*                        == each run recovers its specification's value      *)
+(*   s5_dealt_observed_published_pathE                                        *)
+(*                        == the path that program builds is the manifest's   *)
+(*                           deterministic path                               *)
+(*   s5_dealt_observed_published_recovers                                     *)
+(*                        == the endpoints of that run decode to the dealt    *)
+(*                           position, read off the published value           *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
 From mathcomp Require Import fintype finfun finset.
 From mathcomp Require Import matrix zmodp ssralg ssrnum reals.
 From pgg_reconstruct Require Import pgg_sharing_framework.
+From pgg_smc Require Import pgg_monodromy_profile pgg_execution_plug.
+From pgg_smc Require Import pgg_observed_execution.
 From pgg_smc Require Import pgg_analysis_status.
 From pgg_smc Require Import pgg_instance pgg_functionality.
 From pgg_smc Require Import s5_exec.
@@ -107,6 +123,42 @@ Lemma s5_dealt_executableE :
              endpoints by s5_dealt_endpoints
              recon by s5_dealt_recon) = s5_dealt.
 Proof. exact: erefl. Qed.
+
+(** The dealer-dealt run handed over with the manifest path it builds. The
+    assumption status is the instance's group-order fact, which enters
+    through the reconstruction plug the profile carries; the status is
+    written here and the manifest's prose defines when it is true, so
+    nothing in the term checks it against Print Assumptions. What the value
+    carries is run correctness and no more: nothing about a coalition is
+    asserted, which is the honest content of this run, whose canonical
+    encoding puts the whole secret on one card. *)
+Definition s5_dealt_observed_published : PublishedObserved :=
+  s5_dealt |> publish Observed (AcceptsAxioms [:: AxS5GroupOrder]).
+
+(** The path this program builds is the manifest's own deterministic path.
+    Three of its five coordinates are fixed by the terminal, the assumption
+    status is the payload this file writes, and the fifth is the observed
+    execution s5_dealt_path_observedE already identifies. A reader of the
+    value therefore holds the manifest's path for this program and the proof
+    of run correctness in one term. The equation holds only for the
+    assumption status the program was published under, as the recorded
+    rejection in s5_tableau_checks.v shows. *)
+Lemma s5_dealt_observed_published_pathE :
+  published_observed_path s5_dealt_observed_published = s5_det_path.
+Proof. exact: erefl. Qed.
+
+(** The third conjunct of run correctness, read off the published value: the
+    endpoints of the deterministic run decode to the dealt position. It is
+    the statement S5Analysis.observed_recovers names, and the two other
+    conjuncts come off the same reader. *)
+Definition s5_dealt_observed_published_recovers
+    (s : 'I_5) (w0 : pgg_gT (mp_M S5Analysis.profile))
+    (Gw0 : w0 \in pgg_G (mp_M S5Analysis.profile)) :
+  exec_decode S5Analysis.exec_plug
+    (OE.oe_endpoints_size S5Analysis.observed s w0) = s :=
+  match run_correct_of_observed s5_dealt_observed_published s w0 Gw0 with
+  | And3 _ _ H => H
+  end.
 
 (******************************************************************************)
 (*     The supplied run                                                       *)

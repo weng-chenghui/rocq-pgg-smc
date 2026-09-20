@@ -37,7 +37,7 @@
 (* are not the same term, so a program through the literal is a different     *)
 (* program from one through the lemma, proving the same proposition.          *)
 (*                                                                            *)
-(* The separator of the two terminal rules is |>. Measured on 2026-09-14, |>  *)
+(* The separator of the terminal rules is |>. Measured on 2026-09-14, |>      *)
 (* occurs as a standalone notation token nowhere in the kept tree, MathComp   *)
 (* with analysis, infotheo or Stdlib: every occurrence is inside infotheo's   *)
 (* convex notation x <| p |> y, in fdist_scope and fsdist_scope, and in       *)
@@ -77,7 +77,17 @@
 (* slot L of the encoded rule, the slot k of the leaks rule and the slot c of *)
 (* the conclude rule, so it would be a twentieth, and it is not one only      *)
 (* because ssreflect already reserves it, measured on 2026-09-19 by binding   *)
-(* it in a file that requires nothing but ssreflect.                          *)
+(* it in a file that requires nothing but ssreflect. Observed and Sampled     *)
+(* follow a literal too, measured on 2026-09-21: each follows the literal     *)
+(* publish in one of the two terminal rules below AnalysisBridged, each stays *)
+(* a binder name in a file whose Require lines are ssreflect and this one,    *)
+(* and each stays the CompletionLevel constructor it names, as Tableau        *)
+(* Observed in s5_tableau_observed.v and Tableau Sampled in                   *)
+(* s5_tableau_sampled.v write it. The count of nineteen is unchanged. Inside  *)
+(* the publish position the two tokens are taken by those two rules, so the   *)
+(* transfer-status slot of the three-payload rule cannot be filled by a bare  *)
+(* token spelled Observed or Sampled, though a parenthesised one reaches the  *)
+(* slot.                                                                      *)
 (*                                                                            *)
 (* One of the nineteen shadows a framework definition: endpoints is also the  *)
 (* verifier's endpoint tuple in pgg_interface.v. A file requiring this        *)
@@ -419,4 +429,19 @@ Notation "s |> 'conclude' c 'by' p" := (s ;;; conclude c of p)
    publish itself, so that a program's last statement reads in the order the
    manifest column headings run. *)
 Notation "s |> 'publish' t a" := (s ;;; publish a of t)
+  (at level 90, left associativity, t at level 0, a at level 0).
+
+(* One payload, the assumption status. The terminal takes the observed
+   execution from the program's own data and writes the other three
+   coordinates itself: the level, the empty model slot and
+   NoModelComparison. *)
+Notation "s |> 'publish' 'Observed' a" := (s ;;; publish_observed of a)
+  (at level 90, left associativity, a at level 0).
+
+(* The transfer status and then the assumption status, in the order the
+   manifest's path record carries them and the order the three-payload
+   publish rule writes them. The status slot is the restricted payload type,
+   so a program at this level cannot write one of the two statuses that name
+   a transfer theorem. *)
+Notation "s |> 'publish' 'Sampled' t a" := (s ;;; publish_sampled a of t)
   (at level 90, left associativity, t at level 0, a at level 0).

@@ -9,14 +9,18 @@
 (* term: it fixes a spelling that does not typecheck, and states no general   *)
 (* impossibility. The file declares nothing and nothing depends on it.        *)
 (*                                                                            *)
-(* Two boundaries are recorded. The first is that a probability model belongs *)
-(* to one run: a model is typed over the observed execution it was built      *)
-(* over, so the tape model samples the supplied run and the same statement at *)
-(* the dealer-dealt run is refused. The two modes of the sharing family       *)
-(* therefore share no model, and no statement made at one run's model is a    *)
-(* statement about the other's. The second is that the tolerated coalition    *)
-(* size of s5_F is read off the algebra: the equation asserting it is five,   *)
-(* where the sum-mod scheme tolerates four, is refused.                       *)
+(* Three boundaries are recorded. The first is that a probability model       *)
+(* belongs to one run: a model is typed over the observed execution it was    *)
+(* built over, so the tape model samples the supplied run and the same        *)
+(* statement at the dealer-dealt run is refused. The two modes of the sharing *)
+(* family therefore share no model, and no statement made at one run's model  *)
+(* is a statement about the other's. The second is that the tolerated         *)
+(* coalition size of s5_F is read off the algebra: the equation asserting it  *)
+(* is five, where the sum-mod scheme tolerates four, is refused. The third is *)
+(* that the readers of a security property do not apply to the dealer-dealt   *)
+(* program's published value, which is a PublishedObserved and not a          *)
+(* Published, and that the path built for that value records the assumption   *)
+(* status it was published under.                                             *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
@@ -64,3 +68,33 @@ Fail Definition s5_dealt_rand : Tableau Sampled :=
    specification carries is decided by the kernel rather than by the
    reader. *)
 Fail Definition s5_F_k5 : s5_F = MkFunctionality id 5 := erefl.
+
+(******************************************************************************)
+(*     Terms refused at the dealer-dealt program published at Observed        *)
+(******************************************************************************)
+
+(* The reader of an exact-independence statement takes a PublishedAt, whose
+   data is at AnalysisBridged. The term written under this line applies it to
+   the dealer-dealt program's published value, which is a PublishedObserved,
+   and the kernel refuses that term. *)
+Fail Check (view_secrecy_of s5_dealt_observed_published).
+
+(* The reader naming which security property a program certified takes the
+   same record, and the same value is refused under it. *)
+Fail Check (security_property_of s5_dealt_observed_published).
+
+(* Nor is that value a Published, which is PublishedAt at the empty bound.
+   PublishedObserved and PublishedAt are distinct inductive types with no
+   coercion between them, so the ascription written here is refused. *)
+Fail Check (s5_dealt_observed_published : Published).
+
+(* The same program published under the baseline assumption status: the path
+   it builds is not the manifest's, which records the accepted group-order
+   fact. Conversion decides the two paths apart, so the equation written here
+   is refused. Both sides of that disagreement are written by hand, the
+   payload here and the manifest's field there, so what the kernel decides is
+   whether two authors' statements agree and not which axioms the program
+   uses. *)
+Fail Definition s5_dealt_observed_published_baseline_pathE :
+  published_observed_path (s5_dealt |> publish Observed BaselineClassicalOnly)
+  = s5_det_path := erefl.

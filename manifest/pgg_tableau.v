@@ -77,6 +77,23 @@
 (* the security property untouched and moves the real the evidence's          *)
 (* proposition mentions to any upper bound of it.                             *)
 (*                                                                            *)
+(* Two levels below the bridge have a terminal of their own. A program that   *)
+(* stops at Observed hands over run correctness with a manifest path whose    *)
+(* observed execution is the program's own, whose level, model slot and       *)
+(* transfer status the terminal fixes, and whose assumption status is the     *)
+(* payload the line writes. One that stops at Sampled hands over run          *)
+(* correctness and the link lemma of the model family it named. The two       *)
+(* records are inductive types distinct from PublishedAt, which is what makes *)
+(* every security reader inapplicable to a value of either, so a coercion     *)
+(* added later out of either record into PublishedAt would turn each recorded *)
+(* rejection into an acceptance. The Sampled terminal takes its transfer      *)
+(* status at a payload type holding the two statuses that name an absent      *)
+(* premise rather than a theorem, because a program at that level has proved  *)
+(* no statement in which an idealized model occurs. The assumption status is  *)
+(* a payload at all three levels. No level's proposition determines it and    *)
+(* nothing in the term ties it to Print Assumptions: it is the author's       *)
+(* statement, and the manifest's prose defines when it is true.               *)
+(*                                                                            *)
 (* Definitions:                                                               *)
 (*   ExactWitness           == the security witness for exact independence    *)
 (*   IndistinguishabilityCert                                                 *)
@@ -120,6 +137,26 @@
 (*                             ideal-proximity name                           *)
 (*   security_property_of   == which security property a published program    *)
 (*                             carries                                        *)
+(*   PublishedObserved      == a program stopped at Observed, its path and    *)
+(*                             run correctness                                *)
+(*   PublishedSampled       == a program stopped at Sampled, its path and     *)
+(*                             that level's two conjuncts                     *)
+(*   TransferStatusWithoutTheorem                                             *)
+(*                          == the transfer statuses carrying no theorem      *)
+(*                             about an idealized model                       *)
+(*   transfer_of_without_theorem                                              *)
+(*                          == the manifest transfer status a payload of the  *)
+(*                             Sampled terminal stands for                    *)
+(*   publish_observed       == the terminal of a program stopped at Observed  *)
+(*   publish_sampled        == the terminal of a program stopped at Sampled   *)
+(*   run_correct_of_observed                                                  *)
+(*                          == run correctness of a program published at      *)
+(*                             Observed                                       *)
+(*   run_correct_of_sampled == run correctness of a program published at      *)
+(*                             Sampled                                        *)
+(*   view_identification_of_sampled                                           *)
+(*                          == the link lemma of a program published at       *)
+(*                             Sampled                                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   tableau_left_unit      == sequencing onto a built tableau is application *)
@@ -143,6 +180,20 @@
 (*                             property alone                                 *)
 (*   publish_propertyE      == publishing a program leaves its security       *)
 (*                             property alone                                 *)
+(*   publish_observed_completionE                                             *)
+(*                          == the path of a program published at Observed    *)
+(*                             records Observed                               *)
+(*   publish_observed_transferE                                               *)
+(*                          == it records no model comparison                 *)
+(*   publish_observed_modelE                                                  *)
+(*                          == its model slot is empty                        *)
+(*   publish_sampled_completionE                                              *)
+(*                          == the path of a program published at Sampled     *)
+(*                             records Sampled                                *)
+(*   publish_sampled_transferE                                                *)
+(*                          == it records the manifest status the program's   *)
+(*                             last line wrote                                *)
+(*   publish_sampled_modelE == its model slot is the family the program named *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -1014,6 +1065,167 @@ Definition security_property_of (c : ConcludedBound) (r : PublishedAt c)
   : SecurityProperty :=
   ab_security_property (published_at r) R idx.
 Arguments security_property_of {c} r R idx.
+
+(******************************************************************************)
+(*     Handing a program over below AnalysisBridged                           *)
+(******************************************************************************)
+
+(* A program that stopped at Observed, handed over: its data, a manifest
+   path, and run correctness of the observed execution that data reached. The
+   path field is constrained by neither of the other two, as PublishedAt's is
+   not: the terminal below builds it from the program's own data, and the
+   record accepts any path written by hand beside any data. The proposition
+   field is typed at the data field, as PublishedAt's third field is. A value
+   carries StackProp Observed and nothing above it, so no coalition, privacy
+   or security statement follows from one. *)
+Record PublishedObserved := MkPublishedObserved {
+  published_observed_at   : StackAt Observed ;
+  published_observed_path : AnalysisPath ;
+  published_observed_thm  : StackProp Observed published_observed_at }.
+
+(* StackProp Observed unfolds to a statement quantified over a run argument,
+   so Set Implicit Arguments would take the record for something to infer
+   from that argument. *)
+Arguments published_observed_thm : clear implicits.
+
+(* A program that stopped at Sampled, handed over: its data, a manifest path,
+   and run correctness together with the link lemma of the analysis model
+   family the program named. The path field stands in the same relation to
+   the other two. The program has proved no statement in which an idealized
+   model occurs, so no security property is certified by such a value. *)
+Record PublishedSampled := MkPublishedSampled {
+  published_sampled_at   : StackAt Sampled ;
+  published_sampled_path : AnalysisPath ;
+  published_sampled_thm  : StackProp Sampled published_sampled_at }.
+
+(* The two transfer statuses that carry no theorem about an idealized model.
+   A program at Sampled has proved run correctness and the link lemma and
+   nothing about an ideal, so these are the two its own proposition supports,
+   and a path carrying either of them owes the manifest the premise it lacks
+   rather than a theorem. *)
+Variant TransferStatusWithoutTheorem :=
+  SampledNoModelComparison | SampledStaticExecutedOnly.
+
+(* The manifest transfer status a restricted payload stands for. It is the
+   coordinate a reader of such a path finds, so the two statuses naming a
+   transfer theorem never appear on a path the Sampled terminal built. *)
+Definition transfer_of_without_theorem (t : TransferStatusWithoutTheorem)
+    : TransferStatus :=
+  match t with
+  | SampledNoModelComparison => NoModelComparison
+  | SampledStaticExecutedOnly => StaticExecutedOnly
+  end.
+
+(* The terminal of a program that stops at run correctness. The path takes
+   the observed execution from the program's own data and the terminal writes
+   the other three coordinates: the level Observed, the empty model slot, and
+   NoModelComparison, which is not a payload because a program naming no
+   model compares its execution with nothing. The assumption status is the
+   line's payload. No level's proposition determines it and nothing ties it
+   to Print Assumptions: it is the author's statement, and the manifest's
+   prose defines when it is true. *)
+Definition publish_observed (q : StackAt Observed) (pf : StackProp Observed q)
+    (a : AssumptionStatus) : PublishedObserved :=
+  @MkPublishedObserved q
+    (@MkAnalysisPath (ob_obs q) Observed None NoModelComparison a) pf.
+
+(* The data occurs in the type of the proof, so Set Implicit Arguments would
+   infer it and the bind above, which passes the terminal unapplied, would
+   have no slot to write it in. *)
+Arguments publish_observed : clear implicits.
+
+(* The terminal of a program that stops at a named analysis model family. The
+   path takes the family the program's own data carries, and the transfer
+   status is the line's payload at the restricted type, so the two statuses
+   naming a transfer theorem are unreachable through this terminal. The
+   restriction is carried by this terminal and not by the record, whose path
+   field accepts any path. The assumption status stands on the same footing
+   as at Observed. *)
+Definition publish_sampled (a : AssumptionStatus) (q : StackAt Sampled)
+    (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem)
+    : PublishedSampled :=
+  @MkPublishedSampled q
+    (@MkAnalysisPath (sp_obs q) Sampled (sp_f q)
+       (transfer_of_without_theorem t) a) pf.
+
+(* The data occurs in the type of the proof here too. *)
+Arguments publish_sampled : clear implicits.
+
+(* The path of a program published at Observed records Observed. Conversion
+   decides it, so a reader of the value learns the level its program stopped
+   at without consulting the manifest. *)
+Lemma publish_observed_completionE (q : StackAt Observed)
+    (pf : StackProp Observed q) (a : AssumptionStatus) :
+  ap_completion (published_observed_path (publish_observed q pf a)) = Observed.
+Proof. exact: erefl. Qed.
+
+(* The transfer status of such a path is fixed and not chosen: the program
+   names no model, so nothing of it is compared with an idealized one. *)
+Lemma publish_observed_transferE (q : StackAt Observed)
+    (pf : StackProp Observed q) (a : AssumptionStatus) :
+  ap_transfer (published_observed_path (publish_observed q pf a))
+  = NoModelComparison.
+Proof. exact: erefl. Qed.
+
+(* The model slot of such a path is empty: the program named no model, so
+   nothing in the path points at a distribution. *)
+Lemma publish_observed_modelE (q : StackAt Observed)
+    (pf : StackProp Observed q) (a : AssumptionStatus) :
+  ap_model (published_observed_path (publish_observed q pf a)) = None.
+Proof. exact: erefl. Qed.
+
+(* The path of a program published at Sampled records Sampled, which is as far
+   as that program's own proposition reaches. *)
+Lemma publish_sampled_completionE (a : AssumptionStatus) (q : StackAt Sampled)
+    (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem) :
+  ap_completion (published_sampled_path (publish_sampled a q pf t)) = Sampled.
+Proof. exact: erefl. Qed.
+
+(* The transfer status of such a path is the manifest status the line's
+   payload stands for, and the manifest then owes that path the premise the
+   status names as absent. *)
+Lemma publish_sampled_transferE (a : AssumptionStatus) (q : StackAt Sampled)
+    (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem) :
+  ap_transfer (published_sampled_path (publish_sampled a q pf t))
+  = transfer_of_without_theorem t.
+Proof. exact: erefl. Qed.
+
+(* The model slot of such a path is the family the program's data carries, so
+   the path names the model the link lemma was proved at and not a second
+   family that resembles it. *)
+Lemma publish_sampled_modelE (a : AssumptionStatus) (q : StackAt Sampled)
+    (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem) :
+  ap_model (published_sampled_path (publish_sampled a q pf t)) = sp_f q.
+Proof. exact: erefl. Qed.
+
+(* Run correctness of a program published at Observed: every process
+   finishes, the endpoints number one per seat, and decoding them returns the
+   value the run recovers. It is the whole of what such a value proves, and
+   the reader is the third field itself, so a value the execute rule built
+   hands back the instance's own run-correctness field and the reader adds
+   nothing to it. *)
+Definition run_correct_of_observed (r : PublishedObserved)
+  : oe_correct_prop (ob_obs (published_observed_at r)) :=
+  published_observed_thm r.
+Arguments run_correct_of_observed : clear implicits.
+
+(* Run correctness of a program published at Sampled, the first of the two
+   conjuncts that level carries. A reader of such a value learns that the run
+   finished and that its endpoints decode, and nothing about a coalition. *)
+Definition run_correct_of_sampled (r : PublishedSampled)
+  : oe_correct_prop (sp_obs (published_sampled_at r)) :=
+  proj1 (published_sampled_thm r).
+Arguments run_correct_of_sampled : clear implicits.
+
+(* The link lemma of a program published at Sampled, identifying its executed
+   coalition reader with the direct computation at every real field and
+   index. It is the second and last conjunct of that level, and the
+   hypothesis along which a security statement about this model would be
+   transported, were one proved. *)
+Definition view_identification_of_sampled (r : PublishedSampled)
+  : sampled_viewE_prop (sp_f (published_sampled_at r)) :=
+  proj2 (published_sampled_thm r).
+Arguments view_identification_of_sampled : clear implicits.
 
 (******************************************************************************)
 (*     Where a program's security property is decided                         *)

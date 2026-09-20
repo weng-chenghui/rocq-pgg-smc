@@ -1,0 +1,220 @@
+File "./notes/probes/2026-09-20-terminals-below-analysis-bridged/landing_fidelity.v", line 21, characters 0-50:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+PublishedObserved : Type
+     : Type
+MkPublishedObserved
+:
+forall q : StackAt Observed,
+AnalysisPath -> StackProp Observed q -> PublishedObserved
+     : forall q : StackAt Observed,
+       AnalysisPath -> StackProp Observed q -> PublishedObserved
+published_observed_at : PublishedObserved -> StackAt Observed
+     : PublishedObserved -> StackAt Observed
+published_observed_path : PublishedObserved -> AnalysisPath
+     : PublishedObserved -> AnalysisPath
+published_observed_thm
+:
+forall r : PublishedObserved, StackProp Observed (published_observed_at r)
+     : forall r : PublishedObserved,
+       StackProp Observed (published_observed_at r)
+PublishedSampled : Type
+     : Type
+MkPublishedSampled
+:
+forall q : StackAt Sampled,
+AnalysisPath -> StackProp Sampled q -> PublishedSampled
+     : forall q : StackAt Sampled,
+       AnalysisPath -> StackProp Sampled q -> PublishedSampled
+published_sampled_at : PublishedSampled -> StackAt Sampled
+     : PublishedSampled -> StackAt Sampled
+published_sampled_path : PublishedSampled -> AnalysisPath
+     : PublishedSampled -> AnalysisPath
+published_sampled_thm
+:
+forall r : PublishedSampled, StackProp Sampled (published_sampled_at r)
+     : forall r : PublishedSampled,
+       StackProp Sampled (published_sampled_at r)
+TransferStatusWithoutTheorem : Set
+     : Set
+SampledNoModelComparison : TransferStatusWithoutTheorem
+     : TransferStatusWithoutTheorem
+SampledStaticExecutedOnly : TransferStatusWithoutTheorem
+     : TransferStatusWithoutTheorem
+transfer_of_sampled : TransferStatusWithoutTheorem -> TransferStatus
+     : TransferStatusWithoutTheorem -> TransferStatus
+erefl : transfer_of_sampled SampledNoModelComparison = NoModelComparison
+     : transfer_of_sampled SampledNoModelComparison = NoModelComparison
+erefl : transfer_of_sampled SampledStaticExecutedOnly = StaticExecutedOnly
+     : transfer_of_sampled SampledStaticExecutedOnly = StaticExecutedOnly
+publish_observed
+:
+forall q : StackAt Observed,
+StackProp Observed q -> AssumptionStatus -> PublishedObserved
+     : forall q : StackAt Observed,
+       StackProp Observed q -> AssumptionStatus -> PublishedObserved
+publish_sampled
+:
+AssumptionStatus ->
+forall q : StackAt Sampled,
+StackProp Sampled q -> TransferStatusWithoutTheorem -> PublishedSampled
+     : AssumptionStatus ->
+       forall q : StackAt Sampled,
+       StackProp Sampled q ->
+       TransferStatusWithoutTheorem -> PublishedSampled
+publish_observed_completionE
+:
+forall (q : StackAt Observed) (pf : StackProp Observed q)
+  (a : AssumptionStatus),
+ap_completion (published_observed_path (publish_observed q pf a)) = Observed
+     : forall (q : StackAt Observed) (pf : StackProp Observed q)
+         (a : AssumptionStatus),
+       ap_completion (published_observed_path (publish_observed q pf a)) =
+       Observed
+publish_observed_transferE
+:
+forall (q : StackAt Observed) (pf : StackProp Observed q)
+  (a : AssumptionStatus),
+ap_transfer (published_observed_path (publish_observed q pf a)) =
+NoModelComparison
+     : forall (q : StackAt Observed) (pf : StackProp Observed q)
+         (a : AssumptionStatus),
+       ap_transfer (published_observed_path (publish_observed q pf a)) =
+       NoModelComparison
+publish_observed_modelE
+:
+forall (q : StackAt Observed) (pf : StackProp Observed q)
+  (a : AssumptionStatus),
+ap_model (published_observed_path (publish_observed q pf a)) = None
+     : forall (q : StackAt Observed) (pf : StackProp Observed q)
+         (a : AssumptionStatus),
+       ap_model (published_observed_path (publish_observed q pf a)) = None
+publish_sampled_completionE
+:
+forall (a : AssumptionStatus) (q : StackAt Sampled)
+  (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem),
+ap_completion (published_sampled_path (publish_sampled a q pf t)) = Sampled
+     : forall (a : AssumptionStatus) (q : StackAt Sampled)
+         (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem),
+       ap_completion (published_sampled_path (publish_sampled a q pf t)) =
+       Sampled
+publish_sampled_transferE
+:
+forall (a : AssumptionStatus) (q : StackAt Sampled)
+  (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem),
+ap_transfer (published_sampled_path (publish_sampled a q pf t)) =
+transfer_of_sampled t
+     : forall (a : AssumptionStatus) (q : StackAt Sampled)
+         (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem),
+       ap_transfer (published_sampled_path (publish_sampled a q pf t)) =
+       transfer_of_sampled t
+publish_sampled_modelE
+:
+forall (a : AssumptionStatus) (q : StackAt Sampled)
+  (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem),
+ap_model (published_sampled_path (publish_sampled a q pf t)) = sp_f q
+     : forall (a : AssumptionStatus) (q : StackAt Sampled)
+         (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem),
+       ap_model (published_sampled_path (publish_sampled a q pf t)) = sp_f q
+run_correct_of_observed
+:
+forall r : PublishedObserved,
+oe_correct_prop (ob_obs (published_observed_at r))
+     : forall r : PublishedObserved,
+       oe_correct_prop (ob_obs (published_observed_at r))
+run_correct_of_sampled
+:
+forall r : PublishedSampled,
+oe_correct_prop (sp_obs (published_sampled_at r))
+     : forall r : PublishedSampled,
+       oe_correct_prop (sp_obs (published_sampled_at r))
+view_identification_of_sampled
+:
+forall r : PublishedSampled,
+sampled_viewE_prop (sp_f (published_sampled_at r))
+     : forall r : PublishedSampled,
+       sampled_viewE_prop (sp_f (published_sampled_at r))
+erefl
+:
+({| tableau_at := qo; tableau_thm := pfo |} |> publish Observed a) =
+publish_observed qo pfo a
+     : ({| tableau_at := qo; tableau_thm := pfo |} |> publish Observed a) =
+       publish_observed qo pfo a
+erefl
+:
+({| tableau_at := qs; tableau_thm := pfs |} |> publish Sampled t a) =
+publish_sampled a qs pfs t
+     : ({| tableau_at := qs; tableau_thm := pfs |} |> publish Sampled t a) =
+       publish_sampled a qs pfs t
+{| tableau_at := qb; tableau_thm := pfb |} |> publish IdealFinite a
+:
+Published
+     : Published
+{| tableau_at := qb; tableau_thm := pfb |} |> publish StaticExecutedOnly a
+:
+Published
+     : Published
+{| tableau_at := qb; tableau_thm := pfb |} |> publish NegativeTransfer a
+:
+Published
+     : Published
+{| tableau_at := qb; tableau_thm := pfb |} |> publish NoModelComparison a
+:
+Published
+     : Published
+s5_dealt_observed_published : PublishedObserved
+     : PublishedObserved
+erefl
+:
+s5_dealt_observed_published =
+publish_observed (tableau_at s5_dealt) (tableau_thm s5_dealt)
+  (AcceptsAxioms [:: AxS5GroupOrder])
+     : s5_dealt_observed_published =
+       publish_observed (tableau_at s5_dealt) (tableau_thm s5_dealt)
+         (AcceptsAxioms [:: AxS5GroupOrder])
+s5_dealt_observed_published_pathE
+:
+published_observed_path s5_dealt_observed_published = s5_det_path
+     : published_observed_path s5_dealt_observed_published = s5_det_path
+s5_dealt_observed_published_recovers
+:
+forall (s : 'I_5) (w0 : pgg_gT (mp_M S5Analysis.profile)),
+w0 \in pgg_G (mp_M S5Analysis.profile) ->
+exec_decode S5Analysis.exec_plug
+  (OE.oe_endpoints_size S5Analysis.observed s w0) =
+s
+     : forall (s : 'I_5) (w0 : pgg_gT (mp_M S5Analysis.profile)),
+       w0 \in pgg_G (mp_M S5Analysis.profile) ->
+       exec_decode S5Analysis.exec_plug
+         (OE.oe_endpoints_size S5Analysis.observed s w0) =
+       s
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+rigidity_s5_instance.s5_group_order_eq :
+  #|pgg_G (Gen_PGGTypes (pgg_raag_path.path_gen_tuple 3))| = 120
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
