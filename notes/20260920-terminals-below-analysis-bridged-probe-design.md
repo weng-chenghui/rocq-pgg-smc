@@ -112,3 +112,88 @@ probe directory's `-Q` FIRST. Two audits (soundness, naming) before a landing
 plan. Landing homes, if GO: `manifest/pgg_tableau.v` (record, terminals,
 readers), `manifest/pgg_tableau_syntax.v` (notations),
 `instances/s5/tableau/s5_tableau_observed.v` (the value and its equation).
+
+## Results of the probe and of the two audits, and the landing plan (2026-09-20)
+
+Probe: `notes/probes/2026-09-20-terminals-below-analysis-bridged/` (`LEDGER.md`),
+nine rows compiled, the four main files recompiled from source by the main
+session. Audits: `audit-soundness.md` (GO for a plan; Y6, Y7, Y8 must be carried;
+its own recommendation on T6) and `audit-naming.md` (NO-GO under the probe's
+names; Z1 to Z13). The owner is away; the decisions below are the main
+session's. Every finding of both audits is ACCEPTED unless a decision below
+says otherwise.
+
+### Decisions
+
+1. **Two records, not a family indexed by the level.** `PublishedObserved` and
+   `PublishedSampled` are two `Record`s, each with its own constructor and three
+   fields (`published_observed_at`, `published_observed_path`,
+   `published_observed_thm`; the Sampled three likewise). Reason: the family
+   `PublishedAtLevel l` is inhabited at `Algebraic` with a trivial proposition
+   (Y2) and at `AnalysisBridged` with the content of `Published` under a second
+   type (Y3), and its name collides in a reader's mind with `PublishedAt c`,
+   which is indexed by a bound (Z14); two records have none of the three
+   problems and rename nothing the owner named. `RunCorrectProp` and the
+   dependent reader disappear: readers are `run_correct_of_observed`,
+   `run_correct_of_sampled`, `view_identification_of_sampled`. The probe
+   compiled the family; the landing first compiles the two-record shape in the
+   probe directory (`t_framework_two_records.v`, with the six path equations and
+   the readers) and lands only what compiled there.
+2. **T6: the Sampled terminal admits only the two statuses that name an absent
+   premise** (the soundness audit's recommendation). `TransferStatus`'s docstring
+   divides its four constructors into two that name a theorem and two that name
+   an absent premise; `StackProp Sampled` contains no ideal, distance or
+   obstruction, so a program that stopped there holds no theorem a status could
+   name, and the manifest's duty to state the missing premise is written for
+   exactly the two admitted statuses. Type `TransferStatusWithoutTheorem` with
+   constructors `SampledNoModelComparison`, `SampledStaticExecutedOnly` and the
+   map into `TransferStatus` (name decided at the landing, checked free). The
+   restricted terminal is THE terminal, `publish_sampled` (Z17). Consequence
+   for tracker step 4.2: a refutation publishes `NegativeTransfer` only from a
+   level whose proposition contains the obstruction; step 4.2 designs that
+   statement.
+3. **One shape for the three terminals** (Z8): both new terminals take
+   `(q) (pf)` and their payload as `publish` does, so the surface rules expand
+   through the bind; the `_step` variants do not land.
+4. **Surface** (Z4, Z16, Y6, Y7): `s |> publish Observed a` and
+   `s |> publish Sampled t a`, the framework's own constructor names after the
+   literal verb, transfer status before assumption status as in all thirty-one
+   existing uses. The keyword measurement is re-run at these spellings, and the
+   syntax header gains the measured fact that inside the publish position the
+   two tokens are taken by the new rules.
+5. **Names** (Z1 to Z3): `<inst>_<discriminator>_<phase>_published`, the phase
+   written at Observed and Sampled and elided at the top level:
+   `s5_dealt_observed_published`, `s5_dealt_observed_published_pathE`,
+   `s5_dealt_observed_published_recovers`.
+6. **What lands where** (Z20, Z21, Y13): framework in `manifest/pgg_tableau.v`
+   (one new section with its banner, header paragraph and index entries, one
+   `Arguments` line per declaration as the neighbours have), the two rules in
+   `manifest/pgg_tableau_syntax.v` (header facts corrected, Z12), the S_5 value
+   and its two lemmas in `instances/s5/tableau/s5_tableau_observed.v`
+   (docstrings in that file's `(**` style, Z11), four recorded rejections in
+   `instances/s5/tableau/s5_tableau_checks.v`, each compiled once without `Fail`
+   and its message kept in the probe directory (Y8). NOT landed: the PGL(2,7)
+   Sampled value (the manifest holds no path at `Sampled` for it), the
+   whole-program surface values, the unchosen T6 variants.
+7. **Honesty sentences that must be in the landed comments** (Y1, Y3, Y4, Y5,
+   Y15): the record's three fields are independent and the terminals are what
+   tie the path to the data, as at the top level; nothing ties an assumption
+   status to `Print Assumptions` at any level, the status is the author's
+   statement and the manifest's prose defines when it is true; the new content
+   of the S_5 value is the bundling of the program's theorem beside its path,
+   the path equation being four coordinates fixed by the terminal and one
+   conversion the tree already had; the four rejections of security readers
+   rest on these records being distinct inductive types.
+
+### Order of work
+
+1. Probe directory: `t_framework_two_records.v` and the restricted terminal;
+   `t_s5_two_records.v`; the keyword re-measurement; message files for every
+   `Fail` that lands.
+2. `manifest/pgg_tableau.v`, compile; `manifest/pgg_tableau_syntax.v`, compile.
+3. `instances/s5/tableau/s5_tableau_observed.v`, `s5_tableau_checks.v`, compile.
+4. `landing_fidelity.v` in the probe directory (every landed declaration
+   ascribed at its full statement, `Print Assumptions` of the S_5 value and its
+   two lemmas: `s5_group_order_eq` and the three classical axioms).
+5. Main session: reverse closure of `manifest/pgg_tableau.v` recompiled
+   single-file, fidelity recompiled, two audits, fix pass, commit.
