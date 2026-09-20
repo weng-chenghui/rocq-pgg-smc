@@ -26,11 +26,14 @@
 (* written out from the prefix are identified with these three values         *)
 (* in five_card_tableau_analysis_bridged.v.                                   *)
 (*                                                                            *)
-(* Two of the statements here are about neither a program nor the manifest's  *)
-(* path for it, and no certify statement takes a payload of either kind.      *)
-(* five_card_repeated_endpoint_lt is one starting position's endpoint         *)
-(* marginal under the repeated model's cut law, a statement about where a     *)
-(* single position is sent and not about what any set of seats reads.         *)
+(* Three of the statements here are about neither a program nor the           *)
+(* manifest's path for it, and no certify statement takes a payload of any    *)
+(* of those kinds. five_card_repeated_endpoint_lt is one starting position's  *)
+(* endpoint marginal under the repeated model's cut law, a statement about    *)
+(* where a single position is sent and not about what any set of seats        *)
+(* reads, and five_card_repeated_cut_marginal is that comparison as the       *)
+(* one-position marginal bound of manifest/pgg_tableau_marginal_bounds.v,     *)
+(* which mentions no coalition, no second run argument and no secret.         *)
 (* five_card_biased_leak_bound is Kim's input-privacy bound, an upper bound   *)
 (* on the conditional mutual information between the two committed inputs and *)
 (* the executed colour reading at a list of card positions, given the         *)
@@ -84,6 +87,9 @@
 (*                              under the repeated model's cut law is under   *)
 (*                              2^-40 of the uniform law, in variation        *)
 (*                              distance                                      *)
+(*   five_card_repeated_cut_marginal                                          *)
+(*                           == the same comparison as a one-position         *)
+(*                              marginal bound on the cut, at most 2^-40      *)
 (*   kim_centi_small         == the smallness condition at bias one hundredth *)
 (*   five_card_biased_leak_bound                                              *)
 (*                           == Kim's input-privacy bound at the law the one- *)
@@ -106,6 +112,7 @@ From pgg_smc Require Import five_card_mixing.
 From pgg_smc Require Import pgg_analysis_manifest.
 From pgg_smc Require Import pgg_tableau.
 From pgg_smc Require Import pgg_tableau_syntax.
+From pgg_smc Require Import pgg_tableau_marginal_bounds.
 From pgg_smc Require Import five_card_tableau_observed.
 
 Set Implicit Arguments.
@@ -236,6 +243,25 @@ Lemma five_card_repeated_endpoint_lt (R : realType) (s : 'I_5) :
            (fdist_uniform (card_ord 5))
   < 2%:R ^- 40.
 Proof. by rewrite kim_centi_cut_distE; exact: kim_deal_centi_lt. Qed.
+
+(** The same comparison as a one-position marginal bound on the cut. The
+    cited lemma is strict and this proposition is stated at 2^-40 and not
+    below it, the strictness dropped through ltW, which is what a published
+    number at this magnitude is read as. The function compared is of the
+    shuffle alone, the position the cut sends one starting position to, and
+    not what any seat holds, so the statement names no seat, no set of seats
+    and no secret and is not security evidence. The number is a sum of
+    absolute differences, twice the total variation distance of the
+    literature, so a distinguisher separating the two laws has advantage at
+    most 2^-41. *)
+Lemma five_card_repeated_cut_marginal (R : realType) (s : 'I_5) :
+  @CutMarginalPropAt R five_card_algebra five_card_params
+    (amf_sample kim_centi_family R tt) _
+    (fun sigma : {perm 'I_5} => sigma s) (fdist_uniform (card_ord 5))
+    (2%:R^-40).
+Proof.
+exact: (Order.POrderTheory.ltW (five_card_repeated_endpoint_lt R s)).
+Qed.
 
 (** The bias one hundredth is smaller in absolute value than one fifth, the
     smallness condition of kim_input_private. It is the fourth of the side

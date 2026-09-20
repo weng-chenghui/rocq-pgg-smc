@@ -38,7 +38,9 @@
 (* twice and because its subject is the run parameter record and no program   *)
 (* value. The two sides are not the same term, the framework reading seat i   *)
 (* at tnth (pi_starts _) i and the instance at i, and they agree because this *)
-(* instance's seats start at the eight card positions in order.               *)
+(* instance's seats start at the eight card positions in order. A             *)
+(* coalition's content trace is that same finite map again, so the trace      *)
+(* theorems and the reading theorems of this instance are one statement each. *)
 (*                                                                            *)
 (* The certificate itself, the program published over it and the statements   *)
 (* about them are in instances/pgl27/tableau/, whose AnalysisBridged file     *)
@@ -49,8 +51,11 @@
 (*   pgl27_word_secret       == the dealt secret on the word sample space     *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   pgl27_static_obsE       == the framework's seat reader is the instance's *)
+(*   pgl27_static_obsE       == the framework's reading is the instance's     *)
 (*   pgl27_static_obs_funE   == the same with the cut left free               *)
+(*   pgl27_coalition_trace_static_obsE                                        *)
+(*                           == a coalition's content trace is its static     *)
+(*                              reading                                       *)
 (*   pgl27_word_proximity_close                                               *)
 (*                           == below the four-seat threshold, the two        *)
 (*                              models' joint laws of reading and secret are  *)
@@ -75,7 +80,7 @@ From pgg_smc Require Import pgg_instance pgg_sample_adapter pgg_weighted_words.
 From pgg_smc Require Import pgg_collusion_bound var_dist_supp.
 From pgg_smc Require Import pgl27_group pgl27_profile pgl27_run.
 From pgg_smc Require Import pgl27_secrecy pgl27_mixing pgl27_word_privacy.
-From pgg_smc Require Import pgl27_exec pgl27_models.
+From pgg_smc Require Import pgl27_exec pgl27_trace pgl27_models.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -110,12 +115,28 @@ Qed.
 
 (** The same identification with the cut left free, as an equality of
     functions of the cut. The input-indistinguishability proposition compares
-    two laws obtained by pushing a reader forward along a distribution on cuts,
-    so it needs the reader as one function and not as its values. *)
+    two laws obtained by pushing a reading forward along a distribution on
+    cuts, so it needs the reading as one function and not as its values. *)
 Lemma pgl27_static_obs_funE (R : realType) (C : {set 'I_8}) (s : bool) :
   @static_coalition_obs pgl27_algebra pgl27_dealt_params C s
   = (fun g => pgl27_view R C (s, g)).
 Proof. by apply: boolp.funext => g; exact: pgl27_static_obsE. Qed.
+
+(** A coalition's content trace at this instance is its static coalition
+    reading, at every dealt secret and every cut. The trace records the card
+    each member's interpreter row carries and the reading records the card
+    each member's seat holds after the shuffle, and at this instance's eight
+    seats the two are one finite map. Every theorem this instance publishes
+    about the trace and every theorem it publishes about the reading are
+    therefore one statement each, and the two numbers 2^-39 the tree
+    publishes, one at the trace and one at the reading, are one number. *)
+Lemma pgl27_coalition_trace_static_obsE (R : realType) (C : {set 'I_8})
+    (s : bool) (g : pgg_gT pgl27_M) :
+  pgl27_coalition_trace R C (s, g)
+  = @static_coalition_obs pgl27_algebra pgl27_dealt_params C s g.
+Proof.
+by rewrite (pgl27_coalition_trace_E R C) (pgl27_static_obsE R C s g).
+Qed.
 
 
 (******************************************************************************)

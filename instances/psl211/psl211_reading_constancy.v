@@ -53,9 +53,11 @@
 (* proves the same field through pgl27_word_view_const of                     *)
 (* instances/pgl27/tableau/pgl27_tableau_analysis_bridged.v,                  *)
 (* three-transitivity read as constancy for coalitions of fewer than four     *)
-(* seats. The dealt statement rules out one named ideal and no certificate,   *)
-(* this tree carrying no dealt-mode sample adapter through which a            *)
-(* certificate's ideal could be pinned to it.                                 *)
+(* seats. The dealt statement rules out one named ideal and no certificate.   *)
+(* An ideal can be pinned to these parameters through the dealer-dealt sample *)
+(* adapter psl211_dealt_sample of instances/psl211/psl211_colour_reading.v,   *)
+(* and no certificate is built over it. The dealt parameters carry no         *)
+(* endpoints statement, so there is no program and no path over them either.  *)
 (*                                                                            *)
 (* Not claimed. Input indistinguishability is not shown unavailable at this   *)
 (* instance. What is excluded is a range of epsilon, and the range of larger  *)
@@ -964,8 +966,11 @@ Proof. by rewrite /psl211_dealt_fiber uniform_fdistmap_pointE. Qed.
     different masses. That is a fact about the group and the design: PSL(2,11)
     is 2-transitive and not 3-transitive, where PGL(2,7) proves the same field
     through pgl27_word_view_const. The statement rules out one named ideal and
-    no certificate, this tree carrying no dealt-mode sample adapter through
-    which a certificate's ideal could be pinned to it. *)
+    no certificate. An ideal can be pinned to these parameters through the
+    dealer-dealt sample adapter psl211_dealt_sample of
+    instances/psl211/psl211_colour_reading.v, and no certificate is built over
+    it. The dealt parameters carry no endpoints statement, so there is no
+    program and no path over them either. *)
 Lemma psl211_dealt_constancy_false (R : realType) :
   ~ coalition_reading_constancy psl211_dealt_params
       ((`U psl211_G_pos) : R.-fdist cutT).

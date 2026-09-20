@@ -33,10 +33,18 @@
 (* it, the seat in question varying with the cut while the ideal is fixed     *)
 (* before any coalition is named. What the manifest names for that path is an *)
 (* endpoint marginal bound against the encoder-image ideal, with no claim     *)
-(* about a coalition.                                                         *)
+(* about a coalition. That bound is stated here as s5_word_seat_marginal, a   *)
+(* one-seat marginal bound of manifest/pgg_tableau_marginal_bounds.v: it      *)
+(* mentions no coalition, no second run argument and no secret, and it is not *)
+(* security evidence.                                                         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   s5_rand_sampled      == the supplied run under the uniform tape model    *)
+(*                                                                            *)
+(* Key results:                                                               *)
+(*   s5_word_seat_marginal                                                    *)
+(*                        == one seat's executed endpoint law under the word  *)
+(*                           model, as a one-seat marginal bound              *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
@@ -44,10 +52,13 @@ From mathcomp Require Import fintype finfun finset.
 From mathcomp Require Import matrix zmodp ssralg ssrnum reals.
 From infotheo Require Import fdist proba.
 From pgg_smc Require Import pgg_analysis_status.
+From pgg_smc Require Import pgg_interface pgg_session_types.
+From pgg_smc Require Import pgg_monodromy_profile.
 From pgg_smc Require Import pgg_instance.
 From pgg_smc Require Import pgg_sample_adapter.
-From pgg_smc Require Import s5_exec s5_models.
+From pgg_smc Require Import s5_exec s5_mixing s5_models.
 From pgg_smc Require Import pgg_tableau.
+From pgg_smc Require Import pgg_tableau_marginal_bounds.
 From pgg_smc Require Import pgg_tableau_syntax.
 From pgg_smc Require Import s5_tableau_observed.
 
@@ -56,6 +67,7 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 Import GRing.Theory Num.Theory.
 
+Local Open Scope fdist_scope.
 Local Open Scope ring_scope.
 
 (******************************************************************************)
@@ -70,3 +82,25 @@ Local Open Scope ring_scope.
     apart. *)
 Definition s5_rand_sampled : Tableau Sampled :=
   s5_supplied sample s5_rand_family.
+
+(******************************************************************************)
+(*     The word model's one-seat marginal bound                               *)
+(******************************************************************************)
+
+(** One seat's executed endpoint under the finite word model sits within the
+    square root of five times alpha to the L of the encoder-image law, as a
+    one-seat marginal bound. The ideal law is neither uniform nor independent
+    of the secret, so the number bounds the distance to one named law and no
+    coalition, privacy or secrecy conclusion follows from it. The number is a
+    sum of absolute differences, twice the total variation distance of the
+    literature, so a distinguisher separating the two laws has advantage at
+    most half of it. It is s5_exec_endpoint_bound of instances/s5/s5_models.v
+    stated as the proposition, and it carries that theorem's assumption, the
+    group-order axiom s5_group_order_eq of the instance's rigidity module. *)
+Lemma s5_word_seat_marginal (R : realType) (secretP : R.-fdist 'I_5)
+    (L : nat)
+    (i : 'I_(pi_T' (mp_PI (instance_profile s5_algebra))).+1) :
+  @SeatMarginalPropAt R s5_algebra s5_dealt_params
+    (s5_word_sample secretP L) i (s5_ideal_reading secretP)
+    (Num.sqrt 5%:R * (s5_alpha_R R) ^+ L).
+Proof. exact: (s5_exec_endpoint_bound secretP L i). Qed.
