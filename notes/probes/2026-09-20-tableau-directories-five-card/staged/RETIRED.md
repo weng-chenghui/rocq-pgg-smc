@@ -17,7 +17,7 @@ a `-R` or `-Q` directory of `_CoqProject`, transitively.
 
 | Path | Lines before | Lines after | What leaves |
 |---|---|---|---|
-| `instances/kim2025/five_card_proximity.v` | 594 | 165 | 28 of its 32 declarations, and its `Require` of `five_card_rows`, `s5_tableau_analysis_bridged`, `s5_exec`, `s5_models`, `pgg_analysis_manifest`, `pgg_tableau`, `pgg_tableau_syntax` and `pgg_observed_execution pgg_analysis_status`; it gains nothing |
+| `instances/kim2025/five_card_proximity.v` | 594 | 169 | 28 of its 32 declarations, and its `Require` of `five_card_rows`, `s5_tableau_analysis_bridged`, `s5_exec`, `s5_models`, `pgg_analysis_manifest`, `pgg_tableau`, `pgg_tableau_syntax` and `pgg_observed_execution pgg_analysis_status`; it gains nothing |
 
 The staged reduced copy is
 `staged/instances/kim2025/five_card_proximity.v`. It keeps

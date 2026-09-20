@@ -17,7 +17,7 @@
 (* which the one-cut Sampled program does not meet and its certified sibling  *)
 (* does. The third is a row equation written for another path, the repeated   *)
 (* certified row against the uniform row, which differ in two of their five   *)
-(* coordinates.                                                               *)
+(* fields.                                                                    *)
 (*                                                                            *)
 (* The fourth is the terminal's index binder: a conclude payload with the     *)
 (* right relation but no index binder is refused, which is what keeps a row   *)
@@ -92,10 +92,10 @@ Local Open Scope ring_scope.
 (*     What a model may be sampled over                                       *)
 (******************************************************************************)
 
-(** A model built over one run does not sample another. The two models named
-    at Sampled are typed over this prefix's observed execution, so the two
-    statements hold; a family typed over a different instance's observed
-    execution is rejected where it is written. *)
+(** A model built over one run does not sample another. Kim's two models,
+    named at Sampled, are typed over this prefix's observed execution, so
+    the two statements hold; a family typed over a different instance's
+    observed execution is rejected where it is written. *)
 Fail Definition five_card_row_s5_family : Tableau Sampled :=
   five_card_committed
     sample S5Analysis.rand_family.
@@ -184,7 +184,7 @@ Fail Definition five_card_biased_proximity_by_done (R : realType) (idx : unit)
 
 
 (******************************************************************************)
-(*     What a certificate may name as its ideal                               *)
+(*     What a certificate may hold                                            *)
 (******************************************************************************)
 
 (** Another instance's model is not an ideal for this one. The ideal adapter

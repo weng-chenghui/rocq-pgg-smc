@@ -27,8 +27,8 @@
 (* Definitions:                                                               *)
 (*   five_card_committed     == the prefix all seven rows share               *)
 (*   five_card_F             == the ideal functionality the run realises      *)
-(*   five_card_F_ite         == that ideal function, in its conditional       *)
-(*                              spelling                                      *)
+(*   five_card_F_ite         == the ideal function is its conditional         *)
+(*                              spelling, up to conversion                    *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   five_card_committed_paramsE                                              *)
@@ -99,9 +99,8 @@ Proof. by []. Qed.
 (** The committed program is its own Executable value with the three run
     facts adjoined. The program above writes the algebra, the ideal function
     and the run clauses in one term, the Executable file names the
-    parameters they build, and this equation is what keeps a reader from
-    having to decide which of the two spellings a statement below is made
-    at. *)
+    parameters they build, and this equation is what lets a statement made
+    at that named value be read as a statement about the prefix. *)
 Lemma five_card_committed_executableE :
   (five_card_committed_executable
      execute terminates by five_card_terminates

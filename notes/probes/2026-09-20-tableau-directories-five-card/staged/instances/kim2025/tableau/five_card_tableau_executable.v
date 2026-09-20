@@ -19,7 +19,7 @@
 (* of the encoding and is checked where it is written, and the interpreter is *)
 (* given fuel 100. The value the run is meant to recover is read off the      *)
 (* Targeted rather than written again, which is what keeps the function a row *)
-(* names and the value its run recovers one term.                             *)
+(* names and the value its run is meant to recover one term.                  *)
 (*                                                                            *)
 (* The line continues five_card_algebraic_start through the raw bind rather   *)
 (* than through a keyword rule. The rules dealt and supplied begin at a       *)

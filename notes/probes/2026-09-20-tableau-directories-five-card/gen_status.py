@@ -192,6 +192,12 @@ def read(name):
 
 
 TBL, COUNTS, NPROD, ORDER = table()
+_WH = collect()[3]
+
+
+def where_of(key):
+    return _WH[key]
+
 NEW = len(verify.NEW_NAMES)
 VERIFY = read("verify.out").strip()
 NFAIL = len([k for k in ORDER if k[0].startswith("Fail")])
@@ -396,11 +402,15 @@ is also production `five_card_rows.v`'s innermost entry.
 Production `five_card_proximity.v` opens `ring`, `fdist`, `proba`, so its
 innermost entry is `proba_scope`, and the 28 declarations that move out of it
 are read under `fdist`, `proba`, `entropy`, `ring` in the AnalysisBridged and
-checks files instead. That is the one environment change any moved
-declaration undergoes, and unlike PGL(2,7) it runs one way only: no
-declaration of the rows file moves into the reduced proximity file. It is
-pinned, not assumed: `baseline.v` and `fidelity.v` print the type of every
-one of them under one scope block and the two outputs are diffed.
+checks files instead. There are **two** environment changes, not one. The %(nresc)d
+declarations that leave `five_card_proximity.v` are read under the
+four-scope block of the sampled, AnalysisBridged and checks files; and the
+%(nlow)d declarations of `five_card_rows.v` that land in the algebraic and
+observed files lose `fdist`, `proba` and `entropy`, keeping `ring_scope` as
+the innermost entry, which is what template rule 3 pins. Neither runs the
+other way: no declaration of the rows file moves into the reduced proximity
+file. Both are pinned, not assumed: `baseline.v` and `fidelity.v` print all
+82 non-`Fail` types under one scope block and the diff is empty.
 
 ## The section scaffolding
 
@@ -648,6 +658,40 @@ vocabulary list does not carry and which is production's text in a moved
 declaration, so it is out of scope for this landing and belongs to the
 comment pass.
 
+## Fix pass 1
+
+Against `audit-five-card.md`, F1 to F19 applied, F20 and F21 no change. Every
+auditor replacement was treated as a proposal: the declaration was opened, the
+type read and each clause confirmed before the sentence was written.
+Deviations are in the last column. `verify.py` reports the same 93 of 93
+token-identical declarations after the pass, and a token diff of the seven
+staged `.v` files against commit `6cbc3a8`, comment-stripped, is empty in all
+seven: 556, 120, 140, 270, 578, 3278 and 534 code tokens, none changed.
+
+| id | Final text | Declaration or object checked | Deviation from the auditor's draft |
+|---|---|---|---|
+| F1 | algebraic docstring: "One run mode is built on this value, the committed one: the Executable file continues it into five_card_committed_executable, and five_card_committed_executableE identifies that value, with the three run facts adjoined, with the prefix all seven published rows continue from." | the equation is `(five_card_committed_executable execute terminates by … recon by …) = five_card_committed`; `five_card_algebraic_start` does not occur in it, and the Executable file's own line is `five_card_algebraic_start ;;; params_step of (…)` | folded into the existing sentence about the run mode rather than added as a separate one, so the docstring still makes one claim about that mode; the content is the auditor's |
+| F2 | executable header: "…which is what keeps the function a row names and the value its run **is meant to recover** one term." | `encoded_input_params` takes the ideal function as `f` and stores it as the expected value; the reconstruction fact arrives at Observed with `five_card_recon` | none |
+| F3 | analysis_bridged header, in the positive form: "Of the three, the repeated row is the one whose route the programs here share: the manifest reaches AnalysisBridged for it by the transfer whose base premise is kim_centi_cut_mixing, with five_card_static_obs_const for the reading equality, and kim_centi_cert carries those same two as fields. For the one-cut row the manifest names two theorems reaching that level: the corresponding transfer, whose premises kim_biased_cert carries, and five_card_colour_view_leak_bound, a conditional mutual information no statement of certify takes and which is carried at Sampled. For the uniform row the manifest names five_card_exec_trace_secrecy at that row's own content trace, where the program's statement is five_card_exact_view_secrecy, read off the published row by view_secrecy_of." | the three manifest docstrings were read in full. The repeated row: "its base premise is FiveCardAnalysis.centi_cut_mixing … with FiveCardAnalysis.static_obs_const for the reading equality … Their transfer concludes FiveCardAnalysis.centi_static_obs_indistinguishability, and that conclusion is what reaches AnalysisBridged". The one-cut row: "colour_view_leak_bound bounds a conditional mutual information … reaching AnalysisBridged" and "biased_static_obs_indistinguishability … is a second theorem reaching AnalysisBridged at this row". The uniform row: "exec_trace_secrecy is stated at this row's own random variable content_trace R ord0 … reaching AnalysisBridged". `kim_centi_cert`'s fields include `(@kim_centi_cut_mixing R)` and `(@five_card_static_obs_const R)`; `kim_biased_cert`'s the same pair at one cut | two. The auditor's draft says the repeated row's level is reached "by the same theorem the manifest names"; the manifest names a transfer with two premises and a conclusion, so the sentence names the two premises the certificate carries, which is the checkable claim. And the manifest writes facade aliases; the underlying names are used, `five_card_analysis.v:342`, `:395` and `:406` defining `colour_view_leak_bound`, `centi_cut_mixing` and `static_obs_const` as `@five_card_colour_view_leak_bound`, `@kim_centi_cut_mixing` and `@five_card_static_obs_const`, and `:314` `exec_trace_secrecy` as `@five_card_exec_trace_secrecy` |
+| F4 | checks docstring: "**Kim's two models, named at Sampled,** are typed over this prefix's observed execution, so the two statements hold." | `five_card_tableau_sampled.v` declares three `Tableau Sampled` values; the two the rejection is about are `five_card_row_repeated_tableau` and `five_card_row_biased_tableau` | none. This is the sixth intended docstring difference, re-worded; `verify.py` still prints six and no more |
+| F5 | observed index: "five_card_F_ite == the ideal function is its conditional spelling, up to conversion" | `Definition five_card_F_ite : fn_f five_card_F = (fun ab => if ab.1 then ab.2 else false) := erefl` | none |
+| F6 | algebraic header: "All seven published rows of this instance begin at that algebra, and the uniform analysis and Kim's two analyses first differ three levels above, at Sampled, where each names its own model." | the Observed header names `five_card_committed` as the prefix all seven rows and all three Sampled values continue from, so the three analyses agree at Algebraic, Executable and Observed; `CompletionLevel` has five constructors, Sampled being three above Algebraic | none. The other sentences of the header were re-read for the same shape: "the value below is the one point" occurs nowhere else, and "All seven published rows of this instance begin at that algebra" is true and makes no agreement claim |
+| F7 | sampled header: "Three programs are named here, one per model a published row continues from, and the three model families they sample are those of five_card_models.v: all three sit over the one committed run and are indexed by the unit type." | the three families are declared in `five_card_models.v`; this file declares three `Tableau Sampled` values | none |
+| F8 | sampled header: "Two of the statements here are about neither a program nor the manifest's row for it, and no arm of certify takes a payload of either kind." | the file's index lists eight key results; six are about a program or the manifest's row for it | none |
+| F9 | sampled: "**Of the statements this directory makes** it is the one security statement below AnalysisBridged, and it is of this level for two reasons: its subject is the law the named Sampled model samples, and **the three statements of certify take an ExactWitness, an IndistinguishabilityCert and an IdealProximityCert, none of them a conditional mutual information.** The distance kim_biased_proximity_close of five_card_proximity.v is at no level and is not counted here." — analysis_bridged: "**Of the statements this directory makes,** the one whose subject is neither a payload nor a row is Kim's input-privacy bound, which is in five_card_tableau_sampled.v; the distance kim_biased_proximity_close is in instances/kim2025/five_card_proximity.v and is at no level." | `certify_exact`, `certify_indistinguishability` and `certify_idealproximity` of `manifest/pgg_tableau.v` take an `ExactPayload`, an `IndistinguishabilityPayload` and an `IdealProximityPayload`, which are families of `ExactWitness`, `IndistinguishabilityCert` and `IdealProximityCert`; `kim_biased_proximity_close` is in the reduced file and belongs to no phase | "no program can carry it one level up" is gone, replaced by the three named statements as the remit directs. The class is named in both and the distance named beside it in both |
+| F10 | checks header: "which differ in two of their five **fields**" | `MkAnalysisPathRow` has five fields, and the moved docstring sixteen lines below already says "fields" | none. The three `apr_` projections a published row prints are still called coordinates, which is a different object and is left alone |
+| F11 | checks banner: "What a certificate may hold" | the group holds four rejections with two causes, only one of them about the ideal | none |
+| F12 | analysis_bridged header: "The **map and the five** link lemmas of the exact arm are not there but here, because no proof that stays uses them." | `five_card_colour_fill` is a `Definition`, indexed under `Definitions:`; the other five are `Lemma`s | none |
+| F13 | sampled index: "== one starting position's endpoint marginal under the repeated model's cut law is **under** 2^-40 **of the uniform law, in variation distance**" | `var_dist (fdistmap … ) (fdist_uniform (card_ord 5)) < 2%%:R ^- 40`, a strict bound | none |
+| F14 | locator entry 1: "…five_card_row_uniform_armE, and, **under The exact arm's four conjuncts at this instance**, the reading five_card_exact_view_secrecy." Entry 7: "…_publishedE and _armE, and, **under What the proximity row states at this instance**, the readings five_card_biased_view_proximity and five_card_biased_view_own_marginals." | the banner map of the file was regenerated and every locator name checked against the banner it sits under; the other five entries name nothing outside their banner | none |
+| F15 | `staged/RETIRED.md`: the reduced file's line count is now read from the staged file | 169 | none |
+| F16 | analysis_bridged index: "== the input-indistinguishability proposition at any constant implies the proximity proposition at one fiftieth, its hypothesis unused" | `IndistinguishabilityPropAt (kim_biased_cert R tt) c -> IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50)`, proof `by move=> _; …` | none |
+| F17 | algebraic header: "Two is the threshold **the derived profile declares**" | one object, `profile_k (instance_profile five_card_algebra)`, now named the same way in both headers | none |
+| F18 | observed docstring of `five_card_committed_executableE`: "…the Executable file names the parameters they build, and this equation is what **lets a statement made at that named value be read as a statement about the prefix.**" | the two adjacent equations relate two different pairs; `five_card_committed_paramsE` keeps production's "two spellings" wording, which is its own text | none |
+| F19 | `STATUS.md`: "There are two environment changes, not one. The 28 declarations that leave five_card_proximity.v are read under the four-scope block …; and the 7 declarations of five_card_rows.v that land in the algebraic and observed files lose fdist, proba and entropy, keeping ring_scope as the innermost entry …" | both counts are computed by `gen_status.py` from `verify.py`'s reading | one. The auditor writes "the algebraic, executable and observed files"; the executable file holds no moved declaration, both of its declarations being new, so it is not named |
+| F20 | no change | the seven sites are production text inside moved docstrings | carried to the closing comment pass, as the audit directs |
+| F21 | no change | `five_card_colour_fill` and `five_card_viewS_nth` are encoding mathematics whose single consumer, `five_card_static_obsE`, is at AnalysisBridged | the reason is recorded in the placement table above so it need not be re-derived |
+
 ## Rulings taken
 
 | Question | Ruling | What it changed here |
@@ -662,6 +706,14 @@ comment pass.
 | Q2, Kim's input-privacy bound at Sampled | accepted as placed | the Sampled header states it as a fact with its two reasons, and the AnalysisBridged header no longer reads as holding every security statement |
 | Q3, Candidate B | no | one AnalysisBridged file with a locator table in its header, as PGL(2,7) now has in production |
 """
+
+
+NRESC = len([1 for k, n, _ in verify.items(
+    verify.strip_comments(open(verify.PROD_PROX).read()))
+    if (k, n) not in verify.STAYING])
+NLOW = len([1 for key in ORDER
+            if where_of(key) in ("algebraic", "observed")
+            and key[1] not in verify.NEW_NAMES])
 
 
 def main():
@@ -691,6 +743,8 @@ def main():
         "verify": VERIFY,
         "nfail": NFAIL,
         "stage": stage,
+        "nresc": NRESC,
+        "nlow": NLOW,
     }
     open(os.path.join(HERE, "STATUS.md"), "w").write(txt)
     print("wrote STATUS.md, %d lines" % txt.count("\n"))
