@@ -48,6 +48,7 @@
 (*                                               secret_expectedE             *)
 (*   exact-security bridges                   -> exact_view_indep,            *)
 (*                                               static_indep                 *)
+(*   input-distinguishability limitation      -> perdeck_reading_ge           *)
 (*   single-card marginal bound               -> marginal_bound,              *)
 (*                                               certificate_bundle           *)
 (*   transfer status                          -> exact_transfer_status        *)
@@ -76,6 +77,7 @@ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
 From pgg_smc Require Import psl211_group psl211_orbit psl211_scheme.
 From pgg_smc Require Import psl211_profile psl211_exec psl211_endpoints.
 From pgg_smc Require Import psl211_alldecks psl211_models psl211_word_model.
+From pgg_smc Require Import psl211_alldecks_input_distinguishability.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -224,6 +226,15 @@ Definition exact_view_indep := @psl211_alldecks_exec_exact_view_indep.
 (** static_indep — the same independence at the framework's static reading,
     which is the form the exact-independence witness's field takes. *)
 Definition static_indep := @psl211_alldecks_static_indep.
+
+(** perdeck_reading_ge — the limitation this model carries: under its own cut
+    law a coalition of three of the twelve seats reads two named deck
+    descriptions of one deal at least 1/660 apart, in the sum of absolute
+    differences, so a distinguisher told to compare those two run arguments
+    has advantage at least 1/1320. It fixes two run arguments where
+    static_indep draws the deck description, so the two stand under different
+    quantifiers over the run argument and both hold at this model. *)
+Definition perdeck_reading_ge := @psl211_alldecks_perdeck_reading_ge.
 
 (** marginal_bound — the single-card marginal bound of the shuffle, at
     epsilon zero: the one-position pushforward of the uniform cut is exactly

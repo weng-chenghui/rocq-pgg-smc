@@ -41,9 +41,10 @@
 (* describing it: psl211_alldecks_obstruction_published carries the           *)
 (* obstruction that the model is input distinguishable at 1/660, from which   *)
 (* the number bound and the exclusion of certificates with a close ideal both *)
-(* follow. It certifies no security property, and its path records            *)
-(* NegativeTransfer where psl211_alldecks_path, over the same model, records  *)
-(* StaticExecutedOnly.                                                        *)
+(* follow. It certifies no security property, and the path it publishes is    *)
+(* the manifest's psl211_alldecks_obstruction_path, which records             *)
+(* NegativeTransfer where psl211_alldecks_path, over the same model and the   *)
+(* same run, records StaticExecutedOnly.                                      *)
 (*                                                                            *)
 (* The mathematics reaches these programs through the payloads alone, and     *)
 (* through three named facts: psl211_alldecks_exact_viewE and                 *)
@@ -113,13 +114,12 @@
 (*   psl211_word_view_proximity                                               *)
 (*                           == the proximity program's security statement,   *)
 (*                              at 2^-40                                      *)
+(*   psl211_alldecks_obstruction_gt0                                          *)
+(*                           == the number the obstruction carries is above   *)
+(*                              zero                                          *)
 (*   psl211_alldecks_obstruction_published_pathE                              *)
 (*                           == the obstruction program publishes the         *)
-(*                              all-decks path at NegativeTransfer            *)
-(*   psl211_alldecks_obstruction_published_path_observedE                     *)
-(*                           == that path names the all-decks path's own run  *)
-(*   psl211_alldecks_obstruction_published_path_transfer_neq                  *)
-(*                           == and differs from it in the transfer status    *)
+(*                              manifest's twelfth path                       *)
 (*   psl211_alldecks_published_input_distinguishability                       *)
 (*                           == the obstruction program's statement: the      *)
 (*                              all-decks model is input distinguishable at   *)
@@ -471,13 +471,24 @@ Definition psl211_alldecks_obstruction
       psl211_alldecks_params (amf_sample psl211_exact_family R idx)
       ((#|pgg_G psl211_M|%:R)^-1).
 
-(** psl211_alldecks_obstruction_pf — its proof at every field and index, which
-    is psl211_alldecks_input_distinguishability at the model the family
-    returns there. *)
+(** psl211_alldecks_obstruction_gt0 — the number the obstruction carries is
+    above zero, the shuffle group being non-empty. It is the first half of
+    what the framework's proposition asks of a published member: at a number
+    at or below zero the distance inequality is free and the member would
+    compare nothing. *)
+Lemma psl211_alldecks_obstruction_gt0 (R : realType) :
+  0 < (#|pgg_G psl211_M|%:R)^-1 :> R.
+Proof. by rewrite invr_gt0 ltr0n; exact: psl211_G_pos. Qed.
+
+(** psl211_alldecks_obstruction_pf — its proof at every field and index: the
+    number is above zero, and the model is input distinguishable at it by
+    psl211_alldecks_input_distinguishability at the model the family returns
+    there. *)
 Definition psl211_alldecks_obstruction_pf
   : ObstructionPayloadProp psl211_alldecks_obstruction :=
   fun (R : realType) (_ : unit) =>
-    psl211_alldecks_input_distinguishability R.
+    conj (psl211_alldecks_obstruction_gt0 R)
+         (psl211_alldecks_input_distinguishability R).
 
 (** psl211_alldecks_obstruction_published — the all-decks run, the exact model
     and the obstruction, published. What the value carries about the model is
@@ -513,62 +524,38 @@ Definition psl211_alldecks_obstruction_pf
 
     The path. All five coordinates are honest. The level is AnalysisBridged
     because the manifest's own definition of that level admits a limitation
-    theorem about the same distribution and the same observer, and this is
-    one; the transfer status is NegativeTransfer because that status is
-    defined as a theorem transporting an obstruction to the path's observer,
-    and the value's own proposition is that theorem. The manifest gains no
-    twelfth path in this batch: it records paths and imposes its duties on
-    paths, no duty requires a published program to have one, and the single
-    coordinate with no honest value is the capability line, whose closed
-    vocabulary is correctness, exact privacy, approximate privacy, trace
-    secrecy, conditional entropy, mutual information or endpoint marginal
-    mixing, none of which labels a limitation; extending that vocabulary is
-    the owner's call. Were the path recorded it would be a twelfth path and
-    not a second description of psl211_alldecks_path: the two agree on the
-    observed execution, the level, the model family and the assumption status
-    and differ in the transfer status, and two paths over one model and one
-    pair of statuses are one path. *)
+    theorem about the same distribution and the same observer, and this is one;
+    the transfer status is NegativeTransfer because that status is defined as a
+    theorem transporting an obstruction to the path's observer, and the value's
+    own proposition is that theorem. The path this program publishes is the
+    manifest's twelfth, psl211_alldecks_obstruction_path, whose capability line
+    carries the label input distinguishability. It is not a second description
+    of psl211_alldecks_path: the two agree on the observed execution, the
+    level, the model family and the assumption status and differ in the
+    transfer status, and two paths over one model that differ in a status are
+    two descriptions of different theorems. *)
 Definition psl211_alldecks_obstruction_published : PublishedObstruction :=
   psl211_exact_sampled
     |> publish Obstruction psl211_alldecks_obstruction
        by psl211_alldecks_obstruction_pf BaselineClassicalOnly.
 
 (** psl211_alldecks_obstruction_published_pathE — the path this program
-    publishes: the instance's own observed execution, the level
-    AnalysisBridged, the unit-indexed exact-uniform family, NegativeTransfer
-    and BaselineClassicalOnly. Conversion decides it against the facade's
-    vocabulary, as the instance's two published paths are decided. *)
+    publishes is the manifest's twelfth path for this instance. Conversion
+    decides it, so the descriptive path and the theorem proved about it cannot
+    drift apart, as at the instance's two paths with security evidence. *)
 Lemma psl211_alldecks_obstruction_published_pathE :
   published_obstruction_path psl211_alldecks_obstruction_published
-  = @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
-      PSL211Analysis.exact_family NegativeTransfer BaselineClassicalOnly.
+  = psl211_alldecks_obstruction_path.
 Proof. exact: erefl. Qed.
-
-(** psl211_alldecks_obstruction_published_path_observedE — that path and the
-    manifest's all-decks path are about one run and one static observation of
-    it. *)
-Lemma psl211_alldecks_obstruction_published_path_observedE :
-  ap_observed
-    (published_obstruction_path psl211_alldecks_obstruction_published)
-  = ap_observed psl211_alldecks_path.
-Proof. exact: erefl. Qed.
-
-(** psl211_alldecks_obstruction_published_path_transfer_neq — and they differ
-    in the transfer status, the coordinate that separates a limitation from
-    the instance's exact-independence claim. *)
-Lemma psl211_alldecks_obstruction_published_path_transfer_neq :
-  ap_transfer
-    (published_obstruction_path psl211_alldecks_obstruction_published)
-  <> ap_transfer psl211_alldecks_path.
-Proof. by []. Qed.
 
 (** psl211_alldecks_published_input_distinguishability — the program's reader
-    gives the obstruction back, at every real field: the all-decks model is
-    input distinguishable at 1/660. The published value and this statement are
-    one theorem. *)
+    gives the obstruction back, at every real field, and this is its second
+    conjunct: the all-decks model is input distinguishable at 1/660. The first
+    conjunct is that 1/660 is above zero, which is what makes the second a
+    comparison. The published value and this statement are one theorem. *)
 Theorem psl211_alldecks_published_input_distinguishability (R : realType) :
   InputDistinguishabilityPropAt (amf_sample psl211_exact_family R tt)
     ((#|pgg_G psl211_M|%:R)^-1).
 Proof.
-exact: (obstruction_of psl211_alldecks_obstruction_published R tt).
+exact: (proj2 (obstruction_of psl211_alldecks_obstruction_published R tt)).
 Qed.

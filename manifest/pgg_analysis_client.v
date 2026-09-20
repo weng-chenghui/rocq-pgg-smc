@@ -4,7 +4,7 @@
 (* pgg_analysis_client: the clean client of the analysis manifest             *)
 (*                                                                            *)
 (* One import reaches all four facades, the typed status vocabulary and the   *)
-(* eleven typed paths. The file has EXACTLY ONE Require of any kind, and      *)
+(* twelve typed paths. The file has EXACTLY ONE Require of any kind, and      *)
 (* every Check below is a bare Check on an alias, so no scope needs to be     *)
 (* open and no notation needs to be in scope: what is established here is     *)
 (* reachability of the aliases, not their spelling.                           *)
@@ -131,7 +131,7 @@ Check PSL211Analysis.static_view.
 Check PSL211Analysis.secret.
 
 (******************************************************************************)
-(*     The typed status vocabulary and the eleven paths                       *)
+(*     The typed status vocabulary and the twelve paths                       *)
 (******************************************************************************)
 
 Check CompletionLevel.
@@ -162,6 +162,7 @@ Check s5_word_path.
 Check psl211_alldecks_path.
 Check pgl27_prior_exact_path.
 Check psl211_word_path.
+Check psl211_alldecks_obstruction_path.
 
 (******************************************************************************)
 (*     What one import actually reaches                                       *)

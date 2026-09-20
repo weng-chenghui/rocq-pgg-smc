@@ -68,7 +68,10 @@
 (* (3) A capability line uses the narrowest label the theorem statement       *)
 (* supports, from the closed vocabulary correctness, exact privacy,           *)
 (* approximate privacy, trace secrecy, conditional entropy, mutual            *)
-(* information or endpoint marginal mixing.                                   *)
+(* information, endpoint marginal mixing or input distinguishability. The     *)
+(* last of these labels a limitation: a theorem bounding from below how far   *)
+(* apart a coalition below the privacy threshold reads two run arguments of   *)
+(* the model's own cut law, from which no security property follows.          *)
 (*                                                                            *)
 (* Every identifier in the tables below is checked at the end of this file by *)
 (* one Timeout-guarded Check against its spelled type, and every path by one  *)
@@ -861,6 +864,84 @@ Local Open Scope ring_scope.
 (* certificate has no counterpart of. Those refutations stay true beside this *)
 (* path.                                                                      *)
 (*                                                                            *)
+(*     Path 12: twelve-card chirality instance, all-decks model, input        *)
+(*     distinguishability                                                     *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol family and model | PSL(2,11) twelve-card chirality deck; the    *)
+(*                               deck description drawn uniformly over all of *)
+(*                               them and the cut drawn uniformly over the    *)
+(*                               660 elements of the group, the two           *)
+(*                               independent |                                *)
+(* | profile alias      | PSL211Analysis.profile |                            *)
+(* | execution alias    | PSL211Analysis.exec_plug |                          *)
+(* | observed alias     | PSL211Analysis.observed |                           *)
+(* | sample alias       | PSL211Analysis.exact_sample; the path's typed model *)
+(*                        witness is PSL211Analysis.exact_family, the family  *)
+(*                        indexed by unit |                                   *)
+(* | observers          | PSL211Analysis.static_view                          *)
+(*                          : {ffun 'I_12 -> 'I_12}, the reading of the laid  *)
+(*                            deck at a description and a cut, which          *)
+(*                            static_coalition_obs of protocol/pgg_instance.v *)
+(*                            is at this model;                               *)
+(*                        PSL211Analysis.coalition_endpoints                  *)
+(*                          : {ffun 'I_12 -> 'I_12}, executed |               *)
+(* | distribution-to-observer bridges | PSL211Analysis.cut_distE,             *)
+(*                        PSL211Analysis.exact_coalition_distE |              *)
+(* | bound or certificate | none: the program over this path publishes an     *)
+(*                          obstruction, which carries neither a witness nor  *)
+(*                          a certificate |                                   *)
+(* | final bridge theorem | PSL211Analysis.perdeck_reading_ge |               *)
+(* | correctness theorem  | PSL211Analysis.observed_recovers,                 *)
+(*                          PSL211Analysis.secret_expectedE |                 *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | none: the path's theorem is a limitation. No      *)
+(*                          input-indistinguishability proposition holds at   *)
+(*                          this model at a number below 1/660, in the sum of *)
+(*                          absolute differences, and the advantage of a      *)
+(*                          distinguisher comparing the two run arguments     *)
+(*                          that theorem names is at least 1/1320. The path   *)
+(*                          compares no idealized model, so there is no       *)
+(*                          transfer premise to lack |                        *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | NegativeTransfer |                                *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
+(* | typed path           | psl211_alldecks_obstruction_path |                *)
+(*                                                                            *)
+(* Capabilities, one line per (theorem, distribution, observer, notion):      *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | perdeck_reading_ge | the cut law of exact_sample, which cut_distE names  *)
+(*   as the uniform law on the 660 elements of the shuffle group              *)
+(*   | static_view at psl211_perdeck_coalition, three of the twelve seats     *)
+(*   | input distinguishability at 1/660 |                                    *)
+(* | observed_recovers | none, the statement is distribution-free             *)
+(*   | the executed endpoint list | correctness |                             *)
+(* | secret_expectedE | none, the statement is distribution-free              *)
+(*   | the value the run recovers | correctness |                             *)
+(*                                                                            *)
+(* Level justification. profile gives Algebraic; exec_plug is indexed by      *)
+(* profile, giving Executable; observed is the ObservedExecution over that    *)
+(* profile and plug, giving Observed; exact_sample is a SampleAdapter over    *)
+(* that plug and cut_distE identifies its cut distribution with the uniform   *)
+(* law on the shuffle group, giving Sampled; perdeck_reading_ge is a          *)
+(* limitation theorem stated at that cut distribution and at the coalition's  *)
+(* static reading of it, and AnalysisBridged admits a limitation theorem      *)
+(* about the same distribution and the same observer, giving AnalysisBridged. *)
+(* The transfer status is NegativeTransfer, which is defined as a theorem     *)
+(* transporting an obstruction to the path's observer, and the theorem is     *)
+(* that one. Path 9 records the same instance, the same execution and the     *)
+(* same model, and this path differs from it in the transfer status alone.    *)
+(* The two describe different theorems about one model: Path 9 the exact      *)
+(* independence a coalition of at most five of the twelve seats has of the    *)
+(* chirality when the deck description is drawn, and this path the distance   *)
+(* between the readings of two named deck descriptions. The program that      *)
+(* publishes this path is psl211_alldecks_obstruction_published of            *)
+(* psl211_tableau_analysis_bridged.v in instances/psl211/tableau/, which      *)
+(* certifies no security property.                                            *)
+(*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
 (* These are public observers and correctness statements of the four facades  *)
@@ -891,8 +972,9 @@ Local Open Scope ring_scope.
 (*                                                                            *)
 (* No path names a dummy theorem, an option-valued proof, an axiom or a       *)
 (* placeholder, no endpoint marginal bound is recorded as a privacy or        *)
-(* security capability, and every path whose transfer status is               *)
-(* NoModelComparison or StaticExecutedOnly states in its missing-premise cell *)
+(* security capability, no limitation is recorded as a privacy or security    *)
+(* capability, and every path whose transfer status is NoModelComparison,     *)
+(* StaticExecutedOnly or NegativeTransfer states in its missing-premise cell  *)
 (* either the premise it lacks or why none is absent. The IdealFinite word    *)
 (* path 8 also keeps naming the absent cut-carrier premise below: its         *)
 (* transfer is observer-level and never discharges it.                        *)
@@ -1106,6 +1188,21 @@ Definition pgl27_prior_exact_path : AnalysisPath :=
 Definition psl211_word_path : AnalysisPath :=
   @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
     PSL211Analysis.word_family IdealFinite BaselineClassicalOnly.
+
+(** The AnalysisPath for the twelve-card chirality instance under its
+    all-decks dealer, recording the limitation that model carries rather than
+    its exact independence: PSL211Analysis.observed paired with the
+    unit-indexed exact-uniform family, AnalysisBridged, NegativeTransfer,
+    BaselineClassicalOnly.  perdeck_reading_ge bounds from below the distance
+    between the readings of two named deck descriptions under this path's own
+    cut distribution and at this path's own observer, which is a limitation
+    theorem there and so reaches AnalysisBridged; NegativeTransfer is defined
+    as a theorem transporting an obstruction to the path's observer, and that
+    theorem is this one. It differs from psl211_alldecks_path in the transfer
+    status alone, the two being different theorems about one model. *)
+Definition psl211_alldecks_obstruction_path : AnalysisPath :=
+  @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
+    PSL211Analysis.exact_family NegativeTransfer BaselineClassicalOnly.
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -2087,6 +2184,21 @@ Timeout 60 Check (PSL211Analysis.static_indep :
                    psl211_alldecks.psl211_alldecks_params C u.1 u.2)
     _|_ PSL211Analysis.secret R).
 
+Timeout 60 Check (PSL211Analysis.perdeck_reading_ge :
+  forall R : realType,
+    (#|pgg_G (mp_M PSL211Analysis.profile)|%:R)^-1 <=
+    var_dist
+      (fdistmap (@static_coalition_obs psl211_exec.psl211_algebra
+           psl211_alldecks.psl211_alldecks_params
+           psl211_models.psl211_perdeck_coalition
+           (true, psl211_models.psl211_perdeck_deal))
+         (sa_cut_dist (PSL211Analysis.exact_sample R)))
+      (fdistmap (@static_coalition_obs psl211_exec.psl211_algebra
+           psl211_alldecks.psl211_alldecks_params
+           psl211_models.psl211_perdeck_coalition
+           (false, psl211_models.psl211_perdeck_deal))
+         (sa_cut_dist (PSL211Analysis.exact_sample R)))).
+
 Timeout 60 Check (PSL211Analysis.marginal_bound :
   forall R : realType,
     ShuffleMarginalBound R (mp_M PSL211Analysis.profile)).
@@ -2101,7 +2213,7 @@ Timeout 60 Check
   (erefl : PSL211Analysis.exact_transfer_status = StaticExecutedOnly).
 
 (******************************************************************************)
-(*     The deterministic checker: the eleven typed paths                      *)
+(*     The deterministic checker: the twelve typed paths                      *)
 (*                                                                            *)
 (* One Check per path against AnalysisPath, one erefl pin per status field,   *)
 (* and one typed check on the model slot: a mandatory family at Sampled and   *)
@@ -2206,6 +2318,17 @@ Timeout 60 Check (erefl : ap_transfer psl211_word_path = IdealFinite).
 Timeout 60 Check
   (erefl : ap_assumptions psl211_word_path = BaselineClassicalOnly).
 
+Timeout 60 Check (psl211_alldecks_obstruction_path : AnalysisPath).
+Timeout 60 Check (ap_model psl211_alldecks_obstruction_path
+  : AnalysisModelFamily PSL211Analysis.observed).
+Timeout 60 Check
+  (erefl : ap_completion psl211_alldecks_obstruction_path = AnalysisBridged).
+Timeout 60 Check
+  (erefl : ap_transfer psl211_alldecks_obstruction_path = NegativeTransfer).
+Timeout 60 Check
+  (erefl : ap_assumptions psl211_alldecks_obstruction_path
+           = BaselineClassicalOnly).
+
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)
 (*                                                                            *)
@@ -2233,6 +2356,9 @@ Timeout 60 Check (fun R : realType =>
 
 Timeout 60 Check (fun R : realType =>
   amf_sample (ap_model psl211_word_path) R tt).
+
+Timeout 60 Check (fun R : realType =>
+  amf_sample (ap_model psl211_alldecks_obstruction_path) R tt).
 
 Timeout 60 Check (fun (p : AnalysisPath)
     (fam : AnalysisModelFamily (ap_observed p)) (R : realType)

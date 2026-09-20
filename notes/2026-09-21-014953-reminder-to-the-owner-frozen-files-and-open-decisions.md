@@ -54,11 +54,13 @@ without losing work, since every one was landed as a pure addition.
 
 ## 4. Decisions that are the owner's and were NOT made
 
-1. **The manifest's capability vocabulary has no label for a limitation.** The
-   published obstruction at PSL(2,11) would be an honest twelfth path on all
-   five coordinates, and the closed vocabulary (correctness, exact privacy,
-   approximate privacy, trace secrecy, conditional entropy, mutual information,
-   endpoint marginal mixing) has no word for it. The manifest was not touched.
+1. **The manifest's capability vocabulary had no label for a limitation.**
+   DECIDED by the owner on 2026-09-21 and landed: the label "input
+   distinguishability" joins the closed vocabulary, and the published
+   obstruction at PSL(2,11) is the manifest's twelfth path,
+   `psl211_alldecks_obstruction_path` (AnalysisBridged, NegativeTransfer). The
+   raw inequality moved below the manifest, into
+   `instances/psl211/psl211_alldecks_input_distinguishability.v`.
 2. **The prose tables of `manifest/pgg_analysis_manifest.v` now head each entry
    "Path n" where they said "Row n"**, by the main session's ruling on
    2026-09-20. The numbers did not change. If a text cites an entry by its
@@ -86,11 +88,11 @@ without losing work, since every one was landed as a pure addition.
    `view_identification_of_sampled`, equally unapplied, so they were kept by
    the existing pattern. Under the rule "keep only what the paper claims or
    later work needs", the owner may prune both pairs together.
-7. **The number a published obstruction carries is not constrained in sign.**
-   At a number at or below zero the proposition holds at every model whose
-   run-argument type is inhabited, and the comment on `ObstructionKind` says
-   so. A positivity premise on the terminal would make that unwritable; it
-   was not added, because the one published value is at 1/660.
+7. **The sign of the number a published obstruction carries.** DECIDED by the
+   owner on 2026-09-21 and landed: the proposition an obstruction stands for
+   is `0 < c /\ InputDistinguishabilityPropAt sa c`, so a published value
+   carries the positivity and a sentence at a number at or below zero cannot
+   be published. `InputDistinguishabilityPropAt` itself is unchanged.
 
 ## 5. Paper
 

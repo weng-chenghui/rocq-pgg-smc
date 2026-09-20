@@ -95,10 +95,11 @@
 (* statement, and the manifest's prose defines when it is true.               *)
 (*                                                                            *)
 (* A fourth terminal hands over an obstruction in place of a security         *)
-(* property. Its record holds a program's data at Sampled, a manifest path    *)
-(* at AnalysisBridged and NegativeTransfer, and one member of a closed        *)
+(* property. Its record holds a program's data at Sampled, a manifest path at *)
+(* AnalysisBridged and NegativeTransfer, and one member of a closed           *)
 (* enumeration of facts about the model together with the proof of it. The    *)
-(* single member is input distinguishability at a number: some coalition      *)
+(* single member is input distinguishability at a number, and the proposition *)
+(* it stands for is that the number is above zero and that some coalition     *)
 (* below the privacy threshold reads two run arguments of the model's own cut *)
 (* law at least that far apart, in the sum of absolute differences. No        *)
 (* security property follows from such a value, and two lemmas read           *)
@@ -177,7 +178,8 @@
 (*                             reads two run arguments of the model's own cut *)
 (*                             law at least c apart                           *)
 (*   ObstructionKind        == which obstruction, with no proof of it         *)
-(*   ObstructionProp        == the proposition an obstruction stands for      *)
+(*   ObstructionProp        == the proposition an obstruction stands for: a   *)
+(*                             positive number, and distinguishability at it  *)
 (*   ObstructionPayload     == an obstruction at every field and index        *)
 (*   ObstructionPayloadProp == the proposition such a payload asserts         *)
 (*   PublishObstructionPayload                                                *)
@@ -1412,25 +1414,29 @@ Qed.
    enumeration and not a free proposition: a free proposition is what restate
    hands over, and a reader of a free payload cannot tell what kind of fact
    was published. The one member carries the number the model is
-   distinguishable at, and neither this enumeration nor the terminal below
-   constrains its sign. At a number at or below zero the inequality is free,
+   distinguishable at, and the proposition that member stands for requires
+   that number positive. At a number at or below zero the inequality is free,
    var_dist being non-negative, and the empty coalition is below every
-   threshold, so the member's proposition then holds at every model whose
-   run-argument type is inhabited. It compares two readings of the model
-   only at a positive number. *)
+   threshold, so the distinguishability proposition alone would hold at every
+   model whose run-argument type is inhabited. Positivity is what makes a
+   published member a comparison of two readings of the model. *)
 Variant ObstructionKind (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E)) : Type :=
   | InputDistinguishabilityObstruction of R.
 
-(* The proposition a kind stands for. The constructor selects it, as the
-   constructor of SecurityEvidence selects the proposition EvidenceProp gives,
-   so a program cannot publish one kind's constructor with another kind's
-   proof. *)
+(* The proposition a kind stands for: at the one member, the number is above
+   zero and the model is input distinguishable at it. The constructor selects
+   the proposition, as the constructor of SecurityEvidence selects the
+   proposition EvidenceProp gives, so a program cannot publish one kind's
+   constructor with another kind's proof. Positivity sits here and not in
+   InputDistinguishabilityPropAt, which is the downward-closed family a
+   number bound is read against and which a smaller number must stay in. *)
 Definition ObstructionProp (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (o : ObstructionKind sa) : Prop :=
   match o with
-  | InputDistinguishabilityObstruction c => InputDistinguishabilityPropAt sa c
+  | InputDistinguishabilityObstruction c =>
+      0 < c /\ InputDistinguishabilityPropAt sa c
   end.
 
 (* A kind at every real field and every index of a program's model family. The
