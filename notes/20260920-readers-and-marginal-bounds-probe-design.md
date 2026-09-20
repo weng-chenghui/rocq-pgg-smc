@@ -119,3 +119,85 @@ Probe directory `notes/probes/2026-09-20-readers-and-marginal-bounds/`:
 `manifest/pgg_tableau_readers.v` above `manifest/pgg_tableau.v` (so the
 framework file does not grow), instance restatements in the instances'
 `tableau/` analysis-bridged or sampled files.
+
+## Results of the probe and of the soundness audit; scope cut; landing plan (2026-09-21)
+
+Probe: `notes/probes/2026-09-20-readers-and-marginal-bounds/` (`LEDGER.md`), ten
+rows compiled, recompiled from source by the main session. Audit:
+`audit-soundness.md` (GO for a plan with the scope cut; P4, P5, P6, P12, P15,
+P18, P20 are the findings that change this spec). The owner is away; the
+decisions are the main session's.
+
+### What the probe and the audit established
+
+1. At PGL(2,7) the content trace and the coalition's reading are one reader
+   under two names: `pgl27_coalition_trace C = pgl27_view R C` and
+   `static_coalition_obs C s g = pgl27_view R C (s, g)`, and the tree proved
+   the trace theorem FROM the reading theorem by that equality. The two
+   published 2^-39 were one number before this probe. The spec's motivating
+   instance for a second reader is not one (P4, P5).
+2. A genuinely different reader with a proved theorem exists and the spec
+   missed it: the PSL(2,11) colour view, `psl211_colour_view C`, strictly
+   coarser than the card-identity reading, with `psl211_colour_view_indep`
+   below the threshold of six and `psl211_colour_view_dep_k6` at it
+   (`instances/psl211/psl211_secrecy.v`). Its model `psl211P` has no sample
+   adapter (P20, P21).
+3. `ReaderExactPropAt` at the canonical reader is the `ew_indep` FIELD of
+   `ExactWitness`, not the independence conjunct of the exact-independence
+   proposition, which speaks of the executed view; the two differ by the
+   `Sampled` link lemma. This spec's row R6 was worded wrongly (P6, P7).
+4. The two "refusals" of R9 show only that two definitions have different
+   types. The statement that says "no security property follows from a marginal
+   bound" is a negative with a countermodel; the S_5 phase file already argues
+   one in prose (one seat's reading law moves with the secret while that seat
+   has a small marginal bound) (P12, P23).
+5. The manifest's level for `s5_word_path` is consistent with the manifest's
+   own definition of the level, and the S_5 sampled phase file already records
+   that the word model has no program. Nothing is owed there (P17, P18).
+
+### Decisions
+
+- **Landed now (tracker 4.4):** `SeatMarginalPropAt`, `CutMarginalPropAt`, their
+  vacuity at two, the two instances (`s5_exec_endpoint_bound` with its S_5
+  axiom; the five-card bound, with the statement comment saying that the cited
+  theorem is strict and the proposition is at `<=`), and ONE lemma at PGL(2,7)
+  identifying the content trace with the coalition's static reading, whose
+  comment says that the instance's trace theorems and reading theorems are
+  therefore one statement each. Statement comments carry the factor two (the
+  sum of absolute differences is twice the literature's total variation) and
+  say: one seat or one position, one run law, no coalition, no second run
+  argument, no secret; not security evidence.
+- **NOT landed (tracker 4.1 stays open):** `StaticReader`, the reader forms of
+  the propositions, the post-processing law. They are correct and have no use
+  until a genuinely different reader instantiates them.
+- **Follow-up probe (tracker 4.1b):** the PSL(2,11) colour reader. Rows: a
+  sample adapter over `psl211P` (sample type `bool * pgg_gT psl211_M`,
+  argument `fst`, cut `snd`), with the seat-indexing reconciliation that
+  `pgl27_static_obsE` did at eight cards; the colour reader as a function of
+  the canonical reading (the factorisation of R3, in the direction that is
+  true); `ReaderExactPropAt` at the colour reader from
+  `psl211_colour_view_indep`; sharpness from `psl211_colour_view_dep_k6`; the
+  record's comment rewritten (P15: the type does not enforce that a reader
+  ignores the run's messages; say what it is, a function of the run argument
+  and the cut). Only if these compile does the reader framework get a landing
+  plan. `instances/psl211/psl211_exec.v` and the endpoints closure stay
+  untouched; `psl211_secrecy.v` is not frozen.
+- **Follow-up row (tracker 4.4b), optional:** the S_5 countermodel of finding 4
+  as a theorem.
+
+### Landing plan for 4.4 (after the landing of tracker 4.3 is committed)
+
+1. New leaf file `manifest/pgg_tableau_marginal_bounds.v` (imports the
+   framework and the sample adapter; nothing imports it but the instance files
+   below): the two definitions, `seat_marginal_prop_at2`,
+   `cut_marginal_prop_at2`, boxed header with index. `_CoqProject` line.
+2. `instances/s5/tableau/s5_tableau_sampled.v`: the S_5 instance
+   (`s5_word_seat_marginal`), one header sentence pointing at it from the
+   paragraph that already explains the word model.
+3. `instances/kim2025/tableau/five_card_tableau_sampled.v`: the five-card
+   instance beside `five_card_repeated_endpoint_lt`.
+4. The PGL(2,7) identification lemma in the lowest file that sees both
+   `pgl27_coalition_trace_E` and `pgl27_static_obsE` (the prover finds it and
+   reports; no new import into a mathematics file from the framework).
+5. Fidelity file in the probe directory; names checked free; one naming and
+   comment audit of the landing; closure recompiled by the main session.
