@@ -227,3 +227,23 @@ the `Fail` check if one is dropped; a box content line ends with a space before
 definition; a published row is a program, not a claim; `baseline.v` (production
 modules, the phase files' scope block) is the scope pin, `fidelity.v` is not;
 regenerate every count in STATUS.md from the script's output.
+
+## Third addendum: the twelve rulings of the PGL(2,7) audit (2026-09-20)
+
+Read `notes/probes/2026-09-20-tableau-directories-pgl27/audit-pgl27.md`,
+section "Rulings to carry to five-card". In one line each: a directory's
+headers must agree about where a declaration lives, so grep the whole staged
+tree for a name and its paraphrases; a ruling applied to a header's prose is
+applied to its index too; a hypothesis survives into the index entry; count the
+levels (`CompletionLevel` has five) instead of writing "above"; a section
+banner is one content line, assert it in `verify.py`; `RETIRED.md`'s scan
+covers every tracked file, cross-instance ones included, and a citing file
+with an empty reverse closure is repointed with the instance, not deferred;
+publishing one manifest row twice is not publishing one claim twice ("under a
+different arm"); the sum of absolute differences gets the one sentence of
+`instances/psl211/psl211_word_proximity.v`; no name touches `==` in an index;
+a `Definition`'s body is pinned by an equation, never by `Check`, so list the
+re-scoped `Definition`s and `Print` any that holds a literal; a restate target
+is placed with its consumer; a long AnalysisBridged file gets a locator table
+in its header (per row: banner, `_sampledE`, `_rowE`, `_armE`, reading
+statement), not a directory of its own.
