@@ -227,6 +227,9 @@
 (*   pgl27_word_view_proximity                                                *)
 (*                           == below the four-seat threshold, the proximity  *)
 (*                              program's security statement, at 2^-39        *)
+(*   pgl27_word_proximity_eps_sw_boundE                                       *)
+(*                           == the certificate's number is the marginal      *)
+(*                              bound pgl27_word_cert carries                 *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -1019,3 +1022,17 @@ Theorem pgl27_word_view_proximity (R : realType) (secretP : R.-fdist bool)
 Proof.
 exact: (view_proximity_of pgl27_word_proximity_published R secretP C HC).
 Qed.
+
+(******************************************************************************)
+(*     The number a construction from pgl27_word_cert would carry             *)
+(******************************************************************************)
+
+(** The number pgl27_word_proximity_cert carries is the marginal bound
+    pgl27_word_cert carries, the two-hundred-letter walk's 2^-40. A proximity
+    certificate built from that input-indistinguishability certificate over
+    this model would carry that same number. *)
+Lemma pgl27_word_proximity_eps_sw_boundE (R : realType)
+    (secretP : R.-fdist bool) :
+  ipc_eps (pgl27_word_proximity_cert secretP)
+  = sw_bound_eps (ic_b (pgl27_word_cert secretP)).
+Proof. exact: erefl. Qed.

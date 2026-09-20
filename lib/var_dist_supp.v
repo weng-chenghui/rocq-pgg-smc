@@ -23,6 +23,10 @@
 (*                                 mass transports the distance exactly       *)
 (*   fdistmap_inj_uniform_id    == an injective endomap fixes the uniform law *)
 (*   fdistmap_neq0_codom        == a pushforward is supported in the image    *)
+(*   fdistmap_notin_codom0      == a pushforward gives no mass to a point     *)
+(*                                 outside the image                          *)
+(*   var_dist_supp_disjoint_eq2 == two laws no point of which carries mass    *)
+(*                                 under both are two apart                   *)
 (*   var_dist_fdist1_uniform    == the point mass at true and the uniform law *)
 (*                                 on the booleans are one apart              *)
 (******************************************************************************)
@@ -155,6 +159,44 @@ have Hsimp : \sum_(a in A | a \in f @^-1 b) P a = \sum_(a | f a == b) P a.
   by apply: eq_bigl => a /=; rewrite inE.
 rewrite fdistmapE Hsimp big1 // => a Ha.
 by move: (Hno a); rewrite Ha.
+Qed.
+
+(** A pushforward gives no mass to a point outside the image of its map. It is
+    the contrapositive of fdistmap_neq0_codom: a reading that never returns a
+    value leaves that value with mass zero, which is how two laws are shown to
+    carry mass at no common point. *)
+Lemma fdistmap_notin_codom0 (R : realType) (U B : finType) (g : U -> B)
+    (P : R.-fdist U) (b : B) :
+  (forall u : U, g u != b) -> fdistmap g P b = 0.
+Proof.
+move=> Hno; apply/eqP; apply: contraT => /fdistmap_neq0_codom[u Hu].
+by move: (Hno u); rewrite Hu eqxx.
+Qed.
+
+(******************************************************************************)
+(*     Two laws carrying mass at no common point                              *)
+(******************************************************************************)
+
+(** Two laws on a finite carrier, no point of which carries mass under both,
+    are exactly two apart in the sum of absolute differences. The
+    literature's total variation distance is half of this, so two is the
+    distance between two laws a single observation tells apart with certainty,
+    and a number at two constrains no coalition. *)
+Lemma var_dist_supp_disjoint_eq2 (R : realType) (A : finType)
+    (P Q : R.-fdist A) :
+  (forall a : A, P a = 0 \/ Q a = 0) -> var_dist P Q = 2%:R.
+Proof.
+(* On a disjoint support the absolute difference splits into the two
+   masses, and each sums to one. *)
+move=> Hdisj.
+have Hf1 : forall d : R.-fdist A, \sum_(a : A) d a = 1.
+  by move=> d; rewrite -(FDist.f1 d); apply: eq_bigl => a; rewrite inE.
+rewrite /var_dist.
+have -> : \sum_(a : A) `|P a - Q a| = \sum_(a : A) (P a + Q a).
+  apply: eq_bigr => a _; case: (Hdisj a) => ->.
+  - by rewrite sub0r normrN (ger0_norm (FDist.ge0 Q a)) add0r.
+  - by rewrite subr0 addr0 (ger0_norm (FDist.ge0 P a)).
+by rewrite big_split /= !Hf1 mulr2n.
 Qed.
 
 (******************************************************************************)

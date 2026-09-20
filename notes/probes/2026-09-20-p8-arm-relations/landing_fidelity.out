@@ -1,0 +1,390 @@
+File "./notes/probes/2026-09-20-p8-arm-relations/landing_fidelity.v", line 10, characters 0-77:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+fdistmap_notin_codom0
+:
+forall (R : realType) (U B : finType) (g : U -> B) (P : {fdist U}) (b : B),
+(forall u : U, g u != b) -> fdistmap g P b = 0
+     : forall (R : realType) (U B : finType) (g : U -> B) 
+         (P : {fdist U}) (b : B),
+       (forall u : U, g u != b) -> fdistmap g P b = 0
+var_dist_supp_disjoint_eq2
+:
+forall (R : realType) (A : finType) (P Q : {fdist A}),
+(forall a : A, P a = 0 \/ Q a = 0) -> var_dist P Q = 2
+     : forall (R : realType) (A : finType) (P Q : {fdist A}),
+       (forall a : A, P a = 0 \/ Q a = 0) -> var_dist P Q = 2
+inde_RV_cst
+:
+forall (R : realType) (U : finType) (P : {fdist U}) 
+  (TA TB : finType) (X : {RV P -> TA}) (c : TB),
+P |= X _|_ ((fun=> c) : {RV P -> TB})
+     : forall (R : realType) (U : finType) (P : {fdist U}) 
+         (TA TB : finType) (X : {RV P -> TA}) (c : TB),
+       P |= X _|_ (fun=> c)
+sum_prod_fibreE
+:
+forall (R : realType) (T G V : finType) (PT : {fdist T}) 
+  (Q : {fdist G}) (f : T -> G -> V) (v : V) (x : T),
+\sum_(z | (f z.1 z.2 == v) && (z.1 == x)) PT z.1 * Q z.2 =
+PT x * fdistmap (f x) Q v
+     : forall (R : realType) (T G V : finType) (PT : {fdist T})
+         (Q : {fdist G}) (f : T -> G -> V) (v : V) 
+         (x : T),
+       \sum_(z | (f z.1 z.2 == v) && (z.1 == x)) PT z.1 * Q z.2 =
+       PT x * fdistmap (f x) Q v
+fdistmap_pair_fst_condE
+:
+forall (R : realType) (T G V : finType) (PT : {fdist T}) 
+  (Q : {fdist G}) (f : T -> G -> V) (v : V) (x : T),
+fdistmap (fun z : T * G => (f z.1 z.2, z.1)) PT `x Q (v, x) =
+PT x * fdistmap (f x) Q v
+     : forall (R : realType) (T G V : finType) (PT : {fdist T})
+         (Q : {fdist G}) (f : T -> G -> V) (v : V) 
+         (x : T),
+       fdistmap (fun z : T * G => (f z.1 z.2, z.1)) PT `x Q (v, x) =
+       PT x * fdistmap (f x) Q v
+fdistmap_prod_mixtureE
+:
+forall (R : realType) (T G V : finType) (PT : {fdist T}) 
+  (Q : {fdist G}) (f : T -> G -> V) (v : V),
+fdistmap (fun z : T * G => f z.1 z.2) PT `x Q v =
+\sum_x PT x * fdistmap (f x) Q v
+     : forall (R : realType) (T G V : finType) (PT : {fdist T})
+         (Q : {fdist G}) (f : T -> G -> V) (v : V),
+       fdistmap (fun z : T * G => f z.1 z.2) PT `x Q v =
+       \sum_x PT x * fdistmap (f x) Q v
+fdistmap_pair_fst_prodE
+:
+forall (R : realType) (T G V : finType) (PT : {fdist T}) 
+  (Q : {fdist G}) (f : T -> G -> V),
+(forall x x' : T, fdistmap (f x) Q = fdistmap (f x') Q) ->
+fdistmap (fun z : T * G => (f z.1 z.2, z.1)) PT `x Q =
+(fdistmap (fun z : T * G => f z.1 z.2) PT `x Q) `x PT
+     : forall (R : realType) (T G V : finType) (PT : {fdist T})
+         (Q : {fdist G}) (f : T -> G -> V),
+       (forall x x' : T, fdistmap (f x) Q = fdistmap (f x') Q) ->
+       fdistmap (fun z : T * G => (f z.1 z.2, z.1)) PT `x Q =
+       (fdistmap (fun z : T * G => f z.1 z.2) PT `x Q) `x PT
+var_dist_fdistmap_prodR_le
+:
+forall (R : realType) (A B C : finType) (P : {fdist A}) 
+  (Q1 Q2 : {fdist B}) (h : A * B -> C),
+var_dist (fdistmap h P `x Q1) (fdistmap h P `x Q2) <= var_dist Q1 Q2
+     : forall (R : realType) (A B C : finType) (P : {fdist A})
+         (Q1 Q2 : {fdist B}) (h : A * B -> C),
+       var_dist (fdistmap h P `x Q1) (fdistmap h P `x Q2) <= var_dist Q1 Q2
+profile_k_gt0
+:
+forall A : PGGAlgebraic, (0 < profile_k (instance_profile A))%N
+     : forall A : PGGAlgebraic, (0 < profile_k (instance_profile A))%N
+exact_witness_cst_true sa : ExactWitness sa
+     : ExactWitness sa
+idealproximity_cert_cst_secrets_true_false sa : IdealProximityCert sa
+     : IdealProximityCert sa
+fun u : sa_sampleT sa =>
+erefl : ew_secret (exact_witness_cst_true sa) u = true
+     : forall u : sa_sampleT sa,
+       ew_secret (exact_witness_cst_true sa) u = true
+erefl : ipc_ideal (idealproximity_cert_cst_secrets_true_false sa) = sa
+     : ipc_ideal (idealproximity_cert_cst_secrets_true_false sa) = sa
+fun u : sa_sampleT sa =>
+erefl
+:
+ew_secret (ipc_witness (idealproximity_cert_cst_secrets_true_false sa)) u =
+true
+     : forall u : sa_sampleT sa,
+       ew_secret
+         (ipc_witness (idealproximity_cert_cst_secrets_true_false sa)) u =
+       true
+fun u : sa_sampleT sa =>
+erefl : ipc_secret (idealproximity_cert_cst_secrets_true_false sa) u = false
+     : forall u : sa_sampleT sa,
+       ipc_secret (idealproximity_cert_cst_secrets_true_false sa) u = false
+erefl : ipc_eps (idealproximity_cert_cst_secrets_true_false sa) = 2
+     : ipc_eps (idealproximity_cert_cst_secrets_true_false sa) = 2
+idealproximity_prop_cst_secrets_lt2_false (sa:=sa)
+:
+forall c : R,
+c < 2 ->
+~ IdealProximityPropAt (idealproximity_cert_cst_secrets_true_false sa) c
+     : forall c : R,
+       c < 2 ->
+       ~
+       IdealProximityPropAt (idealproximity_cert_cst_secrets_true_false sa) c
+idealproximity_prop_lt2_uniform_in_cert_false (sa:=sa)
+:
+forall c : R,
+c < 2 -> ~ (forall cert : IdealProximityCert sa, IdealProximityPropAt cert c)
+     : forall c : R,
+       c < 2 ->
+       ~ (forall cert : IdealProximityCert sa, IdealProximityPropAt cert c)
+indistinguishability_prop_idealproximity_lt2_false (sa:=sa)
+:
+forall (ic : IndistinguishabilityCert sa) (c : R),
+c < 2 ->
+~
+(IndistinguishabilityPropAt ic (cert_eps ic) ->
+ forall cert : IdealProximityCert sa, IdealProximityPropAt cert c)
+     : forall (ic : IndistinguishabilityCert sa) (c : R),
+       c < 2 ->
+       ~
+       (IndistinguishabilityPropAt ic (cert_eps ic) ->
+        forall cert : IdealProximityCert sa, IdealProximityPropAt cert c)
+erefl
+:
+sa_sampleP (ideal_prod_adapter arg_decode arg_read ic) =
+(fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic)
+     : sa_sampleP (ideal_prod_adapter arg_decode arg_read ic) =
+       (fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic)
+fun z : argT * pgg_gT (mp_M (instance_profile A)) =>
+erefl : ew_secret (exact_witness_ideal_prod arg_decode arg_read ic) z = z.1
+     : forall z : argT * pgg_gT (mp_M (instance_profile A)),
+       ew_secret (exact_witness_ideal_prod arg_decode arg_read ic) z = z.1
+erefl
+:
+ipc_eps (idealproximity_cert_of_indistinguishability Harg Hprod ic) =
+sw_bound_eps (ic_b ic)
+     : ipc_eps (idealproximity_cert_of_indistinguishability Harg Hprod ic) =
+       sw_bound_eps (ic_b ic)
+ideal_prod_adapter arg_decode arg_read ic : SampleAdapter R (instance_exec E)
+     : SampleAdapter R (instance_exec E)
+ideal_prod_reading_arg_prodE arg_decode arg_read ic
+:
+(#|C| < profile_k (instance_profile A))%N ->
+fdistmap
+  (fun z : argT * pgg_gT (mp_M (instance_profile A)) =>
+   (static_coalition_obs C (arg_decode z.1) z.2, z.1))
+  (fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic) =
+(fdistmap
+   (fun z : argT * pgg_gT (mp_M (instance_profile A)) =>
+    static_coalition_obs C (arg_decode z.1) z.2)
+   (fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic))
+`x (fdistmap arg_read (sa_sampleP sa))
+     : (#|C| < profile_k (instance_profile A))%N ->
+       fdistmap
+         (fun z : argT * pgg_gT (mp_M (instance_profile A)) =>
+          (static_coalition_obs C (arg_decode z.1) z.2, z.1))
+         (fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic) =
+       (fdistmap
+          (fun z : argT * pgg_gT (mp_M (instance_profile A)) =>
+           static_coalition_obs C (arg_decode z.1) z.2)
+          (fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic))
+       `x (fdistmap arg_read (sa_sampleP sa))
+ideal_prod_reading_indep_arg arg_decode arg_read ic
+:
+(#|C| < profile_k (instance_profile A))%N ->
+sa_sampleP (ideal_prod_adapter arg_decode arg_read ic) |= 
+((fun z : sa_sampleT (ideal_prod_adapter arg_decode arg_read ic) =>
+  static_coalition_obs C (sa_arg z) (sa_cut z))
+ :
+ {RV (sa_sampleP (ideal_prod_adapter arg_decode arg_read ic)) -> {ffun 
+ 'I_(pi_T' (mp_PI (instance_profile A))).+1 ->
+ 'I_(pgg_N' (mp_M (instance_profile A))).+1}}) _|_ 
+([eta fst]
+ :
+ {RV (sa_sampleP (ideal_prod_adapter arg_decode arg_read ic)) -> argT})
+     : (#|C| < profile_k (instance_profile A))%N ->
+       sa_sampleP (ideal_prod_adapter arg_decode arg_read ic) |= 
+       (fun z : sa_sampleT (ideal_prod_adapter arg_decode arg_read ic) =>
+        static_coalition_obs C (sa_arg z) (sa_cut z)) _|_ [eta fst]
+exact_witness_ideal_prod arg_decode arg_read ic
+:
+ExactWitness (ideal_prod_adapter arg_decode arg_read ic)
+     : ExactWitness (ideal_prod_adapter arg_decode arg_read ic)
+arg_read_distE arg_decode arg_read ic
+:
+fdistmap (ew_secret (exact_witness_ideal_prod arg_decode arg_read ic))
+  (sa_sampleP (ideal_prod_adapter arg_decode arg_read ic)) =
+fdistmap arg_read (sa_sampleP sa)
+     : fdistmap (ew_secret (exact_witness_ideal_prod arg_decode arg_read ic))
+         (sa_sampleP (ideal_prod_adapter arg_decode arg_read ic)) =
+       fdistmap arg_read (sa_sampleP sa)
+var_dist_joint_reading_arg_le Harg Hprod ic C
+:
+var_dist
+  (fdistmap
+     (fun u : sa_sampleT sa =>
+      (static_coalition_obs C (sa_arg u) (sa_cut u), arg_read u))
+     (sa_sampleP sa))
+  (fdistmap
+     (fun z : argT * pgg_gT (mp_M (instance_profile A)) =>
+      (static_coalition_obs C (arg_decode z.1) z.2, z.1))
+     (fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic)) <=
+var_dist (sa_cut_dist sa) (ic_ideal ic)
+     : var_dist
+         (fdistmap
+            (fun u : sa_sampleT sa =>
+             (static_coalition_obs C (sa_arg u) (sa_cut u), arg_read u))
+            (sa_sampleP sa))
+         (fdistmap
+            (fun z : argT * pgg_gT (mp_M (instance_profile A)) =>
+             (static_coalition_obs C (arg_decode z.1) z.2, z.1))
+            (fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic)) <=
+       var_dist (sa_cut_dist sa) (ic_ideal ic)
+idealproximity_close_of_indistinguishability Harg Hprod ic
+:
+(#|C| < profile_k (instance_profile A))%N ->
+var_dist
+  (fdistmap
+     (fun u : sa_sampleT sa =>
+      (static_coalition_obs C (sa_arg u) (sa_cut u), arg_read u))
+     (sa_sampleP sa))
+  (fdistmap
+     (fun z : sa_sampleT (ideal_prod_adapter arg_decode arg_read ic) =>
+      (static_coalition_obs C (sa_arg z) (sa_cut z),
+       ew_secret (exact_witness_ideal_prod arg_decode arg_read ic) z))
+     (sa_sampleP (ideal_prod_adapter arg_decode arg_read ic))) <=
+sw_bound_eps (ic_b ic)
+     : (#|C| < profile_k (instance_profile A))%N ->
+       var_dist
+         (fdistmap
+            (fun u : sa_sampleT sa =>
+             (static_coalition_obs C (sa_arg u) (sa_cut u), arg_read u))
+            (sa_sampleP sa))
+         (fdistmap
+            (fun z : sa_sampleT (ideal_prod_adapter arg_decode arg_read ic) =>
+             (static_coalition_obs C (sa_arg z) (sa_cut z),
+              ew_secret (exact_witness_ideal_prod arg_decode arg_read ic) z))
+            (sa_sampleP (ideal_prod_adapter arg_decode arg_read ic))) <=
+       sw_bound_eps (ic_b ic)
+idealproximity_cert_of_indistinguishability Harg Hprod ic
+:
+IdealProximityCert sa
+     : IdealProximityCert sa
+idealproximity_prop_of_indistinguishability Harg Hprod ic Hendp
+:
+IdealProximityPropAt
+  (idealproximity_cert_of_indistinguishability Harg Hprod ic)
+  (sw_bound_eps (ic_b ic))
+     : IdealProximityPropAt
+         (idealproximity_cert_of_indistinguishability Harg Hprod ic)
+         (sw_bound_eps (ic_b ic))
+pgl27_word_arg_cut_prodE
+:
+forall (R : realType) (secretP : {fdist bool}),
+fdistmap
+  (fun u : sa_sampleT (amf_sample pgl27_word_family R secretP) =>
+   (sa_arg u, sa_cut u))
+  (sa_sampleP (amf_sample pgl27_word_family R secretP)) =
+secretP `x (rho_word R)
+     : forall (R : realType) (secretP : {fdist bool}),
+       fdistmap
+         (fun u : sa_sampleT (amf_sample pgl27_word_family R secretP) =>
+          (sa_arg u, sa_cut u))
+         (sa_sampleP (amf_sample pgl27_word_family R secretP)) =
+       secretP `x (rho_word R)
+pgl27_word_arg_cut_marginals_prodE
+:
+forall (R : realType) (secretP : {fdist bool}),
+fdistmap (fun u : bool * 200.-tuple 'I_5 => (u.1, sa_cut u))
+  (sa_sampleP (amf_sample pgl27_word_family R secretP)) =
+(fdistmap [eta fst] (sa_sampleP (amf_sample pgl27_word_family R secretP)))
+`x (sa_cut_dist (amf_sample pgl27_word_family R secretP))
+     : forall (R : realType) (secretP : {fdist bool}),
+       fdistmap (fun u : bool * 200.-tuple 'I_5 => (u.1, sa_cut u))
+         (sa_sampleP (amf_sample pgl27_word_family R secretP)) =
+       (fdistmap [eta fst]
+          (sa_sampleP (amf_sample pgl27_word_family R secretP)))
+       `x (sa_cut_dist (amf_sample pgl27_word_family R secretP))
+pgl27_word_arg_readE
+:
+forall (R : realType) (secretP : {fdist bool}) (u : bool * 200.-tuple 'I_5),
+sa_arg u = u.1
+     : forall (R : realType) (secretP : {fdist bool})
+         (u : bool * 200.-tuple 'I_5),
+       sa_arg u = u.1
+kim_biased_arg_cut_prodE
+:
+forall (R : realType) (idx : unit),
+fdistmap
+  (fun u : sa_sampleT (amf_sample kim_biased_family R idx) =>
+   (sa_arg u, sa_cut u))
+  (sa_sampleP (amf_sample kim_biased_family R idx)) =
+(fdist_uniform card_bool2)
+`x (fdistmap (fun k : 'I_5 => (fc_sigma ^+ k)%g)
+      (kim_weight_dist (kim_centi_lt R) (kim_centi_gt R)))
+     : forall (R : realType) (idx : unit),
+       fdistmap
+         (fun u : sa_sampleT (amf_sample kim_biased_family R idx) =>
+          (sa_arg u, sa_cut u))
+         (sa_sampleP (amf_sample kim_biased_family R idx)) =
+       (fdist_uniform card_bool2)
+       `x (fdistmap (fun k : 'I_5 => (fc_sigma ^+ k)%g)
+             (kim_weight_dist (kim_centi_lt R) (kim_centi_gt R)))
+kim_biased_arg_cut_marginals_prodE
+:
+forall (R : realType) (idx : unit),
+fdistmap (fun u : Omega => (five_card_sample_arg u, sa_cut u))
+  (sa_sampleP (amf_sample kim_biased_family R idx)) =
+(fdistmap [eta five_card_sample_arg]
+   (sa_sampleP (amf_sample kim_biased_family R idx)))
+`x (sa_cut_dist (amf_sample kim_biased_family R idx))
+     : forall (R : realType) (idx : unit),
+       fdistmap (fun u : Omega => (five_card_sample_arg u, sa_cut u))
+         (sa_sampleP (amf_sample kim_biased_family R idx)) =
+       (fdistmap [eta five_card_sample_arg]
+          (sa_sampleP (amf_sample kim_biased_family R idx)))
+       `x (sa_cut_dist (amf_sample kim_biased_family R idx))
+kim_biased_arg_readE
+:
+forall (R : realType) (idx : unit) (u : Omega),
+sa_arg u = five_card_sample_arg u
+     : forall (R : realType) (idx : unit) (u : Omega),
+       sa_arg u = five_card_sample_arg u
+pgl27_word_proximity_eps_sw_boundE
+:
+forall (R : realType) (secretP : {fdist bool}),
+ipc_eps (pgl27_word_proximity_cert secretP) =
+sw_bound_eps (ic_b (pgl27_word_cert secretP))
+     : forall (R : realType) (secretP : {fdist bool}),
+       ipc_eps (pgl27_word_proximity_cert secretP) =
+       sw_bound_eps (ic_b (pgl27_word_cert secretP))
+kim_biased_proximity_eps_cert_exact_sw_boundE
+:
+forall (R : realType) (idx : unit),
+ipc_eps (kim_biased_proximity_cert R idx) =
+sw_bound_eps (ic_b (kim_biased_cert_exact R idx))
+     : forall (R : realType) (idx : unit),
+       ipc_eps (kim_biased_proximity_cert R idx) =
+       sw_bound_eps (ic_b (kim_biased_cert_exact R idx))
+kim_biased_proximity_eps_le_cert_sw_bound
+:
+forall (R : realType) (idx : unit),
+ipc_eps (kim_biased_proximity_cert R idx) <=
+sw_bound_eps (ic_b (kim_biased_cert R idx))
+     : forall (R : realType) (idx : unit),
+       ipc_eps (kim_biased_proximity_cert R idx) <=
+       sw_bound_eps (ic_b (kim_biased_cert R idx))
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+Axioms:
+propositional_extensionality : forall P Q : Prop, P <-> Q -> P = Q
+functional_extensionality_dep :
+  forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+  (forall x : A, f x = g x) -> f = g
+constructive_indefinite_description :
+  forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+$SP/rocq1 $SECS $MB rocq compile ${=FLAGS} $F  4.49s user 0.25s system 101% cpu 4.684 total

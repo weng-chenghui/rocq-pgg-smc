@@ -326,6 +326,12 @@
 (*                              any constant implies the proximity            *)
 (*                              proposition at one fiftieth, its hypothesis   *)
 (*                              unused                                        *)
+(*   kim_biased_proximity_eps_cert_exact_sw_boundE                            *)
+(*                           == the proximity certificate's number is the     *)
+(*                              marginal bound kim_biased_cert_exact carries  *)
+(*   kim_biased_proximity_eps_le_cert_sw_bound                                *)
+(*                           == the proximity certificate's number is at most *)
+(*                              the marginal bound kim_biased_cert carries    *)
 (******************************************************************************)
 
 Require Import Lia.
@@ -1254,3 +1260,29 @@ Lemma five_card_biased_indistinguishability_implies_proximity
   IndistinguishabilityPropAt (kim_biased_cert R tt) c ->
   IdealProximityPropAt (kim_biased_proximity_cert R tt) (1 / 50).
 Proof. by move=> _; exact: five_card_biased_proximity_prop_holds. Qed.
+
+(******************************************************************************)
+(*     The numbers a construction from either certificate would carry         *)
+(******************************************************************************)
+
+(** The number kim_biased_proximity_cert carries is the marginal bound
+    kim_biased_cert_exact carries, one fiftieth, the exact one-cut distance.
+    A proximity certificate built from that input-indistinguishability
+    certificate over this model would carry that same number. *)
+Lemma kim_biased_proximity_eps_cert_exact_sw_boundE (R : realType)
+    (idx : unit) :
+  ipc_eps (kim_biased_proximity_cert R idx)
+  = sw_bound_eps (ic_b (kim_biased_cert_exact R idx)).
+Proof. exact: erefl. Qed.
+
+(** The number kim_biased_proximity_cert carries is at most the marginal
+    bound kim_biased_cert carries, the square root of five over eighty, the
+    number the spectral bound carries. It is kim_biased_exact_le_eps read at
+    the two certificates. The two certificates stand over one model and name
+    one ideal cut law, so which of the two an input-indistinguishability
+    premise supplies decides which number a construction from it would
+    carry. *)
+Lemma kim_biased_proximity_eps_le_cert_sw_bound (R : realType) (idx : unit) :
+  ipc_eps (kim_biased_proximity_cert R idx)
+  <= sw_bound_eps (ic_b (kim_biased_cert R idx)).
+Proof. exact: kim_biased_exact_le_eps. Qed.

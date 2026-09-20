@@ -47,6 +47,14 @@
 (*                             given the output                               *)
 (*   kim_repeated_seat_distE == the repeated model's executed seat            *)
 (*                             distribution is the static pushforward         *)
+(*   kim_biased_arg_cut_prodE                                                 *)
+(*                          == the one-cut model's run argument and its       *)
+(*                             cut have a product joint distribution          *)
+(*   kim_biased_arg_cut_marginals_prodE                                       *)
+(*                          == the same joint law as the product of its       *)
+(*                             own two marginals                              *)
+(*   kim_biased_arg_readE   == the one-cut model's run argument is the        *)
+(*                             committed pair five_card_sample_arg reads      *)
 (*                                                                            *)
 (* Hypothesis consumption. The five-card layer carries four side conditions   *)
 (* on the bias eps and one word length. Each declaration consumes a strict    *)
@@ -443,3 +451,67 @@ Definition kim_biased_family : AnalysisModelFamily five_card_observed :=
 Definition kim_centi_family : AnalysisModelFamily five_card_observed :=
   @MkAnalysisModelFamily five_card_observed (fun _ => unit)
     (fun R _ => kim_centi_repeated_sample R).
+
+(******************************************************************************)
+(*     The one-cut model draws its cut apart from its run argument            *)
+(******************************************************************************)
+
+(** The one-cut model's run argument and its cut have a product joint
+    distribution: the committed pair drawn uniformly, and the rotation drawn
+    from Kim's biased weight and realised in the group.
+    kim_biased_arg_cut_marginals_prodE writes the same joint law with the
+    model's own two marginals, which is the shape a construction of
+    ideal-proximity evidence from an input-indistinguishability certificate
+    asks a model for. *)
+Lemma kim_biased_arg_cut_prodE (R : realType) (idx : unit) :
+  fdistmap (fun u => (@sa_arg _ _ _ (amf_sample kim_biased_family R idx) u,
+                      @sa_cut _ _ _ (amf_sample kim_biased_family R idx) u))
+    (sa_sampleP (amf_sample kim_biased_family R idx))
+  = (fdist_uniform card_bool2)
+    `x (fdistmap (fun k : 'I_5 => (fc_sigma ^+ k)%g)
+          (kim_weight_dist (kim_centi_lt R) (kim_centi_gt R))).
+Proof. exact: fdistmap_prodr. Qed.
+
+(** The one-cut model's joint law of the finite coordinate
+    five_card_sample_arg takes off the sample point and its cut is the
+    product of that law's own two marginals. It is the product hypothesis a
+    construction of ideal-proximity evidence from an
+    input-indistinguishability certificate places on a model, written at this
+    model: the first factor is the uniform law on committed pairs by
+    fdist_prod1 and the second is the rotation law by kim_single_cut_distE. *)
+Lemma kim_biased_arg_cut_marginals_prodE (R : realType) (idx : unit) :
+  fdistmap (fun u : five_card_leakage.Omega =>
+              (five_card_sample_arg u,
+               @sa_cut _ _ _ (amf_sample kim_biased_family R idx) u))
+    (sa_sampleP (amf_sample kim_biased_family R idx))
+  = (fdistmap (fun u : five_card_leakage.Omega => five_card_sample_arg u)
+       (sa_sampleP (amf_sample kim_biased_family R idx)))
+    `x (sa_cut_dist (amf_sample kim_biased_family R idx)).
+Proof.
+have Hfst : fdistmap (fun u : five_card_leakage.Omega => five_card_sample_arg u)
+    (sa_sampleP (amf_sample kim_biased_family R idx))
+  = fdist_uniform card_bool2.
+  transitivity (fdistmap fst
+    (fdistmap (fun u : five_card_leakage.Omega =>
+       (five_card_sample_arg u,
+        @sa_cut _ _ _ (amf_sample kim_biased_family R idx) u))
+       (sa_sampleP (amf_sample kim_biased_family R idx)))).
+    by rewrite fdistmap_comp.
+  by rewrite (@kim_biased_arg_cut_prodE R idx) -/(fdist_fst _) fdist_prod1.
+have Hsnd : sa_cut_dist (amf_sample kim_biased_family R idx)
+  = fdistmap (fun k : 'I_5 => (fc_sigma ^+ k)%g)
+      (kim_weight_dist (kim_centi_lt R) (kim_centi_gt R))
+  by exact: kim_single_cut_distE.
+rewrite Hfst Hsnd.
+exact: kim_biased_arg_cut_prodE.
+Qed.
+
+(** The one-cut model's run argument is the committed pair of bits that
+    five_card_sample_arg reads off the sample point. A construction over a
+    finite coordinate of the sample point asks for a decoding of that
+    coordinate back into the run-argument carrier; here that coordinate is
+    the run argument itself and the decoding is the identity. *)
+Lemma kim_biased_arg_readE (R : realType) (idx : unit)
+    (u : five_card_leakage.Omega) :
+  @sa_arg _ _ _ (amf_sample kim_biased_family R idx) u = five_card_sample_arg u.
+Proof. exact: erefl. Qed.

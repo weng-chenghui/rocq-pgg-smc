@@ -38,6 +38,9 @@
 (*   var_dist_prodL             == the same on the other side                 *)
 (*   fdist_prod_snd             == the second marginal of a product is its    *)
 (*                                 second factor                              *)
+(*   var_dist_fdistmap_prodR_le == one map applied to two products with a     *)
+(*                                 common left factor keeps the two right     *)
+(*                                 factors' bound                             *)
 (*   var_dist_own_marginals     == a joint law within a number of a product   *)
 (*                                 law is within three times that number of   *)
 (*                                 the product of its own marginals           *)
@@ -133,6 +136,26 @@ Lemma fdist_prod_snd (P : R.-fdist A) (Q : R.-fdist B) :
 Proof. by rewrite -/(fdist_snd _) -fdistX_prod fdistX2 fdist_prod1. Qed.
 
 End var_dist_product_factor.
+
+(******************************************************************************)
+(*     One reading of two products sharing their left factor                  *)
+(******************************************************************************)
+
+(** One map applied to two product laws sharing their left factor gives two
+    laws no further apart than the two right factors. It is the general core
+    of the step that carries a bound on a model's cut law to a bound on the
+    joint law of a coalition's reading and the model's run argument: the
+    shared left factor is the prior on the run argument, the two right
+    factors are the actual and the ideal cut law, and the map is the pair of
+    the reading and the argument, a deterministic function of the pair. *)
+Lemma var_dist_fdistmap_prodR_le (R : realType) (A B C : finType)
+    (P : R.-fdist A) (Q1 Q2 : R.-fdist B) (h : A * B -> C) :
+  var_dist (fdistmap h (P `x Q1)) (fdistmap h (P `x Q2)) <= var_dist Q1 Q2.
+Proof.
+(* Data processing along h, then var_dist_prodR removes the shared factor. *)
+apply: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _)).
+by rewrite var_dist_prodR.
+Qed.
 
 (******************************************************************************)
 (*     A joint law against the product of its own marginals                   *)

@@ -63,6 +63,13 @@
 (*   pgl27_word_view_indistinguishability_via_transfer                        *)
 (*                              == the 2^-39 coalition-view bound as an       *)
 (*                                 instance of var_dist_fdistmap_transfer     *)
+(*   pgl27_word_arg_cut_prodE   == the word model's run argument and its cut  *)
+(*                                 have a product joint distribution          *)
+(*   pgl27_word_arg_cut_marginals_prodE                                       *)
+(*                              == the same joint law as the product of its   *)
+(*                                 own two marginals                          *)
+(*   pgl27_word_arg_readE       == the word model's run argument is the first *)
+(*                                 component of its sample point              *)
 (*                                                                            *)
 (* The import of pgl27_trace supplies content_of, pgl27_player_trace and      *)
 (* pgl27_coalition_trace; the import of pgg_collusion_bound supplies the      *)
@@ -432,3 +439,58 @@ Definition pgl27_word_family : AnalysisModelFamily pgl27_observed :=
 Definition pgl27_prior_exact_family : AnalysisModelFamily pgl27_observed :=
   @MkAnalysisModelFamily pgl27_observed (fun R => R.-fdist bool)
     (fun R p => @pgl27_prior_sample R p).
+
+(******************************************************************************)
+(*     The word model draws its cut apart from its run argument               *)
+(******************************************************************************)
+
+(** The word model's run argument and its cut have a product joint
+    distribution, the secret prior with the evaluated-word law rho_word.
+    pgl27_word_arg_cut_marginals_prodE writes the same joint law with the
+    model's own two marginals, which is the shape a construction of
+    ideal-proximity evidence from an input-indistinguishability certificate
+    asks a model for. *)
+Lemma pgl27_word_arg_cut_prodE (R : realType) (secretP : R.-fdist bool) :
+  fdistmap (fun u => (@sa_arg _ _ _ (amf_sample pgl27_word_family R secretP) u,
+                      @sa_cut _ _ _ (amf_sample pgl27_word_family R secretP) u))
+    (sa_sampleP (amf_sample pgl27_word_family R secretP))
+  = secretP `x (rho_word R).
+Proof. exact: fdistmap_prodr. Qed.
+
+(** The word model's joint law of the first component of its sample point and
+    its cut is the product of that law's own two marginals. It is the product
+    hypothesis a construction of ideal-proximity evidence from an
+    input-indistinguishability certificate places on a model, written at this
+    model: the first factor is the secret prior by fdist_prod1 and the second
+    is the word shuffle law by pgl27_word_cut_distE. *)
+Lemma pgl27_word_arg_cut_marginals_prodE (R : realType)
+    (secretP : R.-fdist bool) :
+  fdistmap (fun u : bool * (200.-tuple 'I_5) =>
+              (u.1, @sa_cut _ _ _ (amf_sample pgl27_word_family R secretP) u))
+    (sa_sampleP (amf_sample pgl27_word_family R secretP))
+  = (fdistmap (fun u : bool * (200.-tuple 'I_5) => u.1)
+       (sa_sampleP (amf_sample pgl27_word_family R secretP)))
+    `x (sa_cut_dist (amf_sample pgl27_word_family R secretP)).
+Proof.
+have Hfst : fdistmap (fun u : bool * (200.-tuple 'I_5) => u.1)
+    (sa_sampleP (amf_sample pgl27_word_family R secretP)) = secretP.
+  transitivity (fdistmap fst
+    (fdistmap (fun u : bool * (200.-tuple 'I_5) =>
+       (u.1, @sa_cut _ _ _ (amf_sample pgl27_word_family R secretP) u))
+       (sa_sampleP (amf_sample pgl27_word_family R secretP)))).
+    by rewrite fdistmap_comp.
+  by rewrite (@pgl27_word_arg_cut_prodE R secretP) -/(fdist_fst _) fdist_prod1.
+have Hsnd : sa_cut_dist (amf_sample pgl27_word_family R secretP)
+  = rho_word R by exact: pgl27_word_cut_distE.
+rewrite Hfst Hsnd.
+exact: pgl27_word_arg_cut_prodE.
+Qed.
+
+(** The word model's run argument is the first component of its sample point.
+    A construction over a finite coordinate of the sample point asks for a
+    decoding of that coordinate back into the run-argument carrier; here that
+    coordinate is the run argument itself and the decoding is the identity. *)
+Lemma pgl27_word_arg_readE (R : realType) (secretP : R.-fdist bool)
+    (u : bool * (200.-tuple 'I_5)) :
+  @sa_arg _ _ _ (amf_sample pgl27_word_family R secretP) u = u.1.
+Proof. exact: erefl. Qed.
