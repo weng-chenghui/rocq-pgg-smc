@@ -43,8 +43,8 @@
 (* reject the term for an occupied name and not for the arm the term asserts. *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   pgl27_word_published_arm_neq  == the two programs over the word model    *)
-(*                              carry different arms                          *)
+(*   pgl27_word_published_property_neq                                        *)
+(* == the two programs over the word model carry different arms               *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -99,31 +99,33 @@ Fail Definition pgl27_exact_published_leak7 : Published :=
 
 (** Recording the word program at the exact arm is rejected by conversion, so
     the program carries the arm its certify statement wrote and no other. *)
-Fail Definition pgl27_word_published_arm_neq (R : realType)
+Fail Definition pgl27_word_published_property_neq (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published)) R) :=
-  (erefl : security_arm_of pgl27_word_published R idx
-           = ExactIndependenceArm).
+  (erefl : security_property_of pgl27_word_published R idx
+           = ExactIndependenceProperty).
 
 (** The two programs over the one model carry different arms, so the pair is two
     statements about one probability model and not one statement published
     twice. *)
-Lemma pgl27_word_published_arm_neq (R : realType) (secretP : R.-fdist bool) :
-  security_arm_of pgl27_word_proximity_published R secretP
-  <> security_arm_of pgl27_word_branch_published39 R secretP.
+Lemma pgl27_word_published_property_neq (R : realType)
+    (secretP : R.-fdist bool) :
+  security_property_of pgl27_word_proximity_published R secretP
+  <> security_property_of pgl27_word_branch_published39 R secretP.
 Proof.
 (* Three timings are each why one line reads as it does. Binding the prior as an
    index of the proximity program costs 78.7 s in the statement alone, because
    the branch program's index type is then reached by conversion through both
    programs' observed executions, so it is bound at its own type. Rewriting with
-   the two armE lemmas applied to that prior costs 24.3 s, and restating the two
-   equations locally and rewriting with both in the inequation costs 24.1 s,
-   because a rewrite scans the other side of the goal and so converts one
-   program against the other. The equation between the arms is therefore assumed
-   first, and each rewrite then runs on a goal that mentions one program. *)
-have Hp : security_arm_of pgl27_word_proximity_published R secretP
-  = IdealProximityArm by [].
-have Hs : security_arm_of pgl27_word_branch_published39 R secretP
-  = InputIndistinguishabilityArm by [].
+   the two propertyE lemmas applied to that prior costs 24.3 s, and restating
+   the two equations locally and rewriting with both in the inequation costs
+   24.1 s, because a rewrite scans the other side of the goal and so converts
+   one program against the other. The equation between the arms is therefore
+   assumed first, and each rewrite then runs on a goal that mentions one
+   program. *)
+have Hp : security_property_of pgl27_word_proximity_published R secretP
+  = IdealProximityProperty by [].
+have Hs : security_property_of pgl27_word_branch_published39 R secretP
+  = InputIndistinguishabilityProperty by [].
 move=> Harm; move: Hp; rewrite Harm Hs => Hf; discriminate Hf.
 Qed.
 
@@ -192,7 +194,7 @@ Fail Definition pgl27_word_published41 : PublishedAt pgl27_bound41 :=
     where it expects the first of two dealt secrets, and is rejected: what the
     word program proves at a coalition is a distance between the readings of two
     secrets, so the two secrets come before the threshold proof. *)
-Fail Definition pgl27_word_arm_is_not_exact (R : realType)
+Fail Definition pgl27_word_property_is_not_exact (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (HC : (#|C| < 4)%N) :=
   view_secrecy_of pgl27_word_published R secretP C HC.
 

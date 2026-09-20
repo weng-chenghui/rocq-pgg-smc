@@ -1,0 +1,49 @@
+File "./notes/probes/2026-09-20-security-property-rename/locate_new_names.v", line 9, characters 15-18:
+Warning: Loading Stdlib without prefix is deprecated.
+Use "From Stdlib Require Lia" or the deprecated "From Coq Require Lia"
+for compatibility with older Coq versions.
+[deprecated-missing-stdlib,deprecated-since-9.0,deprecated,default]
+File "./notes/probes/2026-09-20-security-property-rename/locate_new_names.v", line 16, characters 0-77:
+Warning: Notations "_ <| _" defined at level 70 with arguments constr
+at next level, constr at next level and "_ <| _ |> _" defined at level 49
+with arguments constr at next level, constr at next level
+have incompatible prefixes. One of them will likely not work.
+[notation-incompatible-prefix,parsing,default]
+No object of basename ExactIndependenceProperty
+No object of basename IdealProximityProperty
+No object of basename InputIndistinguishabilityProperty
+No object of basename EvidenceProp
+No object of basename SecurityProperty
+No object of basename SecurityEvidence
+No object of basename ab_security_property
+No object of basename ab_evidence
+No object of basename certify_exact_propertyE
+No object of basename certify_idealproximity_propertyE
+No object of basename certify_indistinguishability_propertyE
+No object of basename conclude_propertyE
+No object of basename
+five_card_biased_branch_indistinguishability_published_propertyE
+No object of basename
+five_card_biased_indistinguishability_published_propertyE
+No object of basename five_card_biased_proximity_published_propertyE
+No object of basename five_card_biased_published_property_neq
+No object of basename five_card_biased_published_inv25_propertyE
+No object of basename
+five_card_repeated_indistinguishability_published_propertyE
+No object of basename five_card_repeated_published39_propertyE
+No object of basename five_card_uniform_published_propertyE
+No object of basename pgl27_exact_published_propertyE
+No object of basename pgl27_prior_exact_published_propertyE
+No object of basename pgl27_word_property_is_not_exact
+No object of basename pgl27_word_branch_published39_propertyE
+No object of basename pgl27_word_proximity_published_propertyE
+No object of basename pgl27_word_published39_propertyE
+No object of basename pgl27_word_published_propertyE
+No object of basename pgl27_word_published_property_neq
+No object of basename evidence_property
+No object of basename evidence_conclude
+No object of basename psl211_alldecks_published_propertyE
+No object of basename psl211_word_proximity_published_propertyE
+No object of basename publish_propertyE
+No object of basename s5_rand_published_propertyE
+No object of basename security_property_of

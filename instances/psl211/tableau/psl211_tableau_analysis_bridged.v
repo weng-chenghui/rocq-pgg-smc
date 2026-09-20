@@ -63,7 +63,7 @@
 (* Key results:                                                               *)
 (*   psl211_alldecks_published_pathE                                          *)
 (*                           == the program publishes the manifest's path     *)
-(*   psl211_alldecks_published_armE                                           *)
+(*   psl211_alldecks_published_propertyE                                      *)
 (*                           == the program carries the exact arm             *)
 (*   psl211_alldecks_published_sampledE                                       *)
 (*                           == the program is the named Sampled value with   *)
@@ -85,7 +85,7 @@
 (*   psl211_word_proximity_cert_eps_lt2                                       *)
 (*                           == the certificate's number is below the bound   *)
 (*                              two var_dist_le2 gives                        *)
-(*   psl211_word_proximity_published_armE                                     *)
+(*   psl211_word_proximity_published_propertyE                                *)
 (*                           == the program carries the proximity arm         *)
 (*   psl211_word_proximity_published_pathE                                    *)
 (*                           == the program publishes psl211_word_path        *)
@@ -191,9 +191,10 @@ Proof. by []. Qed.
     the coalition's view from the chirality, and not a distance between two
     readings. The certify statement the program wrote settles which arm
     that is. *)
-Lemma psl211_alldecks_published_armE (R : realType)
+Lemma psl211_alldecks_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at psl211_alldecks_published)) R) :
-  security_arm_of psl211_alldecks_published R idx = ExactIndependenceArm.
+  security_property_of psl211_alldecks_published R idx
+  = ExactIndependenceProperty.
 Proof. by []. Qed.
 
 (** psl211_alldecks_published_sampledE — the program is the named Sampled
@@ -276,7 +277,7 @@ Lemma psl211_word_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (psl211_word_proximity_cert R idx)
   = amf_sample (ab_f (published_at psl211_alldecks_published)) R idx
   /\ ExactIndependence (ipc_witness (psl211_word_proximity_cert R idx))
-     = ab_port (published_at psl211_alldecks_published) R idx.
+     = ab_evidence (published_at psl211_alldecks_published) R idx.
 Proof.
 (* exact: erefl and not by []: done does not return on an equation between two
    programs' coordinates, where exact: erefl decides it at once. *)
@@ -364,9 +365,10 @@ Definition psl211_word_proximity_published : Published :=
 (** The arm the program carries, at every real field and index: the distance to
     a private ideal model, and not the distance between two readings of one
     model. *)
-Lemma psl211_word_proximity_published_armE (R : realType)
+Lemma psl211_word_proximity_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at psl211_word_proximity_published)) R) :
-  security_arm_of psl211_word_proximity_published R idx = IdealProximityArm.
+  security_property_of psl211_word_proximity_published R idx
+  = IdealProximityProperty.
 Proof. exact: erefl. Qed.
 
 (** The manifest path the program publishes: the path of the twelve-card

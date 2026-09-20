@@ -90,33 +90,35 @@
 (* Where each published program's chain is, one entry per program.            *)
 (* five_card_uniform_published, under The uniform program:                    *)
 (*     five_card_uniform_published_sampledE,                                  *)
-(*     five_card_uniform_published_pathE, five_card_uniform_published_armE,   *)
-(*     and, under The exact arm's four conjuncts at this instance, the        *)
-(*     reading five_card_exact_view_secrecy.                                  *)
+(*     five_card_uniform_published_pathE,                                     *)
+(*     five_card_uniform_published_propertyE, and, under The exact arm's four *)
+(*     conjuncts at this instance, the reading five_card_exact_view_secrecy.  *)
 (* five_card_repeated_indistinguishability_published, under Kim's two         *)
 (*     programs, certified against the uniform rotation law:                  *)
 (*     five_card_repeated_indistinguishability_published_sampledE, _pathE,    *)
-(*     _armE and _publishedE, and no reading of its own.                      *)
+(*     _propertyE and _publishedE, and no reading of its own.                 *)
 (* five_card_biased_indistinguishability_published, under the same banner:    *)
 (*     five_card_biased_indistinguishability_published_sampledE, _pathE,      *)
-(*     _armE and _publishedE, and no reading of its own.                      *)
+(*     _propertyE and _publishedE, and no reading of its own.                 *)
 (* five_card_repeated_published39, under The same two programs at the         *)
 (*     constants they publish: five_card_repeated_published39_sampledE,       *)
 (*     five_card_repeated_published39_atE,                                    *)
-(*     five_card_repeated_published39_armE, no _pathE of its own, and no      *)
+(*     five_card_repeated_published39_propertyE, no _pathE of its own, and no *)
 (*     reading of its own.                                                    *)
 (* five_card_biased_published_inv25, under the same banner:                   *)
 (*     five_card_biased_published_inv25_sampledE,                             *)
-(*     five_card_biased_published_inv25_armE, five_card_biased_forms_pathE in *)
-(*     place of a _pathE of its own, and no reading of its own.               *)
+(*     five_card_biased_published_inv25_propertyE,                            *)
+(*     five_card_biased_forms_pathE in place of a _pathE of its own, and no   *)
+(*     reading of its own.                                                    *)
 (* five_card_biased_branch_indistinguishability_published, under One model,   *)
 (*     two claims, two programs: written from five_card_biased_sampled, so no *)
-(*     _sampledE, then _atE, _pathE and _armE, and no reading of its own.     *)
+(*     _sampledE, then _atE, _pathE and _propertyE, and no reading of its     *)
+(*     own.                                                                   *)
 (* five_card_biased_proximity_published, under the same banner: written from  *)
 (*     five_card_biased_sampled, so no _sampledE,                             *)
-(*     five_card_biased_proximity_published_pathE, _publishedE and _armE,     *)
-(*     and, under What the proximity program states at this instance, the     *)
-(*     readings five_card_biased_view_proximity and                           *)
+(*     five_card_biased_proximity_published_pathE, _publishedE and            *)
+(*     _propertyE, and, under What the proximity program states at this       *)
+(*     instance, the readings five_card_biased_view_proximity and             *)
 (*     five_card_biased_view_own_marginals.                                   *)
 (*                                                                            *)
 (* An importer of this instance names one module per kind of name. The        *)
@@ -201,7 +203,7 @@
 (*   five_card_uniform_published_pathE                                        *)
 (*                           == the uniform program publishes the manifest's  *)
 (*                              path                                          *)
-(*   five_card_uniform_published_armE                                         *)
+(*   five_card_uniform_published_propertyE                                    *)
 (*                           == the uniform program carries the exact arm     *)
 (*   five_card_exact_view_secrecy                                             *)
 (*                           == at a coalition of at most one of the five     *)
@@ -223,10 +225,10 @@
 (*   five_card_biased_indistinguishability_published_pathE                    *)
 (*                           == the one-cut certified program publishes the   *)
 (*                              manifest's path                               *)
-(*   five_card_repeated_indistinguishability_published_armE                   *)
+(*   five_card_repeated_indistinguishability_published_propertyE              *)
 (*                           == the repeated certified program carries the    *)
 (*                              input-indistinguishability arm                *)
-(*   five_card_biased_indistinguishability_published_armE                     *)
+(*   five_card_biased_indistinguishability_published_propertyE                *)
 (*                           == the one-cut certified program carries that    *)
 (*                              same arm                                      *)
 (*   five_card_repeated_indistinguishability_published_path_fieldsE           *)
@@ -252,7 +254,7 @@
 (*                           == the repeated program at two to the minus      *)
 (*                              thirty-ninth and at its own number carry one  *)
 (*                              accumulated stack                             *)
-(*   five_card_repeated_published39_armE                                      *)
+(*   five_card_repeated_published39_propertyE                                 *)
 (*                           == the concluded repeated program carries that   *)
 (*                              same arm                                      *)
 (*   five_card_inv50_split   == one twenty-fifth as a sum of two per-pair     *)
@@ -263,7 +265,7 @@
 (*   five_card_biased_forms_pathE                                             *)
 (*                           == the two one-cut certified programs publish    *)
 (*                              one path                                      *)
-(*   five_card_biased_published_inv25_armE                                    *)
+(*   five_card_biased_published_inv25_propertyE                               *)
 (*                           == the concluded one-cut program carries that    *)
 (*                              same arm                                      *)
 (*   five_card_bound_inv25_lt2                                                *)
@@ -293,10 +295,10 @@
 (*   five_card_biased_proximity_published_path_fieldsE                        *)
 (*                           == the three coordinates the proximity program   *)
 (*                              publishes                                     *)
-(*   five_card_biased_branch_indistinguishability_published_armE              *)
+(*   five_card_biased_branch_indistinguishability_published_propertyE         *)
 (*                           == the branch carries the input-                 *)
 (*                              indistinguishability arm                      *)
-(*   five_card_biased_proximity_published_armE                                *)
+(*   five_card_biased_proximity_published_propertyE                           *)
 (*                           == the proximity program carries the proximity   *)
 (*                              arm                                           *)
 (*   five_card_biased_view_proximity                                          *)
@@ -534,9 +536,10 @@ Proof. by []. Qed.
     of the coalition's view from the conjunction of the committed bits, and
     not a distance between two readings. The certify statement the program
     wrote settles which arm that is. *)
-Lemma five_card_uniform_published_armE (R : realType)
+Lemma five_card_uniform_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at five_card_uniform_published)) R) :
-  security_arm_of five_card_uniform_published R idx = ExactIndependenceArm.
+  security_property_of five_card_uniform_published R idx
+  = ExactIndependenceProperty.
 Proof. by []. Qed.
 
 
@@ -702,23 +705,23 @@ Proof. by []. Qed.
     pairs, and not independence of the view from the conjunction of the
     committed bits. The certify statement the program wrote settles which arm
     that is. *)
-Lemma five_card_repeated_indistinguishability_published_armE (R : realType)
+Lemma five_card_repeated_indistinguishability_published_propertyE (R : realType)
     (idx : amf_index
              (ab_f (published_at
                       five_card_repeated_indistinguishability_published)) R) :
-  security_arm_of five_card_repeated_indistinguishability_published R idx
-  = InputIndistinguishabilityArm.
+  security_property_of five_card_repeated_indistinguishability_published R idx
+  = InputIndistinguishabilityProperty.
 Proof. exact: erefl. Qed.
 
 (** The arm the one-cut certified program carries. The two Kim programs publish
     different manifest paths, and a reader of the manifest alone could not tell
     which arm either committed to. *)
-Lemma five_card_biased_indistinguishability_published_armE (R : realType)
+Lemma five_card_biased_indistinguishability_published_propertyE (R : realType)
     (idx : amf_index
              (ab_f (published_at
                       five_card_biased_indistinguishability_published)) R) :
-  security_arm_of five_card_biased_indistinguishability_published R idx
-  = InputIndistinguishabilityArm.
+  security_property_of five_card_biased_indistinguishability_published R idx
+  = InputIndistinguishabilityProperty.
 Proof. exact: erefl. Qed.
 
 (** The three coordinates the repeated certified program publishes. *)
@@ -870,10 +873,10 @@ Proof. reflexivity. Qed.
     at or above the certificate's own leaves the port where the certify
     statement put it, so the program at 2^-39 and the program at the
     bundle's spectral number carry the same arm. *)
-Lemma five_card_repeated_published39_armE (R : realType)
+Lemma five_card_repeated_published39_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at five_card_repeated_published39)) R) :
-  security_arm_of five_card_repeated_published39 R idx
-  = InputIndistinguishabilityArm.
+  security_property_of five_card_repeated_published39 R idx
+  = InputIndistinguishabilityProperty.
 Proof. exact: erefl. Qed.
 
 (** The one-cut program's certificate at the exact number one fiftieth. *)
@@ -939,10 +942,10 @@ Proof. exact: erefl. Qed.
     carries the spectral one, so the two programs differ in the number
     they publish and not in what kind of fact they state about a
     coalition. *)
-Lemma five_card_biased_published_inv25_armE (R : realType)
+Lemma five_card_biased_published_inv25_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at five_card_biased_published_inv25)) R) :
-  security_arm_of five_card_biased_published_inv25 R idx
-  = InputIndistinguishabilityArm.
+  security_property_of five_card_biased_published_inv25 R idx
+  = InputIndistinguishabilityProperty.
 Proof. exact: erefl. Qed.
 
 (** One twenty-fifth is under two, the bound var_dist_le2 gives for a
@@ -987,7 +990,7 @@ Lemma kim_biased_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (kim_biased_proximity_cert R idx)
   = amf_sample (ab_f (published_at five_card_uniform_published)) R idx
   /\ ExactIndependence (ipc_witness (kim_biased_proximity_cert R idx))
-     = ab_port (published_at five_card_uniform_published) R idx.
+     = ab_evidence (published_at five_card_uniform_published) R idx.
 Proof. by split. Qed.
 
 
@@ -1097,23 +1100,25 @@ Proof. by []. Qed.
 
 (** The arm the input-indistinguishability branch carries, at every real
     field and index. *)
-Lemma five_card_biased_branch_indistinguishability_published_armE (R : realType)
+Lemma five_card_biased_branch_indistinguishability_published_propertyE
+    (R : realType)
     (idx : amf_index
              (ab_f (published_at
                       five_card_biased_branch_indistinguishability_published))
              R) :
-  security_arm_of five_card_biased_branch_indistinguishability_published R idx
-  = InputIndistinguishabilityArm.
+  security_property_of five_card_biased_branch_indistinguishability_published
+    R idx
+  = InputIndistinguishabilityProperty.
 Proof. by []. Qed.
 
 (** The arm the proximity program carries, at every real field and index:
     the distance to a private ideal model, and not the distance between
     two readings of one model. *)
-Lemma five_card_biased_proximity_published_armE (R : realType)
+Lemma five_card_biased_proximity_published_propertyE (R : realType)
     (idx : amf_index
              (ab_f (published_at five_card_biased_proximity_published)) R) :
-  security_arm_of five_card_biased_proximity_published R idx
-  = IdealProximityArm.
+  security_property_of five_card_biased_proximity_published R idx
+  = IdealProximityProperty.
 Proof. by []. Qed.
 
 

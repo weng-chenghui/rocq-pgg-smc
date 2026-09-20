@@ -55,26 +55,27 @@
 (* Where each published program's chain is, one entry per program.            *)
 (* pgl27_exact_published, under The exact and the word program:               *)
 (*     pgl27_exact_published_sampledE, pgl27_exact_published_pathE,           *)
-(*     pgl27_exact_published_armE, and the readings                           *)
+(*     pgl27_exact_published_propertyE, and the readings                      *)
 (*     pgl27_exec_exact_view_indep_restated and pgl27_exact_view_secrecy.     *)
 (* pgl27_word_published, under the same banner:                               *)
 (*     pgl27_word_published_sampledE, pgl27_word_published_pathE,             *)
-(*     pgl27_word_published_armE, and the reading                             *)
+(*     pgl27_word_published_propertyE, and the reading                        *)
 (*     pgl27_word_view_indistinguishability_restated.                         *)
 (* pgl27_word_published39, under The word program concluded at 2^-39:         *)
-(*     pgl27_word_published39_armE, and no reading of its own.                *)
+(*     pgl27_word_published39_propertyE, and no reading of its own.           *)
 (* pgl27_word_published39_bind, under the same banner: tied to the program    *)
 (*     above by pgl27_word_published39_bindE.                                 *)
 (* pgl27_word_branch_published39, under The same program from the named word  *)
 (*     model: written from pgl27_word_sampled, so no _sampledE, and           *)
-(*     pgl27_word_branch_published39_armE.                                    *)
+(*     pgl27_word_branch_published39_propertyE.                               *)
 (* pgl27_prior_exact_published, under The ideal: the exact shuffle at every   *)
 (*     prior: pgl27_prior_exact_published_sampledE,                           *)
-(*     pgl27_prior_exact_published_pathE, pgl27_prior_exact_published_armE.   *)
+(*     pgl27_prior_exact_published_pathE,                                     *)
+(*     pgl27_prior_exact_published_propertyE.                                 *)
 (* pgl27_word_proximity_published, under One model, two claims, two programs: *)
 (*     written from pgl27_word_sampled, so no _sampledE,                      *)
 (*     pgl27_word_proximity_published_pathE,                                  *)
-(*     pgl27_word_proximity_published_armE, and the reading                   *)
+(*     pgl27_word_proximity_published_propertyE, and the reading              *)
 (*     pgl27_word_view_proximity.                                             *)
 (*                                                                            *)
 (* An importer of this instance names one module per kind of name. The        *)
@@ -152,16 +153,16 @@
 (*   pgl27_word_published_pathE                                               *)
 (*                           == the word program publishes the manifest's     *)
 (*                              path                                          *)
-(*   pgl27_exact_published_armE                                               *)
+(*   pgl27_exact_published_propertyE                                          *)
 (*                           == the exact program carries the exact arm       *)
-(*   pgl27_word_published_armE                                                *)
+(*   pgl27_word_published_propertyE                                           *)
 (*                           == the word program carries the input-           *)
 (*                              indistinguishability arm                      *)
 (*   pgl27_word_published39_bindE                                             *)
 (*                           == the surface and the bind build one term       *)
-(*   pgl27_word_published39_armE                                              *)
+(*   pgl27_word_published39_propertyE                                         *)
 (*                           == the concluded program carries that same arm   *)
-(*   pgl27_word_branch_published39_armE                                       *)
+(*   pgl27_word_branch_published39_propertyE                                  *)
 (*                           == the branch program carries that arm as well   *)
 (*   pgl27_word_bound41_false                                                 *)
 (*                           == the terminal's obligation at 2^-41 is false   *)
@@ -184,7 +185,7 @@
 (*   pgl27_prior_exact_published_sampledE                                     *)
 (*                           == the prior-indexed exact program continues the *)
 (*                              named model                                   *)
-(*   pgl27_prior_exact_published_armE                                         *)
+(*   pgl27_prior_exact_published_propertyE                                    *)
 (*                           == the ideal program carries the exact arm       *)
 (*   pgl27_prior_exact_published_pathE                                        *)
 (*                           == the ideal program publishes                   *)
@@ -206,7 +207,7 @@
 (*   pgl27_word_proximity_published_pathE                                     *)
 (*                           == the proximity program publishes               *)
 (*                              pgl27_word_path                               *)
-(*   pgl27_word_proximity_published_armE                                      *)
+(*   pgl27_word_proximity_published_propertyE                                 *)
 (*                           == that program carries the proximity arm        *)
 (*   pgl27_word_published_families_sampledE                                   *)
 (*                           == both programs over the word model read their  *)
@@ -436,19 +437,20 @@ Proof. by []. Qed.
 (** The arm the exact program carries, at every real field and index:
     independence of the coalition's view from the secret, and not a distance
     between two readings. The program's certify statement settles which arm that
-    is, through certify_exact_armE and publish_armE. *)
-Lemma pgl27_exact_published_armE (R : realType)
+    is, through certify_exact_propertyE and publish_propertyE. *)
+Lemma pgl27_exact_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_exact_published)) R) :
-  security_arm_of pgl27_exact_published R idx = ExactIndependenceArm.
+  security_property_of pgl27_exact_published R idx = ExactIndependenceProperty.
 Proof. by []. Qed.
 
 (** The arm the word program carries. The two programs publish different
     manifest paths here, but a reader of the manifest alone could not tell
     independence of the view from a distance between two readings, and this pair
     of equations is what separates them. *)
-Lemma pgl27_word_published_armE (R : realType)
+Lemma pgl27_word_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published)) R) :
-  security_arm_of pgl27_word_published R idx = InputIndistinguishabilityArm.
+  security_property_of pgl27_word_published R idx
+  = InputIndistinguishabilityProperty.
 Proof. by []. Qed.
 
 
@@ -493,9 +495,10 @@ Proof. by []. Qed.
 (** The arm the concluded program carries. Concluding at an upper bound leaves
     the port untouched, so the program at 2^-39 carries the arm the program at
     its own sum carries. *)
-Lemma pgl27_word_published39_armE (R : realType)
+Lemma pgl27_word_published39_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published39)) R) :
-  security_arm_of pgl27_word_published39 R idx = InputIndistinguishabilityArm.
+  security_property_of pgl27_word_published39 R idx
+  = InputIndistinguishabilityProperty.
 Proof. by []. Qed.
 
 
@@ -517,10 +520,10 @@ Definition pgl27_word_branch_published39 : PublishedAt pgl27_bound39 :=
 (** The arm the branch program carries. Naming the Sampled value before the
     certify statement leaves the port where that statement put it, so the branch
     program carries the arm pgl27_word_published39 carries. *)
-Lemma pgl27_word_branch_published39_armE (R : realType)
+Lemma pgl27_word_branch_published39_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_branch_published39)) R) :
-  security_arm_of pgl27_word_branch_published39 R idx
-  = InputIndistinguishabilityArm.
+  security_property_of pgl27_word_branch_published39 R idx
+  = InputIndistinguishabilityProperty.
 Proof. exact: erefl. Qed.
 
 
@@ -790,9 +793,10 @@ Proof. exact: erefl. Qed.
 
 (** The arm the ideal program carries, at every real field and prior:
     independence of the dealt secret, and not a distance to some other model. *)
-Lemma pgl27_prior_exact_published_armE (R : realType)
+Lemma pgl27_prior_exact_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_prior_exact_published)) R) :
-  security_arm_of pgl27_prior_exact_published R idx = ExactIndependenceArm.
+  security_property_of pgl27_prior_exact_published R idx
+  = ExactIndependenceProperty.
 Proof. by []. Qed.
 
 (** The manifest's typed path for the eight-card orbit instance at the
@@ -842,7 +846,7 @@ Lemma pgl27_word_proximity_cert_idealE (R : realType)
   ipc_ideal (pgl27_word_proximity_cert secretP)
   = amf_sample (ab_f (published_at pgl27_prior_exact_published)) R secretP
   /\ ExactIndependence (ipc_witness (pgl27_word_proximity_cert secretP))
-     = ab_port (published_at pgl27_prior_exact_published) R secretP.
+     = ab_evidence (published_at pgl27_prior_exact_published) R secretP.
 Proof. by split. Qed.
 
 
@@ -938,9 +942,10 @@ Qed.
 (** The arm the proximity program carries, at every real field and prior: the
     distance to a private ideal model, and not the distance between two readings
     of one model. *)
-Lemma pgl27_word_proximity_published_armE (R : realType)
+Lemma pgl27_word_proximity_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_proximity_published)) R) :
-  security_arm_of pgl27_word_proximity_published R idx = IdealProximityArm.
+  security_property_of pgl27_word_proximity_published R idx
+  = IdealProximityProperty.
 Proof. by []. Qed.
 
 (** Both programs over the word model read their analysis model family off the

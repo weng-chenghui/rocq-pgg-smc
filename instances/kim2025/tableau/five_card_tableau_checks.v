@@ -45,7 +45,7 @@
 (* twice.                                                                     *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   five_card_biased_published_arm_neq                                       *)
+(*   five_card_biased_published_property_neq                                  *)
 (* == the two programs over the one-cut model carry different arms            *)
 (******************************************************************************)
 
@@ -236,10 +236,10 @@ Fail Definition kim_biased_indistinguishability_from_centi
 (** The two programs over the one model carry different arms, so the pair is
     two statements about one probability model and not one statement
     published twice. *)
-Lemma five_card_biased_published_arm_neq (R : realType)
+Lemma five_card_biased_published_property_neq (R : realType)
     (idx : amf_index
              (ab_f (published_at five_card_biased_proximity_published)) R) :
-  security_arm_of five_card_biased_proximity_published R idx
-  <> security_arm_of
+  security_property_of five_card_biased_proximity_published R idx
+  <> security_property_of
        five_card_biased_branch_indistinguishability_published R idx.
 Proof. by []. Qed.

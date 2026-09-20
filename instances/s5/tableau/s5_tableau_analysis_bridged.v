@@ -56,7 +56,7 @@
 (*   s5_rand_published_pathE                                                  *)
 (*                        == the randomized program publishes the manifest's  *)
 (*                           path                                             *)
-(*   s5_rand_published_armE                                                   *)
+(*   s5_rand_published_propertyE                                              *)
 (*                        == the program carries the exact arm                *)
 (*   s5_rand_published_sampledE                                               *)
 (*                        == the program is the named Sampled value with the  *)
@@ -186,9 +186,9 @@ Proof. by []. Qed.
     the coalition's view from the tape secret, and not a distance between two
     readings. The certify statement the program wrote settles which arm
     that is. *)
-Lemma s5_rand_published_armE (R : realType)
+Lemma s5_rand_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at s5_rand_published)) R) :
-  security_arm_of s5_rand_published R idx = ExactIndependenceArm.
+  security_property_of s5_rand_published R idx = ExactIndependenceProperty.
 Proof. by []. Qed.
 
 (** The program is the named Sampled value with the payload and the terminal
