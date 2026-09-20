@@ -71,3 +71,64 @@ place `Admitted` may appear), compiled single-file with the production load
 path. Two audits (soundness, naming) before anything is landed. Landing home:
 `manifest/pgg_tableau_arm_relations.v` for A3 to A5 and B1 to B5, a `lib/` or
 `security/` file for A1 (decided by what A1's proof imports).
+
+## Results of the probe and of the two audits (2026-09-20)
+
+Probe: `notes/probes/2026-09-20-p8-arm-relations/` (`LEDGER.md`), all twelve rows
+compiled, recompiled from source by the main session, three classical axioms.
+Audits: `audit-soundness.md` (NO-GO, no false statement, no new axiom; two wrong
+conclusions in the ledger and four over-claiming sentences) and
+`audit-naming.md` (NO-GO under the probe's names, eleven MUST). Every finding
+below is ACCEPTED and changes this spec; the landing follows this section, not
+the ledger rows above.
+
+Changes to the claims.
+
+1. B1's hypothesis as first written does not typecheck (`ex_inputT E` is a bare
+   `Type`). It is stated on a finite reading of the sample point:
+   `argT : finType`, `arg_read : sa_sampleT sa -> argT`,
+   `arg_decode : argT -> ex_inputT E`, `Harg : sa_arg u = arg_decode (arg_read u)`,
+   and the product hypothesis with its two factors NAMED, not quantified:
+   `fdistmap (fun u => (arg_read u, sa_cut u)) (sa_sampleP sa)
+    = fdistmap arg_read (sa_sampleP sa) \`x sa_cut_dist sa`. `Parg` and `rho` stop
+   being variables (naming audit, section structure; soundness U8).
+2. The construction takes the certificate `ic` itself; the ideal law is
+   `ic_ideal ic` and the constancy is `ic_const ic` (soundness U4). The
+   threshold premise that the closeness field discards is dropped (U9).
+3. A4 needs no premise: `profile_k` is a successor at every algebra
+   (`reconstruct/pgg_sharing_framework.v`), so `0 < profile_k` is proved inside
+   (U2). Two is attained by the same certificate; the landing states it (U3).
+4. A5 with a parameter `Q` and a proof of `Q` is A4 restated (U1, naming V10).
+   Landed: the parameter-free `~ forall cert, IdealProximityPropAt cert c` for
+   `c < 2`, and the one premise-shaped corollary whose premise is the
+   input-indistinguishability proposition.
+5. B5's strength is the fineness of `arg_read`: at `argT := unit` with a constant
+   run argument it is true and says nothing. The statement comment says so, and
+   the law-level fact `fdistmap arg_read (sa_sampleP sa)` is the secret's law on
+   both sides is landed beside it (U6, U7).
+6. Departure 6 of the ledger is withdrawn (U5b): at the five-card one-cut model
+   the number is whichever epsilon the chosen input-indistinguishability
+   certificate carries; over `kim_biased_cert_exact` it is one fiftieth, equal
+   to the landed proximity certificate's, and over `kim_biased_cert` it is
+   sqrt 5 / 80. The header of the instance file says what the file proves (U5a).
+7. Not landed: the lemma restating `cert_eps`'s definition under a name that
+   says "halves" (V18; if wanted, `cert_eps_dbl` beside `cert_eps`), the
+   double-negation mutation (V17), `Search` and `Print Assumptions` commands
+   (V23, V24), the unused `erefl` lemma.
+8. Sentences that must not land as written: "any premise whatever" (U10), "the
+   premise is discharged by the certificate" (U11, V11), a recorded `Fail` read
+   as an impossibility (U12), "the sharper of the two numbers" (U13, V19: the
+   two numbers bound different quantities), the ideal adapter "leaks nothing by
+   construction" (V20).
+
+Names and placement: the final name list and the placement table of
+`audit-naming.md`, with two amendments. First, no name and no sentence uses the
+word the owner barred on 2026-09-20 for a constructor of `SecurityPort`; the
+home file is `manifest/pgg_tableau_port_relations.v` after the rename of
+tracker step 2.6f, and P8 lands after that rename. Second, the value judgement
+"degenerate" is replaced by what the certificate is: its two secrets are the
+constants true and false (V7). `var_dist_self` exists in
+`legacy/security/pgg_uniform_security.v` in the same namespace (V1): the landing
+moves that lemma to `lib/var_dist_supp.v` and does not restate it, if the
+legacy file's importers allow; otherwise it lands under `var_dist_xx` and the
+collision is reported.
