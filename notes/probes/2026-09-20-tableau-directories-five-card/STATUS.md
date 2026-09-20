@@ -669,3 +669,24 @@ seven: 556, 120, 140, 270, 578, 3278 and 534 code tokens, none changed.
 | Q1, the `s5_exec` printing difference | keep the earned-import side | the checks header says nothing about it; it is a fact about printing and lives in this page only |
 | Q2, Kim's input-privacy bound at Sampled | accepted as placed | the Sampled header states it as a fact with its two reasons, and the AnalysisBridged header no longer reads as holding every security statement |
 | Q3, Candidate B | no | one AnalysisBridged file with a locator table in its header, as PGL(2,7) now has in production |
+
+## As built (2026-09-20)
+
+Fix pass 1 was audited by the main session: `verify.py` green (93 of 93
+declarations token-identical, 83 of 89 docstrings word-identical with the six
+intended differences, eleven recorded rejections of which ten equal
+production's and one is the tabled printing difference), the final texts of F1
+to F6 and F9 and the corrected locator entries read, and the staged repoint of
+`manifest/pgg_tableau_arm_relations.v` confirmed comment-only by script.
+
+The six staged files were copied with `cp` to `instances/kim2025/tableau/`
+(`cmp`: byte-identical), `instances/kim2025/five_card_proximity.v` was replaced
+by its reduced text (169 lines, no tableau, framework or manifest import),
+`manifest/pgg_tableau_arm_relations.v` received its comment repoint, and
+`_CoqProject` lists the six files after `instances/kim2025/five_card_proximity.v`
+in place of `instances/kim2025/five_card_rows.v`, with no `-R` line. The eight
+files compiled single-file, all rc=0. `instances/kim2025/five_card_rows.v` was
+then removed together with its build outputs, and `fidelity.v`, unchanged, was
+compiled from a scratch directory against production's load path alone: rc=0,
+and its 972 lines of output are byte-identical to the staged run's, whose first
+853 lines are byte-identical to production's before the move.

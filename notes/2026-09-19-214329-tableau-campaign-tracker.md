@@ -57,8 +57,8 @@ Design with the decisions: `notes/2026-09-20-060000-instance-tableau-directory-d
 | 2.1 | S5 (pilot) | DONE: `instances/s5/tableau/`, six files, `s5_rows.v` retired; staged build, audit, fix pass audited by the main session, `cp`, as-built fidelity rc=0 |
 | 2.2 | PSL(2,11) | DONE: `instances/psl211/tableau/`, six files, `psl211_rows.v` retired, `psl211_word_proximity.v` reduced to the distance mathematics; staged build, audit, fix pass audited by the main session, `cp`, as-built fidelity rc=0. Two comment repoints deferred to 2.5 |
 | 2.3 | PGL(2,7) | DONE: `instances/pgl27/tableau/`, six files, `pgl27_rows.v` retired, `pgl27_proximity.v` reduced to the reading and the distance mathematics (it imports no tableau module); the AnalysisBridged header carries a locator table of the seven published rows; staged build, audit, fix pass audited by the main session, `cp`, as-built output byte-identical. Two comment repoints deferred to 2.5 |
-| 2.4 | five-card | staged build running |
-| 2.5 | Manifest header and the dated note of retired file names for the owner's paper edits | open |
+| 2.4 | five-card | DONE: `instances/kim2025/tableau/`, six files, `five_card_rows.v` retired, `five_card_proximity.v` reduced to three laws and the distance; Kim's input-privacy bound is carried at Sampled, and the AnalysisBridged header names per row by what the manifest reaches its level; staged build, two pre-audit passes, audit, fix pass audited by the main session, `cp`, as-built output byte-identical |
+| 2.5 | Closing pass: the deferred comment repoints (`manifest/pgg_analysis_manifest.v`, `instances/psl211/psl211_models.v`, `instances/pgl27/pgl27_encoding_r5.v`), the manifest header, the twelve-item cross-instance wording list of `notes/probes/2026-09-20-tableau-directories-five-card/audit-five-card.md`, the moved docstrings' economic words (owner's question), and the dated note of retired file names for the owner's paper edits | open |
 
 ## Step 3. Recorded small items
 
