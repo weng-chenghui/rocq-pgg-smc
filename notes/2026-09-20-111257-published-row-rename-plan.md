@@ -1,6 +1,6 @@
 # Plan: a name for `PublishedRow` that a paper can show without explaining "row"
 
-Status: PLAN, not started. Owner's request, 2026-09-20: "PublishedRow is weird
+Status: DECIDED by the owner on 2026-09-20, not started: the type is `Published` (at a bound: `PublishedAt c`), the manifest record `AnalysisPath`, depth 3 (all six layers), and a paper's prose noun for the value is "a published claim". `Claimed` was considered and set aside: in the field "claimed security" means asserted and not proved, while the value carries its proof, and the types of terminals are named after the terminal (`restate`, `RestatedTableau`; `publish`, `Published`). Owner's request, 2026-09-20: "PublishedRow is weird
 to show in the paper since what is a Row suddenly need explanation. Unlike
 others like Sampled and Observed. Need a new name and renaming."
 
