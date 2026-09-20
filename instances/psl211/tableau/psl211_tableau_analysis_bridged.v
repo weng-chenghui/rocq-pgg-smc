@@ -22,21 +22,28 @@
 (* positions, one of the 720 labellings of the heart codes and one of the 720 *)
 (* labellings of the club codes.                                              *)
 (*                                                                            *)
-(* Two programs are published here and they part at the model. Over the       *)
-(* uniform cut, what a coalition is shown is independent of the chirality     *)
-(* outright, at every real field and with no number in the claim; that is     *)
-(* exact independence, and the instance supplies one witness for it. Over the *)
-(* 584-letter word cut, what a coalition is shown is within 2^-40, in the sum *)
-(* of absolute differences, of what the uniform-cut execution shows it, so a  *)
-(* distinguisher's advantage is at most 2^-41; that is ideal proximity, and   *)
-(* the instance supplies a certificate whose ideal is the first program's own *)
-(* model. Both numbers are the certificate's, not a constant read from        *)
-(* elsewhere.                                                                 *)
+(* Two programs with security evidence are published here and they part at    *)
+(* the model. Over the uniform cut, what a coalition is shown is independent  *)
+(* of the chirality outright, at every real field and with no number in the   *)
+(* claim; that is exact independence, and the instance supplies one witness   *)
+(* for it. Over the 584-letter word cut, what a coalition is shown is within  *)
+(* 2^-40, in the sum of absolute differences, of what the uniform-cut         *)
+(* execution shows it, so a distinguisher's advantage is at most 2^-41; that  *)
+(* is ideal proximity, and the instance supplies a certificate whose ideal is *)
+(* the first program's own model. Both numbers are the certificate's, not a   *)
+(* constant read from elsewhere.                                              *)
 (*                                                                            *)
 (* No input-indistinguishability program is published over either model. An   *)
 (* input-indistinguishability certificate carries a constancy field, and      *)
 (* instances/psl211/psl211_reading_constancy.v restates that field as         *)
-(* coalition_reading_constancy and refutes it in both run modes.              *)
+(* coalition_reading_constancy and refutes it in both run modes. A third      *)
+(* program over the all-decks model publishes that reason rather than         *)
+(* describing it: psl211_alldecks_obstruction_published carries the           *)
+(* obstruction that the model is input distinguishable at 1/660, from which   *)
+(* the number bound and the exclusion of certificates with a close ideal both *)
+(* follow. It certifies no security property, and its path records            *)
+(* NegativeTransfer where psl211_alldecks_path, over the same model, records  *)
+(* StaticExecutedOnly.                                                        *)
 (*                                                                            *)
 (* The mathematics reaches these programs through the payloads alone, and     *)
 (* through three named facts: psl211_alldecks_exact_viewE and                 *)
@@ -61,6 +68,13 @@
 (*   psl211_word_proximity_published                                          *)
 (*                           == the word path as a program, published at      *)
 (*                              2^-40                                         *)
+(*   psl211_alldecks_obstruction                                              *)
+(*                           == the obstruction at every field and index      *)
+(*   psl211_alldecks_obstruction_pf                                           *)
+(*                           == its proof there                               *)
+(*   psl211_alldecks_obstruction_published                                    *)
+(*                           == the all-decks path as a program publishing    *)
+(*                              that obstruction                              *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_alldecks_published_pathE                                          *)
@@ -99,6 +113,17 @@
 (*   psl211_word_view_proximity                                               *)
 (*                           == the proximity program's security statement,   *)
 (*                              at 2^-40                                      *)
+(*   psl211_alldecks_obstruction_published_pathE                              *)
+(*                           == the obstruction program publishes the         *)
+(*                              all-decks path at NegativeTransfer            *)
+(*   psl211_alldecks_obstruction_published_path_observedE                     *)
+(*                           == that path names the all-decks path's own run  *)
+(*   psl211_alldecks_obstruction_published_path_transfer_neq                  *)
+(*                           == and differs from it in the transfer status    *)
+(*   psl211_alldecks_published_input_distinguishability                       *)
+(*                           == the obstruction program's statement: the      *)
+(*                              all-decks model is input distinguishable at   *)
+(*                              1/660                                         *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -119,6 +144,7 @@ From pgg_smc Require Import psl211_group psl211_orbit psl211_closure.
 From pgg_smc Require Import psl211_scheme psl211_profile psl211_mixing.
 From pgg_smc Require Import psl211_exec psl211_alldecks psl211_models.
 From pgg_smc Require Import psl211_word_model psl211_word_proximity.
+From pgg_smc Require Import psl211_reading_constancy.
 From pgg_smc Require Import psl211_tableau_observed psl211_tableau_sampled.
 
 Set Implicit Arguments.
@@ -394,8 +420,8 @@ Proof. exact: erefl. Qed.
 
 (** psl211_word_proximity_published_sampledE — the proximity program too is
     its named Sampled value with the payload and the terminal adjoined, so the
-    two programs of this instance are each written once above the model they
-    branch at. *)
+    two programs with security evidence are each written once above the model
+    they branch at. *)
 Lemma psl211_word_proximity_published_sampledE :
   (psl211_word_sampled
      certify IdealProximity psl211_word_proximity_cert
@@ -429,4 +455,120 @@ Theorem psl211_word_view_proximity (R : realType) (C : {set seatT})
   <= 2%:R^-40.
 Proof.
 exact: (view_proximity_of psl211_word_proximity_published R tt C HC).
+Qed.
+
+(******************************************************************************)
+(*     The obstruction the all-decks model publishes                          *)
+(******************************************************************************)
+
+(** psl211_alldecks_obstruction — the obstruction, at every real field and at
+    the one index of the all-decks family: the model is input distinguishable
+    at 1/660, the reciprocal of the order of the shuffle group. *)
+Definition psl211_alldecks_obstruction
+  : ObstructionPayload (tableau_at psl211_exact_sampled) :=
+  fun (R : realType) (idx : unit) =>
+    @InputDistinguishabilityObstruction R psl211_algebra
+      psl211_alldecks_params (amf_sample psl211_exact_family R idx)
+      ((#|pgg_G psl211_M|%:R)^-1).
+
+(** psl211_alldecks_obstruction_pf — its proof at every field and index, which
+    is psl211_alldecks_input_distinguishability at the model the family
+    returns there. *)
+Definition psl211_alldecks_obstruction_pf
+  : ObstructionPayloadProp psl211_alldecks_obstruction :=
+  fun (R : realType) (_ : unit) =>
+    psl211_alldecks_input_distinguishability R.
+
+(** psl211_alldecks_obstruction_published — the all-decks run, the exact model
+    and the obstruction, published. What the value carries about the model is
+    that three of the twelve seats read the two chiralities of the deal
+    psl211_perdeck_deal at least 1/660 apart under the model's own cut law, so
+    a distinguisher told to compare those two run arguments has advantage at
+    least 1/1320 there, the sum of absolute differences being twice the total
+    variation distance of the literature. It certifies no security property:
+    its data carries no SecurityEvidence, and every reader of
+    manifest/pgg_tableau.v that names one takes a PublishedAt, a different
+    inductive type.
+
+    What it refutes. Every number at which an input-indistinguishability
+    program over this model states its proposition is at least 1/660, whatever
+    the certificate, by psl211_alldecks_indistinguishability_number_ge.
+    Through the general form of the tail lemma,
+    indistinguishability_prop_of_ideal_close, it also rules out every
+    certificate whose ideal cut sits within eps of this model's own cut law
+    once eps added to itself stays below 1/660, which is
+    no_indistinguishability_cert_ideal_close_of_input_distinguishability at
+    this model. The tree's psl211_alldecks_no_small_eps_cert is the companion
+    exclusion on the other coordinate: it constrains a certificate's own
+    marginal bound rather than where its ideal sits, and it follows by the
+    same route at the certificate's own number.
+
+    Why it does not conflict with psl211_alldecks_published. The two are facts
+    about one model under different quantifiers over the run argument. Exact
+    independence is stated with the deck description drawn uniformly, and it
+    says that a coalition of at most five of the twelve seats then learns
+    nothing about the chirality, exactly. The obstruction fixes two run
+    arguments and compares the readings at those two values. A second and
+    separate fact is that the chirality reindexes the laid deck.
+
+    The path. All five coordinates are honest. The level is AnalysisBridged
+    because the manifest's own definition of that level admits a limitation
+    theorem about the same distribution and the same observer, and this is
+    one; the transfer status is NegativeTransfer because that status is
+    defined as a theorem transporting an obstruction to the path's observer,
+    and the value's own proposition is that theorem. The manifest gains no
+    twelfth path in this batch: it records paths and imposes its duties on
+    paths, no duty requires a published program to have one, and the single
+    coordinate with no honest value is the capability line, whose closed
+    vocabulary is correctness, exact privacy, approximate privacy, trace
+    secrecy, conditional entropy, mutual information or endpoint marginal
+    mixing, none of which labels a limitation; extending that vocabulary is
+    the owner's call. Were the path recorded it would be a twelfth path and
+    not a second description of psl211_alldecks_path: the two agree on the
+    observed execution, the level, the model family and the assumption status
+    and differ in the transfer status, and two paths over one model and one
+    pair of statuses are one path. *)
+Definition psl211_alldecks_obstruction_published : PublishedObstruction :=
+  psl211_exact_sampled
+    |> publish Obstruction psl211_alldecks_obstruction
+       by psl211_alldecks_obstruction_pf BaselineClassicalOnly.
+
+(** psl211_alldecks_obstruction_published_pathE — the path this program
+    publishes: the instance's own observed execution, the level
+    AnalysisBridged, the unit-indexed exact-uniform family, NegativeTransfer
+    and BaselineClassicalOnly. Conversion decides it against the facade's
+    vocabulary, as the instance's two published paths are decided. *)
+Lemma psl211_alldecks_obstruction_published_pathE :
+  published_obstruction_path psl211_alldecks_obstruction_published
+  = @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
+      PSL211Analysis.exact_family NegativeTransfer BaselineClassicalOnly.
+Proof. exact: erefl. Qed.
+
+(** psl211_alldecks_obstruction_published_path_observedE — that path and the
+    manifest's all-decks path are about one run and one static observation of
+    it. *)
+Lemma psl211_alldecks_obstruction_published_path_observedE :
+  ap_observed
+    (published_obstruction_path psl211_alldecks_obstruction_published)
+  = ap_observed psl211_alldecks_path.
+Proof. exact: erefl. Qed.
+
+(** psl211_alldecks_obstruction_published_path_transfer_neq — and they differ
+    in the transfer status, the coordinate that separates a limitation from
+    the instance's exact-independence claim. *)
+Lemma psl211_alldecks_obstruction_published_path_transfer_neq :
+  ap_transfer
+    (published_obstruction_path psl211_alldecks_obstruction_published)
+  <> ap_transfer psl211_alldecks_path.
+Proof. by []. Qed.
+
+(** psl211_alldecks_published_input_distinguishability — the program's reader
+    gives the obstruction back, at every real field: the all-decks model is
+    input distinguishable at 1/660. The published value and this statement are
+    one theorem. *)
+Theorem psl211_alldecks_published_input_distinguishability (R : realType) :
+  InputDistinguishabilityPropAt (amf_sample psl211_exact_family R tt)
+    ((#|pgg_G psl211_M|%:R)^-1).
+Proof.
+exact: (obstruction_of psl211_alldecks_obstruction_published R tt).
 Qed.

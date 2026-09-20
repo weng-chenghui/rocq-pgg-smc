@@ -230,6 +230,9 @@
 (*   pgl27_word_proximity_eps_sw_boundE                                       *)
 (*                           == the certificate's number is the marginal      *)
 (*                              bound pgl27_word_cert carries                 *)
+(*   pgl27_word_input_distinguishability_false                                *)
+(*                           == the word model is not input distinguishable   *)
+(*                              at any number above 2^-39                     *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -1036,3 +1039,32 @@ Lemma pgl27_word_proximity_eps_sw_boundE (R : realType)
   ipc_eps (pgl27_word_proximity_cert secretP)
   = sw_bound_eps (ic_b (pgl27_word_cert secretP)).
 Proof. exact: erefl. Qed.
+
+
+(******************************************************************************)
+(*     Where the input-distinguishability proposition fails                   *)
+(******************************************************************************)
+
+(** pgl27_word_input_distinguishability_false — the two-hundred-letter word
+    model of the eight-card orbit instance is not input distinguishable at any
+    number above 2^-39. Below four colluding seats the published program
+    pgl27_word_published39 bounds the distance between the readings of every
+    two dealt secrets under this model's own cut law by 2^-39, so no pair of
+    run arguments separates them further and the existential the proposition
+    asserts has no witness. The obstruction that
+    psl211_alldecks_obstruction_published carries is therefore a statement
+    about the twelve-card chirality model and not a proposition every model
+    satisfies. *)
+Theorem pgl27_word_input_distinguishability_false (R : realType)
+    (secretP : R.-fdist bool) (c : R) :
+  2%:R^-39 < c ->
+  InputDistinguishabilityPropAt (amf_sample pgl27_word_family R secretP) c ->
+  False.
+Proof.
+move=> Hc Hd.
+have Hprop : IndistinguishabilityPropAt (pgl27_word_cert secretP) (2%:R^-39)
+  := view_indistinguishability_of pgl27_word_published39 R secretP.
+have Hge := indistinguishability_number_ge_of_input_distinguishability Hd Hprop.
+by move: (Order.POrderTheory.lt_le_trans Hc Hge);
+   rewrite Order.POrderTheory.ltxx.
+Qed.

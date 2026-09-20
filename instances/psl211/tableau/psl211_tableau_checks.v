@@ -10,7 +10,7 @@
 (* term: it fixes a spelling that does not typecheck, and states no general   *)
 (* impossibility. The file declares nothing and nothing depends on it.        *)
 (*                                                                            *)
-(* Three boundaries are recorded. The first is that an obligation built where *)
+(* Four boundaries are recorded. The first is that an obligation built where  *)
 (* the statement is written is not the named lemma: the inline-reduction      *)
 (* prefix and the named prefix drive the same run, and the equation between   *)
 (* the two prefixes is still refused, because an opaque lemma is convertible  *)
@@ -23,7 +23,12 @@
 (* Beside it, the ideal of the certificate this instance builds is refused as *)
 (* the word model the certificate is about; a certificate whose ideal were    *)
 (* its own model would hold its closeness field at zero, the two sides of     *)
-(* that field being one term.                                                 *)
+(* that field being one term. The fourth is which readers reach a published   *)
+(* obstruction. The readers of manifest/pgg_tableau.v that name a security    *)
+(* statement or a security property all take a PublishedAt, and               *)
+(* PublishedObstruction is a different inductive type with no coercion into   *)
+(* it, so none of them applies; the two terms below are the two spellings     *)
+(* that were checked.                                                         *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -129,3 +134,29 @@ Fail Definition psl211_word_proximity_cert_ideal_self (R : realType)
     (idx : unit) :
   ipc_ideal (psl211_word_proximity_cert R idx)
   = amf_sample psl211_word_family R idx := erefl.
+
+(******************************************************************************)
+(*     Which readers a published obstruction refuses                          *)
+(******************************************************************************)
+
+(** The exact-independence reader is refused on a published obstruction. That
+    reader is the second conjunct of the third field of a PublishedAt, and a
+    published obstruction is a value of a different inductive type, so the
+    rejection is a failure to unify the two record types:
+
+      The term "r" has type "PublishedObstruction"
+      while it is expected to have type "PublishedAt ?c".
+*)
+Section obstruction_reader_secrecy.
+Variable r : PublishedObstruction.
+Fail Check (view_secrecy_of r).
+End obstruction_reader_secrecy.
+
+(** The security-property reader is refused on the same value, and for the
+    same reason. A published obstruction carries no SecurityEvidence, so there
+    is no property for such a reader to name. *)
+(* The message is the one above, word for word, at the same argument. *)
+Section obstruction_reader_property.
+Variable r : PublishedObstruction.
+Fail Check (security_property_of r).
+End obstruction_reader_property.

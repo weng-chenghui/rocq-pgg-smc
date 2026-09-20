@@ -78,6 +78,20 @@ without losing work, since every one was landed as a pure addition.
    that a marginal bound implies no security property is argued in a comment
    and not compiled; `restate` below the top level.
 
+6. **Declarations with no use site yet.** The landing of the published
+   obstruction added `input_distinguishability_prop_le`,
+   `indistinguishability_prop_of_ideal_close`, `run_correct_of_obstruction`
+   and `view_identification_of_obstruction`, which nothing applies today. The
+   two readers mirror `run_correct_of_sampled` and
+   `view_identification_of_sampled`, equally unapplied, so they were kept by
+   the existing pattern. Under the rule "keep only what the paper claims or
+   later work needs", the owner may prune both pairs together.
+7. **The number a published obstruction carries is not constrained in sign.**
+   At a number at or below zero the proposition holds at every model whose
+   run-argument type is inhabited, and the comment on `ObstructionKind` says
+   so. A positivity premise on the terminal would make that unwritable; it
+   was not added, because the one published value is at 1/660.
+
 ## 5. Paper
 
 No `.tex` file was edited at any point. The renamed identifiers a text would

@@ -83,10 +83,14 @@
 (* a binder name in a file whose Require lines are ssreflect and this one,    *)
 (* and each stays the CompletionLevel constructor it names, as Tableau        *)
 (* Observed in s5_tableau_observed.v and Tableau Sampled in                   *)
-(* s5_tableau_sampled.v write it. The count of nineteen is unchanged. Inside  *)
-(* the publish position the two tokens are taken by those two rules, so the   *)
-(* transfer-status slot of the three-payload rule cannot be filled by a bare  *)
-(* token spelled Observed or Sampled, though a parenthesised one reaches the  *)
+(* s5_tableau_sampled.v write it. Obstruction sits in the same position,      *)
+(* measured on 2026-09-21 in the same way: it follows the literal publish in  *)
+(* the terminal rule handing over an obstruction, and it stays a binder name  *)
+(* and a top-level identifier in a file whose Require lines are ssreflect and *)
+(* this one. The count of nineteen is unchanged. Inside the publish position  *)
+(* the three tokens are taken by those three rules, so the transfer-status    *)
+(* slot of the three-payload rule cannot be filled by a bare token spelled    *)
+(* Observed, Sampled or Obstruction, though a parenthesised one reaches the   *)
 (* slot.                                                                      *)
 (*                                                                            *)
 (* One of the nineteen shadows a framework definition: endpoints is also the  *)
@@ -445,3 +449,13 @@ Notation "s |> 'publish' 'Observed' a" := (s ;;; publish_observed of a)
    a transfer theorem. *)
 Notation "s |> 'publish' 'Sampled' t a" := (s ;;; publish_sampled a of t)
   (at level 90, left associativity, t at level 0, a at level 0).
+
+(* The obstruction, the proof of it and then the assumption status. The
+   obstruction occupies the column the transfer status occupies in the other
+   two publish rules, that coordinate being fixed at NegativeTransfer by the
+   terminal, so a program's last statement still reads in the order the
+   manifest column headings run. *)
+Notation "s |> 'publish' 'Obstruction' o 'by' pf a" :=
+  (s ;;; publish_obstruction a of (mk_obstruction (tableau_at s) o pf))
+  (at level 90, left associativity, o at level 0, pf at level 0,
+   a at level 0).
