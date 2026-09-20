@@ -99,9 +99,9 @@ Lemma psl211_word_sampleP_E (R : realType) :
 Proof. exact: erefl. Qed.
 
 (** The cut this model draws is the 584-letter word law. That law is the one
-    psl211_word_mixing bounds against uniform, so the distance the proximity
-    arm bounds is a distance between the two cuts of one execution and not a
-    distance between two executions. *)
+    psl211_word_mixing bounds against uniform, so the distance the
+    ideal-proximity proposition bounds is a distance between the two cuts of
+    one execution and not a distance between two executions. *)
 Lemma psl211_word_cut_distE (R : realType) :
   @sa_cut_dist R (instance_profile psl211_algebra)
     (instance_exec psl211_alldecks_params) (psl211_word_sample R)

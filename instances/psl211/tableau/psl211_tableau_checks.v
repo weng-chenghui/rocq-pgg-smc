@@ -17,13 +17,13 @@
 (* with nothing. The second is what that fork rules out: the model is typed   *)
 (* over the observed execution the named prefix builds and is refused over    *)
 (* the inline one, so no typed evidence crosses between them. The third is    *)
-(* which ideal the proximity arm admits. A certificate's ideal is a sample    *)
-(* adapter over the program's own execution, so the eight-card orbit          *)
-(* instance's model is refused at its type and no distance is reached. Beside *)
-(* it, the ideal of the certificate this instance builds is refused as the    *)
-(* word model the certificate is about; a certificate whose ideal were its    *)
-(* own model would hold its distance field at zero, the two sides of that     *)
-(* field being one term.                                                      *)
+(* which ideal the proximity certificate's type admits. A certificate's ideal *)
+(* is a sample adapter over the program's own execution, so the eight-card    *)
+(* orbit instance's model is refused at its type and no distance is reached.  *)
+(* Beside it, the ideal of the certificate this instance builds is refused as *)
+(* the word model the certificate is about; a certificate whose ideal were    *)
+(* its own model would hold its closeness field at zero, the two sides of     *)
+(* that field being one term.                                                 *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -87,7 +87,7 @@ Fail Definition psl211_vm_reuse_sampled : Tableau Sampled :=
   psl211_alldecks_prefix_vm sample psl211_exact_family.
 
 (******************************************************************************)
-(*     Which ideal the arm refuses                                            *)
+(*     Which ideal the certificate's type refuses                             *)
 (******************************************************************************)
 
 (** The eight-card orbit instance's exact family cannot be the ideal of a

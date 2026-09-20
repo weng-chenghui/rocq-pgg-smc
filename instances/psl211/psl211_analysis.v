@@ -193,8 +193,8 @@ Definition exact_coalition_distE := @psl211_alldecks_coalition_distE.
 (* ===== 5. Correctness ===== *)
 (*                                                                            *)
 (* The observed-execution package derives recovery, and the second alias      *)
-(* names the secret the exact arm is about as the value that recovery         *)
-(* returns.                                                                   *)
+(* names the secret the exact-independence witness carries as the value that  *)
+(* recovery returns.                                                          *)
 (******************************************************************************)
 
 (** observed_recovers — the observed run decodes to the chirality its deck
@@ -222,7 +222,7 @@ Definition content_traceE := @psl211_content_traceE.
 Definition exact_view_indep := @psl211_alldecks_exec_exact_view_indep.
 
 (** static_indep — the same independence at the framework's static reading,
-    which is the form the exact arm's witness field takes. *)
+    which is the form the exact-independence witness's field takes. *)
 Definition static_indep := @psl211_alldecks_static_indep.
 
 (** marginal_bound — the single-card marginal bound of the shuffle, at

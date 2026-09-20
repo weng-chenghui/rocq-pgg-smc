@@ -26,7 +26,7 @@
 (* function of the same two bits is refused where it is written, so the       *)
 (* function a program names is decided by the kernel.                         *)
 (*                                                                            *)
-(* The sixth is the proof: the proximity arm's proposition is a bound between *)
+(* The sixth is the proof: the ideal-proximity proposition is a bound between *)
 (* two laws on a real field and not a Boolean the kernel reduces, so neither  *)
 (* conversion nor done reaches it, and both spellings are refused.            *)
 (*                                                                            *)
@@ -36,17 +36,17 @@
 (* witness proved about it are refused there. Three are about the sample      *)
 (* adapter every certificate type is indexed by, which separates the two Kim  *)
 (* models although their families carry one index type, and which refuses a   *)
-(* certificate of either arm where the other model's is required.             *)
+(* certificate for either property where the other model's is required.       *)
 (*                                                                            *)
 (* The one positive statement of this file is a comparison of two programs    *)
 (* rather than a statement about one, which is what puts it here: the two     *)
-(* programs over the one-cut model carry different arms, so the pair is two   *)
-(* statements about one probability model and not one statement published     *)
-(* twice.                                                                     *)
+(* programs over the one-cut model certify different properties, so the pair  *)
+(* is two statements about one probability model and not one statement        *)
+(* published twice.                                                           *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   five_card_biased_published_property_neq                                  *)
-(* == the two programs over the one-cut model carry different arms            *)
+(* == the two programs over the one-cut model certify different properties    *)
 (******************************************************************************)
 
 Require Import Lia.
@@ -165,9 +165,9 @@ Fail Definition five_card_F_or
 (*     The conclusion does not hold by computation                            *)
 (******************************************************************************)
 
-(** The arm's proposition at Kim's one-cut certificate is not closed by
-    conversion. A variation distance between two laws on a real field is not a
-    Boolean a kernel reduces, so a proof of the program's claim has to be the
+(** The ideal-proximity proposition at Kim's one-cut certificate is not closed
+    by conversion. A variation distance between two laws on a real field is not
+    a Boolean a kernel reduces, so a proof of the program's claim has to be the
     mathematics and cannot be the computation. *)
 Fail Definition five_card_biased_proximity_by_computation (R : realType)
     (idx : unit)
@@ -217,12 +217,12 @@ Fail Definition five_card_repeated_proximity : Tableau AnalysisBridged :=
   five_card_repeated_sampled
     certify IdealProximity kim_biased_proximity_cert.
 
-(** The converse direction, at the arm the tree already carries: the
-    seven-cut model's input-indistinguishability certificate is rejected
-    where the one-cut model's is required. The proximity arm and the
-    input-indistinguishability arm are rejected at the same argument, the
-    sample adapter each certificate type is indexed by, so a certificate of
-    either arm is rejected where the other model's is required. *)
+(** The converse direction, at the security property the tree already carries:
+    the seven-cut model's input-indistinguishability certificate is rejected
+    where the one-cut model's is required. The proximity certificate and the
+    input-indistinguishability certificate are rejected at the same argument,
+    the sample adapter each certificate type is indexed by, so a certificate for
+    either property is rejected where the other model's is required. *)
 Fail Definition kim_biased_indistinguishability_from_centi
   (R : realType) (idx : unit)
   : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
@@ -230,11 +230,11 @@ Fail Definition kim_biased_indistinguishability_from_centi
 
 
 (******************************************************************************)
-(*     The arm two programs over one model carry                              *)
+(*     The security property two programs over one model carry                *)
 (******************************************************************************)
 
-(** The two programs over the one model carry different arms, so the pair is
-    two statements about one probability model and not one statement
+(** The two programs over the one model certify different properties, so the
+    pair is two statements about one probability model and not one statement
     published twice. *)
 Lemma five_card_biased_published_property_neq (R : realType)
     (idx : amf_index

@@ -12,12 +12,14 @@
 (*                                                                            *)
 (* Seven groups. Two are about what a clause records: the coalition size      *)
 (* written in a leaks clause is checked against the proof it names, and the   *)
-(* arm a program carries is the one its certify statement wrote, so recording *)
-(* the word program at the exact arm is refused. Beside the second sits the   *)
-(* one positive statement of this file, that the two programs over the word   *)
-(* model carry different arms, which is a comparison of two programs rather   *)
-(* than a statement about one; the sixth group turns the same point the other *)
-(* way, refusing to read the exact arm's four conjuncts off the word program. *)
+(* security property a program carries is the one the certify statement that  *)
+(* wrote its evidence fixes, so recording the word program for exact          *)
+(* independence is refused. Beside the second sits the one positive statement *)
+(* of this file, that the two programs over the word model certify different  *)
+(* properties, which is a comparison of two programs rather than a statement  *)
+(* about one; the sixth group turns the same point the other way, refusing to *)
+(* read the exact-independence proposition's four conjuncts off the word      *)
+(* program.                                                                   *)
 (*                                                                            *)
 (* One group is the fork the literal reduction makes: a prefix that builds    *)
 (* its own termination obligation is not the term pgl27_dealt is, and the     *)
@@ -39,12 +41,13 @@
 (*                                                                            *)
 (* One lemma of this file shares its name with the rejection recorded above   *)
 (* it, and the order is what lets both compile. Rocq checks that a name is    *)
-(* free before it elaborates a body, so a file holding the lemma first would  *)
-(* reject the term for an occupied name and not for the arm the term asserts. *)
+(* free before it elaborates a body, so a file holding the                    *)
+(* lemma first would reject the term for an occupied name                     *)
+(* and not for the security property the term asserts.                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_word_published_property_neq                                        *)
-(* == the two programs over the word model carry different arms               *)
+(* == the two programs over the word model certify different properties       *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -94,19 +97,20 @@ Fail Definition pgl27_exact_published_leak7 : Published :=
 
 
 (******************************************************************************)
-(*     The arm a program carries                                              *)
+(*     The security property a program carries                                *)
 (******************************************************************************)
 
-(** Recording the word program at the exact arm is rejected by conversion, so
-    the program carries the arm its certify statement wrote and no other. *)
+(** Recording the word program for exact independence is rejected by conversion,
+    so the program carries the security property its certify statement fixed and
+    no other. *)
 Fail Definition pgl27_word_published_property_neq (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published)) R) :=
   (erefl : security_property_of pgl27_word_published R idx
            = ExactIndependenceProperty).
 
-(** The two programs over the one model carry different arms, so the pair is two
-    statements about one probability model and not one statement published
-    twice. *)
+(** The two programs over the one model certify different properties, so the
+    pair is two statements about one probability model and not one statement
+    published twice. *)
 Lemma pgl27_word_published_property_neq (R : realType)
     (secretP : R.-fdist bool) :
   security_property_of pgl27_word_proximity_published R secretP
@@ -119,9 +123,9 @@ Proof.
    the two propertyE lemmas applied to that prior costs 24.3 s, and restating
    the two equations locally and rewriting with both in the inequation costs
    24.1 s, because a rewrite scans the other side of the goal and so converts
-   one program against the other. The equation between the arms is therefore
-   assumed first, and each rewrite then runs on a goal that mentions one
-   program. *)
+   one program against the other. The equation between the security properties
+   is therefore assumed first, and each rewrite then runs on a goal that
+   mentions one program. *)
 have Hp : security_property_of pgl27_word_proximity_published R secretP
   = IdealProximityProperty by [].
 have Hs : security_property_of pgl27_word_branch_published39 R secretP
@@ -185,15 +189,16 @@ Fail Definition pgl27_word_published41 : PublishedAt pgl27_bound41 :=
 
 
 (******************************************************************************)
-(*     The arms are different statements                                      *)
+(*     The security properties are different statements                       *)
 (******************************************************************************)
 
-(** The arms are different statements, and the difference is visible in what a
-    program's projection takes after the coalition. A program certifying input
-    indistinguishability is asked here for a threshold proof in the position
-    where it expects the first of two dealt secrets, and is rejected: what the
-    word program proves at a coalition is a distance between the readings of two
-    secrets, so the two secrets come before the threshold proof. *)
+(** The security properties are different statements, and the difference is
+    visible in what a program's projection takes after the coalition. A program
+    certifying input indistinguishability is asked here for a threshold proof in
+    the position where it expects the first of two dealt secrets, and is
+    rejected: what the word program proves at a coalition is a distance between
+    the readings of two secrets, so the two secrets come before the threshold
+    proof. *)
 Fail Definition pgl27_word_property_is_not_exact (R : realType)
     (secretP : R.-fdist bool) (C : {set 'I_8}) (HC : (#|C| < 4)%N) :=
   view_secrecy_of pgl27_word_published R secretP C HC.

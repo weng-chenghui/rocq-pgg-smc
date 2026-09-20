@@ -7,11 +7,11 @@
 (* The word model psl211_word_family names and the all-decks model of         *)
 (* psl211_models.v run one execution over one sample space and differ in the  *)
 (* law of the cut alone. This file measures that difference and nothing else: *)
-(* it carries the bound the proximity arm of this instance takes as its       *)
-(* distance field, and the two arithmetic facts about the number that field   *)
+(* it carries the bound this instance's proximity certificate holds in its    *)
+(* closeness field, and the two arithmetic facts about the number that field  *)
 (* names. The certificate built on them, the program certified over it and    *)
-(* the statements about that program are at AnalysisBridged,                  *)
-(* in instances/psl211/tableau/.                                              *)
+(* the statements about that program are at AnalysisBridged, in               *)
+(* instances/psl211/tableau/.                                                 *)
 (*                                                                            *)
 (* Every number below bounds a sum of absolute differences, which is twice    *)
 (* the total variation distance of the literature, so a bound of 2^-40 here   *)
@@ -19,7 +19,7 @@
 (*                                                                            *)
 (* Six is the threshold the derived profile declares, and this bound is       *)
 (* proved at every coalition of the twelve seats and not only below it, the   *)
-(* threshold entering the arm's proposition and not the bound.                *)
+(* threshold entering the ideal-proximity proposition and not the bound.      *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   psl211_word_proximity_close                                              *)
@@ -70,13 +70,13 @@ Local Notation seatT :=
 (** At every coalition of the twelve seats, the joint law of
     that coalition's reading with the chirality under the 584-letter word
     shuffle is within 2^-40 of the same joint law under the uniform shuffle.
-    It is the distance field of this instance's proximity certificate: the two
-    models differ in the law of the cut alone, and the pair of a reading and
-    the chirality is a deterministic function of the sample point, so the
-    distance between the two cuts carries down to that pair unchanged. The
-    claim is an average over the deck description and the cut. The bound holds
-    at every coalition and not only below the threshold; the threshold enters
-    the arm's proposition and not this distance. *)
+    It is the closeness field of this instance's proximity certificate: the two
+    models differ in the law of the cut alone, and the pair of a reading and the
+    chirality is a deterministic function of the sample point, so the distance
+    between the two cuts carries down to that pair unchanged. The claim is an
+    average over the deck description and the cut. The bound holds at every
+    coalition and not only below the threshold; the threshold enters the
+    ideal-proximity proposition and not this distance. *)
 Lemma psl211_word_proximity_close (R : realType) (C : {set seatT}) :
   (#|C| < profile_k (instance_profile psl211_algebra))%N ->
   var_dist
@@ -115,11 +115,12 @@ Proof. by apply: exprn_ege1; rewrite ler1n. Qed.
 Fact psl211_pow2_40_gt0 (R : realType) : (0:R) < 2%:R^+40.
 Proof. by rewrite exprn_gt0 // ltr0n. Qed.
 
-(** The two models' laws are within two of each other by the bound every pair of
-    laws on one finite sample space meets, with no fact about the twelve-card
-    instance and no fact about the 584-letter walk. A proximity certificate
-    carrying two would be a certificate about nothing, which is why the number a
-    program publishes is what a reader of the arm must read. *)
+(** The two models' laws are within two of each other by the bound every pair
+    of laws on one finite sample space meets, with no fact about the
+    twelve-card instance and no fact about the 584-letter walk. A proximity
+    certificate carrying two would be a certificate about nothing, which is
+    why the number a program publishes is what a reader of the ideal-proximity
+    proposition must read. *)
 Lemma psl211_word_law_le2 (R : realType) :
   var_dist (psl211_wordP R) (psl211_alldecksP R) <= 2%:R.
 Proof. exact: var_dist_le2. Qed.

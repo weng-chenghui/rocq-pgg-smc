@@ -70,7 +70,7 @@
 (* that rule alone, but it follows a slot in the two rules added beside it.   *)
 (* The tokens inputs, terminates, publish, conclude, vm_compute,              *)
 (* ExactIndependence, InputIndistinguishability and IdealProximity follow a   *)
-(* literal and stay identifiers, which is what keeps the three port           *)
+(* literal and stay identifiers, which is what keeps the three evidence       *)
 (* constructors and the conclude terminal usable by name; at follows a        *)
 (* literal too, the literal leaks in one rule and InputIndistinguishability   *)
 (* in the other, and was a keyword of Rocq before this file. by follows the   *)
@@ -150,9 +150,9 @@ Arguments obs_payload : clear implicits.
    between that bound's law and the law the model draws its cut from, the
    ideal cut, the distance of the drawn cut from the ideal, and the constancy
    of a coalition's view of the ideal cut in the run argument. The split is
-   what makes the port's perfect and statistical halves visible where it is
-   written: the fourth component is an inequality at the first component's
-   epsilon, and the fifth is an equation. *)
+   what makes the certificate's perfect and statistical halves visible where
+   it is written: the fourth component is an inequality at the first
+   component's epsilon, and the fifth is an equation. *)
 Definition mk_indistinguishability (x : StackAt Sampled)
     (b : forall (R : realType) (idx : amf_index (sp_f x) R),
            ShuffleMarginalBound R (instance_M (projT1 x)))
@@ -252,7 +252,7 @@ Lemma supplied_realises_expected (t : Targeted) L n Ht He Hr :
 Proof. by []. Qed.
 
 (******************************************************************************)
-(*     The tightness annotation of the exact arm                              *)
+(*     The tightness annotation of exact independence                         *)
 (******************************************************************************)
 
 (* At every real field and index, some coalition of exactly k seats reads a
@@ -266,8 +266,8 @@ Proof. by []. Qed.
    proof reached. It is an annotation on the guarantee and not part of it: k
    occurs in the type, so the kernel checks the number against the proof, and
    the annotated program is convertible with the unannotated one. It attaches
-   to the exact arm alone, so a program certifying input indistinguishability
-   carries no such claim. *)
+   to exact independence alone, so a program certifying input
+   indistinguishability carries no such claim. *)
 Definition ExactLeakAt (k : nat) (x : StackAt Sampled) (p : ExactPayload x)
     : Prop :=
   forall (R : realType) (idx : amf_index (sp_f x) R),
@@ -279,10 +279,10 @@ Definition ExactLeakAt (k : nat) (x : StackAt Sampled) (p : ExactPayload x)
                              ((amf_sample (sp_f x) R idx).(sa_cut) u)) ).
 Arguments ExactLeakAt : clear implicits.
 
-(* The exact arm's witness, with a tightness annotation checked against it and
-   then dropped. The result is the witness itself, so the annotation leaves
-   the term a program builds unchanged and everything proved about an annotated
-   program is proved about the unannotated one. *)
+(* The exact-independence witness, with a tightness annotation checked against
+   it and then dropped. The result is the witness itself, so the annotation
+   leaves the term a program builds unchanged and everything proved about an
+   annotated program is proved about the unannotated one. *)
 Definition exact_leaks (x : StackAt Sampled) (p : ExactPayload x)
     (k : nat) (H : ExactLeakAt k x p) : ExactPayload x := p.
 Arguments exact_leaks : clear implicits.

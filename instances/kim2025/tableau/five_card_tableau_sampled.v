@@ -9,7 +9,7 @@
 (* built from the interpreter's own endpoints is the one computed directly    *)
 (* from the run argument and the cut. That identification is what turns a     *)
 (* claim about the messages a run exchanges into a claim about a group        *)
-(* action, and it is the last thing proved before an arm is named.            *)
+(* action, and it is the last thing proved before the certify statement.      *)
 (*                                                                            *)
 (* Three programs are named here, one per model a published program continues *)
 (* from, and the three model families they sample are those of                *)
@@ -27,7 +27,7 @@
 (* in five_card_tableau_analysis_bridged.v.                                   *)
 (*                                                                            *)
 (* Two of the statements here are about neither a program nor the manifest's  *)
-(* path for it, and no arm of certify takes a payload of either kind.         *)
+(* path for it, and no certify statement takes a payload of either kind.      *)
 (* five_card_repeated_endpoint_lt is one starting position's endpoint         *)
 (* marginal under the repeated model's cut law, a statement about where a     *)
 (* single position is sent and not about what any set of seats reads.         *)
@@ -155,7 +155,7 @@ Definition five_card_repeated_sampled : Tableau Sampled :=
     single cut at the same bias. The program stops at Sampled, one level
     under the AnalysisBridged the manifest records for this path, because
     five_card_colour_view_leak_bound bounds a conditional mutual information
-    and no arm of certify takes a bound of that kind. The manifest's level
+    and no certify statement takes a bound of that kind. The manifest's level
     for this path rests on that theorem and on the certificate
     five_card_biased_indistinguishability_published carries, and on no
     payload of this program. *)

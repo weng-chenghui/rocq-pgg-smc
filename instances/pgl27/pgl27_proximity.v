@@ -10,7 +10,7 @@
 (* generator word. This file holds the mathematics that separates the two,    *)
 (* with no program in it, published or not.                                   *)
 (*                                                                            *)
-(* One bound is the certificate field of the proximity arm: below the         *)
+(* One bound is the closeness field of the proximity certificate: below the   *)
 (* four-seat threshold, the joint law of a coalition's reading with the dealt *)
 (* secret under the walk is within 2^-40 of the same joint law under the      *)
 (* uniform cut at the same law of the secret. The number is the walk's        *)
@@ -22,15 +22,16 @@
 (* the total variation distance of the literature, so a bound of 2^-40 here   *)
 (* is a distinguishing advantage of at most 2^-41 wherever it is used.        *)
 (*                                                                            *)
-(* The other distance runs the other way. A proximity certificate compares    *)
-(* two models at one index, so the two have to be read at one law of the      *)
-(* dealt secret. pgl27_prior_exact_family of pgl27_models.v carries that law  *)
-(* as its index, where pgl27_exact_family is indexed by the unit type and its *)
-(* one member fixes the uniform law. An ideal taken from the unit-indexed     *)
-(* family can therefore only be the ideal of a word model at the uniform law, *)
-(* and the distance of a word model at another law to it is at least the      *)
-(* distance between the two laws of the secret, which                         *)
-(* pgl27_word_uniform_ideal_close_false exhibits at a point mass.             *)
+(* The other distance runs the other way. A proximity certificate holds its   *)
+(* ideal at the same index as the model it is about, so the two have to be    *)
+(* read at one law of the dealt secret. pgl27_prior_exact_family of           *)
+(* pgl27_models.v carries that law as its index, where pgl27_exact_family is  *)
+(* indexed by the unit type and its one member fixes the uniform law. An      *)
+(* ideal taken from the unit-indexed family can therefore only be the ideal   *)
+(* of a word model at the uniform law, and the distance of a word model at    *)
+(* another law to it is at least the distance between the two laws of the     *)
+(* secret, which pgl27_word_uniform_ideal_close_false exhibits at a point     *)
+(* mass.                                                                      *)
 (*                                                                            *)
 (* The identification of the framework's static reading of a coalition with   *)
 (* pgl27_view opens the file, because the distance proof rewrites with it     *)
@@ -57,7 +58,7 @@
 (*   pgl27_pow2_40_ge1       == two to the fortieth is at least one           *)
 (*   pgl27_pow2_40_gt0       == two to the fortieth is positive               *)
 (*   pgl27_word_uniform_ideal_close_false                                     *)
-(*                           == the distance field is false at every          *)
+(*                           == the closeness field is false at every         *)
 (*                              coalition, with the uniform-secret exact      *)
 (*                              model as the ideal of the word model at a     *)
 (*                              point-mass prior                              *)
@@ -108,8 +109,8 @@ by case: ifP => // _; rewrite tnth_ord_tuple.
 Qed.
 
 (** The same identification with the cut left free, as an equality of
-    functions of the cut. The input-indistinguishability arm compares two
-    laws obtained by pushing a reader forward along a distribution on cuts,
+    functions of the cut. The input-indistinguishability proposition compares
+    two laws obtained by pushing a reader forward along a distribution on cuts,
     so it needs the reader as one function and not as its values. *)
 Lemma pgl27_static_obs_funE (R : realType) (C : {set 'I_8}) (s : bool) :
   @static_coalition_obs pgl27_algebra pgl27_dealt_params C s
@@ -137,15 +138,15 @@ Arguments pgl27_word_secret [R] secretP.
 (** At every coalition of fewer than four seats and at every prior, the joint
     law of that coalition's reading with the dealt secret under the
     two-hundred-letter word walk is within 2^-40 of the same joint law under
-    the uniform cut at the same prior. It is the certificate field of the
-    proximity arm at this instance: the two models differ in the law of the
-    cut alone, the secret is drawn from the same prior and independently of
+    the uniform cut at the same prior. It is the closeness field of the
+    proximity certificate at this instance: the two models differ in the law of
+    the cut alone, the secret is drawn from the same prior and independently of
     the cut in both, and the pair of a reading and the secret is a
-    deterministic function of the pair of the secret and the cut. The premise
-    is the arm's threshold at this instance, four seats. pgl27_word_mixing,
-    the bound on the cut group's own distance, carries no coalition premise,
-    so the same bound is reachable at every coalition by a route this proof
-    does not take. *)
+    deterministic function of the pair of the secret and the cut. The premise is
+    the ideal-proximity proposition's threshold at this instance, four seats.
+    pgl27_word_mixing, the bound on the cut group's own distance, carries no
+    coalition premise, so the same bound is reachable at every coalition by a
+    route this proof does not take. *)
 Lemma pgl27_word_proximity_close (R : realType) (secretP : R.-fdist bool)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
@@ -223,15 +224,15 @@ Variable R : realType.
 
 Let P1 : R.-fdist bool := fdist1 true.
 
-(** The distance field of a proximity certificate is false, and not merely
-    unwritable, when the ideal is the uniform-secret member of the tree's
-    exact family and the actual model is the word walk at the point-mass
-    prior. Pushing both joint laws forward along the secret coordinate leaves
-    the two priors themselves, one apart, and 2^-40 is below that, so the two
-    models are separated by their secrets alone and no reading of the cut can
-    bring them together. It says nothing at a prior near the uniform one,
-    where the same lower bound is small. It is stated at every coalition and
-    not only below four seats, so it refutes more than the field asks. *)
+(** The closeness field of a proximity certificate is false, and not merely
+    unwritable, when the ideal is the uniform-secret member of the tree's exact
+    family and the actual model is the word walk at the point-mass prior.
+    Pushing both joint laws forward along the secret coordinate leaves the two
+    priors themselves, one apart, and 2^-40 is below that, so the two models are
+    separated by their secrets alone and no reading of the cut can bring them
+    together. It says nothing at a prior near the uniform one, where the same
+    lower bound is small. It is stated at every coalition and not only below
+    four seats, so it refutes more than the field asks. *)
 Lemma pgl27_word_uniform_ideal_close_false
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   ~ (var_dist

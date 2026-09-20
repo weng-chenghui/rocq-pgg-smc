@@ -11,10 +11,10 @@
 (* whatever the run argument. This file restates that field as a standalone   *)
 (* proposition, checks the restatement against the record, and refutes it at  *)
 (* PSL(2,11) in the two run modes the instance carries. The instance          *)
-(* publishes its all-decks program through the exact arm and its word program *)
-(* through the proximity arm, in                                              *)
+(* publishes its all-decks program with exact-independence evidence and its   *)
+(* word program with ideal-proximity evidence, in                             *)
 (* instances/psl211/tableau/psl211_tableau_analysis_bridged.v, and this file  *)
-(* is what the input-indistinguishability arm would require of it.            *)
+(* is what certifying input indistinguishability would require of it.         *)
 (*                                                                            *)
 (* All-decks mode. The run argument is a whole deck description: one of the   *)
 (* two chiralities, one of the 132 block lines of that chirality's Steiner    *)
@@ -40,11 +40,10 @@
 (* publishes at least 1/660. psl211_alldecks_no_zero_eps_cert states the same *)
 (* at epsilon zero, which is the epsilon profile_eps_psl211 of                *)
 (* instances/psl211/psl211_profile.v gives this instance's single-card        *)
-(* marginal bound. The exclusion covers the input-indistinguishability arm    *)
-(* alone: a proximity certificate carries no shuffle bound and no constancy   *)
-(* field, and the program of                                                  *)
-(* instances/psl211/tableau/psl211_tableau_analysis_bridged.v publishes 2^-40 *)
-(* over the word model through the proximity arm.                             *)
+(* marginal bound. The exclusion covers input indistinguishability alone: a   *)
+(* proximity certificate carries no shuffle bound and no constancy field, and *)
+(* the program of instances/psl211/tableau/psl211_tableau_analysis_bridged.v  *)
+(* publishes 2^-40 over the word model with ideal-proximity evidence.         *)
 (*                                                                            *)
 (* Dealt mode. The run argument is the chirality itself, so here the field    *)
 (* is exactly constancy in the secret, and it still fails: three seats see a  *)
@@ -58,10 +57,10 @@
 (* this tree carrying no dealt-mode sample adapter through which a            *)
 (* certificate's ideal could be pinned to it.                                 *)
 (*                                                                            *)
-(* Not claimed. The input-indistinguishability arm is not shown unavailable   *)
-(* at this instance. What is excluded is a range of epsilon, and the range of *)
-(* larger epsilon is occupied: the uniform law on the whole of {perm 'I_12}   *)
-(* reads the same at every deck description, its variation distance from `U   *)
+(* Not claimed. Input indistinguishability is not shown unavailable at this   *)
+(* instance. What is excluded is a range of epsilon, and the range of larger  *)
+(* epsilon is occupied: the uniform law on the whole of {perm 'I_12} reads    *)
+(* the same at every deck description, its variation distance from `U         *)
 (* psl211_G_pos is 2 * (1 - 660/12!), so a certificate at that ideal exists   *)
 (* with an epsilon near 2. Its cert_eps is that epsilon twice, near 4, while  *)
 (* infotheo's var_dist sums the absolute differences of two laws and so never *)
@@ -192,14 +191,14 @@ Local Notation viewT := ({ffun seatT -> cardT}).
 
 (** coalition_reading_constancy E ideal — a coalition of fewer than profile_k
     seats reads the law ideal on cuts the same way whatever the run argument.
-    This is what an input-indistinguishability certificate asserts about its
-    idealized cut, and the certificate's variation-distance field is what
-    transfers that assertion from the ideal to the real cut. Where the run
-    argument carries the secret, as it does in both run modes of this instance,
-    the field is at least constancy in the secret; where the run argument
-    carries data outside the secret as well, as it does under the all-decks
-    parameters, the field asks for constancy in that data too and is stronger
-    than the privacy the instance claims. *)
+    This is what an input-indistinguishability certificate's constancy field
+    states about its idealized cut, and the certificate's variation-distance
+    field is what transfers that statement from the ideal to the real cut. Where
+    the run argument carries the secret, as it does in both run modes of this
+    instance, the field is at least constancy in the secret; where the run
+    argument carries data outside the secret as well, as it does under the
+    all-decks parameters, the field asks for constancy in that data too and is
+    stronger than the privacy the instance claims. *)
 Definition coalition_reading_constancy (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A)
     (ideal : R.-fdist (pgg_gT (mp_M (instance_profile A)))) : Prop :=
@@ -244,10 +243,10 @@ by case: (_ \notin _); case: (_ \notin _).
 Qed.
 
 (** psl211_perdeck_coalition_below_k — those three seats meet the threshold
-    premise every security arm states, the derived profile declaring six. A
-    refutation of a field quantified over coalitions below the threshold has
-    to discharge this premise, and it is the counterexample's only nontrivial
-    premise. *)
+    premise every security proposition states, the derived profile declaring
+    six. A refutation of a field quantified over coalitions below the
+    threshold has to discharge this premise, and it is the counterexample's
+    only nontrivial premise. *)
 Lemma psl211_perdeck_coalition_below_k :
   (#|psl211_perdeck_coalition| < profile_k (instance_profile psl211_algebra))%N.
 Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
@@ -701,11 +700,11 @@ Qed.
     the shuffle bound epsilon twice, so a program over this model that publishes
     its certificate's own number publishes at least 1/660. The obligation of
     conclude bounds the published number below by cert_eps cert, so no program
-    over this model publishes less. This fixes from below what the
-    input-indistinguishability arm can publish at this model. It says neither
-    that the arm is unavailable here nor anything about what a coalition of at
-    most five seats reads. *)
-(* The obligation of conclude at an input-indistinguishability port is cert_eps
+    over this model publishes less. This fixes from below what an
+    input-indistinguishability program can publish at this model. It says
+    neither that input indistinguishability is unavailable here nor anything
+    about what a coalition of at most five seats reads. *)
+(* The obligation of conclude at input-indistinguishability evidence is cert_eps
    cert <= odflt (cert_eps cert) (c R), and the proposition the program carries
    is IndistinguishabilityPropAt cert (odflt (cert_eps cert) (c R)). *)
 (* The excluded range of epsilon is bounded above. The header records why the

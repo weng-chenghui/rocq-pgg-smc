@@ -4,11 +4,12 @@
 (* s5_tableau_analysis_bridged: the five-seat instance at AnalysisBridged     *)
 (*                                                                            *)
 (* The AnalysisBridged level adjoins one security payload per real field and  *)
-(* per index of the model, and the proposition it carries is that payload's   *)
-(* arm on top of everything the levels below proved. This is the level at     *)
-(* which a program says something about a coalition, and the arm decides what *)
-(* it says: the exact arm asserts independence, and not a distance between    *)
-(* two readings.                                                              *)
+(* per index of the model, and the proposition it carries is the one that     *)
+(* payload proves, on top of everything the levels below proved. This is the  *)
+(* level at which a program says something about a coalition, and which       *)
+(* security property the evidence proves is what it says: the                 *)
+(* exact-independence proposition asserts independence, and not a distance    *)
+(* between two readings.                                                      *)
 (*                                                                            *)
 (* The security argument a five-seat program makes is the one a five-of-five  *)
 (* additive sharing makes. A secret in 'I_5 is split into five shares summing *)
@@ -43,7 +44,8 @@
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   s5_rand_exact_witness                                                    *)
-(*                        == the exact arm's witness at every field and index *)
+(*                        == the exact-independence witness at every field    *)
+(*                           and index                                        *)
 (*   s5_rand_published    == the randomized path as a program                 *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -57,11 +59,13 @@
 (*                        == the randomized program publishes the manifest's  *)
 (*                           path                                             *)
 (*   s5_rand_published_propertyE                                              *)
-(*                        == the program carries the exact arm                *)
+(*                        == the program's security property is exact         *)
+(*                           independence                                     *)
 (*   s5_rand_published_sampledE                                               *)
 (*                        == the program is the named Sampled value with the  *)
 (*                           payload and the terminal adjoined                *)
-(*   s5_rand_view_secrecy == the exact arm's four conjuncts at this instance  *)
+(*   s5_rand_view_secrecy == the exact-independence proposition's four        *)
+(*                           conjuncts at this instance                       *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
@@ -140,15 +144,15 @@ Qed.
 (*     The tape model's witness                                               *)
 (******************************************************************************)
 
-(** The exact arm's witness: the tape secret as a random variable on the tape
-    space, and, at every coalition of fewer than five seats, the independence
-    of that coalition's reading from it. The independence is exact, four
-    additive shares of a uniform tape carrying no information about the
+(** The exact-independence witness: the tape secret as a random variable on the
+    tape space, and, at every coalition of fewer than five seats, the
+    independence of that coalition's reading from it. The independence is exact,
+    four additive shares of a uniform tape carrying no information about the
     secret at all rather than a small amount, and it is exact for a reason no
     shuffle takes part in. The framework derives the zero mutual information,
-    the unchanged conditional entropy and the closure under post-processing
-    from this one field, so the witness is all the exact arm requires of this
-    instance. *)
+    the unchanged conditional entropy and the closure under post-processing from
+    this one field, so the witness is all that certifying exact independence
+    requires of this instance. *)
 Definition s5_rand_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample s5_rand_family R idx) :=
   @MkExactWitness R s5_algebra s5_supplied_params
@@ -182,10 +186,10 @@ Lemma s5_rand_published_pathE :
   published_path s5_rand_published = s5_rand_path.
 Proof. by []. Qed.
 
-(** The arm this program carries, at every real field and index: independence of
-    the coalition's view from the tape secret, and not a distance between two
-    readings. The certify statement the program wrote settles which arm
-    that is. *)
+(** The security property this program carries, at every real field and index,
+    is exact independence: independence of the coalition's view from the tape
+    secret, and not a distance between two readings. The certify statement the
+    program wrote settles which property that is. *)
 Lemma s5_rand_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at s5_rand_published)) R) :
   security_property_of s5_rand_published R idx = ExactIndependenceProperty.
@@ -203,7 +207,7 @@ Lemma s5_rand_published_sampledE :
 Proof. exact: erefl. Qed.
 
 (******************************************************************************)
-(*     The exact arm's four conjuncts at this instance                        *)
+(*     The exact-independence proposition's four conjuncts at this instance   *)
 (******************************************************************************)
 
 (** The randomized program's view secrecy at this instance: at fewer than five
@@ -211,9 +215,10 @@ Proof. exact: erefl. Qed.
     secret, carries zero mutual information with it, leaves its entropy
     unchanged under conditioning, and stays independent of it under every
     deterministic function of the seat-to-card map. The four conjuncts are the
-    whole content of the exact arm at this instance; the proof is the program's
-    security projection applied, so a reader who wants the information-theoretic
-    reading of the program needs no further derivation. *)
+    whole content of the exact-independence proposition at this instance; the
+    proof is the program's security projection applied, so a reader who wants
+    the information-theoretic reading of the program needs no further
+    derivation. *)
 Theorem s5_rand_view_secrecy (R : realType) (C : {set 'I_5})
     (HC : (#|C| < 5)%N) :
   [/\ s5_rand_sampleP R

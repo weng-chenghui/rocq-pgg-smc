@@ -4,38 +4,41 @@
 (* pgl27_tableau_analysis_bridged: the eight-card orbit instance at the       *)
 (* AnalysisBridged level                                                      *)
 (*                                                                            *)
-(* The AnalysisBridged level adjoins one security arm to a Sampled value, and *)
-(* the proposition it carries is that arm's own, on top of run correctness    *)
-(* and of the identification of the two readings of a coalition. A publish    *)
-(* terminal then turns the value into a Published. Every payload this         *)
-(* instance gives an arm is here, every program it publishes is here, and     *)
-(* every statement whose subject is a payload or a program is here.           *)
+(* The AnalysisBridged level adjoins security evidence to a Sampled value at  *)
+(* every real field and index, and the proposition it carries is the one that *)
+(* evidence proves, on top of run correctness and of the identification of    *)
+(* the two readings of a coalition. A publish terminal then turns the value   *)
+(* into a Published. Every payload this instance gives a certify statement is *)
+(* here, every program it publishes is here, and every statement whose        *)
+(* subject is a payload or a program is here.                                 *)
 (*                                                                            *)
-(* Three arms are used over the one dealer-dealt run. The exact arm takes an  *)
-(* ExactWitness, whose one field is independence of a coalition's reading     *)
-(* from the dealt secret; at the uniform cut this is three-transitivity of    *)
-(* PGL(2,7) on the eight points read as a privacy statement, and it is exact, *)
-(* with no number in it. The input-indistinguishability arm takes a           *)
-(* certificate comparing the readings of two dealt secrets under one model.   *)
-(* The proximity arm takes a certificate comparing one model with an ideal    *)
-(* one at the same index.                                                     *)
+(* All three security properties are certified over the one dealer-dealt run. *)
+(* Certifying exact independence takes an ExactWitness, whose one field is    *)
+(* independence of a coalition's reading from the dealt secret; at the        *)
+(* uniform cut this is three-transitivity of PGL(2,7) on the eight points     *)
+(* read as a privacy statement, and it is exact, with no number in it.        *)
+(* Certifying input indistinguishability takes a certificate comparing the    *)
+(* readings of two dealt secrets under one model. Certifying ideal proximity  *)
+(* takes a certificate comparing one model with an ideal one at the same      *)
+(* index.                                                                     *)
 (*                                                                            *)
 (* Two numbers, and both are read off the one walk bound. pgl27_word_mixing   *)
 (* bounds the distance between the two-hundred-letter walk and the uniform    *)
 (* cut on the group by 2^-40, and pgl27_word_marginal_bound carries that      *)
-(* number. The input-indistinguishability certificate crosses from the walk   *)
-(* to the ideal cut once for each of the two dealt secrets it compares, so    *)
-(* its cert_eps is that number added to itself, 2^-39. The proximity          *)
-(* certificate compares one law with one law and carries the number itself,   *)
-(* 2^-40, and the proximity program concludes at 2^-39, the constant the      *)
-(* other program over the same model publishes, so the terminal's obligation  *)
-(* is met strictly. Each of these numbers bounds a sum of absolute            *)
-(* differences, twice a total variation distance, so a distinguisher's        *)
-(* advantage against a program concluded at 2^-39 is at most 2^-40. Four is   *)
-(* the threshold the derived profile declares, so every statement here that   *)
-(* quantifies over a coalition quantifies over at most three of the eight     *)
-(* seats, each seat reading the card at the cut image of its own position,    *)
-(* and pgl27_exact_leak4 records that four already leak.                      *)
+(* number. The input-indistinguishability tail makes two hops from the walk   *)
+(* to the ideal cut, one for each of the two dealt secrets the proposition    *)
+(* compares, so cert_eps is that number added to itself, 2^-39. The           *)
+(* ideal-proximity proposition compares one law with one law, and the         *)
+(* certificate carries the number itself, 2^-40, and the proximity program    *)
+(* concludes at 2^-39, the constant the other program over the same model     *)
+(* publishes, so the terminal's obligation is met strictly. Each of these     *)
+(* numbers bounds a sum of absolute differences, twice a total variation      *)
+(* distance, so a distinguisher's advantage against a program concluded at    *)
+(* 2^-39 is at most 2^-40. Four is the threshold the derived profile          *)
+(* declares, so every statement here that quantifies over a coalition         *)
+(* quantifies over at most three of the eight seats, each seat reading the    *)
+(* card at the cut image of its own position, and pgl27_exact_leak4 records   *)
+(* that four already leak.                                                    *)
 (*                                                                            *)
 (* Seven programs are published, and three of them publish the manifest's     *)
 (* own. pgl27_exact_published_pathE, pgl27_word_published_pathE and           *)
@@ -45,8 +48,8 @@
 (* this instance. The other four are the word program concluded at 2^-39 in   *)
 (* three spellings, through the surface, through the raw bind and from the    *)
 (* named Sampled value, and the proximity program, which publishes the same   *)
-(* manifest path under a different arm. An AnalysisPath holds descriptive     *)
-(* metadata and no Prop, so one manifest path published by an                 *)
+(* manifest path for a different security property. An AnalysisPath holds     *)
+(* descriptive metadata and no Prop, so one manifest path published by an     *)
 (* input-indistinguishability program and by a proximity program says nothing *)
 (* about either claim. The manifest carries no fourth path over this          *)
 (* instance, and none of the three is published by a route this development's *)
@@ -83,10 +86,11 @@
 (* Executable value and the parameter equation; the observed file the two     *)
 (* prefixes, the inline fork's parameter equation and the ideal               *)
 (* functionality; the sampled file the three named models; this file the      *)
-(* payloads, the programs, the path and arm equations, the bridges, the       *)
-(* restated theorems and the two arm statements; and the checks file the      *)
-(* recorded rejections and the comparison of the two word programs' arms. No  *)
-(* file of the six uses Require Export.                                       *)
+(* payloads, the programs, the path and security-property equations, the      *)
+(* bridges, the restated theorems and the two theorems stating the certified  *)
+(* properties; and the checks file the recorded rejections and the comparison *)
+(* of the two word programs' security properties. No file of the six uses     *)
+(* Require Export.                                                            *)
 (*                                                                            *)
 (* This file requires instances/pgl27/pgl27_proximity.v, which holds the      *)
 (* reading and the distance mathematics the certificates are built from: the  *)
@@ -96,10 +100,9 @@
 (* 2^-40 the conclude obligation is proved with.                              *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   pgl27_exact_witness     == the exact arm's witness at every field and    *)
-(*                              index                                         *)
-(*   pgl27_word_cert         == the input-indistinguishability arm's          *)
-(*                              certificate                                   *)
+(*   pgl27_exact_witness     == the exact-independence witness at every field *)
+(*                              and index                                     *)
+(*   pgl27_word_cert         == the input-indistinguishability certificate    *)
 (*   pgl27_exact_published   == the exact path as a program                   *)
 (*   pgl27_word_published    == the word path as a program                    *)
 (*   pgl27_bound39           == the name 2^-39 for the word program's bound   *)
@@ -122,15 +125,15 @@
 (*                           == the published exact statement and the exact   *)
 (*                              program's restatement inhabit one type        *)
 (*   pgl27_prior_exact_witness                                                *)
-(*                           == the exact arm's witness at the prior-indexed  *)
-(*                              exact shuffle                                 *)
+(*                           == the exact-independence witness at the         *)
+(*                              prior-indexed exact shuffle                   *)
 (*   pgl27_prior_exact_published                                              *)
 (*                           == that shuffle published as its own program     *)
 (*   pgl27_word_proximity_cert                                                *)
 (*                           == the word model's proximity certificate        *)
 (*   pgl27_word_proximity_published                                           *)
-(*                           == the word path as a program at the proximity   *)
-(*                              arm, concluded at 2^-39                       *)
+(*                           == the word path as a program certifying ideal   *)
+(*                              proximity, concluded at 2^-39                 *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_exact_viewE       == the framework's seat reader is the            *)
@@ -154,16 +157,19 @@
 (*                           == the word program publishes the manifest's     *)
 (*                              path                                          *)
 (*   pgl27_exact_published_propertyE                                          *)
-(*                           == the exact program carries the exact arm       *)
+(*                           == the exact program's security property is      *)
+(*                              exact independence                            *)
 (*   pgl27_word_published_propertyE                                           *)
-(*                           == the word program carries the input-           *)
-(*                              indistinguishability arm                      *)
+(*                           == the word program's security property is input *)
+(*                              indistinguishability                          *)
 (*   pgl27_word_published39_bindE                                             *)
 (*                           == the surface and the bind build one term       *)
 (*   pgl27_word_published39_propertyE                                         *)
-(*                           == the concluded program carries that same arm   *)
+(*                           == the concluded program's security property is  *)
+(*                              input indistinguishability                    *)
 (*   pgl27_word_branch_published39_propertyE                                  *)
-(*                           == the branch program carries that arm as well   *)
+(*                           == the branch program's security property is     *)
+(*                              input indistinguishability as well            *)
 (*   pgl27_word_bound41_false                                                 *)
 (*                           == the terminal's obligation at 2^-41 is false   *)
 (*   pgl27_word_bridge       == the word program's proposition gives its      *)
@@ -177,8 +183,9 @@
 (*                           == the exact statement, from the exact program   *)
 (*                              alone                                         *)
 (*   pgl27_exact_view_secrecy                                                 *)
-(*                           == below the four-seat threshold, the exact      *)
-(*                              arm's four conjuncts at this instance         *)
+(*                           == below the four-seat threshold, the            *)
+(*                              exact-independence proposition's four         *)
+(*                              conjuncts at this instance                    *)
 (*   pgl27_prior_viewE       == the framework's reading of a coalition at the *)
 (*                              prior-indexed exact shuffle is the instance's *)
 (*                              own reading pgl27_view                        *)
@@ -186,14 +193,15 @@
 (*                           == the prior-indexed exact program continues the *)
 (*                              named model                                   *)
 (*   pgl27_prior_exact_published_propertyE                                    *)
-(*                           == the ideal program carries the exact arm       *)
+(*                           == the ideal program's security property is      *)
+(*                              exact independence                            *)
 (*   pgl27_prior_exact_published_pathE                                        *)
 (*                           == the ideal program publishes                   *)
 (*                              pgl27_prior_exact_path                        *)
 (*   pgl27_word_proximity_cert_idealE                                         *)
 (*                           == the certificate's ideal is the ideal          *)
-(*                              program's model, and the port built from its  *)
-(*                              witness is that program's port                *)
+(*                              program's model, and the evidence built from  *)
+(*                              its witness is that program's evidence        *)
 (*   pgl27_word_proximity_cert_epsE                                           *)
 (*                           == the certificate's number is 2^-40             *)
 (*   pgl27_word_proximity_eps_halfE                                           *)
@@ -208,7 +216,8 @@
 (*                           == the proximity program publishes               *)
 (*                              pgl27_word_path                               *)
 (*   pgl27_word_proximity_published_propertyE                                 *)
-(*                           == that program carries the proximity arm        *)
+(*                           == that program's security property is ideal     *)
+(*                              proximity                                     *)
 (*   pgl27_word_published_families_sampledE                                   *)
 (*                           == both programs over the word model read their  *)
 (*                              model family off the one named Sampled value  *)
@@ -255,9 +264,10 @@ Local Open Scope ring_scope.
 (******************************************************************************)
 
 (** The same identification once more, with the secret left inside the sample
-    point. The exact arm compares a coalition's reading with the secret on one
-    probability space, so the secret cannot be fixed first: the reader is a
-    random variable of the pair, and that random variable is pgl27_view R C. *)
+    point. The exact-independence proposition compares a coalition's reading
+    with the secret on one probability space, so the secret cannot be fixed
+    first: the reader is a random variable of the pair, and that random variable
+    is pgl27_view R C. *)
 Lemma pgl27_exact_viewE (R : realType) (idx : unit)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (fun u => @static_coalition_obs pgl27_algebra pgl27_dealt_params C
@@ -266,15 +276,16 @@ Lemma pgl27_exact_viewE (R : realType) (idx : unit)
   = pgl27_view R C.
 Proof. by apply: boolp.funext; case=> s g; exact: pgl27_static_obsE. Qed.
 
-(** The exact arm's witness: the dealt secret as a random variable on the exact
-    sample space, and, at every coalition of fewer than four seats, the
+(** The exact-independence witness: the dealt secret as a random variable on the
+    exact sample space, and, at every coalition of fewer than four seats, the
     independence of that coalition's reading from it. The independence is
     pgl27_view_indep, which is three-transitivity of PGL(2,7) on the eight
     points read as a privacy statement, and it is exact: the uniform cut makes
     the reading carry no information about the secret at all, not a small
     amount. The framework derives the zero mutual information, the unchanged
     conditional entropy and the closure under post-processing from this one
-    field, so the witness is all the exact arm requires of this instance. *)
+    field, so the witness is all that certifying exact independence requires of
+    this instance. *)
 Definition pgl27_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample pgl27_exact_family R idx) :=
   @MkExactWitness R pgl27_algebra pgl27_dealt_params
@@ -312,8 +323,8 @@ Qed.
     reading of the ideal uniform cut. It is pgl27_view_law_const, which is
     three-transitivity of PGL(2,7) read as a privacy statement, carried to
     the framework's reader at each of the two secrets; the statement is
-    exact, and it is the half of the input-indistinguishability arm that
-    appeals to no mixing bound. *)
+    exact, and it is the half of the input-indistinguishability certificate
+    that appeals to no mixing bound. *)
 Lemma pgl27_word_view_const (R : realType)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile pgl27_algebra))).+1}) :
   (#|C| < profile_k (instance_profile pgl27_algebra))%N ->
@@ -328,7 +339,7 @@ rewrite (pgl27_static_obs_funE R C x) (pgl27_static_obs_funE R C x').
 exact: (pgl27_view_law_const R x x' HC).
 Qed.
 
-(** The input-indistinguishability arm's certificate at each secret prior. Its
+(** The input-indistinguishability certificate at each secret prior. Its
     five fields are the two-hundred-letter walk's marginal bound; the
     identification of that bound's law with the law the word adapter draws its
     cut from, which is pgl27_word_cut_distE read backwards; the uniform
@@ -434,19 +445,20 @@ Lemma pgl27_word_published_pathE :
   published_path pgl27_word_published = pgl27_word_path.
 Proof. by []. Qed.
 
-(** The arm the exact program carries, at every real field and index:
-    independence of the coalition's view from the secret, and not a distance
-    between two readings. The program's certify statement settles which arm that
-    is, through certify_exact_propertyE and publish_propertyE. *)
+(** The security property this program carries, at every real field and index,
+    is exact independence: independence of the coalition's view from the secret,
+    and not a distance between two readings. The program's certify statement
+    settles which property that is, through certify_exact_propertyE and
+    publish_propertyE. *)
 Lemma pgl27_exact_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_exact_published)) R) :
   security_property_of pgl27_exact_published R idx = ExactIndependenceProperty.
 Proof. by []. Qed.
 
-(** The arm the word program carries. The two programs publish different
-    manifest paths here, but a reader of the manifest alone could not tell
-    independence of the view from a distance between two readings, and this pair
-    of equations is what separates them. *)
+(** The security property the word program carries. The two programs publish
+    different manifest paths here, but a reader of the manifest alone could not
+    tell independence of the view from a distance between two readings, and this
+    pair of equations is what separates them. *)
 Lemma pgl27_word_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published)) R) :
   security_property_of pgl27_word_published R idx
@@ -459,7 +471,7 @@ Proof. by []. Qed.
 (******************************************************************************)
 
 (** The name 2^-39 for a bound, at every real field. A single real will not
-    serve, because the security port quantifies over the field. *)
+    serve, because the security evidence is given at every real field. *)
 Definition pgl27_bound39 : ConcludedBound := fun R => Some (2%:R^-39 : R).
 
 (** The word program concluded at the single constant 2^-39. The data, the model
@@ -492,9 +504,9 @@ Lemma pgl27_word_published39_bindE :
   pgl27_word_published39 = pgl27_word_published39_bind.
 Proof. by []. Qed.
 
-(** The arm the concluded program carries. Concluding at an upper bound leaves
-    the port untouched, so the program at 2^-39 carries the arm the program at
-    its own sum carries. *)
+(** The security property the concluded program carries. Concluding at an upper
+    bound leaves the evidence untouched, so the program at 2^-39 carries the
+    property the program at its own sum carries. *)
 Lemma pgl27_word_published39_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_published39)) R) :
   security_property_of pgl27_word_published39 R idx
@@ -517,9 +529,10 @@ Definition pgl27_word_branch_published39 : PublishedAt pgl27_bound39 :=
     |> conclude pgl27_bound39 by (fun R _ => ssr_ext.eqW (pow2_split R))
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The arm the branch program carries. Naming the Sampled value before the
-    certify statement leaves the port where that statement put it, so the branch
-    program carries the arm pgl27_word_published39 carries. *)
+(** The security property the branch program carries. Naming the Sampled value
+    before the certify statement leaves the evidence where that statement put
+    it, so the branch program carries the property pgl27_word_published39
+    carries. *)
 Lemma pgl27_word_branch_published39_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_branch_published39)) R) :
   security_property_of pgl27_word_branch_published39 R idx
@@ -625,10 +638,11 @@ Definition pgl27_exact_target (R : realType) : Prop :=
           0 C) `x (fdistmap (pgl27_secret R) (pgl27P R)))%fdist.
 
 (** The derivation from the exact program's accumulated proposition to that
-    statement. The program's first conjunct of the arm is independence of the
-    executed reader from the secret, which gives the product law directly; what
-    remains is to rewrite the executed reader as the instance's view, using the
-    program's own view identification and then pgl27_static_obsE. *)
+    statement. The first conjunct of the exact-independence proposition the
+    program carries is independence of the executed reader from the secret,
+    which gives the product law directly; what remains is to rewrite the
+    executed reader as the instance's view, using the program's own view
+    identification and then pgl27_static_obsE. *)
 Lemma pgl27_exact_bridge (R : realType) (q : StackAt AnalysisBridged)
     (Hq : q = tableau_at (pgl27_dealt
                          ;;; sample_step of pgl27_exact_family
@@ -670,7 +684,7 @@ Proof. exact: (rq_thm (pgl27_exact_restated R) C HC). Qed.
 
 
 (******************************************************************************)
-(*     The exact arm's four conjuncts at this instance                        *)
+(*     The exact-independence proposition's four conjuncts at this instance   *)
 (******************************************************************************)
 
 (** The exact program's view secrecy at this instance: at fewer than four
@@ -678,9 +692,10 @@ Proof. exact: (rq_thm (pgl27_exact_restated R) C HC). Qed.
     secret, carries zero mutual information with it, leaves the secret's entropy
     unchanged under conditioning, and stays independent of it under every
     deterministic function of the seat-to-card map. The four conjuncts are the
-    whole content of the exact arm at this instance; the proof is the program's
-    security projection applied, so a reader who wants the information-theoretic
-    reading of the program needs no further derivation. *)
+    whole content of the exact-independence proposition at this instance; the
+    proof is the program's security projection applied, so a reader who wants
+    the information-theoretic reading of the program needs no further
+    derivation. *)
 Theorem pgl27_exact_view_secrecy (R : realType) (C : {set 'I_8})
     (HC : (#|C| < 4)%N) :
   [/\ pgl27P R |= (@sa_coalition_view R pgl27_profile pgl27_exec_plug
@@ -749,11 +764,11 @@ Lemma pgl27_prior_viewE (R : realType) (secretP : R.-fdist bool)
   = pgl27_view R C.
 Proof. by apply: boolp.funext; case=> s g; exact: pgl27_static_obsE. Qed.
 
-(** The exact arm's witness at every prior: the dealt secret as a random
+(** The exact-independence witness at every prior: the dealt secret as a random
     variable on this sample space, and, at every coalition of fewer than four
     seats, the independence of that coalition's reading from it. The
-    independence is pgl27_view_indep_gen, three-transitivity of PGL(2,7) read
-    as a privacy statement, which holds whatever the law of the secret is. The
+    independence is pgl27_view_indep_gen, three-transitivity of PGL(2,7) read as
+    a privacy statement, which holds whatever the law of the secret is. The
     reading carries no information about the secret at all and not a small
     amount, so this model is an execution a proximity certificate may call
     ideal. *)
@@ -769,7 +784,7 @@ Definition pgl27_prior_exact_witness (R : realType) (secretP : R.-fdist bool)
           (pgl27_prior_viewE secretP C))).
 
 (** The prior-indexed exact shuffle, from the observed prefix the two existing
-    PGL(2,7) programs share, certified by the exact arm and published. Its
+    PGL(2,7) programs share, certified for exact independence and published. Its
     transfer status is StaticExecutedOnly, because this model draws the uniform
     cut itself and no idealized shuffle is being compared with a real one; what
     the program carries about a coalition of fewer than four seats is
@@ -791,8 +806,9 @@ Lemma pgl27_prior_exact_published_sampledE :
   = pgl27_prior_exact_published.
 Proof. exact: erefl. Qed.
 
-(** The arm the ideal program carries, at every real field and prior:
-    independence of the dealt secret, and not a distance to some other model. *)
+(** The security property the ideal program carries, at every real field and
+    prior, is exact independence: independence of the dealt secret, and not a
+    distance to some other model. *)
 Lemma pgl27_prior_exact_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_prior_exact_published)) R) :
   security_property_of pgl27_prior_exact_published R idx
@@ -837,10 +853,10 @@ Definition pgl27_word_proximity_cert (R : realType) (secretP : R.-fdist bool)
     (fun C HC => pgl27_word_proximity_close secretP HC).
 
 (** The model the certificate calls ideal is the model the published ideal
-    program carries, and the port built from the certificate's witness is that
-    program's port. Conversion decides both, so the ideal a word program is
-    measured against is the model pgl27_prior_exact_published publishes and not
-    a second description of it. *)
+    program carries, and the evidence built from the certificate's witness is
+    that program's evidence. Conversion decides both, so the ideal a word
+    program is measured against is the model pgl27_prior_exact_published
+    publishes and not a second description of it. *)
 Lemma pgl27_word_proximity_cert_idealE (R : realType)
     (secretP : R.-fdist bool) :
   ipc_ideal (pgl27_word_proximity_cert secretP)
@@ -861,15 +877,15 @@ Lemma pgl27_word_proximity_cert_epsE (R : realType) (secretP : R.-fdist bool) :
 Proof. exact: erefl. Qed.
 
 (** The number pgl27_word_cert carries at this model is twice the number
-    pgl27_word_proximity_cert carries. Both are read off pgl27_word_mixing,
-    the one bound on the cut group's distance; the input-indistinguishability
-    arm loses that bound at each of two hops, one per dealt secret, and the
-    proximity arm compares one law with one law. The relation is between
-    these two certificates and not between the two arms: cert_eps is by
-    definition the walk's marginal number added to itself, and this proximity
-    certificate chooses that same marginal number as its own field, which a
-    proximity certificate over the same model and the same ideal is free not
-    to do. *)
+    pgl27_word_proximity_cert carries. Both are read off pgl27_word_mixing, the
+    one bound on the cut group's distance; the input-indistinguishability tail
+    loses that bound at each of two hops, one per dealt secret, and the
+    ideal-proximity proposition compares one law with one law. The relation is
+    between these two certificates and not between the two security properties:
+    cert_eps is by definition the walk's marginal number added to itself, and
+    this proximity certificate chooses that same marginal number as its own
+    field, which a proximity certificate over the same model and the same ideal
+    is free not to do. *)
 Lemma pgl27_word_proximity_eps_halfE (R : realType) (secretP : R.-fdist bool) :
   cert_eps (pgl27_word_cert secretP)
   = ipc_eps (pgl27_word_proximity_cert secretP)
@@ -877,8 +893,8 @@ Lemma pgl27_word_proximity_eps_halfE (R : realType) (secretP : R.-fdist bool) :
 Proof. by []. Qed.
 
 (** The certificate's number is at most 2^-39, the constant the word program
-    publishes for the input-indistinguishability arm. It is the obligation of
-    the terminal that concludes the proximity program at that constant, and the
+    publishes for input indistinguishability. It is the obligation of the
+    terminal that concludes the proximity program at that constant, and the
     obligation is met strictly, the certificate's number being half of the
     published one. *)
 Lemma pgl27_word_proximity_le39 (R : realType) (secretP : R.-fdist bool) :
@@ -908,7 +924,7 @@ Qed.
 (*     One model, two claims, two programs                                    *)
 (******************************************************************************)
 
-(** The word model certified by the proximity arm and concluded at 2^-39, the
+(** The word model certified for ideal proximity and concluded at 2^-39, the
     constant the input-indistinguishability program of the same model publishes
     and the one the published reading statement pgl27_word_view_proximity
     carries. The certificate's own number is 2^-40, half of that. Below four
@@ -916,10 +932,11 @@ Qed.
     a coalition's reading with the dealt secret within that number of the same
     joint law under the prior-indexed exact execution, where the reading and the
     secret are independent outright, so the ideal side is the product of its two
-    marginals. The certificate hops to the ideal once and so loses that number
-    once, where the input-indistinguishability program hops twice. Its transfer
-    status is IdealFinite, the same the input-indistinguishability program
-    carries, and the two certificates compare against the same ideal cut. *)
+    marginals. The proximity certificate's closeness field is one hop to the
+    ideal, so that number is lost once, where the input-indistinguishability
+    tail makes two hops. Its transfer status is IdealFinite, the same the
+    input-indistinguishability program carries, and the two certificates compare
+    against the same ideal cut. *)
 Definition pgl27_word_proximity_published : PublishedAt pgl27_bound39 :=
   pgl27_word_sampled
     certify IdealProximity pgl27_word_proximity_cert
@@ -939,9 +956,9 @@ Proof.
 exact: erefl.
 Qed.
 
-(** The arm the proximity program carries, at every real field and prior: the
-    distance to a private ideal model, and not the distance between two readings
-    of one model. *)
+(** The security property this program carries, at every real field and prior,
+    is ideal proximity: the distance to a private ideal model, and not the
+    distance between two readings of one model. *)
 Lemma pgl27_word_proximity_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at pgl27_word_proximity_published)) R) :
   security_property_of pgl27_word_proximity_published R idx
@@ -949,9 +966,9 @@ Lemma pgl27_word_proximity_published_propertyE (R : realType)
 Proof. by []. Qed.
 
 (** Both programs over the word model read their analysis model family off the
-    one named Tableau Sampled value, so the pair differs in the arm and in
-    nothing about the algebra, the run or the law. The family is what a
-    continuation of a named value reads off the name. *)
+    one named Tableau Sampled value, so the pair differs in the security
+    property and in nothing about the algebra, the run or the law. The family
+    is what a continuation of a named value reads off the name. *)
 Lemma pgl27_word_published_families_sampledE :
   ab_f (published_at pgl27_word_proximity_published)
   = sp_f (tableau_at pgl27_word_sampled)

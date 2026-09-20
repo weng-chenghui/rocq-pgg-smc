@@ -10,14 +10,14 @@
 (* space carries. This file holds the mathematics that separates the two,     *)
 (* with no program in it, published or not.                                   *)
 (*                                                                            *)
-(* The bound is the certificate field of the proximity arm: at every          *)
+(* The bound is the closeness field of the proximity certificate: at every    *)
 (* coalition, the joint law of that coalition's reading with the conjunction  *)
 (* of the committed bits under Kim's one biased cut is within one fiftieth of *)
 (* the same joint law under the uniform rotation. The number is the bound     *)
 (* kim_biased_cut_mixing_exact proves on the cut group's own distance. Two is *)
 (* the threshold the derived profile declares, and this bound is proved at    *)
 (* every coalition of the five seats and not only below it, the threshold     *)
-(* entering the arm's proposition and not the bound.                          *)
+(* entering the ideal-proximity proposition and not the bound.                *)
 (*                                                                            *)
 (* Every number below bounds a sum of absolute differences, which is twice    *)
 (* the total variation distance of the literature, so a bound of one fiftieth *)
@@ -133,14 +133,14 @@ Qed.
 
 (** At every coalition, the joint law of that coalition's reading with the
     secret under Kim's one biased cut is within one fiftieth of the same joint
-    law under the uniform rotation. It is the certificate field of the
-    proximity arm at this instance: the two models differ only in the law of
+    law under the uniform rotation. It is the closeness field of the proximity
+    certificate at this instance: the two models differ only in the law of
     the rotation, the committed bits are drawn uniformly and independently of
     it in both, so the distance on the cut group is the distance of the two
     joint laws of the bits and the cut, and the pair of a reading and the
     secret is a deterministic function of those. The bound holds at every
-    coalition and not only below the threshold; the threshold enters the arm's
-    proposition and not this distance. *)
+    coalition and not only below the threshold; the threshold enters the
+    ideal-proximity proposition and not this distance. *)
 Lemma kim_biased_proximity_close
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   var_dist

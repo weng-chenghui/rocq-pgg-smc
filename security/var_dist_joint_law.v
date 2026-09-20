@@ -64,10 +64,10 @@ Local Open Scope fdist_scope.
 (** Two laws on one sample space, within d of each other, stay within d when
     each is read as the pair of a coalition's reading and the secret. It is
     data processing along the map pairing the two readers, and it is the step
-    by which the proximity arm's certificate is discharged: the actual and the
-    ideal model of one execution differ only in the law they draw a sample
-    point from, and the pair the arm compares is a deterministic function of
-    that point. *)
+    by which a proximity certificate's ipc_close field is discharged: the
+    actual and the ideal model of one execution differ only in the law they
+    draw a sample point from, and the pair ipc_close compares is a
+    deterministic function of that point. *)
 Lemma var_dist_fdistmap_pair (R : realType) (U V W : finType)
     (P Q : R.-fdist U) (reading : U -> V) (secret : U -> W) (d : R) :
   var_dist P Q <= d ->

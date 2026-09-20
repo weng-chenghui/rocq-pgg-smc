@@ -36,7 +36,7 @@
 (* exports it, so the row reader is restated here as psl211_content_of and    *)
 (* pinned in both directions by psl211_content_ofE.                           *)
 (*                                                                            *)
-(* The exact arm's witness over psl211_exact_family is built in               *)
+(* The exact-independence witness over psl211_exact_family is built in        *)
 (* instances/psl211/tableau/psl211_tableau_analysis_bridged.v, beside the     *)
 (* Tableau surface whose ExactWitness record gives it its type, which is      *)
 (* where the other three instances build theirs. This file therefore          *)
@@ -245,7 +245,7 @@ Lemma psl211_alldecks_sample_cutE (R : realType)
 Proof. by []. Qed.
 
 (** psl211_alldecks_cut_distE — the cut this model draws is the uniform law on
-    the shuffle group. This is the cut the exact arm needs. *)
+    the shuffle group. This is the cut the exact-independence witness needs. *)
 Lemma psl211_alldecks_cut_distE (R : realType) :
   @sa_cut_dist R (instance_profile psl211_algebra)
     (instance_exec psl211_alldecks_params) (psl211_alldecks_sample R)
@@ -307,9 +307,9 @@ by apply: boolp.funext => g; exact: psl211_alldecks_static_obs_viewE.
 Qed.
 
 (** psl211_alldecks_exact_viewE — the same identification once more, with the
-    deck description inside the sample point. The exact arm compares a
-    coalition's reading with the secret on one probability space, so the run
-    argument cannot be fixed first. *)
+    deck description inside the sample point. The exact-independence proposition
+    compares a coalition's reading with the secret on one probability space, so
+    the run argument cannot be fixed first. *)
 Lemma psl211_alldecks_exact_viewE (C : {set seatT}) :
   (fun u : psl211_inputT * pgg_gT psl211_M =>
      @static_coalition_obs psl211_algebra psl211_alldecks_params C u.1 u.2)
@@ -439,12 +439,12 @@ Lemma psl211_content_ofE (N : nat) (m : pgg_data N.+1) (x : 'I_N.+1)
   psl211_content_of (m :: PGG_hand (x :: l) :: rest) = x.
 Proof. by []. Qed.
 
-(** psl211_alldecks_secret_expectedE — the secret the exact arm certifies is
-    the value the run recovers, read off the same sample point. The exact
-    arm's witness has no field relating its secret to the run's expected
-    value, so without this equation that secret could be independent of a bit
-    the protocol never reconstructs and the published independence would be
-    true and empty. *)
+(** psl211_alldecks_secret_expectedE — the secret the exact-independence
+    witness carries is the value the run recovers, read off the same sample
+    point. The exact-independence witness has no field relating its secret to
+    the run's expected value, so without this equation that secret could be
+    independent of a bit the protocol never reconstructs and the published
+    independence would be true and empty. *)
 Lemma psl211_alldecks_secret_expectedE (R : realType)
     (u : psl211_inputT * pgg_gT psl211_M) :
   psl211_alldecks_secret R u
@@ -498,7 +498,7 @@ by move=> v; exact: psl211_alldecks_fiber_transfer.
 Qed.
 
 (** psl211_alldecks_static_indep — the same independence on the framework's
-    side, which is the form the exact arm's witness demands of it. *)
+    side, which is the form the exact-independence witness demands of it. *)
 Lemma psl211_alldecks_static_indep (R : realType) (C : {set seatT}) :
   (#|C| <= 5)%N ->
   psl211_alldecksP R
@@ -1144,15 +1144,15 @@ Definition psl211_fixed_dealP (R : realType) :
     (@psl211_fixed_deal_delta R) (`U psl211_G_pos).
 
 (** psl211_fixed_deal_view_dep — under that dealer law the reading of three
-    seats is NOT independent of the chirality.  This is what entitles the
-    paper to say that privacy is a property of the dealer law and not of the
-    protocol alone: the shuffle group, the design and the coalition are the
-    ones PSL(2,11) uses, only the dealer changed, and the conclusion fails.
-    Read together with psl211_alldecks_view_indep_via_dealer it says that for
-    PSL(2,11) privacy depends on which deal law the dealer uses: the uniform
-    one delivers it, and the point mass at psl211_perdeck_deal does not.  What
-    is NOT shown here is that a hidden uniform deal leaks: the deal is public
-    in this refutation, being a point mass. *)
+    seats is NOT independent of the chirality.  This is what entitles the paper
+    to say that privacy depends on the dealer law and not on the protocol alone:
+    the shuffle group, the design and the coalition are the ones PSL(2,11) uses,
+    only the dealer changed, and the conclusion fails. Read together with
+    psl211_alldecks_view_indep_via_dealer it says that for PSL(2,11) privacy
+    depends on which deal law the dealer uses: the uniform one delivers it, and
+    the point mass at psl211_perdeck_deal does not.  What is NOT shown here is
+    that a hidden uniform deal leaks: the deal is public in this refutation,
+    being a point mass. *)
 Lemma psl211_fixed_deal_view_dep (R : realType) :
   ~ (psl211_fixed_dealP R |=
        @dealer_shuffle_view R bool psl211_deal cutT viewT

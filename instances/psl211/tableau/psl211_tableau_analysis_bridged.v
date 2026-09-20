@@ -5,11 +5,13 @@
 (*                                  AnalysisBridged                           *)
 (*                                                                            *)
 (* The AnalysisBridged level adjoins one security payload per real field and  *)
-(* per index of the model, and the proposition it carries is that payload's   *)
-(* arm on top of everything the levels below proved. This is the level at     *)
-(* which a program says something about a coalition, and the arm decides what *)
-(* it says: the exact arm asserts independence, and the proximity arm a       *)
-(* distance to a model whose own privacy is a theorem.                        *)
+(* per index of the model, and the proposition it carries is the one that     *)
+(* payload proves, on top of everything the levels below proved. This is the  *)
+(* level at which a program says something about a coalition, and which       *)
+(* security property the evidence proves is what it says: the                 *)
+(* exact-independence proposition asserts independence, and the               *)
+(* ideal-proximity proposition a distance to a model whose own privacy is a   *)
+(* theorem.                                                                   *)
 (*                                                                            *)
 (* Six is the threshold the derived profile declares, so every statement here *)
 (* that quantifies over a coalition quantifies over at most five of the       *)
@@ -22,17 +24,17 @@
 (*                                                                            *)
 (* Two programs are published here and they part at the model. Over the       *)
 (* uniform cut, what a coalition is shown is independent of the chirality     *)
-(* outright, at every real field and with no number in the claim; that is the *)
-(* exact arm, and the instance gives it one witness. Over the 584-letter word *)
-(* cut, what a coalition is shown is within 2^-40, in the sum of absolute     *)
-(* differences, of what the uniform-cut execution shows it, so a              *)
-(* distinguisher's advantage is at most 2^-41; that is the proximity arm, and *)
-(* the instance gives it a certificate whose ideal is the first program's own *)
+(* outright, at every real field and with no number in the claim; that is     *)
+(* exact independence, and the instance supplies one witness for it. Over the *)
+(* 584-letter word cut, what a coalition is shown is within 2^-40, in the sum *)
+(* of absolute differences, of what the uniform-cut execution shows it, so a  *)
+(* distinguisher's advantage is at most 2^-41; that is ideal proximity, and   *)
+(* the instance supplies a certificate whose ideal is the first program's own *)
 (* model. Both numbers are the certificate's, not a constant read from        *)
 (* elsewhere.                                                                 *)
 (*                                                                            *)
-(* No input-indistinguishability program is published over either model. A    *)
-(* certificate of that arm carries a constancy field, and                     *)
+(* No input-indistinguishability program is published over either model. An   *)
+(* input-indistinguishability certificate carries a constancy field, and      *)
 (* instances/psl211/psl211_reading_constancy.v restates that field as         *)
 (* coalition_reading_constancy and refutes it in both run modes.              *)
 (*                                                                            *)
@@ -50,8 +52,8 @@
 (* for a parameter record.                                                    *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   psl211_exact_witness    == the exact arm's witness at every field and    *)
-(*                              index                                         *)
+(*   psl211_exact_witness    == the exact-independence witness at every field *)
+(*                              and index                                     *)
 (*   psl211_alldecks_published                                                *)
 (*                           == the all-decks path as a program               *)
 (*   psl211_word_proximity_cert                                               *)
@@ -64,17 +66,18 @@
 (*   psl211_alldecks_published_pathE                                          *)
 (*                           == the program publishes the manifest's path     *)
 (*   psl211_alldecks_published_propertyE                                      *)
-(*                           == the program carries the exact arm             *)
+(*                           == the program's security property is exact      *)
+(*                              independence                                  *)
 (*   psl211_alldecks_published_sampledE                                       *)
 (*                           == the program is the named Sampled value with   *)
 (*                              the payload and the terminal adjoined         *)
 (*   psl211_alldecks_view_secrecy                                             *)
-(*                           == the exact arm's four conjuncts at this        *)
-(*                              instance                                      *)
+(*                           == the exact-independence proposition's four     *)
+(*                              conjuncts at this instance                    *)
 (*   psl211_word_proximity_cert_idealE                                        *)
 (*                           == the certificate's ideal is the all-decks      *)
-(*                              program's model, and the port built from its  *)
-(*                              witness is that program's port                *)
+(*                              program's model, and the evidence built from  *)
+(*                              its witness is that program's evidence        *)
 (*   psl211_word_proximity_cert_secretE                                       *)
 (*                           == the certificate's secret and the secret its   *)
 (*                              witness carries are one term                  *)
@@ -86,7 +89,8 @@
 (*                           == the certificate's number is below the bound   *)
 (*                              two var_dist_le2 gives                        *)
 (*   psl211_word_proximity_published_propertyE                                *)
-(*                           == the program carries the proximity arm         *)
+(*                           == the program's security property is ideal      *)
+(*                              proximity                                     *)
 (*   psl211_word_proximity_published_pathE                                    *)
 (*                           == the program publishes psl211_word_path        *)
 (*   psl211_word_proximity_published_sampledE                                 *)
@@ -137,19 +141,20 @@ Local Notation cardT :=
   ('I_(pgg_N' (mp_M (instance_profile psl211_algebra))).+1).
 
 (******************************************************************************)
-(*     The exact arm's witness                                                *)
+(*     The exact-independence witness                                         *)
 (******************************************************************************)
 
-(** psl211_exact_witness — the exact arm's witness: the chirality as a random
-    variable on the all-decks sample space, and, at every coalition of fewer
-    than six of the twelve seats, the independence of that coalition's reading
-    from it. The independence is psl211_alldecks_view_indep, which is the
-    equality of the two chiralities' deal counts read as a privacy statement,
-    and it is exact: a uniform deck description and a uniform cut leave the
-    reading carrying no information about the chirality at all, not a small
-    amount. The framework derives the zero mutual information, the unchanged
-    conditional entropy and the closure under post-processing from this one
-    field, so the witness is all the exact arm requires of this instance. *)
+(** psl211_exact_witness — the exact-independence witness: the chirality as a
+    random variable on the all-decks sample space, and, at every coalition of
+    fewer than six of the twelve seats, the independence of that coalition's
+    reading from it. The independence is psl211_alldecks_view_indep, which is
+    the equality of the two chiralities' deal counts read as a privacy
+    statement, and it is exact: a uniform deck description and a uniform cut
+    leave the reading carrying no information about the chirality at all, not a
+    small amount. The framework derives the zero mutual information, the
+    unchanged conditional entropy and the closure under post-processing from
+    this one field, so the witness is all that certifying exact independence
+    requires of this instance. *)
 Definition psl211_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample psl211_exact_family R idx) :=
   @MkExactWitness R psl211_algebra psl211_alldecks_params
@@ -187,10 +192,10 @@ Lemma psl211_alldecks_published_pathE :
   published_path psl211_alldecks_published = psl211_alldecks_path.
 Proof. by []. Qed.
 
-(** The arm this program carries, at every real field and index: independence of
-    the coalition's view from the chirality, and not a distance between two
-    readings. The certify statement the program wrote settles which arm
-    that is. *)
+(** The security property this program carries, at every real field and index,
+    is exact independence: independence of the coalition's view from the
+    chirality, and not a distance between two readings. The certify statement
+    the program wrote settles which property that is. *)
 Lemma psl211_alldecks_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at psl211_alldecks_published)) R) :
   security_property_of psl211_alldecks_published R idx
@@ -210,7 +215,7 @@ Lemma psl211_alldecks_published_sampledE :
 Proof. exact: erefl. Qed.
 
 (******************************************************************************)
-(*     The exact arm's four conjuncts at this instance                        *)
+(*     The exact-independence proposition's four conjuncts at this instance   *)
 (******************************************************************************)
 
 (** psl211_alldecks_view_secrecy — the program's view secrecy at this
@@ -218,10 +223,10 @@ Proof. exact: erefl. Qed.
     is independent of the chirality, carries zero mutual information with it,
     leaves the chirality's entropy unchanged under conditioning, and stays
     independent of it under every deterministic function of the seat-to-card
-    map. The four conjuncts are the whole content of the exact arm here; the
-    proof is the program's security projection applied, so a reader who wants
-    the information-theoretic reading of the program needs no further
-    derivation. *)
+    map. The four conjuncts are the whole content of the exact-independence
+    proposition here; the proof is the program's security projection applied, so
+    a reader who wants the information-theoretic reading of the program needs no
+    further derivation. *)
 Theorem psl211_alldecks_view_secrecy (R : realType) (C : {set seatT})
     (HC : (#|C| < 6)%N) :
   [/\ psl211_alldecksP R
@@ -269,10 +274,10 @@ Definition psl211_word_proximity_cert (R : realType) (idx : unit)
     (fun C HC => @psl211_word_proximity_close R C HC).
 
 (** The model the certificate calls ideal is the model the published all-decks
-    program carries, and the port built from the witness the certificate carries
-    is that program's port. Conversion decides both, so the ideal a word program
-    is measured against is the model the all-decks program publishes and not a
-    second description of it. *)
+    program carries, and the evidence built from the witness the certificate
+    carries is that program's evidence. Conversion decides both, so the ideal a
+    word program is measured against is the model the all-decks program
+    publishes and not a second description of it. *)
 Lemma psl211_word_proximity_cert_idealE (R : realType) (idx : unit) :
   ipc_ideal (psl211_word_proximity_cert R idx)
   = amf_sample (ab_f (published_at psl211_alldecks_published)) R idx
@@ -285,10 +290,10 @@ split; exact: erefl.
 Qed.
 
 (** The secret the certificate names and the secret its witness carries are
-    one term, psl211_alldecks_secret. A proximity certificate whose two
-    secrets differ compares a coalition's reading against a product taken in
-    a different bit, so what a coalition is shown says nothing about the bit
-    the arm's proposition names. *)
+    one term, psl211_alldecks_secret. Where a certificate's two secrets differ,
+    the ideal-proximity proposition compares a coalition's reading against a
+    product taken in a different bit, so what a coalition is shown says nothing
+    about the bit the ideal-proximity proposition names. *)
 Lemma psl211_word_proximity_cert_secretE (R : realType) (idx : unit) :
   ipc_secret (psl211_word_proximity_cert R idx) = psl211_alldecks_secret R
   /\ ew_secret (ipc_witness (psl211_word_proximity_cert R idx))
@@ -296,12 +301,13 @@ Lemma psl211_word_proximity_cert_secretE (R : realType) (idx : unit) :
 Proof. split; exact: erefl. Qed.
 
 (** The carrier of that secret is the two-element type of the chirality bit.
-    At a one-point carrier the arm's proposition compares two readings and
-    mentions no secret at all, the second factor of the product being a point
-    mass, so the number would bound nothing about what a coalition learns of
-    the bit. The secret is also the one the protocol reconstructs:
-    psl211_alldecks_secret_expectedE of instances/psl211/psl211_models.v
-    reads it as the value the run recovers, at every sample point. *)
+    At a one-point carrier the ideal-proximity proposition compares two
+    readings and mentions no secret at all, the second factor of the product
+    being a point mass, so the number would bound nothing about what a
+    coalition learns of the bit. The secret is also the one the protocol
+    reconstructs: psl211_alldecks_secret_expectedE of
+    instances/psl211/psl211_models.v reads it as the value the run recovers,
+    at every sample point. *)
 Lemma psl211_word_proximity_cert_secretTE (R : realType) (idx : unit) :
   ew_secretT (ipc_witness (psl211_word_proximity_cert R idx)) = bool.
 Proof. exact: erefl. Qed.
@@ -337,8 +343,8 @@ Qed.
 (*     The program                                                            *)
 (******************************************************************************)
 
-(** The word model certified by the proximity arm and published at 2^-40, the
-    number the certificate proves. What a static coalition of at most five of
+(** The word model certified for ideal proximity and published at 2^-40, the
+    number the certificate carries. What a static coalition of at most five of
     the twelve seats is shown is that the joint law of its reading with the
     chirality is within that number, in the sum of absolute differences, of the
     product of the two marginals the all-decks execution has, where the reading
@@ -362,9 +368,9 @@ Definition psl211_word_proximity_published : Published :=
     certify IdealProximity psl211_word_proximity_cert
     |> publish IdealFinite BaselineClassicalOnly.
 
-(** The arm the program carries, at every real field and index: the distance to
-    a private ideal model, and not the distance between two readings of one
-    model. *)
+(** The security property this program carries, at every real field and index,
+    is ideal proximity: the distance to a private ideal model, and not the
+    distance between two readings of one model. *)
 Lemma psl211_word_proximity_published_propertyE (R : realType)
     (idx : amf_index (ab_f (published_at psl211_word_proximity_published)) R) :
   security_property_of psl211_word_proximity_published R idx

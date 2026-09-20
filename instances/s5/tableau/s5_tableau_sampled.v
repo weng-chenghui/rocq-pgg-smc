@@ -9,7 +9,7 @@
 (* built from the interpreter's own endpoints is the one computed directly    *)
 (* from the run argument and the cut. That identification is what turns a     *)
 (* claim about the messages a run exchanges into a claim about a group        *)
-(* action, and it is the last thing proved before an arm is named.            *)
+(* action, and it is the last thing proved before the certify statement.      *)
 (*                                                                            *)
 (* One family is named here, the uniform tape model over the supplied run.    *)
 (* Its cut is the identity, so no shuffle enters what a coalition reads and   *)
