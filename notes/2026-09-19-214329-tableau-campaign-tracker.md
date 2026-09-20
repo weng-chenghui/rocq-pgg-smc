@@ -58,7 +58,14 @@ Design with the decisions: `notes/2026-09-20-060000-instance-tableau-directory-d
 | 2.2 | PSL(2,11) | DONE: `instances/psl211/tableau/`, six files, `psl211_rows.v` retired, `psl211_word_proximity.v` reduced to the distance mathematics; staged build, audit, fix pass audited by the main session, `cp`, as-built fidelity rc=0. Two comment repoints deferred to 2.5 |
 | 2.3 | PGL(2,7) | DONE: `instances/pgl27/tableau/`, six files, `pgl27_rows.v` retired, `pgl27_proximity.v` reduced to the reading and the distance mathematics (it imports no tableau module); the AnalysisBridged header carries a locator table of the seven published rows; staged build, audit, fix pass audited by the main session, `cp`, as-built output byte-identical. Two comment repoints deferred to 2.5 |
 | 2.4 | five-card | DONE: `instances/kim2025/tableau/`, six files, `five_card_rows.v` retired, `five_card_proximity.v` reduced to three laws and the distance; Kim's input-privacy bound is carried at Sampled, and the AnalysisBridged header names per row by what the manifest reaches its level; staged build, two pre-audit passes, audit, fix pass audited by the main session, `cp`, as-built output byte-identical |
-| 2.5 | Closing pass: the deferred comment repoints (`manifest/pgg_analysis_manifest.v`, `instances/psl211/psl211_models.v`, `instances/pgl27/pgl27_encoding_r5.v`), the manifest header, the twelve-item cross-instance wording list of `notes/probes/2026-09-20-tableau-directories-five-card/audit-five-card.md`, the moved docstrings' economic words (owner's question), and the dated note of retired file names for the owner's paper edits | open |
+| 2.5 | Closing pass | DONE (comments only, 16 files): six citations of retired or reduced files repointed to the file that holds the declaration, ten of the twelve cross-instance wording items brought to one true form per instance (S5 branches at Executable and its cut is the identity, so it keeps its own sentences; two items needed no edit); by an Opus rocq-prover, audited by the main session (code tokens identical by script over all 16 files); 41 files recompiled rc=0. As-built note: `notes/2026-09-20-103832-tableau-directories-as-built.md`. Open: the docstring of `pgl27_algebraic_start` says "three probability models" where the header now says families |
+
+## Step 2.6. Owner's two naming decisions (2026-09-20)
+
+| # | Item | State |
+|---|---|---|
+| 2.6a | `Reprice` -> `ConcludedBound`, `no_reprice` -> `no_concluded_bound`, `*_reprice39` -> `*_bound39` and the rest (owner: "1A: go as you suggested") | open |
+| 2.6b | The economic words for a relation ("spends", "price", "currencies", "pays", "buys") replaced by the field's terms: a hop of a hybrid and the loss it adds ("loses at most"), perfect against statistical security, tight against slack; literal compile costs stay. Owner proposed "loss". About 36 files; four of them are in the forward closure of `psl211_endpoints.v` and stay as they are | open |
 
 ## Step 3. Recorded small items
 

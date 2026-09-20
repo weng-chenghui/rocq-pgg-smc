@@ -10,7 +10,7 @@
 (* generator word. This file holds the mathematics that separates the two,    *)
 (* with no program and no published row in it.                                *)
 (*                                                                            *)
-(* One distance is the certificate field of the proximity arm: below the      *)
+(* One bound is the certificate field of the proximity arm: below the         *)
 (* four-seat threshold, the joint law of a coalition's reading with the dealt *)
 (* secret under the walk is within 2^-40 of the same joint law under the      *)
 (* uniform cut at the same law of the secret. The number is the walk's        *)
