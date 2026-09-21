@@ -99,12 +99,19 @@
 (* and the slot c of the obstruction terminal, so it would be a twenty-first, *)
 (* and it is not one only because ssreflect already reserves it, measured on  *)
 (* 2026-09-19 by binding it in a file that requires nothing but ssreflect. by *)
-(* also follows the literal naming the security property in four of the five  *)
-(* certify rules, and the evidence of such a statement is the term after it;  *)
-(* in the fifth the token after the property's name is at and the marginal    *)
-(* bound follows by. of is the word of the bind, following its slot f, and it *)
-(* reserves nothing, being a keyword of Rocq independently of this file as    *)
-(* well, measured on 2026-09-21 in the same way.                              *)
+(* also follows the literal naming the security property in four of the       *)
+(* eight certify rules, and the evidence of such a statement is the term      *)
+(* after it; in the five-clause rule the token after the property's name is   *)
+(* at and the marginal bound follows by, and in the three rules that name a   *)
+(* reading it follows that reading.                                           *)
+(*                                                                            *)
+(* of introduces what is read. It follows the literal naming the security     *)
+(* property in the three certify rules that name a reading, and the literal   *)
+(* InputDistinguishability in one of the two obstruction terminals; the term  *)
+(* after it is the reading. It is also the word of the bind of pgg_tableau.v, *)
+(* following that rule's slot f, and it reserves nothing, being a keyword of  *)
+(* Rocq independently of this file, measured on 2026-09-21 in the same way,   *)
+(* so the count stays twenty.                                                 *)
 (*                                                                            *)
 (* assuming, measured on 2026-09-21, follows the slot t of the three-payload  *)
 (* publish rule, the slot t of the Sampled terminal and the slot pf of the    *)
@@ -117,8 +124,8 @@
 (*                                                                            *)
 (* The surface has two kinds of word. A preposition carries one meaning       *)
 (* throughout: at a number, a size or a real field with its index, by a proof *)
-(* or a piece of evidence, assuming an assumption status, and of the payload  *)
-(* of a bind. A slot name names a thing, and the term that is that thing      *)
+(* or a piece of evidence, assuming an assumption status, and of what is      *)
+(* read. A slot name names a thing, and the term that is that thing           *)
 (* follows it, at once or after a preposition: dealt, encoded and supplied    *)
 (* name the mode a run is driven in, inputs the input carrier, layout the     *)
 (* sharing the dealer deals, decoded_by the reader of the committed payload   *)
@@ -148,7 +155,7 @@
 (* writes it bare. No file requiring the surface writes any of the other      *)
 (* nineteen bare either, and no declaration of this file binds any of the     *)
 (* twenty: the two realisation lemmas bind L and n, dealt_params_stepE binds  *)
-(* x, q and n, and input_distinguishability_obstruction binds q and c.        *)
+(* x, q and n, and input_distinguishability_obstruction binds q, r and c.     *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   obs_payload  == the three run facts in the shape execute_step wants      *)
@@ -164,7 +171,8 @@
 (*                   parameters                                               *)
 (*   input_distinguishability_obstruction                                     *)
 (*                == the one obstruction kind at every real field and index   *)
-(*                   of a program's model family, at one number in the field  *)
+(*                   of a program's model family, at one reading and one      *)
+(*                   number in the field                                      *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   dealt_params_stepE == the dealer-dealt statement is params_step at the   *)
@@ -218,7 +226,9 @@ Arguments obs_payload : clear implicits.
    of a coalition's view of the ideal cut in the run argument. The split is
    what makes the certificate's perfect and statistical halves visible where
    it is written: the fourth component is an inequality at the first
-   component's epsilon, and the fifth is an equation. *)
+   component's epsilon, and the fifth is an equation. The certificate it
+   builds is at the coalition's own endpoints, the finest reading, and a
+   certificate at any other reading is written through the record. *)
 Definition mk_indistinguishability (x : StackAt Sampled)
     (b : forall (R : realType) (idx : amf_index (sp_f x) R),
            ShuffleMarginalBound R (instance_M (projT1 x)))
@@ -237,7 +247,7 @@ Definition mk_indistinguishability (x : StackAt Sampled)
               = fdistmap (static_coalition_obs C y') (u R idx))
     : IndistinguishabilityPayload x :=
   fun R idx => @MkIndistinguishabilityCert R (projT1 x) (projT1 (projT2 x))
-    (amf_sample (sp_f x) R idx)
+    (amf_sample (sp_f x) R idx) (coalition_endpoint_reading (projT1 x))
     (b R idx) (Hd R idx) (u R idx) (Hc R idx) (Hk R idx).
 Arguments mk_indistinguishability : clear implicits.
 
@@ -466,13 +476,38 @@ Notation "s 'certify' 'IdealProximity' 'by' c" :=
   (s ;;; certify_idealproximity of c)
   (at level 90, left associativity, c at level 0).
 
+(* The reading follows the security property's name, and the evidence
+   follows by. The clause is a type ascription on that evidence: the
+   payload's type is the witness or the certificate at r, so evidence at
+   another reading is rejected where it is written and a program's text
+   cannot name a reading its evidence is not about. A statement omitting
+   the clause is a statement at the coalition's own endpoints and expands
+   to the rule above it, whose payload mentions no reading at all. *)
+Notation "s 'certify' 'ExactIndependence' 'of' r 'by' w" :=
+  (s ;;; certify_reading_exact
+     of (exact_of_reading (tableau_at s) r w))
+  (at level 90, left associativity, r at level 0, w at level 0).
+
+Notation "s 'certify' 'InputIndistinguishability' 'of' r 'by' c" :=
+  (s ;;; certify_reading_indistinguishability
+     of (indistinguishability_of_reading (tableau_at s) r c))
+  (at level 90, left associativity, r at level 0, c at level 0).
+
+Notation "s 'certify' 'IdealProximity' 'of' r 'by' c" :=
+  (s ;;; certify_reading_idealproximity
+     of (idealproximity_of_reading (tableau_at s) r c))
+  (at level 90, left associativity, r at level 0, c at level 0).
+
 (* The five clauses name the real field and the model index once, after at,
    and the statement abstracts every clause over them. Each component is a
    term in those two variables rather than a function of them, so what a
    clause displays is the component and not the plumbing that quantifies it.
    The first of the five, the marginal bound, follows by, as the evidence of
    the other four certify rules does; the two names after at are the binders
-   the rule quantifies over and not values. *)
+   the rule quantifies over and not values. The statement is at the
+   coalition's own endpoints and has no form naming a reading, because
+   nothing in the tree builds a certificate at another reading out of five
+   components. *)
 Notation "s 'certify' 'InputIndistinguishability' 'at' R idx 'by' b 'tied' 'by' Hd 'ideal' u 'mixing' 'by' Hc 'invariant' 'by' Hk" :=
   (s ;;; certify_indistinguishability of (mk_indistinguishability (tableau_at s)
      (fun R idx => b) (fun R idx => Hd) (fun R idx => u)
@@ -514,16 +549,18 @@ Notation "s |> 'publish' 'Sampled' t 'assuming' a" :=
   (at level 90, left associativity, t at level 0, a at level 0).
 
 (* The one obstruction kind at every real field and every index of a
-   program's model family, at a number that is a term in the field and in
-   nothing else. The framework's payload admits a number that differs at
-   each index; this builder does not, which is what lets the terminal below
-   write the number in the program's own line instead of taking a payload
-   named beside it. An obstruction whose number differs at two indices of
-   one family is written through the bind and the constructor. *)
+   program's model family, at one reading and at a number that is a term in
+   the field and in nothing else. The framework's payload admits a reading
+   and a number that differ at each index; this builder does not, which is
+   what lets the terminals below write both in the program's own line
+   instead of taking a payload named beside it. An obstruction whose reading
+   or number differs at two indices of one family is written through the
+   bind and the constructor. *)
 Definition input_distinguishability_obstruction (q : StackAt Sampled)
-    (c : forall R : realType, R) : ObstructionPayload q :=
+    (r : CoalitionReading (projT1 q)) (c : forall R : realType, R)
+    : ObstructionPayload q :=
   fun R idx => @InputDistinguishabilityObstruction R _ _
-                 (amf_sample (sp_f q) R idx) (c R).
+                 (amf_sample (sp_f q) R idx) r (c R).
 Arguments input_distinguishability_obstruction : clear implicits.
 
 (* The kind, its number, the proof of it and then the assumption status. The
@@ -535,10 +572,27 @@ Arguments input_distinguishability_obstruction : clear implicits.
    The kind's name follows the literal Obstruction and the number follows at,
    so the line says which kind is published and at which number without a
    payload named elsewhere, and the proof is what the kind's proposition asks
-   for at that number. *)
+   for at that number. The reading is the coalition's own endpoints, the
+   finest, so a program written this way publishes the obstruction that
+   refutes the most. *)
 Notation "s |> 'publish' 'Obstruction' 'InputDistinguishability' 'at' c 'by' pf 'assuming' a" :=
   (s ;;; publish_obstruction a
      of (mk_obstruction (tableau_at s)
-           (input_distinguishability_obstruction (tableau_at s) c) pf))
+           (input_distinguishability_obstruction (tableau_at s)
+              (coalition_endpoint_reading (projT1 (tableau_at s))) c) pf))
   (at level 90, left associativity, c at level 0, pf at level 0,
    a at level 0).
+
+(* The same terminal with the reading written after of, between the kind's
+   name and the number. A program uses it when the coalition it exhibits
+   tells two run arguments apart through less than the whole of its
+   endpoints; by input_distinguishability_prop_coalition_endpoint_reading
+   such an obstruction is an obstruction at the endpoint reading too, so the
+   clause records what the instance proved and not the limit of what the
+   published value refutes. *)
+Notation "s |> 'publish' 'Obstruction' 'InputDistinguishability' 'of' r 'at' c 'by' pf 'assuming' a" :=
+  (s ;;; publish_obstruction a
+     of (mk_obstruction (tableau_at s)
+           (input_distinguishability_obstruction (tableau_at s) r c) pf))
+  (at level 90, left associativity, r at level 0, c at level 0,
+   pf at level 0, a at level 0).

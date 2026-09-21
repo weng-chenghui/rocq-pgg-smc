@@ -235,11 +235,13 @@ Definition coalition_reading_constancy (R : realType) (A : PGGAlgebraic)
 (** indistinguishability_cert_reading_constancy — coalition_reading_constancy
     is the fifth field of IndistinguishabilityCert read at the certificate's
     own ideal, so refuting the proposition at a law refutes every certificate
-    whose ideal cut is that law. *)
+    whose ideal cut is that law. The certificate is at the coalition's own
+    endpoint reading, the finest; a certificate at a coarser reading asks
+    constancy of that coarser reading alone and is not covered. *)
 Lemma indistinguishability_cert_reading_constancy (R : realType)
     (A : PGGAlgebraic) (E : ExecutionParams A)
     (sa : SampleAdapter R (instance_exec E))
-    (cert : IndistinguishabilityCert sa) :
+    (cert : IndistinguishabilityCert sa (coalition_endpoint_reading A)) :
   coalition_reading_constancy E (ic_ideal cert).
 Proof. exact: ic_const cert. Qed.
 
@@ -703,9 +705,12 @@ Qed.
     group-uniform law. The certificate's own identification field says its
     shuffle law is the adapter's cut, and this adapter's cut is the uniform
     law on the shuffle group, so the epsilon a certificate quotes is an
-    epsilon against that law however its marginal bound record was built. *)
+    epsilon against that law however its marginal bound record was built. The
+    certificate is at the coalition's own endpoint reading; the statement
+    leaves a certificate at a coarser reading open. *)
 Lemma psl211_alldecks_cert_ideal_close (R : realType)
-    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) :
+    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)
+              (coalition_endpoint_reading psl211_algebra)) :
   var_dist ((`U psl211_G_pos) : R.-fdist cutT) (ic_ideal cert)
   <= sw_bound_eps (ic_b cert).
 Proof.
@@ -727,7 +732,10 @@ Qed.
     over this model publishes less. This fixes from below what an
     input-indistinguishability program can publish at this model. It says
     neither that input indistinguishability is unavailable here nor anything
-    about what a coalition of at most five seats reads. *)
+    about what a coalition of at most five seats reads. The certificate is at
+    the coalition's own endpoint reading, the finest; what a certificate at a
+    coarser reading may hold as its epsilon stays open, and the colour
+    reading of instances/psl211/psl211_colour_reading.v is such a reading. *)
 (* The obligation of conclude at input-indistinguishability evidence is cert_eps
    cert <= odflt (cert_eps cert) (c R), and the proposition the program carries
    is IndistinguishabilityPropAt cert (odflt (cert_eps cert) (c R)). *)
@@ -735,7 +743,8 @@ Qed.
    larger range is occupied and that the occupancy is argued and not
    compiled. *)
 Theorem psl211_alldecks_no_small_eps_cert (R : realType)
-    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) :
+    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)
+              (coalition_endpoint_reading psl211_algebra)) :
   sw_bound_eps (ic_b cert) + sw_bound_eps (ic_b cert)
     < (#|pgg_G psl211_M|%:R)^-1 -> False.
 Proof.
@@ -752,9 +761,12 @@ Qed.
     marginal bound. A certificate must hold its ideal cut within its own
     epsilon of the group-uniform law, and the group-uniform law is not a cut
     these three seats read constantly, so the sharper the shuffle bound the
-    less room the certificate has. *)
+    less room the certificate has. It is at the coalition's own endpoint
+    reading, as the theorem it specialises is, and says nothing of a
+    certificate at a coarser one. *)
 Corollary psl211_alldecks_no_zero_eps_cert (R : realType)
-    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) :
+    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)
+              (coalition_endpoint_reading psl211_algebra)) :
   sw_bound_eps (ic_b cert) = 0 -> False.
 Proof.
 move=> Heps.
@@ -779,9 +791,12 @@ Qed.
     chirality when the deck description is drawn is
     psl211_alldecks_static_indep, exactly nothing; the two facts stand under
     different quantifiers over the run argument, one drawing it and one fixing
-    two of its values. *)
+    two of its values. The reading is the coalition's own endpoints, the
+    finest, so this is the strongest of the distinguishability statements
+    about the model and every coarser reading's obstruction implies it. *)
 Theorem psl211_alldecks_input_distinguishability (R : realType) :
   InputDistinguishabilityPropAt (psl211_alldecks_sample R)
+    (coalition_endpoint_reading psl211_algebra)
     ((#|pgg_G psl211_M|%:R)^-1).
 Proof.
 exists psl211_perdeck_coalition, (true, psl211_perdeck_deal),
@@ -801,9 +816,14 @@ Qed.
     certificate's own number, and neither is edited by the other. A certificate
     whose ideal cut sits further than half of 1/660 from the group-uniform law
     is untouched by both, and a program over it still publishes at least
-    1/660. *)
+    1/660. Both the obstruction and the certificate are at the coalition's
+    own endpoint reading: this is the framework's number bound at one
+    reading, and a program whose certificate is at a coarser reading is
+    bounded only through a factorisation, by
+    indistinguishability_number_ge_across_readings. *)
 Corollary psl211_alldecks_indistinguishability_number_ge (R : realType)
-    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)) (c : R) :
+    (cert : IndistinguishabilityCert (psl211_alldecks_sample R)
+              (coalition_endpoint_reading psl211_algebra)) (c : R) :
   IndistinguishabilityPropAt cert c -> (#|pgg_G psl211_M|%:R)^-1 <= c.
 Proof.
 move=> Hprop.

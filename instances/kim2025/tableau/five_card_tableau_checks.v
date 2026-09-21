@@ -192,9 +192,11 @@ Fail Definition five_card_biased_proximity_by_done (R : realType) (idx : unit)
     S5 instance and the witness proved about it are rejected where they are
     written and not deep inside the proposition. *)
 Fail Definition kim_biased_cert_s5_ideal (R : realType) (idx : unit)
-  : IdealProximityCert (amf_sample kim_biased_family R idx) :=
+  : IdealProximityCert (amf_sample kim_biased_family R idx)
+      (coalition_endpoint_reading five_card_algebra) :=
   @MkIdealProximityCert R five_card_algebra five_card_params
     (amf_sample kim_biased_family R idx)
+    (coalition_endpoint_reading five_card_algebra)
     (amf_sample s5_rand_family R idx)
     (s5_rand_exact_witness R idx)
     (five_card_leakage.Secret R)
@@ -207,7 +209,8 @@ Fail Definition kim_biased_cert_s5_ideal (R : realType) (idx : unit)
     adapter, and the two adapters differ in their sample space as well as in
     their law. *)
 Fail Definition kim_centi_proximity_from_biased (R : realType) (idx : unit)
-  : IdealProximityCert (amf_sample kim_centi_family R idx) :=
+  : IdealProximityCert (amf_sample kim_centi_family R idx)
+      (coalition_endpoint_reading five_card_algebra) :=
   kim_biased_proximity_cert R idx.
 
 (** The same rejection where it is written in a program: the seven-cut
@@ -225,7 +228,8 @@ Fail Definition five_card_repeated_proximity : Tableau AnalysisBridged :=
     either property is rejected where the other model's is required. *)
 Fail Definition kim_biased_indistinguishability_from_centi
   (R : realType) (idx : unit)
-  : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
+  : IndistinguishabilityCert (amf_sample kim_biased_family R idx)
+      (coalition_endpoint_reading five_card_algebra) :=
   kim_centi_cert R idx.
 
 

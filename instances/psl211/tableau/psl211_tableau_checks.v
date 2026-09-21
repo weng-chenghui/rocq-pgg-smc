@@ -117,9 +117,11 @@ Fail Definition psl211_vm_reuse_sampled : Tableau Sampled :=
 *)
 Fail Definition psl211_word_proximity_cert_pgl27_ideal (R : realType)
     (idx : unit)
-  : IdealProximityCert (amf_sample psl211_word_family R idx) :=
+  : IdealProximityCert (amf_sample psl211_word_family R idx)
+      (coalition_endpoint_reading psl211_algebra) :=
   @MkIdealProximityCert R psl211_algebra psl211_alldecks_params
     (amf_sample psl211_word_family R idx)
+    (coalition_endpoint_reading psl211_algebra)
     (amf_sample pgl27_exact_family R tt)
     (psl211_exact_witness R idx)
     (psl211_alldecks_secret R)

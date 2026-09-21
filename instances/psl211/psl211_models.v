@@ -58,6 +58,9 @@
 (*   psl211_alldecks_sample  == the sample adapter over the all-decks plug    *)
 (*   psl211_alldecks_endpoints == the endpoint obligation of the run          *)
 (*   psl211_alldecks_observed  == the run packaged with its three run facts   *)
+(*   psl211_dealt_endpoints  == the endpoint obligation of the dealer-dealt   *)
+(*                              run                                           *)
+(*   psl211_dealt_observed   == that run packaged with its three run facts    *)
 (*   psl211_content_of       == the card an executed interpreter row reports  *)
 (*   psl211_exec_content_trace == the coalition's rows read through it        *)
 (*   psl211_content_trace    == the same reader as a random variable          *)
@@ -350,6 +353,25 @@ Definition psl211_alldecks_endpoints
 Definition psl211_alldecks_observed : OE.ObservedExecution :=
   instance_observed psl211_alldecks_terminates psl211_alldecks_endpoints
     psl211_alldecks_recon.
+
+(** psl211_dealt_endpoints — the interpreter's messages of the dealer-dealt
+    run compute the direct computation of the laid deck. It is the twin of
+    psl211_alldecks_endpoints over the other mode a run of this instance is
+    driven in: the profile's abstract-readout equation quantifies over the
+    content readout, so one equation serves both modes and neither costs a
+    reduction of its own. *)
+Definition psl211_dealt_endpoints
+  : instance_endpoints_stmt psl211_dealt_params :=
+  profile_endpointsE psl211_profile_endpoints.
+
+(** psl211_dealt_observed — the observed execution of the dealer-dealt run:
+    the run finishes inside its fuel, the verifier collects one endpoint per
+    seat, and decoding them returns the chirality the dealer dealt. It is the
+    twin of psl211_alldecks_observed, and it is the value the programs over
+    the fixed-dealer colour model are written at. *)
+Definition psl211_dealt_observed : OE.ObservedExecution :=
+  instance_observed psl211_dealt_terminates psl211_dealt_endpoints
+    psl211_dealt_recon.
 
 (** psl211_alldecks_observed_recovers — the packaged all-decks run decodes to
     the chirality its input names, at every deck description and every cut in

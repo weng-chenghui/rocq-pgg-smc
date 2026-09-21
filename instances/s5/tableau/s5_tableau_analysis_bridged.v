@@ -154,9 +154,11 @@ Qed.
     this one field, so the witness is all that certifying exact independence
     requires of this instance. *)
 Definition s5_rand_exact_witness (R : realType) (idx : unit)
-  : ExactWitness (amf_sample s5_rand_family R idx) :=
+  : ExactWitness (amf_sample s5_rand_family R idx)
+      (coalition_endpoint_reading s5_algebra) :=
   @MkExactWitness R s5_algebra s5_supplied_params
-    (amf_sample s5_rand_family R idx) 'Z_5
+    (amf_sample s5_rand_family R idx)
+    (coalition_endpoint_reading s5_algebra) 'Z_5
     (rsh_secret (@unif_randomized_sharing R 3 4))
     (@s5_rand_static_obs_indep R idx).
 

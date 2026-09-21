@@ -81,6 +81,10 @@
 (* Definitions:                                                               *)
 (*   exact_witness_cst_true     == the exact witness over an arbitrary model  *)
 (*                                 whose secret is the constant true          *)
+(*   coalition_reading_cst_unit == the reading granting a coalition one       *)
+(*                                 value at every coalition                   *)
+(*   exact_witness_cst_reading  == the exact witness at that reading, over an *)
+(*                                 arbitrary model and at any secret          *)
 (*   idealproximity_cert_cst_secrets_true_false                               *)
 (*                              == the proximity certificate over an          *)
 (*                                 arbitrary model whose two secrets are the  *)
@@ -174,7 +178,7 @@ Local Open Scope proba_scope.
     something about a coalition exactly in so far as it is below two. *)
 Lemma idealproximity_prop_at2 (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
-    (cert : IdealProximityCert sa) :
+    (r : CoalitionReading A) (cert : IdealProximityCert sa r) :
   IdealProximityPropAt cert 2%:R.
 Proof. by move=> C _; exact: var_dist_le2. Qed.
 
@@ -199,8 +203,8 @@ Variable sa : SampleAdapter R (instance_exec E).
     proposition to the ideal-proximity proposition does hold for all that, its
     premise discarded: idealproximity_prop_at2 gives the ideal-proximity
     proposition at two whatever the premise. *)
-Lemma indistinguishability_prop_cert_free
-    (cert cert' : IndistinguishabilityCert sa) (c : R) :
+Lemma indistinguishability_prop_cert_free (r : CoalitionReading A)
+    (cert cert' : IndistinguishabilityCert sa r) (c : R) :
   IndistinguishabilityPropAt cert c = IndistinguishabilityPropAt cert' c.
 Proof. by []. Qed.
 
@@ -210,8 +214,8 @@ Proof. by []. Qed.
     says that the equality between the proposition at two certificates is not
     closed by conversion, and no more: two logically equivalent propositions
     would still be equal under propositional extensionality. *)
-Fail Definition idealproximity_prop_cert_free
-    (cert cert' : IdealProximityCert sa) (c : R) :
+Fail Definition idealproximity_prop_cert_free (r : CoalitionReading A)
+    (cert cert' : IdealProximityCert sa r) (c : R) :
   IdealProximityPropAt cert c = IdealProximityPropAt cert' c
   := ltac:(by []).
 
@@ -220,7 +224,8 @@ Fail Definition idealproximity_prop_cert_free
     so the ideal-proximity proposition cannot be stated at it, and the two are
     not two readings of one object. *)
 Fail Definition indistinguishability_cert_in_proximity_prop
-    (cert : IndistinguishabilityCert sa) (c : R) : Prop :=
+    (r : CoalitionReading A) (cert : IndistinguishabilityCert sa r) (c : R)
+    : Prop :=
   IdealProximityPropAt cert c.
 
 (** The proximity number bounds the distance between the two models' reading
@@ -230,32 +235,41 @@ Fail Definition indistinguishability_cert_in_proximity_prop
     This is the proximity number read on the carrier the
     input-indistinguishability proposition states its own bound on, and it needs
     no model of one proposition to be a model of the other. *)
-Lemma idealproximity_reading_le (cert : IdealProximityCert sa) (c : R) :
+Lemma idealproximity_reading_le (r : CoalitionReading A)
+    (cert : IdealProximityCert sa r) (c : R) :
   IdealProximityPropAt cert c ->
   forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
     (#|C| < profile_k (instance_profile A))%N ->
     var_dist
-      (fdistmap (@sa_coalition_view R (instance_profile A) (instance_exec E)
-                   sa 0 C) (sa_sampleP sa))
-      (fdistmap (@sa_coalition_view R (instance_profile A) (instance_exec E)
-                   (ipc_ideal cert) 0 C) (sa_sampleP (ipc_ideal cert)))
+      (fdistmap (fun u => @cr_read A r C
+                   (@sa_coalition_view R (instance_profile A)
+                      (instance_exec E) sa 0 C u)) (sa_sampleP sa))
+      (fdistmap (fun u => @cr_read A r C
+                   (@sa_coalition_view R (instance_profile A)
+                      (instance_exec E) (ipc_ideal cert) 0 C u))
+         (sa_sampleP (ipc_ideal cert)))
     <= c.
 Proof.
 move=> H C HC.
 have Hl : fdistmap fst
-    (fdistmap (fun u => (@sa_coalition_view R (instance_profile A)
-                           (instance_exec E) sa 0 C u, ipc_secret cert u))
-       (sa_sampleP sa))
-  = fdistmap (@sa_coalition_view R (instance_profile A) (instance_exec E)
-                sa 0 C) (sa_sampleP sa).
+    (fdistmap (fun u => (@cr_read A r C
+                           (@sa_coalition_view R (instance_profile A)
+                              (instance_exec E) sa 0 C u),
+                         ipc_secret cert u)) (sa_sampleP sa))
+  = fdistmap (fun u => @cr_read A r C
+                (@sa_coalition_view R (instance_profile A) (instance_exec E)
+                   sa 0 C u)) (sa_sampleP sa).
   by rewrite fdistmap_comp.
 have Hr : fdistmap fst
-    ((fdistmap (@sa_coalition_view R (instance_profile A) (instance_exec E)
-                  (ipc_ideal cert) 0 C) (sa_sampleP (ipc_ideal cert)))
+    ((fdistmap (fun u => @cr_read A r C
+                  (@sa_coalition_view R (instance_profile A)
+                     (instance_exec E) (ipc_ideal cert) 0 C u))
+        (sa_sampleP (ipc_ideal cert)))
      `x (fdistmap (ew_secret (ipc_witness cert))
            (sa_sampleP (ipc_ideal cert))))
-  = fdistmap (@sa_coalition_view R (instance_profile A) (instance_exec E)
-                (ipc_ideal cert) 0 C) (sa_sampleP (ipc_ideal cert)).
+  = fdistmap (fun u => @cr_read A r C
+                (@sa_coalition_view R (instance_profile A) (instance_exec E)
+                   (ipc_ideal cert) 0 C u)) (sa_sampleP (ipc_ideal cert)).
   exact: fdist_prod1.
 rewrite -Hl -Hr.
 exact: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _) (H C HC)).
@@ -275,7 +289,8 @@ End proximity_against_indistinguishability.
     Without it the final application does not typecheck. *)
 Fail Definition idealproximity_tail_without_independence (R : realType)
     (A : PGGAlgebraic) (E : ExecutionParams A)
-    (sa : SampleAdapter R (instance_exec E)) (cert : IdealProximityCert sa)
+    (sa : SampleAdapter R (instance_exec E)) (r : CoalitionReading A)
+    (cert : IdealProximityCert sa r)
     (Hview : forall C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1},
        @sa_coalition_view R (instance_profile A) (instance_exec E) sa 0 C
        = (fun u => static_coalition_obs C (sa.(sa_arg) u) (sa.(sa_cut) u)))
@@ -285,8 +300,8 @@ Fail Definition idealproximity_tail_without_independence (R : realType)
        = (fun u => static_coalition_obs C ((ipc_ideal cert).(sa_arg) u)
                      ((ipc_ideal cert).(sa_cut) u)))
   : IdealProximityPropAt cert (ipc_eps cert)
-  := ltac:(move=> C HC; rewrite (Hview C) (Hideal C);
-           exact: (@ipc_close _ _ _ _ cert C HC)).
+  := ltac:(move=> C HC; rewrite /IdealProximityPropAt (Hview C) (Hideal C);
+           exact: (@ipc_close _ _ _ _ _ cert C HC)).
 
 (******************************************************************************)
 (*     The privacy threshold of every algebra is positive                     *)
@@ -314,12 +329,38 @@ Variable sa : SampleAdapter R (instance_exec E).
     true. Its independence field is inde_RV_cst, which uses no property of
     the model, so holding an exact witness is by itself no statement about
     what a model hides. *)
-Definition exact_witness_cst_true : ExactWitness sa :=
-  @MkExactWitness R A E sa bool ((fun=> true) : {RV (sa_sampleP sa) -> bool})
+Definition exact_witness_cst_true
+  : ExactWitness sa (coalition_endpoint_reading A) :=
+  @MkExactWitness R A E sa (coalition_endpoint_reading A) bool
+    ((fun=> true) : {RV (sa_sampleP sa) -> bool})
     (fun C _ =>
        @inde_RV_cst R (sa_sampleT sa) (sa_sampleP sa) _ bool
          (fun u => static_coalition_obs C (sa.(sa_arg) u) (sa.(sa_cut) u))
          true).
+
+(** The reading whose value type is unit at every coalition: a coalition is
+    granted one value and reads it whatever the deal. It is the coarsest
+    reading of all, every reading factoring through it. *)
+Definition coalition_reading_cst_unit : CoalitionReading A :=
+  @MkCoalitionReading A (fun _ => (unit : finType)) (fun _ _ => tt).
+
+(** The exact witness at that reading, over an arbitrary model and at an
+    arbitrary secret. Its independence field is inde_RV_cst read on the
+    reading rather than on the secret, so it uses no property of the model
+    and no property of the secret either. Holding exact-independence
+    evidence is therefore by itself no statement about what a model hides:
+    what a program says depends on the reading it certifies at as much as on
+    the property it certifies, and this is the reading at which it says
+    nothing. *)
+Definition exact_witness_cst_reading (secretT : finType)
+    (secret : {RV (sa_sampleP sa) -> secretT})
+  : ExactWitness sa coalition_reading_cst_unit :=
+  @MkExactWitness R A E sa coalition_reading_cst_unit secretT secret
+    (fun C _ =>
+       proj1 (@inde_RV_sym R (sa_sampleT sa) (sa_sampleP sa) secretT
+                (unit : finType) secret (fun=> tt))
+         (@inde_RV_cst R (sa_sampleT sa) (sa_sampleP sa) secretT
+            (unit : finType) secret tt)).
 
 (** The proximity certificate over an arbitrary model: its ideal is that
     model itself, its ideal secret is the constant true, its own secret the
@@ -328,8 +369,9 @@ Definition exact_witness_cst_true : ExactWitness sa :=
     execution parameters and an arbitrary sample adapter, so ideal-proximity
     evidence exists over a model about which nothing is known. *)
 Definition idealproximity_cert_cst_secrets_true_false
-  : IdealProximityCert sa :=
-  @MkIdealProximityCert R A E sa sa exact_witness_cst_true
+  : IdealProximityCert sa (coalition_endpoint_reading A) :=
+  @MkIdealProximityCert R A E sa (coalition_endpoint_reading A) sa
+    exact_witness_cst_true
     ((fun=> false) : {RV (sa_sampleP sa) -> bool}) 2%:R
     (fun C _ => var_dist_le2 _ _).
 
@@ -371,7 +413,8 @@ Qed.
     computes. *)
 Lemma idealproximity_prop_lt2_uniform_in_cert_false (c : R) :
   c < 2%:R ->
-  ~ (forall cert : IdealProximityCert sa, IdealProximityPropAt cert c).
+  ~ (forall cert : IdealProximityCert sa (coalition_endpoint_reading A),
+       IdealProximityPropAt cert c).
 Proof.
 move=> Hc H.
 exact: (idealproximity_prop_cst_secrets_lt2_false Hc
@@ -385,10 +428,12 @@ Qed.
     fails is not its strength but the quantifier over certificates in the
     conclusion. *)
 Lemma indistinguishability_prop_idealproximity_lt2_false
-    (ic : IndistinguishabilityCert sa) (c : R) :
+    (ic : IndistinguishabilityCert sa (coalition_endpoint_reading A))
+    (c : R) :
   c < 2%:R ->
   ~ (IndistinguishabilityPropAt ic (cert_eps ic) ->
-     forall cert : IdealProximityCert sa, IdealProximityPropAt cert c).
+     forall cert : IdealProximityCert sa (coalition_endpoint_reading A),
+       IdealProximityPropAt cert c).
 Proof.
 move=> Hc Himp.
 exact: (idealproximity_prop_lt2_uniform_in_cert_false Hc
@@ -414,7 +459,7 @@ Hypothesis Harg : forall u : sa_sampleT sa,
 Hypothesis Hprod :
   fdistmap (fun u => (arg_read u, sa.(sa_cut) u)) (sa_sampleP sa)
   = (fdistmap arg_read (sa_sampleP sa)) `x (sa_cut_dist sa).
-Variable ic : IndistinguishabilityCert sa.
+Variable ic : IndistinguishabilityCert sa (coalition_endpoint_reading A).
 
 (** The ideal model: the same execution run on a sample space that draws the
     run argument from the actual model's own law of arg_read and the cut
@@ -448,7 +493,7 @@ exact: (@fdistmap_pair_fst_prodE R argT _ _
   (fdistmap arg_read (sa_sampleP sa)) (ic_ideal ic)
   (fun (x : argT) (g : pgg_gT (mp_M (instance_profile A))) =>
      static_coalition_obs C (arg_decode x) g)
-  (fun x x' => @ic_const _ _ _ _ ic C HC (arg_decode x) (arg_decode x'))).
+  (fun x x' => @ic_const _ _ _ _ _ ic C HC (arg_decode x) (arg_decode x'))).
 Qed.
 
 (** The same fact in the form an exact witness asks for: below the threshold
@@ -488,8 +533,9 @@ Qed.
     argument. The ideal-proximity proposition compares an actual joint law
     with a product of two marginals, and this independence is what makes
     that product the ideal's own joint law. *)
-Definition exact_witness_ideal_prod : ExactWitness ideal_prod_adapter :=
-  @MkExactWitness R A E ideal_prod_adapter argT
+Definition exact_witness_ideal_prod
+  : ExactWitness ideal_prod_adapter (coalition_endpoint_reading A) :=
+  @MkExactWitness R A E ideal_prod_adapter (coalition_endpoint_reading A) argT
     ((fun z => z.1) : {RV (sa_sampleP ideal_prod_adapter) -> argT})
     ideal_prod_reading_indep_arg.
 
@@ -565,8 +611,9 @@ Qed.
     argument, its own secret the actual model's run argument, and its number
     the marginal-bound epsilon once, where cert_eps is that epsilon twice. *)
 Definition idealproximity_cert_of_indistinguishability
-  : IdealProximityCert sa :=
-  @MkIdealProximityCert R A E sa ideal_prod_adapter exact_witness_ideal_prod
+  : IdealProximityCert sa (coalition_endpoint_reading A) :=
+  @MkIdealProximityCert R A E sa (coalition_endpoint_reading A)
+    ideal_prod_adapter exact_witness_ideal_prod
     (arg_read : {RV (sa_sampleP sa) -> argT}) (sw_bound_eps (ic_b ic))
     idealproximity_close_of_indistinguishability.
 

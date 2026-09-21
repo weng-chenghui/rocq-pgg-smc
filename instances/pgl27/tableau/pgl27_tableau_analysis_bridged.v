@@ -293,9 +293,11 @@ Proof. by apply: boolp.funext; case=> s g; exact: pgl27_static_obsE. Qed.
     field, so the witness is all that certifying exact independence requires of
     this instance. *)
 Definition pgl27_exact_witness (R : realType) (idx : unit)
-  : ExactWitness (amf_sample pgl27_exact_family R idx) :=
+  : ExactWitness (amf_sample pgl27_exact_family R idx)
+      (coalition_endpoint_reading pgl27_algebra) :=
   @MkExactWitness R pgl27_algebra pgl27_dealt_params
-    (amf_sample pgl27_exact_family R idx) bool (pgl27_secret R)
+    (amf_sample pgl27_exact_family R idx)
+    (coalition_endpoint_reading pgl27_algebra) bool (pgl27_secret R)
     (fun C HC =>
        let H3 : (#|C| <= 3)%N := HC in
        (eq_ind_r
@@ -357,9 +359,11 @@ Qed.
     the ideal cut is exact and three-transitive, and the only statistical
     quantity anywhere in this program is the walk's 2^-40. *)
 Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
-  : IndistinguishabilityCert (amf_sample pgl27_word_family R secretP) :=
+  : IndistinguishabilityCert (amf_sample pgl27_word_family R secretP)
+      (coalition_endpoint_reading pgl27_algebra) :=
   @MkIndistinguishabilityCert R pgl27_algebra pgl27_dealt_params
     (amf_sample pgl27_word_family R secretP)
+    (coalition_endpoint_reading pgl27_algebra)
     (pgl27_word_marginal_bound R)
     (esym (pgl27_word_cut_distE secretP))
     (`U pgl27_G_pos : R.-fdist (pgg_gT pgl27_M))
@@ -779,9 +783,11 @@ Proof. by apply: boolp.funext; case=> s g; exact: pgl27_static_obsE. Qed.
     amount, so this model is an execution a proximity certificate may call
     ideal. *)
 Definition pgl27_prior_exact_witness (R : realType) (secretP : R.-fdist bool)
-  : ExactWitness (amf_sample pgl27_prior_exact_family R secretP) :=
+  : ExactWitness (amf_sample pgl27_prior_exact_family R secretP)
+      (coalition_endpoint_reading pgl27_algebra) :=
   @MkExactWitness R pgl27_algebra pgl27_dealt_params
-    (amf_sample pgl27_prior_exact_family R secretP) bool (pgl27_secret R)
+    (amf_sample pgl27_prior_exact_family R secretP)
+    (coalition_endpoint_reading pgl27_algebra) bool (pgl27_secret R)
     (fun C HC =>
        let H3 : (#|C| <= 3)%N := HC in
        (eq_ind_r
@@ -849,9 +855,11 @@ Proof. exact: erefl. Qed.
     already publishes, and the secret is the word model's own first projection,
     typed at the carrier that witness names. *)
 Definition pgl27_word_proximity_cert (R : realType) (secretP : R.-fdist bool)
-  : IdealProximityCert (amf_sample pgl27_word_family R secretP) :=
+  : IdealProximityCert (amf_sample pgl27_word_family R secretP)
+      (coalition_endpoint_reading pgl27_algebra) :=
   @MkIdealProximityCert R pgl27_algebra pgl27_dealt_params
     (amf_sample pgl27_word_family R secretP)
+    (coalition_endpoint_reading pgl27_algebra)
     (amf_sample pgl27_prior_exact_family R secretP)
     (pgl27_prior_exact_witness secretP)
     (pgl27_word_secret secretP)
@@ -1054,11 +1062,19 @@ Proof. exact: erefl. Qed.
     asserts has no witness. The obstruction that
     psl211_alldecks_obstruction_published carries is therefore a statement
     about the twelve-card chirality model and not a proposition every model
-    satisfies. *)
+    satisfies.
+
+    The reading named is the coalition's own endpoints, the finest, and the
+    statement covers every reading because of that: by
+    input_distinguishability_prop_coalition_endpoint_reading an obstruction
+    at any reading of this model is an obstruction at the endpoint reading
+    at the same number, so refuting the proposition here refutes it
+    everywhere. Nothing is left open at a coarser reading. *)
 Theorem pgl27_word_input_distinguishability_false (R : realType)
     (secretP : R.-fdist bool) (c : R) :
   2%:R^-39 < c ->
-  InputDistinguishabilityPropAt (amf_sample pgl27_word_family R secretP) c ->
+  InputDistinguishabilityPropAt (amf_sample pgl27_word_family R secretP)
+    (coalition_endpoint_reading pgl27_algebra) c ->
   False.
 Proof.
 move=> Hc Hd.

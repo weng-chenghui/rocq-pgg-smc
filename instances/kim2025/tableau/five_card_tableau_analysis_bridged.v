@@ -499,9 +499,11 @@ Qed.
     witness is all that certifying exact independence requires of this
     instance. *)
 Definition five_card_exact_witness (R : realType) (idx : unit)
-  : ExactWitness (amf_sample five_card_uniform_family R idx) :=
+  : ExactWitness (amf_sample five_card_uniform_family R idx)
+      (coalition_endpoint_reading five_card_algebra) :=
   @MkExactWitness R five_card_algebra five_card_params
-    (amf_sample five_card_uniform_family R idx) bool (Secret R)
+    (amf_sample five_card_uniform_family R idx)
+    (coalition_endpoint_reading five_card_algebra) bool (Secret R)
     (@five_card_static_obs_indep R idx).
 
 
@@ -625,9 +627,11 @@ Qed.
     only inexact quantity in the program is the bundle's spectral number; the
     ideal cut and the constancy field are exact. *)
 Definition kim_centi_cert (R : realType) (idx : unit)
-  : IndistinguishabilityCert (amf_sample kim_centi_family R idx) :=
+  : IndistinguishabilityCert (amf_sample kim_centi_family R idx)
+      (coalition_endpoint_reading five_card_algebra) :=
   @MkIndistinguishabilityCert R five_card_algebra five_card_params
     (amf_sample kim_centi_family R idx)
+    (coalition_endpoint_reading five_card_algebra)
     (scb_bound (kim_security_bundle_centi R))
     (esym (kim_centi_cut_distE R))
     (sa_cut_dist (five_card_sample R))
@@ -640,9 +644,11 @@ Definition kim_centi_cert (R : realType) (idx : unit)
     the same two terms as in the repeated certified program's certificate, so
     the two programs differ only in the shuffle and its number. *)
 Definition kim_biased_cert (R : realType) (idx : unit)
-  : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
+  : IndistinguishabilityCert (amf_sample kim_biased_family R idx)
+      (coalition_endpoint_reading five_card_algebra) :=
   @MkIndistinguishabilityCert R five_card_algebra five_card_params
     (amf_sample kim_biased_family R idx)
+    (coalition_endpoint_reading five_card_algebra)
     (kim_biased_marginal_bound R)
     (kim_biased_sample_cut_witnessE R)
     (sa_cut_dist (five_card_sample R))
@@ -892,9 +898,11 @@ Proof. exact: erefl. Qed.
 
 (** The one-cut program's certificate at the exact number one fiftieth. *)
 Definition kim_biased_cert_exact (R : realType) (idx : unit)
-  : IndistinguishabilityCert (amf_sample kim_biased_family R idx) :=
+  : IndistinguishabilityCert (amf_sample kim_biased_family R idx)
+      (coalition_endpoint_reading five_card_algebra) :=
   @MkIndistinguishabilityCert R five_card_algebra five_card_params
     (amf_sample kim_biased_family R idx)
+    (coalition_endpoint_reading five_card_algebra)
     (kim_biased_marginal_bound_exact R)
     (kim_biased_sample_cut_witnessE R)
     (sa_cut_dist (five_card_sample R))
@@ -983,9 +991,11 @@ Proof. by lra. Qed.
     five_card_proximity.v, which says the distance between the two joint
     laws is at most that number. *)
 Definition kim_biased_proximity_cert (R : realType) (idx : unit)
-  : IdealProximityCert (amf_sample kim_biased_family R idx) :=
+  : IdealProximityCert (amf_sample kim_biased_family R idx)
+      (coalition_endpoint_reading five_card_algebra) :=
   @MkIdealProximityCert R five_card_algebra five_card_params
     (amf_sample kim_biased_family R idx)
+    (coalition_endpoint_reading five_card_algebra)
     (amf_sample five_card_uniform_family R idx)
     (five_card_exact_witness R idx)
     (five_card_leakage.Secret R)

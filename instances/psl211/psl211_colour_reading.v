@@ -24,10 +24,14 @@
 (* positions. A proposition stated at a reading therefore has an instance     *)
 (* here that is not the framework's own reading under a second name.          *)
 (*                                                                            *)
-(* The dealer-dealt parameters carry no endpoints statement, so there is no   *)
-(* Observed and no Sampled level over them, no program and no path. Every     *)
-(* statement below is about the model's law and the static reading, and none  *)
-(* is about an executed run.                                                  *)
+(* The dealer-dealt parameters read their endpoints through                   *)
+(* profile_endpointsE, as instances/psl211/psl211_endpoints.v states, so      *)
+(* psl211_models.v carries an endpoints statement and an observed execution   *)
+(* for them and instances/psl211/tableau/psl211_tableau_dealt.v carries the   *)
+(* Sampled level and the two programs over them. Every statement in this      *)
+(* file is about the model's law and a reading of a coalition's endpoints,    *)
+(* and the identification of that reading with the executed one is the link   *)
+(* lemma the Sampled level of that file proves.                               *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_dealt_sample       == the fixed-dealer colour model as a sample   *)
@@ -51,7 +55,7 @@
 (*                                value at that sample point                  *)
 (*   psl211_colour_reading_funE                                               *)
 (*                             == the same with the sample point left free    *)
-(*   psl211_colour_reading_factorsE                                           *)
+(*   psl211_colour_of_reading_obsE                                           *)
 (*                             == the colour reading is the colour map of     *)
 (*                                the card-identity reading                   *)
 (*   psl211_colour_indistinguishability_of_coalition_reading                  *)
@@ -90,7 +94,7 @@ From pgg_reconstruct Require Import transitivity_privacy design_privacy.
 From pgg_smc Require Import psl211_group psl211_orbit psl211_scheme.
 From pgg_smc Require Import psl211_profile psl211_exec psl211_secrecy.
 From pgg_smc Require Import psl211_models psl211_reading_constancy.
-From pgg_smc Require Import pgg_tableau_reading.
+From pgg_smc Require Import pgg_tableau pgg_tableau_reading.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -130,9 +134,11 @@ Proof. by []. Qed.
     a cut, the bit from the prior and the cut uniform on PSL(2,11), the two
     independent; the run argument is the bit and the cut is the shuffle. The
     run argument of these parameters is the chirality itself, and the
-    chirality is what the colour view reads. The dealer-dealt parameters carry
-    no endpoints statement, so every statement made over this adapter is about
-    the model's law and the static reading, and not about an executed run. *)
+    chirality is what the colour view reads. Every statement made over this
+    adapter is about the model's law and a reading of a coalition's
+    endpoints; the Sampled level built over these parameters in
+    instances/psl211/tableau/psl211_tableau_dealt.v is what identifies that
+    reading with the executed one. *)
 Definition psl211_dealt_sample (R : realType) (secretP : R.-fdist bool)
   : SampleAdapter R (instance_exec psl211_dealt_params) :=
   @MkSampleAdapter R (instance_profile psl211_algebra)
@@ -189,76 +195,39 @@ Qed.
     the position, and each position outside the coalition to false. It is
     what a coalition sees when it can tell the colour at each of its
     positions and not which card of that colour lies there. *)
-Definition psl211_colour_reading : StaticReading psl211_dealt_params :=
-  @MkStaticReading psl211_algebra psl211_dealt_params
-    (fun _ => [the finType of {ffun seats -> bool}])
-    (fun (C : {set seats}) (b : ex_inputT psl211_dealt_params) (g : cutT) =>
-       [ffun i => if i \in C
-                  then psl211_is_heart
-                         (tnth (psl211_orbit_encode b) (@pgg_rho psl211_M g i))
-                  else false]).
-
-(** psl211_colour_readingE — the model's colour view of a sample point is the
-    colour reading's value at that point's run argument and cut. The two
-    sides are the same term: the reading was written at the position index the
-    model uses, so no seat reconciliation enters here. It enters one step
-    later, at psl211_colour_reading_factorsE, where the framework's own
-    reading indexes through pi_starts. *)
-Lemma psl211_colour_readingE (R : realType) (secretP : R.-fdist bool)
-    (C : {set seats}) (u : bool * pgg_gT psl211_M) :
-  psl211_colour_view secretP C u
-  = sr_read psl211_colour_reading C
-      ((psl211_dealt_sample secretP).(sa_arg) u)
-      ((psl211_dealt_sample secretP).(sa_cut) u).
-Proof.
-by apply/ffunP => i; rewrite /psl211_colour_view /colour_view !ffunE.
-Qed.
-
-(** psl211_colour_reading_funE — the same identification with the sample point
-    left free. A proposition stated at a reading pushes the reading forward
-    along the model's law, so it needs the reading as one function and not as
-    its values. *)
-Lemma psl211_colour_reading_funE (R : realType) (secretP : R.-fdist bool)
-    (C : {set seats}) :
-  psl211_colour_view secretP C
-  = (fun u => sr_read psl211_colour_reading C
-                ((psl211_dealt_sample secretP).(sa_arg) u)
-                ((psl211_dealt_sample secretP).(sa_cut) u)).
-Proof. by apply: boolp.funext => u; exact: psl211_colour_readingE. Qed.
-
-
-(******************************************************************************)
-(*     The colour reading is the colour map of the card-identity reading      *)
-(******************************************************************************)
-
-(** psl211_colour_of_reading — the colour map on readings: keep the colour of
-    the card each position of the coalition reads and discard its identity,
-    and return false outside the coalition. It is a function of the coalition
-    as well as of the reading, because a coalition's static reading returns
-    card zero outside the coalition and card zero is a heart. *)
 Definition psl211_colour_of_reading (C : {set seats})
     (v : {ffun seats -> cards}) : {ffun seats -> bool} :=
   [ffun i => if i \in C then psl211_is_heart (v i) else false].
 
-(** psl211_colour_reading_factorsE — the colour reading is the colour map
-    applied to the coalition's card-identity reading, at every coalition,
-    every run argument and every cut. This is the factorisation hypothesis of
-    the post-processing law of a proposition at a reading, in the direction
-    that holds: card identities determine colours. The converse direction is
-    refuted by psl211_colour_of_reading_collides. *)
-Lemma psl211_colour_reading_factorsE (C : {set seats})
+(** psl211_colour_reading — the colour a coalition sees at each of its
+    positions, as a reading of that coalition's endpoints: keep the colour of
+    the card each position holds and discard its identity, and return false
+    outside the coalition.  It is a function of the endpoints alone, which is
+    what makes the colour view a reading of this record and not a second
+    kind of thing; the identification with the model's colour view is
+    psl211_colour_readingE below.  It is a function of the coalition as well
+    as of the endpoint map, because a coalition's endpoints give card zero
+    outside the coalition and card zero is a heart. *)
+Definition psl211_colour_reading : CoalitionReading psl211_algebra :=
+  @MkCoalitionReading psl211_algebra
+    (fun _ => [the finType of {ffun seats -> bool}])
+    psl211_colour_of_reading.
+
+(** psl211_colour_of_reading_obsE — reading a coalition's endpoints through
+    the colour map gives each position of the coalition the colour of the
+    card the encoder deck of that chirality puts at the cut image of the
+    position. It is where the instance's seat reconciliation enters: the
+    framework's endpoint map indexes through pi_starts and the colour pattern
+    does not. *)
+Lemma psl211_colour_of_reading_obsE (C : {set seats})
     (b : ex_inputT psl211_dealt_params) (g : cutT) :
-  sr_read psl211_colour_reading C b g
-  = psl211_colour_of_reading C
-      (sr_read (static_coalition_reading psl211_dealt_params) C b g).
+  psl211_colour_of_reading C
+    (@static_coalition_obs psl211_algebra psl211_dealt_params C b g)
+  = [ffun i => if i \in C
+               then psl211_is_heart
+                      (tnth (psl211_orbit_encode b) (@pgg_rho psl211_M g i))
+               else false].
 Proof.
-(* the value of a coalition's static reading is the framework's reading by one
-   iota step, and the instance's reconciliation lemma needs it under that
-   name; each ffunE is fired once and at a named side, an unscoped repeat
-   rewriting the framework's reading open before the reconciliation can see
-   it *)
-have -> : sr_read (static_coalition_reading psl211_dealt_params) C b g
-        = @static_coalition_obs psl211_algebra psl211_dealt_params C b g by [].
 apply/ffunP => i.
 have HR : psl211_colour_of_reading C
             (@static_coalition_obs psl211_algebra psl211_dealt_params C b g) i
@@ -273,11 +242,46 @@ have HR : psl211_colour_of_reading C
 by rewrite HR ffunE.
 Qed.
 
+(** psl211_colour_readingE — the model's colour view of a sample point is what
+    the colour reading grants the coalition of that point's endpoints. It is
+    where the instance's seat reconciliation is spent: the colour view is
+    written at the position index the model uses and a coalition's endpoints
+    index through pi_starts, and psl211_colour_of_reading_obsE is what
+    identifies the two. *)
+Lemma psl211_colour_readingE (R : realType) (secretP : R.-fdist bool)
+    (C : {set seats}) (u : bool * pgg_gT psl211_M) :
+  psl211_colour_view secretP C u
+  = cr_read psl211_colour_reading C
+      (static_coalition_obs C ((psl211_dealt_sample secretP).(sa_arg) u)
+         ((psl211_dealt_sample secretP).(sa_cut) u)).
+Proof.
+rewrite /cr_read /psl211_colour_reading psl211_colour_of_reading_obsE.
+by apply/ffunP => i; rewrite /psl211_colour_view /colour_view !ffunE.
+Qed.
+
+(** psl211_colour_reading_funE — the same identification with the sample point
+    left free. A proposition stated at a reading pushes the reading forward
+    along the model's law, so it needs the reading as one function and not as
+    its values. *)
+Lemma psl211_colour_reading_funE (R : realType) (secretP : R.-fdist bool)
+    (C : {set seats}) :
+  psl211_colour_view secretP C
+  = (fun u => cr_read psl211_colour_reading C
+                (static_coalition_obs C
+                   ((psl211_dealt_sample secretP).(sa_arg) u)
+                   ((psl211_dealt_sample secretP).(sa_cut) u))).
+Proof. by apply: boolp.funext => u; exact: psl211_colour_readingE. Qed.
+
+
+(******************************************************************************)
+(*     What travels from the endpoint reading to the colour reading           *)
+(******************************************************************************)
+
 (** psl211_colour_indistinguishability_of_coalition_reading — the framework's
     post-processing law discharged at this pair of readings: an
     input-indistinguishability proposition at the coalition's card-identity
     reading gives the same number at the colour reading. The factorisation it
-    consumes is psl211_colour_reading_factorsE, whose map is not injective, so
+    consumes is psl211_colour_of_reading_obsE, whose map is not injective, so
     this is the data processing inequality applied at a genuine coarsening and
     not at a renaming. It transports a bound and produces none. At zero the
     card-identity reading has no such proposition over this adapter, by
@@ -287,21 +291,22 @@ Qed.
 Lemma psl211_colour_indistinguishability_of_coalition_reading (R : realType)
     (secretP : R.-fdist bool) (c : R) :
   ReadingIndistinguishabilityPropAt (psl211_dealt_sample secretP)
-    (static_coalition_reading psl211_dealt_params) c ->
+    (coalition_endpoint_reading psl211_algebra) c ->
   ReadingIndistinguishabilityPropAt (psl211_dealt_sample secretP)
     psl211_colour_reading c.
 Proof.
 (* the reading arguments and the factorisation are positional on the
    framework's law, only its carrier arguments being implicit *)
 exact: (reading_indistinguishability_postprocessing
-          (static_coalition_reading psl211_dealt_params) psl211_colour_reading
-          psl211_colour_of_reading psl211_colour_reading_factorsE c).
+          (coalition_endpoint_reading psl211_algebra) psl211_colour_reading
+          psl211_colour_of_reading
+          (fun C v => erefl) c).
 Qed.
 
 (** psl211_colour_of_reading_collides — two finite maps that give a position
     of the coalition two different hearts have the same colour value, so the
     colour map is not injective and the identity of
-    psl211_colour_reading_factorsE is a factorisation in one direction only.
+    psl211_colour_of_reading_obsE is a factorisation in one direction only.
     That the two readings themselves differ is not this lemma's content; it is
     psl211_dealt_reading_indep_false. *)
 Lemma psl211_colour_of_reading_collides (C : {set seats}) (i0 : seats) :
@@ -329,9 +334,10 @@ Qed.
     adapter. The thresholds meet on the nose, the instance's counting argument
     reaching five of the twelve positions and the derived profile declaring
     six. The statement is an independence and not a numeric bound, and no
-    entropy form of the framework is restated at it. The dealer-dealt
-    parameters carry no endpoints statement, so this is a statement about the
-    model's law and the static reading, and not about an executed run. *)
+    entropy form of the framework is restated at it. It is stated of the
+    model's law and the colour reading of a coalition's endpoints; the
+    program of instances/psl211/tableau/psl211_tableau_dealt.v carries it to
+    the executed run along the link lemma of the Sampled level. *)
 Lemma psl211_colour_reading_indep (R : realType) (secretP : R.-fdist bool) :
   ReadingExactIndependence (psl211_dealt_sample secretP) psl211_colour_reading
     (psl211_secret secretP).
@@ -365,9 +371,11 @@ Lemma psl211_colour_reading_dep_k6 (R : realType) (secretP : R.-fdist bool) :
   secretP true != 0 -> secretP false != 0 ->
   (#|psl211_leak_coalition| = profile_k (instance_profile psl211_algebra))%N /\
   ~ sa_sampleP (psl211_dealt_sample secretP)
-      |= (fun u => sr_read psl211_colour_reading psl211_leak_coalition
-                     ((psl211_dealt_sample secretP).(sa_arg) u)
-                     ((psl211_dealt_sample secretP).(sa_cut) u))
+      |= (fun u => cr_read psl211_colour_reading psl211_leak_coalition
+                     (@static_coalition_obs psl211_algebra
+                        psl211_dealt_params psl211_leak_coalition
+                        ((psl211_dealt_sample secretP).(sa_arg) u)
+                        ((psl211_dealt_sample secretP).(sa_cut) u)))
          _|_ psl211_secret secretP.
 Proof.
 move=> Ht Hf; have [Hcard Hdep] := psl211_colour_view_dep_k6 secretP Ht Hf.
@@ -395,10 +403,12 @@ Definition psl211_dealt_perdeck_reading (R : realType) (secretP : R.-fdist bool)
     coordinates. One iota step of the reading record and two of the adapter
     record. *)
 Lemma psl211_dealt_perdeck_readingE (R : realType) (secretP : R.-fdist bool) :
-  (fun u => sr_read (static_coalition_reading psl211_dealt_params)
+  (fun u => @cr_read psl211_algebra
+              (coalition_endpoint_reading psl211_algebra)
               psl211_perdeck_coalition
-              ((psl211_dealt_sample secretP).(sa_arg) u)
-              ((psl211_dealt_sample secretP).(sa_cut) u))
+              (static_coalition_obs psl211_perdeck_coalition
+                 ((psl211_dealt_sample secretP).(sa_arg) u)
+                 ((psl211_dealt_sample secretP).(sa_cut) u)))
   = psl211_dealt_perdeck_reading secretP.
 Proof. by []. Qed.
 
@@ -417,14 +427,14 @@ Proof. by []. Qed.
     form of psl211_dealt_constancy_false of
     instances/psl211/psl211_reading_constancy.v: the same coalition, the same
     fibers and the same two counts, a mass equality there and an independence
-    here. The dealer-dealt parameters carry no endpoints statement, so this is
-    a statement about the model's law and the static reading, and not about an
-    executed run. *)
+    here. It is stated of the model's law and the coalition's own endpoint
+    reading, and it is why exact independence at the colour reading does not
+    carry back to the endpoint reading. *)
 Lemma psl211_dealt_reading_indep_false (R : realType)
     (secretP : R.-fdist bool) :
   secretP true != 0 -> secretP false != 0 ->
   ~ ReadingExactIndependence (psl211_dealt_sample secretP)
-      (static_coalition_reading psl211_dealt_params) (psl211_secret secretP).
+      (coalition_endpoint_reading psl211_algebra) (psl211_secret secretP).
 Proof.
 move=> Ht Hf Hind.
 have Hmass (b : bool) (g : pgg_gT psl211_M) :

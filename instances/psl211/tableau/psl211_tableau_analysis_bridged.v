@@ -182,9 +182,12 @@ Local Notation cardT :=
     this one field, so the witness is all that certifying exact independence
     requires of this instance. *)
 Definition psl211_exact_witness (R : realType) (idx : unit)
-  : ExactWitness (amf_sample psl211_exact_family R idx) :=
+  : ExactWitness (amf_sample psl211_exact_family R idx)
+      (coalition_endpoint_reading psl211_algebra) :=
   @MkExactWitness R psl211_algebra psl211_alldecks_params
-    (amf_sample psl211_exact_family R idx) bool (psl211_alldecks_secret R)
+    (amf_sample psl211_exact_family R idx)
+    (coalition_endpoint_reading psl211_algebra) bool
+    (psl211_alldecks_secret R)
     (fun C HC =>
        let H5 : (#|C| <= 5)%N := HC in
        (eq_ind_r
@@ -290,9 +293,11 @@ Proof. exact: (view_secrecy_of psl211_alldecks_published R tt C HC). Qed.
     its witness and the secret are terms the all-decks program publishes, and
     the number is this certificate's own. *)
 Definition psl211_word_proximity_cert (R : realType) (idx : unit)
-  : IdealProximityCert (amf_sample psl211_word_family R idx) :=
+  : IdealProximityCert (amf_sample psl211_word_family R idx)
+      (coalition_endpoint_reading psl211_algebra) :=
   @MkIdealProximityCert R psl211_algebra psl211_alldecks_params
     (amf_sample psl211_word_family R idx)
+    (coalition_endpoint_reading psl211_algebra)
     (amf_sample psl211_exact_family R idx)
     (psl211_exact_witness R idx)
     (psl211_alldecks_secret R)
@@ -477,6 +482,7 @@ Definition psl211_alldecks_obstruction
   fun (R : realType) (idx : unit) =>
     @InputDistinguishabilityObstruction R psl211_algebra
       psl211_alldecks_params (amf_sample psl211_exact_family R idx)
+      (coalition_endpoint_reading psl211_algebra)
       ((#|pgg_G psl211_M|%:R)^-1).
 
 (** psl211_alldecks_obstruction_gt0 — the number the obstruction carries is
@@ -564,6 +570,7 @@ Proof. exact: erefl. Qed.
     comparison. The published value and this statement are one theorem. *)
 Theorem psl211_alldecks_published_input_distinguishability (R : realType) :
   InputDistinguishabilityPropAt (amf_sample psl211_exact_family R tt)
+    (coalition_endpoint_reading psl211_algebra)
     ((#|pgg_G psl211_M|%:R)^-1).
 Proof.
 exact: (proj2 (obstruction_of psl211_alldecks_obstruction_published R tt)).

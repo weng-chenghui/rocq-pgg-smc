@@ -229,9 +229,11 @@ Fail Definition pgl27_word_property_is_not_exact (R : realType)
     refuses it there is the distance field, which the guard below records. *)
 Fail Definition pgl27_word_proximity_cert_unit_ideal (R : realType)
     (secretP : R.-fdist bool)
-  : IdealProximityCert (amf_sample pgl27_word_family R secretP) :=
+  : IdealProximityCert (amf_sample pgl27_word_family R secretP)
+      (coalition_endpoint_reading pgl27_algebra) :=
   @MkIdealProximityCert R pgl27_algebra pgl27_dealt_params
     (amf_sample pgl27_word_family R secretP)
+    (coalition_endpoint_reading pgl27_algebra)
     (amf_sample pgl27_exact_family R secretP)
     (@pgl27_exact_witness R secretP)
     (pgl27_word_secret secretP)
@@ -252,9 +254,11 @@ Fail Definition pgl27_word_proximity_cert_unit_ideal (R : realType)
     nothing is claimed. *)
 Fail Definition pgl27_word_proximity_cert_uniform_ideal (R : realType)
     (secretP : R.-fdist bool)
-  : IdealProximityCert (amf_sample pgl27_word_family R secretP) :=
+  : IdealProximityCert (amf_sample pgl27_word_family R secretP)
+      (coalition_endpoint_reading pgl27_algebra) :=
   @MkIdealProximityCert R pgl27_algebra pgl27_dealt_params
     (amf_sample pgl27_word_family R secretP)
+    (coalition_endpoint_reading pgl27_algebra)
     (amf_sample pgl27_exact_family R tt)
     (@pgl27_exact_witness R tt)
     (pgl27_word_secret secretP)

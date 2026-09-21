@@ -254,4 +254,5 @@ instances/psl211/tableau/psl211_tableau_observed.v
 instances/psl211/tableau/psl211_tableau_sampled.v
 instances/psl211/tableau/psl211_tableau_analysis_bridged.v
 instances/psl211/tableau/psl211_tableau_checks.v
+instances/psl211/tableau/psl211_tableau_dealt.v
 manifest/pgg_analysis_client.v
