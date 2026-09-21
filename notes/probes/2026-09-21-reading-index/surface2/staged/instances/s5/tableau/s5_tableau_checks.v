@@ -1,22 +1,15 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* s5_tableau_checks: the terms refused at the five-seat instance             *)
+(* s5_tableau_checks: the terms the kernel refuses at the five-seat instance  *)
 (*                                                                            *)
-(* Each entry below is one written term the development refuses, recorded so  *)
-(* that the refusal is compiled rather than described. A recorded refusal     *)
+(* Each entry below is one written term that the kernel rejects, recorded so  *)
+(* that the rejection is compiled rather than described. A recorded rejection *)
 (* says what it says about the one term written under it and about no other   *)
-(* term: it fixes a spelling the development does not accept, and states no   *)
-(* general impossibility. The file declares nothing and nothing depends on    *)
-(* it.                                                                        *)
+(* term: it fixes a spelling that does not typecheck, and states no general   *)
+(* impossibility. The file declares nothing and nothing depends on it.        *)
 (*                                                                            *)
-(* A term the kernel refuses stands under a Fail and is compiled here. A term *)
-(* the parser refuses cannot stand under one: the error is raised while the   *)
-(* sentence is read, so the Fail never runs and a file holding the term does  *)
-(* not compile. Such an entry writes the term inside its comment and quotes   *)
-(* the message, and the term is compiled once on its own under notes/probes.  *)
-(*                                                                            *)
-(* Five boundaries are recorded. The first is that a probability model        *)
+(* Three boundaries are recorded. The first is that a probability model       *)
 (* belongs to one run: a model is typed over the observed execution it was    *)
 (* built over, so the tape model samples the supplied run and the same        *)
 (* statement at the dealer-dealt run is refused. The two modes of the sharing *)
@@ -27,11 +20,7 @@
 (* that the readers of a security property do not apply to the dealer-dealt   *)
 (* program's published value, which is a PublishedObserved and not a          *)
 (* Published, and that the path built for that value records the assumption   *)
-(* status it was published under. The fourth and the fifth are two spellings  *)
-(* of the statement surface that the parser refuses, both of them             *)
-(* perturbations of s5_rand_published: a certify statement whose evidence is  *)
-(* written with no by, and a publish terminal whose assumption status is      *)
-(* written with no assuming.                                                  *)
+(* status it was published under.                                             *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq.
@@ -110,42 +99,3 @@ Fail Definition s5_dealt_observed_published_baseline_pathE :
   published_observed_path
     (s5_dealt |> publish Observed assuming BaselineClassicalOnly)
   = s5_det_path := erefl.
-
-
-(******************************************************************************)
-(*     Spellings of the surface the parser refuses                            *)
-(******************************************************************************)
-
-(* The evidence of a certify statement stands after by, so the bare spelling
-   has no parse: the term ends at the Sampled value, and the sentence has
-   no closing full stop where one is expected. The perturbed program is
-   s5_rand_published with by taken out and nothing else changed,
-
-     s5_rand_sampled
-       certify ExactIndependence s5_rand_exact_witness
-       |> publish StaticExecutedOnly
-          assuming (AcceptsAxioms [:: AxS5GroupOrder]).
-
-   and compiling it gives
-
-     Error: Syntax error: '.' expected after [gallina] (in [vernac_aux]).
-
-   The term is written inside this comment and not under a Fail: the error
-   is raised while the sentence is read, and a Fail around it never runs. *)
-
-(* The assumption status of a publish terminal stands after assuming, so the
-   bare spelling has no parse either, and here the parser names the token it
-   wants. The perturbed program is s5_rand_published with assuming taken out
-   and nothing else changed,
-
-     s5_rand_sampled
-       certify ExactIndependence by s5_rand_exact_witness
-       |> publish StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder]).
-
-   and compiling it gives
-
-     Error: Syntax error: 'assuming' expected after [term level 0] (in
-     [term]).
-
-   The transfer status reaches its slot and the assumption status after it
-   has nowhere to go, which is what the message reports. *)

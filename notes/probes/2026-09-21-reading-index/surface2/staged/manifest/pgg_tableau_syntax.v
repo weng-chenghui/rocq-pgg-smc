@@ -61,94 +61,45 @@
 (* constrains the layout and not the run, and it is what makes the program's  *)
 (* recon clause a bare lemma name.                                            *)
 (*                                                                            *)
-(* The surface reserves twenty identifiers as global keywords in every file   *)
+(* The surface reserves nineteen identifiers as global keywords in every file *)
 (* that requires this one: dealt, functionality, execute, endpoints, recon,   *)
 (* sample, certify, leaks, tied, ideal, mixing, invariant, encoded, supplied, *)
-(* layout, decoded_by, committed_by, expecting, fuel and assuming. A token is *)
-(* reserved in two positions, measured on 2026-09-14 and 2026-09-21: when it  *)
-(* follows a slot in some rule, and when it opens one. Every one of the       *)
-(* twenty follows a slot, and no rule of this file opens with a literal.      *)
-(*                                                                            *)
-(* fuel is among them, measured on 2026-09-14: it follows the literal dealt   *)
-(* in the dealer-dealt rule and would stay an identifier for that rule alone, *)
-(* but it follows a slot in the encoded rule and in the supplied rule.        *)
-(*                                                                            *)
+(* layout, decoded_by, committed_by, expecting and fuel. Each follows a slot  *)
+(* in some rule. Measured on 2026-09-14, fuel is among them: it follows the   *)
+(* literal dealt in the dealer-dealt rule and would stay an identifier for    *)
+(* that rule alone, but it follows a slot in the two rules added beside it.   *)
 (* The tokens inputs, terminates, publish, conclude, vm_compute,              *)
-(* ExactIndependence, InputIndistinguishability, IdealProximity,              *)
-(* InputDistinguishability, Observed, Sampled and Obstruction follow a        *)
+(* ExactIndependence, InputIndistinguishability and IdealProximity follow a   *)
 (* literal and stay identifiers, which is what keeps the three evidence       *)
-(* constructors, the conclude and publish terminals and the two completion    *)
-(* levels usable by name. Observed, Sampled and Obstruction each follow the   *)
-(* literal publish, and InputDistinguishability follows the literal           *)
-(* Obstruction; each stays a binder name and a top-level identifier in a file *)
-(* whose Require lines are ssreflect and this one, measured on 2026-09-21,    *)
-(* and Observed and Sampled each stay the CompletionLevel constructor they    *)
-(* name, as Tableau Observed in s5_tableau_observed.v and Tableau Sampled in  *)
-(* s5_tableau_sampled.v write it. Inside the publish position the three       *)
-(* tokens are taken by their rules, so the transfer-status slot of the        *)
-(* three-payload rule cannot be filled by a bare token spelled Observed,      *)
-(* Sampled or Obstruction, though a parenthesised one reaches the slot.       *)
+(* constructors and the conclude terminal usable by name; at follows a        *)
+(* literal too, the literal leaks in one rule and InputIndistinguishability   *)
+(* in the other, and was a keyword of Rocq before this file. by follows the   *)
+(* slot L of the encoded rule, the slot k of the leaks rule and the slot c of *)
+(* the conclude rule, so it would be a twentieth, and it is not one only      *)
+(* because ssreflect already reserves it, measured on 2026-09-19 by binding   *)
+(* it in a file that requires nothing but ssreflect. Observed and Sampled     *)
+(* follow a literal too, measured on 2026-09-21: each follows the literal     *)
+(* publish in one of the two terminal rules below AnalysisBridged, each stays *)
+(* a binder name in a file whose Require lines are ssreflect and this one,    *)
+(* and each stays the CompletionLevel constructor it names, as Tableau        *)
+(* Observed in s5_tableau_observed.v and Tableau Sampled in                   *)
+(* s5_tableau_sampled.v write it. Obstruction sits in the same position,      *)
+(* measured on 2026-09-21 in the same way: it follows the literal publish in  *)
+(* the terminal rule handing over an obstruction, and it stays a binder name  *)
+(* and a top-level identifier in a file whose Require lines are ssreflect and *)
+(* this one. The count of nineteen is unchanged. Inside the publish position  *)
+(* the three tokens are taken by those three rules, so the transfer-status    *)
+(* slot of the three-payload rule cannot be filled by a bare token spelled    *)
+(* Observed, Sampled or Obstruction, though a parenthesised one reaches the   *)
+(* slot.                                                                      *)
 (*                                                                            *)
-(* at follows a literal in each of the four rules that use it: leaks in the   *)
-(* tightness annotation, InputIndistinguishability in the five-clause rule,   *)
-(* conclude in the number terminal and InputDistinguishability in the         *)
-(* obstruction terminal. It is a keyword of Rocq independently of this file,  *)
-(* a binder named at being refused where the only Require is ssreflect. by    *)
-(* follows the slot L of the encoded rule, the slot k of the leaks clause,    *)
-(* the slot idx of the five-clause rule, the slot c of the number terminal    *)
-(* and the slot c of the obstruction terminal, so it would be a twenty-first, *)
-(* and it is not one only because ssreflect already reserves it, measured on  *)
-(* 2026-09-19 by binding it in a file that requires nothing but ssreflect. by *)
-(* also follows the literal naming the security property in four of the five  *)
-(* certify rules, and the evidence of such a statement is the term after it;  *)
-(* in the fifth the token after the property's name is at and the marginal    *)
-(* bound follows by. of is the word of the bind, following its slot f, and it *)
-(* reserves nothing, being a keyword of Rocq independently of this file as    *)
-(* well, measured on 2026-09-21 in the same way.                              *)
-(*                                                                            *)
-(* assuming, measured on 2026-09-21, follows the slot t of the three-payload  *)
-(* publish rule, the slot t of the Sampled terminal and the slot pf of the    *)
-(* obstruction terminal, and the literal Observed in the fourth rule. In a    *)
-(* file whose Require lines are ssreflect and this one it is refused both as  *)
-(* a binder name and as a top-level identifier, and in a file that does not   *)
-(* require this one both uses are accepted. No declaration of the tree is     *)
-(* named assuming, and the word occurs in the code of this file and of the    *)
-(* eight instance files that write programs in its surface and nowhere else.  *)
-(*                                                                            *)
-(* The surface has two kinds of word. A preposition carries one meaning       *)
-(* throughout: at a number, a size or a real field with its index, by a proof *)
-(* or a piece of evidence, assuming an assumption status, and of the payload  *)
-(* of a bind. A slot name names a thing, and the term that is that thing      *)
-(* follows it, at once or after a preposition: dealt, encoded and supplied    *)
-(* name the mode a run is driven in, inputs the input carrier, layout the     *)
-(* sharing the dealer deals, decoded_by the reader of the committed payload   *)
-(* list, committed_by the commit processes, expecting the value a run         *)
-(* recovers, fuel the number of steps the interpreter is allowed, execute the *)
-(* run statement, terminates, endpoints and recon its three obligations,      *)
-(* sample the model family, certify the security property, leaks the          *)
-(* coalition size of a tightness annotation, tied the equation between the    *)
-(* bound's law and the model's cut law, ideal the ideal cut, mixing the       *)
-(* distance from it, invariant the constancy of a coalition's view,           *)
-(* functionality the ideal function, conclude the number a program publishes, *)
-(* and publish what a program hands over, a transfer status in one rule, a    *)
-(* completion level in two and the published object in the fourth.            *)
-(*                                                                            *)
-(* A leaks annotation attaches to the evidence it follows and not to the      *)
-(* statement around it: the rule wraps the witness written after by, and      *)
-(* gives that witness back, so the annotated statement and the unannotated    *)
-(* one are one term.                                                          *)
-(*                                                                            *)
-(* In the five-clause rule the two terms after at are binders, the real field *)
-(* and the model index, which the rule quantifies each of the five clauses    *)
-(* over. Everywhere else the term after at is a value.                        *)
-(*                                                                            *)
-(* One of the twenty shadows a framework definition: endpoints is also the    *)
+(* One of the nineteen shadows a framework definition: endpoints is also the  *)
 (* verifier's endpoint tuple in pgg_interface.v. A file requiring this        *)
 (* surface must write that one through its module path. No file in the tree   *)
 (* writes it bare. No file requiring the surface writes any of the other      *)
-(* nineteen bare either, and no declaration of this file binds any of the     *)
-(* twenty: the two realisation lemmas bind L and n, dealt_params_stepE binds  *)
-(* x, q and n, and input_distinguishability_obstruction binds q and c.        *)
+(* eighteen bare either, and no declaration of this file binds any of the     *)
+(* nineteen: the two realisation lemmas bind L and n, and dealt_params_stepE  *)
+(* binds x, q and n.                                                          *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   obs_payload  == the three run facts in the shape execute_step wants      *)
@@ -162,9 +113,6 @@
 (*   exact_leaks  == the witness again, with such an annotation checked       *)
 (*   params_step  == the statement raising a program to Executable at given   *)
 (*                   parameters                                               *)
-(*   input_distinguishability_obstruction                                     *)
-(*                == the one obstruction kind at every real field and index   *)
-(*                   of a program's model family, at one number in the field  *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   dealt_params_stepE == the dealer-dealt statement is params_step at the   *)
@@ -442,10 +390,10 @@ Notation "s 'execute' 'terminates' 'by' 'vm_compute' 'endpoints' 'by' e 'recon' 
 Notation "s 'sample' f" := (s ;;; sample_step of f)
   (at level 90, left associativity, f at level 0).
 
-(* Every certify rule introduces its evidence with by, the preposition a
-   terminal introduces a proof with. The term after by is what the statement
-   rests on, and the security property's name is a literal of the rule and
-   not a function that term is an argument of. *)
+(* Every certify rule introduces its evidence with by, the preposition every
+   terminal already uses for a proof. The evidence is what the statement
+   rests on, so writing it bare read as an application of the property's
+   name to a term. *)
 Notation "s 'certify' 'ExactIndependence' 'by' w" :=
   (s ;;; certify_exact of w)
   (at level 90, left associativity, w at level 0).
@@ -469,10 +417,7 @@ Notation "s 'certify' 'IdealProximity' 'by' c" :=
 (* The five clauses name the real field and the model index once, after at,
    and the statement abstracts every clause over them. Each component is a
    term in those two variables rather than a function of them, so what a
-   clause displays is the component and not the plumbing that quantifies it.
-   The first of the five, the marginal bound, follows by, as the evidence of
-   the other four certify rules does; the two names after at are the binders
-   the rule quantifies over and not values. *)
+   clause displays is the component and not the plumbing that quantifies it. *)
 Notation "s 'certify' 'InputIndistinguishability' 'at' R idx 'by' b 'tied' 'by' Hd 'ideal' u 'mixing' 'by' Hc 'invariant' 'by' Hk" :=
   (s ;;; certify_indistinguishability of (mk_indistinguishability (tableau_at s)
      (fun R idx => b) (fun R idx => Hd) (fun R idx => u)
@@ -481,34 +426,33 @@ Notation "s 'certify' 'InputIndistinguishability' 'at' R idx 'by' b 'tied' 'by' 
    b at level 10, Hd at level 10, u at level 10, Hc at level 10,
    Hk at level 10, only parsing).
 
-(* The number a program publishes, after at, and the proof that the program's
-   own bound is at most that number, after by. The terminal is written in the
-   same surface as the statements of a program, so a program that publishes a
-   constant a paper cites is one program in one language and not a program
-   that falls back to the bind at its last two lines. *)
+(* The number a program publishes, and the proof that the program's own bound is
+   at most that number. The terminal is written in the same surface as the
+   statements of a program, so a program that publishes a constant a paper cites
+   is one program in one language and not a program that falls back to the bind
+   at its last two lines. *)
 Notation "s |> 'conclude' 'at' c 'by' p" := (s ;;; conclude c of p)
   (at level 90, left associativity, c at level 0, p at level 0).
 
-(* The two statuses are written transfer first, the transfer status filling
-   the slot after publish and the assumption status following assuming,
-   against the argument order of publish itself, so that a program's last
-   statement reads in the order the manifest column headings run. *)
+(* The two statuses are written transfer first, against the argument order of
+   publish itself, so that a program's last statement reads in the order the
+   manifest column headings run. *)
 Notation "s |> 'publish' t 'assuming' a" := (s ;;; publish a of t)
   (at level 90, left associativity, t at level 0, a at level 0).
 
-(* One payload, the assumption status, after assuming. The terminal takes the
-   observed execution from the program's own data and writes the other three
+(* One payload, the assumption status. The terminal takes the observed
+   execution from the program's own data and writes the other three
    coordinates itself: the level, the empty model slot and
    NoModelComparison. *)
 Notation "s |> 'publish' 'Observed' 'assuming' a" :=
   (s ;;; publish_observed of a)
   (at level 90, left associativity, a at level 0).
 
-(* The transfer status and then the assumption status after assuming, in the
-   order the manifest's path record carries them and the order the
-   three-payload publish rule writes them. The status slot is the restricted
-   payload type, so a program at this level cannot write one of the two
-   statuses that name a transfer theorem. *)
+(* The transfer status and then the assumption status, in the order the
+   manifest's path record carries them and the order the three-payload
+   publish rule writes them. The status slot is the restricted payload type,
+   so a program at this level cannot write one of the two statuses that name
+   a transfer theorem. *)
 Notation "s |> 'publish' 'Sampled' t 'assuming' a" :=
   (s ;;; publish_sampled a of t)
   (at level 90, left associativity, t at level 0, a at level 0).
@@ -526,16 +470,16 @@ Definition input_distinguishability_obstruction (q : StackAt Sampled)
                  (amf_sample (sp_f q) R idx) (c R).
 Arguments input_distinguishability_obstruction : clear implicits.
 
-(* The kind, its number, the proof of it and then the assumption status. The
-   obstruction occupies the column the transfer status occupies in the other
-   two publish rules, that coordinate being fixed at NegativeTransfer by the
-   terminal, so a program's last statement reads in the order the manifest
-   column headings run.
+(* The kind, its reading, its number, the proof of it and then the
+   assumption status. The obstruction occupies the column the transfer
+   status occupies in the other two publish rules, that coordinate being
+   fixed at NegativeTransfer by the terminal, so a program's last statement
+   reads in the order the manifest column headings run.
 
-   The kind's name follows the literal Obstruction and the number follows at,
-   so the line says which kind is published and at which number without a
-   payload named elsewhere, and the proof is what the kind's proposition asks
-   for at that number. *)
+   The kind's name follows the literal Obstruction and the number follows
+   at, so the line says which kind is published and at which number without
+   a payload named elsewhere, and the proof is what the kind's proposition
+   asks for at that number. *)
 Notation "s |> 'publish' 'Obstruction' 'InputDistinguishability' 'at' c 'by' pf 'assuming' a" :=
   (s ;;; publish_obstruction a
      of (mk_obstruction (tableau_at s)

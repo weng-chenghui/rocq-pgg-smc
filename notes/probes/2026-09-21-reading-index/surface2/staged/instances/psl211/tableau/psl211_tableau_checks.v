@@ -1,22 +1,16 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* psl211_tableau_checks: the terms refused at the twelve-card instance       *)
+(* psl211_tableau_checks: the terms the kernel refuses at the twelve-card     *)
+(* instance                                                                   *)
 (*                                                                            *)
-(* Each entry below is one written term the development refuses, recorded so  *)
-(* that the refusal is compiled rather than described. A recorded refusal     *)
+(* Each entry below is one written term that the kernel rejects, recorded so  *)
+(* that the rejection is compiled rather than described. A recorded rejection *)
 (* says what it says about the one term written under it and about no other   *)
-(* term: it fixes a spelling the development does not accept, and states no   *)
-(* general impossibility. The file declares nothing and nothing depends on    *)
-(* it.                                                                        *)
+(* term: it fixes a spelling that does not typecheck, and states no general   *)
+(* impossibility. The file declares nothing and nothing depends on it.        *)
 (*                                                                            *)
-(* A term the kernel refuses stands under a Fail and is compiled here. A term *)
-(* the parser refuses cannot stand under one: the error is raised while the   *)
-(* sentence is read, so the Fail never runs and a file holding the term does  *)
-(* not compile. Such an entry writes the term inside its comment and quotes   *)
-(* the message, and the term is compiled once on its own under notes/probes.  *)
-(*                                                                            *)
-(* Five boundaries are recorded. The first is that an obligation built where  *)
+(* Four boundaries are recorded. The first is that an obligation built where  *)
 (* the statement is written is not the named lemma: the inline-reduction      *)
 (* prefix and the named prefix drive the same run, and the equation between   *)
 (* the two prefixes is still refused, because an opaque lemma is convertible  *)
@@ -34,10 +28,7 @@
 (* statement or a security property all take a PublishedAt, and               *)
 (* PublishedObstruction is a different inductive type with no coercion into   *)
 (* it, so none of them applies; the two terms below are the two spellings     *)
-(* that were checked. The fifth is a spelling of the statement surface that   *)
-(* the parser refuses: the obstruction terminal names the kind it publishes   *)
-(* and then its number after at, and psl211_alldecks_obstruction_published    *)
-(* with a payload written in place of the two has no parse.                   *)
+(* that were checked.                                                         *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -169,27 +160,3 @@ Section obstruction_reader_property.
 Variable r : PublishedObstruction.
 Fail Check (security_property_of r).
 End obstruction_reader_property.
-
-
-(******************************************************************************)
-(*     A spelling of the surface the parser refuses                           *)
-(******************************************************************************)
-
-(* The obstruction terminal names the kind it publishes after the literal
-   Obstruction and the number of that kind after at, so a payload written in
-   place of the two has no parse, and the parser names the token it wants
-   where the payload's proof ends. The perturbed program is
-   psl211_alldecks_obstruction_published with the named payload in the kind's
-   position,
-
-     psl211_exact_sampled
-       |> publish Obstruction psl211_alldecks_obstruction
-          by psl211_alldecks_obstruction_pf assuming BaselineClassicalOnly.
-
-   and compiling it gives
-
-     Error: Syntax error: 'assuming' expected after [term level 0] (in
-     [term]).
-
-   The term is written inside this comment and not under a Fail: the error
-   is raised while the sentence is read, and a Fail around it never runs. *)

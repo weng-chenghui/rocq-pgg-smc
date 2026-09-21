@@ -1,21 +1,16 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* pgl27_tableau_checks: the terms refused at the eight-card orbit instance   *)
+(* pgl27_tableau_checks: the terms the kernel refuses at the eight-card orbit *)
+(* instance                                                                   *)
 (*                                                                            *)
-(* Each entry below is one written term the development refuses, recorded so  *)
-(* that the refusal is compiled rather than described. A recorded refusal     *)
+(* Each entry below is one written term that the kernel rejects, recorded so  *)
+(* that the rejection is compiled rather than described. A recorded rejection *)
 (* says what it says about the one term written under it and about no other   *)
-(* term: it fixes a spelling the development does not accept, and states no   *)
-(* general impossibility.                                                     *)
+(* term: it fixes a spelling that does not typecheck, and states no general   *)
+(* impossibility.                                                             *)
 (*                                                                            *)
-(* A term the kernel refuses stands under a Fail and is compiled here. A term *)
-(* the parser refuses cannot stand under one: the error is raised while the   *)
-(* sentence is read, so the Fail never runs and a file holding the term does  *)
-(* not compile. Such an entry writes the term inside its comment and quotes   *)
-(* the message, and the term is compiled once on its own under notes/probes.  *)
-(*                                                                            *)
-(* Eight groups. Two are about what a clause records: the coalition size      *)
+(* Seven groups. Two are about what a clause records: the coalition size      *)
 (* written in a leaks clause is checked against the proof it names, and the   *)
 (* security property a program carries is the one the certify statement that  *)
 (* wrote its evidence fixes, so recording the word program for exact          *)
@@ -34,27 +29,21 @@
 (* program at 2^-41 is refused where its terminal is written, the             *)
 (* certificate's own number being twice 2^-40.                                *)
 (*                                                                            *)
-(* The seventh group is what a proximity certificate may name as its ideal,   *)
-(* and its three rejections have two causes. Two are refused at the index     *)
-(* type, which separates the exact family indexed by the unit type from the   *)
-(* two families indexed by a law of the dealt secret, and not the exact       *)
-(* shuffle from the word walk. The third is well typed at its index and       *)
-(* refused at its distance field, whose proof relates the word model at one   *)
-(* law of the secret to the exact model at that same law and not to the exact *)
-(* model at the uniform one. What refutes that field, rather than refusing a  *)
-(* written term, is pgl27_word_uniform_ideal_close_false of                   *)
-(* pgl27_proximity.v.                                                         *)
-(*                                                                            *)
-(* The eighth is a spelling of the statement surface that the parser refuses, *)
-(* and the one entry of this file that stands under no Fail: the number of a  *)
-(* conclude terminal is written after at, and pgl27_word_published39 with at  *)
-(* taken out has no parse.                                                    *)
+(* The last group is what a proximity certificate may name as its ideal, and  *)
+(* its three rejections have two causes. Two are refused at the index type,   *)
+(* which separates the exact family indexed by the unit type from the two     *)
+(* families indexed by a law of the dealt secret, and not the exact shuffle   *)
+(* from the word walk. The third is well typed at its index and refused at    *)
+(* its distance field, whose proof relates the word model at one law of the   *)
+(* secret to the exact model at that same law and not to the exact model at   *)
+(* the uniform one. What refutes that field, rather than refusing a written   *)
+(* term, is pgl27_word_uniform_ideal_close_false of pgl27_proximity.v.        *)
 (*                                                                            *)
 (* One lemma of this file shares its name with the rejection recorded above   *)
 (* it, and the order is what lets both compile. Rocq checks that a name is    *)
-(* free before it elaborates a body, so a file holding the lemma first would  *)
-(* reject the term for an occupied name and not for the security property the *)
-(* term asserts.                                                              *)
+(* free before it elaborates a body, so a file holding the                    *)
+(* lemma first would reject the term for an occupied name                     *)
+(* and not for the security property the term asserts.                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_word_published_property_neq                                        *)
@@ -274,26 +263,3 @@ Fail Definition pgl27_word_proximity_cert_uniform_ideal (R : realType)
 Fail Definition pgl27_cross_model_proximity : Tableau AnalysisBridged :=
   pgl27_dealt sample pgl27_exact_family
     certify IdealProximity by pgl27_word_proximity_cert.
-
-
-(******************************************************************************)
-(*     A spelling of the surface the parser refuses                           *)
-(******************************************************************************)
-
-(* The number a conclude terminal publishes stands after at, so the bare
-   spelling has no parse: the term ends at the certify statement, and the
-   sentence has no closing full stop where one is expected. The perturbed
-   program is pgl27_word_published39 with at taken out and nothing else
-   changed,
-
-     pgl27_word_sampled
-       certify InputIndistinguishability by pgl27_word_cert
-       |> conclude pgl27_bound39 by (fun R _ => ssr_ext.eqW (pow2_split R))
-       |> publish IdealFinite assuming BaselineClassicalOnly.
-
-   and compiling it gives
-
-     Error: Syntax error: '.' expected after [gallina] (in [vernac_aux]).
-
-   The term is written inside this comment and not under a Fail: the error
-   is raised while the sentence is read, and a Fail around it never runs. *)
