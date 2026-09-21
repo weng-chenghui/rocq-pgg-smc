@@ -8,6 +8,15 @@ was LEFT AS IT IS, because it sits in the forward closure of
 recompiling the endpoint file: 900 s, 17 GB) or because it is code that only
 the owner should rename.
 
+**STATUS 2026-09-21, late afternoon: sections 1 and 2 are DONE** on the
+owner's order, main eaad140: every item below was applied, the tree was
+recompiled once (130 files, `psl211_endpoints.v` once, 799 s), and the one
+exception is `smc/smc_interpreter.v`, vendored verbatim from the infotheo fork,
+whose two lens names stay. The correction of this note's own text: only ONE
+sentence of `psl211_profile.v` was a twin of a rewritten sentence, not three.
+New names: `notes/2026-09-21-164859-renamed-identifiers-n-traces-and-bound-variables.md`.
+The sections are kept as the record of what was found.
+
 ## 1. Comments in frozen files that still carry a word the owner barred
 
 | What | Where | How many | List with the text |
@@ -114,6 +123,23 @@ without losing work, since every one was landed as a pure addition.
    the word "reading" still means the value read in comments of files the
    landing did not touch (`five_card_proximity.v`, `pgl27_exec.v`,
    `pgg_analysis_manifest.v`, `var_dist_joint_law.v` and others).
+
+10. **Two vocabulary decisions that are the owner's (found on 2026-09-21,
+   nothing applied):** (a) `notes/probes/2026-09-21-frozen-files-pass/SHEET-READING.md`
+   proposes 273 comment sites in 40 files where "reading" names a value, a
+   law or an instance's own function, to be replaced by "endpoints", "view",
+   "law"; that would overturn the concept word chosen on 2026-09-20 outside
+   the record's own files and bring "view" back as a concept word. (b) a
+   `var_dist` is called a total variation, which is off by the factor two the
+   tree otherwise states everywhere: `security/pgg_mixing.v` (ten comments and
+   the identifier `symm_ds_TV_bound`), `instances/kim2025/kim_input_privacy.v`
+   (four), `instances/pgl27/pgl27_mixing.v:13`, `security/pgg_schreier.v:321`.
+   Neither touches a frozen file.
+11. **`legacy/`** was not recompiled after the pass of 2026-09-21 (nor after
+   any landing of this campaign); its compiled files are older than what they
+   require. Tool defects recorded: `scripts/comment_pass/reflow.py` joins
+   sentences with one space and its `--all` is not idempotent on the frozen
+   files.
 
 ## 5. Paper
 
