@@ -75,7 +75,7 @@ exact: (@ttrans_point_uniform (pgg_N' pgl27_M) (pgg_gT pgl27_M)
   (pgg_G pgl27_M) (@pgg_rho pgl27_M) 3 pgl27_3transitive R pgl27_G_pos s isT).
 Qed.
 
-(** pgl27_se_exact — the single-card pushforward is at variational distance
+(** pgl27_se_exact — the single-card pushforward is at variation distance
     zero from uniform. *)
 Lemma pgl27_se_exact (s : 'I_8) :
   var_dist (fdistmap (fun sigma : {perm 'I_8} => sigma s) pgl27_rho_dist)

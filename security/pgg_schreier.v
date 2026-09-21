@@ -274,12 +274,24 @@ End geometric_rate.
 (*   - No weval_inj hypothesis in sc_convergence                              *)
 (*   - State space is 'I_N directly (Schreier graph), not G (Cayley graph)   *)
 (*                                                                            *)
-(* The standard upper bound lemma (Diaconis 1988, Ch. 3B Proposition 2):     *)
-(*   d_TV(Q^L(s, .), uniform_N) <= sqrt(N) * (1 - lambda_gap)^L             *)
+(* The standard upper bound lemma (Diaconis 1988, Ch. 3B, Lemma 1; for a      *)
+(* reversible chain Levin-Peres-Wilmer 2017, Lemma 12.18) bounds 4 * d_TV^2   *)
+(* by a sum over the non-trivial eigenvalues; when each of them is at most    *)
+(* 1 - lambda_gap in modulus this gives                                       *)
+(*   2 * d_TV(Q^L(s, .), uniform_N) <= sqrt(N) * (1 - lambda_gap)^L           *)
 (* where Q is the Schreier transition matrix and lambda_gap is its spectral  *)
 (* gap. This requires the chain to be doubly stochastic (uniform stationary  *)
 (* distribution), which holds for symmetric generator sets (S = S^{-1}).     *)
 (* Each instance axiomatizes the bound and justifies it per-family.          *)
+(*                                                                            *)
+(* The left side is var_dist, the sum of absolute differences, d_TV being the *)
+(* total variation distance of the literature, so sc_convergence states that  *)
+(* bound with no factor lost. security/pgg_mixing.v proves the var_dist form  *)
+(* from a Rayleigh bound on Q^2, as symm_ds_TV_bound for an alphabet of       *)
+(* involutions under 0 <= alpha and alpha <= 1, and as                        *)
+(* symm_ds_TV_bound_inv_closed for an alphabet each of whose letters is       *)
+(* paired with its inverse by an involution of the letter index               *)
+(* under 0 <= alpha alone.                                                    *)
 (*                                                                            *)
 (* Per-family axioms (backed by cited mathematical results):                  *)
 (*   Monster: Kassabov-Lubotzky-Nikolov 2006 (finite simple groups are       *)
@@ -317,10 +329,12 @@ Record SchreierCertificate := MkSchreierCertificate {
      distribution (the bridge lemma establishes the equality).
 
      Mathematical source:
-       Diaconis (1988), Ch. 3B Proposition 2 (upper bound lemma)
+       Diaconis (1988), Ch. 3B, Lemma 1 (upper bound lemma)
        Saloff-Coste (1997), Theorem 2.6 (sum-of-squares to TV conversion)
-     Applied to the Schreier graph (N vertices) instead of the
-     Cayley graph (|G| vertices), giving prefactor sqrt(N). *)
+     Applied to the Schreier graph (N vertices) instead of the Cayley
+     graph (|G| vertices), giving prefactor sqrt(N). The field bounds
+     var_dist, which is 2 * d_TV, the left side of the bound displayed
+     in the banner of this section. *)
   sc_convergence : forall (L : nat) (s : 'I_N),
     var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
                        (rho_from_words L sigmas))
@@ -376,7 +390,7 @@ Proof. exact: envelope_ge0 (sc_lambda_le1 sc) (sqrtr_ge0 _) L. Qed.
    sqrt(N) * r^L' <= sqrt(N) * r^L when 0 <= r < 1, L <= L'.
    Follows from r^(a+b) = r^a * r^b and r^b <= 1 for 0 <= r <= 1.
 
-   IMPORTANT: the actual var_dist (exact variational distance) is NOT
+   IMPORTANT: the actual var_dist (exact variation distance) is NOT
    monotonic in L. For example, with transposition generators, at L=2
    the identity enters the achievable set (sigma^2 = id), concentrating
    mass on the diagonal and spiking var_dist above its L=1 value:

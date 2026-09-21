@@ -233,7 +233,7 @@ Proof. by case: w => [ab k]; rewrite /kim_input_dist fdist_prodE /= fdist_unifor
 
 (** kim_w_dev — each Kim weight [W k] deviates from the uniform value 1/5 by
     at most the bias: `|W k - 1/5| <= |eps|. This is the per-letter
-    deviation kim_w_tv sums into a total-variation bound. *)
+    deviation kim_w_tv sums into a variation-distance bound. *)
 Fact kim_w_dev (k : 'I_5) : `|W k - 5%:R^-1| <= `|eps|.
 Proof.
 rewrite /W kim_weight_distE; case: ifP => _.
@@ -245,15 +245,15 @@ Qed.
 
 (** kim_w_ge — each Kim weight [W k] is at least the uniform value minus the
     bias: 1/5 - |eps| <= W k. This is the lower bound kim_q_ge_pos sums to
-    floor a realised view's cut mass. *)
+    bound a realised view's cut mass from below. *)
 Fact kim_w_ge (k : 'I_5) : 5%:R^-1 - `|eps| <= W k.
 Proof.
 have := kim_w_dev k; rewrite ler_norml => /andP[H1 _]; lra.
 Qed.
 
 (** kim_w_tv — the Kim weight vector deviates from the uniform distribution
-    on 'I_5, in total variation, by at most twice the bias:
-    sum_k `|W k - 1/5| <= 2 |eps|. This is the total-variation ceiling
+    on 'I_5, in variation distance, by at most twice the bias:
+    sum_k `|W k - 1/5| <= 2 |eps|. This is the variation-distance bound
     kim_q_dev transports to the per-input view law. *)
 Fact kim_w_tv : \sum_(k in 'I_5) `|W k - 5%:R^-1| <= 2%:R * `|eps|.
 Proof.
@@ -351,7 +351,7 @@ by rewrite (den_boer_view_count_eq R v Hxx).
 Qed.
 
 (** kim_q_dev — the per-input view law kim_q A x deviates from the uniform
-    reference kim_qctr A x, in total variation, by at most twice the bias:
+    reference kim_qctr A x, in variation distance, by at most twice the bias:
     sum_v `|kim_q A x v - kim_qctr A x v| <= 2 |eps|. This transports
     kim_w_tv's per-letter bound to the level of a single input's view
     law. *)
@@ -374,8 +374,8 @@ by apply: ler_sum => k _.
 Qed.
 
 (** kim_qbar_diff — a false-fibre input's view law kim_q A x differs from the
-    mixed reference kim_qbar A, in total variation, by at most four times
-    the bias. This is the total-variation bound kim_chi2_bound squares and
+    mixed reference kim_qbar A, in variation distance, by at most four times
+    the bias. This is the variation-distance bound kim_chi2_bound squares and
     rescales into a chi-square bound. *)
 Fact kim_qbar_diff (A : seq nat) (x : bool * bool) :
   ~~ (x.1 && x.2) ->
@@ -440,8 +440,8 @@ Hypothesis eps_small : 0 < 5%:R^-1 - `|eps|.
 
 (** kim_q_ge_pos — when a view is realised by some uniform cut, its biased
     weight kim_q A x' v is at least the minimum cut weight 1/5 - |eps|. This
-    floors an individual input's realised view mass, the fact kim_qbar_ge
-    averages across the false fibre. *)
+    bounds an individual input's realised view mass from below, the fact
+    kim_qbar_ge averages across the false fibre. *)
 Fact kim_q_ge_pos (A : seq nat) (x' : bool * bool) (v : (size A).-tuple bool) :
   0 < kim_qctr A x' v -> 5%:R^-1 - `|eps| <= kim_q A x' v.
 Proof.
@@ -524,9 +524,10 @@ Qed.
 
 (** kim_chi2_bound — a false-fibre input's view law deviates from the mixed
     reference kim_qbar, in Pearson chi-square, by at most
-    16 eps^2 / (1/5 - |eps|). This squares kim_qbar_diff's total-variation
-    bound and floors the denominator with kim_qbar_ge, the two facts the
-    chi-square-to-KL step kim_div_bound needs. *)
+    16 eps^2 / (1/5 - |eps|). This squares kim_qbar_diff's
+    variation-distance bound and bounds the denominator from below with
+    kim_qbar_ge, the two facts the chi-square-to-KL step kim_div_bound
+    needs. *)
 Fact kim_chi2_bound (A : seq nat) (x : bool * bool) :
   ~~ (x.1 && x.2) ->
   \sum_v (kim_q A x v - kim_qbar A v) ^+ 2 / kim_qbar A v

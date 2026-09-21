@@ -503,7 +503,7 @@ exact: kim_spectral_convergence.
 Defined.
 
 (** fc_kim_security_bundle — the certificate bundle at word length L, carrying
-    the spectral marginal bound, the exact variational distance and the
+    the spectral marginal bound, the exact variation distance and the
     asymptotic convergence certificate. *)
 Definition fc_kim_security_bundle (L : nat) :
   ShuffleCertificateBundle R FiveCardKim_M :=

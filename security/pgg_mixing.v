@@ -3,7 +3,7 @@
 (******************************************************************************)
 (* General Mixing Lemma for Symmetric Doubly-Stochastic Schreier Matrices     *)
 (*                                                                            *)
-(* This file proves the generic total-variation-distance bound                *)
+(* This file proves the generic variation-distance bound                      *)
 (*                                                                            *)
 (*   var_dist(Q^L e_s, U) <= sqrt(N) * alpha^L                                *)
 (*                                                                            *)
@@ -34,7 +34,7 @@
 (* Power-norm contraction under Rayleigh-on-Q^2:                              *)
 (*   symm_ds_step_norm_sq_bound, symm_ds_power_norm_sq_bound                  *)
 (*                                                                            *)
-(* Total-variation bound (main theorem):                                      *)
+(* Variation-distance bound (main theorem):                                   *)
 (*   symm_ds_TV_bound                                                         *)
 (*                                                                            *)
 (* Same bound for an alphabet only closed under inversion, each letter        *)
@@ -115,7 +115,7 @@ by rewrite pmulrn_lge0 in Hnneg.
 Qed.
 
 (******************************************************************************)
-(*     Section 2: Bridge from variation distance to L^2 norm                  *)
+(*     Section 2: Bridge from variation distance to the Euclidean norm        *)
 (******************************************************************************)
 
 (* For any two distributions P, Q over a finite set of size N,
@@ -299,7 +299,7 @@ Qed.
 End symm_ds.
 
 (******************************************************************************)
-(*     Section 5: Total-variation bound                                       *)
+(*     Section 5: Variation-distance bound                                    *)
 (*                                                                            *)
 (* Combines the power-norm bound with the sqrt(N) bridge and the identity     *)
 (* ||e_s - U||_2^2 = 1 - 1/N <= 1 to conclude                                 *)
@@ -420,7 +420,8 @@ Qed.
 
 (** es_minus_U_norm_sq_le1 — the mean-zero witness e_s - U has squared norm
     1 - 1/N, so in particular at most 1: the starting slack the spectral
-    contraction alpha^L multiplies down in the final TV bound. *)
+    contraction alpha^L multiplies down in the final variation-distance
+    bound. *)
 Lemma es_minus_U_norm_sq_le1 (s : 'I_N) :
   cV_inner (e_cV s - uniform_cV) (e_cV s - uniform_cV) <= 1.
 Proof.
@@ -428,18 +429,18 @@ rewrite es_minus_U_norm_sq.
 by rewrite gerBl invr_ge0 ler0n.
 Qed.
 
-(* The L^2 norm of a column vector. *)
+(* The Euclidean norm of a column vector. *)
 Definition vec_norm2 (v : 'cV[R]_N) : R := Num.sqrt (cV_inner v v).
 
-(** vec_norm2_ge0 — the L^2 norm vec_norm2 v is non-negative, as any
-    Euclidean norm must be. *)
+(** vec_norm2_ge0 — the Euclidean norm vec_norm2 v is non-negative, as any
+    norm must be. *)
 Lemma vec_norm2_ge0 (v : 'cV[R]_N) : 0 <= vec_norm2 v.
 Proof. exact: sqrtr_ge0. Qed.
 
 (** symm_ds_power_norm2_bound — the square root of
     symm_ds_power_norm_sq_bound: ||Q^L v|| <= alpha^L ||v|| whenever
     sum_i v_i = 0, the Euclidean-norm form the bridge from the sum of
-    absolute values composes with to reach the total-variation bound. *)
+    absolute values composes with to reach the variation-distance bound. *)
 Lemma symm_ds_power_norm2_bound (L : nat) (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
   vec_norm2 (Q ^+ L *m v) <= alpha ^+ L * vec_norm2 v.
@@ -497,7 +498,7 @@ have Hless : Num.sqrt (x ^+ 2) <= Num.sqrt (#|'I_N|%:R * y).
 by rewrite -sqrtrM ?ler0n.
 Qed.
 
-(* The L^2 norm of e_s - U is at most 1. *)
+(* The Euclidean norm of e_s - U is at most 1. *)
 Lemma es_minus_U_norm2_le1 (s : 'I_N) :
   vec_norm2 (e_cV s - uniform_cV) <= 1.
 Proof.
@@ -552,7 +553,7 @@ End TV_bound.
 (*                                                                            *)
 (* When the generators are all involutions, the Schreier transition matrix    *)
 (* `schreier_transition R sigmas` is symmetric and doubly stochastic, so the  *)
-(* general TV bound applies.                                                  *)
+(* general variation-distance bound applies.                                  *)
 (******************************************************************************)
 
 Section schreier_bridges.
@@ -616,7 +617,8 @@ Qed.
    fdistmap ... rho_from_words, the probabilistic picture) equals the
    (a, ord0) entry of the L-step Schreier transition matrix applied to the
    point mass at s (Q^L *m e_s, the linear-algebra picture this file's
-   spectral TV bound operates in): the bridge between the two. *)
+   spectral variation-distance bound operates in): the bridge between the
+   two. *)
 Lemma schreier_endpoint_eq_Q_power (L : nat) (s a : 'I_N) :
   fdistmap (fun sigma : {perm 'I_N} => sigma s) (rho_from_words L sigmas) a
   = ((schreier_transition R sigmas) ^+ L *m \col_i (i == s)%:R) a ord0.
@@ -645,11 +647,11 @@ Qed.
 End schreier_bridges.
 
 (******************************************************************************)
-(*     Section 7: Schreier-form total-variation bound                         *)
+(*     Section 7: Schreier-form variation-distance bound                      *)
 (*                                                                            *)
-(* Combines the column-vector TV bound, the bridge lemmas of Section 6, and  *)
-(* the Rayleigh hypothesis on Q^2 to deliver the exact shape of              *)
-(* `SchreierCertificate.sc_convergence`.                                     *)
+(* Combines the column-vector variation-distance bound, the bridge lemmas     *)
+(* of Section 6, and the Rayleigh hypothesis on Q^2 to deliver the exact      *)
+(* shape of `SchreierCertificate.sc_convergence`.                             *)
 (******************************************************************************)
 
 Section schreier_TV_bound.
@@ -665,7 +667,7 @@ Hypothesis sigmas_invol :
 (** symm_ds_TV_bound — conditional on the Rayleigh hypothesis on Q^2
     holding with spectral bound alpha, the coalition's endpoint marginal
     after L Schreier-walk steps from starting card position s is within
-    sqrt(N) * alpha^L of the fully uniform distribution. The spectral gap
+    sqrt(N) * alpha^L of uniform in variation distance. The spectral gap
     alpha drives the endpoint toward uniform exponentially in L, with the
     sqrt(N) prefactor coming from the bridge from the sum of absolute
     values to the Euclidean norm rather than the sqrt(|G|) blowup a
@@ -723,7 +725,7 @@ End schreier_TV_bound.
 (* An alphabet that is only closed under inversion, each letter paired with   *)
 (* its inverse by an involution f of the letter index, yields the same        *)
 (* symmetric doubly stochastic transition matrix and hence the same           *)
-(* total-variation bound.  Involutive alphabets are the case f = id.          *)
+(* variation-distance bound.  Involutive alphabets are the case f = id.       *)
 (******************************************************************************)
 
 Section schreier_inv_closed.
@@ -809,11 +811,12 @@ Qed.
 (** symm_ds_TV_bound_inv_closed — conditional on the Rayleigh bound
     <v, Q^2 v> <= alpha^2 <v, v> on sum-zero vectors, the endpoint marginal
     of the length-L walk started at card position s lies within
-    sqrt(N) * alpha^L of uniform.  The conclusion of symm_ds_TV_bound under
-    the weaker structural hypothesis: an alphabet that carries the inverse
-    of each of its letters, rather than one whose letters are all
-    involutions.  The bound is unconditional in the adversary and averages
-    over words; alpha is the only quantity an instance must supply. *)
+    sqrt(N) * alpha^L of uniform in variation distance.  The conclusion of
+    symm_ds_TV_bound under the weaker structural hypothesis: an alphabet
+    that carries the inverse of each of its letters, rather than one whose
+    letters are all involutions.  The bound is unconditional in the
+    adversary and averages over words; alpha is the only quantity an
+    instance must supply. *)
 Lemma symm_ds_TV_bound_inv_closed (alpha : R) (L : nat) (s : 'I_N) :
   0 <= alpha ->
   (forall v : 'cV[R]_N,

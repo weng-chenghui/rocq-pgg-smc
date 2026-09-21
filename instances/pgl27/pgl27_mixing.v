@@ -10,7 +10,7 @@
 (* nat-level breadth-first search enumerates the group as permutation tables  *)
 (* of 'I_8; a checker re-verifies the 336-entry closure. A companion binary-N *)
 (* walk of length L = 200 tabulates the distribution reached from the         *)
-(* identity, and a scalar checker certifies its total-variation bound.        *)
+(* identity, and a scalar checker certifies its variation-distance bound.     *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_moves      == the inverse-closed five-letter walk alphabet         *)
