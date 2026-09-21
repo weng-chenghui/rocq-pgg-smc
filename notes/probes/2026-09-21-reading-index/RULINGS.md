@@ -127,3 +127,36 @@ Does not land: `exact_witness_postprocessing`, ideal-proximity
 post-processing, a second PGL(2,7) program at the content trace (the same
 term as the first), marginal bounds as readings, a manifest path for the
 colour program (later unit).
+
+## Addendum after probe B round 3 (same day)
+
+Verified by the main session from source: the staged PGL(2,7) program file
+8.7 s (production baseline 6.8 s), `k15a_distinguishable.v` 4.3 s, both rc=0.
+
+The one-record variant (`index2/staged1/`) compiles in the framework, in
+`pgg_tableau_reading.v` and in `psl211_reading_constancy.v`; retiring
+`StaticReading` costs nothing there. `psl211_colour_reading.v` does NOT
+restate by annotation alone: 100 changed lines and two proofs to rework,
+because with one record the colour reading IS `psl211_colour_of_reading`
+applied to the endpoint map, so `psl211_colour_readingE` needs the seat
+reconciliation the two-record file proved separately
+(`psl211_colour_reading_factorsE`), and `cr_read` takes one argument where
+`sr_read` took two. The criterion of design ruling 1 (annotations only) is
+therefore not met as written.
+
+RULING: one record all the same. The criterion was a guard against a large
+rework, and the rework measured is two proofs whose merged script is the
+concatenation of two that exist. The alternative keeps two records and two
+names for one reading at every instance, which is the defect the naming audit
+classed MUST (N1, N4, N10). The hand pass over `psl211_colour_reading.v` is
+its own step of landing commit 2, done before the new Tableau file is
+written, with the merged lemma named once. `ReadingExactIndependence` and
+`exact_independence_of_witness` stay, restated over `CoalitionReading`,
+because the colour theorem is stated at the first.
+`indistinguishability_number_ge_across_readings` lands with the monotonicity
+lemmas (three lines).
+
+Still owed at the landing (not done by the probe): the four PSL(2,11) names of
+the naming ruling applied in the new Tableau file, `Print Assumptions` on the
+three tails and on `input_distinguishability_prop_finer`, the probe files
+recompiled against the one-record tree.

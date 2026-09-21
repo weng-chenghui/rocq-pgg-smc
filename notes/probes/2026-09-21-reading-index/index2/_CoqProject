@@ -1,0 +1,69 @@
+-arg -w -arg -projection-no-head-constant
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -notation-overridden
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -notation-incompatible-format
+
+-R ../../../../lib pgg_smc
+-R ../../../../protocol pgg_smc
+-R ../../../../groups pgg_smc
+-R ../../../../security pgg_smc
+-R ../../../../smc pgg_smc
+-R ../../../../reconstruct pgg_reconstruct
+-R ../../../../instances/denboer1989 pgg_smc
+-R ../../../../instances/kim2025 pgg_smc
+-R ../../../../instances/s5 pgg_smc
+-R ../../../../instances/pgl27 pgg_smc
+-R ../../../../instances/psl211 pgg_smc
+-R ../../../../manifest pgg_smc
+-R ../../../../legacy/groups pgg_smc
+-R ../../../../legacy/instances/abelian pgg_smc
+-R ../../../../legacy/instances/cyclic pgg_smc
+-R ../../../../legacy/instances/monster pgg_smc
+-R ../../../../legacy/instances/oc pgg_smc
+-R ../../../../legacy/instances/s5x5 pgg_smc
+-R ../../../../legacy/instances/star pgg_smc
+-R ../../../../legacy/protocol pgg_smc
+-R ../../../../legacy/reconstruct pgg_reconstruct
+-R ../../../../legacy/security pgg_smc
+
+-Q . reading_index
+
+# The staged roots are mapped to pgg_smc AFTER production's AND after the
+# -Q . line, because Rocq 9.0.0 resolves a Require to the LAST matching -R
+# or -Q entry.  Precedent: notes/probes/2026-09-20-tableau-extensions-landing1.
+-R staged/manifest pgg_smc
+-R staged/instances/pgl27 pgg_smc
+-R staged/instances/kim2025 pgg_smc
+-R staged/instances/s5 pgg_smc
+-R staged/instances/psl211 pgg_smc
+
+staged/manifest/pgg_tableau.v
+staged/manifest/pgg_tableau_syntax.v
+staged/manifest/pgg_tableau_reading.v
+staged/manifest/pgg_tableau_security_property_relations.v
+staged/instances/pgl27/tableau/pgl27_tableau_algebraic.v
+staged/instances/pgl27/tableau/pgl27_tableau_executable.v
+staged/instances/pgl27/tableau/pgl27_tableau_observed.v
+staged/instances/pgl27/tableau/pgl27_tableau_sampled.v
+staged/instances/pgl27/tableau/pgl27_tableau_analysis_bridged.v
+staged/instances/pgl27/tableau/pgl27_tableau_checks.v
+staged/instances/kim2025/tableau/five_card_tableau_algebraic.v
+staged/instances/kim2025/tableau/five_card_tableau_executable.v
+staged/instances/kim2025/tableau/five_card_tableau_observed.v
+staged/instances/kim2025/tableau/five_card_tableau_sampled.v
+staged/instances/kim2025/tableau/five_card_tableau_analysis_bridged.v
+staged/instances/psl211/psl211_reading_constancy.v
+staged/instances/psl211/tableau/psl211_tableau_algebraic.v
+staged/instances/psl211/tableau/psl211_tableau_executable.v
+staged/instances/psl211/tableau/psl211_tableau_observed.v
+staged/instances/psl211/tableau/psl211_tableau_sampled.v
+staged/instances/psl211/tableau/psl211_tableau_analysis_bridged.v
+staged/instances/psl211/psl211_colour_reading.v
+k5_default_reading.v
+k7_k11_tails.v
+k12_k14_psl211.v
+k17_vacuity.v
+k15a_distinguishable.v
+k15b_obstruction.v
+m6_dealt_endpoints_home.v
