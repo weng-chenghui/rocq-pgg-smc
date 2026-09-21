@@ -48,7 +48,9 @@ preposition at all.
 |---|---|---|
 | evidence of a certify statement | bare | `by e` |
 | reading of a certify statement | none | `of r`, omitted means the coalition's endpoint reading |
-| reading of an obstruction | none | inside the kind: `obstruction InputDistinguishability of r at c` (owner, 2026-09-21, after probe A measured that a notation's leading literal becomes a global keyword: the word reserved is `obstruction`, and `InputDistinguishability`, two letters from the identifier `InputIndistinguishability`, stays an identifier) |
+| reading of an obstruction | none | inline in the terminal: `s \|> publish Obstruction InputDistinguishability of r at c by pf assuming a` (owner, 2026-09-21, second decision: the earlier spelling with a leading `obstruction` keyword read aloud as "publish Obstruction (obstruction ...)" once inlined; the inline rule reserves no new keyword, `InputDistinguishability` follows the literal `Obstruction` and stays an identifier, and the program's own line shows the reading and the number; `c` is a number per real field, as the bound of `conclude` is) |
+| number of a conclude terminal | bare after the action word | `s \|> conclude at c by p` (owner, 2026-09-21) |
+| marginal bound of the five-clause certify rule | bare after the slot `idx` | `at R idx by b` (main session's ruling on the naming audit's N20, same principle; the owner was asked and answered the other two) |
 | assumption status of every publish rule | bare last term | `assuming a` |
 
 One preposition per meaning: `of` introduces what is read, `at` a number, a
@@ -135,8 +137,8 @@ s certify IdealProximity of r by c
 s |> publish t assuming a
 s |> publish Observed assuming a
 s |> publish Sampled t assuming a
-s |> publish Obstruction o by pf assuming a
-obstruction InputDistinguishability of r at c          (* an obstruction kind *)
+s |> publish Obstruction InputDistinguishability of r at c by pf assuming a
+s |> conclude at c by p
 ```
 
 The five-clause input-indistinguishability rule keeps its clauses and gains
