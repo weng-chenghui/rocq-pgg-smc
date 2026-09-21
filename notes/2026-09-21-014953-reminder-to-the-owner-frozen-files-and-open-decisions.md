@@ -94,6 +94,27 @@ without losing work, since every one was landed as a pure addition.
    carries the positivity and a sentence at a number at or below zero cannot
    be published. `InputDistinguishabilityPropAt` itself is unchanged.
 
+8. **Decisions made WITH the owner on 2026-09-21 (chat), all landed, main
+   0fe7377:** the reading indexes `certify` (not `observe`, not a new phase);
+   prepositions `of` what is read, `at` a number, a size or a real field with
+   its index, `by` a proof or a piece of evidence, `assuming` an assumption
+   status; the obstruction published inline with its reading and its number
+   (the owner first chose a spelling with a leading `obstruction` keyword and
+   replaced it after the read-aloud audit); `conclude at c by p`. Decided by
+   the main session under the same principle and open to the owner:
+   `at R idx by b` in the five-clause rule; ONE reading record
+   (`CoalitionReading`) with `StaticReading` retired; every obstruction
+   program names its reading and the terminal without a reading was removed.
+9. **Later units the reading work left:** a manifest path for the colour
+   program (a thirteenth; its raw theorem must first sit below the manifest,
+   as for the twelfth); post-processing of ideal proximity (attempted, the
+   construction does not typecheck yet, nothing calls it); slot-name clauses
+   (`sample f`, `dealt fuel n`, `ideal u`) still read as an application to a
+   first reader, and only a change of the language's shape would cure it;
+   the word "reading" still means the value read in comments of files the
+   landing did not touch (`five_card_proximity.v`, `pgl27_exec.v`,
+   `pgg_analysis_manifest.v`, `var_dist_joint_law.v` and others).
+
 ## 5. Paper
 
 No `.tex` file was edited at any point. The renamed identifiers a text would
