@@ -942,6 +942,160 @@ Local Open Scope ring_scope.
 (* psl211_tableau_analysis_bridged.v in instances/psl211/tableau/, which      *)
 (* certifies no security property.                                            *)
 (*                                                                            *)
+(*     Path 13: twelve-card chirality instance, dealer-dealt model, colour    *)
+(*     observer                                                               *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol family and model | PSL(2,11) twelve-card chirality deck; the    *)
+(*                               chirality drawn from a prior on it and the   *)
+(*                               cut drawn uniformly over the 660 elements of *)
+(*                               the group, the two independent |             *)
+(* | profile alias      | PSL211Analysis.profile |                            *)
+(* | execution alias    | PSL211Analysis.dealt_exec_plug |                    *)
+(* | observed alias     | PSL211Analysis.dealt_observed |                     *)
+(* | sample alias       | PSL211Analysis.dealt_sample; the path's typed model *)
+(*                        witness is PSL211Analysis.dealt_family, the family  *)
+(*                        indexed by the prior on the chirality |             *)
+(* | observers          | PSL211Analysis.dealt_colour_of_reading              *)
+(*                          : {ffun 'I_12 -> bool}, the colour of the card    *)
+(*                            each seat of the coalition holds;               *)
+(*                        PSL211Analysis.dealt_static_view                    *)
+(*                          : {ffun 'I_12 -> 'I_12}, the card identities the  *)
+(*                            colour map is read off;                         *)
+(*                        PSL211Analysis.dealt_secret                         *)
+(*                          : bool, the chirality the dealer was given, a     *)
+(*                            random variable on dealt_prior at the path's    *)
+(*                            index |                                         *)
+(* | distribution-to-observer bridges | PSL211Analysis.dealt_cut_distE |      *)
+(* | bound or certificate | none: the theorem is an independence and carries  *)
+(*                          no number |                                       *)
+(* | final bridge theorem | PSL211Analysis.dealt_colour_indep |               *)
+(* | correctness theorem  | PSL211Analysis.dealt_observed_recovers |          *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | none: the cut this model draws is the uniform law *)
+(*                          on the group already, so no idealized model is    *)
+(*                          compared and there is no transfer premise to      *)
+(*                          lack |                                            *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | StaticExecutedOnly |                              *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
+(* | typed path           | psl211_dealt_colour_path |                        *)
+(*                                                                            *)
+(* Capabilities, one line per (theorem, distribution, observer, notion):      *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | dealt_colour_indep | the sample law of dealt_sample, which is            *)
+(*   dealt_prior secretP, the chirality drawn from secretP and the cut drawn  *)
+(*   uniformly over the 660 elements of the shuffle group, the two            *)
+(*   independent                                                              *)
+(*   | dealt_colour_of_reading at a coalition of at most five of the twelve   *)
+(*     seats | exact privacy |                                                *)
+(* | dealt_observed_recovers | none, the statement is distribution-free       *)
+(*   | the executed endpoint list | correctness |                             *)
+(*                                                                            *)
+(* Level justification. profile gives Algebraic; dealt_exec_plug is indexed   *)
+(* by profile, giving Executable; dealt_observed is the ObservedExecution     *)
+(* over that profile and plug, giving Observed; dealt_sample is a             *)
+(* SampleAdapter over that plug and dealt_cut_distE identifies its cut        *)
+(* distribution with the uniform law on the shuffle group, giving Sampled;    *)
+(* dealt_colour_indep is a privacy theorem stated at sa_sampleP               *)
+(* (dealt_sample secretP), the model's own sample law, and at the colour      *)
+(* observer read off that model's own coalition reader, so the theorem, the   *)
+(* distribution and the observer are this path's own, giving AnalysisBridged. *)
+(* The transfer status is StaticExecutedOnly, the path comparing no idealized *)
+(* model.                                                                     *)
+(*                                                                            *)
+(* Under these parameters the run argument of the execution IS the chirality, *)
+(* so the secret the independence is of is the run argument itself and not a  *)
+(* coordinate of a drawn deck description, which is what separates this path  *)
+(* from Path 9 over the same instance. The capability is exact privacy at the *)
+(* colour observer and at no other: at the card-identity observer             *)
+(* dealt_static_view the same independence fails at every prior giving mass   *)
+(* to both chiralities, by psl211_dealt_reading_indep_false of                *)
+(* instances/psl211/psl211_colour_reading.v, and that is the theorem Path 14  *)
+(* below records in its distributional form. The threshold the capability is  *)
+(* stated below is the largest one: at the six seats of the mirror            *)
+(* representative independence at the colour observer already fails at every  *)
+(* prior giving mass to both chiralities, by psl211_colour_reading_dep_k6 of  *)
+(* the same file, and six is what the derived profile declares. The program   *)
+(* that publishes this path is psl211_colour_exact_published of               *)
+(* psl211_tableau_dealt.v in instances/psl211/tableau/.                       *)
+(*                                                                            *)
+(*     Path 14: twelve-card chirality instance, dealer-dealt model, input     *)
+(*     distinguishability                                                     *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol family and model | PSL(2,11) twelve-card chirality deck; the    *)
+(*                               chirality drawn from a prior on it and the   *)
+(*                               cut drawn uniformly over the 660 elements of *)
+(*                               the group, the two independent |             *)
+(* | profile alias      | PSL211Analysis.profile |                            *)
+(* | execution alias    | PSL211Analysis.dealt_exec_plug |                    *)
+(* | observed alias     | PSL211Analysis.dealt_observed |                     *)
+(* | sample alias       | PSL211Analysis.dealt_sample; the path's typed model *)
+(*                        witness is PSL211Analysis.dealt_family |            *)
+(* | observers          | PSL211Analysis.dealt_static_view                    *)
+(*                          : {ffun 'I_12 -> 'I_12}, the reading of the deck  *)
+(*                            the dealer laid, which static_coalition_obs of  *)
+(*                            protocol/pgg_instance.v is at this model |      *)
+(* | distribution-to-observer bridges | PSL211Analysis.dealt_cut_distE |      *)
+(* | bound or certificate | none: the program over this path publishes an     *)
+(*                          obstruction, which carries neither a witness nor  *)
+(*                          a certificate |                                   *)
+(* | final bridge theorem | PSL211Analysis.dealt_perdeck_reading_ge |         *)
+(* | correctness theorem  | PSL211Analysis.dealt_observed_recovers |          *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | none: the path's theorem is a limitation. No      *)
+(*                          input-indistinguishability proposition holds at   *)
+(*                          this model at this observer at a number below     *)
+(*                          1/660, in the sum of absolute differences, and    *)
+(*                          the advantage of a distinguisher comparing the    *)
+(*                          two run arguments that theorem names is at least  *)
+(*                          1/1320. The path compares no idealized model, so  *)
+(*                          there is no transfer premise to lack |            *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | NegativeTransfer |                                *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
+(* | typed path           | psl211_dealt_obstruction_path |                   *)
+(*                                                                            *)
+(* Capabilities, one line per (theorem, distribution, observer, notion):      *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | dealt_perdeck_reading_ge | the cut law of dealt_sample, which            *)
+(*   dealt_cut_distE names as the uniform law on the 660 elements of the      *)
+(*   shuffle group                                                            *)
+(*   | dealt_static_view at psl211_perdeck_coalition, three of the twelve     *)
+(*     seats | input distinguishability at 1/660 |                            *)
+(* | dealt_observed_recovers | none, the statement is distribution-free       *)
+(*   | the executed endpoint list | correctness |                             *)
+(*                                                                            *)
+(* Level justification. The first four levels are Path 13's, the two paths    *)
+(* naming one execution, one observed execution and one model family.         *)
+(* dealt_perdeck_reading_ge is a limitation theorem stated at that cut        *)
+(* distribution and at the coalition's own reading of the laid deck, and      *)
+(* AnalysisBridged admits a limitation theorem about the same distribution    *)
+(* and the same observer, giving AnalysisBridged. The transfer status is      *)
+(* NegativeTransfer, which is defined as a theorem transporting an            *)
+(* obstruction to the path's observer, and the theorem is that one. Path 13   *)
+(* records the same instance, the same execution and the same model, and this *)
+(* path differs from it in the observer and in the transfer status: the two   *)
+(* describe different theorems about one model, Path 13 the exact             *)
+(* independence the colours of a coalition of at most five of the twelve      *)
+(* seats have of the chirality, and this path the distance between the        *)
+(* readings of the two chiralities at three seats' card identities. Because   *)
+(* the run argument is the chirality here, the two run arguments this path's  *)
+(* theorem compares are the two values of the secret, so the limitation is    *)
+(* about this model's privacy at the card-identity observer and not about     *)
+(* two inputs alone. At Path 12 the two run arguments are the two             *)
+(* chiralities of one deal, a deck description being a chirality and a deal,  *)
+(* so the limitation there is at one fixed deal. The program that publishes   *)
+(* this path is psl211_dealt_obstruction_published of psl211_tableau_dealt.v  *)
+(* in instances/psl211/tableau/, which certifies no security property.        *)
+(*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
 (* These are public observers and correctness statements of the four facades  *)
@@ -966,7 +1120,9 @@ Local Open Scope ring_scope.
 (*                word_transfer_conditional |                                 *)
 (* | PSL211Analysis | seat_endpoint, coalition_endpoints, prior, cut_distE,   *)
 (*                    exact_coalition_distE, content_traceE, content_trace,   *)
-(*                    exact_transfer_status |                                 *)
+(*                    exact_transfer_status, dealt_prior,                     *)
+(*                    dealt_colour_transfer_status,                           *)
+(*                    dealt_obstruction_transfer_status |                     *)
 (*                                                                            *)
 (*     Absent capabilities                                                    *)
 (*                                                                            *)
@@ -1203,6 +1359,38 @@ Definition psl211_word_path : AnalysisPath :=
 Definition psl211_alldecks_obstruction_path : AnalysisPath :=
   @MkAnalysisPath PSL211Analysis.observed AnalysisBridged
     PSL211Analysis.exact_family NegativeTransfer BaselineClassicalOnly.
+
+(** The AnalysisPath for the twelve-card chirality instance under its
+    dealer-dealt run at the colour observer: PSL211Analysis.dealt_observed
+    paired with the prior-indexed dealer-dealt family, AnalysisBridged,
+    StaticExecutedOnly, BaselineClassicalOnly.  dealt_colour_indep is proved
+    at this path's own sample distribution and observer, which is what
+    reaches AnalysisBridged; the cut is the uniform distribution on the group
+    already, so no idealized model is compared. It differs from
+    psl211_alldecks_path in the observed execution and in the model family:
+    the run argument of this execution is the chirality itself, so the
+    independence recorded here is of the secret and not of a coordinate of a
+    drawn deck description. *)
+Definition psl211_dealt_colour_path : AnalysisPath :=
+  @MkAnalysisPath PSL211Analysis.dealt_observed AnalysisBridged
+    PSL211Analysis.dealt_family StaticExecutedOnly BaselineClassicalOnly.
+
+(** The AnalysisPath for the twelve-card chirality instance under its
+    dealer-dealt run at the coalition's reading of the laid deck, recording
+    the limitation that model carries rather than the exact independence of
+    the colours: PSL211Analysis.dealt_observed paired with the same
+    prior-indexed family, AnalysisBridged, NegativeTransfer,
+    BaselineClassicalOnly.  dealt_perdeck_reading_ge bounds from below the
+    distance between the readings of the two chiralities under this path's
+    own cut distribution and at this path's own observer, which is a
+    limitation theorem there and so reaches AnalysisBridged; NegativeTransfer
+    is defined as a theorem transporting an obstruction to the path's
+    observer, and that theorem is this one. It differs from
+    psl211_dealt_colour_path in the observer and in the transfer status, the
+    two being different theorems about one model. *)
+Definition psl211_dealt_obstruction_path : AnalysisPath :=
+  @MkAnalysisPath PSL211Analysis.dealt_observed AnalysisBridged
+    PSL211Analysis.dealt_family NegativeTransfer BaselineClassicalOnly.
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -2211,9 +2399,83 @@ Timeout 60 Check (PSL211Analysis.certificate_bundle :
 
 Timeout 60 Check
   (erefl : PSL211Analysis.exact_transfer_status = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : PSL211Analysis.dealt_colour_transfer_status = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : PSL211Analysis.dealt_obstruction_transfer_status
+           = NegativeTransfer).
 
 (******************************************************************************)
-(*     The deterministic checker: the twelve typed paths                      *)
+(*     The deterministic checker: the dealer-dealt model of that instance     *)
+(*                                                                            *)
+(* The same twelve-card instance driven in its other mode. The run argument   *)
+(* is the chirality itself, so the aliases below are pinned at a bare bool    *)
+(* where the all-decks ones are pinned at a deck description.                 *)
+(******************************************************************************)
+
+Timeout 60 Check (PSL211Analysis.dealt_exec_plug :
+  ExecutionPlug PSL211Analysis.profile).
+
+Timeout 60 Check (PSL211Analysis.dealt_observed : OE.ObservedExecution).
+
+Timeout 60 Check (PSL211Analysis.dealt_static_view :
+  {set 'I_(pi_T' (mp_PI PSL211Analysis.profile)).+1} ->
+  ep_inputT PSL211Analysis.dealt_exec_plug ->
+  pgg_gT (mp_M PSL211Analysis.profile) ->
+  {ffun 'I_(pi_T' (mp_PI PSL211Analysis.profile)).+1 ->
+        'I_(pgg_N' (mp_M PSL211Analysis.profile)).+1}).
+
+Timeout 60 Check (PSL211Analysis.dealt_colour_of_reading :
+  {set 'I_12} -> {ffun 'I_12 -> 'I_12} -> {ffun 'I_12 -> bool}).
+
+Timeout 60 Check (PSL211Analysis.dealt_secret :
+  forall (R : realType) (secretP : R.-fdist bool),
+    {RV (PSL211Analysis.dealt_prior secretP) -> bool}).
+
+Timeout 60 Check (PSL211Analysis.dealt_sample :
+  forall (R : realType) (secretP : R.-fdist bool),
+    SampleAdapter R PSL211Analysis.dealt_exec_plug).
+
+Timeout 60 Check (PSL211Analysis.dealt_family :
+  AnalysisModelFamily PSL211Analysis.dealt_observed).
+
+Timeout 60 Check (PSL211Analysis.dealt_cut_distE :
+  forall (R : realType) (secretP : R.-fdist bool),
+    sa_cut_dist (PSL211Analysis.dealt_sample secretP)
+    = (`U psl211_group.psl211_G_pos
+       : R.-fdist (pgg_gT (mp_M PSL211Analysis.profile)))).
+
+Timeout 60 Check (PSL211Analysis.dealt_observed_recovers :
+  forall (x : bool) (w0 : pgg_gT (mp_M PSL211Analysis.profile)),
+    w0 \in pgg_G (mp_M PSL211Analysis.profile) ->
+    exec_decode PSL211Analysis.dealt_exec_plug
+      (OE.oe_endpoints_size PSL211Analysis.dealt_observed x w0) = x).
+
+Timeout 60 Check (PSL211Analysis.dealt_colour_indep :
+  forall (R : realType) (secretP : R.-fdist bool) (C : {set 'I_12}),
+    (#|C| < profile_k PSL211Analysis.profile)%N ->
+    sa_sampleP (PSL211Analysis.dealt_sample secretP)
+    |= (fun u => PSL211Analysis.dealt_colour_of_reading C
+                   (PSL211Analysis.dealt_static_view C
+                      ((PSL211Analysis.dealt_sample secretP).(sa_arg) u)
+                      ((PSL211Analysis.dealt_sample secretP).(sa_cut) u)))
+       _|_ PSL211Analysis.dealt_secret secretP).
+
+Timeout 60 Check (PSL211Analysis.dealt_perdeck_reading_ge :
+  forall (R : realType) (secretP : R.-fdist bool),
+    (#|pgg_G (mp_M PSL211Analysis.profile)|%:R)^-1 <=
+    var_dist
+      (fdistmap
+         (PSL211Analysis.dealt_static_view
+            psl211_models.psl211_perdeck_coalition true)
+         (sa_cut_dist (PSL211Analysis.dealt_sample secretP)))
+      (fdistmap
+         (PSL211Analysis.dealt_static_view
+            psl211_models.psl211_perdeck_coalition false)
+         (sa_cut_dist (PSL211Analysis.dealt_sample secretP)))).
+
+(******************************************************************************)
+(*     The deterministic checker: the fourteen typed paths                    *)
 (*                                                                            *)
 (* One Check per path against AnalysisPath, one erefl pin per status field,   *)
 (* and one typed check on the model slot: a mandatory family at Sampled and   *)
@@ -2329,6 +2591,27 @@ Timeout 60 Check
   (erefl : ap_assumptions psl211_alldecks_obstruction_path
            = BaselineClassicalOnly).
 
+Timeout 60 Check (psl211_dealt_colour_path : AnalysisPath).
+Timeout 60 Check (ap_model psl211_dealt_colour_path
+  : AnalysisModelFamily PSL211Analysis.dealt_observed).
+Timeout 60 Check
+  (erefl : ap_completion psl211_dealt_colour_path = AnalysisBridged).
+Timeout 60 Check
+  (erefl : ap_transfer psl211_dealt_colour_path = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : ap_assumptions psl211_dealt_colour_path = BaselineClassicalOnly).
+
+Timeout 60 Check (psl211_dealt_obstruction_path : AnalysisPath).
+Timeout 60 Check (ap_model psl211_dealt_obstruction_path
+  : AnalysisModelFamily PSL211Analysis.dealt_observed).
+Timeout 60 Check
+  (erefl : ap_completion psl211_dealt_obstruction_path = AnalysisBridged).
+Timeout 60 Check
+  (erefl : ap_transfer psl211_dealt_obstruction_path = NegativeTransfer).
+Timeout 60 Check
+  (erefl : ap_assumptions psl211_dealt_obstruction_path
+           = BaselineClassicalOnly).
+
 (******************************************************************************)
 (*     The model families exercised at their index types                      *)
 (*                                                                            *)
@@ -2359,6 +2642,12 @@ Timeout 60 Check (fun R : realType =>
 
 Timeout 60 Check (fun R : realType =>
   amf_sample (ap_model psl211_alldecks_obstruction_path) R tt).
+
+Timeout 60 Check (fun (R : realType) (secretP : R.-fdist bool) =>
+  amf_sample (ap_model psl211_dealt_colour_path) R secretP).
+
+Timeout 60 Check (fun (R : realType) (secretP : R.-fdist bool) =>
+  amf_sample (ap_model psl211_dealt_obstruction_path) R secretP).
 
 Timeout 60 Check (fun (p : AnalysisPath)
     (fam : AnalysisModelFamily (ap_observed p)) (R : realType)

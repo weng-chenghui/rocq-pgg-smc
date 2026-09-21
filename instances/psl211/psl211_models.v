@@ -93,6 +93,8 @@
 (*                              sample point                                  *)
 (*   psl211_alldecks_observed_recovers == the packaged run decodes to the     *)
 (*                              chirality its input names                     *)
+(*   psl211_dealt_observed_recovers == the packaged dealer-dealt run decodes  *)
+(*                              to the chirality the dealer was given         *)
 (*   psl211_exec_rowE        == a seat's executed trace is row 2 + i          *)
 (*   psl211_content_traceE   == the executed content reader is that random    *)
 (*                              variable                                      *)
@@ -376,13 +378,27 @@ Definition psl211_dealt_observed : OE.ObservedExecution :=
 (** psl211_alldecks_observed_recovers — the packaged all-decks run decodes to
     the chirality its input names, at every deck description and every cut in
     the group. This is the correctness half of what the instance publishes:
-    the value a coalition is proved to learn nothing about is the value the
+    the value a coalition of fewer than six seats is proved to learn nothing
+    about, the deck description being drawn uniformly, is the value the
     protocol actually reconstructs. *)
 Theorem psl211_alldecks_observed_recovers (x : psl211_inputT)
     (w0 : pgg_gT psl211_M) (Gw0 : w0 \in pgg_G psl211_M) :
   @exec_decode mpP eP (@exec_endpoints mpP eP x w0 0)
     (OE.oe_endpoints_size psl211_alldecks_observed x w0) = x.1.
 Proof. exact: (OE.oe_run_recovers psl211_alldecks_observed x w0 Gw0). Qed.
+
+(** psl211_dealt_observed_recovers — the packaged dealer-dealt run decodes to
+    the chirality the dealer was given, at every chirality and every cut in
+    the group. It is the correctness half of what the dealer-dealt model
+    publishes: the chirality that a coalition of fewer than six seats is
+    proved to learn nothing about from the colours of its cards is the one
+    the protocol reconstructs. *)
+Theorem psl211_dealt_observed_recovers (x : bool)
+    (w0 : pgg_gT psl211_M) (Gw0 : w0 \in pgg_G psl211_M) :
+  @exec_decode mpP (instance_exec psl211_dealt_params)
+    (@exec_endpoints mpP (instance_exec psl211_dealt_params) x w0 0)
+    (OE.oe_endpoints_size psl211_dealt_observed x w0) = x.
+Proof. exact: (OE.oe_run_recovers psl211_dealt_observed x w0 Gw0). Qed.
 
 (******************************************************************************)
 (*     The executed content reader                                            *)

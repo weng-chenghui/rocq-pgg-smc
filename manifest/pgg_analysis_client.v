@@ -4,7 +4,7 @@
 (* pgg_analysis_client: the clean client of the analysis manifest             *)
 (*                                                                            *)
 (* One import reaches all four facades, the typed status vocabulary and the   *)
-(* twelve typed paths. The file has EXACTLY ONE Require of any kind, and      *)
+(* fourteen typed paths. The file has EXACTLY ONE Require of any kind, and    *)
 (* every Check below is a bare Check on an alias, so no scope needs to be     *)
 (* open and no notation needs to be in scope: what is established here is     *)
 (* reachability of the aliases, not their spelling.                           *)
@@ -129,9 +129,19 @@ Check PSL211Analysis.seat_endpoint.
 Check PSL211Analysis.coalition_endpoints.
 Check PSL211Analysis.static_view.
 Check PSL211Analysis.secret.
+Check PSL211Analysis.dealt_exec_plug.            (* 2 Execution *)
+Check PSL211Analysis.dealt_colour_of_reading.    (* 3 Observers *)
+Check PSL211Analysis.dealt_sample.               (* 4 Models *)
+Check PSL211Analysis.dealt_family.               (* 4 Models, typed family *)
+Check PSL211Analysis.dealt_observed_recovers.    (* 5 Correctness *)
+Check PSL211Analysis.dealt_colour_indep.         (* 6 Security *)
+Check PSL211Analysis.dealt_perdeck_reading_ge.   (* 6 Security, limitation *)
+Check PSL211Analysis.dealt_colour_transfer_status.
+                                                 (* 7 Transfer, typed status *)
+Check PSL211Analysis.dealt_obstruction_transfer_status.
 
 (******************************************************************************)
-(*     The typed status vocabulary and the twelve paths                       *)
+(*     The typed status vocabulary and the fourteen paths                     *)
 (******************************************************************************)
 
 Check CompletionLevel.
@@ -163,6 +173,8 @@ Check psl211_alldecks_path.
 Check pgl27_prior_exact_path.
 Check psl211_word_path.
 Check psl211_alldecks_obstruction_path.
+Check psl211_dealt_colour_path.
+Check psl211_dealt_obstruction_path.
 
 (******************************************************************************)
 (*     What one import actually reaches                                       *)

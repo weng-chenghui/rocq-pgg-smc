@@ -31,16 +31,13 @@
 (* The two programs share every line up to the Sampled level, and they must:  *)
 (* a reading is a coordinate of the security claim and not of the model, so   *)
 (* two programs that differ in the reading alone still name one execution,    *)
-(* one model family and one link lemma. Neither of the paths they publish is  *)
-(* among the manifest's twelve. The obstruction's path differs from the       *)
-(* manifest's twelfth in two coordinates, its observed execution and its      *)
-(* model family, the twelfth being over the all-decks run; a manifest path    *)
-(* for the colour program needs its raw theorem stated below the manifest and *)
-(* is not written here.                                                       *)
+(* one model family and one link lemma. The colour program publishes the      *)
+(* manifest's thirteenth path, psl211_dealt_colour_path, and the obstruction  *)
+(* program its fourteenth, psl211_dealt_obstruction_path, both of             *)
+(* manifest/pgg_analysis_manifest.v, and the two _pathE lemmas below decide   *)
+(* each equality by conversion.                                               *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   psl211_dealt_family    == the fixed-dealer colour model as an analysis   *)
-(*                             family, one member per prior on the chirality  *)
 (*   psl211_dealt_sampled   == the shared prefix of both programs, at Sampled *)
 (*   psl211_colour_exact_witness                                              *)
 (*                          == the exact-independence witness at the colour   *)
@@ -91,8 +88,8 @@ From pgg_smc Require Import pgg_analysis_status pgg_analysis_manifest.
 From pgg_smc Require Import pgg_tableau pgg_tableau_syntax.
 From pgg_smc Require Import psl211_group psl211_orbit psl211_scheme.
 From pgg_smc Require Import psl211_profile psl211_exec psl211_secrecy.
-From pgg_smc Require Import psl211_models psl211_reading_constancy.
-From pgg_smc Require Import psl211_colour_reading.
+From pgg_smc Require Import psl211_models psl211_dealt_model.
+From pgg_smc Require Import psl211_reading_constancy psl211_colour_reading.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -109,16 +106,10 @@ Local Notation cutT := (pgg_gT (mp_M (instance_profile psl211_algebra))).
 (*     The model family and the prefix both programs share                    *)
 (******************************************************************************)
 
-(** psl211_dealt_family — the fixed-dealer colour model as an analysis model
-    family: one member per prior on the chirality, at every real field. The
-    index is the prior and not the unit type, because the colour theorems of
-    this instance hold under every prior and the two facts that refute
-    independence need a prior giving mass to both chiralities. *)
-Definition psl211_dealt_family : AnalysisModelFamily psl211_dealt_observed :=
-  @MkAnalysisModelFamily psl211_dealt_observed
-    (fun R : realType => R.-fdist bool)
-    (fun (R : realType) (secretP : R.-fdist bool) =>
-       psl211_dealt_sample secretP).
+(* The model family psl211_dealt_family the sample line below names is built
+   in instances/psl211/psl211_dealt_model.v, below the analysis manifest, so
+   that the manifest's two paths over this model can carry it as their typed
+   model witness. *)
 
 (** psl211_dealt_sampled — the shared prefix of both programs: the algebra,
     the dealer-dealt parameters at the instance's fuel, the three run facts
@@ -187,16 +178,13 @@ Lemma psl211_colour_exact_published_propertyE (R : realType)
   = ExactIndependenceProperty.
 Proof. exact: erefl. Qed.
 
-(** psl211_colour_exact_published_pathE — the path it publishes records the
-    dealer-dealt run, the AnalysisBridged level, the family the sample
-    statement named and the two statuses. It is not one of the manifest's
-    twelve: the manifest's paths for this instance are over the all-decks
-    run, and a path whose observer column holds the colour reading needs its
-    raw theorem stated below the manifest. *)
+(** psl211_colour_exact_published_pathE — the path it publishes is the
+    manifest's thirteenth: the dealer-dealt run, the AnalysisBridged level,
+    the family the sample statement named and the two statuses. The equality
+    is decided by conversion, so the program and the manifest cannot drift
+    apart. *)
 Lemma psl211_colour_exact_published_pathE :
-  published_path psl211_colour_exact_published
-  = @MkAnalysisPath psl211_dealt_observed AnalysisBridged psl211_dealt_family
-      StaticExecutedOnly BaselineClassicalOnly.
+  published_path psl211_colour_exact_published = psl211_dealt_colour_path.
 Proof. exact: erefl. Qed.
 
 (******************************************************************************)
@@ -221,36 +209,12 @@ Lemma psl211_dealt_input_distinguishable (R : realType)
     (coalition_endpoint_reading psl211_algebra)
     ((#|pgg_G psl211_M|%:R)^-1 : R).
 Proof.
-(* each mass is pinned in a statement naming one chirality, and the two are
-   brought together afterwards: a rewrite with a mass lemma in a goal
-   holding both chiralities searches a goal holding both deck tables *)
-have [Ht Hf] := psl211_dealt_raw_countE.
-have Ct : #|psl211_dealt_fiber true| = 0 :=
-  etrans (psl211_dealt_fiberE true) Ht.
-have Cf : #|psl211_dealt_fiber false| = 1 :=
-  etrans (psl211_dealt_fiberE false) Hf.
-have Ut : (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
-    psl211_perdeck_coalition true) ((`U psl211_G_pos) : R.-fdist cutT))
-    psl211_dealt_view = 0 :> R.
-  by rewrite psl211_dealt_massE Ct mulr0n.
-have Uf : (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
-    psl211_perdeck_coalition false) ((`U psl211_G_pos) : R.-fdist cutT))
-    psl211_dealt_view = (#|pgg_G psl211_M|%:R)^-1 :> R.
-  by rewrite psl211_dealt_massE Cf mulr1n.
-have Hle : ((#|pgg_G psl211_M|%:R)^-1 : R)
-  <= var_dist
-       (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
-          psl211_perdeck_coalition true) ((`U psl211_G_pos) : R.-fdist cutT))
-       (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
-          psl211_perdeck_coalition false) ((`U psl211_G_pos) : R.-fdist cutT)).
-  apply: (Order.POrderTheory.le_trans _ (leq_var_dist _ _ psl211_dealt_view)).
-  rewrite Ut Uf sub0r normrN ger0_norm ?invr_ge0 ?ler0n //.
 (* the goal the existential leaves reads the coalition's endpoints through
-   the identity reading, and the two masses above are stated at the bare
-   reader. The identification is one iota step and one eta step and is
-   discharged here, in a statement naming one chirality, rather than left to
-   the conversion that closes the goal: a goal holding both chiralities and
-   both deck tables is the shape that does not return *)
+   the identity reading, and the raw inequality is stated at the bare reader.
+   The identification is one iota step and one eta step and is discharged
+   here, in a statement naming one chirality, rather than left to the
+   conversion that closes the goal: a goal holding both chiralities and both
+   deck tables is the shape that does not return *)
 have Hred (b : bool) :
     (fun g : cutT => @cr_read psl211_algebra
         (coalition_endpoint_reading psl211_algebra) psl211_perdeck_coalition
@@ -262,8 +226,7 @@ have Hred (b : bool) :
 exists psl211_perdeck_coalition, true, false.
 split; first exact: psl211_perdeck_coalition_below_k.
 rewrite (Hred true) (Hred false).
-rewrite (psl211_dealt_sample_cut_distE secretP).
-exact: Hle.
+exact: psl211_dealt_perdeck_reading_ge.
 Qed.
 
 (** psl211_dealt_number — 1/660, the reciprocal of the order of the shuffle
@@ -319,12 +282,10 @@ Lemma psl211_dealt_obstruction_published_kindE :
   = psl211_dealt_obstruction.
 Proof. exact: erefl. Qed.
 
-(** psl211_dealt_obstruction_published_pathE — the path it publishes records
-    the dealer-dealt run, the AnalysisBridged level, the model family and
-    NegativeTransfer. It is not the manifest's twelfth path, which is over
-    the all-decks run, and it is not among the manifest's twelve. *)
+(** psl211_dealt_obstruction_published_pathE — the path it publishes is the
+    manifest's fourteenth: the dealer-dealt run, the AnalysisBridged level,
+    the model family and NegativeTransfer. *)
 Lemma psl211_dealt_obstruction_published_pathE :
   published_obstruction_path psl211_dealt_obstruction_published
-  = @MkAnalysisPath psl211_dealt_observed AnalysisBridged psl211_dealt_family
-      NegativeTransfer BaselineClassicalOnly.
+  = psl211_dealt_obstruction_path.
 Proof. exact: erefl. Qed.

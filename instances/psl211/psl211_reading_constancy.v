@@ -71,7 +71,7 @@
 (* three-transitivity read as constancy for coalitions of fewer than four     *)
 (* seats. The dealt statement rules out one named ideal and no certificate.   *)
 (* An ideal can be pinned to these parameters through the dealer-dealt sample *)
-(* adapter psl211_dealt_sample of instances/psl211/psl211_colour_reading.v,   *)
+(* adapter psl211_dealt_sample of instances/psl211/psl211_dealt_model.v,      *)
 (* and no certificate is built over it. The dealt parameters read their       *)
 (* endpoints through profile_endpointsE, so instances/psl211/psl211_models.v  *)
 (* carries an endpoints statement and an observed execution for them, and     *)
@@ -189,6 +189,7 @@ From pgg_smc Require Import psl211_scheme psl211_profile psl211_exec.
 From pgg_smc Require Import psl211_endpoints psl211_alldecks psl211_models.
 From pgg_smc Require Import psl211_alldecks_input_distinguishability.
 From pgg_smc Require Import psl211_blocks psl211_closure psl211_mixing.
+From pgg_smc Require Import psl211_dealt_model.
 From pgg_smc Require Import pgg_weighted_words.
 
 Set Implicit Arguments.
@@ -257,33 +258,10 @@ Proof. exact: ic_const cert. Qed.
 (*     The three seats are below the privacy threshold                        *)
 (******************************************************************************)
 
-(** psl211_perdeck_coalition_le3 — the coalition witnessing the refutations
-    has at most three seats, so it is one of the coalitions the instance's
-    privacy claim covers and not an oversized one. *)
-(* The bound is read off a three-point superset and never off an enumeration
-   of the twelve seats, the ordinal enumeration going through an opaque
-   decision that does not reduce. *)
-Lemma psl211_perdeck_coalition_le3 : (#|psl211_perdeck_coalition| <= 3)%N.
-Proof.
-have Hsub : psl211_perdeck_coalition \subset
-    ((psl211_code12 0 : seatT) |: ((psl211_code12 1 : seatT) |:
-       [set (psl211_code12 2 : seatT)])).
-  apply/subsetP => i.
-  rewrite /psl211_perdeck_coalition in_set !inE -!val_eqE.
-  by case: i => [] [|[|[|k]]] Hk.
-apply: leq_trans (subset_leq_card Hsub) _.
-rewrite cardsU1 cardsU1 cards1.
-by case: (_ \notin _); case: (_ \notin _).
-Qed.
-
-(** psl211_perdeck_coalition_below_k — those three seats meet the threshold
-    premise every security proposition states, the derived profile declaring
-    six. A refutation of a field quantified over coalitions below the
-    threshold has to discharge this premise, and it is the counterexample's
-    only nontrivial premise. *)
-Lemma psl211_perdeck_coalition_below_k :
-  (#|psl211_perdeck_coalition| < profile_k (instance_profile psl211_algebra))%N.
-Proof. by apply: leq_ltn_trans psl211_perdeck_coalition_le3 _. Qed.
+(* The three seats of psl211_perdeck_coalition are below the privacy
+   threshold by psl211_perdeck_coalition_below_k of
+   instances/psl211/psl211_dealt_model.v, which every refutation below
+   discharges its threshold premise with. *)
 
 (******************************************************************************)
 (*     The constancy field fails at the group-uniform ideal                   *)
@@ -902,157 +880,18 @@ Qed.
 (*     The dealer-dealt mode, where the run argument is the secret            *)
 (******************************************************************************)
 
-(** psl211_dealt_decktbl b — the encoder deck of chirality b as a twelve-entry
-    position-to-code table: the heart codes 0 to 5 ascend along the
-    representative row of the system b names and the club codes 6 to 11 ascend
-    along its complement. *)
-(* Only raw nat data is counted from here on, the ordinal enumeration going
-   through an opaque decision that does not reduce. *)
-Definition psl211_dealt_decktbl (b : bool) : seq nat :=
-  if b then [:: 6; 7; 0; 1; 8; 2; 9; 3; 4; 5; 10; 11]
-       else [:: 0; 1; 6; 2; 7; 8; 9; 3; 10; 11; 4; 5].
+(* The encoder decks of the two chiralities, the reading psl211_dealt_view of
+   three seats, the fibers of cuts carrying each deck to it and the masses
+   those fibers give it are stated in instances/psl211/psl211_dealt_model.v,
+   below the analysis manifest, because the analysis manifest's paths over
+   the dealer-dealt model name the theorems built on them. What is left here
+   is the refutation itself, which is about the constancy field and therefore
+   about a record of the Tableau. *)
 
-(** psl211_dealt_decktblE — the card the encoder deals to a position is that
-    table's entry at the position. *)
-Lemma psl211_dealt_decktblE (b : bool) (i : 'I_12) :
-  val (tnth (psl211_orbit_encode b) i)
-  = nth 0 (psl211_dealt_decktbl b) (val i).
-Proof.
-rewrite /psl211_orbit_encode tnth_mktuple.
-by case: b; case: i => -[|[|[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]]]] ?.
-Qed.
-
-(** psl211_dealt_decktbl_mod — every entry of that table is below twelve, so
-    reading it modulo twelve changes nothing. *)
-Lemma psl211_dealt_decktbl_mod (b : bool) (k : nat) :
-  nth 0 (psl211_dealt_decktbl b) k %% 12 = nth 0 (psl211_dealt_decktbl b) k.
-Proof.
-by case: b; case: k => [|[|[|[|[|[|[|[|[|[|[|[|k]]]]]]]]]]]] //=;
-   rewrite nth_nil.
-Qed.
-
-(** psl211_dealt_view — the reading that gives cards 0, 1 and 6 to seats 0, 1
-    and 2, and card 0 to every seat outside the coalition. The encoder decks
-    of the two chiralities reach it under different numbers of cuts, which is
-    what refutes the constancy field in the dealt mode. *)
-Definition psl211_dealt_view : viewT :=
-  [ffun i => psl211_code12 (nth 0 [:: 0; 1; 6] (val i))].
-
-(** psl211_dealt_test sq t — what the coalition is granted of the deck sq
-    under the cut whose table is t matches psl211_dealt_view, tested on raw
-    codes. *)
-Definition psl211_dealt_test (sq t : seq nat) : bool :=
-  [&& nth 0 sq (nth 0 t 0) %% 12 == 0,
-      nth 0 sq (nth 0 t 1) %% 12 == 1 &
-      nth 0 sq (nth 0 t 2) %% 12 == 6].
-
-(** psl211_dealt_testE — the raw test decides the reading, so the fiber over
-    psl211_dealt_view is counted by a boolean on nat lists. *)
-Lemma psl211_dealt_testE (sq t : seq nat) :
-  (psl211_perdeck_raw_view sq t == psl211_dealt_view) = psl211_dealt_test sq t.
-Proof.
-rewrite /psl211_dealt_test; apply/idP/idP.
-- move/eqP/ffunP => H; apply/and3P; split; apply/eqP.
-  + by move: (H (psl211_code12 0)) => /(congr1 val); rewrite !ffunE /=.
-  + by move: (H (psl211_code12 1)) => /(congr1 val); rewrite !ffunE /=.
-  + by move: (H (psl211_code12 2)) => /(congr1 val); rewrite !ffunE /=.
-- case/and3P => H0 H1 H2; apply/eqP/ffunP => i.
-  rewrite !ffunE; apply/val_inj.
-  case: i => [] [|[|[|k]]] Hk //=.
-  + by rewrite (eqP H0).
-  + by rewrite (eqP H1).
-  + by rewrite (eqP H2).
-  + by rewrite nth_default.
-Qed.
-
-(** psl211_dealt_raw_count b — how many of the 660 cuts carry the encoder deck
-    of chirality b to psl211_dealt_view. *)
-Definition psl211_dealt_raw_count (b : bool) : nat :=
-  count (psl211_dealt_test (psl211_dealt_decktbl b))
-    (unzip1 psl211_elem_table).
-
-(** psl211_dealt_raw_countE — that count is zero at one chirality and one at
-    the other. *)
-(* vm_compute reads the closure table's body whatever the conversion oracle
-   has been told, so this sentence is unaffected by the Local Opaque the
-   block-line section leaves standing. *)
-Lemma psl211_dealt_raw_countE :
-  psl211_dealt_raw_count true = 0 /\ psl211_dealt_raw_count false = 1.
-Proof. by split; vm_compute. Qed.
-
-(** psl211_dealt_static_obsE — seat i's entry of the framework's static
-    coalition reading under the dealt parameters is the card the encoder deck
-    of the run argument puts at the cut image of seat i. The dealt analogue of
-    psl211_alldecks_static_obsE. *)
-Lemma psl211_dealt_static_obsE (C : {set seatT})
-    (b : ex_inputT psl211_dealt_params) (g : cutT) (i : seatT) :
-  @static_coalition_obs psl211_algebra psl211_dealt_params C b g i
-  = if i \in C
-    then tnth (psl211_orbit_encode b) (@pgg_rho psl211_M g i)
-    else ord0.
-Proof.
-rewrite static_coalition_obsE.
-by case: ifP => // _; rewrite /= tnth_ord_tuple.
-Qed.
-
-(** psl211_dealt_raw_viewE — the raw reading is the framework's reading. *)
-Lemma psl211_dealt_raw_viewE (b : bool) (g : cutT) :
-  psl211_perdeck_raw_view (psl211_dealt_decktbl b) (psl211_ptbl g)
-  = @static_coalition_obs psl211_algebra psl211_dealt_params
-      psl211_perdeck_coalition b g.
-Proof.
-apply/ffunP => i.
-rewrite /psl211_perdeck_raw_view ffunE psl211_dealt_static_obsE.
-(* in_set and not inE: inE would rewrite the seq membership on the left
-   instead of the set membership on the right *)
-rewrite /psl211_perdeck_coalition in_set.
-case Hi: (val i \in [:: 0; 1; 2]) => //.
-rewrite psl211_perdeck_ptbl_nth; apply/val_inj.
-by rewrite psl211_dealt_decktblE /= psl211_dealt_decktbl_mod.
-Qed.
-
-(** psl211_dealt_fiber b — the cuts of the group carrying the encoder deck of
-    chirality b to psl211_dealt_view. *)
-Definition psl211_dealt_fiber (b : bool) : {set cutT} :=
-  [set g in pgg_G psl211_M |
-     @static_coalition_obs psl211_algebra psl211_dealt_params
-       psl211_perdeck_coalition b g == psl211_dealt_view].
-
-(** psl211_dealt_fiberE — that fiber has the raw count as its cardinality. *)
-Lemma psl211_dealt_fiberE (b : bool) :
-  #|psl211_dealt_fiber b| = psl211_dealt_raw_count b.
-Proof.
-rewrite /psl211_dealt_fiber /psl211_dealt_raw_count.
-transitivity
-  (count (fun g => @static_coalition_obs psl211_algebra psl211_dealt_params
-      psl211_perdeck_coalition b g == psl211_dealt_view)
-    (enum (pgg_G psl211_M))).
-  rewrite cardE /enum_mem size_filter count_filter.
-  by apply: eq_count => g; rewrite !inE andbC.
-transitivity
-  (count (psl211_dealt_test (psl211_dealt_decktbl b))
-    [seq psl211_ptbl g | g <- enum (pgg_G psl211_M)]).
-  rewrite count_map; apply: eq_count => g.
-  by rewrite -psl211_dealt_raw_viewE psl211_dealt_testE.
-rewrite -!size_filter; apply: perm_size.
-exact: (perm_filter _ psl211_perdeck_ptbl_enum).
-Qed.
-
-(* psl211_dealt_raw_count is sealed for the rest of the file: nothing further
-   needs its body, psl211_dealt_raw_countE supplies both values, and leaving
-   it transparent lets a unifier that falls back to conversion evaluate the
-   count over the 660 tabulated cuts. *)
+(* psl211_dealt_raw_count is sealed here as it is where it is defined: the
+   seal is per file, and a unifier that falls back to conversion would
+   otherwise evaluate the count over the 660 tabulated cuts. *)
 Local Opaque psl211_dealt_raw_count.
-
-(** psl211_dealt_massE b — at the encoder deck of chirality b the law of what
-    the coalition reads gives psl211_dealt_view the mass of its fiber of cuts
-    over the order of the shuffle group. *)
-Lemma psl211_dealt_massE (R : realType) (b : bool) :
-  (fdistmap (@static_coalition_obs psl211_algebra psl211_dealt_params
-       psl211_perdeck_coalition b) ((`U psl211_G_pos) : R.-fdist cutT))
-     psl211_dealt_view
-  = (#|pgg_G psl211_M|%:R)^-1 *+ #|psl211_dealt_fiber b| :> R.
-Proof. by rewrite /psl211_dealt_fiber uniform_fdistmap_pointE. Qed.
 
 (** psl211_dealt_constancy_false — under the dealer-dealt run parameters the
     constancy field is false at the uniform law on the shuffle group, so no
@@ -1066,7 +905,7 @@ Proof. by rewrite /psl211_dealt_fiber uniform_fdistmap_pointE. Qed.
     through pgl27_word_view_const. The statement rules out one named ideal and
     no certificate. An ideal can be pinned to these parameters through the
     dealer-dealt sample adapter psl211_dealt_sample of
-    instances/psl211/psl211_colour_reading.v, and no certificate is built over
+    instances/psl211/psl211_dealt_model.v, and no certificate is built over
     it. The dealt parameters read their endpoints through profile_endpointsE, so
     instances/psl211/psl211_models.v carries an endpoints statement and an
     observed execution for them, and

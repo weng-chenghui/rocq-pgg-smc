@@ -8,12 +8,12 @@
 (* The colour theorems of instances/psl211/psl211_secrecy.v are read in       *)
 (* psl211P, the law of a chirality bit drawn from a prior together with an    *)
 (* independent uniform PSL(2,11) shuffle. A proposition of the Tableau is     *)
-(* stated at a sample adapter and at a reading, and this file supplies both   *)
-(* over that law: the adapter psl211_dealt_sample over the dealer-dealt run   *)
-(* parameters, whose run argument carrier is the chirality itself, and the    *)
-(* colour reading, which gives each position of a coalition the colour of     *)
-(* the card the encoder deck of that chirality puts at the cut image of that  *)
-(* position.                                                                  *)
+(* stated at a sample adapter and at a reading. The adapter over that law is  *)
+(* psl211_dealt_sample of instances/psl211/psl211_dealt_model.v, over the     *)
+(* dealer-dealt run parameters, whose run argument carrier is the chirality   *)
+(* itself. What this file supplies is the reading: the colour reading, which  *)
+(* gives each position of a coalition the colour of the card the encoder      *)
+(* deck of that chirality puts at the cut image of that position.             *)
 (*                                                                            *)
 (* Two readings of one model are separated here. The colour reading is a      *)
 (* non-injective function of the coalition's card-identity reading, so the    *)
@@ -33,10 +33,15 @@
 (* and the identification of that reading with the executed one is the link   *)
 (* lemma the Sampled level of that file proves.                               *)
 (*                                                                            *)
+(* The model itself is not built here. The sample adapter                     *)
+(* psl211_dealt_sample, the colour map psl211_colour_of_reading and the two   *)
+(* theorems the analysis manifest's dealer-dealt paths name are stated in     *)
+(* instances/psl211/psl211_dealt_model.v, below the analysis manifest,        *)
+(* because a theorem a manifest path names has to be reachable from the       *)
+(* facade. What is here is the reading record those results are read at and   *)
+(* the statements that need it.                                               *)
+(*                                                                            *)
 (* Definitions:                                                               *)
-(*   psl211_dealt_sample       == the fixed-dealer colour model as a sample   *)
-(*                                adapter over the dealer-dealt execution     *)
-(*   psl211_colour_of_reading  == the colour map on a coalition's endpoints   *)
 (*   psl211_colour_reading     == the colour of the card at each position of  *)
 (*                                a coalition, as a reading of its endpoints  *)
 (*   psl211_dealt_perdeck_reading                                             *)
@@ -44,16 +49,6 @@
 (*                                positions, as a random variable             *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   psl211_dealt_inputTE      == the run argument carrier of the dealt plug  *)
-(*                                is the chirality                            *)
-(*   psl211_dealt_sample_lawE  == the adapter's law is psl211P                *)
-(*   psl211_dealt_sample_argE  == the run argument is the chirality bit       *)
-(*   psl211_dealt_sample_cutE  == the cut is the shuffle                      *)
-(*   psl211_dealt_sample_cut_distE                                            *)
-(*                             == the cut law is uniform on the group         *)
-(*   psl211_colour_of_reading_obsE                                            *)
-(*                             == a coalition's endpoints read through the    *)
-(*                                colour map give its colour pattern          *)
 (*   psl211_colour_readingE    == the model's colour view is the reading's    *)
 (*                                value at that sample point                  *)
 (*   psl211_colour_reading_funE                                               *)
@@ -61,9 +56,6 @@
 (*   psl211_colour_indistinguishability_of_coalition_reading                  *)
 (*                             == the post-processing law at that             *)
 (*                                factorisation                               *)
-(*   psl211_colour_of_reading_collides                                        *)
-(*                             == that colour map is not injective at a       *)
-(*                                nonempty coalition                          *)
 (*   psl211_colour_reading_indep                                              *)
 (*                             == below the threshold the colour reading is   *)
 (*                                independent of the chirality                *)
@@ -93,7 +85,8 @@ From pgg_smc Require Import pgg_instance pgg_sample_adapter.
 From pgg_reconstruct Require Import transitivity_privacy design_privacy.
 From pgg_smc Require Import psl211_group psl211_orbit psl211_scheme.
 From pgg_smc Require Import psl211_profile psl211_exec psl211_secrecy.
-From pgg_smc Require Import psl211_models psl211_reading_constancy.
+From pgg_smc Require Import psl211_models psl211_dealt_model.
+From pgg_smc Require Import psl211_reading_constancy.
 From pgg_smc Require Import pgg_tableau pgg_tableau_reading.
 
 Set Implicit Arguments.
@@ -113,90 +106,8 @@ Local Notation cutT := (pgg_gT (mp_M (instance_profile psl211_algebra))).
 
 
 (******************************************************************************)
-(*     The fixed-dealer colour model as a sample adapter                      *)
-(******************************************************************************)
-
-(** psl211_dealt_inputTE — the run argument carrier of the dealer-dealt plug
-    is the Boolean chirality, the first coordinate of a sample point of
-    psl211P. The two layers therefore meet with no coercion between them. *)
-Lemma psl211_dealt_inputTE :
-  ep_inputT (instance_exec psl211_dealt_params) = bool.
-Proof. by []. Qed.
-
-(* Why the dealer-dealt mode and not the all-decks one: the all-decks run
-   argument is a whole deck description and its law psl211_alldecksP redraws
-   the deck, so psl211_alldecks_sample is over a different sample space and a
-   different execution, and the weighted-word family draws the cut from a walk
-   rather than uniformly. No family of this instance has psl211P as its law. *)
-
-(** psl211_dealt_sample — the fixed-dealer colour model as a sample adapter
-    over the dealer-dealt execution: one sample point is a chirality bit and
-    a cut, the bit from the prior and the cut uniform on PSL(2,11), the two
-    independent; the run argument is the bit and the cut is the shuffle. The
-    run argument of these parameters is the chirality itself, and the
-    chirality is what the colour view reads. Every statement made over this
-    adapter is about the model's law and a reading of a coalition's
-    endpoints; the Sampled level built over these parameters in
-    instances/psl211/tableau/psl211_tableau_dealt.v is what identifies that
-    reading with the executed one. *)
-Definition psl211_dealt_sample (R : realType) (secretP : R.-fdist bool)
-  : SampleAdapter R (instance_exec psl211_dealt_params) :=
-  @MkSampleAdapter R (instance_profile psl211_algebra)
-    (instance_exec psl211_dealt_params)
-    ((bool * pgg_gT psl211_M)%type : finType)
-    (psl211P secretP) fst snd.
-
-(** psl211_dealt_sample_lawE — the adapter's law is the model's law. *)
-Lemma psl211_dealt_sample_lawE (R : realType) (secretP : R.-fdist bool) :
-  sa_sampleP (psl211_dealt_sample secretP) = psl211P secretP.
-Proof. by []. Qed.
-
-(** psl211_dealt_sample_argE — the run argument of a sample point is its
-    chirality bit. *)
-Lemma psl211_dealt_sample_argE (R : realType) (secretP : R.-fdist bool)
-    (u : bool * pgg_gT psl211_M) :
-  (psl211_dealt_sample secretP).(sa_arg) u = u.1.
-Proof. by []. Qed.
-
-(** psl211_dealt_sample_cutE — the cut of a sample point is its shuffle. *)
-Lemma psl211_dealt_sample_cutE (R : realType) (secretP : R.-fdist bool)
-    (u : bool * pgg_gT psl211_M) :
-  (psl211_dealt_sample secretP).(sa_cut) u = u.2.
-Proof. by []. Qed.
-
-(** psl211_dealt_sample_cut_distE — the cut this model draws is the uniform
-    law on the shuffle group, whatever the prior on the chirality. The
-    input-indistinguishability proposition at a reading pushes the reading
-    forward along this law, so it is the law the colour theorems' own
-    uniformity hypothesis meets. *)
-Lemma psl211_dealt_sample_cut_distE (R : realType) (secretP : R.-fdist bool) :
-  @sa_cut_dist R (instance_profile psl211_algebra)
-    (instance_exec psl211_dealt_params) (psl211_dealt_sample secretP)
-  = (`U psl211_G_pos : R.-fdist (pgg_gT psl211_M)).
-Proof.
-have -> : @sa_cut_dist R (instance_profile psl211_algebra)
-            (instance_exec psl211_dealt_params) (psl211_dealt_sample secretP)
-        = fdist_snd (psl211P secretP) by [].
-apply/fdist_ext => g; rewrite fdist_sndE.
-under eq_bigr do rewrite /psl211P fdist_prodE /=.
-by rewrite -big_distrl /= FDist.f1 mul1r.
-Qed.
-
-
-(******************************************************************************)
 (*     The colour view as a reading of a coalition's endpoints                *)
 (******************************************************************************)
-
-(** psl211_colour_of_reading — the colour map on a coalition's endpoints:
-    send each position of the coalition to the colour, heart or club, of the
-    card that position holds, and every position outside the coalition to
-    false. It is the read function of psl211_colour_reading below, and it is
-    a function of the coalition as well as of the endpoint map, because a
-    coalition's endpoints give card zero outside the coalition and card zero
-    is a heart. *)
-Definition psl211_colour_of_reading (C : {set seats})
-    (v : {ffun seats -> cards}) : {ffun seats -> bool} :=
-  [ffun i => if i \in C then psl211_is_heart (v i) else false].
 
 (** psl211_colour_reading — the colour a coalition sees at each of its
     positions, as a reading of that coalition's endpoints: keep the colour of
@@ -212,35 +123,6 @@ Definition psl211_colour_reading : CoalitionReading psl211_algebra :=
     (fun _ => [the finType of {ffun seats -> bool}])
     psl211_colour_of_reading.
 
-(** psl211_colour_of_reading_obsE — reading a coalition's endpoints through
-    the colour map gives each position of the coalition the colour of the
-    card the encoder deck of that chirality puts at the cut image of the
-    position. It is where the instance's seat reconciliation enters: the
-    framework's endpoint map indexes through pi_starts and the colour pattern
-    does not. *)
-Lemma psl211_colour_of_reading_obsE (C : {set seats})
-    (b : ex_inputT psl211_dealt_params) (g : cutT) :
-  psl211_colour_of_reading C
-    (@static_coalition_obs psl211_algebra psl211_dealt_params C b g)
-  = [ffun i => if i \in C
-               then psl211_is_heart
-                      (tnth (psl211_orbit_encode b) (@pgg_rho psl211_M g i))
-               else false].
-Proof.
-apply/ffunP => i.
-have HR : psl211_colour_of_reading C
-            (@static_coalition_obs psl211_algebra psl211_dealt_params C b g) i
-        = if i \in C
-          then psl211_is_heart
-                 (tnth (psl211_orbit_encode b) (@pgg_rho psl211_M g i))
-          else false.
-  rewrite /psl211_colour_of_reading ffunE psl211_dealt_static_obsE.
-  (* the membership is cased and not the outer conditional alone: the
-     reconciliation leaves a second copy of it under psl211_is_heart *)
-  by case: (i \in C).
-by rewrite HR ffunE.
-Qed.
-
 (** psl211_colour_readingE — the model's colour view of a sample point is what
     the colour reading grants the coalition of that point's endpoints. It is
     where the instance's seat reconciliation is used: the colour view is
@@ -253,9 +135,10 @@ Lemma psl211_colour_readingE (R : realType) (secretP : R.-fdist bool)
   = cr_read psl211_colour_reading C
       (static_coalition_obs C ((psl211_dealt_sample secretP).(sa_arg) u)
          ((psl211_dealt_sample secretP).(sa_cut) u)).
+(* The reading record's read function is psl211_colour_of_reading by one iota
+   step, so the raw identification is this one at a fixed sample point. *)
 Proof.
-rewrite /cr_read /psl211_colour_reading psl211_colour_of_reading_obsE.
-by apply/ffunP => i; rewrite /psl211_colour_view /colour_view !ffunE.
+exact: (congr1 (fun f => f u) (psl211_dealt_colour_viewE secretP C)).
 Qed.
 
 (** psl211_colour_reading_funE — the same identification with the sample point
@@ -269,7 +152,7 @@ Lemma psl211_colour_reading_funE (R : realType) (secretP : R.-fdist bool)
                 (static_coalition_obs C
                    ((psl211_dealt_sample secretP).(sa_arg) u)
                    ((psl211_dealt_sample secretP).(sa_cut) u))).
-Proof. by apply: boolp.funext => u; exact: psl211_colour_readingE. Qed.
+Proof. exact: psl211_dealt_colour_viewE. Qed.
 
 
 (******************************************************************************)
@@ -302,26 +185,6 @@ exact: (reading_indistinguishability_postprocessing
           (fun C v => erefl) c).
 Qed.
 
-(** psl211_colour_of_reading_collides — two finite maps that give a position
-    of the coalition two different hearts have the same colour value, so the
-    colour map is not injective and the factorisation of
-    psl211_colour_indistinguishability_of_coalition_reading runs in one
-    direction only. That the two readings themselves differ is not this lemma's
-    content; it is psl211_dealt_reading_indep_false. *)
-Lemma psl211_colour_of_reading_collides (C : {set seats}) (i0 : seats) :
-  i0 \in C ->
-  exists v w : {ffun seats -> cards},
-    v != w /\ psl211_colour_of_reading C v = psl211_colour_of_reading C w.
-Proof.
-move=> Hi0.
-exists [ffun _ : seats => (@Ordinal 12 0 isT : cards)],
-       [ffun _ : seats => (@Ordinal 12 1 isT : cards)]; split.
-  apply/eqP => Hvw; have := congr1 (fun f : {ffun seats -> cards} => f i0) Hvw.
-  by rewrite !ffunE.
-by apply/ffunP => i; rewrite /psl211_colour_of_reading !ffunE; case: ifP.
-Qed.
-
-
 (******************************************************************************)
 (*     Exact independence at the colour reading, and the sharp threshold      *)
 (******************************************************************************)
@@ -340,11 +203,9 @@ Qed.
 Lemma psl211_colour_reading_indep (R : realType) (secretP : R.-fdist bool) :
   ReadingExactIndependence (psl211_dealt_sample secretP) psl211_colour_reading
     (psl211_secret secretP).
-Proof.
-move=> C HC.
-have HC5 : (#|C| <= 5)%N by rewrite -ltnS -profile_k_psl211_algebra; exact: HC.
-by rewrite -psl211_colour_reading_funE; exact: psl211_colour_view_indep HC5.
-Qed.
+(* The proposition is the raw theorem with the reading record's read function
+   in place of psl211_colour_of_reading, one iota step apart. *)
+Proof. exact: psl211_dealt_colour_indep. Qed.
 
 (** psl211_leak_coalition_not_below_k — the six positions of the mirror
     representative are not below the framework's threshold, so the coalition
