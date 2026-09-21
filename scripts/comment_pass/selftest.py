@@ -13,6 +13,9 @@ Rocq process is started.  Four groups:
   c  rename build, apply and check with a two-name map, one new name long
      enough to make an index entry wrap.
   d  the reverse closure of the last commit, and a dry run of the compiles.
+  e  a paragraph that sets two spaces after a sentence keeps them when it is
+     laid out again, an abbreviation in mid-sentence keeps its single space,
+     and a paragraph with single spacing is not given double spacing.
 
 usage: selftest.py [--dir DIR] [--repo DIR] [--only a,b,c,d]
 """
@@ -187,11 +190,32 @@ def group_d(d, repo):
     return ok
 
 
+def group_e():
+    two = ("(* Its own file.  Compiling it beside another proof is not an "
+           "option, see e.g. the note of the instance.  The closure table is "
+           "read through a seal, so nothing here unfolds it. *)\nLemma a : True."
+           "\nProof. by []. Qed.\n")
+    one = two.replace(".  ", ". ")
+    ok = True
+    for text, want in ((two, 2), (one, 0)):
+        new, _ = R.reflow_text(text, None, True)
+        again, _ = R.reflow_text(new, None, True)
+        got = new.count(".  ")
+        ok &= got == want and again == new
+        ok &= C.prose_words(new) == C.prose_words(text)
+        ok &= C.code_tokens(new) == C.code_tokens(text)
+        ok &= "e.g. the" in new.replace("\n   ", " ")
+        print("  double gaps %d (want %d), idempotent %s" % (got, want,
+                                                            again == new))
+    print("group e: %s" % ("OK" if ok else "PROBLEMS"))
+    return ok
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", default=DEFAULT_DIR)
     ap.add_argument("--repo", default=os.path.dirname(os.path.dirname(HERE)))
-    ap.add_argument("--only", default="a,b,c,d")
+    ap.add_argument("--only", default="a,b,c,d,e")
     a = ap.parse_args()
     os.makedirs(a.dir, exist_ok=True)
     base, work = setup(a.dir, a.repo)
@@ -209,6 +233,9 @@ def main():
     if "d" in only:
         print("\n===== group d: the closure and a dry run of the compiles")
         res["d"] = group_d(a.dir, a.repo)
+    if "e" in only:
+        print("\n===== group e: two-space sentence spacing is kept")
+        res["e"] = group_e()
     print("\n===== %s" % ", ".join("%s %s" % (k, "OK" if v else "PROBLEMS")
                                    for k, v in sorted(res.items())))
     return 0 if all(res.values()) else 1

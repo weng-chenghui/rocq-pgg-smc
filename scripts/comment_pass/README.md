@@ -85,7 +85,14 @@ stays whole. A last line that holds one word only because the closing
 delimiter did not fit is rebalanced against the line above it. Only the
 paragraphs whose words differ from the base are touched, unless `--all` is
 given. The pass is idempotent and leaves the words of every paragraph
-unchanged.
+unchanged. A paragraph that sets two spaces after a sentence keeps them:
+the gap is doubled after a word ending a sentence when the next word does not
+start in lower case, so an abbreviation in mid-sentence keeps its single
+space. `--all` lays out every paragraph by these rules, so on a file that was
+laid out by hand on a grid of its own (a 77-byte box, an index with two `==`
+columns, a list inside a prose paragraph) it rewrites lines nobody edited:
+use it only on a file this tool laid out before, and edit such places line by
+line.
 
 **`check_pass.py sites.tsv --base REV [--words W...]`** is the audit of an
 applied pass. For every file that differs from the base it checks that the

@@ -338,6 +338,7 @@ def paragraphs(text, path=""):
     for k, b in enumerate(blocks):
         for p in b.paras:
             p.block = k
+            p.double = has_double_spacing(lines[p.first:p.last + 1])
     return blocks, [p for b in blocks for p in b.paras]
 
 
@@ -492,7 +493,32 @@ def _join(cur, w):
     return cur + w if (not cur or cur.endswith(" ")) else cur + " " + w
 
 
-def wrap(words, first, cont, limit, tail="", floor=None):
+SENTENCE_END = re.compile(r"[.?!][)\]]?$")
+
+
+def _gap(prev, nxt, double):
+    """The space between two words of one line.  A paragraph that sets two
+    spaces after a sentence keeps them: the gap is doubled after a word that
+    ends a sentence when the next word does not start in lower case, so that
+    an abbreviation in mid-sentence keeps its single space."""
+    if double and SENTENCE_END.search(prev) and not nxt[:1].islower():
+        return "  "
+    return " "
+
+
+def _line(words, double):
+    out = ""
+    for k, w in enumerate(words):
+        out += (_gap(words[k - 1], w, double) if k else "") + w
+    return out
+
+
+def has_double_spacing(lines):
+    """Whether a paragraph sets two spaces after a sentence inside a line."""
+    return any(re.search(r"[.?!][)\]]?  +[^\s*]", x) for x in lines)
+
+
+def wrap(words, first, cont, limit, tail="", floor=None, double=False):
     """Greedy fill by bytes, then one rebalance so that the last line does
     not hold a single short word while the line above has room.  Never splits
     a word, so a hyphenated word stays whole."""
@@ -501,7 +527,8 @@ def wrap(words, first, cont, limit, tail="", floor=None):
     groups = [[]]
     for k, w in enumerate(words):
         pref = first if len(groups) == 1 else cont
-        cand = _join(pref + " ".join(groups[-1]) if groups[-1] else pref, w)
+        cand = (pref + _line(groups[-1] + [w], double)) if groups[-1] \
+            else _join(pref, w)
         extra = bw(tail) if k == len(words) - 1 else 0
         if groups[-1] and bw(cand) + extra > limit:
             groups.append([w])
@@ -510,16 +537,18 @@ def wrap(words, first, cont, limit, tail="", floor=None):
     if len(groups) >= 2 and len(groups[-1]) == 1 and len(groups[-2]) >= 2:
         # An orphan the closing delimiter alone pushed down: the word itself
         # would have fitted on the line above.  Rebalance the two lines.
-        above = (first if len(groups) == 2 else cont) + " ".join(groups[-2])
+        above = (first if len(groups) == 2 else cont) \
+            + _line(groups[-2], double)
         moved = [groups[-2][-1]] + groups[-1]
-        if (bw(above + " " + groups[-1][0]) <= limit
-                and bw(cont + " ".join(moved)) + bw(tail) <= limit):
+        if (bw(above + _gap(groups[-2][-1], groups[-1][0], double)
+               + groups[-1][0]) <= limit
+                and bw(cont + _line(moved, double)) + bw(tail) <= limit):
             groups[-2] = groups[-2][:-1]
             groups[-1] = moved
     out = []
     for k, g in enumerate(groups):
         pref = first if k == 0 else cont
-        line = (pref + " ".join(g)).rstrip()
+        line = (pref + _line(g, double)).rstrip()
         extra = bw(tail) if k == len(groups) - 1 else 0
         if (floor is not None and len(g) == 1 and k and bw(line) + extra > limit
                 and not cont.strip()):
@@ -543,31 +572,34 @@ def render_para(para, words=None):
     if para.raw is not None and w == para.words:
         return [boxline(x.rstrip()) for x in para.raw]
     L = para.layout
+    D = getattr(para, "double", False)
     if para.kind == "banner":
         ind = " " * L["indent"]
         return [boxline(x) for x in
-                wrap(w, ind, ind, BOX_FILL, floor=L["indent"])]
+                wrap(w, ind, ind, BOX_FILL, floor=L["indent"], double=D)]
     if para.kind == "table":
         return [boxline(x.rstrip()) for x in para.raw]
     if para.kind == "box-prose":
         return [boxline(x) for x in
                 wrap(w, " " * L["base"], " " * L["cont"], BOX_FILL,
-                     floor=L["base"])]
+                     floor=L["base"], double=D)]
     if para.kind == "box-index":
         ent, eq = L["ent"], L["eq"]
         if "==" not in w:
             return [boxline(x) for x in
-                    wrap(w, " " * ent, " " * (eq + 3), BOX_FILL, floor=eq)]
+                    wrap(w, " " * ent, " " * (eq + 3), BOX_FILL, floor=eq,
+                         double=D)]
         cut = w.index("==")
         name, desc = " ".join(w[:cut]), w[cut + 1:]
         cont = " " * (eq + 3)
         if ent + bw(name) + 1 <= eq:
             first = " " * ent + name + " " * (eq - ent - bw(name)) + "== "
             return [boxline(x) for x in
-                    wrap(desc, first, cont, BOX_FILL, floor=eq)]
+                    wrap(desc, first, cont, BOX_FILL, floor=eq, double=D)]
         out = [boxline(" " * ent + name)]
         out += [boxline(x) for x in
-                wrap(desc, " " * eq + "== ", cont, BOX_FILL, floor=eq)]
+                wrap(desc, " " * eq + "== ", cont, BOX_FILL, floor=eq,
+                     double=D)]
         return out
     raise ValueError(para.kind)
 
@@ -590,7 +622,7 @@ def render_block(blk, new_words=None):
         if k:
             lines.append("")
         lines += wrap(words_of(p), first, cont, LINE_LIMIT, tail,
-                      floor=L["col"])
+                      floor=L["col"], double=getattr(p, "double", False))
     return lines
 
 
