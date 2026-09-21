@@ -94,3 +94,21 @@ Opus audit of spec and probe (soundness and naming together, asked what is
 worth landing), rulings, landing by an Opus rocq-prover, main-session
 recompile of the closure and of the fidelity file, one audit of the landed
 comments, fix pass, commit.
+
+## 6. Probe and audit, folded (2026-09-21)
+
+Records: `notes/probes/2026-09-21-dealt-manifest-paths/` (`LEDGER.md`,
+`AUDIT.md`, `RULINGS.md`, the staged tree, `fidelity.v`). All nine rows GO.
+`AnalysisModelFamily` is defined in `manifest/pgg_analysis_status.v`, below
+the manifest, so the family moves down with no obstacle; 26 declarations move
+verbatim into `instances/psl211/psl211_dealt_model.v`; the raw theorems are
+`psl211_dealt_colour_indep` (the unfolding of `ReadingExactIndependence` at
+the colour map, at the adapter's SAMPLE law) and
+`psl211_dealt_perdeck_reading_ge` (the bare inequality at 1/660, twin of the
+all-decks one); 35 existing statements unchanged; closure 34 files, no frozen
+file. The audit's corrections are to the manifest prose: the distribution of
+Path 13's theorem is the sample law and not the cut law, the two failure
+sentences carry the premise that the prior gives mass to both chiralities,
+and the comparison with Path 12 is restated. Landing: one commit, source the
+staged tree with the rulings applied.
+

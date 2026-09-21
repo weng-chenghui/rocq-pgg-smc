@@ -1,0 +1,48 @@
+-arg -w -arg -projection-no-head-constant
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -notation-overridden
+-arg -w -arg -ambiguous-paths
+-arg -w -arg -notation-incompatible-format
+
+-R ../../../lib pgg_smc
+-R ../../../protocol pgg_smc
+-R ../../../groups pgg_smc
+-R ../../../security pgg_smc
+-R ../../../smc pgg_smc
+-R ../../../reconstruct pgg_reconstruct
+-R ../../../instances/denboer1989 pgg_smc
+-R ../../../instances/kim2025 pgg_smc
+-R ../../../instances/s5 pgg_smc
+-R ../../../instances/pgl27 pgg_smc
+-R ../../../instances/psl211 pgg_smc
+-R ../../../manifest pgg_smc
+-R ../../../legacy/groups pgg_smc
+-R ../../../legacy/instances/abelian pgg_smc
+-R ../../../legacy/instances/cyclic pgg_smc
+-R ../../../legacy/instances/monster pgg_smc
+-R ../../../legacy/instances/oc pgg_smc
+-R ../../../legacy/instances/s5x5 pgg_smc
+-R ../../../legacy/instances/star pgg_smc
+-R ../../../legacy/protocol pgg_smc
+-R ../../../legacy/reconstruct pgg_reconstruct
+-R ../../../legacy/security pgg_smc
+
+-Q . dealt_manifest_paths
+
+# The staged roots are mapped to pgg_smc AFTER production's lines, because
+# Rocq 9.0.0 resolves a Require to the LAST matching -R or -Q entry, so a
+# staged copy shadows the production file of the same module name.
+-R staged/manifest pgg_smc
+-R staged/instances/psl211 pgg_smc
+
+staged/instances/psl211/psl211_dealt_model.v
+staged/instances/psl211/psl211_analysis.v
+staged/manifest/pgg_analysis_manifest.v
+staged/manifest/pgg_tableau.v
+staged/manifest/pgg_tableau_syntax.v
+staged/manifest/pgg_tableau_reading.v
+staged/instances/psl211/psl211_reading_constancy.v
+staged/instances/psl211/psl211_colour_reading.v
+staged/instances/psl211/tableau/psl211_tableau_dealt.v
+staged/manifest/pgg_analysis_client.v
+fidelity.v
