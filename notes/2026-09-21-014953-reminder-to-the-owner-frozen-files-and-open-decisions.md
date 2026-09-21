@@ -114,9 +114,9 @@ without losing work, since every one was landed as a pure addition.
    `at R idx by b` in the five-clause rule; ONE reading record
    (`CoalitionReading`) with `StaticReading` retired; every obstruction
    program names its reading and the terminal without a reading was removed.
-9. **Later units the reading work left:** a manifest path for the colour
-   program (a thirteenth; its raw theorem must first sit below the manifest,
-   as for the twelfth); post-processing of ideal proximity (attempted, the
+9. **Later units the reading work left:** the manifest paths for the two
+   programs over the dealer-dealt model are DONE (the thirteenth and the
+   fourteenth, main 22e3d22); post-processing of ideal proximity (attempted, the
    construction does not typecheck yet, nothing calls it); slot-name clauses
    (`sample f`, `dealt fuel n`, `ideal u`) still read as an application to a
    first reader, and only a change of the language's shape would cure it;
@@ -137,9 +137,10 @@ without losing work, since every one was landed as a pure addition.
    Neither touches a frozen file.
 11. **`legacy/`** was not recompiled after the pass of 2026-09-21 (nor after
    any landing of this campaign); its compiled files are older than what they
-   require. Tool defects recorded: `scripts/comment_pass/reflow.py` joins
-   sentences with one space and its `--all` is not idempotent on the frozen
-   files.
+   require. Tool defect fixed on 2026-09-21 (b426481): the layout pass keeps two-space
+   sentence spacing. `--all` was idempotent all along; what it does is lay out
+   hand-laid files by its own rules, and its README now says where not to use
+   it.
 
 ## 5. Paper
 
