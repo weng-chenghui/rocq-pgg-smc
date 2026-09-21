@@ -12,7 +12,7 @@
 (* One reading factors through another when a coalitionwise map sends what    *)
 (* the finer grants to what the coarser grants. Along such a map the two      *)
 (* distance properties travel in opposite directions, and saying which is     *)
-(* the whole content of the file. An input-indistinguishability bound travels *)
+(* most of what the file holds. An input-indistinguishability bound travels   *)
 (* from the finer reading to the coarser one, which is the data processing    *)
 (* inequality: granting a coalition less cannot separate two run arguments    *)
 (* further. Input DISTINGUISHABILITY travels the other way, from the coarser  *)
@@ -53,9 +53,9 @@
 (*                              == so every obstruction is one at the         *)
 (*                                 coalition's own endpoints                  *)
 (*   indistinguishability_number_ge_across_readings                           *)
-(*                              == an obstruction at a reading and a          *)
-(*                                 certificate at a finer one bound each      *)
-(*                                 other                                      *)
+(*                              == an obstruction at a reading bounds from    *)
+(*                                 below the number of a certificate at a     *)
+(*                                 finer one                                  *)
 (*   exact_independence_of_witness                                            *)
 (*                              == a witness is exact independence at its     *)
 (*                                 own reading                                *)
@@ -199,10 +199,10 @@ exact: (input_distinguishability_prop_finer
           (reading_factors_coalition_endpoint_reading r)).
 Qed.
 
-(* An obstruction at one reading and a certificate at a reading the first
-   factors through bound each other. The number bound of the framework is
-   this one at a single reading; a bound across two readings needs the
-   factorisation and is this lemma, not that one. *)
+(* An obstruction at one reading bounds from below the number of a
+   certificate at a reading the first factors through. The number bound of
+   the framework is this one at a single reading. A bound across two
+   readings needs the factorisation and is this lemma, not that one. *)
 Lemma indistinguishability_number_ge_across_readings
     (r r' : CoalitionReading A)
     (f : forall C : {set seats}, @cr_readT A r C -> @cr_readT A r' C)
@@ -220,8 +220,8 @@ Qed.
 (*     Exact independence at a reading                                        *)
 (******************************************************************************)
 
-(* Exact independence at a reading r: below the privacy threshold, the
-   coalition's reading through r of the model's own run argument and cut is
+(* Exact independence at a reading r: below the privacy threshold, what r
+   grants the coalition of the model's own run argument and cut is
    independent of the secret. It is an independence and not a numeric bound.
    The framework's entropy forms sit inside ExactProp, derived there from
    independence of the executed coalition view, which this proposition

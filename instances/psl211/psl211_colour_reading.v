@@ -36,9 +36,9 @@
 (* Definitions:                                                               *)
 (*   psl211_dealt_sample       == the fixed-dealer colour model as a sample   *)
 (*                                adapter over the dealer-dealt execution     *)
+(*   psl211_colour_of_reading  == the colour map on a coalition's endpoints   *)
 (*   psl211_colour_reading     == the colour of the card at each position of  *)
-(*                                a coalition, as a static reading            *)
-(*   psl211_colour_of_reading  == the colour map on card-identity readings    *)
+(*                                a coalition, as a reading of its endpoints  *)
 (*   psl211_dealt_perdeck_reading                                             *)
 (*                             == the card-identity reading of three named    *)
 (*                                positions, as a random variable             *)
@@ -51,13 +51,13 @@
 (*   psl211_dealt_sample_cutE  == the cut is the shuffle                      *)
 (*   psl211_dealt_sample_cut_distE                                            *)
 (*                             == the cut law is uniform on the group         *)
+(*   psl211_colour_of_reading_obsE                                            *)
+(*                             == a coalition's endpoints read through the    *)
+(*                                colour map give its colour pattern          *)
 (*   psl211_colour_readingE    == the model's colour view is the reading's    *)
 (*                                value at that sample point                  *)
 (*   psl211_colour_reading_funE                                               *)
 (*                             == the same with the sample point left free    *)
-(*   psl211_colour_of_reading_obsE                                           *)
-(*                             == the colour reading is the colour map of     *)
-(*                                the card-identity reading                   *)
 (*   psl211_colour_indistinguishability_of_coalition_reading                  *)
 (*                             == the post-processing law at that             *)
 (*                                factorisation                               *)
@@ -184,17 +184,16 @@ Qed.
 
 
 (******************************************************************************)
-(*     The colour view as a static reading                                    *)
+(*     The colour view as a reading of a coalition's endpoints                *)
 (******************************************************************************)
 
-(** psl211_colour_reading — the colour a coalition sees at each of its
-    positions, as a static reading of the dealer-dealt execution: the reading
-    takes the coalition, the run argument and the cut, and returns the finite
-    map sending each position of the coalition to the colour, heart or club,
-    of the card the encoder deck of that chirality puts at the cut image of
-    the position, and each position outside the coalition to false. It is
-    what a coalition sees when it can tell the colour at each of its
-    positions and not which card of that colour lies there. *)
+(** psl211_colour_of_reading — the colour map on a coalition's endpoints:
+    send each position of the coalition to the colour, heart or club, of the
+    card that position holds, and every position outside the coalition to
+    false. It is the read function of psl211_colour_reading below, and it is
+    a function of the coalition as well as of the endpoint map, because a
+    coalition's endpoints give card zero outside the coalition and card zero
+    is a heart. *)
 Definition psl211_colour_of_reading (C : {set seats})
     (v : {ffun seats -> cards}) : {ffun seats -> bool} :=
   [ffun i => if i \in C then psl211_is_heart (v i) else false].
@@ -281,13 +280,13 @@ Proof. by apply: boolp.funext => u; exact: psl211_colour_readingE. Qed.
     post-processing law discharged at this pair of readings: an
     input-indistinguishability proposition at the coalition's card-identity
     reading gives the same number at the colour reading. The factorisation it
-    consumes is psl211_colour_of_reading_obsE, whose map is not injective, so
-    this is the data processing inequality applied at a genuine coarsening and
-    not at a renaming. It transports a bound and produces none. At zero the
-    card-identity reading has no such proposition over this adapter, by
-    psl211_dealt_constancy_false of
-    instances/psl211/psl211_reading_constancy.v; at a positive number none is
-    proved and none is refuted. *)
+    consumes holds by conversion, psl211_colour_of_reading being the read
+    function of the colour reading itself. That map is not injective, so this is
+    the data processing inequality applied at a genuine coarsening and not at a
+    renaming. It transports a bound and produces none. At zero the card-identity
+    reading has no such proposition over this adapter, by
+    psl211_dealt_constancy_false of instances/psl211/psl211_reading_constancy.v;
+    at a positive number none is proved and none is refuted. *)
 Lemma psl211_colour_indistinguishability_of_coalition_reading (R : realType)
     (secretP : R.-fdist bool) (c : R) :
   ReadingIndistinguishabilityPropAt (psl211_dealt_sample secretP)
@@ -305,10 +304,10 @@ Qed.
 
 (** psl211_colour_of_reading_collides — two finite maps that give a position
     of the coalition two different hearts have the same colour value, so the
-    colour map is not injective and the identity of
-    psl211_colour_of_reading_obsE is a factorisation in one direction only.
-    That the two readings themselves differ is not this lemma's content; it is
-    psl211_dealt_reading_indep_false. *)
+    colour map is not injective and the factorisation of
+    psl211_colour_indistinguishability_of_coalition_reading runs in one
+    direction only. That the two readings themselves differ is not this lemma's
+    content; it is psl211_dealt_reading_indep_false. *)
 Lemma psl211_colour_of_reading_collides (C : {set seats}) (i0 : seats) :
   i0 \in C ->
   exists v w : {ffun seats -> cards},

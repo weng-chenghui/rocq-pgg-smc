@@ -172,15 +172,16 @@ Local Notation cardT :=
 
 (** psl211_exact_witness — the exact-independence witness: the chirality as a
     random variable on the all-decks sample space, and, at every coalition of
-    fewer than six of the twelve seats, the independence of that coalition's
-    reading from it. The independence is psl211_alldecks_view_indep, which is
-    the equality of the two chiralities' deal counts read as a privacy
-    statement, and it is exact: a uniform deck description and a uniform cut
-    leave the reading carrying no information about the chirality at all, not a
-    small amount. The framework derives the zero mutual information, the
-    unchanged conditional entropy and the closure under post-processing from
-    this one field, so the witness is all that certifying exact independence
-    requires of this instance. *)
+    fewer than six of the twelve seats, the independence from it of the whole of
+    that coalition's endpoints, which is the reading this witness is indexed by.
+    The independence is psl211_alldecks_view_indep, which is the equality of the
+    two chiralities' deal counts read as a privacy statement, and it is exact: a
+    uniform deck description and a uniform cut leave what that reading grants
+    carrying no information about the chirality at all, not a small amount. The
+    framework derives the zero mutual information, the unchanged conditional
+    entropy and the closure under post-processing from this one field, so the
+    witness is all that certifying exact independence requires of this
+    instance. *)
 Definition psl211_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample psl211_exact_family R idx)
       (coalition_endpoint_reading psl211_algebra) :=
@@ -283,15 +284,16 @@ Proof. exact: (view_secrecy_of psl211_alldecks_published R tt C HC). Qed.
 (*     The certificate, and its ideal                                         *)
 (******************************************************************************)
 
-(** The proximity certificate of the PSL(2,11) word program. Its five fields are
-    the all-decks model as the ideal; that model's exact witness, which is what
-    makes the ideal an execution whose coalitions of at most five seats learn
-    nothing at all; the chirality, which is the secret of the two models as one
-    term; the word walk's number 2^-40; and psl211_word_proximity_close as the
-    distance field, which bounds by that number the distance between the two
-    models' joint laws of a coalition's reading with the chirality. The ideal,
-    its witness and the secret are terms the all-decks program publishes, and
-    the number is this certificate's own. *)
+(** The proximity certificate of the PSL(2,11) word program, at the coalition's
+    own endpoint reading. Its five fields are the all-decks model as the ideal;
+    that model's exact witness, which is what makes the ideal an execution whose
+    coalitions of at most five seats learn nothing at all; the chirality, which
+    is the secret of the two models as one term; the word walk's number 2^-40;
+    and psl211_word_proximity_close as the distance field, which bounds by that
+    number the distance between the two models' joint laws of a coalition's
+    endpoints with the chirality. The ideal, its witness and the secret are
+    terms the all-decks program publishes, and the number is this certificate's
+    own. *)
 Definition psl211_word_proximity_cert (R : realType) (idx : unit)
   : IdealProximityCert (amf_sample psl211_word_family R idx)
       (coalition_endpoint_reading psl211_algebra) :=
@@ -320,9 +322,9 @@ Proof.
 split; exact: erefl.
 Qed.
 
-(** The secret the certificate names and the secret its witness carries are
-    one term, psl211_alldecks_secret. Where a certificate's two secrets differ,
-    the ideal-proximity proposition compares a coalition's reading against a
+(** The secret the certificate names and the secret its witness carries are one
+    term, psl211_alldecks_secret. Where a certificate's two secrets differ, the
+    ideal-proximity proposition compares a coalition's endpoints against a
     product taken in a different bit, so what a coalition is shown says nothing
     about the bit the ideal-proximity proposition names. *)
 Lemma psl211_word_proximity_cert_secretE (R : realType) (idx : unit) :
@@ -475,8 +477,9 @@ Definition psl211_alldecks_number : forall R : realType, R :=
   fun R => (#|pgg_G psl211_M|%:R)^-1.
 
 (** psl211_alldecks_obstruction — the obstruction, at every real field and at
-    the one index of the all-decks family: the model is input distinguishable
-    at 1/660, the reciprocal of the order of the shuffle group. *)
+    the one index of the all-decks family: at the coalition's own endpoint
+    reading the model is input distinguishable at 1/660, the reciprocal of
+    the order of the shuffle group. *)
 Definition psl211_alldecks_obstruction
   : ObstructionPayload (tableau_at psl211_exact_sampled) :=
   fun (R : realType) (idx : unit) =>
@@ -515,18 +518,21 @@ Definition psl211_alldecks_obstruction_pf
     manifest/pgg_tableau.v that names one takes a PublishedAt, a different
     inductive type.
 
-    What it refutes. Every number at which an input-indistinguishability
-    program over this model states its proposition is at least 1/660, whatever
-    the certificate, by psl211_alldecks_indistinguishability_number_ge.
-    Through the general form of the tail lemma,
+    What it refutes, at the coalition's own endpoint reading. Every number at
+    which an input-indistinguishability program over this model and that
+    reading states its proposition is at least 1/660, whatever the
+    certificate, by psl211_alldecks_indistinguishability_number_ge. Through
+    the general form of the tail lemma,
     indistinguishability_prop_of_ideal_close, it also rules out every
-    certificate whose ideal cut sits within eps of this model's own cut law
-    once eps added to itself stays below 1/660, which is
+    certificate at that reading whose ideal cut sits within eps of this
+    model's own cut law once eps added to itself stays below 1/660, which is
     no_indistinguishability_cert_ideal_close_of_input_distinguishability at
-    this model. The tree's psl211_alldecks_no_small_eps_cert is the companion
-    exclusion on the other coordinate: it constrains a certificate's own
-    marginal bound rather than where its ideal sits, and it follows by the
-    same route at the certificate's own number.
+    this model. A certificate at a coarser reading is bounded only through a
+    factorisation, by indistinguishability_number_ge_across_readings. The
+    tree's psl211_alldecks_no_small_eps_cert is the companion exclusion on
+    the other coordinate: it constrains a certificate's own marginal bound
+    rather than where its ideal sits, and it follows by the same route at
+    the certificate's own number.
 
     Why it does not conflict with psl211_alldecks_published. The two are facts
     about one model under different quantifiers over the run argument. Exact
@@ -551,6 +557,7 @@ Definition psl211_alldecks_obstruction_pf
 Definition psl211_alldecks_obstruction_published : PublishedObstruction :=
   psl211_exact_sampled
     |> publish Obstruction InputDistinguishability
+       of (coalition_endpoint_reading psl211_algebra)
        at psl211_alldecks_number
        by psl211_alldecks_obstruction_pf assuming BaselineClassicalOnly.
 
@@ -565,9 +572,10 @@ Proof. exact: erefl. Qed.
 
 (** psl211_alldecks_published_input_distinguishability — the program's reader
     gives the obstruction back, at every real field, and this is its second
-    conjunct: the all-decks model is input distinguishable at 1/660. The first
-    conjunct is that 1/660 is above zero, which is what makes the second a
-    comparison. The published value and this statement are one theorem. *)
+    conjunct: at the coalition's own endpoint reading the all-decks model is
+    input distinguishable at 1/660. The first conjunct is that 1/660 is above
+    zero, which is what makes the second a comparison. The published value
+    and this statement are one theorem. *)
 Theorem psl211_alldecks_published_input_distinguishability (R : realType) :
   InputDistinguishabilityPropAt (amf_sample psl211_exact_family R tt)
     (coalition_endpoint_reading psl211_algebra)

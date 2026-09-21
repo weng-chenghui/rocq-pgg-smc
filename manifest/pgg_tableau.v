@@ -50,8 +50,8 @@
 (* bound's own law, ic_Hd identifies that law with the model's own cut law,   *)
 (* and ic_const asks a coalition below the threshold to read ic_ideal the     *)
 (* same at every two run arguments. At some models these three fields leave   *)
-(* no certificate whose marginal bound's epsilon, taken twice, is below a     *)
-(* positive number.                                                           *)
+(* no certificate at one reading whose marginal bound's epsilon, taken twice, *)
+(* is below a positive number.                                                *)
 (*                                                                            *)
 (* Each of the three propositions is reached by one composition law, and      *)
 (* those laws are where the mathematics of the program sits. exact_tail       *)
@@ -127,34 +127,27 @@
 (* whose payload is a reading paired with the evidence at it.                 *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   CoalitionReading       == what a coalition is granted to read off its   *)
+(*   CoalitionReading       == what a coalition is granted to read off its    *)
 (*                             own endpoints                                  *)
 (*   coalition_endpoint_reading                                               *)
 (*                          == the identity at every coalition                *)
-(*   evidence_reading       == the reading the evidence is stated at          *)
-(*   ab_reading             == the reading the data at AnalysisBridged        *)
-(*                             carries                                        *)
-(*   reading_of             == the reading of a published program             *)
-(*   ReadingIndistinguishabilityPropAt                                        *)
-(*                          == the input-indistinguishability proposition at  *)
-(*                             a reading, at no certificate                   *)
-(*   certify_reading_exact  == the exact statement at a reading the program   *)
-(*                             names                                          *)
-(*   certify_reading_indistinguishability                                     *)
-(*                          == the same for input indistinguishability        *)
-(*   certify_reading_idealproximity                                           *)
-(*                          == the same for ideal proximity                   *)
 (*   ExactWitness           == the security witness for exact independence    *)
 (*   IndistinguishabilityCert                                                 *)
 (*                          == the security certificate for input             *)
 (*                             indistinguishability                           *)
 (*   IdealProximityCert     == the security certificate for ideal proximity   *)
 (*   SecurityEvidence       == the evidence an instance certifies with        *)
+(*   evidence_reading       == the reading the evidence is stated at          *)
 (*   SecurityProperty       == which security property, with no witness or    *)
 (*                             certificate                                    *)
 (*   evidence_property      == the security property the evidence proves      *)
 (*   StackAt                == the data a program holds at one completion     *)
 (*                             level                                          *)
+(*   ab_reading             == the reading the data at AnalysisBridged        *)
+(*                             carries                                        *)
+(*   ReadingIndistinguishabilityPropAt                                        *)
+(*                          == the input-indistinguishability proposition of  *)
+(*                             a reading, with no certificate in it           *)
 (*   StackProp              == the proposition a program holds at one level   *)
 (*   TableauAt              == data at a level with a proof about it          *)
 (*   tableau_bind           == sequencing, written s ;;; f 'of' p             *)
@@ -279,12 +272,14 @@
 (*                          == a model distinguishable at a number is         *)
 (*                             distinguishable at every smaller number        *)
 (*   indistinguishability_number_ge_of_input_distinguishability               *)
-(*                          == a distinguishable model bounds from below the  *)
-(*                             number an input-indistinguishability program   *)
-(*                             over it publishes                              *)
+(*                          == a model distinguishable at a reading bounds    *)
+(*                             from below the number an                       *)
+(*                             input-indistinguishability program at that     *)
+(*                             reading publishes                              *)
 (*   no_indistinguishability_cert_ideal_close_of_input_distinguishability     *)
-(*                          == and leaves no certificate whose ideal cut is   *)
-(*                             that close to its own cut law                  *)
+(*                          == and leaves no certificate at that reading      *)
+(*                             whose ideal cut is that close to its own cut   *)
+(*                             law                                            *)
 (*   publish_obstruction_completionE                                          *)
 (*                          == the path of a published obstruction records    *)
 (*                             AnalysisBridged                                *)
@@ -412,22 +407,20 @@ Record IndistinguishabilityCert (R : realType) (A : PGGAlgebraic)
                                  (static_coalition_obs C x' g)) ic_ideal }.
 
 (* The proximity certificate at a reading: a second sample adapter over the
-   program's
-   own execution, standing for the ideal run; an exact witness for that ideal
-   at the same reading, which is what makes the ideal a model whose own
-   privacy is proved and not a bare law; the actual model's secret, typed at
-   the carrier the ideal's witness names, so that the two models speak of one
-   secret; a number; and, at every coalition below the privacy threshold,
+   program's own execution, standing for the ideal run; an exact witness for
+   that ideal at the same reading, which is what makes the ideal a model whose
+   own privacy is proved and not a bare law; the actual model's secret, typed
+   at the carrier the ideal's witness names, so that the two models speak of
+   one secret; a number; and, at every coalition below the privacy threshold,
    that number as a bound on the variation distance between the two models'
    joint laws of what the reading grants the coalition and the secret. One
-   reading serves both models, so the number measures the distance between
-   two models and not between two readings. The comparison is an average over
-   the run argument of each model and not a statement at a fixed run
-   argument, and the number is an upper bound the instance chooses on what
-   the actual model loses against an execution that leaks nothing, not a
-   quantity the record determines: any number at which ipc_close is provable
-   is a legal field, so a certificate says as much as its number is small and
-   no more. *)
+   reading serves both models, so the number measures the distance between two
+   models and not between two readings. The comparison is an average over the
+   run argument of each model and not a statement at a fixed run argument, and
+   the number is an upper bound the instance chooses on what the actual model
+   loses against an execution that leaks nothing, not a quantity the record
+   determines: any number at which ipc_close is provable is a legal field, so
+   a certificate says as much as its number is small and no more. *)
 Record IdealProximityCert (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (r : CoalitionReading A) :=
@@ -711,16 +704,16 @@ Arguments ExactProp {R A E sa r} w.
 
 (* The input-indistinguishability proposition at a reading: below the
    threshold, two run arguments give, of the model's own cut law, readings
-   within variation distance c. It is stated at a reading and at no
-   certificate, because the certificate's ideal cut and constancy field are
-   used inside indistinguishability_tail and have left the claim; that is
-   what lets a bound proved at one reading travel to another along a
-   factorisation, with no certificate at the far end. The bound is a
-   parameter rather than the certificate's own sum, so conclude can state a
-   finished program at any number at or above that sum, the constant a paper
-   cites among them, without reproving the proposition. The number bounds a
-   sum of absolute differences, twice the total variation distance of the
-   literature, so a distinguisher's advantage is at most half of it. *)
+   within variation distance c. It is stated of a reading, with no certificate
+   in it, because the certificate's ideal cut and constancy field are used
+   inside indistinguishability_tail and have left the claim; that is what lets
+   a bound proved at one reading travel to another along a factorisation, with
+   no certificate at the far end. The bound is a parameter rather than the
+   certificate's own sum, so conclude can state a finished program at any
+   number at or above that sum, the constant a paper cites among them, without
+   reproving the proposition. The number bounds a sum of absolute differences,
+   twice the total variation distance of the literature, so a distinguisher's
+   advantage is at most half of it. *)
 Definition ReadingIndistinguishabilityPropAt (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (r : CoalitionReading A) (c : R) : Prop :=
@@ -760,19 +753,19 @@ Arguments cert_eps {R A E sa r} cert.
    certificate is indexed by: below the threshold, the joint law of what that
    reading grants the coalition of the executed run, with the secret, under
    the actual model, is within variation distance c of the product of the two
-   marginals the ideal model has, its own reading and its own secret. The
-   right side is a product because the ideal's witness makes those two
-   independent there, so c bounds the sum of the absolute differences between
-   what a coalition below the threshold sees jointly with the secret and two
-   quantities drawn apart, and a distinguisher's advantage is at most half of
-   c, the sum of the absolute differences being twice the total variation
-   distance of the literature. The attack model is a static coalition of
-   fewer than k seats, and the reading is what that coalition is granted to
-   see of its own endpoints; the claim is an average over the run argument
-   and not a statement at a fixed run argument. The bound is a parameter, as
-   it is for the input-indistinguishability proposition, so conclude can
-   state a finished program at any number at or above the certificate's
-   ipc_eps, the one a paper cites among them. *)
+   marginals the ideal model has, what the reading grants it and its own
+   secret. The right side is a product because the ideal's witness makes those
+   two independent there, so c bounds the sum of the absolute differences
+   between what a coalition below the threshold sees jointly with the secret
+   and two quantities drawn apart, and a distinguisher's advantage is at most
+   half of c, the sum of the absolute differences being twice the total
+   variation distance of the literature. The attack model is a static
+   coalition of fewer than k seats, and the reading is what that coalition is
+   granted to see of its own endpoints; the claim is an average over the run
+   argument and not a statement at a fixed run argument. The bound is a
+   parameter, as it is for the input-indistinguishability proposition, so
+   conclude can state a finished program at any number at or above the
+   certificate's ipc_eps, the one a paper cites among them. *)
 Definition IdealProximityPropAt (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E))
     (r : CoalitionReading A) (cert : IdealProximityCert sa r) (c : R) : Prop :=
@@ -982,7 +975,7 @@ Definition ExactPayload (x : StackAt Sampled) : Type :=
    occurs; the equations between two spellings of one such program are then
    decided by a conversion that does not descend into the program's own
    stack coordinate. *)
-Definition ExactPayloadOfReading (x : StackAt Sampled) : Type :=
+Definition ReadingExactPayload (x : StackAt Sampled) : Type :=
   { r : CoalitionReading (projT1 x)
   & forall (R : realType) (idx : amf_index (sp_f x) R),
       ExactWitness (amf_sample (sp_f x) R idx) r }.
@@ -990,13 +983,13 @@ Definition ExactPayloadOfReading (x : StackAt Sampled) : Type :=
 (* The pair a statement at a named reading takes. The reading is written
    once and the witness is checked against it where it is written, so a
    program cannot name one reading and certify at another. *)
-Definition exact_of_reading (x : StackAt Sampled)
+Definition reading_exact_payload (x : StackAt Sampled)
     (r : CoalitionReading (projT1 x))
     (w : forall (R : realType) (idx : amf_index (sp_f x) R),
            ExactWitness (amf_sample (sp_f x) R idx) r)
-  : ExactPayloadOfReading x :=
+  : ReadingExactPayload x :=
   existT _ r w.
-Arguments exact_of_reading : clear implicits.
+Arguments reading_exact_payload : clear implicits.
 
 (* The payload of certify_indistinguishability: one
    input-indistinguishability certificate per real field and index of the
@@ -1013,7 +1006,7 @@ Definition IndistinguishabilityPayload (x : StackAt Sampled) : Type :=
 (* The reading, paired with one certificate per real field and index at it.
    It stands to the type above as the exact pair stands to the exact
    payload, and for the same reason. *)
-Definition IndistinguishabilityPayloadOfReading (x : StackAt Sampled) : Type :=
+Definition ReadingIndistinguishabilityPayload (x : StackAt Sampled) : Type :=
   { r : CoalitionReading (projT1 x)
   & forall (R : realType) (idx : amf_index (sp_f x) R),
       IndistinguishabilityCert (amf_sample (sp_f x) R idx) r }.
@@ -1021,13 +1014,13 @@ Definition IndistinguishabilityPayloadOfReading (x : StackAt Sampled) : Type :=
 (* The pair the input-indistinguishability statement at a named reading
    takes, the certificate checked against the reading where it is
    written. *)
-Definition indistinguishability_of_reading (x : StackAt Sampled)
+Definition reading_indistinguishability_payload (x : StackAt Sampled)
     (r : CoalitionReading (projT1 x))
     (c : forall (R : realType) (idx : amf_index (sp_f x) R),
            IndistinguishabilityCert (amf_sample (sp_f x) R idx) r)
-  : IndistinguishabilityPayloadOfReading x :=
+  : ReadingIndistinguishabilityPayload x :=
   existT _ r c.
-Arguments indistinguishability_of_reading : clear implicits.
+Arguments reading_indistinguishability_payload : clear implicits.
 
 (* The payload of certify_idealproximity: one proximity certificate per real
    field and index of the accumulated family. Uniform in the field for the
@@ -1042,20 +1035,20 @@ Definition IdealProximityPayload (x : StackAt Sampled) : Type :=
 
 (* The reading, paired with one proximity certificate per real field and
    index at it, on the pattern of the other two. *)
-Definition IdealProximityPayloadOfReading (x : StackAt Sampled) : Type :=
+Definition ReadingIdealProximityPayload (x : StackAt Sampled) : Type :=
   { r : CoalitionReading (projT1 x)
   & forall (R : realType) (idx : amf_index (sp_f x) R),
       IdealProximityCert (amf_sample (sp_f x) R idx) r }.
 
 (* The pair the proximity statement at a named reading takes, the
    certificate checked against the reading where it is written. *)
-Definition idealproximity_of_reading (x : StackAt Sampled)
+Definition reading_idealproximity_payload (x : StackAt Sampled)
     (r : CoalitionReading (projT1 x))
     (c : forall (R : realType) (idx : amf_index (sp_f x) R),
            IdealProximityCert (amf_sample (sp_f x) R idx) r)
-  : IdealProximityPayloadOfReading x :=
+  : ReadingIdealProximityPayload x :=
   existT _ r c.
-Arguments idealproximity_of_reading : clear implicits.
+Arguments reading_idealproximity_payload : clear implicits.
 
 (* The independence a witness states at the direct computation, transported
    to the view along the link lemma, with its entropy forms and
@@ -1203,7 +1196,7 @@ Arguments certify_exact x q p : assert.
    whole endpoints, which for exact independence is the weaker of the two
    claims and not a bound at a larger number. *)
 Definition certify_reading_exact (x : StackAt Sampled)
-    (q : StackProp Sampled x) (p : ExactPayloadOfReading x)
+    (q : StackProp Sampled x) (p : ReadingExactPayload x)
     : Tableau AnalysisBridged :=
   @MkTableau AnalysisBridged (StackProp AnalysisBridged)
     (existT _ (projT1 x) (existT _ (projT1 (projT2 x))
@@ -1239,7 +1232,7 @@ Arguments certify_indistinguishability x q p : assert.
    not the only reading its number holds at. *)
 Definition certify_reading_indistinguishability (x : StackAt Sampled)
     (q : StackProp Sampled x)
-    (p : IndistinguishabilityPayloadOfReading x) : Tableau AnalysisBridged :=
+    (p : ReadingIndistinguishabilityPayload x) : Tableau AnalysisBridged :=
   @MkTableau AnalysisBridged (StackProp AnalysisBridged)
     (existT _ (projT1 x) (existT _ (projT1 (projT2 x))
        (existT _ (sp_Ht x) (existT _ (sp_He x) (existT _ (sp_Hr x)
@@ -1279,7 +1272,7 @@ Arguments certify_idealproximity x q p : assert.
    own line. Both models are compared through that one reading, and no
    lemma carries a proximity number from one reading to another. *)
 Definition certify_reading_idealproximity (x : StackAt Sampled)
-    (q : StackProp Sampled x) (p : IdealProximityPayloadOfReading x)
+    (q : StackProp Sampled x) (p : ReadingIdealProximityPayload x)
     : Tableau AnalysisBridged :=
   @MkTableau AnalysisBridged (StackProp AnalysisBridged)
     (existT _ (projT1 x) (existT _ (projT1 (projT2 x))
@@ -1460,11 +1453,10 @@ Definition security_property_of (c : ConcludedBound) (r : PublishedAt c)
 Arguments security_property_of {c} r R idx.
 
 (* The reading a published program's claim is made at, at one real field and
-   one index of its family. It is the fourth coordinate of the manifest's
-   description of a capability, the observer, which the path itself does not
-   carry: two programs over one model and one pair of statuses are one
-   manifest path, and the security property and the reading are where they
-   differ. *)
+   one index of its family. It is the observer coordinate of the manifest's
+   description of a capability, which the path itself does not carry: two
+   programs over one model and one pair of statuses are one manifest path, and
+   the security property and the reading are where they differ. *)
 Definition reading_of (c : ConcludedBound) (p : PublishedAt c) (R : realType)
     (idx : amf_index (ab_f (published_at p)) R)
   : CoalitionReading (projT1 (published_at p)) :=
@@ -1735,15 +1727,15 @@ Qed.
    hands over, and a reader of a free payload cannot tell what kind of fact
    was published. The one member carries the reading the model is
    distinguishable at and the number it is distinguishable at, the reading
-   standing to an obstruction as it stands to security evidence, so the two
-   readers of a published program answer the same question of a negative
+   standing to an obstruction as it stands to security evidence, so
+   security_property_of and reading_of answer the same question of a negative
    result and of a positive one. The proposition that member stands for
    requires the number positive. At a number at or below zero the inequality
-   is free,
-   var_dist being non-negative, and the empty coalition is below every
-   threshold, so the distinguishability proposition alone would hold at every
-   model whose run-argument type is inhabited. Positivity is what makes a
-   published member a comparison of two readings of the model. *)
+   is free, var_dist being non-negative, and the empty coalition is below
+   every threshold, so the distinguishability proposition alone would hold at
+   every model whose run-argument type is inhabited. Positivity is what makes
+   a published member a comparison of what the reading grants at two run
+   arguments. *)
 Variant ObstructionKind (R : realType) (A : PGGAlgebraic)
     (E : ExecutionParams A) (sa : SampleAdapter R (instance_exec E)) : Type :=
   | InputDistinguishabilityObstruction of CoalitionReading A & R.
@@ -1977,7 +1969,7 @@ Lemma certify_exact_readingE (x : StackAt Sampled) (q : StackProp Sampled x)
     (idx : amf_index (ab_f (tableau_at (@certify_exact x q p))) R) :
   ab_reading (tableau_at (@certify_exact x q p)) R idx
   = coalition_endpoint_reading (projT1 x).
-Proof. by []. Qed.
+Proof. exact: erefl. Qed.
 
 (* The same for the input-indistinguishability statement. *)
 Lemma certify_indistinguishability_readingE (x : StackAt Sampled)
@@ -1987,7 +1979,7 @@ Lemma certify_indistinguishability_readingE (x : StackAt Sampled)
              (ab_f (tableau_at (@certify_indistinguishability x q p))) R) :
   ab_reading (tableau_at (@certify_indistinguishability x q p)) R idx
   = coalition_endpoint_reading (projT1 x).
-Proof. by []. Qed.
+Proof. exact: erefl. Qed.
 
 (* The same for the proximity statement. *)
 Lemma certify_idealproximity_readingE (x : StackAt Sampled)
@@ -1996,7 +1988,7 @@ Lemma certify_idealproximity_readingE (x : StackAt Sampled)
              (ab_f (tableau_at (@certify_idealproximity x q p))) R) :
   ab_reading (tableau_at (@certify_idealproximity x q p)) R idx
   = coalition_endpoint_reading (projT1 x).
-Proof. by []. Qed.
+Proof. exact: erefl. Qed.
 
 (* Concluding a program at a chosen number leaves its security property where
    the certify statement put it. The terminal moves a real and not the

@@ -14,7 +14,7 @@
 (*                                                                            *)
 (* All three security properties are certified over the one dealer-dealt run. *)
 (* Certifying exact independence takes an ExactWitness, whose one field is    *)
-(* independence of a coalition's reading from the dealt secret; at the        *)
+(* independence of a coalition's endpoints from the dealt secret; at the      *)
 (* uniform cut this is three-transitivity of PGL(2,7) on the eight points     *)
 (* read as a privacy statement, and it is exact, with no number in it.        *)
 (* Certifying input indistinguishability takes a certificate comparing the    *)
@@ -270,7 +270,7 @@ Local Open Scope ring_scope.
 (******************************************************************************)
 
 (** The same identification once more, with the secret left inside the sample
-    point. The exact-independence proposition compares a coalition's reading
+    point. The exact-independence proposition compares a coalition's endpoints
     with the secret on one probability space, so the secret cannot be fixed
     first: the reader is a random variable of the pair, and that random variable
     is pgl27_view R C. *)
@@ -284,14 +284,15 @@ Proof. by apply: boolp.funext; case=> s g; exact: pgl27_static_obsE. Qed.
 
 (** The exact-independence witness: the dealt secret as a random variable on the
     exact sample space, and, at every coalition of fewer than four seats, the
-    independence of that coalition's reading from it. The independence is
+    independence from it of the whole of that coalition's endpoints, which is
+    the reading this witness is indexed by. The independence is
     pgl27_view_indep, which is three-transitivity of PGL(2,7) on the eight
     points read as a privacy statement, and it is exact: the uniform cut makes
-    the reading carry no information about the secret at all, not a small
-    amount. The framework derives the zero mutual information, the unchanged
-    conditional entropy and the closure under post-processing from this one
-    field, so the witness is all that certifying exact independence requires of
-    this instance. *)
+    what that reading grants carry no information about the secret at all, not a
+    small amount. The framework derives the zero mutual information, the
+    unchanged conditional entropy and the closure under post-processing from
+    this one field, so the witness is all that certifying exact independence
+    requires of this instance. *)
 Definition pgl27_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample pgl27_exact_family R idx)
       (coalition_endpoint_reading pgl27_algebra) :=
@@ -347,17 +348,18 @@ rewrite (pgl27_static_obs_funE R C x) (pgl27_static_obs_funE R C x').
 exact: (pgl27_view_law_const R x x' HC).
 Qed.
 
-(** The input-indistinguishability certificate at each secret prior. Its
-    five fields are the two-hundred-letter walk's marginal bound; the
-    identification of that bound's law with the law the word adapter draws its
-    cut from, which is pgl27_word_cut_distE read backwards; the uniform
-    distribution on the group as the ideal cut; the distance pgl27_word_mixing
-    of the walk from that ideal, an unconditional theorem about the walk whose
-    bound is 2^-40; and the constancy of a coalition's reading of the ideal cut
-    in the dealt secret, which is pgl27_word_view_const and is exact. Perfect
-    and statistical security are both visible in the fields: everything about
-    the ideal cut is exact and three-transitive, and the only statistical
-    quantity anywhere in this program is the walk's 2^-40. *)
+(** The input-indistinguishability certificate at each secret prior, at the
+    coalition's own endpoint reading. Its five fields are the two-hundred-letter
+    walk's marginal bound; the identification of that bound's law with the law
+    the word adapter draws its cut from, which is pgl27_word_cut_distE read
+    backwards; the uniform distribution on the group as the ideal cut; the
+    distance pgl27_word_mixing of the walk from that ideal, an unconditional
+    theorem about the walk whose bound is 2^-40; and the constancy of what that
+    reading grants a coalition of the ideal cut in the dealt secret, which is
+    pgl27_word_view_const and is exact. Perfect and statistical security are
+    both visible in the fields: everything about the ideal cut is exact and
+    three-transitive, and the only statistical quantity anywhere in this program
+    is the walk's 2^-40. *)
 Definition pgl27_word_cert (R : realType) (secretP : R.-fdist bool)
   : IndistinguishabilityCert (amf_sample pgl27_word_family R secretP)
       (coalition_endpoint_reading pgl27_algebra) :=
@@ -776,10 +778,11 @@ Proof. by apply: boolp.funext; case=> s g; exact: pgl27_static_obsE. Qed.
 
 (** The exact-independence witness at every prior: the dealt secret as a random
     variable on this sample space, and, at every coalition of fewer than four
-    seats, the independence of that coalition's reading from it. The
-    independence is pgl27_view_indep_gen, three-transitivity of PGL(2,7) read as
-    a privacy statement, which holds whatever the law of the secret is. The
-    reading carries no information about the secret at all and not a small
+    seats, the independence from it of the whole of that coalition's endpoints,
+    which is the reading this witness is indexed by. The independence is
+    pgl27_view_indep_gen, three-transitivity of PGL(2,7) read as a privacy
+    statement, which holds whatever the law of the secret is. What that reading
+    grants carries no information about the secret at all and not a small
     amount, so this model is an execution a proximity certificate may call
     ideal. *)
 Definition pgl27_prior_exact_witness (R : realType) (secretP : R.-fdist bool)
@@ -845,15 +848,15 @@ Proof. exact: erefl. Qed.
 (*     The proximity certificate, and its ideal                               *)
 (******************************************************************************)
 
-(** The proximity certificate of the PGL(2,7) word program at every prior. Its
-    five fields are the prior-indexed exact shuffle as the ideal; that model's
-    exact witness, which is what makes the ideal an execution whose coalitions
-    below four seats learn nothing at all; the dealt secret of the word model;
-    the walk's marginal number 2^-40; and the distance
-    pgl27_word_proximity_close of pgl27_proximity.v. The only inexact quantity
-    is that number: the ideal and its witness are the terms the ideal program
-    already publishes, and the secret is the word model's own first projection,
-    typed at the carrier that witness names. *)
+(** The proximity certificate of the PGL(2,7) word program at every prior, at
+    the coalition's own endpoint reading. Its five fields are the prior-indexed
+    exact shuffle as the ideal; that model's exact witness, which is what makes
+    the ideal an execution whose coalitions below four seats learn nothing at
+    all; the dealt secret of the word model; the walk's marginal number 2^-40;
+    and the distance pgl27_word_proximity_close of pgl27_proximity.v. The only
+    inexact quantity is that number: the ideal and its witness are the terms the
+    ideal program already publishes, and the secret is the word model's own
+    first projection, typed at the carrier that witness names. *)
 Definition pgl27_word_proximity_cert (R : realType) (secretP : R.-fdist bool)
   : IdealProximityCert (amf_sample pgl27_word_family R secretP)
       (coalition_endpoint_reading pgl27_algebra) :=
@@ -943,10 +946,10 @@ Qed.
     and the one the published reading statement pgl27_word_view_proximity
     carries. The certificate's own number is 2^-40, half of that. Below four
     seats its distance field, pgl27_word_proximity_close, puts the joint law of
-    a coalition's reading with the dealt secret within that number of the same
-    joint law under the prior-indexed exact execution, where the reading and the
-    secret are independent outright, so the ideal side is the product of its two
-    marginals. The proximity certificate's closeness field is one hop to the
+    a coalition's endpoints with the dealt secret within that number of the same
+    joint law under the prior-indexed exact execution, where those endpoints and
+    the secret are independent outright, so the ideal side is the product of its
+    two marginals. The proximity certificate's closeness field is one hop to the
     ideal, so that number is lost once, where the input-indistinguishability
     tail makes two hops. Its transfer status is IdealFinite, the same the
     input-indistinguishability program carries, and the two certificates compare

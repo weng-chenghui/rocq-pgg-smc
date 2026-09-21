@@ -124,9 +124,9 @@
 (*                                 certificate                                *)
 (*   ideal_prod_reading_arg_prodE                                             *)
 (*                              == below the threshold the ideal model's      *)
-(*                                 joint law of a coalition's reading and the *)
-(*                                 run argument is the product of its two     *)
-(*                                 marginals                                  *)
+(*                                 joint law of what the reading grants a     *)
+(*                                 coalition and the run argument is the      *)
+(*                                 product of its two marginals               *)
 (*   ideal_prod_reading_indep_arg                                             *)
 (*                              == the same as an independence                *)
 (*   arg_read_distE             == the ideal model's secret is distributed as *)
@@ -325,10 +325,10 @@ Variable A : PGGAlgebraic.
 Variable E : ExecutionParams A.
 Variable sa : SampleAdapter R (instance_exec E).
 
-(** The exact witness over an arbitrary model whose secret is the constant
-    true. Its independence field is inde_RV_cst, which uses no property of
-    the model, so holding an exact witness is by itself no statement about
-    what a model hides. *)
+(** The exact witness at the coalition's own endpoint reading, over an arbitrary
+    model whose secret is the constant true. Its independence field is
+    inde_RV_cst, which uses no property of the model, so holding an exact
+    witness is by itself no statement about what a model hides. *)
 Definition exact_witness_cst_true
   : ExactWitness sa (coalition_endpoint_reading A) :=
   @MkExactWitness R A E sa (coalition_endpoint_reading A) bool
@@ -339,19 +339,21 @@ Definition exact_witness_cst_true
          true).
 
 (** The reading whose value type is unit at every coalition: a coalition is
-    granted one value and reads it whatever the deal. It is the coarsest
-    reading of all, every reading factoring through it. *)
+    granted one value and reads it whatever the deal. It is the coarsest reading
+    of all, factoring through every reading of this algebra. *)
 Definition coalition_reading_cst_unit : CoalitionReading A :=
   @MkCoalitionReading A (fun _ => (unit : finType)) (fun _ _ => tt).
 
 (** The exact witness at that reading, over an arbitrary model and at an
-    arbitrary secret. Its independence field is inde_RV_cst read on the
-    reading rather than on the secret, so it uses no property of the model
-    and no property of the secret either. Holding exact-independence
-    evidence is therefore by itself no statement about what a model hides:
-    what a program says depends on the reading it certifies at as much as on
-    the property it certifies, and this is the reading at which it says
-    nothing. *)
+    arbitrary secret. Its independence field is inde_RV_cst read on the reading
+    rather than on the secret, so it uses no property of the model and no
+    property of the secret either. Holding exact-independence evidence is
+    therefore by itself no statement about what a model hides: what a program
+    says depends on the reading it certifies at as much as on the property it
+    certifies, and this is the reading at which it says nothing. A program built
+    on this witness publishes the same manifest path and carries the same
+    security property as one built at the coalition's own endpoints, and
+    reading_of is the only coordinate that separates the two. *)
 Definition exact_witness_cst_reading (secretT : finType)
     (secret : {RV (sa_sampleP sa) -> secretT})
   : ExactWitness sa coalition_reading_cst_unit :=
@@ -472,11 +474,11 @@ Definition ideal_prod_adapter : SampleAdapter R (instance_exec E) :=
     ((fdistmap arg_read (sa_sampleP sa)) `x (ic_ideal ic))
     (fun z => arg_decode z.1) (fun z => z.2).
 
-(** Below the threshold the ideal model's joint law of a coalition's reading
-    and the run argument is the product of its two marginals. It is the
-    input-indistinguishability certificate's constancy field read on that
-    model, and it is what makes the ideal a model whose own privacy is
-    proved rather than stipulated. *)
+(** Below the threshold the ideal model's joint law of what the reading grants a
+    coalition and the run argument is the product of its two marginals. It is
+    the input-indistinguishability certificate's constancy field read on that
+    model, and it is what makes the ideal a model whose own privacy is proved
+    rather than stipulated. *)
 Lemma ideal_prod_reading_arg_prodE
     (C : {set 'I_(pi_T' (mp_PI (instance_profile A))).+1}) :
   (#|C| < profile_k (instance_profile A))%N ->

@@ -21,8 +21,8 @@
 (* layout's share cast; the instance's psl211_alldecks_view reads it at i.    *)
 (* The share cast disappears by conversion, the scheme's share count and the  *)
 (* algebra's card count both being twelve, and the starting tuple is          *)
-(* ord_tuple 12, so the two readings agree. The executed reading of the       *)
-(* interpreter's messages is carried to the static one by the endpoint        *)
+(* ord_tuple 12, so the two agree. What the interpreter's messages give of a  *)
+(* coalition's endpoints is carried to the static computation by the endpoint *)
 (* equation of psl211_endpoints.v, which enters here only through             *)
 (* supplied_endpointsE and is never unfolded.                                 *)
 (*                                                                            *)
@@ -70,9 +70,9 @@
 (*   psl211_dealerP          == the instance's data in the dealer sample      *)
 (*                              space                                         *)
 (*   psl211_dealer_assoc     == the reassociation of the two sample spaces    *)
-(*   psl211_dealer_view      == the coalition's reading as a function of the  *)
+(*   psl211_dealer_view      == a coalition's endpoints as a function of the  *)
 (*                              dealer model's three coordinates              *)
-(*   psl211_dealer_mixed_law == the reading's law at one chirality,           *)
+(*   psl211_dealer_mixed_law == the law of those endpoints at one chirality,  *)
 (*                              averaged over the deal and the cut            *)
 (*   psl211_perdeck_deal     == the deal fixing the counterexample            *)
 (*   psl211_perdeck_coalition == the three seats 0, 1 and 2                   *)
@@ -263,7 +263,7 @@ by rewrite -big_distrl /= FDist.f1 mul1r.
 Qed.
 
 (******************************************************************************)
-(*     The identification of the coalition's reading                          *)
+(*     The identification of a coalition's endpoints                          *)
 (******************************************************************************)
 
 (** psl211_alldecks_static_obsE — seat i's entry of the framework's static
@@ -311,8 +311,8 @@ Qed.
 
 (** psl211_alldecks_exact_viewE — the same identification once more, with the
     deck description inside the sample point. The exact-independence proposition
-    compares a coalition's reading with the secret on one probability space, so
-    the run argument cannot be fixed first. *)
+    compares a coalition's endpoints with the secret on one probability space,
+    so the run argument cannot be fixed first. *)
 Lemma psl211_alldecks_exact_viewE (C : {set seatT}) :
   (fun u : psl211_inputT * pgg_gT psl211_M =>
      @static_coalition_obs psl211_algebra psl211_alldecks_params C u.1 u.2)
@@ -358,7 +358,7 @@ Definition psl211_alldecks_observed : OE.ObservedExecution :=
     run compute the direct computation of the laid deck. It is the twin of
     psl211_alldecks_endpoints over the other mode a run of this instance is
     driven in: the profile's abstract-readout equation quantifies over the
-    content readout, so one equation serves both modes and neither costs a
+    content readout, so one equation serves both modes and neither needs a
     reduction of its own. *)
 Definition psl211_dealt_endpoints
   : instance_endpoints_stmt psl211_dealt_params :=
@@ -699,8 +699,8 @@ Fail Definition psl211_dealer_bad_secretE :
     \o psl211_dealer_bad_assoc =
   psl211_alldecks_secret R := erefl.
 
-(** psl211_dealer_mixed_law C b — the law of the coalition's reading at
-    chirality b, averaged over the deal and the cut.  It is the quantity the
+(** psl211_dealer_mixed_law C b — the law of the coalition's endpoints at
+    chirality b, averaged over the deal and the cut. It is the quantity the
     dealer model's privacy premise asks to be the same for both chiralities. *)
 Definition psl211_dealer_mixed_law (C : {set seatT}) (b : bool) :
     R.-fdist viewT :=
@@ -1087,9 +1087,9 @@ rewrite invr_eq0 pnatr_eq0 => /eqP Hcard.
 by move: psl211_G_pos; rewrite Hcard.
 Qed.
 
-(** psl211_perdeck_no_common_law — no law on readings is the law of the
-    coalition's reading at psl211_perdeck_deal under both chiralities.  This is
-    the second premise of dealer_shuffle_view_indep_of_deck written at
+(** psl211_perdeck_no_common_law — no law on what a coalition is granted is
+    the law of its endpoints at psl211_perdeck_deal under both chiralities. This
+    is the second premise of dealer_shuffle_view_indep_of_deck written at
     PSL(2,11), for an arbitrary validity predicate that accepts that deal, and
     it has no solution, so the per-deck condition of
     dealer_shuffle_view_indep_of_deck is not available at this deal. *)

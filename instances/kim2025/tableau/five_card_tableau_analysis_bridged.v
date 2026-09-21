@@ -18,7 +18,7 @@
 (*                                                                            *)
 (* All three security properties are certified over the one committed run.    *)
 (* Certifying exact independence takes an ExactWitness, whose one field is    *)
-(* independence of a coalition's reading from the conjunction of the two      *)
+(* independence of a coalition's endpoints from the conjunction of the two    *)
 (* committed bits; under the uniform rotation this is leak_view_set, the      *)
 (* exact mutual information of a reveal pattern, at a pattern of at most one  *)
 (* card, where that information is zero, and the witness carries no number.   *)
@@ -138,12 +138,12 @@
 (* This file requires instances/kim2025/five_card_proximity.v, which holds    *)
 (* the laws and the distance the proximity certificate is built from: the     *)
 (* uniform law on the pair of committed bits under either cardinality proof,  *)
-(* the factorisation of a coalition's reading and the secret through the pair *)
-(* of the committed bits and the cut, that pair's joint law at a product law  *)
-(* on the sample space, and the bound of one fiftieth on the distance between *)
-(* the two models' joint laws, which is the certificate's last field. The map *)
-(* and the five link lemmas five_card_exact_witness is built from are not     *)
-(* there but here, because no proof that stays uses them.                     *)
+(* the factorisation of a coalition's endpoints and the secret through the    *)
+(* pair of the committed bits and the cut, that pair's joint law at a product *)
+(* law on the sample space, and the bound of one fiftieth on the distance     *)
+(* between the two models' joint laws, which is the certificate's last field. *)
+(* The map and the five link lemmas five_card_exact_witness is built from are *)
+(* not there but here, because no proof that stays uses them.                 *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   five_card_colour_fill   == a coalition's colours read back as card       *)
@@ -189,8 +189,8 @@
 (*   five_card_viewS_nth     == a coalition's colour tuple read at one of its *)
 (*                              own seats                                     *)
 (*   five_card_static_obsE   == the framework's direct computation of a       *)
-(*                              coalition's reading is the instance's colour  *)
-(*                              reading encoded                               *)
+(*                              coalition's endpoints is the instance's       *)
+(*                              colour reading encoded                        *)
 (*   five_card_viewS_indep   == at most one revealed colour is independent of *)
 (*                              the conjunction                               *)
 (*   five_card_exact_viewE   == the same identification with the committed    *)
@@ -459,10 +459,10 @@ Qed.
 
 (** The same identification as five_card_static_obsE, with the committed pair
     and the cut left inside the sample point. The exact-independence proposition
-    compares a coalition's reading with the secret on one probability space, so
-    neither can be fixed first: the direct computation is a random variable of
-    the sample point, and that random variable is the coalition's colour reading
-    encoded. *)
+    compares a coalition's endpoints with the secret on one probability space,
+    so neither can be fixed first: the direct computation is a random variable
+    of the sample point, and that random variable is the coalition's colour
+    reading encoded. *)
 Lemma five_card_exact_viewE (R : realType) (idx : unit)
     (C : {set 'I_(pi_T' (mp_PI (instance_profile five_card_algebra))).+1}) :
   (fun u => @static_coalition_obs five_card_algebra five_card_params C
@@ -491,13 +491,14 @@ Qed.
 
 (** The exact-independence witness: the conjunction of the two committed bits as
     a random variable on the uniform sample space, and, at every coalition of
-    fewer than two seats, the independence of that coalition's reading from it.
-    The independence is exact, the uniform rotation making the reading carry no
-    information about the conjunction at all rather than a small amount. The
-    framework derives the zero mutual information, the unchanged conditional
-    entropy and the closure under post-processing from this one field, so the
-    witness is all that certifying exact independence requires of this
-    instance. *)
+    fewer than two seats, the independence from it of the whole of that
+    coalition's endpoints, which is the reading this witness is indexed by. The
+    independence is exact, the uniform rotation making what that reading grants
+    carry no information about the conjunction at all rather than a small
+    amount. The framework derives the zero mutual information, the unchanged
+    conditional entropy and the closure under post-processing from this one
+    field, so the witness is all that certifying exact independence requires of
+    this instance. *)
 Definition five_card_exact_witness (R : realType) (idx : unit)
   : ExactWitness (amf_sample five_card_uniform_family R idx)
       (coalition_endpoint_reading five_card_algebra) :=
@@ -619,13 +620,14 @@ by lia.
 Qed.
 
 (** The input-indistinguishability certificate of the repeated certified
-    program. Its five fields are the seven-cut bundle's marginal bound; the
-    identification of that bound's law with the law the repeated adapter draws
-    its cut from; the uniform rotation law as the ideal cut; the distance of the
-    seven-cut law from that ideal; and the constancy, at every coalition of at
-    most one seat, of the reading of the ideal cut in the committed pair. The
-    only inexact quantity in the program is the bundle's spectral number; the
-    ideal cut and the constancy field are exact. *)
+    program, at the coalition's own endpoint reading. Its five fields are the
+    seven-cut bundle's marginal bound; the identification of that bound's law
+    with the law the repeated adapter draws its cut from; the uniform rotation
+    law as the ideal cut; the distance of the seven-cut law from that ideal; and
+    the constancy, at every coalition of at most one seat, of what that reading
+    grants of the ideal cut in the committed pair. The only inexact quantity in
+    the program is the bundle's spectral number; the ideal cut and the constancy
+    field are exact. *)
 Definition kim_centi_cert (R : realType) (idx : unit)
   : IndistinguishabilityCert (amf_sample kim_centi_family R idx)
       (coalition_endpoint_reading five_card_algebra) :=
@@ -639,10 +641,11 @@ Definition kim_centi_cert (R : realType) (idx : unit)
     (@five_card_static_obs_const R).
 
 (** The input-indistinguishability certificate of the one-cut certified program,
-    with the same five fields at word length one. The ideal cut and the
-    constancy, at every coalition of at most one seat, of the reading of it are
-    the same two terms as in the repeated certified program's certificate, so
-    the two programs differ only in the shuffle and its number. *)
+    at the coalition's own endpoint reading, with the same five fields at word
+    length one. The ideal cut and the constancy, at every coalition of at most
+    one seat, of what that reading grants of it are the same two terms as in the
+    repeated certified program's certificate, so the two programs differ only in
+    the shuffle and its number. *)
 Definition kim_biased_cert (R : realType) (idx : unit)
   : IndistinguishabilityCert (amf_sample kim_biased_family R idx)
       (coalition_endpoint_reading five_card_algebra) :=
@@ -896,7 +899,8 @@ Lemma five_card_repeated_published39_propertyE (R : realType)
   = InputIndistinguishabilityProperty.
 Proof. exact: erefl. Qed.
 
-(** The one-cut program's certificate at the exact number one fiftieth. *)
+(** The one-cut program's certificate at the coalition's own endpoint reading
+    and at the exact number one fiftieth. *)
 Definition kim_biased_cert_exact (R : realType) (idx : unit)
   : IndistinguishabilityCert (amf_sample kim_biased_family R idx)
       (coalition_endpoint_reading five_card_algebra) :=
@@ -978,18 +982,18 @@ Proof. by lra. Qed.
 (*     The proximity certificate, and its ideal                               *)
 (******************************************************************************)
 
-(** The proximity certificate of Kim's one-cut program. Its five fields are
-    the den Boer uniform model as the ideal; that model's exact witness,
-    which is what makes the ideal an execution whose coalitions learn
-    nothing at all; the conjunction of the committed bits as the one-cut
-    model's own secret; one fiftieth; and the distance above. The ideal and
-    the witness are the terms the published uniform program carries, which
-    kim_biased_proximity_cert_idealE states, and the secret is the same
-    conjunction that program's witness is stated at. The number is the
-    bound kim_biased_cut_mixing_exact proves on the cut group's own
-    distance, and the last field is kim_biased_proximity_close of
-    five_card_proximity.v, which says the distance between the two joint
-    laws is at most that number. *)
+(** The proximity certificate of Kim's one-cut program, at the coalition's own
+    endpoint reading. Its five fields are the den Boer uniform model as the
+    ideal; that model's exact witness, which is what makes the ideal an
+    execution whose coalitions learn nothing at all; the conjunction of the
+    committed bits as the one-cut model's own secret; one fiftieth; and the
+    distance above. The ideal and the witness are the terms the published
+    uniform program carries, which kim_biased_proximity_cert_idealE states, and
+    the secret is the same conjunction that program's witness is stated at. The
+    number is the bound kim_biased_cut_mixing_exact proves on the cut group's
+    own distance, and the last field is kim_biased_proximity_close of
+    five_card_proximity.v, which says the distance between the two joint laws is
+    at most that number. *)
 Definition kim_biased_proximity_cert (R : realType) (idx : unit)
   : IdealProximityCert (amf_sample kim_biased_family R idx)
       (coalition_endpoint_reading five_card_algebra) :=
@@ -1149,11 +1153,12 @@ Proof. by []. Qed.
 (******************************************************************************)
 
 (** The proximity program's security statement at the five-card instance: at
-    fewer than two colluding seats, the joint law of the coalition's executed
-    reading and the conjunction of the committed bits under Kim's one biased
-    cut is within one fiftieth of the product of the two marginals of the den
-    Boer uniform execution. The proof is the program's security projection
-    applied, so the program and this statement are one theorem. *)
+    fewer than two colluding seats, the joint law of what the coalition is
+    granted of the executed run and the conjunction of the committed bits under
+    Kim's one biased cut is within one fiftieth of the product of the two
+    marginals of the den Boer uniform execution. The proof is the program's
+    security projection applied, so the program and this statement are one
+    theorem. *)
 Theorem five_card_biased_view_proximity (R : realType) (C : {set 'I_5})
     (HC : (#|C| < 2)%N) :
   var_dist
@@ -1171,13 +1176,13 @@ exact: (view_proximity_of five_card_biased_proximity_published R tt C HC).
 Qed.
 
 (** The one-cut program's bound restated against the executed law's own two
-    marginals: at fewer than two colluding seats, the joint law of the
-    coalition's reading with the conjunction of the committed bits is within
-    three fiftieths of the product of that same law's two marginals. The den
-    Boer uniform model has left the statement. What remains is a bound on how
-    far the one-cut run is from making a coalition's reading and the secret
-    independent, and the advantage a distinguisher gets from it is at most
-    three hundredths. *)
+    marginals: at fewer than two colluding seats, the joint law of a coalition's
+    endpoints with the conjunction of the committed bits is within three
+    fiftieths of the product of that same law's two marginals. The den Boer
+    uniform model has left the statement. What remains is a bound on how far the
+    one-cut run is from making a coalition's endpoints and the secret
+    independent, and the advantage a distinguisher gets from it is at most three
+    hundredths. *)
 Theorem five_card_biased_view_own_marginals (R : realType) (C : {set 'I_5})
     (HC : (#|C| < 2)%N) :
   var_dist
@@ -1237,9 +1242,9 @@ Proof. by rewrite cards1. Qed.
 
 (** Kim's one-cut program's claim with every hypothesis discharged: one real
     field, one coalition of one named seat, and the threshold condition proved
-    rather than assumed. The coalition is not empty, so the reading the bound
-    is stated on is the seat's own content observation at that seat, where the
-    empty coalition's reading is ord0 at every seat. *)
+    rather than assumed. The coalition is not empty, so what the bound is stated
+    on is the seat's own content observation at that seat, where the empty
+    coalition is granted ord0 at every seat. *)
 Definition five_card_biased_proximity_at_singleton (R : realType) (i : 'I_5) :=
   @five_card_biased_view_proximity R [set i]
     (five_card_singleton_below_threshold i).

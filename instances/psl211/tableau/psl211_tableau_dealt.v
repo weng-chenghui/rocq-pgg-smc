@@ -33,9 +33,10 @@
 (* two programs that differ in the reading alone still name one execution,    *)
 (* one model family and one link lemma. Neither of the paths they publish is  *)
 (* among the manifest's twelve. The obstruction's path differs from the       *)
-(* manifest's twelfth in its observed execution, that one being the           *)
-(* all-decks run; a manifest path for the colour program needs its raw        *)
-(* theorem stated below the manifest and is not written here.                 *)
+(* manifest's twelfth in two coordinates, its observed execution and its      *)
+(* model family, the twelfth being over the all-decks run; a manifest path    *)
+(* for the colour program needs its raw theorem stated below the manifest and *)
+(* is not written here.                                                       *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   psl211_dealt_family    == the fixed-dealer colour model as an analysis   *)
@@ -54,9 +55,9 @@
 (*                          == the obstruction program                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
-(*   psl211_dealt_input_distinguishable                                       *)
-(*                          == the model is input distinguishable at 1/660    *)
-(*                             at the coalition's own endpoint reading        *)
+(*   psl211_dealt_sampled_viewE                                               *)
+(*                          == the link lemma of the Sampled level, for both  *)
+(*                             programs                                       *)
 (*   psl211_colour_exact_published_readingE                                   *)
 (*                          == the colour program's reading is the colour     *)
 (*                             reading                                        *)
@@ -64,6 +65,13 @@
 (*                          == its security property is exact independence    *)
 (*   psl211_colour_exact_published_pathE                                      *)
 (*                          == the path it publishes                          *)
+(*   psl211_dealt_input_distinguishable                                       *)
+(*                          == the model is input distinguishable at 1/660    *)
+(*                             at the coalition's own endpoint reading        *)
+(*   psl211_dealt_number_gt0                                                  *)
+(*                          == the number is above zero                       *)
+(*   psl211_dealt_obstruction_pf                                              *)
+(*                          == its proof at every field and prior             *)
 (*   psl211_dealt_obstruction_published_kindE                                 *)
 (*                          == the obstruction the second program hands over  *)
 (*   psl211_dealt_obstruction_published_pathE                                 *)
@@ -196,26 +204,26 @@ Proof. exact: erefl. Qed.
 (******************************************************************************)
 
 (** psl211_dealt_input_distinguishable — the fixed-dealer model is input
-    distinguishable at the coalition's own endpoint reading, at the
-    reciprocal of the order of the shuffle group. The coalition is the three
-    positions psl211_perdeck_coalition, below the threshold of six, and the
-    two run arguments are the two chiralities of one deal: the encoder deck
-    of one puts the three cards of psl211_dealt_view under exactly one cut
-    and the other under none, so the two pushforwards of the uniform cut law
-    differ at that reading by one cut's mass and the sum of absolute
-    differences is at least that. Over these parameters the run argument is
-    the chirality, so this is a privacy statement at this model, and that
-    does not generalise to a mode whose run argument is a deck description.
-
-    Each mass is pinned in a statement naming one chirality, and the two are
-    brought together afterwards: a rewrite with a mass lemma in a goal
-    holding both chiralities searches a goal holding both deck tables. *)
+    distinguishable at the coalition's own endpoint reading, at the reciprocal
+    of the order of the shuffle group. The coalition is the three positions
+    psl211_perdeck_coalition, below the threshold of six, and the two run
+    arguments are the two chiralities, the dealer laying the cards from each:
+    the encoder deck of one puts the three cards of psl211_dealt_view under
+    exactly one cut and the other under none, so the two pushforwards of the
+    uniform cut law differ at that reading by one cut's mass and the sum of
+    absolute differences is at least that. Over these parameters the run
+    argument is the chirality, so this is a privacy statement at this model, and
+    that does not generalise to a mode whose run argument is a deck
+    description. *)
 Lemma psl211_dealt_input_distinguishable (R : realType)
     (secretP : R.-fdist bool) :
   InputDistinguishabilityPropAt (psl211_dealt_sample secretP)
     (coalition_endpoint_reading psl211_algebra)
     ((#|pgg_G psl211_M|%:R)^-1 : R).
 Proof.
+(* each mass is pinned in a statement naming one chirality, and the two are
+   brought together afterwards: a rewrite with a mass lemma in a goal
+   holding both chiralities searches a goal holding both deck tables *)
 have [Ht Hf] := psl211_dealt_raw_countE.
 have Ct : #|psl211_dealt_fiber true| = 0 :=
   etrans (psl211_dealt_fiberE true) Ht.
@@ -287,16 +295,16 @@ Definition psl211_dealt_obstruction_pf
     conj (psl211_dealt_number_gt0 R)
          (psl211_dealt_input_distinguishable secretP).
 
-(** psl211_dealt_obstruction_published — the obstruction program. It
-    certifies no security property, its data carrying no SecurityEvidence,
-    and it denies what its one member names: every number at which an
-    input-indistinguishability program over this model AT THIS READING states
+(** psl211_dealt_obstruction_published — the obstruction program. It certifies
+    no security property, its data carrying no SecurityEvidence, and two
+    exclusions follow from its one member: every number at which an
+    input-indistinguishability program over this model at this reading states
     its proposition is at least 1/660, and no certificate at this reading has
-    its ideal cut within eps of the model's own cut law once eps added to
-    itself stays below 1/660. It leaves the colour reading untouched, where
+    its ideal cut within eps of the model's own cut law once eps added to itself
+    stays below 1/660. It leaves the colour reading untouched, where
     psl211_colour_exact_published certifies exact independence over the same
-    model; the two are the pair a reading of a coalition's endpoints exists
-    to separate. *)
+    model; the two are the pair a reading of a coalition's endpoints exists to
+    separate. *)
 Definition psl211_dealt_obstruction_published : PublishedObstruction :=
   psl211_dealt_sampled
     |> publish Obstruction InputDistinguishability

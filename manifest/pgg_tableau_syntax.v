@@ -107,11 +107,11 @@
 (*                                                                            *)
 (* of introduces what is read. It follows the literal naming the security     *)
 (* property in the three certify rules that name a reading, and the literal   *)
-(* InputDistinguishability in one of the two obstruction terminals; the term  *)
-(* after it is the reading. It is also the word of the bind of pgg_tableau.v, *)
-(* following that rule's slot f, and it reserves nothing, being a keyword of  *)
-(* Rocq independently of this file, measured on 2026-09-21 in the same way,   *)
-(* so the count stays twenty.                                                 *)
+(* InputDistinguishability in the obstruction terminal; the term after it is  *)
+(* the reading. It is also the word of the bind of pgg_tableau.v, following   *)
+(* that rule's slot f, and it reserves nothing, being a keyword of Rocq       *)
+(* independently of this file, measured on 2026-09-21 in the same way, so the *)
+(* count stays twenty.                                                        *)
 (*                                                                            *)
 (* assuming, measured on 2026-09-21, follows the slot t of the three-payload  *)
 (* publish rule, the slot t of the Sampled terminal and the slot pf of the    *)
@@ -125,16 +125,17 @@
 (* The surface has two kinds of word. A preposition carries one meaning       *)
 (* throughout: at a number, a size or a real field with its index, by a proof *)
 (* or a piece of evidence, assuming an assumption status, and of what is      *)
-(* read. A slot name names a thing, and the term that is that thing           *)
-(* follows it, at once or after a preposition: dealt, encoded and supplied    *)
-(* name the mode a run is driven in, inputs the input carrier, layout the     *)
-(* sharing the dealer deals, decoded_by the reader of the committed payload   *)
-(* list, committed_by the commit processes, expecting the value a run         *)
-(* recovers, fuel the number of steps the interpreter is allowed, execute the *)
-(* run statement, terminates, endpoints and recon its three obligations,      *)
-(* sample the model family, certify the security property, leaks the          *)
-(* coalition size of a tightness annotation, tied the equation between the    *)
-(* bound's law and the model's cut law, ideal the ideal cut, mixing the       *)
+(* read. The bind of manifest/pgg_tableau.v writes of ahead of a payload and  *)
+(* is not one of these rules. A slot name names a thing, and the term that is *)
+(* that thing follows it, at once or after a preposition: dealt, encoded and  *)
+(* supplied name the mode a run is driven in, inputs the input carrier,       *)
+(* layout the sharing the dealer deals, decoded_by the reader of the          *)
+(* committed payload list, committed_by the commit processes, expecting the   *)
+(* value a run recovers, fuel the number of steps the interpreter is allowed, *)
+(* execute the run statement, terminates, endpoints and recon its three       *)
+(* obligations, sample the model family, certify the security property, leaks *)
+(* the coalition size of a tightness annotation, tied the equation between    *)
+(* the bound's law and the model's cut law, ideal the ideal cut, mixing the   *)
 (* distance from it, invariant the constancy of a coalition's view,           *)
 (* functionality the ideal function, conclude the number a program publishes, *)
 (* and publish what a program hands over, a transfer status in one rule, a    *)
@@ -485,17 +486,17 @@ Notation "s 'certify' 'IdealProximity' 'by' c" :=
    to the rule above it, whose payload mentions no reading at all. *)
 Notation "s 'certify' 'ExactIndependence' 'of' r 'by' w" :=
   (s ;;; certify_reading_exact
-     of (exact_of_reading (tableau_at s) r w))
+     of (reading_exact_payload (tableau_at s) r w))
   (at level 90, left associativity, r at level 0, w at level 0).
 
 Notation "s 'certify' 'InputIndistinguishability' 'of' r 'by' c" :=
   (s ;;; certify_reading_indistinguishability
-     of (indistinguishability_of_reading (tableau_at s) r c))
+     of (reading_indistinguishability_payload (tableau_at s) r c))
   (at level 90, left associativity, r at level 0, c at level 0).
 
 Notation "s 'certify' 'IdealProximity' 'of' r 'by' c" :=
   (s ;;; certify_reading_idealproximity
-     of (idealproximity_of_reading (tableau_at s) r c))
+     of (reading_idealproximity_payload (tableau_at s) r c))
   (at level 90, left associativity, r at level 0, c at level 0).
 
 (* The five clauses name the real field and the model index once, after at,
@@ -563,33 +564,22 @@ Definition input_distinguishability_obstruction (q : StackAt Sampled)
                  (amf_sample (sp_f q) R idx) r (c R).
 Arguments input_distinguishability_obstruction : clear implicits.
 
-(* The kind, its number, the proof of it and then the assumption status. The
-   obstruction occupies the column the transfer status occupies in the other
-   two publish rules, that coordinate being fixed at NegativeTransfer by the
-   terminal, so a program's last statement reads in the order the manifest
-   column headings run.
+(* The kind, the reading, the number, the proof and then the assumption
+   status. The obstruction occupies the column the transfer status occupies
+   in the other two publish rules, that coordinate being fixed at
+   NegativeTransfer by the terminal, so a program's last statement reads in
+   the order the manifest column headings run.
 
-   The kind's name follows the literal Obstruction and the number follows at,
-   so the line says which kind is published and at which number without a
-   payload named elsewhere, and the proof is what the kind's proposition asks
-   for at that number. The reading is the coalition's own endpoints, the
-   finest, so a program written this way publishes the obstruction that
-   refutes the most. *)
-Notation "s |> 'publish' 'Obstruction' 'InputDistinguishability' 'at' c 'by' pf 'assuming' a" :=
-  (s ;;; publish_obstruction a
-     of (mk_obstruction (tableau_at s)
-           (input_distinguishability_obstruction (tableau_at s)
-              (coalition_endpoint_reading (projT1 (tableau_at s))) c) pf))
-  (at level 90, left associativity, c at level 0, pf at level 0,
-   a at level 0).
-
-(* The same terminal with the reading written after of, between the kind's
-   name and the number. A program uses it when the coalition it exhibits
-   tells two run arguments apart through less than the whole of its
-   endpoints; by input_distinguishability_prop_coalition_endpoint_reading
-   such an obstruction is an obstruction at the endpoint reading too, so the
-   clause records what the instance proved and not the limit of what the
-   published value refutes. *)
+   The kind's name follows the literal Obstruction, the reading follows of
+   and the number follows at, so the line says which kind is published, at
+   which reading and at which number with no payload named elsewhere, and
+   the proof is what the kind's proposition asks for at that number. When the
+   reading named is the coalition's own endpoints, the finest, what the
+   program publishes refutes certificates at that reading and leaves
+   certificates at every coarser reading open; an obstruction at a coarser
+   reading refutes certificates there and at every reading it factors
+   through, the endpoint reading among them, which is
+   input_distinguishability_prop_coalition_endpoint_reading. *)
 Notation "s |> 'publish' 'Obstruction' 'InputDistinguishability' 'of' r 'at' c 'by' pf 'assuming' a" :=
   (s ;;; publish_obstruction a
      of (mk_obstruction (tableau_at s)

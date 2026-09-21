@@ -31,14 +31,15 @@
 (* every real field, and that is the theorem the published program carries.   *)
 (*                                                                            *)
 (* The quantitative form fixes what an input-indistinguishability program     *)
-(* would have to publish. A certificate over the all-decks model states its   *)
-(* distance against the group-uniform law, its identification field pinning   *)
-(* its shuffle law to the adapter's cut, so no certificate carries a shuffle  *)
-(* bound epsilon strictly below 1/1320. The obligation of conclude bounds the *)
-(* published number below by cert_eps cert, which is that epsilon twice, so   *)
-(* every program over this model that publishes its certificate's own number  *)
-(* publishes at least 1/660. psl211_alldecks_no_zero_eps_cert states the same *)
-(* at epsilon zero, which is the epsilon profile_eps_psl211 of                *)
+(* would have to publish. A certificate over the all-decks model at the       *)
+(* coalition's own endpoint reading states its distance against the           *)
+(* group-uniform law, its identification field pinning its shuffle law to the *)
+(* adapter's cut, so no certificate carries a shuffle bound epsilon strictly  *)
+(* below 1/1320. The obligation of conclude bounds the published number below *)
+(* by cert_eps cert, which is that epsilon twice, so every program over this  *)
+(* model that publishes its certificate's own number publishes at least       *)
+(* 1/660. psl211_alldecks_no_zero_eps_cert states the same at epsilon zero,   *)
+(* which is the epsilon profile_eps_psl211 of                                 *)
 (* instances/psl211/psl211_profile.v gives this instance's single-card        *)
 (* marginal bound. The exclusion covers input indistinguishability alone: a   *)
 (* proximity certificate carries no shuffle bound and no constancy field, and *)
@@ -52,15 +53,16 @@
 (* distinguishable at 1/660 in the sense of manifest/pgg_tableau.v. No        *)
 (* certificate occurs in that statement, and the number bound above follows   *)
 (* from it for every certificate at once: 1/660 bounds from below what any    *)
-(* input-indistinguishability program over this model publishes, and a        *)
-(* distinguisher told to compare those two run arguments has advantage at     *)
-(* least 1/1320. The inequality itself is stated in                           *)
-(* instances/psl211/psl211_alldecks_input_distinguishability.v, below the     *)
-(* analysis manifest, which records it as a path; this file states it in the  *)
-(* framework's vocabulary and reads the consequences for certificates off it. *)
+(* input-indistinguishability program over this model at the coalition's own  *)
+(* endpoint reading publishes, and a distinguisher told to compare those two  *)
+(* run arguments has advantage at least 1/1320. The inequality itself is      *)
+(* stated in instances/psl211/psl211_alldecks_input_distinguishability.v,     *)
+(* below the analysis manifest, which records it as a path; this file states  *)
+(* it in the framework's vocabulary and reads the consequences for            *)
+(* certificates off it.                                                       *)
 (*                                                                            *)
-(* Dealt mode. The run argument is the chirality itself, so here the field    *)
-(* is exactly constancy in the secret, and it still fails: three seats see a  *)
+(* Dealt mode. The run argument is the chirality itself, so here the field is *)
+(* exactly constancy in the secret, and it still fails: three seats see a     *)
 (* reading that one chirality's encoder deck reaches under exactly one cut    *)
 (* and the other reaches under none. That is a fact about the group and the   *)
 (* design. PSL(2,11) is 2-transitive and not 3-transitive, where PGL(2,7)     *)
@@ -70,8 +72,11 @@
 (* seats. The dealt statement rules out one named ideal and no certificate.   *)
 (* An ideal can be pinned to these parameters through the dealer-dealt sample *)
 (* adapter psl211_dealt_sample of instances/psl211/psl211_colour_reading.v,   *)
-(* and no certificate is built over it. The dealt parameters carry no         *)
-(* endpoints statement, so there is no program and no path over them either.  *)
+(* and no certificate is built over it. The dealt parameters read their       *)
+(* endpoints through profile_endpointsE, so instances/psl211/psl211_models.v  *)
+(* carries an endpoints statement and an observed execution for them, and     *)
+(* instances/psl211/tableau/psl211_tableau_dealt.v carries two programs and   *)
+(* two paths over them.                                                       *)
 (*                                                                            *)
 (* Not claimed. Input indistinguishability is not shown unavailable at this   *)
 (* instance. What is excluded is a range of epsilon, and the range of larger  *)
@@ -134,20 +139,23 @@
 (*                           == a certificate's distance field is stated      *)
 (*                              against the group-uniform law                 *)
 (*   psl211_alldecks_no_small_eps_cert                                        *)
-(*                           == no certificate over the all-decks model       *)
-(*                              carries a shuffle bound epsilon under 1/1320  *)
+(*                           == no certificate over the all-decks model at    *)
+(*                              the coalition's own endpoint reading carries  *)
+(*                              a shuffle bound epsilon under 1/1320          *)
 (*   psl211_alldecks_no_zero_eps_cert                                         *)
 (*                           == in particular none carries an epsilon of      *)
 (*                              zero, the epsilon of this instance's          *)
 (*                              single-card marginal bound                    *)
 (*   psl211_alldecks_input_distinguishability                                 *)
 (*                           == the all-decks model is input distinguishable  *)
-(*                              at 1/660                                      *)
+(*   psl211_alldecks_input_distinguishability                                 *)
+(*                           == at the coalition's own endpoint reading the   *)
+(*                              all-decks model is input distinguishable at   *)
+(*                              1/660                                         *)
 (*   psl211_alldecks_indistinguishability_number_ge                           *)
 (*                           == every number an input-indistinguishability    *)
-(*                              program over that model states is at least    *)
-(*                              1/660                                         *)
-(*   psl211_alldecks_constancy_false_word584                                  *)
+(*                              program over that model at that reading       *)
+(*                              states is at least 1/660                      *)
 (*                           == the field is false at every ideal within eps  *)
 (*                              of the 584-letter word shuffle's cut law,     *)
 (*                              once twice the sum of eps and 2^-40 stays     *)
@@ -337,8 +345,8 @@ Definition psl211_blockline1_deal : psl211_deal :=
 Definition psl211_blockline1_view : viewT :=
   [ffun i => psl211_code12 (nth 0 [:: 3; 2; 4] (val i))].
 
-(** psl211_blockline1_test sq t — the coalition's reading of the deck sq under
-    the cut whose table is t matches psl211_blockline1_view, tested on raw
+(** psl211_blockline1_test sq t — what the coalition is granted of the deck sq
+    under the cut whose table is t matches psl211_blockline1_view, tested on raw
     codes. *)
 Definition psl211_blockline1_test (sq t : seq nat) : bool :=
   [&& nth 0 sq (nth 0 t 0) %% 12 == 3,
@@ -729,13 +737,14 @@ Qed.
     the shuffle bound epsilon twice, so a program over this model that publishes
     its certificate's own number publishes at least 1/660. The obligation of
     conclude bounds the published number below by cert_eps cert, so no program
-    over this model publishes less. This fixes from below what an
-    input-indistinguishability program can publish at this model. It says
-    neither that input indistinguishability is unavailable here nor anything
-    about what a coalition of at most five seats reads. The certificate is at
-    the coalition's own endpoint reading, the finest; what a certificate at a
-    coarser reading may hold as its epsilon stays open, and the colour
-    reading of instances/psl211/psl211_colour_reading.v is such a reading. *)
+    over this model whose certificate is at that reading publishes less. This
+    fixes from below what an input-indistinguishability program can publish at
+    this model. It says neither that input indistinguishability is unavailable
+    here nor anything about what a coalition of at most five seats reads. The
+    certificate is at the coalition's own endpoint reading, the finest; what a
+    certificate at a coarser reading may hold as its epsilon stays open, and the
+    colour reading of instances/psl211/psl211_colour_reading.v is such a
+    reading. *)
 (* The obligation of conclude at input-indistinguishability evidence is cert_eps
    cert <= odflt (cert_eps cert) (c R), and the proposition the program carries
    is IndistinguishabilityPropAt cert (odflt (cert_eps cert) (c R)). *)
@@ -791,9 +800,10 @@ Qed.
     chirality when the deck description is drawn is
     psl211_alldecks_static_indep, exactly nothing; the two facts stand under
     different quantifiers over the run argument, one drawing it and one fixing
-    two of its values. The reading is the coalition's own endpoints, the
-    finest, so this is the strongest of the distinguishability statements
-    about the model and every coarser reading's obstruction implies it. *)
+    two of its values. The reading is the coalition's own endpoints, the finest,
+    so this is the weakest of the distinguishability statements about the model:
+    an obstruction at any coarser reading implies it, and the converse does not
+    hold in general. *)
 Theorem psl211_alldecks_input_distinguishability (R : realType) :
   InputDistinguishabilityPropAt (psl211_alldecks_sample R)
     (coalition_endpoint_reading psl211_algebra)
@@ -928,8 +938,9 @@ Qed.
 Definition psl211_dealt_view : viewT :=
   [ffun i => psl211_code12 (nth 0 [:: 0; 1; 6] (val i))].
 
-(** psl211_dealt_test sq t — the coalition's reading of the deck sq under the
-    cut whose table is t matches psl211_dealt_view, tested on raw codes. *)
+(** psl211_dealt_test sq t — what the coalition is granted of the deck sq
+    under the cut whose table is t matches psl211_dealt_view, tested on raw
+    codes. *)
 Definition psl211_dealt_test (sq t : seq nat) : bool :=
   [&& nth 0 sq (nth 0 t 0) %% 12 == 0,
       nth 0 sq (nth 0 t 1) %% 12 == 1 &
@@ -1048,16 +1059,19 @@ Proof. by rewrite /psl211_dealt_fiber uniform_fdistmap_pointE. Qed.
     input-indistinguishability certificate over these parameters can take that
     law as its ideal cut, while a certificate at some other ideal stays open.
     The dealt run argument is the chirality and nothing else, so here the
-    constancy field is exactly constancy in the secret, and it fails because
-    the encoder decks of the two chiralities give one reading of three seats
+    constancy field is exactly constancy in the secret, and it fails because the
+    encoder decks of the two chiralities give one reading of three seats
     different masses. That is a fact about the group and the design: PSL(2,11)
     is 2-transitive and not 3-transitive, where PGL(2,7) proves the same field
     through pgl27_word_view_const. The statement rules out one named ideal and
     no certificate. An ideal can be pinned to these parameters through the
     dealer-dealt sample adapter psl211_dealt_sample of
     instances/psl211/psl211_colour_reading.v, and no certificate is built over
-    it. The dealt parameters carry no endpoints statement, so there is no
-    program and no path over them either. *)
+    it. The dealt parameters read their endpoints through profile_endpointsE, so
+    instances/psl211/psl211_models.v carries an endpoints statement and an
+    observed execution for them, and
+    instances/psl211/tableau/psl211_tableau_dealt.v carries two programs and two
+    paths over them. *)
 Lemma psl211_dealt_constancy_false (R : realType) :
   ~ coalition_reading_constancy psl211_dealt_params
       ((`U psl211_G_pos) : R.-fdist cutT).

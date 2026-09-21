@@ -23,7 +23,7 @@
 (*                                                                            *)
 (* The mathematics reaches the program through one payload and two facts. The *)
 (* payload is the exact witness. The first fact identifies the framework's    *)
-(* direct computation of a coalition's reading with the additive sharing's    *)
+(* direct computation of a coalition's endpoints with the additive sharing's  *)
 (* own, which holds because this model draws the identity cut. The second is  *)
 (* s5_exec_coalition_secrecy, the sharing's privacy at a uniform tape, read   *)
 (* from zero mutual information back to independence. No other security       *)
@@ -50,7 +50,7 @@
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   s5_rand_static_obsE  == the framework's direct computation of a          *)
-(*                           coalition's reading is the one the additive      *)
+(*                           coalition's endpoints is the one the additive    *)
 (*                           sharing makes                                    *)
 (*   s5_rand_static_obs_indep                                                 *)
 (*                        == below five seats that computation is independent *)
@@ -146,11 +146,12 @@ Qed.
 
 (** The exact-independence witness: the tape secret as a random variable on the
     tape space, and, at every coalition of fewer than five seats, the
-    independence of that coalition's reading from it. The independence is exact,
-    four additive shares of a uniform tape carrying no information about the
-    secret at all rather than a small amount, and it is exact for a reason no
-    shuffle takes part in. The framework derives the zero mutual information,
-    the unchanged conditional entropy and the closure under post-processing from
+    independence from it of the whole of that coalition's endpoints, which is
+    the reading this witness is indexed by. The independence is exact, four
+    additive shares of a uniform tape carrying no information about the secret
+    at all rather than a small amount, and it is exact for a reason no shuffle
+    takes part in. The framework derives the zero mutual information, the
+    unchanged conditional entropy and the closure under post-processing from
     this one field, so the witness is all that certifying exact independence
     requires of this instance. *)
 Definition s5_rand_exact_witness (R : realType) (idx : unit)

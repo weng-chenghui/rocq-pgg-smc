@@ -38,6 +38,7 @@ From pgg_smc Require Import pgl27_tableau_analysis_bridged.
 From pgg_smc Require Import psl211_group psl211_orbit psl211_scheme.
 From pgg_smc Require Import psl211_profile psl211_exec psl211_models.
 From pgg_smc Require Import psl211_reading_constancy psl211_colour_reading.
+From pgg_smc Require Import psl211_tableau_sampled.
 From pgg_smc Require Import psl211_tableau_analysis_bridged.
 From pgg_smc Require Import psl211_tableau_dealt.
 
@@ -118,39 +119,39 @@ Check (@ReadingIndistinguishabilityPropAt
        : forall (R : realType) (A : PGGAlgebraic) (E : ExecutionParams A),
          SampleAdapter R (instance_exec E) -> CoalitionReading A -> R -> Prop).
 
-Check (@ExactPayloadOfReading : StackAt Sampled -> Type).
-Check (@IndistinguishabilityPayloadOfReading : StackAt Sampled -> Type).
-Check (@IdealProximityPayloadOfReading : StackAt Sampled -> Type).
+Check (@ReadingExactPayload : StackAt Sampled -> Type).
+Check (@ReadingIndistinguishabilityPayload : StackAt Sampled -> Type).
+Check (@ReadingIdealProximityPayload : StackAt Sampled -> Type).
 
-Check (exact_of_reading
+Check (reading_exact_payload
        : forall (x : StackAt Sampled) (r : CoalitionReading (projT1 x)),
          (forall (R : realType) (idx : amf_index (sp_f x) R),
             ExactWitness (amf_sample (sp_f x) R idx) r) ->
-         ExactPayloadOfReading x).
+         ReadingExactPayload x).
 
-Check (indistinguishability_of_reading
+Check (reading_indistinguishability_payload
        : forall (x : StackAt Sampled) (r : CoalitionReading (projT1 x)),
          (forall (R : realType) (idx : amf_index (sp_f x) R),
             IndistinguishabilityCert (amf_sample (sp_f x) R idx) r) ->
-         IndistinguishabilityPayloadOfReading x).
+         ReadingIndistinguishabilityPayload x).
 
-Check (idealproximity_of_reading
+Check (reading_idealproximity_payload
        : forall (x : StackAt Sampled) (r : CoalitionReading (projT1 x)),
          (forall (R : realType) (idx : amf_index (sp_f x) R),
             IdealProximityCert (amf_sample (sp_f x) R idx) r) ->
-         IdealProximityPayloadOfReading x).
+         ReadingIdealProximityPayload x).
 
 Check (certify_reading_exact
        : forall (x : StackAt Sampled), StackProp Sampled x ->
-         ExactPayloadOfReading x -> Tableau AnalysisBridged).
+         ReadingExactPayload x -> Tableau AnalysisBridged).
 
 Check (certify_reading_indistinguishability
        : forall (x : StackAt Sampled), StackProp Sampled x ->
-         IndistinguishabilityPayloadOfReading x -> Tableau AnalysisBridged).
+         ReadingIndistinguishabilityPayload x -> Tableau AnalysisBridged).
 
 Check (certify_reading_idealproximity
        : forall (x : StackAt Sampled), StackProp Sampled x ->
-         IdealProximityPayloadOfReading x -> Tableau AnalysisBridged).
+         ReadingIdealProximityPayload x -> Tableau AnalysisBridged).
 
 Check (@certify_exact_readingE
        : forall (x : StackAt Sampled) (q : StackProp Sampled x)
@@ -315,6 +316,22 @@ Check (psl211_dealt_obstruction_published_pathE
        : published_obstruction_path psl211_dealt_obstruction_published
          = @MkAnalysisPath psl211_dealt_observed AnalysisBridged
              psl211_dealt_family NegativeTransfer BaselineClassicalOnly).
+
+(******************************************************************************)
+(*     The obstruction terminal, in the landed surface                        *)
+(******************************************************************************)
+
+(* The all-decks obstruction program names the reading it publishes at after
+   of, as the dealer-dealt one does, and the line the surface reads is the
+   term the definition carries. *)
+Check (erefl
+       : psl211_alldecks_obstruction_published
+         = (psl211_exact_sampled
+              |> publish Obstruction InputDistinguishability
+                 of (coalition_endpoint_reading psl211_algebra)
+                 at psl211_alldecks_number
+                 by psl211_alldecks_obstruction_pf
+                 assuming BaselineClassicalOnly)).
 
 (******************************************************************************)
 (*     K5: the four propositions at the default reading are today's           *)
