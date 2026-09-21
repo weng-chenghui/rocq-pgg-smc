@@ -129,7 +129,9 @@ without losing work, since every one was landed as a pure addition.
    proposes 273 comment sites in 40 files where "reading" names a value, a
    law or an instance's own function, to be replaced by "endpoints", "view",
    "law"; that would overturn the concept word chosen on 2026-09-20 outside
-   the record's own files and bring "view" back as a concept word. (b) a
+   the record's own files and bring "view" back as a concept word. (b) DONE on the owner's decision of the same day (tracker 4.7;
+   identifiers kept; two frozen sites left: `reconstruct/algebraic_rigidity.v:104`
+   and `protocol/card_exchange_pismc.v:81`), which was: a
    `var_dist` is called a total variation, which is off by the factor two the
    tree otherwise states everywhere: `security/pgg_mixing.v` (ten comments and
    the identifier `symm_ds_TV_bound`), `instances/kim2025/kim_input_privacy.v`
