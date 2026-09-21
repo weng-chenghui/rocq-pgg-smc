@@ -120,8 +120,11 @@ equation and every instance proof as it is. `exact_tail`,
 `indistinguishability_tail`, `idealproximity_tail`,
 `indistinguishability_number_ge_of_input_distinguishability` and
 `no_indistinguishability_cert_ideal_close_of_input_distinguishability` are
-reproved at a free reading; the number bound pairs an obstruction and a
-certificate at the SAME reading, and says nothing across two readings.
+reproved at a free reading; the number bound AS STATED pairs an obstruction
+and a certificate at one reading. Across two readings it needs a
+factorisation: an obstruction at a reading that factors through `r` is an
+obstruction at `r` at the same number (the soundness audit compiled it), so an
+obstruction at any reading is one at the endpoint reading, the finest.
 Post-processing: evidence at a reading gives the proposition at every reading
 that factors through it, at the same number
 (`reading_indistinguishability_postprocessing` is the existing form).
@@ -131,7 +134,6 @@ that factors through it, at the same number
 ```coq
 s certify ExactIndependence by w                       (* default reading *)
 s certify ExactIndependence of r by w
-s certify ExactIndependence of r by w leaks at k by H
 s certify InputIndistinguishability of r by c
 s certify IdealProximity of r by c
 s |> publish t assuming a
@@ -141,8 +143,10 @@ s |> publish Obstruction InputDistinguishability of r at c by pf assuming a
 s |> conclude at c by p
 ```
 
-The five-clause input-indistinguishability rule keeps its clauses and gains
-the optional `of r` after the property's name.
+The five-clause input-indistinguishability rule is at the default reading and
+its header says so; its marginal bound follows `by` (`at R idx by b`). A
+`leaks` annotation beside `of r`, and an `of r` form of the five-clause rule,
+were struck after the audits: nothing in the tree would call them.
 
 ### 3.6 Instances
 
@@ -179,14 +183,24 @@ the optional `of r` after the property's name.
 3. Every number bounds a sum of absolute differences, twice the total
    variation distance of the literature; a distinguisher's advantage is at
    most half of it. A `<=` bound is not the distance.
-4. A coarser reading can only help the designer for the two distance
-   properties (post-processing), and for exact independence the implication
+4. A coarser reading can only help the designer for input
+   indistinguishability (post-processing, proved; for ideal proximity it is
+   expected and NOT proved), and for exact independence the implication
    runs from the finer reading to the coarser and not back; PSL(2,11) is the
    witness that the converse fails. No comment may say a reading "is secure"
    without naming the reading and the property.
-5. An obstruction at a reading refutes certificates AT THAT READING only.
-6. The default reading changes no existing statement: convertibility is
-   checked by `erefl`, not argued.
+5. The number bound and the exclusion of certificates are STATED at one
+   reading. That is a scope of the lemmas and not a fact about obstructions:
+   distinguishability is monotone along a factorisation, from the coarser
+   reading to the finer, and the endpoint reading is the finest. An
+   obstruction at the endpoint reading therefore excludes certificates at that
+   reading and leaves certificates at a coarser reading open; every comment
+   on such a statement names the reading.
+6. At the default reading the four propositions are convertible with
+   today's, checked by `erefl` against verbatim copies. The record types are
+   distinct inductives, so statements that bind a witness or a certificate
+   change their types (43 annotation sites, no proof script), and five of
+   them narrow to the default reading.
 7. Frozen files are not edited. If a transfer lemma in a frozen file is
    stated at `static_coalition_obs` alone, its generalisation goes in a file
    that is not frozen.
@@ -227,3 +241,69 @@ the optional `of r` after the property's name.
    term).
 4. Fold, landing plan, landing in two commits: surface migration (notation
    only), then the reading index with the PSL(2,11) programs.
+
+## 8. Probes and audits, folded (2026-09-21)
+
+Records: `notes/probes/2026-09-21-reading-index/` (`surface/`, `surface2/`,
+`index/`, `index2/`, `audit-naming/`, `audit-soundness/`, `RULINGS.md`). The
+rulings file is the authority where it and the sections above differ; the
+differences are these.
+
+- The record is `CoalitionReading A`, indexed by the algebra alone, fields
+  `cr_readT`, `cr_read`; the default is `coalition_endpoint_reading`. One
+  record for the tree if the restatement of `psl211_colour_reading.v` is
+  annotations only (probe B round 3 measures it).
+- The reading does not enter every payload. A payload that is a dependent
+  pair made the conversion between two spellings of one program reduce the
+  whole Sampled coordinate (64.6 s for one `exact: erefl`). Each property has
+  two statements: the one that names no reading keeps production's payload
+  and body, and its twin `certify_reading_*` takes the reading. Measured:
+  8.6 s against a 6.8 s baseline, every `exact: erefl` at most 0.004 s, no
+  raw-bind site changes, 43 annotation changes in all.
+- Ledger: K1 GO (`assuming` is the twentieth keyword), K2 GO, K3 GO (66 sites),
+  K4 measured (a notation's leading literal is reserved; the owner chose the
+  inline obstruction rule, which reserves nothing), K5 to K10 GO, K11 GO for
+  input indistinguishability and for the exact witness, NOT proved for ideal
+  proximity, K12 to K14 GO, K15 GO at 1/660 with `psl211_perdeck_coalition`
+  and the two chiralities, K16 GO, K17 GO as joint inhabitation over one
+  algebra (not one model), K18: no file over 120 s after round 2.
+- K13 corrected a sentence of the tree: the dealer-dealt parameters do have
+  an endpoints statement, `profile_endpointsE psl211_profile_endpoints`, one
+  line, so there is an Observed and a Sampled level over them.
+- Problem 2 of section 1 (the second observer of the manifest's Path 2) is
+  NOT addressed: the content trace is the endpoint reading under a second
+  name, and a second program would be the first program's term.
+- A manifest path for the colour program is a later unit (the raw theorem
+  must sit below the manifest, as for the twelfth path).
+
+## 9. Landing plan
+
+Two commits, each landed by an Opus rocq-prover, verified by the main session
+(closure recompile with `scripts/comment_pass/`, fidelity file against
+production, `Print Assumptions`), then one combined Opus audit of the landed
+comments and a comments-only fix pass.
+
+1. **Surface.** `manifest/pgg_tableau_syntax.v` and every program of the four
+   `instances/*/tableau/` directories: certify evidence after `by`, the
+   five-clause bound after `by`, `conclude at c by p`, every publish rule
+   ends `assuming a`, the obstruction published inline (without the reading
+   until commit 2). Source: `surface2/staged/`. Notation only: every existing
+   equation still by `exact: erefl`; the header's keyword paragraph from probe
+   A round 2's corrected draft, with the two categories of words. Rejections
+   of the old spellings recorded with their messages.
+2. **Reading index.** `manifest/pgg_tableau.v` (record, default, index on the
+   three records, twin statements, tails, `reading_of` and the `_readingE`
+   lemmas, `ReadingIndistinguishabilityPropAt`, obstruction kind with its
+   reading), `manifest/pgg_tableau_reading.v` (reduced to lemmas about
+   readings, with the three monotonicity lemmas),
+   `manifest/pgg_tableau_security_property_relations.v` (14 sites, the
+   constant-reading record), `manifest/pgg_tableau_syntax.v` (`of r`), the 43
+   annotation sites, `instances/psl211/psl211_models.v` (dealer-dealt endpoints
+   and observed execution), `instances/psl211/psl211_colour_reading.v`
+   (restated, header corrected), new
+   `instances/psl211/tableau/psl211_tableau_dealt.v` (family, Sampled value,
+   colour program, endpoint-reading obstruction at 1/660), comments of the
+   narrowed statements. Source: `index2/staged/` and `index2/k*.v`. Trap for
+   the prover: at PSL(2,11) discharge the reading wrapper in a `have` naming
+   one chirality before any goal holds both.
+
