@@ -82,7 +82,7 @@ Record ExecutionPlug (mp : MonodromyProfile) :=
     ep_input_procs    : ep_inputT
                           -> seq (aproc pgg_dtype
                                     (pgg_data (pgg_N' (mp_M mp)).+1)) ;
-    (* ep_fuel selects the interpreter evaluation budget used by exec_run.
+    (* ep_fuel selects the interpreter evaluation fuel used by exec_run.
        Replacing a sufficient fuel value by another sufficient one does not
        define a different algebraic profile. *)
     ep_fuel           : nat ;

@@ -94,27 +94,27 @@
 | 208 | Lemma | `star3_ct1` | Lemma star3_ct1 : clique_traces 4 1 (star_comm_nat 3) = 4. |
 | 211 | Lemma | `star3_ct2` | Lemma star3_ct2 : clique_traces 4 2 (star_comm_nat 3) = 13. |
 | 214 | Lemma | `star3_ct3` | Lemma star3_ct3 : clique_traces 4 3 (star_comm_nat 3) = 40. |
-| 218 | Lemma | `star3_ntB0` | (* Cross-check with n_traces_natB *) |
-| 221 | Lemma | `star3_ntB1` | Lemma star3_ntB1 : n_traces_natB 4 1 (star_comm_nat 3) = 4. |
-| 224 | Lemma | `star3_ntB2` | Lemma star3_ntB2 : n_traces_natB 4 2 (star_comm_nat 3) = 13. |
-| 227 | Lemma | `star3_ntB3` | Lemma star3_ntB3 : n_traces_natB 4 3 (star_comm_nat 3) = 40. |
+| 218 | Lemma | `star3_n_traces_natB0` | (* Cross-check with n_traces_natB *) |
+| 221 | Lemma | `star3_n_traces_natB1` | Lemma star3_n_traces_natB1 : n_traces_natB 4 1 (star_comm_nat 3) = 4. |
+| 224 | Lemma | `star3_n_traces_natB2` | Lemma star3_n_traces_natB2 : n_traces_natB 4 2 (star_comm_nat 3) = 13. |
+| 227 | Lemma | `star3_n_traces_natB3` | Lemma star3_n_traces_natB3 : n_traces_natB 4 3 (star_comm_nat 3) = 40. |
 | 232 | Lemma | `free3_ct0` | (* ---- Trace counts: free group (3 generators) ---- *) |
 | 235 | Lemma | `free3_ct1` | Lemma free3_ct1 : clique_traces 3 1 (fun _ _ => false) = 3. |
 | 238 | Lemma | `free3_ct2` | Lemma free3_ct2 : clique_traces 3 2 (fun _ _ => false) = 9. |
 | 241 | Lemma | `free3_ct3` | Lemma free3_ct3 : clique_traces 3 3 (fun _ _ => false) = 27. |
-| 245 | Lemma | `free3_ntB2` | (* Cross-check *) |
+| 245 | Lemma | `free3_n_traces_natB2` | (* Cross-check *) |
 | 250 | Lemma | `abelian3_ct0` | (* ---- Trace counts: abelian (3 generators) ---- *) |
 | 253 | Lemma | `abelian3_ct1` | Lemma abelian3_ct1 : clique_traces 3 1 complete_comm_nat = 3. |
 | 256 | Lemma | `abelian3_ct2` | Lemma abelian3_ct2 : clique_traces 3 2 complete_comm_nat = 6. |
 | 259 | Lemma | `abelian3_ct3` | Lemma abelian3_ct3 : clique_traces 3 3 complete_comm_nat = 10. |
-| 265 | Lemma | `abelian3_ntB2` | (* Cross-check *) |
-| 268 | Lemma | `abelian3_ntB3` | Lemma abelian3_ntB3 : n_traces_natB 3 3 complete_comm_nat = 10. |
+| 265 | Lemma | `abelian3_n_traces_natB2` | (* Cross-check *) |
+| 268 | Lemma | `abelian3_n_traces_natB3` | Lemma abelian3_n_traces_natB3 : n_traces_natB 3 3 complete_comm_nat = 10. |
 | 273 | Lemma | `path3_ct0` | (* ---- Trace counts: path (3 generators) ---- *) |
 | 276 | Lemma | `path3_ct1` | Lemma path3_ct1 : clique_traces 3 1 path_comm_nat = 3. |
 | 279 | Lemma | `path3_ct2` | Lemma path3_ct2 : clique_traces 3 2 path_comm_nat = 8. |
 | 282 | Lemma | `path3_ct3` | Lemma path3_ct3 : clique_traces 3 3 path_comm_nat = 21. |
-| 286 | Lemma | `path3_ntB2` | (* Cross-check *) |
-| 289 | Lemma | `path3_ntB3` | Lemma path3_ntB3 : n_traces_natB 3 3 path_comm_nat = 21. |
+| 286 | Lemma | `path3_n_traces_natB2` | (* Cross-check *) |
+| 289 | Lemma | `path3_n_traces_natB3` | Lemma path3_n_traces_natB3 : n_traces_natB 3 3 path_comm_nat = 21. |
 | 298 | Lemma | `subseqs_k_size` | (* --- Helper lemma: size of elements in subseqs_k --- *) |
 | 310 | Lemma | `filter_pred1T` | (* --- Empty graph: clique_count Tg 0 = 1, clique_count Tg 1 = Tg --- *) |
 | 314 | Lemma | `all_pairs_comm_nil` | Lemma all_pairs_comm_nil comm : all_pairs_comm_sorted comm [::] = true. |
@@ -175,8 +175,8 @@
 | 971 | Lemma | `table_T4_path` | Lemma table_T4_path : |
 | 982 | Lemma | `table_T4_star3` | (* Note: path P_4 and star K_{1,3} have the same clique polynomial P(z) = 1 - 4z + 3z^2 = (1-z)(1-3z), hence the same trace counts. By the Cartier-Foata theorem, the trace-counting generating functio… |
 | 987 | Lemma | `table_T4_abelian` | Lemma table_T4_abelian : |
-| 993 | Lemma | `path4_ntB_check` | (* Cross-check: n_traces_natB for path P_4 matches the clique prediction *) |
-| 999 | Lemma | `star3_ntB_check` | (* Cross-check: n_traces_natB for star K_{1,3} matches *) |
+| 993 | Lemma | `path4_n_traces_natB_check` | (* Cross-check: n_traces_natB for path P_4 matches the clique prediction *) |
+| 999 | Lemma | `star3_n_traces_natB_check` | (* Cross-check: n_traces_natB for star K_{1,3} matches *) |
 
 ### `groups/pgg_raag_path.v` (14)
 
@@ -392,9 +392,9 @@
 |---:|---|---|---|
 | 42 | Lemma | `s5_gens_agree` | Lemma s5_gens_agree (i : 'I_4) (x : 'I_5) : |
 | 51 | Lemma | `s5_weval_inj1` | (* Word-eval injectivity via nat-level boolean check + vm_compute *) |
-| 60 | Lemma | `s5_nt_L1` | (* N=5, Tg=4, comm = path (\|i-j\| >= 2) *) |
-| 63 | Lemma | `s5_nt_L2` | Lemma s5_nt_L2 : n_traces_natB 4 2 path_comm_nat = 13. |
-| 66 | Lemma | `s5_nt_L3` | Lemma s5_nt_L3 : n_traces_natB 4 3 path_comm_nat = 40. |
+| 60 | Lemma | `s5_n_traces_natB1` | (* N=5, Tg=4, comm = path (\|i-j\| >= 2) *) |
+| 63 | Lemma | `s5_n_traces_natB2` | Lemma s5_n_traces_natB2 : n_traces_natB 4 2 path_comm_nat = 13. |
+| 66 | Lemma | `s5_n_traces_natB3` | Lemma s5_n_traces_natB3 : n_traces_natB 4 3 path_comm_nat = 40. |
 
 ### `instances/s5/rigidity_s5_instance.v` (9)
 

@@ -38,7 +38,7 @@
 (* the alphabet a mixing argument runs on; without it a step takes the        *)
 (* presentation generators. It reaches no proposition proved about a run.     *)
 (*                                                                            *)
-(* The block spends four identifiers as global keywords in every file that    *)
+(* The block reserves four identifiers as global keywords in every file that  *)
 (* requires this one: encode, read, private and shuffled_by. Each of them     *)
 (* follows a slot in some rule, which is what makes a token a keyword; the    *)
 (* tokens mount, walk, along, seat, players, secret, deal, cache, seats and   *)
@@ -80,7 +80,7 @@ Import Prenex Implicits.
 (* The shuffle action on share indices of an instance whose shares are the
    deck positions: the deck action, transported along the share-count equation.
    It is the map a block writes into pga_monodromy, and the reason an instance
-   in this surface owes no relation between share indices and cards beyond the
+   in this surface needs no relation between share indices and cards beyond the
    share count itself. *)
 Definition ord_monodromy (m n : nat) (gens : m.+1.-tuple {perm 'I_n.+2})
     (T : nat) (Hc : T = n.+2) : {perm 'I_n.+2} -> {perm 'I_T} :=
@@ -147,8 +147,9 @@ Arguments no_walk {m n} gens.
    obligation checked by conversion against the three terms written in the
    block.
    The three equations are the whole content: the result is the scheme
-   unchanged, and what the combinator buys is that a block naming a different
-   encoding from the scheme's own is rejected where it is written. *)
+   unchanged, and what the combinator gives is that a block naming a
+   different encoding from the scheme's own is rejected where it is
+   written. *)
 Definition pinned_scheme (secretT shareT : Type)
     (S : ThresholdScheme secretT shareT)
     (e : secretT -> (ts_T' S).+1.-tuple shareT)

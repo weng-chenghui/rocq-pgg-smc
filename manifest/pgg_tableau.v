@@ -1498,8 +1498,8 @@ Record PublishedSampled := MkPublishedSampled {
 (* The two transfer statuses that carry no theorem about an idealized model.
    A program at Sampled has proved run correctness and the link lemma and
    nothing about an ideal, so these are the two its own proposition supports,
-   and a path carrying either of them owes the manifest the premise it lacks
-   rather than a theorem. *)
+   and a path carrying either of them names in the manifest the premise it
+   lacks rather than a theorem. *)
 Variant TransferStatusWithoutTheorem :=
   SampledNoModelComparison | SampledStaticExecutedOnly.
 
@@ -1579,8 +1579,8 @@ Lemma publish_sampled_completionE (a : AssumptionStatus) (q : StackAt Sampled)
 Proof. exact: erefl. Qed.
 
 (* The transfer status of such a path is the manifest status the line's
-   payload stands for, and the manifest then owes that path the premise the
-   status names as absent. *)
+   payload stands for, and the manifest then states for that path the
+   premise the status names as absent. *)
 Lemma publish_sampled_transferE (a : AssumptionStatus) (q : StackAt Sampled)
     (pf : StackProp Sampled q) (t : TransferStatusWithoutTheorem) :
   ap_transfer (published_sampled_path (publish_sampled a q pf t))

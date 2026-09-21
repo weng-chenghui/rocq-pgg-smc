@@ -243,7 +243,7 @@ Qed.
 
 (** psl211_colour_readingE — the model's colour view of a sample point is what
     the colour reading grants the coalition of that point's endpoints. It is
-    where the instance's seat reconciliation is spent: the colour view is
+    where the instance's seat reconciliation is used: the colour view is
     written at the position index the model uses and a coalition's endpoints
     index through pi_starts, and psl211_colour_of_reading_obsE is what
     identifies the two. *)

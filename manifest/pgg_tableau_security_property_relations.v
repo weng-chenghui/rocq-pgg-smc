@@ -467,7 +467,7 @@ Variable ic : IndistinguishabilityCert sa (coalition_endpoint_reading A).
     run argument from the actual model's own law of arg_read and the cut
     from the certificate's ideal law, the two independent. What it holds no
     coordinate for is any coupling between the run argument and the cut, and
-    the distance below is what that omission costs. *)
+    the distance below is what that omission loses. *)
 Definition ideal_prod_adapter : SampleAdapter R (instance_exec E) :=
   @MkSampleAdapter R (instance_profile A) (instance_exec E)
     [the finType of (argT * pgg_gT (mp_M (instance_profile A)))%type]

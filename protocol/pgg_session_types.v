@@ -108,8 +108,8 @@ Definition PGGInit {party n env} (x : data) (p : @sproc pgg_dtype data party n e
   SInit x p.
 
 (* Types a process's final return of data x under the empty session
-   environment: every send this process owed has already been matched, so
-   nothing remains to type-check downstream of it. *)
+   environment: every send this process had to make has already been
+   matched, so nothing remains to type-check downstream of it. *)
 Definition PGGRet {party : nat} (x : data)
     : @sproc pgg_dtype data party 2 senv_end :=
   SRet x.

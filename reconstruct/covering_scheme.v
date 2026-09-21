@@ -186,7 +186,7 @@ Proof. by move=> Hle; rewrite leq_add2l leq_mul2l Hle orbT. Qed.
 
 (* The reconstruction/privacy gap ts_T - ts_k never exceeds twice the
    genus, restated in subtraction form directly from cs_gap. This is the
-   CoveringScheme-level statement of the same price cap that
+   CoveringScheme-level statement of the same upper bound that
    algebraic_rigidity.v's ar_gap_bound exposes at the AlgebraicRigidity
    level. *)
 Lemma gap_bound (cs : CoveringScheme M) :

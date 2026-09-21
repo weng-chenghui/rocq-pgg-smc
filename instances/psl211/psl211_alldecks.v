@@ -787,14 +787,14 @@ Qed.
 (** ad_list_to_set_inj — an ascending list of positions is recovered from the
     set it codes, so a set-level pattern equation and its code-list form say
     the same thing. *)
-Local Lemma ad_list_to_set_inj (L1 L2 : seq nat) :
-  sorted ltn L1 -> all (fun n => (n < 12)%N) L1 ->
-  sorted ltn L2 -> all (fun n => (n < 12)%N) L2 ->
-  psl211_list_to_set L1 = psl211_list_to_set L2 -> L1 = L2.
+Local Lemma ad_list_to_set_inj (L L' : seq nat) :
+  sorted ltn L -> all (fun n => (n < 12)%N) L ->
+  sorted ltn L' -> all (fun n => (n < 12)%N) L' ->
+  psl211_list_to_set L = psl211_list_to_set L' -> L = L'.
 Proof.
 move=> S1 A1 S2 A2 Heq; apply: (irr_sorted_eq ltn_trans ltnn) => //.
-move=> n; rewrite -(perm_mem (ad_perm_list_to_set L1 S1 A1)) Heq.
-by rewrite (perm_mem (ad_perm_list_to_set L2 S2 A2)).
+move=> n; rewrite -(perm_mem (ad_perm_list_to_set L S1 A1)) Heq.
+by rewrite (perm_mem (ad_perm_list_to_set L' S2 A2)).
 Qed.
 
 (** ad_inter_setE — the set coded by the trace of a row on a code list is the

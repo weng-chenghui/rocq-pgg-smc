@@ -68,7 +68,7 @@ Fixpoint solve_L_aux (Tg N eps_n eps_d fuel L : nat) : option nat :=
     else solve_L_aux Tg N eps_n eps_d fuel' L.+1
   end.
 
-(* Wraps solve_L_aux with a fixed fuel budget of 100: the smallest L such
+(* Wraps solve_L_aux with a fixed fuel of 100: the smallest L such
    that epsilon_endpoint_rat Tg N L <= eps_n/eps_d, or None if no such L
    is found within 100 steps.  The search that solve's FixEps branch
    performs to turn a dealer's target epsilon into a concrete word length,

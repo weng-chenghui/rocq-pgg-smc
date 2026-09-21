@@ -16,16 +16,16 @@
 (* framework writes down the stack.                                           *)
 (*                                                                            *)
 (* One of the three run obligations is discharged here for every instance,    *)
-(* and a second is replaced by a cheaper equivalent. generic_static_recon     *)
+(* and a second is replaced by a faster equivalent. generic_static_recon      *)
 (* proves that decoding the static endpoint reading returns the dealt value,  *)
 (* from the reconstruction invariance of the plug's scheme and a single       *)
 (* coordinate hypothesis; dealt_static_recon supplies that hypothesis from    *)
-(* pga_coordE, so a dealer-dealt instance owes no reconstruction proof at     *)
+(* pga_coordE, so a dealer-dealt instance needs no reconstruction proof at    *)
 (* all. profile_endpointsE leaves the endpoint obligation with the instance   *)
-(* and only makes it cheaper: it carries the endpoint equation from a         *)
+(* and only makes it faster: it carries the endpoint equation from a          *)
 (* statement whose content readout is a variable to the statement about the   *)
 (* dealt readout. The equation is decided by reduction, and it is reduction   *)
-(* of a concrete dealt card that makes that costly, or impossible where an    *)
+(* of a concrete dealt card that makes that slow, or impossible where an      *)
 (* encoding passes through an opaque insub and never reduces at all. Keeping  *)
 (* the readout a variable removes the dealt card from the reduction, so one   *)
 (* reduction per profile replaces one reduction per plug: measured on         *)
@@ -51,9 +51,9 @@
 (* and one instance fact, that decoding the payload list returns the input    *)
 (* the committers hold.                                                       *)
 (*                                                                            *)
-(* What an instance owes is termination, instance_terminates_stmt, which has  *)
-(* no route through the algebra, and one reduction proof at its own profile:  *)
-(* profile_endpoints_stmt in the sharing family, and                          *)
+(* What an instance must supply is termination, instance_terminates_stmt,     *)
+(* which has no route through the algebra, and one reduction proof at its own *)
+(* profile: profile_endpoints_stmt in the sharing family, and                 *)
 (* profile_commit_endpoints_stmt in the input family.                         *)
 (*                                                                            *)
 (* Definitions:                                                               *)
@@ -300,8 +300,8 @@ Record ExecutionParams (A : PGGAlgebraic) := MkExecutionParams {
      specification side of correctness, so a run that decodes to something
      else is a failed run rather than a different protocol. *)
   ex_expected : ex_inputT -> pga_secretT A ;
-  (* ex_fuel is the interpreter budget. Replacing a sufficient budget by
-     another sufficient one leaves every statement below unchanged. *)
+  (* ex_fuel is the interpreter fuel. Replacing a sufficient fuel value
+     by another sufficient one leaves every statement below unchanged. *)
   ex_fuel     : nat ;
 }.
 
@@ -312,7 +312,7 @@ Arguments ex_expected {A} E : rename.
 (* The plug a parameter record builds: params_exec at the record's own mode,
    readout and fuel. Four of the six fields reach the plug, ex_inputT as its
    run argument type and ex_content, ex_commits and ex_fuel as its readout,
-   process list and budget. ex_content_obs and ex_expected do not, because they
+   process list and fuel. ex_content_obs and ex_expected do not, because they
    are not execution data, and they enter at instance_observed. Routing the
    plug through the record rather than letting an instance call params_exec is
    what stops a run whose interpreter readout disagrees with the static
@@ -361,8 +361,8 @@ Definition instance_recon_stmt (A : PGGAlgebraic) (E : ExecutionParams A)
 
 (* The observed execution of a parameter record, packed with its three run
    facts. This is the value every downstream analysis consumes, so supplying
-   an algebra, a parameter record and the three proofs is the whole of what
-   an instance owes the framework. *)
+   an algebra, a parameter record and the three proofs is all the framework
+   requires of an instance. *)
 Definition instance_observed (A : PGGAlgebraic) (E : ExecutionParams A)
     (Ht : instance_terminates_stmt E) (He : instance_endpoints_stmt E)
     (Hr : instance_recon_stmt E) : OE.ObservedExecution :=
@@ -454,7 +454,7 @@ Arguments encoded_input_params : clear implicits.
    the value the run recovers is the one written beside it. That value is a
    reading of the run argument and not a function of any committer's input,
    which is what keeps this mode in the sharing family. The sharing claim is
-   not an argument here, which is what leaves such a run owing a
+   not an argument here, which is what leaves such a run with a
    reconstruction obligation of its own. *)
 Definition supplied_input_params (A : PGGAlgebraic) (inputT : Type)
     (layout : inputT -> (ts_T' (pga_scheme A)).+1.-tuple 'I_(pga_n A).+2)
@@ -688,7 +688,7 @@ Arguments layout_static_recon : clear implicits.
 
 (* The reconstruction obligation of an input-family run, discharged from the
    sharing claim written in its own parameter statement. Every argument occurs
-   in the conclusion, so such a run owes no reconstruction proof beyond the
+   in the conclusion, so such a run needs no reconstruction proof beyond the
    encoding it already named. *)
 Lemma encoded_static_recon (A : PGGAlgebraic) (inputT : Type)
     (f : inputT -> pga_secretT A)
@@ -706,7 +706,7 @@ Qed.
 
 (* The eight arguments of encoded_input_params occur in the statement the
    obligation is made about, so the lemma is written unapplied where the
-   obligation is owed. *)
+   obligation is discharged. *)
 Arguments encoded_static_recon {A inputT f layout Hv dec procs fuel} x w0.
 
 (* The reconstruction obligation of a sharing-family run at a supplied layout,
@@ -753,7 +753,7 @@ Definition profile_endpoints_stmt (A : PGGAlgebraic) (fuel : nat) : Prop :=
 (* The endpoint obligation of a dealer-dealt run, read off the profile's own
    abstract-readout equation. Instantiating the variable readout at
    dealt_content gives the dealt direct computation by conversion, so the
-   instance-level statement costs no reduction of its own. *)
+   instance-level statement uses no reduction of its own. *)
 Lemma profile_endpointsE (A : PGGAlgebraic) (fuel : nat) :
   profile_endpoints_stmt A fuel ->
   instance_endpoints_stmt (dealt_secret_params A fuel).
@@ -762,7 +762,7 @@ Proof. by move=> H x w0; exact: (H _ (@dealt_content A) x w0). Qed.
 (* The endpoint obligation of a sharing-family run at a supplied layout, read
    off the same abstract-readout equation. The profile statement already
    quantifies over the content readout, so instantiating it at the supplied
-   layout costs the run no reduction of its own, and the two modes of the
+   layout uses no reduction of the run's own, and the two modes of the
    sharing family share the profile's one decision. *)
 Lemma supplied_endpointsE (A : PGGAlgebraic) (inputT : Type)
     (layout : inputT -> (ts_T' (pga_scheme A)).+1.-tuple 'I_(pga_n A).+2)
@@ -797,7 +797,7 @@ Definition profile_commit_endpoints_stmt (A : PGGAlgebraic) (inputT : Type)
 (* The endpoint obligation of an input-family run, from the profile's
    commit-mode equation and the single fact that decoding the payload list
    returns the input the committers hold. That decoding fact is the whole of
-   what an instance adds: the reduction is spent once at the profile, and this
+   what an instance adds: the reduction runs once, at the profile, and this
    lemma is what turns the layout the dealer assembled from the payloads into
    the layout the direct computation reads. *)
 Lemma encoded_endpointsE (A : PGGAlgebraic) (inputT : Type)

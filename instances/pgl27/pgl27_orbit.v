@@ -128,8 +128,8 @@ by case: (sort _ (enum S)) => [|a [|b [|c [|d [|? ?]]]]].
 Qed.
 
 (* The verdict depends only on the multiset of codes. *)
-Local Lemma nclass_perm (L1 L2 : seq nat) :
-  perm_eq L1 L2 -> nclass L1 = nclass L2.
+Local Lemma nclass_perm (L L' : seq nat) :
+  perm_eq L L' -> nclass L = nclass L'.
 Proof.
 by move=> /(perm_sortP leq_total leq_trans anti_leq) Hs; rewrite /nclass Hs.
 Qed.
@@ -469,14 +469,14 @@ by move=> A; rewrite subset_classE; apply: nclass_perm;
 Qed.
 
 (* list_to_set is injective on strictly ascending four-lists. *)
-Local Lemma list_to_set_inj (L1 L2 : seq nat) :
-  asc4 L1 -> asc4 L2 -> list_to_set L1 = list_to_set L2 -> L1 = L2.
+Local Lemma list_to_set_inj (L L' : seq nat) :
+  asc4 L -> asc4 L' -> list_to_set L = list_to_set L' -> L = L'.
 Proof.
 move=> A1 A2 Heq; apply: (irr_sorted_eq ltn_trans ltnn).
 - by case/and3P: A1.
 - by case/and3P: A2.
-- move=> n; rewrite -(perm_mem (@perm_list_to_set L1 A1)) Heq.
-  by rewrite (perm_mem (@perm_list_to_set L2 A2)).
+- move=> n; rewrite -(perm_mem (@perm_list_to_set L A1)) Heq.
+  by rewrite (perm_mem (@perm_list_to_set L' A2)).
 Qed.
 
 (* A four-subset class count equals the code-level count over sorted4, so a
@@ -492,7 +492,7 @@ have key : forall S : {set 'I_8}, #|S| = 4 -> asc4 (map val (enum S)).
   by rewrite size_map -cardE HcS.
 have Huniq : uniq [seq list_to_set L | L <- filter pn sorted4].
   rewrite map_inj_in_uniq; last first.
-    move=> L1 L2; rewrite !mem_filter => /andP[_ H1] /andP[_ H2].
+    move=> L L'; rewrite !mem_filter => /andP[_ H1] /andP[_ H2].
     by apply: list_to_set_inj; apply: (allP sorted4_asc).
   by rewrite filter_uniq // sorted4_uniq.
 have Hmem : [set S : {set 'I_8} | (#|S| == 4) && p S]

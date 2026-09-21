@@ -191,25 +191,25 @@ Qed.
 
 (* Epsilon is monotonically decreasing in L *)
 Lemma weighted_schreier_epsilon_decreasing
-    (wsc : WeightedSchreierCertificate) (L1 L2 : nat) :
-  (L1 <= L2)%N ->
-  weighted_schreier_epsilon wsc L2 <= weighted_schreier_epsilon wsc L1.
+    (wsc : WeightedSchreierCertificate) (L L' : nat) :
+  (L <= L')%N ->
+  weighted_schreier_epsilon wsc L' <= weighted_schreier_epsilon wsc L.
 Proof.
 exact: (pgg_schreier.envelope_decreasing (wsc_lambda_pos wsc)
                                          (wsc_lambda_le1 wsc) (sqrtr_ge0 _)).
 Qed.
 
-(* Monotone security: if secure at L1, at least as secure at L2 >= L1 *)
+(* Monotone security: if secure at L, at least as secure at L' >= L *)
 Lemma weighted_security_monotone
     (wsc : WeightedSchreierCertificate)
-    (L1 L2 : nat) (HL : (L1 <= L2)%N) :
+    (L L' : nat) (HL : (L <= L')%N) :
   forall (s : 'I_N),
-  var_dist (@endpoint_dist_weighted R n' m L2 sigmas W s)
+  var_dist (@endpoint_dist_weighted R n' m L' sigmas W s)
            (fdist_uniform (card_ord N))
-  <= weighted_schreier_epsilon wsc L1.
+  <= weighted_schreier_epsilon wsc L.
 Proof.
 move=> s.
-apply: (Order.POrderTheory.le_trans (wsc_convergence wsc L2 s)).
+apply: (Order.POrderTheory.le_trans (wsc_convergence wsc L' s)).
 exact: weighted_schreier_epsilon_decreasing.
 Qed.
 

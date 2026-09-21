@@ -21,7 +21,7 @@ From pgg_smc Require Import pgg_raag_path pgg_raag_clique.
 (* Contents:                                                                  *)
 (*   s5_gens_nat == nat-level generator function for vm_compute               *)
 (*   s5_gens_agree == agreement with path_gen at m=3                          *)
-(*   s5_nt_L* == vm_compute trace counts                                      *)
+(*   s5_n_traces_natB* == vm_compute trace counts                             *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -56,21 +56,21 @@ Qed.
 (* vm_compute trace count demonstrations *)
 (* N=5, Tg=4, comm = path (|i-j| >= 2) *)
 
-(** s5_nt_L1 — [n_traces_natB] evaluated at the S_5 path-RAAG independence
-    relation counts 4 length-1 commutation classes, one per generator: at
-    length 1 no commutation identifies distinct words, so the trace count is
-    just the generator count. *)
-Lemma s5_nt_L1 : n_traces_natB 4 1 path_comm_nat = 4.
+(** s5_n_traces_natB1 — [n_traces_natB] evaluated at the S_5 path-RAAG
+    independence relation counts 4 length-1 commutation classes, one per
+    generator: at length 1 no commutation identifies distinct words, so the
+    trace count is just the generator count. *)
+Lemma s5_n_traces_natB1 : n_traces_natB 4 1 path_comm_nat = 4.
 Proof. by vm_compute. Qed.
 
-(** s5_nt_L2 — [n_traces_natB] evaluated at the S_5 path-RAAG independence
-    relation counts 13 distinct commutation classes of length-2 words: a
-    decidable, [vm_compute]-checked instance of the general trace-counting
-    machinery at this generator set. *)
-Lemma s5_nt_L2 : n_traces_natB 4 2 path_comm_nat = 13.
+(** s5_n_traces_natB2 — [n_traces_natB] evaluated at the S_5 path-RAAG
+    independence relation counts 13 distinct commutation classes of length-2
+    words: a decidable, [vm_compute]-checked instance of the general
+    trace-counting machinery at this generator set. *)
+Lemma s5_n_traces_natB2 : n_traces_natB 4 2 path_comm_nat = 13.
 Proof. by vm_compute. Qed.
 
-(** s5_nt_L3 — the same count at length 3 is 40 distinct commutation
-    classes. *)
-Lemma s5_nt_L3 : n_traces_natB 4 3 path_comm_nat = 40.
+(** s5_n_traces_natB3 — the same count at length 3 is 40 distinct
+    commutation classes. *)
+Lemma s5_n_traces_natB3 : n_traces_natB 4 3 path_comm_nat = 40.
 Proof. by vm_compute. Qed.

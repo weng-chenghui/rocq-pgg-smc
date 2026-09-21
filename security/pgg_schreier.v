@@ -56,8 +56,8 @@
 (*       property of the Markov chain, independent of word-eval injectivity   *)
 (*   convergence_rate sc == 1 - sc_lambda_gap sc, decay factor per step       *)
 (*   schreier_epsilon sc L == sqrt(N) * (1-gap)^L, the epsilon bound         *)
-(*   schreier_epsilon_decreasing == eps(L2) <= eps(L1) when L1 <= L2         *)
-(*   security_monotone == var_dist at L2 bounded by eps(L1) when L1 <= L2    *)
+(*   schreier_epsilon_decreasing == eps(L') <= eps(L) when L <= L'           *)
+(*   security_monotone == var_dist at L' bounded by eps(L) when L <= L'      *)
 (*                                                                            *)
 (* Bridge to rho_from_words:                                                  *)
 (*   schreier_walk_eq_endpoint == Q^L(s,x) = Pr[sigma_w(s) = x] (axiom)     *)
@@ -91,7 +91,7 @@
 (* - Diaconis (1988), Group Representations in Probability and Statistics     *)
 (*     Ch. 3B Proposition 2: upper bound lemma (sqrt|Omega| prefactor)       *)
 (* - Saloff-Coste (1997), Lectures on Finite Markov Chains, Theorem 2.6     *)
-(*     L2 to total variation conversion for reversible chains                *)
+(*     sum-of-squares to total variation conversion for reversible chains    *)
 (* - Caputo-Liggett-Richthammer (2010), proof of Aldous' spectral gap        *)
 (*     conjecture: transposition Cayley graphs on S_n, gap = 1/C(n,2)       *)
 (* - Kassabov-Lubotzky-Nikolov (2006), finite simple groups are expanders    *)
@@ -252,8 +252,8 @@ Proof. by rewrite ltrBlDr addrC -ltrBlDr subrr. Qed.
 Local Lemma envelope_ge0 (L : nat) : 0 <= c * (1 - lam) ^+ L.
 Proof. by apply: mulr_ge0 => //; apply: exprn_ge0; exact: rate_ge0. Qed.
 
-Local Lemma envelope_decreasing (L1 L2 : nat) :
-  (L1 <= L2)%N -> c * (1 - lam) ^+ L2 <= c * (1 - lam) ^+ L1.
+Local Lemma envelope_decreasing (L L' : nat) :
+  (L <= L')%N -> c * (1 - lam) ^+ L' <= c * (1 - lam) ^+ L.
 Proof.
 move=> HL; apply: ler_wpM2l => //; apply: ler_wiXn2l => //;
   by [exact: rate_ge0 | rewrite gerBl; exact: Order.POrderTheory.ltW lam_pos].
@@ -318,7 +318,7 @@ Record SchreierCertificate := MkSchreierCertificate {
 
      Mathematical source:
        Diaconis (1988), Ch. 3B Proposition 2 (upper bound lemma)
-       Saloff-Coste (1997), Theorem 2.6 (L2 to TV conversion)
+       Saloff-Coste (1997), Theorem 2.6 (sum-of-squares to TV conversion)
      Applied to the Schreier graph (N vertices) instead of the
      Cayley graph (|G| vertices), giving prefactor sqrt(N). *)
   sc_convergence : forall (L : nat) (s : 'I_N),
@@ -373,7 +373,7 @@ Lemma schreier_epsilon_ge0 (sc : SchreierCertificate) (L : nat) :
 Proof. exact: envelope_ge0 (sc_lambda_le1 sc) (sqrtr_ge0 _) L. Qed.
 
 (* The UPPER BOUND schreier_epsilon is monotonically decreasing in L.
-   sqrt(N) * r^L2 <= sqrt(N) * r^L1 when 0 <= r < 1, L1 <= L2.
+   sqrt(N) * r^L' <= sqrt(N) * r^L when 0 <= r < 1, L <= L'.
    Follows from r^(a+b) = r^a * r^b and r^b <= 1 for 0 <= r <= 1.
 
    IMPORTANT: the actual var_dist (exact variational distance) is NOT
@@ -384,25 +384,25 @@ Proof. exact: envelope_ge0 (sc_lambda_le1 sc) (sqrtr_ge0 _) L. Qed.
      spectral bound: 3.0  2.4  1.9  1.5  1.2  ...  (monotone envelope)
    This lemma is about the envelope, not the exact value. The envelope
    is eventually tight (both converge to 0 geometrically). *)
-Lemma schreier_epsilon_decreasing (sc : SchreierCertificate) (L1 L2 : nat) :
-  (L1 <= L2)%N -> schreier_epsilon sc L2 <= schreier_epsilon sc L1.
+Lemma schreier_epsilon_decreasing (sc : SchreierCertificate) (L L' : nat) :
+  (L <= L')%N -> schreier_epsilon sc L' <= schreier_epsilon sc L.
 Proof.
 exact: (envelope_decreasing (sc_lambda_pos sc) (sc_lambda_le1 sc)
                             (sqrtr_ge0 _)).
 Qed.
 
-(* Monotone security: if secure at L1, at least as secure at L2 >= L1 *)
+(* Monotone security: if secure at L, at least as secure at L' >= L *)
 Lemma security_monotone (sc : SchreierCertificate)
-    (L1 L2 : nat)
-    (HL : (L1 <= L2)%N) :
+    (L L' : nat)
+    (HL : (L <= L')%N) :
   forall (s : 'I_N),
   var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
-                     (rho_from_words L2 sigmas))
+                     (rho_from_words L' sigmas))
            (fdist_uniform (card_ord N))
-  <= schreier_epsilon sc L1.
+  <= schreier_epsilon sc L.
 Proof.
 move=> s.
-apply: (Order.POrderTheory.le_trans (sc_convergence sc L2 s)).
+apply: (Order.POrderTheory.le_trans (sc_convergence sc L' s)).
 exact: schreier_epsilon_decreasing.
 Qed.
 

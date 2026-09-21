@@ -75,9 +75,9 @@ Qed.
 (** psl211_se_exact — the single-card pushforward of the uniform shuffle is
     at variation distance zero from uniform, not merely close to it.  This is
     the exact certificate the bundle below carries: at one card position the
-    idealised shuffle has no error to price, so every epsilon in this
-    instance's marginal layer is zero and the only price paid anywhere is the
-    2^-40 of psl211_word_mixing for the realistic word shuffle. *)
+    idealised shuffle has no error at all, so every epsilon in this
+    instance's marginal layer is zero and the only loss anywhere is the one
+    psl211_word_mixing bounds by 2^-40 for the realistic word shuffle. *)
 Lemma psl211_se_exact (s : 'I_12) :
   var_dist (fdistmap (fun sigma : {perm 'I_12} => sigma s) psl211_rho_dist)
            (fdist_uniform (card_ord 12)) = 0%R.
@@ -96,11 +96,11 @@ Lemma psl211_sw_bound (s : 'I_12) :
 Proof. rewrite psl211_se_exact; exact: lexx. Qed.
 
 (** psl211_marginal_bound — the marginal bound at epsilon = 0: single-card
-    perfect uniformity of the PSL(2,11) shuffle, carrying word length 0,
-    the uniform shuffle distribution and its per-position bound. Word
-    length 0 records that this model does no word shuffling at all: the
-    cut is drawn from the group itself, and the price of that idealisation
-    is paid by psl211_word_mixing, not here. *)
+    perfect uniformity of the PSL(2,11) shuffle, carrying word length 0, the
+    uniform shuffle distribution and its per-position bound. Word length 0
+    records that this model does no word shuffling at all: the cut is drawn
+    from the group itself, and the loss of that idealisation is bounded by
+    psl211_word_mixing, not here. *)
 Definition psl211_marginal_bound : ShuffleMarginalBound R psl211_M :=
   @MkShuffleMarginalBound R psl211_M 0 0%R psl211_rho_dist psl211_sw_bound.
 
@@ -129,7 +129,7 @@ Definition psl211_profile : MonodromyProfile :=
     on the twelve positions, so it fixes no arbitrary five-set; the bound
     comes from the two Steiner systems meeting every five-set in the same
     block patterns with the same multiplicities (psl211_count_okT).
-    Two-transitivity buys the single-card marginal above and nothing
+    Two-transitivity gives the single-card marginal above and nothing
     about this threshold. *)
 Lemma profile_k_psl211 : profile_k psl211_profile = 6.
 Proof. by []. Qed.

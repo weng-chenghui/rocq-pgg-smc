@@ -1039,7 +1039,7 @@ Definition n_traces (L : nat) : nat :=
 
 (* Exchanging two adjacent letters that commute leaves the deck permutation
    the word evaluates to unchanged.
-   This is where the raag_sigmas_comm field of the mixin is spent, and it is why
+   This is where the raag_sigmas_comm field of the mixin is used, and it is why
    trace classes are coarser than words while still finer than deck
    permutations. *)
 Lemma word_eval_adj_swap L (w1 w2 : pgg_word M L) :

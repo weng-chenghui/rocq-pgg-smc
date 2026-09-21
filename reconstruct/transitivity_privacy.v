@@ -398,7 +398,7 @@ have Hst : st \in dtuple_on k [set: 'I_N'.+1].
 have stinj : injective (tnth st) by apply/tuple_uniqP; exact: enum_uniq.
 have Htt : tt \in dtuple_on k [set: 'I_N'.+1].
   rewrite inE; apply/andP; split; last by apply/subsetP.
-  by apply/tuple_uniqP => l1 l2; rewrite !tnth_mktuple => /perm_inj/stinj->.
+  by apply/tuple_uniqP => i j; rewrite !tnth_mktuple => /perm_inj/stinj->.
 have ktrans : [transitive^k rho @* G, on [set: 'I_N'.+1] | 'P].
   exact: (ntransitive_weak Hk rhoG_ntrans).
 have [h hin htt] := atransP2 ktrans Hst Htt.
@@ -602,7 +602,7 @@ have phi_in : forall g : gT,
     [tuple tnth (encode b) (rho g (tnth p l)) | l < k]
       \in dtuple_on k [set: 'I_N'.+1].
   move=> g; rewrite inE; apply/andP; split.
-    apply/tuple_uniqP => l1 l2; rewrite !tnth_mktuple => /b_inj/perm_inj.
+    apply/tuple_uniqP => i j; rewrite !tnth_mktuple => /b_inj/perm_inj.
     by move: Hp; rewrite inE => /andP[/tuple_uniqP pinj _]; apply: pinj.
   by apply/subsetP => x _; rewrite inE.
 have fibeqgen : forall r : k.-tuple 'I_N'.+1,
@@ -612,7 +612,7 @@ have fibeqgen : forall r : k.-tuple 'I_N'.+1,
   move=> r Hr.
   have Hr' : [tuple eb (tnth r l) | l < k] \in dtuple_on k [set: 'I_N'.+1].
     rewrite inE; apply/andP; split.
-      apply/tuple_uniqP => l1 l2; rewrite !tnth_mktuple => /(can_inj ebK').
+      apply/tuple_uniqP => i j; rewrite !tnth_mktuple => /(can_inj ebK').
       by move: Hr; rewrite inE => /andP[/tuple_uniqP rinj _]; apply: rinj.
     by apply/subsetP => x _; rewrite inE.
   rewrite -(rho_tuple_fiber_card rhoG_ntrans Hk Hp Hr').

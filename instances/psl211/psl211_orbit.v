@@ -839,16 +839,16 @@ by rewrite (perm_size (perm_list_to_set Hs Hl)).
 Qed.
 
 (* psl211_list_to_set is injective on strictly ascending code lists. *)
-Local Lemma list_to_set_inj (L1 L2 : seq nat) :
-  sorted ltn L1 -> all (fun n => (n < 12)%N) L1 ->
-  sorted ltn L2 -> all (fun n => (n < 12)%N) L2 ->
-  psl211_list_to_set L1 = psl211_list_to_set L2 -> L1 = L2.
+Local Lemma list_to_set_inj (L L' : seq nat) :
+  sorted ltn L -> all (fun n => (n < 12)%N) L ->
+  sorted ltn L' -> all (fun n => (n < 12)%N) L' ->
+  psl211_list_to_set L = psl211_list_to_set L' -> L = L'.
 Proof.
 move=> S1 A1 S2 A2 Heq; apply: (irr_sorted_eq ltn_trans ltnn) => //.
 move=> n; rewrite -(perm_mem (perm_list_to_set S1 A1)) Heq.
 by rewrite (perm_mem (perm_list_to_set S2 A2)).
 Qed.
-Arguments list_to_set_inj [L1 L2].
+Arguments list_to_set_inj [L L'].
 
 (* A census of the six-subsets runs at the code level over any complete,
    repetition-free enumeration s of the ascending six-lists.  The
@@ -868,7 +868,7 @@ have key : forall S : {set 'I_12}, #|S| = 6 -> psl211_asc6 (map val (enum S)).
   by rewrite size_map -cardE HcS.
 have Huniq : uniq [seq psl211_list_to_set L | L <- filter pn s].
   rewrite map_inj_in_uniq; last first.
-    move=> L1 L2; rewrite !mem_filter => /andP[_ H1] /andP[_ H2].
+    move=> L L'; rewrite !mem_filter => /andP[_ H1] /andP[_ H2].
     have /and3P[S1 A1 _] := allP Hasc _ H1.
     have /and3P[S2 A2 _] := allP Hasc _ H2.
     exact: list_to_set_inj.
@@ -1025,7 +1025,7 @@ have Hrow (R : seq nat) : R \in tbl ->
   by apply: (list_to_set_inj S1 A1 S2 A2); rewrite Hinter HA'.
 have Huniq : uniq [seq psl211_list_to_set R | R <- filter p tbl].
   rewrite map_inj_in_uniq; last first.
-    move=> L1 L2; rewrite !mem_filter => /andP[_ H1] /andP[_ H2].
+    move=> L L'; rewrite !mem_filter => /andP[_ H1] /andP[_ H2].
     have /and3P[S1 A1 _] := allP Htbl _ H1.
     have /and3P[S2 A2 _] := allP Htbl _ H2.
     exact: list_to_set_inj.

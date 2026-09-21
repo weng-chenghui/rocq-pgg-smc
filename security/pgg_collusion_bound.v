@@ -38,7 +38,7 @@ Section var_dist_extra.
 Context {R : realType}.
 Variable A : finType.
 
-(** var_dist_triangle — total variation distance satisfies the triangle
+(** var_dist_triangle — variation distance satisfies the triangle
     inequality. *)
 Lemma var_dist_triangle (P Q M : R.-fdist A) :
   var_dist P M <= var_dist P Q + var_dist Q M.
@@ -64,7 +64,7 @@ Section var_dist_inj.
    in legacy/). *)
 Variable R : realType.
 
-(** var_dist_fdistmap_inj — an injective reader transports the total variation
+(** var_dist_fdistmap_inj — an injective reader transports the variation
     distance exactly: for injective [f],
     [var_dist (fdistmap f P) (fdistmap f Q) = var_dist P Q], the equality case
     of the data processing inequality [var_dist_fdistmap] below. Shared by the
@@ -112,7 +112,7 @@ Context {R : realType}.
 Variables (A B : finType).
 
 (* Pushing two distributions forward through the same map never increases
-   their TV distance: the data-processing inequality Assumption 1's
+   their variation distance: the data-processing inequality Assumption 1's
    reduction relies on to move a bound on the group-level distribution to
    a bound on an observed coalition endpoint. The reduction is lossy
    through a non-injective f: the group-level spectral bound this
@@ -156,12 +156,12 @@ Hypothesis card_C_gt0 : (0 < #|C|)%N.
 
 Let k := (#|A| - #|C|)%N.
 
-(** var_dist_uniform_supp — the TV distance from uniform-on-a-support-C to
-    the fully uniform distribution on A is 2k / |A|, where k = |A| - |C| is
-    the size of the excluded complement. This is the generic price, in TV
-    distance, of shrinking a uniform distribution's support by k elements;
-    the file's coalition bounds cash it in wherever a coalition narrows an
-    ideal posterior's support. *)
+(** var_dist_uniform_supp — the variation distance from
+    uniform-on-a-support-C to the fully uniform distribution on A is 2k /
+    |A|, where k = |A| - |C| is the size of the excluded complement. This is
+    the generic loss, in variation distance, of shrinking a uniform
+    distribution's support by k elements; the file's coalition bounds use it
+    wherever a coalition narrows an ideal posterior's support. *)
 Lemma var_dist_uniform_supp :
   var_dist (@fdist_uniform_supp R A C card_C_gt0) (fdist_uniform card_A) =
   2%:R * k%:R / #|A|%:R.
@@ -234,7 +234,7 @@ Qed.
     product pushforwards are within delta, the two right factors possibly
     on different carriers: var_dist (fdistmap (uncurry h) (P `x Q))
     (fdistmap (uncurry h') (P `x Q')) <= delta from the per-coordinate
-    bounds, by joint convexity of the total variation distance. *)
+    bounds, by joint convexity of the variation distance. *)
 Lemma var_dist_fdistmap_prod_mix (A B B' C : finType) (P : R.-fdist A)
     (Q : R.-fdist B) (Q' : R.-fdist B')
     (h : A -> B -> C) (h' : A -> B' -> C) (delta : R) :
@@ -260,7 +260,7 @@ by rewrite -big_distrl /= FDist.f1 mul1r.
 Qed.
 
 (** var_dist_supp_ge — a distribution supported on a set of size k among
-    n.+1 values is at total variation distance at least 2 (1 - k / n.+1)
+    n.+1 values is at variation distance at least 2 (1 - k / n.+1)
     from the uniform distribution: 2%:R * (1 - #|S|%:R / n.+1%:R) <=
     var_dist P (fdist_uniform _) whenever P vanishes outside S. *)
 Lemma var_dist_supp_ge (n : nat) (S : {set 'I_n.+1}) (P : R.-fdist 'I_n.+1) :
@@ -388,7 +388,7 @@ Qed.
 (* The unconditional bound: pushing Assumption 1's group-level gap epsilon
    through the endpoint-evaluation map (the data processing inequality
    above) gives the same epsilon for the coalition's marginal at a single
-   card position, with no overhead from the coalition's other
+   card position, with no extra term from the coalition's other
    observations. *)
 Theorem collusion_bound_unconditional :
   var_dist adversary_marginal target_uniform <= epsilon.
@@ -462,12 +462,11 @@ Lemma card_remaining : #|remaining| = (N - T')%N.
 Proof. exact: card_remaining_values. Qed.
 
 (** collusion_bound_conditional — the coalition's conditional posterior over
-    the unobserved card position's value is within epsilon + 2T'/N of
-    fully uniform, where epsilon is the DPI-derived distance to the ideal
-    posterior conditional on dpi_bound, and
-    2T'/N is the unconditional TV price of that ideal posterior itself
-    being uniform only over the N - T' card positions the coalition has
-    not observed. *)
+    the unobserved card position's value is within epsilon + 2T'/N of fully
+    uniform, where epsilon is the DPI-derived distance to the ideal posterior
+    conditional on dpi_bound, and 2T'/N is the unconditional variation
+    distance from that ideal posterior, uniform only over the N - T' card
+    positions the coalition has not observed, to the fully uniform law. *)
 Theorem collusion_bound_conditional :
   var_dist adversary_posterior full_uniform <= epsilon + 2%:R * T'%:R / N%:R.
 Proof.
@@ -878,9 +877,9 @@ Hypothesis le_card_CB : (#|C| <= #|B|)%N.
 Let img := f @: C.
 
 (** var_dist_fdistmap_unbalanced — pushing the law uniform on a support C
-    forward through f and comparing to full uniform on B gives TV distance
-    2(|B| - |f @: C|)/|B|, the same closed form as the balanced case,
-    without assuming |C| = |B|. *)
+    forward through f and comparing to full uniform on B gives variation
+    distance 2(|B| - |f @: C|)/|B|, the same closed form as the balanced
+    case, without assuming |C| = |B|. *)
 Lemma var_dist_fdistmap_unbalanced :
   var_dist (fdistmap f (@fdist_uniform_supp R _ C card_C_gt0))
            (fdist_uniform card_B) =

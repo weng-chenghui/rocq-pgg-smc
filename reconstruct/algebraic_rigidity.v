@@ -122,7 +122,8 @@ Record SecurityExact (rho : R.-fdist {perm 'I_N'.+1}) := MkSecurityExact {
 (* decays to 0. For reducible walks (e.g. S_5 x S_5 with pile-disjoint     *)
 (* generators) the actual stationary distribution is uniform on the orbit, *)
 (* and the gap to fdist_uniform is the constant sa_eps_inf (1 in infotheo's *)
-(* un-halved L^1 var_dist convention; 1/2 in standard TV).                  *)
+(* var_dist, the un-halved sum of absolute differences; 1/2 in the total    *)
+(* variation distance of the literature).                                   *)
 Record SecurityAsymptotic := MkSecurityAsymptotic {
   sa_spectral_gap : R;
   sa_eps_inf : R;
@@ -152,8 +153,10 @@ Record ShuffleMarginalBound := MkShuffleMarginalBound {
      (legacy/reconstruct/pgg_dealer_bridge.v) and by the
      SecurityParams of a CertifiedSolution. *)
   sw_L : nat;
-  (* sw_bound_eps is the stated full-L1 upper bound on one endpoint marginal.
-     It is a per-position quantity, not a coalition-view distance. *)
+  (* sw_bound_eps is the stated upper bound on one endpoint marginal, in the
+     sum of absolute differences, which is twice the total variation distance
+     of the literature. It is a per-position quantity, not a coalition-view
+     distance. *)
   sw_bound_eps : R;
   (* sw_rho_dist is the analyzed distribution on permutation images. *)
   sw_rho_dist : R.-fdist {perm 'I_N'.+1};
@@ -191,7 +194,7 @@ Record ShuffleCertificateBundle := MkShuffleCertificateBundle {
 
 (* The cs_gap field of [tw_covering] (ts_T <= ts_k + 2 * cd_genus,
    from cover_tradeoff.v:gap_bound) is a privacy-vs-reveal gap, not
-   a dropout-tolerance budget. Reconstruction in every concrete
+   a dropout-tolerance allowance. Reconstruction in every concrete
    threshold scheme used here consumes the FULL share tuple:
    - rs_massey_exact (legacy/reconstruct/rs_massey_bridge.v:194): RS gives
      ts_T = ts_k at genus 0, so the gap is zero;
@@ -388,8 +391,8 @@ Qed.
 (** The reconstruction/privacy gap ts_T - ts_k is at most twice the genus,
     unconditionally, whichever regime ar_genus_gap_dichotomy places the
     scheme in. This is the numeric form of the threshold leg of algebraic
-    rigidity: genus is not just a classification but a literal price cap on
-    the gap. *)
+    rigidity: genus is not just a classification, and twice the genus is a
+    literal upper bound on the gap. *)
 Lemma ar_gap_bound :
   let cs := tw_covering (ar_threshold ar) in
   ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <= 2 * cd_genus (cs_data cs).

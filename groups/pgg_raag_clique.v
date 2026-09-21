@@ -249,16 +249,16 @@ Proof. by vm_compute. Qed.
 (* The same four numbers obtained by enumerating words and counting distinct
    normal forms, with no clique polynomial involved.  Agreement of the two
    columns is Cartier-Foata at these lengths. *)
-Lemma star3_ntB0 : n_traces_natB 4 0 (star_comm_nat 3) = 1.
+Lemma star3_n_traces_natB0 : n_traces_natB 4 0 (star_comm_nat 3) = 1.
 Proof. by vm_compute. Qed.
 
-Lemma star3_ntB1 : n_traces_natB 4 1 (star_comm_nat 3) = 4.
+Lemma star3_n_traces_natB1 : n_traces_natB 4 1 (star_comm_nat 3) = 4.
 Proof. by vm_compute. Qed.
 
-Lemma star3_ntB2 : n_traces_natB 4 2 (star_comm_nat 3) = 13.
+Lemma star3_n_traces_natB2 : n_traces_natB 4 2 (star_comm_nat 3) = 13.
 Proof. by vm_compute. Qed.
 
-Lemma star3_ntB3 : n_traces_natB 4 3 (star_comm_nat 3) = 40.
+Lemma star3_n_traces_natB3 : n_traces_natB 4 3 (star_comm_nat 3) = 40.
 Proof. by vm_compute. Qed.
 
 (* ---- Trace counts: free group (3 generators) ---- *)
@@ -279,7 +279,7 @@ Lemma free3_ct3 : clique_traces 3 3 (fun _ _ => false) = 27.
 Proof. by vm_compute. Qed.
 
 (* The enumerative count agrees at L = 2. *)
-Lemma free3_ntB2 : n_traces_natB 3 2 (fun _ _ => false) = 9.
+Lemma free3_n_traces_natB2 : n_traces_natB 3 2 (fun _ _ => false) = 9.
 Proof. by vm_compute. Qed.
 
 (* ---- Trace counts: abelian (3 generators) ---- *)
@@ -301,10 +301,10 @@ Lemma abelian3_ct3 : clique_traces 3 3 complete_comm_nat = 10.
 Proof. by vm_compute. Qed.
 
 (* The enumerative count agrees at L = 2 and L = 3. *)
-Lemma abelian3_ntB2 : n_traces_natB 3 2 complete_comm_nat = 6.
+Lemma abelian3_n_traces_natB2 : n_traces_natB 3 2 complete_comm_nat = 6.
 Proof. by vm_compute. Qed.
 
-Lemma abelian3_ntB3 : n_traces_natB 3 3 complete_comm_nat = 10.
+Lemma abelian3_n_traces_natB3 : n_traces_natB 3 3 complete_comm_nat = 10.
 Proof. by vm_compute. Qed.
 
 (* ---- Trace counts: path (3 generators) ---- *)
@@ -325,10 +325,10 @@ Lemma path3_ct3 : clique_traces 3 3 path_comm_nat = 21.
 Proof. by vm_compute. Qed.
 
 (* The enumerative count agrees at L = 2 and L = 3. *)
-Lemma path3_ntB2 : n_traces_natB 3 2 path_comm_nat = 8.
+Lemma path3_n_traces_natB2 : n_traces_natB 3 2 path_comm_nat = 8.
 Proof. by vm_compute. Qed.
 
-Lemma path3_ntB3 : n_traces_natB 3 3 path_comm_nat = 21.
+Lemma path3_n_traces_natB3 : n_traces_natB 3 3 path_comm_nat = 21.
 Proof. by vm_compute. Qed.
 
 (* ========================================================================== *)
@@ -1125,12 +1125,12 @@ Lemma table_T4_abelian :
 Proof. by vm_compute. Qed.
 
 (* The enumerated counts for both graphs, matching the predicted rows. *)
-Lemma path4_ntB_check :
+Lemma path4_n_traces_natB_check :
   [seq n_traces_natB 4 L path4_comm_nat | L <- iota 0 4]
   = [:: 1; 4; 13; 40].
 Proof. by vm_compute. Qed.
 
-Lemma star3_ntB_check :
+Lemma star3_n_traces_natB_check :
   [seq n_traces_natB 4 L (star_comm_nat 3) | L <- iota 0 4]
   = [:: 1; 4; 13; 40].
 Proof. by vm_compute. Qed.
