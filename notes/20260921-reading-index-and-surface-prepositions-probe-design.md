@@ -48,11 +48,11 @@ preposition at all.
 |---|---|---|
 | evidence of a certify statement | bare | `by e` |
 | reading of a certify statement | none | `of r`, omitted means the coalition's endpoint reading |
-| reading of an obstruction | none | inside the kind: `InputDistinguishability of r at c` |
+| reading of an obstruction | none | inside the kind: `obstruction InputDistinguishability of r at c` (owner, 2026-09-21, after probe A measured that a notation's leading literal becomes a global keyword: the word reserved is `obstruction`, and `InputDistinguishability`, two letters from the identifier `InputIndistinguishability`, stays an identifier) |
 | assumption status of every publish rule | bare last term | `assuming a` |
 
 One preposition per meaning: `of` introduces what is read, `at` a number, a
-size or a real field, `by` a proof or a piece of evidence, `assuming` an
+size or a real field with its index, `by` a proof or a piece of evidence, `assuming` an
 assumption status. `under` was rejected: it is an ssreflect tactic with 363
 uses in the tree, and whether a notation token breaks them was not measured.
 `assuming` occurs in no code of the tree (five files use the word in
@@ -136,7 +136,7 @@ s |> publish t assuming a
 s |> publish Observed assuming a
 s |> publish Sampled t assuming a
 s |> publish Obstruction o by pf assuming a
-InputDistinguishability of r at c                      (* an obstruction kind *)
+obstruction InputDistinguishability of r at c          (* an obstruction kind *)
 ```
 
 The five-clause input-indistinguishability rule keeps its clauses and gains
