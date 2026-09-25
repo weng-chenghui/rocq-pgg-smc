@@ -9,7 +9,38 @@ permissions:
   contents: read
 
 jobs:
-  flattened-build:
+  flatten-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Configure temporary commit identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create flattened source archive
+        id: flattened
+        shell: bash
+        run: |
+          set -euo pipefail
+          commit_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
+          archive_stamp="$(date -u -d "@${commit_epoch}" +%Y%m%d-%H%M%S)"
+          source_archive_path="dist/${archive_stamp}-pgg-smc-flat.tar.gz"
+          ./scripts/flatten_artifact.sh "$GITHUB_SHA" "$source_archive_path"
+          echo "source_archive_path=$source_archive_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload flattened source archive
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: pgg-smc-flat-${{ github.sha }}
+          path: ${{ steps.flattened.outputs.source_archive_path }}
+          if-no-files-found: error
+
+  build-flattened:
+    needs: flatten-source
     runs-on: ubuntu-latest
     timeout-minutes: 360
     container:
@@ -33,38 +64,39 @@ jobs:
       - name: Install dependencies
         run: opam install . --deps-only --yes
 
-      - name: Configure temporary commit identity
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Download flattened source archive
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: pgg-smc-flat-${{ github.sha }}
+          path: dist/source-artifact
 
-      - name: Build flattened sources
-        id: flattened
+      - name: Compile flattened sources
+        id: built
         shell: bash
         run: |
           set -euo pipefail
           ulimit -s unlimited
+          mapfile -t source_archives < <(
+            find dist/source-artifact -maxdepth 1 -type f \
+              -name '*-pgg-smc-flat.tar.gz' -print
+          )
+          if [[ "${#source_archives[@]}" -ne 1 ]]; then
+            printf 'expected one flattened source archive, found %d\n' \
+              "${#source_archives[@]}" >&2
+            exit 1
+          fi
           commit_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
           archive_stamp="$(date -u -d "@${commit_epoch}" +%Y%m%d-%H%M%S)"
-          source_archive_path="dist/${archive_stamp}-pgg-smc-flat.tar.gz"
           built_archive_path="dist/${archive_stamp}-pgg-smc-built.tar.gz"
           active_switch="$(opam switch show --safe)"
-          ROCQ_OPAM_SWITCH="$active_switch" FLATTEN_JOBS=1 \
-            ./scripts/flatten_artifact.sh "$GITHUB_SHA" \
-              "$source_archive_path" "$built_archive_path"
-          echo "source_archive_path=$source_archive_path" >> "$GITHUB_OUTPUT"
+          ROCQ_OPAM_SWITCH="$active_switch" ROCQ_JOBS=1 \
+            ./scripts/build_flat_artifact.sh \
+              "${source_archives[0]}" "$built_archive_path"
           echo "built_archive_path=$built_archive_path" >> "$GITHUB_OUTPUT"
-
-      - name: Upload flattened source archive
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: pgg-smc-flat-${{ github.sha }}
-          path: ${{ steps.flattened.outputs.source_archive_path }}
-          if-no-files-found: error
 
       - name: Upload compiled flattened archive
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: pgg-smc-built-${{ github.sha }}
-          path: ${{ steps.flattened.outputs.built_archive_path }}
+          path: ${{ steps.built.outputs.built_archive_path }}
           if-no-files-found: error

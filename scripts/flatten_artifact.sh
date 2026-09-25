@@ -1,22 +1,19 @@
 #!/bin/bash
 #
-# Build flat Rocq source and compiled archives on a timestamped branch without
-# changing the caller's branch or tracked working-tree files.
+# Build a flat Rocq source archive on a timestamped branch without changing
+# the caller's branch or tracked working-tree files.
 #
 # The generated artifact excludes the complete legacy/ tree.  Project files
 # listed by _CoqProject are moved to the repository root, both logical roots
-# are unified as pgg_smc, imports are adjusted, and the result is rebuilt
-# before it is committed and archived.
+# are unified as pgg_smc, and imports are adjusted before the result is
+# committed and archived.
 #
 # Usage:
-#   scripts/flatten_artifact.sh [SOURCE_REF] [OUT_SOURCE_TARBALL] \
-#     [OUT_BUILT_TARBALL]
+#   scripts/flatten_artifact.sh [SOURCE_REF] [OUT_SOURCE_TARBALL]
 #
 # SOURCE_REF defaults to HEAD.  OUT_SOURCE_TARBALL defaults to
 # dist/pgg-smc-flat-YYYYMMDD-HHMMSS.tar.gz in this repository.  A relative
 # output path is resolved from the directory in which the script is invoked.
-# OUT_BUILT_TARBALL is optional.  When supplied, it receives the same flat
-# sources together with the compiled Rocq files.
 # Only committed content reachable from SOURCE_REF enters the generated
 # branch.  The script itself therefore remains absent from that branch while
 # it is uncommitted in the caller's working tree.
@@ -86,26 +83,15 @@ fail() {
 
 SOURCE_REF="${1:-HEAD}"
 OUT_SOURCE_TARBALL_ARG="${2:-}"
-OUT_BUILT_TARBALL_ARG="${3:-}"
-OPAM_SWITCH_DIR="${ROCQ_OPAM_SWITCH:-$HOME/Projects/coq}"
-FLATTEN_JOBS="${FLATTEN_JOBS:-4}"
-case "$FLATTEN_JOBS" in
-  ''|*[!0-9]*|0)
-    fail "FLATTEN_JOBS must be a positive integer"
-    ;;
-esac
 
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 BRANCH_NAME="flat-artifact-${TIMESTAMP}-$$"
 BASE_TMP="${TMPDIR:-/tmp}"
 BASE_TMP="${BASE_TMP%/}"
 WORKTREE_DIR="${BASE_TMP}/flatten-artifact-${TIMESTAMP}-$$"
-BUILD_LOG="${BASE_TMP}/flatten-artifact-build-${TIMESTAMP}-$$.log"
 COMMIT_LOG="${BASE_TMP}/flatten-artifact-commit-${TIMESTAMP}-$$.log"
 SOURCE_TAR_LIST="${BASE_TMP}/flatten-artifact-source-tar-${TIMESTAMP}-$$.txt"
-BUILT_TAR_LIST="${BASE_TMP}/flatten-artifact-built-tar-${TIMESTAMP}-$$.txt"
 SOURCE_ARCHIVE_TMP="${BASE_TMP}/pgg-smc-flat-${TIMESTAMP}-$$.tar.gz"
-BUILT_ARCHIVE_TMP="${BASE_TMP}/pgg-smc-built-${TIMESTAMP}-$$.tar.gz"
 
 if [[ -z "$OUT_SOURCE_TARBALL_ARG" ]]; then
   OUT_SOURCE_TARBALL="${MAIN_REPO_ROOT}/dist/pgg-smc-flat-${TIMESTAMP}.tar.gz"
@@ -117,20 +103,6 @@ fi
 OUT_SOURCE_TARBALL="$(
   resolve_output_path "$(normalize_absolute_path "$OUT_SOURCE_TARBALL")"
 )"
-
-OUT_BUILT_TARBALL=""
-if [[ -n "$OUT_BUILT_TARBALL_ARG" ]]; then
-  if [[ "$OUT_BUILT_TARBALL_ARG" = /* ]]; then
-    OUT_BUILT_TARBALL="$OUT_BUILT_TARBALL_ARG"
-  else
-    OUT_BUILT_TARBALL="${INVOCATION_DIR}/${OUT_BUILT_TARBALL_ARG}"
-  fi
-  OUT_BUILT_TARBALL="$(
-    resolve_output_path "$(normalize_absolute_path "$OUT_BUILT_TARBALL")"
-  )"
-  [[ "$OUT_BUILT_TARBALL" != "$OUT_SOURCE_TARBALL" ]] \
-    || fail "source and built archive paths must differ"
-fi
 
 GIT_DIR_ABS="$(
   realpath "$(git -C "$MAIN_REPO_ROOT" rev-parse --absolute-git-dir)"
@@ -152,26 +124,6 @@ case "$OUT_SOURCE_TARBALL" in
     fi
     ;;
 esac
-if [[ -n "$OUT_BUILT_TARBALL" ]]; then
-  case "$OUT_BUILT_TARBALL" in
-    "$GIT_DIR_ABS"|"$GIT_DIR_ABS"/*)
-      fail "built archive path must not be inside Git metadata"
-      ;;
-  esac
-  if [[ -d "$OUT_BUILT_TARBALL" ]]; then
-    fail "built archive path names an existing directory: $OUT_BUILT_TARBALL"
-  fi
-  case "$OUT_BUILT_TARBALL" in
-    "$MAIN_REPO_ROOT"/*)
-      OUTPUT_REPO_PATH="${OUT_BUILT_TARBALL#"$MAIN_REPO_ROOT"/}"
-      if git -C "$MAIN_REPO_ROOT" ls-files --error-unmatch \
-        -- "$OUTPUT_REPO_PATH" >/dev/null 2>&1; then
-        fail "built archive path names a tracked caller file: $OUTPUT_REPO_PATH"
-      fi
-      ;;
-  esac
-fi
-
 WORKTREE_REGISTERED=0
 BRANCH_CREATED=0
 KEEP_BRANCH=0
@@ -193,9 +145,9 @@ cleanup() {
   fi
 
   if [[ "$ec" -eq 0 ]]; then
-    rm -f "$BUILD_LOG" "$COMMIT_LOG" "$SOURCE_TAR_LIST" "$BUILT_TAR_LIST"
+    rm -f "$COMMIT_LOG" "$SOURCE_TAR_LIST"
   fi
-  rm -f "$SOURCE_ARCHIVE_TMP" "$BUILT_ARCHIVE_TMP"
+  rm -f "$SOURCE_ARCHIVE_TMP"
 
   return "$ec"
 }
@@ -209,9 +161,6 @@ log "source ref:  $SOURCE_REF"
 log "branch:      $BRANCH_NAME"
 log "worktree:    $WORKTREE_DIR"
 log "source archive: $OUT_SOURCE_TARBALL"
-if [[ -n "$OUT_BUILT_TARBALL" ]]; then
-  log "built archive:  $OUT_BUILT_TARBALL"
-fi
 
 git -C "$MAIN_REPO_ROOT" worktree add -b "$BRANCH_NAME" \
   "$WORKTREE_DIR" "$SOURCE_REF" \
@@ -382,45 +331,11 @@ git add -- _CoqProject "${FLAT_VFILES[@]}"
 git diff --exit-code -- _CoqProject "${FLAT_VFILES[@]}" >/dev/null \
   || fail "rewritten sources differ from their staged versions"
 
-log "activating opam switch at $OPAM_SWITCH_DIR"
-command -v opam >/dev/null 2>&1 || fail "opam is not available"
-eval "$(opam env --switch="$OPAM_SWITCH_DIR" --set-switch)" \
-  || fail "could not activate opam switch at $OPAM_SWITCH_DIR"
-command -v rocq >/dev/null 2>&1 \
-  || fail "rocq is unavailable after activating the opam switch"
-
-rm -f Makefile.coq Makefile.coq.conf .Makefile.coq.d
-log "generating Makefile.coq from the flattened _CoqProject"
-rocq makefile -f _CoqProject -o Makefile.coq \
-  || fail "rocq makefile failed"
-
-log "building the flattened project with $FLATTEN_JOBS job(s)"
-if ! make -f Makefile.coq -j"$FLATTEN_JOBS" > "$BUILD_LOG" 2>&1; then
-  log "build failed; tail of $BUILD_LOG:"
-  tail -n 200 "$BUILD_LOG" >&2
-  fail "the flattened project does not compile"
-fi
-log "build succeeded"
-rm -f Makefile.coq Makefile.coq.conf .Makefile.coq.d
-
-BUILT_ENTRIES=()
-for source in "${FLAT_VFILES[@]}"; do
-  stem="${source%.v}"
-  [[ -f "${stem}.vo" ]] \
-    || fail "compiled output '${stem}.vo' is missing"
-  BUILT_ENTRIES+=("${stem}.vo")
-  for suffix in glob vos vok; do
-    [[ -f "${stem}.${suffix}" ]] && BUILT_ENTRIES+=("${stem}.${suffix}")
-  done
-  [[ -f ".${stem}.aux" ]] && BUILT_ENTRIES+=(".${stem}.aux")
-done
-
 COMMIT_MSG="flatten: relocate non-legacy Rocq sources into the repository root
 
 Relocate ${#VFILES[@]} _CoqProject sources into the repository root for
 artifact packing. Exclude the complete legacy directory, unify logical
-roots as ${NEW_ROOT}, and rewrite project-local imports. The flattened
-project compiles before this commit is created."
+roots as ${NEW_ROOT}, and rewrite project-local imports."
 
 export ROCQ_AUDIT_BYPASS=fast
 COMMIT_METHOD="ROCQ_AUDIT_BYPASS=fast with --no-gpg-sign"
@@ -443,7 +358,7 @@ logical root '${NEW_ROOT}'.
 
 To rebuild:
     rocq makefile -f _CoqProject -o Makefile.coq
-    make -f Makefile.coq -j${FLATTEN_JOBS}
+    make -f Makefile.coq -j1
 
 Makefile.coq is generated and is not included.  This archive was created
 on $(date -u +%Y-%m-%dT%H:%M:%SZ) from branch ${BRANCH_NAME}, commit
@@ -470,40 +385,6 @@ fi
 mkdir -p "$(dirname "$OUT_SOURCE_TARBALL")"
 mv -f "$SOURCE_ARCHIVE_TMP" "$OUT_SOURCE_TARBALL"
 
-BUILT_TAR_ENTRY_COUNT=0
-if [[ -n "$OUT_BUILT_TARBALL" ]]; then
-  cat > "$NOTE_FILE" <<EOF
-This built archive contains the non-legacy Rocq sources of the '${NEW_ROOT}'
-development and their compiled files in one directory.  _CoqProject maps
-that directory to the logical root '${NEW_ROOT}'.
-
-The files were compiled with:
-    rocq makefile -f _CoqProject -o Makefile.coq
-    make -f Makefile.coq -j${FLATTEN_JOBS}
-
-The generated Makefile is not included.  This archive was created on
-$(date -u +%Y-%m-%dT%H:%M:%SZ) from branch ${BRANCH_NAME}, commit
-${COMMIT_HASH}.  The complete legacy/ directory is excluded.
-EOF
-
-  rm -f "$BUILT_ARCHIVE_TMP"
-  COPYFILE_DISABLE=1 tar --no-xattrs -czf "$BUILT_ARCHIVE_TMP" \
-    -C "$WORKTREE_DIR" "${FLAT_VFILES[@]}" _CoqProject \
-    "$(basename "$NOTE_FILE")" "${BUILT_ENTRIES[@]}" \
-    || fail "could not create temporary built archive"
-  tar -tzf "$BUILT_ARCHIVE_TMP" > "$BUILT_TAR_LIST" \
-    || fail "could not read temporary built archive"
-  BUILT_TAR_ENTRY_COUNT="$(wc -l < "$BUILT_TAR_LIST" | tr -d '[:space:]')"
-  if grep -q '/' "$BUILT_TAR_LIST"; then
-    fail "built archive contains a path below the flat root"
-  fi
-  if grep -q '^legacy' "$BUILT_TAR_LIST"; then
-    fail "built archive contains a legacy entry"
-  fi
-  mkdir -p "$(dirname "$OUT_BUILT_TARBALL")"
-  mv -f "$BUILT_ARCHIVE_TMP" "$OUT_BUILT_TARBALL"
-fi
-
 cat <<SUMMARY
 
 === flatten_artifact.sh: done ===
@@ -512,8 +393,6 @@ Branch:           $BRANCH_NAME
 Commit:           $COMMIT_HASH
 Commit method:    $COMMIT_METHOD
 Source archive:   $OUT_SOURCE_TARBALL
-Built archive:    ${OUT_BUILT_TARBALL:-not requested}
 Rocq file count:  ${#VFILES[@]}
 Source entries:   $SOURCE_TAR_ENTRY_COUNT
-Built entries:    $BUILT_TAR_ENTRY_COUNT
 SUMMARY

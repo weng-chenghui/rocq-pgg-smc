@@ -3,20 +3,16 @@
 ## Goal
 
 Publish the existing source repository as the public GitHub repository
-`weng-chenghui/rocq-pgg-smc`.  Every push to `main` must build the flattened
-non-legacy Rocq sources and retain the resulting tarball as a GitHub Actions
-artifact.  The `WADT2026` tag is created only after the first workflow run for
-the CI implementation commit succeeds.
+`weng-chenghui/rocq-pgg-smc`. Every push to `main` must first publish the
+flattened non-legacy Rocq sources, then compile that exact archive and publish a
+second built archive. The `WADT2026` tag is created only after both jobs succeed.
 
 ## Problem
 
-The repository has a script that relocates the non-legacy Rocq sources into one
-directory, rewrites their logical root, compiles that flattened development,
-and creates a tarball.  The script currently assumes a local opam switch and
-always compiles with four jobs.  Those assumptions do not fit a GitHub-hosted
-runner, where the switch path differs and concurrent Rocq processes can exceed
-the available memory.  Its in-place `sed` form is also specific to macOS and
-fails on the Ubuntu runner.
+The source archive must not wait for the expensive Rocq build. Otherwise an
+installation or compilation failure also prevents publication of the already
+valid flattened sources. The workflow therefore separates source preparation
+from compilation and passes the source archive between the two jobs.
 
 The flattened tree is a build output.  It must not become a second repository
 or a maintained branch on GitHub.
@@ -41,28 +37,23 @@ of this work.
 
 ## Workflow
 
-`.github/workflows/flattened-build.yml` runs on each push to `main`.  It has one
-Ubuntu job with read-only repository permissions and these steps:
+`.github/workflows/flattened-build.yml` runs on each push to `main` with
+read-only repository permissions. It has two jobs.
 
-1. Check out the pushed commit.
-2. Install OCaml 4.14 and opam with `ocaml/setup-ocaml`.
-3. Add the released Rocq opam repository and run
-   `opam install . --deps-only --yes`.  This installs the dependencies declared
-   by `rocq-pgg-smc.opam` without compiling the original source tree.
-4. Configure an identity for the temporary commit made inside the flatten
-   worktree.
-5. In one shell step, raise the stack limit, read the active switch with
-   `opam switch show --safe`, and run the flatten script with one compilation
-   job.  The script receives `$GITHUB_SHA`, not `HEAD`.
-6. Read the pushed commit's committer epoch with `%ct` and format it in UTC as
-   `YYYYMMDD-HHMMSS-pgg-smc-flat.tar.gz`.
-7. Upload that tarball as the workflow artifact.  A missing tarball fails the
-   workflow.
+The `flatten-source` job checks out the pushed commit, configures the temporary
+Git identity, runs `scripts/flatten_artifact.sh`, and uploads the dated source
+tarball. It does not start Rocq, opam, or `make`.
+
+The `build-flattened` job depends on `flatten-source`. It runs in the pinned
+MathComp 2.5.0 and Rocq 9.0 image, checks out the repository to obtain the opam
+manifest and build helper, and installs only the missing dependencies. It then
+downloads the source artifact, compiles it with one job through
+`scripts/build_flat_artifact.sh`, and uploads the dated built tarball.
 
 Official third-party actions are pinned to immutable commit SHAs.  Their major
 release names are recorded in comments so future updates are deliberate.
 
-## Flatten Script Interface
+## Script Interfaces
 
 `scripts/flatten_artifact.sh` keeps its existing positional interface:
 
@@ -70,34 +61,38 @@ release names are recorded in comments so future updates are deliberate.
 scripts/flatten_artifact.sh SOURCE_REF OUT_TARBALL
 ```
 
-It also accepts `FLATTEN_JOBS`, a positive integer whose default remains `4` for
-local compatibility.  The workflow sets it to `1`.  The chosen value controls
-both the actual `make` invocation and the rebuild command written into
-`ARTIFACT-README.txt`.
+This script only rewrites and archives the source tree. It does not require a
+Rocq installation.
+
+The build helper consumes that archive directly:
+
+```text
+scripts/build_flat_artifact.sh SOURCE_TARBALL OUT_BUILT_TARBALL
+```
+
+It accepts `ROCQ_JOBS`, which defaults to `1`. It requires every `.v` file to
+produce a matching `.vo`, retains optional Rocq side files, and excludes the
+generated Makefile and environment-specific configuration.
 
 The macOS-only in-place `sed` call is replaced by a portable rewrite to a
 temporary file followed by `mv`.  The rewritten content remains identical on
 macOS, Alpine Linux, and Ubuntu.
 
-The workflow passes `ROCQ_OPAM_SWITCH` using the switch selected by
-`ocaml/setup-ocaml`.  No GitHub-specific path is embedded in the script.
+The second job passes `ROCQ_OPAM_SWITCH` from the active switch in the MathComp
+image. No GitHub-specific switch path is embedded in the helper.
 
 ## Resource Handling
 
-The flattened build runs sequentially because individual Rocq files already
-use substantial memory.  The workflow raises the stack limit before invoking
-the script because `pgl27_spectral.v` exceeds the usual 8 MiB soft limit.  The
-first real workflow run determines whether the standard public runner has
-enough memory for `psl211_endpoints.v`.  If it does not, the workflow log is
-kept as evidence and no tag is created.  An available-disk check may justify a
-runner-local swap file in a follow-up commit.  A paid runner is outside this
-design and requires separate approval.
+The build runs sequentially because individual Rocq files already use
+substantial memory. The second job raises the stack limit because
+`pgl27_spectral.v` exceeds the usual 8 MiB soft limit. A paid runner remains
+outside this design.
 
 ## Failure Behavior
 
-Dependency installation, flattening, compilation, archive validation, and
-artifact upload are all required steps.  Any nonzero exit status fails the job.
-The workflow does not push generated branches or modify `main`.
+Flattening and source upload must succeed before the build job starts. Once the
+source artifact is uploaded, a later dependency or compilation failure does not
+remove it. The workflow does not push generated branches or modify `main`.
 
 No `WADT2026` tag is created while the workflow is queued, running, cancelled,
 or unsuccessful.  After a successful run, an annotated local tag is created at
@@ -108,17 +103,20 @@ the exact tested `main` commit and pushed to `origin`.
 Before publication, the implementation receives these local checks:
 
 - the shell script parses successfully;
-- `FLATTEN_JOBS=1` reaches the generated build command;
-- invalid job counts are rejected;
+- the source-only script never invokes opam, Rocq, or `make`;
+- the build helper compiles only files received in the source tarball;
+- `ROCQ_JOBS=1` reaches the generated build command and invalid counts fail;
+- source files and `_CoqProject` are identical in the source and built archives;
 - import rewriting produces the same result with GNU and BSD userlands;
-- the workflow YAML parses and names only the intended `main` push trigger;
+- the workflow has two jobs and the build job depends on the source job;
+- the upload and download artifact names match exactly;
 - the Git diff contains only the intended workflow, script, and related
   documentation.
 
 After publication, `gh` is used to observe the exact workflow run started by
 the pushed implementation commit.  Success means GitHub reports the run's
-conclusion as `success` and the run contains the flattened tarball artifact.
-Only then is `WADT2026` pushed.
+conclusion as `success` and the run contains both tarball artifacts. Only then
+is `WADT2026` pushed.
 
 ## Non-goals
 
@@ -133,7 +131,7 @@ Only then is `WADT2026` pushed.
 
 - GitHub workflow syntax:
   https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
-- OCaml and opam setup action:
-  https://github.com/ocaml/setup-ocaml
 - Artifact upload action:
   https://github.com/actions/upload-artifact
+- Artifact download action:
+  https://github.com/actions/download-artifact

@@ -34,11 +34,10 @@ docker run --rm rocq-pgg-smc-flat
 ```
 
 The Make target first creates `dist/pgg-smc-flat.tar.gz` from committed `HEAD`.
-The flattening step excludes the complete `legacy/` tree and verifies the flat
-development with the configured host opam switch. The Docker build then
-installs the dependency constraints from `rocq-pgg-smc.opam` and copies only
-the flattened sources into the image. The first build can take a long time
-while opam compiles the Rocq dependencies.
+The flattening step excludes the complete `legacy/` tree and does not require a
+host Rocq installation. The Docker build installs the dependency constraints
+from `rocq-pgg-smc.opam` and copies only the flattened sources into the image.
+The first build can take a long time while opam compiles the Rocq dependencies.
 
 A successful run ends with `make` exiting with status 0 and no `Error` line in
 the output. To build the image and run this check in one command, use:
@@ -70,6 +69,13 @@ make docker-check DOCKER_JOBS=2
 
 Increase this value only when the Docker memory limit can hold the concurrent
 Rocq processes.
+
+### GitHub Actions artifacts
+
+Each push to `main` first publishes a flattened source tarball. A second job
+downloads that exact tarball, compiles it in a MathComp container, and publishes
+a separate built tarball. The source tarball therefore remains available even
+if dependency installation or compilation fails in the second job.
 
 To inspect the image or keep its compiled files, start a shell:
 
