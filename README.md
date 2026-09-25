@@ -1,7 +1,7 @@
 # rocq-pgg-smc
 
 Formalization of PGG-SMC (Parametric Group Game SMC): group-based secure
-multiparty computation — card-based protocols, RAAG hopping, entropy
+multiparty computation — card-based protocols, entropy
 security bounds — in Rocq, over the infotheo library. A PGG is a protocol
 game parametric over an instance (G, N, rho): a finite group G acting on
 N card positions through a permutation representation rho, with
