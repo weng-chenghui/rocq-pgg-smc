@@ -35,8 +35,7 @@ From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra.
 From mathcomp Require Import ring reals.
 From infotheo Require Import realType_ext realType_ln ssr_ext ssralg_ext.
-From infotheo Require Import bigop_ext fdist proba entropy.
-From infotheo.dumas2017dual.entropy_fiber Require Import entropy_fiber.
+From infotheo Require Import bigop_ext fdist proba jfdist_cond entropy.
 
 Import GRing.Theory Num.Theory.
 
@@ -48,6 +47,73 @@ Local Open Scope ring_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
+
+Section support_centropy.
+
+Context {R : realType}.
+Variable T : finType.
+Variable P : R.-fdist T.
+Variables (DomainT CodomainT : finType).
+Variable X : {RV P -> DomainT}.
+Variable Y : {RV P -> CodomainT}.
+
+(** A conditional joint distribution agrees with event-based conditional
+    probability whenever the conditioning value has nonzero probability.
+    This equality lets the entropy calculation use its probability
+    hypotheses. @composes: support_centropy1_uniform_over_set *)
+Local Lemma support_jfdist_cond_cPr_eq
+    {TX TY : finType} (X0 : {RV P -> TX}) (Y0 : {RV P -> TY}) x y :
+  `Pr[X0 = x] != 0 ->
+  jfdist_cond `p_[% X0, Y0] x y = `Pr[Y0 = y | X0 = x].
+Proof.
+move=> Hx_pos.
+rewrite jfdist_condE; last first.
+  by rewrite fst_RV2 dist_of_RVE.
+rewrite cpr_eqE /jcPr.
+congr (_ / _).
+- rewrite Pr_fdistX setX1 Pr_set1 dist_of_RVE.
+  by rewrite pfwd1_pairC.
+- rewrite fdistX2 fst_RV2.
+  by rewrite Pr_set1 dist_of_RVE.
+Qed.
+
+(** If the conditional law is uniform on a nonempty finite set and zero
+    outside it, its entropy is the logarithm of the set's cardinality. This
+    identifies the compatible-secret set with the adversary's remaining
+    uncertainty. @composes: support_posterior_entropy_ambiguousE *)
+Local Lemma support_centropy1_uniform_over_set
+    (S : {set DomainT}) (c : CodomainT) :
+  `Pr[Y = c] != 0 ->
+  (forall x, x \in S -> `Pr[X = x | Y = c] = #|S|%:R^-1) ->
+  (forall x, x \notin S -> `Pr[X = x | Y = c] = 0) ->
+  (0 < #|S|)%N ->
+  `H[X | Y = c] = log (#|S|%:R : R).
+Proof.
+move=> Hcond_pos Hsol_unif Hnonsol_zero Hcard_pos.
+have -> : `H[X | Y = c] =
+    - \sum_(x : DomainT)
+        `Pr[X = x | Y = c] * log (`Pr[X = x | Y = c]).
+  rewrite centropy1_RVE //.
+    rewrite /entropy; congr (- _); apply: eq_bigr => x _.
+    by rewrite (@support_jfdist_cond_cPr_eq CodomainT DomainT Y X c x).
+  by rewrite fst_RV2 dist_of_RVE.
+rewrite (bigID (mem S)) /=.
+have -> : \sum_(i | i \notin S)
+    `Pr[X = i | Y = c] * log (`Pr[X = i | Y = c]) = 0.
+  apply: big1 => x Hx_notin.
+  by rewrite (Hnonsol_zero x Hx_notin) mul0r.
+rewrite addr0.
+have -> : \sum_(i in S)
+    `Pr[X = i | Y = c] * log (`Pr[X = i | Y = c]) =
+    \sum_(i in S) #|S|%:R^-1 * log (#|S|%:R^-1 : R).
+  apply: eq_bigr => x Hx_in.
+  by rewrite (Hsol_unif x Hx_in).
+rewrite big_const iter_addr addr0 -mulr_natr mul1r.
+rewrite logV; last by rewrite ltr0n.
+by field; rewrite pnatr_eq0 -lt0n.
+Qed.
+
+End support_centropy.
 
 Section support_posterior.
 
@@ -269,7 +335,7 @@ move=> Hv.
 have Hsol := support_posterior_secret_uniformE Hv.
 have Hout := support_posterior_secret_eq0 Hv.
 have Hcard := support_compatible_secrets_cardE Hv.
-rewrite (@centropy1_uniform_over_set R _ _ _ _
+rewrite (@support_centropy1_uniform_over_set R _ _ _ _
            support_posterior_secret support_posterior_view
            (support_compatible_secrets v) v Hv Hsol Hout); last first.
   by rewrite Hcard; case: (support_ambiguous_view v).
