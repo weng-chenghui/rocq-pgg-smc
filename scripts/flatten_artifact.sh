@@ -155,9 +155,13 @@ trap cleanup EXIT
 
 git -C "$MAIN_REPO_ROOT" rev-parse --verify "${SOURCE_REF}^{commit}" >/dev/null \
   || fail "source ref '$SOURCE_REF' is not a commit"
+SOURCE_COMMIT="$(
+  git -C "$MAIN_REPO_ROOT" rev-parse "${SOURCE_REF}^{commit}"
+)"
 
 log "main repo:   $MAIN_REPO_ROOT"
 log "source ref:  $SOURCE_REF"
+log "source commit: $SOURCE_COMMIT"
 log "branch:      $BRANCH_NAME"
 log "worktree:    $WORKTREE_DIR"
 log "source archive: $OUT_SOURCE_TARBALL"
@@ -360,9 +364,11 @@ To rebuild:
     rocq makefile -f _CoqProject -o Makefile.coq
     make -f Makefile.coq -j1
 
-Makefile.coq is generated and is not included.  This archive was created
-on $(date -u +%Y-%m-%dT%H:%M:%SZ) from branch ${BRANCH_NAME}, commit
-${COMMIT_HASH}.  The complete legacy/ directory is excluded.
+Makefile.coq is generated and is not included.  The complete legacy/ directory
+is excluded.
+
+Source repository commit: ${SOURCE_COMMIT}
+Flattened transformation commit: ${COMMIT_HASH}
 EOF
 
 rm -f "$SOURCE_ARCHIVE_TMP"

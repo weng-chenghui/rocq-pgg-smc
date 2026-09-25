@@ -1,4 +1,4 @@
-name: Flattened build
+name: Flattened release
 
 'on':
   push:
@@ -8,10 +8,16 @@ name: Flattened build
 permissions:
   contents: read
 
+concurrency:
+  group: flattened-release-${{ github.sha }}
+  cancel-in-progress: false
+
 jobs:
   flatten-source:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - name: Check out source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -32,6 +38,14 @@ jobs:
           ./scripts/flatten_artifact.sh "$GITHUB_SHA" "$source_archive_path"
           echo "source_archive_path=$source_archive_path" >> "$GITHUB_OUTPUT"
 
+      - name: Publish source release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          scripts/publish_commit_release.sh source \
+            "$GITHUB_REPOSITORY" "$GITHUB_SHA" \
+            "${{ steps.flattened.outputs.source_archive_path }}"
+
       - name: Upload flattened source archive
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
@@ -39,43 +53,31 @@ jobs:
           path: ${{ steps.flattened.outputs.source_archive_path }}
           if-no-files-found: error
 
-  build-flattened:
+  publish-image:
     needs: flatten-source
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    container:
-      image: mathcomp/mathcomp@sha256:ad95400eeb7f6fecb9d3b85673bf58990ae5800d9a8c41fd533e2f9678754cbc
-      options: --user root
-      env:
-        OPAMROOT: /home/rocq/.opam
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Check out source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - name: Verify base toolchain
+      - name: Download released flattened source archive
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          eval "$(opam env --set-switch)"
-          opam switch show --safe
-          rocq --version
+          mkdir -p dist/source-artifact
+          gh release download "wadt2026-$GITHUB_SHA" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern '*-pgg-smc-flat.tar.gz' \
+            --dir dist/source-artifact
 
-      - name: Trust checked-out repository
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Install dependencies
-        run: opam install . --deps-only --yes
-
-      - name: Download flattened source archive
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: pgg-smc-flat-${{ github.sha }}
-          path: dist/source-artifact
-
-      - name: Compile flattened sources
-        id: built
+      - name: Prepare Docker build input
         shell: bash
         run: |
           set -euo pipefail
-          ulimit -s unlimited
           mapfile -t source_archives < <(
             find dist/source-artifact -maxdepth 1 -type f \
               -name '*-pgg-smc-flat.tar.gz' -print
@@ -85,18 +87,39 @@ jobs:
               "${#source_archives[@]}" >&2
             exit 1
           fi
-          commit_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
-          archive_stamp="$(date -u -d "@${commit_epoch}" +%Y%m%d-%H%M%S)"
-          built_archive_path="dist/${archive_stamp}-pgg-smc-built.tar.gz"
-          active_switch="$(opam switch show --safe)"
-          ROCQ_OPAM_SWITCH="$active_switch" ROCQ_JOBS=1 \
-            ./scripts/build_flat_artifact.sh \
-              "${source_archives[0]}" "$built_archive_path"
-          echo "built_archive_path=$built_archive_path" >> "$GITHUB_OUTPUT"
+          cp "${source_archives[0]}" dist/pgg-smc-flat.tar.gz
 
-      - name: Upload compiled flattened archive
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: pgg-smc-built-${{ github.sha }}
-          path: ${{ steps.built.outputs.built_archive_path }}
-          if-no-files-found: error
+      - name: Log in to GitHub Container Registry
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GHCR_TOKEN" | docker login ghcr.io \
+            --username "$GITHUB_ACTOR" --password-stdin
+
+      - name: Build and publish Docker package
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_tag="ghcr.io/${GITHUB_REPOSITORY}:${GITHUB_SHA}"
+          docker build \
+            --platform linux/amd64 \
+            --build-arg ROCQ_JOBS=1 \
+            --build-arg SOURCE_URL="https://github.com/${GITHUB_REPOSITORY}" \
+            --build-arg SOURCE_REVISION="$GITHUB_SHA" \
+            --tag "$image_tag" .
+          docker push "$image_tag"
+          image_digest="$(
+            docker buildx imagetools inspect "$image_tag" \
+              --format '{{json .Manifest.Digest}}' | tr -d '"'
+          )"
+          [[ "$image_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          echo "image_digest=$image_digest" >> "$GITHUB_OUTPUT"
+
+      - name: Update release with Docker package
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          scripts/publish_commit_release.sh image \
+            "$GITHUB_REPOSITORY" "$GITHUB_SHA" \
+            "ghcr.io/${GITHUB_REPOSITORY}@${{ steps.image.outputs.image_digest }}"

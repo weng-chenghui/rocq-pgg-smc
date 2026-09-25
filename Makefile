@@ -23,9 +23,10 @@ clean: $(ROCQMAKEFILE)
 
 docker-build:
 	./scripts/flatten_artifact.sh "$(FLAT_SOURCE_REF)" "$(FLAT_ARCHIVE)"
-	docker build --file Dockerfile --tag "$(DOCKER_IMAGE)" .
+	docker build --build-arg ROCQ_JOBS="$(DOCKER_JOBS)" \
+		--file Dockerfile --tag "$(DOCKER_IMAGE)" .
 
 docker-check: docker-build
-	docker run --rm --env ROCQ_JOBS="$(DOCKER_JOBS)" "$(DOCKER_IMAGE)"
+	docker run --rm "$(DOCKER_IMAGE)"
 
 .PHONY: all install clean docker-build docker-check

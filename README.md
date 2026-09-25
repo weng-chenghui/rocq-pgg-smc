@@ -24,23 +24,26 @@ both (0.9.7 release and the dumas2017dual dev line).
 
 ### Building with Docker
 
-The image installs the Rocq toolchain and the MathComp dependencies at build
-time. Running the container compiles every source listed in the flattened
-`_CoqProject` with `make`.
+The image installs the required dependencies, compiles every source in the
+flattened `_CoqProject`, and installs the result during `docker build`.
 
 ```shell
 make docker-build
 docker run --rm rocq-pgg-smc-flat
+docker run --rm -it rocq-pgg-smc-flat sh
 ```
 
 The Make target first creates `dist/pgg-smc-flat.tar.gz` from committed `HEAD`.
 The flattening step excludes the complete `legacy/` tree and does not require a
 host Rocq installation. The Docker build installs the dependency constraints
 from `rocq-pgg-smc.opam` and copies only the flattened sources into the image.
-The first build can take a long time while opam compiles the Rocq dependencies.
+The first build can take a long time while opam installs dependencies and Rocq
+compiles the flattened development. Running the image without a command checks
+that an installed module is present. Passing `sh` opens the packaged
+environment.
 
-A successful run ends with `make` exiting with status 0 and no `Error` line in
-the output. To build the image and run this check in one command, use:
+A successful build has already compiled and installed the development. To
+build the image and check that installation in one command, use:
 
 ```shell
 make docker-check
@@ -70,19 +73,28 @@ make docker-check DOCKER_JOBS=2
 Increase this value only when the Docker memory limit can hold the concurrent
 Rocq processes.
 
-### GitHub Actions artifacts
+### GitHub releases and Docker packages
 
-Each push to `main` first publishes a flattened source tarball. A second job
-downloads that exact tarball, compiles it in a MathComp container, and publishes
-a separate built tarball. The source tarball therefore remains available even
-if dependency installation or compilation fails in the second job.
+Each push to `main` creates a commit-specific prerelease as soon as the
+flattened source tarball is ready. The release tag has the form
+`wadt2026-<full-commit-sha>`. It does not wait for Rocq compilation.
 
-To inspect the image or keep its compiled files, start a shell:
+A second job downloads that exact tarball from the release, compiles and
+installs it in a Docker image, and publishes the image to GitHub Container
+Registry under the full commit SHA. When that job finishes, it adds the
+immutable image digest and pull command to the same release. If image
+construction fails, the source release remains available. Repeated runs keep
+the first released source tar so the release and image use the same input.
+
+The flattened tarball is a source artifact, not an installable opam package.
+Rocq does not provide a portable precompiled opam package format for `.vo`
+files. The Docker image supplies the compiled development together with the
+Rocq and library versions used to build it.
+
+To inspect the installed package, start a shell:
 
 ```shell
-docker run --rm -it --env ROCQ_JOBS=1 rocq-pgg-smc-flat sh
-ulimit -s unlimited
-opam exec -- make -f Makefile.rocq -j"${ROCQ_JOBS:-1}"
+docker run --rm -it rocq-pgg-smc-flat sh
 ```
 
 The piSMC language modules (`smc/`: `graded_resource`, `smc_interpreter`,

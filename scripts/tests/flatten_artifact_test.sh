@@ -42,6 +42,7 @@ git -C "$FIXTURE" config user.name 'Flatten Test'
 git -C "$FIXTURE" config user.email 'flatten-test@example.invalid'
 git -C "$FIXTURE" add -- .
 git -C "$FIXTURE" commit -q -m 'fixture'
+SOURCE_COMMIT="$(git -C "$FIXTURE" rev-parse HEAD)"
 
 ARCHIVE="$OUTPUT/fixture-flat.tar.gz"
 (
@@ -54,6 +55,8 @@ ARCHIVE="$OUTPUT/fixture-flat.tar.gz"
 test ! -e "$TOOL_LOG"
 tar -xOf "$ARCHIVE" ARTIFACT-README.txt \
   | grep -F 'make -f Makefile.coq -j1'
+tar -xOf "$ARCHIVE" ARTIFACT-README.txt \
+  | grep -F "Source repository commit: $SOURCE_COMMIT"
 tar -xOf "$ARCHIVE" A.v \
   | grep -F 'From pgg_smc Require Import B.'
 if tar -tzf "$ARCHIVE" | grep -q '\.vo$'; then
