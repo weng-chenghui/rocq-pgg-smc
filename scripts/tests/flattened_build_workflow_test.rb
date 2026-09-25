@@ -43,6 +43,17 @@ unless uses == expected_uses
   raise "wrong action references: #{uses.inspect}"
 end
 
+steps = job.fetch("steps")
+trust_index = steps.index { |step| step["name"] == "Trust checked-out repository" }
+install_index = steps.index { |step| step["name"] == "Install dependencies" }
+raise "missing repository trust step" unless trust_index
+raise "missing dependency installation step" unless install_index
+raise "repository trust must precede dependency installation" unless trust_index < install_index
+trust_command = steps.fetch(trust_index).fetch("run")
+unless trust_command == 'git config --global --add safe.directory "$GITHUB_WORKSPACE"'
+  raise "wrong repository trust command: #{trust_command.inspect}"
+end
+
 required_text = [
   "opam install . --deps-only --yes",
   "$GITHUB_SHA",

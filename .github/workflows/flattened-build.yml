@@ -27,6 +27,9 @@ jobs:
           opam switch show --safe
           rocq --version
 
+      - name: Trust checked-out repository
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Install dependencies
         run: opam install . --deps-only --yes
 
