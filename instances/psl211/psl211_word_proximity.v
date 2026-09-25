@@ -11,7 +11,7 @@
 (* closeness field, and the two arithmetic facts about the number that field  *)
 (* names. The certificate built on them, the program certified over it and    *)
 (* the statements about that program are at AnalysisBridged, in               *)
-(* instances/psl211/tableau/.                                                 *)
+(* instances/psl211/verifolio/.                                                 *)
 (*                                                                            *)
 (* Every number below bounds a sum of absolute differences, which is twice    *)
 (* the total variation distance of the literature, so a bound of 2^-40 here   *)

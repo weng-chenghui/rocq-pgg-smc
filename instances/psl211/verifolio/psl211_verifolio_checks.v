@@ -1,0 +1,197 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
+(******************************************************************************)
+(* psl211_verifolio_checks: the terms refused at the twelve-card instance       *)
+(*                                                                            *)
+(* Each entry below is one written term the development refuses, recorded so  *)
+(* that the refusal is compiled rather than described. A recorded refusal     *)
+(* says what it says about the one term written under it and about no other   *)
+(* term: it fixes a spelling the development does not accept, and states no   *)
+(* general impossibility. The file declares nothing and nothing depends on    *)
+(* it.                                                                        *)
+(*                                                                            *)
+(* A term the kernel refuses stands under a Fail and is compiled here. A term *)
+(* the parser refuses cannot stand under one: the error is raised while the   *)
+(* sentence is read, so the Fail never runs and a file holding the term does  *)
+(* not compile. Such an entry writes the term inside its comment and quotes   *)
+(* the message, and the term is compiled once on its own under notes/probes.  *)
+(*                                                                            *)
+(* Five boundaries are recorded. The first is that an obligation built where  *)
+(* the statement is written is not the named lemma: the inline-reduction      *)
+(* prefix and the named prefix drive the same run, and the equation between   *)
+(* the two prefixes is still refused, because an opaque lemma is convertible  *)
+(* with nothing. The second is what that fork rules out: the model is typed   *)
+(* over the observed execution the named prefix builds and is refused over    *)
+(* the inline one, so no typed evidence crosses between them. The third is    *)
+(* which ideal the proximity certificate's type admits. A certificate's ideal *)
+(* is a sample adapter over the program's own execution, so the eight-card    *)
+(* orbit instance's model is refused at its type and no distance is reached.  *)
+(* Beside it, the ideal of the certificate this instance builds is refused as *)
+(* the word model the certificate is about; a certificate whose ideal were    *)
+(* its own model would hold its closeness field at zero, the two sides of     *)
+(* that field being one term. The fourth is which readers reach a published   *)
+(* obstruction. The readers of manifest/pgg_verifolio.v that name a security    *)
+(* statement or a security property all take a PublishedAt, and               *)
+(* PublishedObstruction is a different inductive type with no coercion into   *)
+(* it, so none of them applies; the two terms below are the two spellings     *)
+(* that were checked. The fifth is a spelling of the statement surface that   *)
+(* the parser refuses: the obstruction terminal names the kind it publishes   *)
+(* and then its number after at, and psl211_alldecks_obstruction_published    *)
+(* with a payload written in place of the two has no parse.                   *)
+(******************************************************************************)
+
+From HB Require Import structures.
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import morphism action bigop order ssrnum ssralg.
+From mathcomp Require Import boolp reals lra.
+From infotheo Require Import realType_ext fdist proba variation_dist.
+From pgg_smc Require Import var_dist_supp var_dist_joint_law.
+From pgg_smc Require Import smc_interpreter pgg_interface pgg_monodromy_profile.
+From pgg_smc Require Import pgg_execution_plug pgg_observed_execution.
+From pgg_smc Require Import pgg_sample_adapter pgg_weighted_words.
+From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
+From pgg_smc Require Import pgg_instance.
+From pgg_smc Require Import pgg_analysis_status pgg_analysis_manifest.
+From pgg_smc Require Import pgg_verifolio pgg_verifolio_syntax.
+From pgg_smc Require Import psl211_group psl211_orbit psl211_closure.
+From pgg_smc Require Import psl211_scheme psl211_profile psl211_mixing.
+From pgg_smc Require Import psl211_exec psl211_alldecks psl211_models.
+From pgg_smc Require Import psl211_word_model psl211_word_proximity.
+From pgg_smc Require Import pgl27_models.
+From pgg_smc Require Import psl211_verifolio_observed.
+From pgg_smc Require Import psl211_verifolio_analysis_bridged.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+Import GRing.Theory Num.Theory.
+
+Local Open Scope fdist_scope.
+Local Open Scope proba_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+
+(******************************************************************************)
+(*     An inline obligation is not the named lemma                            *)
+(******************************************************************************)
+
+(** The two prefixes are not the same term. The rejection is a conversion
+    failure between the two prefixes themselves:
+
+      The term "erefl" has type
+       "psl211_alldecks_prefix_vm = psl211_alldecks_prefix_vm"
+      while it is expected to have type
+       "psl211_alldecks_prefix_vm = psl211_alldecks_prefix"
+      (cannot unify "psl211_alldecks_prefix_vm" and "psl211_alldecks_prefix").
+*)
+Fail Definition psl211_alldecks_prefix_vm_neq :
+  psl211_alldecks_prefix_vm = psl211_alldecks_prefix := erefl.
+
+(******************************************************************************)
+(*     A model belongs to the run it was built over                           *)
+(******************************************************************************)
+
+(** The analysis model family is typed against the observed execution the named
+    prefix builds, and is rejected over the inline-reduction one: the two
+    prefixes hold different termination proofs, so their observed executions are
+    different terms and no typed evidence crosses between them. This is the fork
+    made visible, and the reason the program names its termination lemma. *)
+Fail Definition psl211_vm_reuse_sampled : Verifolio Sampled :=
+  psl211_alldecks_prefix_vm sample psl211_exact_family.
+
+(******************************************************************************)
+(*     Which ideal the certificate's type refuses                             *)
+(******************************************************************************)
+
+(** The eight-card orbit instance's exact family cannot be the ideal of a
+    twelve-card word program. A certificate's ideal is a sample adapter over the
+    program's own execution, and the two instances run different executions, so
+    the field is rejected at its type and no distance is reached. The
+    rejection is a failure to unify the two executions:
+
+      The term "amf_sample pgl27_exact_family R tt" has type
+       "SampleAdapter R (OE.oe_execution pgl27_exec.pgl27_observed)"
+      while it is expected to have type
+       "SampleAdapter R (instance_exec psl211_alldecks_params)".
+*)
+Fail Definition psl211_word_proximity_cert_pgl27_ideal (R : realType)
+    (idx : unit)
+  : IdealProximityCert (amf_sample psl211_word_family R idx)
+      (coalition_endpoint_reading psl211_algebra) :=
+  @MkIdealProximityCert R psl211_algebra psl211_alldecks_params
+    (amf_sample psl211_word_family R idx)
+    (coalition_endpoint_reading psl211_algebra)
+    (amf_sample pgl27_exact_family R tt)
+    (psl211_exact_witness R idx)
+    (psl211_alldecks_secret R)
+    (2%:R^-40)
+    (fun C HC => @psl211_word_proximity_close R C HC).
+
+(** The certificate's ideal is not convertible with the word model it is
+    about. A certificate naming its own model as the ideal holds its distance
+    field at zero, the two sides of that field being one term, so the number
+    it publishes bounds a distance from the model to itself. The rejection is
+    a failure to unify the two models:
+
+      The term "erefl" has type
+       "ipc_ideal (psl211_word_proximity_cert R idx) =
+        ipc_ideal (psl211_word_proximity_cert R idx)"
+      while it is expected to have type
+       "ipc_ideal (psl211_word_proximity_cert R idx) =
+        amf_sample psl211_word_family R idx".
+*)
+Fail Definition psl211_word_proximity_cert_ideal_self (R : realType)
+    (idx : unit) :
+  ipc_ideal (psl211_word_proximity_cert R idx)
+  = amf_sample psl211_word_family R idx := erefl.
+
+(******************************************************************************)
+(*     Which readers a published obstruction refuses                          *)
+(******************************************************************************)
+
+(** The exact-independence reader is refused on a published obstruction. That
+    reader is the second conjunct of the third field of a PublishedAt, and a
+    published obstruction is a value of a different inductive type, so the
+    rejection is a failure to unify the two record types:
+
+      The term "r" has type "PublishedObstruction"
+      while it is expected to have type "PublishedAt ?c".
+*)
+Section obstruction_reader_secrecy.
+Variable r : PublishedObstruction.
+Fail Check (view_secrecy_of r).
+End obstruction_reader_secrecy.
+
+(** The security-property reader is refused on the same value, and for the
+    same reason. A published obstruction carries no SecurityEvidence, so there
+    is no property for such a reader to name. *)
+(* The message is the one above, word for word, at the same argument. *)
+Section obstruction_reader_property.
+Variable r : PublishedObstruction.
+Fail Check (security_property_of r).
+End obstruction_reader_property.
+
+
+(******************************************************************************)
+(*     A spelling of the surface the parser refuses                           *)
+(******************************************************************************)
+
+(* The obstruction terminal names the kind it publishes after the literal
+   Obstruction and the number of that kind after at, so a payload written in
+   place of the two has no parse, and the parser names the token it wants
+   where the payload's proof ends. The perturbed program is
+   psl211_alldecks_obstruction_published with the named payload in the kind's
+   position,
+
+     psl211_exact_sampled
+       |> publish Obstruction psl211_alldecks_obstruction
+          by psl211_alldecks_obstruction_pf assuming BaselineClassicalOnly.
+
+   and compiling it gives
+
+     Error: Syntax error: 'assuming' expected after [term level 0] (in
+     [term]).
+
+   The term is written inside this comment and not under a Fail: the error
+   is raised while the sentence is read, and a Fail around it never runs. *)

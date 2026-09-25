@@ -7,7 +7,7 @@
 (*                                                                            *)
 (* The colour theorems of instances/psl211/psl211_secrecy.v are read in       *)
 (* psl211P, the law of a chirality bit drawn from a prior together with an    *)
-(* independent uniform PSL(2,11) shuffle. A proposition of the Tableau is     *)
+(* independent uniform PSL(2,11) shuffle. A proposition of the Verifolio is     *)
 (* stated at a sample adapter and at a reading. The adapter over that law is  *)
 (* psl211_dealt_sample of instances/psl211/psl211_dealt_model.v, over the     *)
 (* dealer-dealt run parameters, whose run argument carrier is the chirality   *)
@@ -27,7 +27,7 @@
 (* The dealer-dealt parameters read their endpoints through                   *)
 (* profile_endpointsE, as instances/psl211/psl211_endpoints.v states, so      *)
 (* psl211_models.v carries an endpoints statement and an observed execution   *)
-(* for them and instances/psl211/tableau/psl211_tableau_dealt.v carries the   *)
+(* for them and instances/psl211/verifolio/psl211_verifolio_dealt.v carries the   *)
 (* Sampled level and the two programs over them. Every statement in this      *)
 (* file is about the model's law and a reading of a coalition's endpoints,    *)
 (* and the identification of that reading with the executed one is the link   *)
@@ -87,7 +87,7 @@ From pgg_smc Require Import psl211_group psl211_orbit psl211_scheme.
 From pgg_smc Require Import psl211_profile psl211_exec psl211_secrecy.
 From pgg_smc Require Import psl211_models psl211_dealt_model.
 From pgg_smc Require Import psl211_reading_constancy.
-From pgg_smc Require Import pgg_tableau pgg_tableau_reading.
+From pgg_smc Require Import pgg_verifolio pgg_verifolio_reading.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -198,7 +198,7 @@ Qed.
     six. The statement is an independence and not a numeric bound, and no
     entropy form of the framework is restated at it. It is stated of the
     model's law and the colour reading of a coalition's endpoints; the
-    program of instances/psl211/tableau/psl211_tableau_dealt.v carries it to
+    program of instances/psl211/verifolio/psl211_verifolio_dealt.v carries it to
     the executed run along the link lemma of the Sampled level. *)
 Lemma psl211_colour_reading_indep (R : realType) (secretP : R.-fdist bool) :
   ReadingExactIndependence (psl211_dealt_sample secretP) psl211_colour_reading

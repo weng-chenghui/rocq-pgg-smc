@@ -5,7 +5,7 @@
 (*                           constancy field at the twelve-card chirality     *)
 (*                           instance, refuted in both run modes              *)
 (*                                                                            *)
-(* An input-indistinguishability certificate of manifest/pgg_tableau.v        *)
+(* An input-indistinguishability certificate of manifest/pgg_verifolio.v        *)
 (* carries five fields, and the fifth, ic_const, asks that a coalition of     *)
 (* fewer than profile_k seats read the certificate's ideal cut the same way   *)
 (* whatever the run argument. This file restates that field as a standalone   *)
@@ -13,7 +13,7 @@
 (* PSL(2,11) in the two run modes the instance carries. The instance          *)
 (* publishes its all-decks program with exact-independence evidence and its   *)
 (* word program with ideal-proximity evidence, in                             *)
-(* instances/psl211/tableau/psl211_tableau_analysis_bridged.v, and this file  *)
+(* instances/psl211/verifolio/psl211_verifolio_analysis_bridged.v, and this file  *)
 (* is what certifying input indistinguishability would require of it.         *)
 (*                                                                            *)
 (* All-decks mode. The run argument is a whole deck description: one of the   *)
@@ -43,14 +43,14 @@
 (* instances/psl211/psl211_profile.v gives this instance's single-card        *)
 (* marginal bound. The exclusion covers input indistinguishability alone: a   *)
 (* proximity certificate carries no shuffle bound and no constancy field, and *)
-(* the program of instances/psl211/tableau/psl211_tableau_analysis_bridged.v  *)
+(* the program of instances/psl211/verifolio/psl211_verifolio_analysis_bridged.v  *)
 (* publishes 2^-40 over the word model with ideal-proximity evidence.         *)
 (*                                                                            *)
 (* The same quantity read off the model rather than off a certificate. Under  *)
 (* the all-decks model's own cut law the coalition psl211_perdeck_coalition   *)
 (* of three of the twelve seats reads the two chiralities of one deal 1/660   *)
 (* apart in the sum of absolute differences, so that model is input           *)
-(* distinguishable at 1/660 in the sense of manifest/pgg_tableau.v. No        *)
+(* distinguishable at 1/660 in the sense of manifest/pgg_verifolio.v. No        *)
 (* certificate occurs in that statement, and the number bound above follows   *)
 (* from it for every certificate at once: 1/660 bounds from below what any    *)
 (* input-indistinguishability program over this model at the coalition's own  *)
@@ -67,7 +67,7 @@
 (* and the other reaches under none. That is a fact about the group and the   *)
 (* design. PSL(2,11) is 2-transitive and not 3-transitive, where PGL(2,7)     *)
 (* proves the same field through pgl27_word_view_const of                     *)
-(* instances/pgl27/tableau/pgl27_tableau_analysis_bridged.v,                  *)
+(* instances/pgl27/verifolio/pgl27_verifolio_analysis_bridged.v,                  *)
 (* three-transitivity read as constancy for coalitions of fewer than four     *)
 (* seats. The dealt statement rules out one named ideal and no certificate.   *)
 (* An ideal can be pinned to these parameters through the dealer-dealt sample *)
@@ -75,7 +75,7 @@
 (* and no certificate is built over it. The dealt parameters read their       *)
 (* endpoints through profile_endpointsE, so instances/psl211/psl211_models.v  *)
 (* carries an endpoints statement and an observed execution for them, and     *)
-(* instances/psl211/tableau/psl211_tableau_dealt.v carries two programs and   *)
+(* instances/psl211/verifolio/psl211_verifolio_dealt.v carries two programs and   *)
 (* two paths over them.                                                       *)
 (*                                                                            *)
 (* Not claimed. Input indistinguishability is not shown unavailable at this   *)
@@ -94,14 +94,14 @@
 (* each. Nothing here says the word program is excluded outright:             *)
 (* psl211_alldecks_constancy_false_word584 reaches eps < 1/1320 - 2^-40, and  *)
 (* the program published over the weighted-word adapter psl211_word_sample in *)
-(* instances/psl211/tableau/psl211_tableau_analysis_bridged.v carries a       *)
+(* instances/psl211/verifolio/psl211_verifolio_analysis_bridged.v carries a       *)
 (* proximity certificate, which has no constancy field to refute. How wide    *)
 (* each failure is stays measured and not proved; the reading multiplicity    *)
 (* diagnostics are recorded in notes/probes/2026-09-19-psl211-sc-const/.      *)
 (*                                                                            *)
 (* Names. The first two declarations are framework-level: they are stated for *)
 (* any algebra and any execution parameters, and sit here rather than beside  *)
-(* IndistinguishabilityCert in manifest/pgg_tableau.v. A deck description is  *)
+(* IndistinguishabilityCert in manifest/pgg_verifolio.v. A deck description is  *)
 (* a whole run argument and a deal is its three coordinates other than the    *)
 (* secret. The psl211_blockline1_ prefix names block line one and the         *)
 (* comparison with block line zero at one chirality, as psl211_perdeck_ of    *)
@@ -183,7 +183,7 @@ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 From pgg_reconstruct Require Import design_privacy algebraic_rigidity.
 From pgg_smc Require Import pgg_instance.
 From pgg_smc Require Import pgg_analysis_status pgg_analysis_manifest.
-From pgg_smc Require Import pgg_tableau.
+From pgg_smc Require Import pgg_verifolio.
 From pgg_smc Require Import psl211_group psl211_orbit.
 From pgg_smc Require Import psl211_scheme psl211_profile psl211_exec.
 From pgg_smc Require Import psl211_endpoints psl211_alldecks psl211_models.
@@ -856,7 +856,7 @@ Qed.
     ic_Hd, and no adapter has to be named here. The weighted-word adapter
     psl211_word_sample of instances/psl211/psl211_word_model.v draws this cut,
     and the program published over it in
-    instances/psl211/tableau/psl211_tableau_analysis_bridged.v carries a
+    instances/psl211/verifolio/psl211_verifolio_analysis_bridged.v carries a
     proximity certificate, and IdealProximityCert has no constancy field, so
     this refutation denies no field of that program's certificate. *)
 Lemma psl211_alldecks_constancy_false_word584 (R : realType)
@@ -886,7 +886,7 @@ Qed.
    below the analysis manifest, because the analysis manifest's paths over
    the dealer-dealt model name the theorems built on them. What is left here
    is the refutation itself, which is about the constancy field and therefore
-   about a record of the Tableau. *)
+   about a record of the Verifolio. *)
 
 (* psl211_dealt_raw_count is sealed here as it is where it is defined: the
    seal is per file, and a unifier that falls back to conversion would
@@ -909,7 +909,7 @@ Local Opaque psl211_dealt_raw_count.
     it. The dealt parameters read their endpoints through profile_endpointsE, so
     instances/psl211/psl211_models.v carries an endpoints statement and an
     observed execution for them, and
-    instances/psl211/tableau/psl211_tableau_dealt.v carries two programs and two
+    instances/psl211/verifolio/psl211_verifolio_dealt.v carries two programs and two
     paths over them. *)
 Lemma psl211_dealt_constancy_false (R : realType) :
   ~ coalition_reading_constancy psl211_dealt_params

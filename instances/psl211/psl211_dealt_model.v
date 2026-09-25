@@ -9,13 +9,13 @@
 (* chirality, so the run argument of psl211_dealt_params IS the chirality a   *)
 (* coalition is not to learn. This file carries the model built on that run   *)
 (* and the two theorems stated over it, in the framework's own vocabulary and *)
-(* with no definition of the Tableau: the sample adapter, the model family    *)
+(* with no definition of the Verifolio: the sample adapter, the model family    *)
 (* indexed by the prior on the chirality, the colour map on a coalition's     *)
 (* endpoints, the fibre counts of the two encoder decks, and the two          *)
 (* theorems the analysis manifest's paths over this model name.               *)
 (*                                                                            *)
 (* Why the two theorems are here and not beside their programs: the analysis  *)
-(* manifest names only facade aliases, and the facade is below the Tableau    *)
+(* manifest names only facade aliases, and the facade is below the Verifolio    *)
 (* while the programs are above it, so a theorem a manifest path names has to *)
 (* be stated where the facade can reach it.                                   *)
 (*                                                                            *)
@@ -157,7 +157,7 @@ Proof. by []. Qed.
     chirality is what the colour view reads. Every statement made over this
     adapter is about the model's law and a reading of a coalition's
     endpoints; the Sampled level built over these parameters in
-    instances/psl211/tableau/psl211_tableau_dealt.v is what identifies that
+    instances/psl211/verifolio/psl211_verifolio_dealt.v is what identifies that
     reading with the executed one. *)
 Definition psl211_dealt_sample (R : realType) (secretP : R.-fdist bool)
   : SampleAdapter R (instance_exec psl211_dealt_params) :=

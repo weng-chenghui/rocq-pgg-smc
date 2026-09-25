@@ -11,7 +11,7 @@
 (* These are the two decks of orbit_encode (pgl27_orbit.v), so this is the    *)
 (* pair the scheme of pgl27_scheme.v deals and the pair named by the deal     *)
 (* clause of pgl27_algebra (pgl27_exec.v), from which the manifest paths of   *)
-(* pgl27_tableau_analysis_bridged.v descend. Every leakage value below is a   *)
+(* pgl27_verifolio_analysis_bridged.v descend. Every leakage value below is a   *)
 (* value of the scheme the rest of the development executes, and not of a     *)
 (* variant of it.                                                             *)
 (*                                                                            *)
