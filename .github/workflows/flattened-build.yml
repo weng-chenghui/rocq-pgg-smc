@@ -12,17 +12,20 @@ jobs:
   flattened-build:
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    container:
+      image: mathcomp/mathcomp@sha256:ad95400eeb7f6fecb9d3b85673bf58990ae5800d9a8c41fd533e2f9678754cbc
+      options: --user root
+      env:
+        OPAMROOT: /home/rocq/.opam
     steps:
       - name: Check out source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - name: Set up OCaml and opam
-        uses: ocaml/setup-ocaml@93303b622b2522e4411e295f9e77411a24912ac7 # v3
-        with:
-          ocaml-compiler: "4.14"
-          opam-repositories: |
-            coq-released: https://coq.inria.fr/opam/released
-            default: https://opam.ocaml.org
+      - name: Verify base toolchain
+        run: |
+          eval "$(opam env --set-switch)"
+          opam switch show --safe
+          rocq --version
 
       - name: Install dependencies
         run: opam install . --deps-only --yes
@@ -40,15 +43,25 @@ jobs:
           ulimit -s unlimited
           commit_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
           archive_stamp="$(date -u -d "@${commit_epoch}" +%Y%m%d-%H%M%S)"
-          archive_path="dist/${archive_stamp}-pgg-smc-flat.tar.gz"
+          source_archive_path="dist/${archive_stamp}-pgg-smc-flat.tar.gz"
+          built_archive_path="dist/${archive_stamp}-pgg-smc-built.tar.gz"
           active_switch="$(opam switch show --safe)"
           ROCQ_OPAM_SWITCH="$active_switch" FLATTEN_JOBS=1 \
-            ./scripts/flatten_artifact.sh "$GITHUB_SHA" "$archive_path"
-          echo "archive_path=$archive_path" >> "$GITHUB_OUTPUT"
+            ./scripts/flatten_artifact.sh "$GITHUB_SHA" \
+              "$source_archive_path" "$built_archive_path"
+          echo "source_archive_path=$source_archive_path" >> "$GITHUB_OUTPUT"
+          echo "built_archive_path=$built_archive_path" >> "$GITHUB_OUTPUT"
 
-      - name: Upload flattened archive
+      - name: Upload flattened source archive
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: pgg-smc-flat-${{ github.sha }}
-          path: ${{ steps.flattened.outputs.archive_path }}
+          path: ${{ steps.flattened.outputs.source_archive_path }}
+          if-no-files-found: error
+
+      - name: Upload compiled flattened archive
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: pgg-smc-built-${{ github.sha }}
+          path: ${{ steps.flattened.outputs.built_archive_path }}
           if-no-files-found: error

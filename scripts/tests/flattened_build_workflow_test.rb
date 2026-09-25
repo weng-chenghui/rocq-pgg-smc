@@ -24,10 +24,19 @@ end
 job = jobs.fetch("flattened-build")
 raise "wrong runner" unless job.fetch("runs-on") == "ubuntu-latest"
 
+expected_container = {
+  "image" => "mathcomp/mathcomp@sha256:ad95400eeb7f6fecb9d3b85673bf58990ae5800d9a8c41fd533e2f9678754cbc",
+  "options" => "--user root",
+  "env" => {"OPAMROOT" => "/home/rocq/.opam"}
+}
+unless job.fetch("container") == expected_container
+  raise "wrong build container: #{job.fetch("container").inspect}"
+end
+
 uses = job.fetch("steps").map { |step| step["uses"] }.compact
 expected_uses = [
   "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
-  "ocaml/setup-ocaml@93303b622b2522e4411e295f9e77411a24912ac7",
+  "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
   "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
 ]
 unless uses == expected_uses
@@ -39,6 +48,10 @@ required_text = [
   "$GITHUB_SHA",
   "opam switch show --safe",
   "FLATTEN_JOBS=1",
+  "source_archive_path",
+  "built_archive_path",
+  "-flat.tar.gz",
+  "-built.tar.gz",
   "ulimit -s unlimited",
   "%ct",
   "date -u",

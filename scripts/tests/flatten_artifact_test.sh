@@ -39,7 +39,12 @@ printf '%s\n' \
   'exit 1' > "$SHIMS/rocq"
 printf '%s\n' \
   '#!/bin/sh' \
-  'printf "%s\n" "$*" >> "$FLATTEN_TEST_MAKE_LOG"' > "$SHIMS/make"
+  'printf "%s\n" "$*" >> "$FLATTEN_TEST_MAKE_LOG"' \
+  'while IFS= read -r source; do' \
+  '  case "$source" in' \
+  '    *.v) : > "${source%.v}.vo" ;;' \
+  '  esac' \
+  'done < _CoqProject' > "$SHIMS/make"
 chmod +x "$SHIMS/opam" "$SHIMS/rocq" "$SHIMS/make"
 
 git -C "$FIXTURE" init -q -b main
@@ -49,13 +54,14 @@ git -C "$FIXTURE" add -- .
 git -C "$FIXTURE" commit -q -m 'fixture'
 
 ARCHIVE="$OUTPUT/fixture-flat.tar.gz"
+BUILT_ARCHIVE="$OUTPUT/fixture-built.tar.gz"
 (
   cd "$FIXTURE"
   PATH="$SHIMS:$PATH" \
     FLATTEN_TEST_MAKE_LOG="$MAKE_LOG" \
     ROCQ_OPAM_SWITCH=test-switch \
     FLATTEN_JOBS=1 \
-    ./scripts/flatten_artifact.sh HEAD "$ARCHIVE"
+    ./scripts/flatten_artifact.sh HEAD "$ARCHIVE" "$BUILT_ARCHIVE"
 )
 
 grep -Fx -- '-f Makefile.coq -j1' "$MAKE_LOG"
@@ -63,6 +69,16 @@ tar -xOf "$ARCHIVE" ARTIFACT-README.txt \
   | grep -F 'make -f Makefile.coq -j1'
 tar -xOf "$ARCHIVE" A.v \
   | grep -F 'From pgg_smc Require Import B.'
+if tar -tzf "$ARCHIVE" | grep -q '\.vo$'; then
+  printf 'source archive unexpectedly contains compiled files\n' >&2
+  exit 1
+fi
+tar -tzf "$BUILT_ARCHIVE" | grep -Fx 'A.vo'
+tar -tzf "$BUILT_ARCHIVE" | grep -Fx 'B.vo'
+test "$(tar -xOf "$ARCHIVE" A.v | shasum -a 256)" = \
+  "$(tar -xOf "$BUILT_ARCHIVE" A.v | shasum -a 256)"
+test "$(tar -xOf "$ARCHIVE" _CoqProject | shasum -a 256)" = \
+  "$(tar -xOf "$BUILT_ARCHIVE" _CoqProject | shasum -a 256)"
 
 for invalid_jobs in 0 two; do
   INVALID_LOG="$TEST_ROOT/invalid-${invalid_jobs}.log"
