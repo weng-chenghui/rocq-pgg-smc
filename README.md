@@ -12,94 +12,104 @@ the geometry reading is retired, 2026-08-26.)
 Extracted 2026-08-26 from the `pgg-smc/` subtree of the infotheo-pgg
 fork; see `docs/superpowers/specs/2026-08-26-rocq-pgg-smc-extraction-design.md`.
 
-## Build
+## Building with Docker
 
-Requires Rocq 9.0, MathComp 2.5, and the published `coq-infotheo`
-package, version 0.9.7 or later (`opam install coq-infotheo`). A
-`coq-infotheo` dev pin also works; the sources are verified against
-both (0.9.7 release and the dumas2017dual dev line).
-
-    make -j8        # compile everything in _CoqProject
-    make clean
-
-### Building with Docker
-
-The image installs the required dependencies, compiles every source in the
-flattened `_CoqProject`, and installs the result during `docker build`.
+Docker needs no local Rocq installation. The image installs the dependencies,
+compiles every source in the flattened `_CoqProject`, and installs the result.
+All of this happens during `docker build`.
 
 ```shell
-make docker-build
-docker run --rm rocq-pgg-smc-flat
-docker run --rm -it rocq-pgg-smc-flat sh
+make docker-build                      # flatten HEAD, then build the image
+docker run --rm rocq-pgg-smc-flat      # check the installed development
+docker run --rm -it rocq-pgg-smc-flat sh   # open a shell in the image
 ```
 
-The Make target first creates `dist/pgg-smc-flat.tar.gz` from committed `HEAD`.
-The flattening step excludes the complete `legacy/` tree and does not require a
-host Rocq installation. The Docker build installs the dependency constraints
+`make docker-build` first writes `dist/pgg-smc-flat.tar.gz` from the committed
+`HEAD`. Uncommitted changes are not included. The flattened archive leaves out
+the whole `legacy/` tree. The Docker build installs the dependency constraints
 from `rocq-pgg-smc.opam` and copies only the flattened sources into the image.
 The first build can take a long time while opam installs dependencies and Rocq
-compiles the flattened development. Running the image without a command checks
-that an installed module is present. Passing `sh` opens the packaged
-environment.
+compiles the development.
 
-A successful build has already compiled and installed the development. To
-build the image and check that installation in one command, use:
+Running the image without a command checks that an installed module is
+present. It prints nothing and exits with status 0 on success. To build the
+image and run this check in one step, use:
 
 ```shell
 make docker-check
 ```
 
-The check compiles one Rocq file at a time by default. In the current Docker
-image, compiling `pgl27_group.v` was observed to use about 5.4 GiB of memory.
-Using all available CPU cores can therefore exhaust Docker Desktop's memory
-when several Rocq processes run together, in which case `make` reports the
-affected process as `Killed`.
+### Memory and parallel jobs
 
-The container also raises its soft stack limit from Alpine's 8 MiB default.
-The computation in `pgl27_spectral.v` exceeds that default and otherwise ends
+`DOCKER_JOBS` sets the number of Rocq files compiled at the same time during
+the image build. The default is 1:
+
+```shell
+make docker-build DOCKER_JOBS=2
+```
+
+Raise it only when Docker has enough memory for several Rocq processes at
+once. Compiling `pgl27_group.v` alone used about 5.4 GiB. When several such
+processes run together, Docker Desktop can run out of memory and `make`
+reports the process as `Killed`.
+
+One job does not lower the memory needed by a single file. In one measured
+build, `psl211_endpoints.v` reached about 15.3 GiB and caused heavy swapping
+under a 15.6 GiB Docker memory limit. Set Docker Desktop's memory limit well
+above that before a full build.
+
+The build also raises the stack limit above the usual 8 MiB default. The
+computation in `pgl27_spectral.v` needs more than that and otherwise stops
 with `Stack overflow`.
 
-Limiting parallelism does not reduce the memory required by one Rocq process.
-On this machine, `psl211_endpoints.v` reached about 15.3 GiB and caused severe
-swapping under a 15.6 GiB Docker memory limit. Increase Docker Desktop's memory
-limit before the full check if it approaches that limit even with one job.
+## Building locally
 
-Set `DOCKER_JOBS` to choose the number of parallel Rocq compilation jobs:
+Requires Rocq 9.0 or 9.1, MathComp 2.5, and the published `coq-infotheo`
+package, version 0.9.7 or later. A `coq-infotheo` dev pin also works. The
+sources are checked against both the 0.9.7 release and the dumas2017dual dev
+line. The full dependency list is in `rocq-pgg-smc.opam`, and opam can
+install it:
 
 ```shell
-make docker-check DOCKER_JOBS=2
+opam install ./rocq-pgg-smc.opam --deps-only
 ```
 
-Increase this value only when the Docker memory limit can hold the concurrent
-Rocq processes.
+Then build:
 
-### GitHub releases and Docker packages
+```shell
+make -j8          # compile everything in _CoqProject
+make install      # optional: install the compiled library
+```
 
-Each push to `main` creates a commit-specific prerelease as soon as the
-flattened source tarball is ready. The release tag has the form
+To remove the build outputs later, run `make clean`.
+
+## GitHub releases and Docker packages
+
+The release for the WADT 2026 paper is
+https://github.com/weng-chenghui/rocq-pgg-smc/releases/tag/WADT2026-r1.
+
+Each push to `main` also creates a commit-specific prerelease as soon as the
+flattened source archive is ready. The release tag has the form
 `wadt2026-<full-commit-sha>`. It does not wait for Rocq compilation.
 
-A second job downloads that exact tarball from the release, compiles and
+A second job downloads that exact archive from the release, compiles and
 installs it in a Docker image, and publishes the image to GitHub Container
 Registry under the full commit SHA. When that job finishes, it adds the
-immutable image digest and pull command to the same release. If image
-construction fails, the source release remains available. Repeated runs keep
-the first released source tar so the release and image use the same input.
+image digest and pull command to the same release. If the image build fails,
+the source release stays available. Repeated runs keep the first released
+source archive, so the release and the image use the same input.
 
-The flattened tarball is a source artifact, not an installable opam package.
-Rocq does not provide a portable precompiled opam package format for `.vo`
-files. The Docker image supplies the compiled development together with the
-Rocq and library versions used to build it.
+The flattened archive is a source artifact, not an installable opam package.
+Rocq has no portable package format for compiled `.vo` files. The Docker
+image supplies the compiled development together with the Rocq and library
+versions used to build it.
 
-To inspect the installed package, start a shell:
-
-```shell
-docker run --rm -it rocq-pgg-smc-flat sh
-```
+## Layout
 
 The piSMC language modules (`smc/`: `graded_resource`, `smc_interpreter`,
 `smc_session_types`, `pismc`) are vendored into this repository — they
 are fork-only work absent from released infotheo.
 
 Logical namespaces: `pgg_smc` (most directories, including `smc/`),
-`pgg_reconstruct` (`reconstruct/`).
+`pgg_reconstruct` (`reconstruct/`). The flattened archive and the Docker
+image use the single namespace `pgg_smc` for both.
