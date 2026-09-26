@@ -80,10 +80,7 @@ To remove the build outputs later, run `make clean`.
 
 ## GitHub releases and Docker packages
 
-The release for the WADT 2026 paper is
-https://github.com/weng-chenghui/rocq-pgg-smc/releases/tag/WADT2026-r1.
-
-Each push to `main` also creates a commit-specific prerelease as soon as the
+Each push to `main` creates a commit-specific prerelease as soon as the
 flattened source archive is ready. The release tag has the form
 `wadt2026-<full-commit-sha>`. It does not wait for Rocq compilation.
 

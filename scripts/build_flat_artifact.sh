@@ -209,12 +209,14 @@ Makefile.coq is generated and is not included.  This archive was created on
 $(date -u +%Y-%m-%dT%H:%M:%SZ).  The complete legacy/ directory is excluded.
 EOF
 
-OPAM_FILES=()
-[[ -f rocq-pgg-smc.opam ]] && OPAM_FILES+=(rocq-pgg-smc.opam)
+EXTRA_FILES=()
+for extra in rocq-pgg-smc.opam Dockerfile .dockerignore; do
+  [[ -f "$extra" ]] && EXTRA_FILES+=("$extra")
+done
 
 COPYFILE_DISABLE=1 tar --no-xattrs -czf "$BUILT_ARCHIVE_TMP" \
   "${VFILES[@]}" _CoqProject Makefile README.md BUILD-INFO.txt \
-  ${OPAM_FILES[@]+"${OPAM_FILES[@]}"} "${BUILT_ENTRIES[@]}" \
+  ${EXTRA_FILES[@]+"${EXTRA_FILES[@]}"} "${BUILT_ENTRIES[@]}" \
   || fail "could not create temporary built archive"
 tar -tzf "$BUILT_ARCHIVE_TMP" > "$BUILT_TAR_LIST" \
   || fail "could not read temporary built archive"

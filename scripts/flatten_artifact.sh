@@ -357,14 +357,22 @@ log "committed $COMMIT_HASH on $BRANCH_NAME"
 OPAM_FILE="rocq-pgg-smc.opam"
 [[ -f "$OPAM_FILE" ]] \
   || fail "no $OPAM_FILE exists at the source-ref repository root"
+[[ -f Dockerfile ]] \
+  || fail "no Dockerfile exists at the source-ref repository root"
+DOCKER_BASE_LINE="$(grep -m1 -E '^FROM[[:space:]]' Dockerfile || true)"
+[[ -n "$DOCKER_BASE_LINE" ]] \
+  || fail "the repository Dockerfile has no FROM line"
 
-# The archive's Makefile and README.md are written over the worktree copies
-# after the commit, so the flattened branch keeps the repository versions.
+# The archive's Makefile, README.md, Dockerfile and .dockerignore are written
+# over the worktree copies after the commit, so the flattened branch keeps the
+# repository versions.
 {
   printf '%s\n' \
     '# Build the flattened pgg_smc development.' \
     '# The real makefile is generated from _CoqProject by rocq makefile.' \
     'ROCQMAKEFILE := Makefile.rocq' \
+    'DOCKER_IMAGE ?= rocq-pgg-smc-flat' \
+    'DOCKER_JOBS ?= 1' \
     '' \
     '# pgl27_spectral.v needs more stack than the usual 8 MiB default.' \
     'RAISE_STACK := ulimit -s unlimited 2>/dev/null || ulimit -s hard 2>/dev/null || true' \
@@ -385,8 +393,52 @@ OPAM_FILE="rocq-pgg-smc.opam"
     '	$(MAKE) -f $(ROCQMAKEFILE) clean' \
     '	rm -f $(ROCQMAKEFILE) $(ROCQMAKEFILE).conf' \
     '' \
-    '.PHONY: all install clean'
+    'docker-build:' \
+    '	docker build --build-arg ROCQ_JOBS="$(DOCKER_JOBS)" \' \
+    '		--file Dockerfile --tag "$(DOCKER_IMAGE)" .' \
+    '' \
+    'docker-check: docker-build' \
+    '	docker run --rm "$(DOCKER_IMAGE)"' \
+    '' \
+    '.PHONY: all install clean docker-build docker-check'
 } > Makefile
+
+# The dependency layers match the repository Dockerfile, so both images share
+# them.  The sources come from this directory instead of a tarball.
+cat > Dockerfile <<EOF
+# syntax=docker/dockerfile:1
+
+${DOCKER_BASE_LINE}
+
+USER root
+ENV OPAMROOT=/home/rocq/.opam
+WORKDIR /workspace
+
+COPY ${OPAM_FILE} .
+RUN eval "\$(opam env --set-switch)" && \\
+    opam install ./${OPAM_FILE} --deps-only --yes
+
+COPY . .
+ARG ROCQ_JOBS=1
+RUN opam exec -- rocq makefile -f _CoqProject -o Makefile.rocq && \\
+    ulimit -s unlimited && \\
+    case "\$ROCQ_JOBS" in ''|*[!0-9]*|0) exit 2;; esac && \\
+    opam exec -- make -f Makefile.rocq -j"\${ROCQ_JOBS}" && \\
+    opam exec -- make -f Makefile.rocq install
+
+LABEL org.opencontainers.image.source="https://github.com/weng-chenghui/rocq-pgg-smc" \\
+      org.opencontainers.image.revision="${SOURCE_COMMIT}" \\
+      org.opencontainers.image.title="rocq-pgg-smc" \\
+      org.opencontainers.image.description="Compiled flattened PGG-SMC Rocq development"
+
+USER rocq
+ENTRYPOINT ["opam", "exec", "--"]
+CMD ["sh", "-c", "find \\"\$(opam var lib)\\" -path '*/${NEW_ROOT}/pgg_instance.vo' -print -quit | grep -q ."]
+EOF
+
+printf '%s\n' \
+  '*.vo' '*.vos' '*.vok' '*.glob' '.*.aux' '.lia.cache' '.nia.cache' \
+  'Makefile.rocq' 'Makefile.rocq.conf' '.Makefile.rocq.d' > .dockerignore
 
 cat > README.md <<EOF
 # rocq-pgg-smc (flattened sources)
@@ -422,6 +474,23 @@ make clean    # remove the build outputs
 compiles through it. To compile one file and the files it imports, name its
 \`.vo\` file, for example \`make pgg_instance.vo\`.
 
+## Building with Docker
+
+Docker needs no local Rocq installation. The image installs the dependencies
+from \`${OPAM_FILE}\`, compiles every file in \`_CoqProject\` and installs
+the result, all during \`docker build\`.
+
+\`\`\`shell
+make docker-build                          # build the image rocq-pgg-smc-flat
+make docker-check                          # build it, then check the install
+docker run --rm -it rocq-pgg-smc-flat sh   # open a shell in the image
+\`\`\`
+
+\`make docker-check\` prints nothing and exits with status 0 when the
+compiled library is installed. \`DOCKER_JOBS=N\` sets the number of files
+compiled at the same time and defaults to 1. \`DOCKER_IMAGE\` sets the image
+name. Give Docker well over 16 GiB of memory for a full build.
+
 ## Memory, jobs and stack
 
 \`make -jN\` compiles N files at the same time. Keep N small. Compiling
@@ -438,12 +507,13 @@ EOF
 rm -f "$SOURCE_ARCHIVE_TMP"
 COPYFILE_DISABLE=1 tar --no-xattrs -czf "$SOURCE_ARCHIVE_TMP" -C "$WORKTREE_DIR" \
   "${FLAT_VFILES[@]}" _CoqProject Makefile README.md "$OPAM_FILE" \
+  Dockerfile .dockerignore \
   || fail "could not create temporary source archive"
 
 tar -tzf "$SOURCE_ARCHIVE_TMP" > "$SOURCE_TAR_LIST" \
   || fail "could not read temporary source archive"
 SOURCE_TAR_ENTRY_COUNT="$(wc -l < "$SOURCE_TAR_LIST" | tr -d '[:space:]')"
-EXPECTED_ENTRY_COUNT=$((${#VFILES[@]} + 4))
+EXPECTED_ENTRY_COUNT=$((${#VFILES[@]} + 6))
 [[ "$SOURCE_TAR_ENTRY_COUNT" -eq "$EXPECTED_ENTRY_COUNT" ]] \
   || fail "source archive has $SOURCE_TAR_ENTRY_COUNT entries; expected $EXPECTED_ENTRY_COUNT"
 if grep -q '/' "$SOURCE_TAR_LIST"; then

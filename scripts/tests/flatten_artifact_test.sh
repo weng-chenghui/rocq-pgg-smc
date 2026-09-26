@@ -29,6 +29,8 @@ printf '%s\n' \
 printf '%s\n' 'From pgg_reconstruct Require Import B.' > "$FIXTURE/lib/A.v"
 printf '%s\n' 'Definition b := true.' > "$FIXTURE/reconstruct/B.v"
 printf '%s\n' 'opam-version: "2.0"' > "$FIXTURE/rocq-pgg-smc.opam"
+printf '%s\n' 'FROM example/base@sha256:0123' \
+  'COPY dist/pgg-smc-flat.tar.gz /tmp/' > "$FIXTURE/Dockerfile"
 
 printf '%s\n' \
   '#!/bin/sh' \
@@ -55,11 +57,21 @@ ARCHIVE="$OUTPUT/fixture-flat.tar.gz"
 
 test ! -e "$TOOL_LOG"
 test "$(tar -tzf "$ARCHIVE" | LC_ALL=C sort | tr '\n' ' ')" = \
-  'A.v B.v Makefile README.md _CoqProject rocq-pgg-smc.opam '
+  '.dockerignore A.v B.v Dockerfile Makefile README.md _CoqProject rocq-pgg-smc.opam '
 tar -xOf "$ARCHIVE" Makefile \
   | grep -F 'rocq makefile -f _CoqProject -o $(ROCQMAKEFILE)'
 tar -xOf "$ARCHIVE" Makefile | grep -q '^	\$(RAISE_STACK); \$(MAKE)'
-if tar -xOf "$ARCHIVE" Makefile | grep -Eq 'docker|flatten_artifact'; then
+tar -xOf "$ARCHIVE" Makefile | grep -q '^docker-check: docker-build$'
+tar -xOf "$ARCHIVE" Makefile | grep -F -- '--file Dockerfile --tag "$(DOCKER_IMAGE)" .'
+tar -xOf "$ARCHIVE" Dockerfile | grep -Fx 'FROM example/base@sha256:0123'
+tar -xOf "$ARCHIVE" Dockerfile | grep -Fx 'COPY . .'
+tar -xOf "$ARCHIVE" Dockerfile | grep -F "revision=\"$SOURCE_COMMIT\""
+if tar -xOf "$ARCHIVE" Dockerfile | grep -q 'dist/'; then
+  printf 'flat Dockerfile unexpectedly reads a tarball\n' >&2
+  exit 1
+fi
+tar -xOf "$ARCHIVE" .dockerignore | grep -Fx '*.vo'
+if tar -xOf "$ARCHIVE" Makefile | grep -q 'flatten_artifact'; then
   printf 'flat Makefile unexpectedly refers to repository-only targets\n' >&2
   exit 1
 fi
