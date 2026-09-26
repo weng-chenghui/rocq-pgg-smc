@@ -31,10 +31,11 @@ git -C "$FIXTURE" commit -q -m 'fixture'
 printf '%s\n' '-Q . pgg_smc' 'A.v' 'B.v' > "$SOURCE_DIR/_CoqProject"
 printf '%s\n' 'From pgg_smc Require Import B.' > "$SOURCE_DIR/A.v"
 printf '%s\n' 'Definition b := true.' > "$SOURCE_DIR/B.v"
-printf '%s\n' 'flat source fixture' > "$SOURCE_DIR/ARTIFACT-README.txt"
+printf '%s\n' 'flat source fixture' > "$SOURCE_DIR/README.md"
+printf '%s\n' 'all:' > "$SOURCE_DIR/Makefile"
 SOURCE_ARCHIVE="$OUTPUT/fixture-flat.tar.gz"
 COPYFILE_DISABLE=1 tar --no-xattrs -czf "$SOURCE_ARCHIVE" -C "$SOURCE_DIR" \
-  A.v B.v _CoqProject ARTIFACT-README.txt
+  A.v B.v _CoqProject Makefile README.md
 
 printf '%s\n' \
   '#!/bin/sh' \
@@ -64,6 +65,8 @@ PATH="$SHIMS:$PATH" \
 grep -Fx -- '-f Makefile.coq -j1' "$MAKE_LOG"
 tar -tzf "$BUILT_ARCHIVE" | grep -Fx 'A.vo'
 tar -tzf "$BUILT_ARCHIVE" | grep -Fx 'B.vo'
+tar -tzf "$BUILT_ARCHIVE" | grep -Fx 'Makefile'
+tar -tzf "$BUILT_ARCHIVE" | grep -Fx 'README.md'
 if tar -tzf "$BUILT_ARCHIVE" | grep -Eq '(^|/)Makefile\.coq'; then
   printf 'built archive unexpectedly contains generated Makefile files\n' >&2
   exit 1

@@ -145,8 +145,10 @@ if grep -q '^legacy' "$SOURCE_TAR_LIST"; then
 fi
 grep -Fxq '_CoqProject' "$SOURCE_TAR_LIST" \
   || fail "source archive has no _CoqProject"
-grep -Fxq 'ARTIFACT-README.txt' "$SOURCE_TAR_LIST" \
-  || fail "source archive has no ARTIFACT-README.txt"
+for required in Makefile README.md; do
+  grep -Fxq "$required" "$SOURCE_TAR_LIST" \
+    || fail "source archive has no $required"
+done
 
 mkdir -p "$BUILD_DIR"
 tar -xzf "$SOURCE_TARBALL" -C "$BUILD_DIR" \
@@ -195,7 +197,7 @@ for source in "${VFILES[@]}"; do
   [[ -f ".${stem}.aux" ]] && BUILT_ENTRIES+=(".${stem}.aux")
 done
 
-cat > ARTIFACT-README.txt <<EOF
+cat > BUILD-INFO.txt <<EOF
 This built archive contains the flat Rocq sources and their compiled files.
 _CoqProject maps this directory to the logical root 'pgg_smc'.
 
@@ -203,12 +205,16 @@ The files were compiled with:
     rocq makefile -f _CoqProject -o Makefile.coq
     make -f Makefile.coq -j${ROCQ_JOBS}
 
-The generated Makefile is not included.  This archive was created on
+Makefile.coq is generated and is not included.  This archive was created on
 $(date -u +%Y-%m-%dT%H:%M:%SZ).  The complete legacy/ directory is excluded.
 EOF
 
+OPAM_FILES=()
+[[ -f rocq-pgg-smc.opam ]] && OPAM_FILES+=(rocq-pgg-smc.opam)
+
 COPYFILE_DISABLE=1 tar --no-xattrs -czf "$BUILT_ARCHIVE_TMP" \
-  "${VFILES[@]}" _CoqProject ARTIFACT-README.txt "${BUILT_ENTRIES[@]}" \
+  "${VFILES[@]}" _CoqProject Makefile README.md BUILD-INFO.txt \
+  ${OPAM_FILES[@]+"${OPAM_FILES[@]}"} "${BUILT_ENTRIES[@]}" \
   || fail "could not create temporary built archive"
 tar -tzf "$BUILT_ARCHIVE_TMP" > "$BUILT_TAR_LIST" \
   || fail "could not read temporary built archive"

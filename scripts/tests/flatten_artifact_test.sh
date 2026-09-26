@@ -28,6 +28,7 @@ printf '%s\n' \
   'reconstruct/B.v' > "$FIXTURE/_CoqProject"
 printf '%s\n' 'From pgg_reconstruct Require Import B.' > "$FIXTURE/lib/A.v"
 printf '%s\n' 'Definition b := true.' > "$FIXTURE/reconstruct/B.v"
+printf '%s\n' 'opam-version: "2.0"' > "$FIXTURE/rocq-pgg-smc.opam"
 
 printf '%s\n' \
   '#!/bin/sh' \
@@ -53,10 +54,19 @@ ARCHIVE="$OUTPUT/fixture-flat.tar.gz"
 )
 
 test ! -e "$TOOL_LOG"
-tar -xOf "$ARCHIVE" ARTIFACT-README.txt \
-  | grep -F 'make -f Makefile.coq -j1'
-tar -xOf "$ARCHIVE" ARTIFACT-README.txt \
-  | grep -F "Source repository commit: $SOURCE_COMMIT"
+test "$(tar -tzf "$ARCHIVE" | LC_ALL=C sort | tr '\n' ' ')" = \
+  'A.v B.v Makefile README.md _CoqProject rocq-pgg-smc.opam '
+tar -xOf "$ARCHIVE" Makefile \
+  | grep -F 'rocq makefile -f _CoqProject -o $(ROCQMAKEFILE)'
+tar -xOf "$ARCHIVE" Makefile | grep -q '^	\$(RAISE_STACK); \$(MAKE)'
+if tar -xOf "$ARCHIVE" Makefile | grep -Eq 'docker|flatten_artifact'; then
+  printf 'flat Makefile unexpectedly refers to repository-only targets\n' >&2
+  exit 1
+fi
+tar -xOf "$ARCHIVE" README.md \
+  | grep -F "Source repository commit: \`$SOURCE_COMMIT\`"
+tar -xOf "$ARCHIVE" README.md \
+  | grep -F 'opam install ./rocq-pgg-smc.opam --deps-only'
 tar -xOf "$ARCHIVE" A.v \
   | grep -F 'From pgg_smc Require Import B.'
 if tar -tzf "$ARCHIVE" | grep -q '\.vo$'; then

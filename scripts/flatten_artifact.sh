@@ -354,32 +354,96 @@ COMMIT_HASH="$(git rev-parse HEAD)"
 KEEP_BRANCH=1
 log "committed $COMMIT_HASH on $BRANCH_NAME"
 
-NOTE_FILE="${WORKTREE_DIR}/ARTIFACT-README.txt"
-cat > "$NOTE_FILE" <<EOF
-This source archive contains the non-legacy Rocq sources of the '${NEW_ROOT}'
-development in one directory.  _CoqProject maps that directory to the
-logical root '${NEW_ROOT}'.
+OPAM_FILE="rocq-pgg-smc.opam"
+[[ -f "$OPAM_FILE" ]] \
+  || fail "no $OPAM_FILE exists at the source-ref repository root"
 
-To rebuild:
-    rocq makefile -f _CoqProject -o Makefile.coq
-    make -f Makefile.coq -j1
+# The archive's Makefile and README.md are written over the worktree copies
+# after the commit, so the flattened branch keeps the repository versions.
+{
+  printf '%s\n' \
+    '# Build the flattened pgg_smc development.' \
+    '# The real makefile is generated from _CoqProject by rocq makefile.' \
+    'ROCQMAKEFILE := Makefile.rocq' \
+    '' \
+    '# pgl27_spectral.v needs more stack than the usual 8 MiB default.' \
+    'RAISE_STACK := ulimit -s unlimited 2>/dev/null || ulimit -s hard 2>/dev/null || true' \
+    '' \
+    'all: $(ROCQMAKEFILE)' \
+    '	$(RAISE_STACK); $(MAKE) -f $(ROCQMAKEFILE) all' \
+    '' \
+    '$(ROCQMAKEFILE): _CoqProject' \
+    '	rocq makefile -f _CoqProject -o $(ROCQMAKEFILE)' \
+    '' \
+    '%.vo: $(ROCQMAKEFILE) %.v' \
+    '	$(RAISE_STACK); $(MAKE) -f $(ROCQMAKEFILE) $@' \
+    '' \
+    'install: $(ROCQMAKEFILE)' \
+    '	$(MAKE) -f $(ROCQMAKEFILE) install' \
+    '' \
+    'clean: $(ROCQMAKEFILE)' \
+    '	$(MAKE) -f $(ROCQMAKEFILE) clean' \
+    '	rm -f $(ROCQMAKEFILE) $(ROCQMAKEFILE).conf' \
+    '' \
+    '.PHONY: all install clean'
+} > Makefile
 
-Makefile.coq is generated and is not included.  The complete legacy/ directory
-is excluded.
+cat > README.md <<EOF
+# rocq-pgg-smc (flattened sources)
 
-Source repository commit: ${SOURCE_COMMIT}
-Flattened transformation commit: ${COMMIT_HASH}
+This archive holds the Rocq sources of the PGG-SMC development in one
+directory. \`_CoqProject\` maps the directory to the logical root
+\`${NEW_ROOT}\`. The \`legacy/\` tree of the repository is left out.
+
+Source repository: https://github.com/weng-chenghui/rocq-pgg-smc
+
+- Source repository commit: \`${SOURCE_COMMIT}\`
+- Flattened transformation commit: \`${COMMIT_HASH}\`
+- Rocq files: ${#VFILES[@]}
+
+## Requirements
+
+Rocq 9.0 or 9.1, MathComp 2.5, and \`coq-infotheo\` 0.9.7 or later. The
+full dependency list is in \`${OPAM_FILE}\`. opam can install it:
+
+\`\`\`shell
+opam install ./${OPAM_FILE} --deps-only
+\`\`\`
+
+## Building
+
+\`\`\`shell
+make          # compile every file listed in _CoqProject
+make install  # optional: install the compiled library as ${NEW_ROOT}
+make clean    # remove the build outputs
+\`\`\`
+
+\`make\` first writes \`Makefile.rocq\` with \`rocq makefile\` and then
+compiles through it. To compile one file and the files it imports, name its
+\`.vo\` file, for example \`make pgg_instance.vo\`.
+
+## Memory, jobs and stack
+
+\`make -jN\` compiles N files at the same time. Keep N small. Compiling
+\`pgl27_group.v\` alone used about 5.4 GiB, and \`psl211_endpoints.v\`
+reached about 15.3 GiB in one measured build. Run a full build on a machine
+with well over 16 GiB of memory.
+
+\`pgl27_spectral.v\` needs more than the usual 8 MiB stack and otherwise
+stops with \`Stack overflow\`. The Makefile raises the stack limit before it
+compiles. If the system does not allow that, run \`ulimit -s unlimited\`
+yourself before \`make\`.
 EOF
 
 rm -f "$SOURCE_ARCHIVE_TMP"
 COPYFILE_DISABLE=1 tar --no-xattrs -czf "$SOURCE_ARCHIVE_TMP" -C "$WORKTREE_DIR" \
-  "${FLAT_VFILES[@]}" _CoqProject "$(basename "$NOTE_FILE")" \
+  "${FLAT_VFILES[@]}" _CoqProject Makefile README.md "$OPAM_FILE" \
   || fail "could not create temporary source archive"
 
 tar -tzf "$SOURCE_ARCHIVE_TMP" > "$SOURCE_TAR_LIST" \
   || fail "could not read temporary source archive"
 SOURCE_TAR_ENTRY_COUNT="$(wc -l < "$SOURCE_TAR_LIST" | tr -d '[:space:]')"
-EXPECTED_ENTRY_COUNT=$((${#VFILES[@]} + 2))
+EXPECTED_ENTRY_COUNT=$((${#VFILES[@]} + 4))
 [[ "$SOURCE_TAR_ENTRY_COUNT" -eq "$EXPECTED_ENTRY_COUNT" ]] \
   || fail "source archive has $SOURCE_TAR_ENTRY_COUNT entries; expected $EXPECTED_ENTRY_COUNT"
 if grep -q '/' "$SOURCE_TAR_LIST"; then
