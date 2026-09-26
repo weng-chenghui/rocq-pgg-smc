@@ -6,11 +6,6 @@ security bounds — in Rocq, over the infotheo library. A PGG is a protocol
 game parametric over an instance (G, N, rho): a finite group G acting on
 N card positions through a permutation representation rho, with
 dealer-sampled words and entropy-quantified coalition security.
-(Historical note: PGG formerly expanded to "Parametric Geometry Group";
-the geometry reading is retired, 2026-08-26.)
-
-Extracted 2026-08-26 from the `pgg-smc/` subtree of the infotheo-pgg
-fork; see `docs/superpowers/specs/2026-08-26-rocq-pgg-smc-extraction-design.md`.
 
 ## Building with Docker
 
